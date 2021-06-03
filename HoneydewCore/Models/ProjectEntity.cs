@@ -2,7 +2,7 @@
 {
     public abstract class ProjectEntity
     {
-        public string Name { get; init; }
+        public string Name { get; set; }
         public string Path { get; init; }
     }
 }
