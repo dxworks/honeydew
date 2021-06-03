@@ -15,7 +15,7 @@ namespace HoneydewCoreTest.Analyzers.IO.Readers
 
         public ProjectLoaderTests()
         {
-            _sut = new SolutionLoader(_fileReaderMock.Object);
+            _sut = new SolutionLoader(_fileReaderMock.Object, new List<PathFilter>());
         }
 
         [Fact]
@@ -89,7 +89,8 @@ namespace HoneydewCoreTest.Analyzers.IO.Readers
                 _fileReaderMock.Setup(reader => reader.ReadFile(path)).Returns("");
             }
 
-            var projectModel = _sut.LoadSolution(pathToProject, filters);
+            _sut.SetPathFilters(filters);
+            var projectModel = _sut.LoadSolution(pathToProject);
 
             Assert.NotNull(projectModel);
 
@@ -140,7 +141,8 @@ namespace HoneydewCoreTest.Analyzers.IO.Readers
                 _fileReaderMock.Setup(reader => reader.ReadFile(path)).Returns("");
             }
 
-            var projectModel = _sut.LoadSolution(pathToProject, filters);
+            _sut.SetPathFilters(filters);
+            var projectModel = _sut.LoadSolution(pathToProject);
 
             Assert.NotNull(projectModel);
 
@@ -190,7 +192,8 @@ namespace HoneydewCoreTest.Analyzers.IO.Readers
                 _fileReaderMock.Setup(reader => reader.ReadFile(path)).Returns("");
             }
 
-            var projectModel = _sut.LoadSolution(pathToProject, filters);
+            _sut.SetPathFilters(filters);
+            var projectModel = _sut.LoadSolution(pathToProject);
 
             Assert.NotNull(projectModel);
 

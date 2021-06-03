@@ -4,10 +4,10 @@ using HoneydewCore.Models;
 
 namespace HoneydewCore.IO.Readers
 {
-     public interface ISolutionLoader
-     {
-          SolutionModel LoadSolution(string projectPath, IList<PathFilter> filters);
+    public interface ISolutionLoader
+    {
+        void SetPathFilters(IList<PathFilter> filters);
 
-          SolutionModel LoadSolution(string projectPath);
-     }
+        SolutionModel LoadSolution(string projectPath);
+    }
 }

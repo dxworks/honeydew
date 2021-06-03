@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using HoneydewCore.IO.Readers.Filters;
 using HoneydewCore.Models;
 
@@ -9,12 +8,14 @@ namespace HoneydewCore.IO.Readers
     {
         public string ProjectPath { get; private set; }
 
-        private readonly IFileReader _fileReader;
         private IList<PathFilter> _filters;
 
-        public SolutionLoader(IFileReader fileReader)
+        private readonly IFileReader _fileReader;
+
+        public SolutionLoader(IFileReader fileReader, IList<PathFilter> filters)
         {
             _fileReader = fileReader;
+            _filters = filters;
         }
 
         public SolutionLoader()
@@ -22,13 +23,16 @@ namespace HoneydewCore.IO.Readers
             _fileReader = new FileReader();
         }
 
+        public void SetPathFilters(IList<PathFilter> filters)
+        {
+            _filters = filters;
+        }
+
         public SolutionModel LoadSolution(string projectPath)
         {
-            _filters ??= new List<PathFilter>();
-
             ProjectPath = projectPath;
 
-            var filePaths = _fileReader.ReadFilePaths(projectPath);
+            var filePaths = _fileReader.ReadFilePaths(projectPath, _filters);
 
             if (filePaths.Count == 0)
             {
@@ -39,21 +43,10 @@ namespace HoneydewCore.IO.Readers
 
             foreach (string path in filePaths)
             {
-                if (_filters.Count > 0 && !_filters.Any(filter => filter(path)))
-                {
-                    continue;
-                }
-
                 var fileContent = _fileReader.ReadFile(path);
             }
 
             return solutionModel;
-        }
-
-        public SolutionModel LoadSolution(string projectPath, IList<PathFilter> filters)
-        {
-            _filters = filters;
-            return LoadSolution(projectPath);
         }
     }
 }

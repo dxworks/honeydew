@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using HoneydewCore.IO.Readers.Filters;
 
 namespace HoneydewCore.IO.Readers
 {
@@ -13,9 +15,21 @@ namespace HoneydewCore.IO.Readers
 
           public IList<string> ReadFilePaths(string directoryPath)
           {
+               return ReadFilePaths(directoryPath, new List<PathFilter>());
+          }
+
+          public IList<string> ReadFilePaths(string directoryPath, IList<PathFilter> filters)
+          {
                try
                {
-                    return Directory.GetFiles(directoryPath);
+                    var filePaths = Directory.GetFiles(directoryPath);
+
+                    if (filters == null || filters.Count == 0)
+                    {
+                         return filePaths;
+                    }
+
+                    return filePaths.Where(path => filters.Any(filter => filter(path))).ToList();
                }
                catch (Exception e)
                {
