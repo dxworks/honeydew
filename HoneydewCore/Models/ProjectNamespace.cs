@@ -2,8 +2,8 @@
 
 namespace HoneydewCore.Models
 {
-     public class ProjectNamespace
-     {
-          public IList<ProjectEntity> Entities { get; init; }
-     }
+    public class ProjectNamespace : ProjectEntity
+    {
+        public IList<ProjectEntity> Entities { get; init; }
+    }
 }

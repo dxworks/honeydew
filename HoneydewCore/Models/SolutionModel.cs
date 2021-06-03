@@ -2,8 +2,8 @@
 
 namespace HoneydewCore.Models
 {
-     public class SolutionModel
-     {
-          public IList<ProjectModel> Projects { get; init; }
-     }
+    public class SolutionModel : ProjectEntity
+    {
+        public IList<ProjectModel> Projects { get; init; }
+    }
 }

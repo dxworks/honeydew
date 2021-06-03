@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using HoneydewCore.Extractors;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Filters;
 using Moq;
@@ -7,15 +8,15 @@ using Xunit;
 
 namespace HoneydewCoreTest.Analyzers.IO.Readers
 {
-    public class ProjectLoaderTests
+    public class SolutionLoaderTests
     {
         private readonly ISolutionLoader _sut;
 
         private readonly Mock<IFileReader> _fileReaderMock = new();
 
-        public ProjectLoaderTests()
+        public SolutionLoaderTests()
         {
-            _sut = new SolutionLoader(_fileReaderMock.Object, new List<PathFilter>());
+            _sut = new SolutionLoader(_fileReaderMock.Object, new List<IExtractor>());
         }
 
         [Fact]
@@ -79,17 +80,14 @@ namespace HoneydewCoreTest.Analyzers.IO.Readers
                 $"{pathToProject}/res/images/img.png",
             };
 
-            IList<PathFilter> filters = new List<PathFilter>();
-            filters.Add(path => path.EndsWith(".cs"));
-
-            _fileReaderMock.Setup(reader => reader.ReadFilePaths(pathToProject)).Returns(pathsList);
+            _fileReaderMock.Setup(reader => reader.ReadFilePaths(pathToProject))
+                .Returns(pathsList.Where(path => path.EndsWith(".cs")).ToList());
 
             foreach (string path in pathsList)
             {
                 _fileReaderMock.Setup(reader => reader.ReadFile(path)).Returns("");
             }
 
-            _sut.SetPathFilters(filters);
             var projectModel = _sut.LoadSolution(pathToProject);
 
             Assert.NotNull(projectModel);
@@ -134,14 +132,17 @@ namespace HoneydewCoreTest.Analyzers.IO.Readers
                 filters.Add(path => path.EndsWith(extension));
             }
 
-            _fileReaderMock.Setup(reader => reader.ReadFilePaths(pathToProject)).Returns(pathsList);
+            _fileReaderMock.Setup(reader => reader.ReadFilePaths(pathToProject))
+                .Returns(pathsList.Where(path =>
+                {
+                    return filters.Any(filter => filter(path));
+                }).ToList());
 
             foreach (string path in pathsList)
             {
                 _fileReaderMock.Setup(reader => reader.ReadFile(path)).Returns("");
             }
 
-            _sut.SetPathFilters(filters);
             var projectModel = _sut.LoadSolution(pathToProject);
 
             Assert.NotNull(projectModel);
@@ -158,7 +159,7 @@ namespace HoneydewCoreTest.Analyzers.IO.Readers
                 }
             }
         }
-        
+
         [Fact]
         public void LoadProjectTest_ShouldIgnoreFolderPathsFromFolder_WhenGivenValidPathToAProject()
         {
@@ -185,14 +186,17 @@ namespace HoneydewCoreTest.Analyzers.IO.Readers
             filters.Add(path => path.EndsWith(".png"));
             filters.Add(path => path.EndsWith(".config"));
 
-            _fileReaderMock.Setup(reader => reader.ReadFilePaths(pathToProject)).Returns(pathsList);
+            _fileReaderMock.Setup(reader => reader.ReadFilePaths(pathToProject))
+                .Returns(pathsList.Where(path =>
+                {
+                    return filters.Any(filter => filter(path));
+                }).ToList());
 
             foreach (string path in pathsList)
             {
                 _fileReaderMock.Setup(reader => reader.ReadFile(path)).Returns("");
             }
 
-            _sut.SetPathFilters(filters);
             var projectModel = _sut.LoadSolution(pathToProject);
 
             Assert.NotNull(projectModel);
