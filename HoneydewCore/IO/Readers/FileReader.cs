@@ -6,36 +6,38 @@ using HoneydewCore.IO.Readers.Filters;
 
 namespace HoneydewCore.IO.Readers
 {
-     public class FileReader : IFileReader
-     {
-          public string ReadFile(string path)
-          {
-               return File.ReadAllText(path);
-          }
+    public class FileReader : IFileReader
+    {
+        private readonly IList<PathFilter> _filters;
 
-          public IList<string> ReadFilePaths(string directoryPath)
-          {
-               return ReadFilePaths(directoryPath, new List<PathFilter>());
-          }
+        public FileReader(IList<PathFilter> filters)
+        {
+            _filters = filters ?? new List<PathFilter>();
+        }
+        
+        public string ReadFile(string path)
+        {
+            return File.ReadAllText(path);
+        }
 
-          public IList<string> ReadFilePaths(string directoryPath, IList<PathFilter> filters)
-          {
-               try
-               {
-                    var filePaths = Directory.GetFiles(directoryPath);
+        public IList<string> ReadFilePaths(string directoryPath)
+        {
+            try
+            {
+                var filePaths = Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories);
 
-                    if (filters == null || filters.Count == 0)
-                    {
-                         return filePaths;
-                    }
+                if (_filters.Count == 0)
+                {
+                    return filePaths;
+                }
 
-                    return filePaths.Where(path => filters.Any(filter => filter(path))).ToList();
-               }
-               catch (Exception e)
-               {
-                    Console.WriteLine(e);
-                    return new List<string>();
-               }
-          }
-     }
+                return filePaths.Where(path => _filters.Any(filter => filter(path))).ToList();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return new List<string>();
+            }
+        }
+    }
 }

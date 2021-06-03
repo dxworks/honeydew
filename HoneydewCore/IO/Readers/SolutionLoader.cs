@@ -1,38 +1,23 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.IO.Readers.Filters;
+using HoneydewCore.Extractors;
 using HoneydewCore.Models;
 
 namespace HoneydewCore.IO.Readers
 {
     public class SolutionLoader : ISolutionLoader
     {
-        public string ProjectPath { get; private set; }
-
-        private IList<PathFilter> _filters;
-
         private readonly IFileReader _fileReader;
+        private readonly IList<IExtractor> _extractors;
 
-        public SolutionLoader(IFileReader fileReader, IList<PathFilter> filters)
+        public SolutionLoader(IFileReader fileReader, IList<IExtractor> extractors)
         {
             _fileReader = fileReader;
-            _filters = filters;
-        }
-
-        public SolutionLoader()
-        {
-            _fileReader = new FileReader();
-        }
-
-        public void SetPathFilters(IList<PathFilter> filters)
-        {
-            _filters = filters;
+            _extractors = extractors;
         }
 
         public SolutionModel LoadSolution(string projectPath)
         {
-            ProjectPath = projectPath;
-
-            var filePaths = _fileReader.ReadFilePaths(projectPath, _filters);
+            var filePaths = _fileReader.ReadFilePaths(projectPath);
 
             if (filePaths.Count == 0)
             {

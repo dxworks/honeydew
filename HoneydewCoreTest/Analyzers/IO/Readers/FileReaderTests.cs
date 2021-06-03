@@ -1,5 +1,7 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using HoneydewCore.IO.Readers;
+using HoneydewCore.IO.Readers.Filters;
 using Xunit;
 
 namespace HoneydewCoreTest.Analyzers.IO.Readers
@@ -10,7 +12,7 @@ namespace HoneydewCoreTest.Analyzers.IO.Readers
 
         public FileReaderTests()
         {
-            _sut = new FileReader();
+            _sut = new FileReader(new List<PathFilter>());
         }
 
         [Fact]

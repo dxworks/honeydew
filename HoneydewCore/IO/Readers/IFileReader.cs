@@ -7,8 +7,6 @@ namespace HoneydewCore.IO.Readers
     {
         string ReadFile(string path);
 
-        IList<string> ReadFilePaths(string directoryPath, IList<PathFilter> filters);
-
         IList<string> ReadFilePaths(string directoryPath);
     }
 }

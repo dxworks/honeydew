@@ -1,26 +1,33 @@
 ﻿using System;
-using HoneydewCore;
+using System.Collections.Generic;
+using HoneydewCore.Extractors;
 using HoneydewCore.IO.Readers;
+using HoneydewCore.IO.Readers.Filters;
 
 namespace Honeydew
 {
-     class Program
-     {
-          static void Main(string[] args)
-          {
-               string pathToProject = "D:\\Work\\Visual Studio 2019\\CSharp\\Catan";
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string pathToProject = "D:\\Work\\Visual Studio 2019\\CSharp\\Catan";
 
-               Console.WriteLine("Reading project from {0}...", pathToProject);
+            Console.WriteLine("Reading project from {0}...", pathToProject);
 
-               ISolutionLoader solutionLoader = new SolutionLoader();
+            var filters = new List<PathFilter>();
+            filters.Add(path => path.EndsWith(".cs"));
 
-               var projectModel = solutionLoader.LoadSolution(pathToProject);
+            var extractors = new List<IExtractor>();
 
-               Console.WriteLine("Project read");
-               Console.WriteLine(projectModel);
+            ISolutionLoader solutionLoader = new SolutionLoader(new FileReader(filters), extractors);
 
+            var projectModel = solutionLoader.LoadSolution(pathToProject);
 
-               Console.ReadKey();
-          }
-     }
+            Console.WriteLine("Project read");
+            Console.WriteLine(projectModel);
+
+            Console.WriteLine("Enter any key to exit ...");
+            Console.ReadKey();
+        }
+    }
 }
