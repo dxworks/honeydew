@@ -58,7 +58,7 @@ namespace HoneydewCoreTest.Extractors
 
             Assert.NotEmpty(projectClass.Metrics);
             Assert.True(projectClass.Metrics.TryGetValue(usingsCountMetric.GetName(), out var count));
-            Assert.Equal(5, count);
+            Assert.Equal(12, count);
         }
     }
 }

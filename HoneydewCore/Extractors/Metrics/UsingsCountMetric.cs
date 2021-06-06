@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewCore.Extractors.Metrics
 {
     public class UsingsCountMetric : CSharpMetricExtractor
     {
-        private ICollection<UsingDirectiveSyntax> Usings { get; } = new List<UsingDirectiveSyntax>();
+        private int usingsCount = 0;
 
         public override string GetName()
         {
@@ -14,15 +13,12 @@ namespace HoneydewCore.Extractors.Metrics
 
         public override int GetMetric()
         {
-            return Usings.Count;
+            return usingsCount;
         }
 
         public override void VisitUsingDirective(UsingDirectiveSyntax node)
         {
-            if (node.Name.ToString() != "System" && !node.Name.ToString().StartsWith("System."))
-            {
-                Usings.Add(node);
-            }
+            usingsCount++;
         }
     }
 }
