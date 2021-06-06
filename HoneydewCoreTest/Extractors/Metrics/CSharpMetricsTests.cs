@@ -4,7 +4,7 @@ using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Models;
 using Xunit;
 
-namespace HoneydewCoreTest.Extractors
+namespace HoneydewCoreTest.Extractors.Metrics
 {
     public class CSharpMetricsTests
     {

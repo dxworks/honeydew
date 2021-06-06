@@ -2,6 +2,7 @@
 using System.Linq;
 using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Models;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -30,7 +31,7 @@ namespace HoneydewCore.Extractors
 
             var diagnostics = root.GetDiagnostics();
 
-            if (diagnostics.Any())
+            if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
             {
                 throw new ExtractionException();
             }
@@ -43,9 +44,6 @@ namespace HoneydewCore.Extractors
                 Namespace = namespaceDeclarationSyntax.Name.ToString(),
                 Name = classDeclarationSyntax.Identifier.ToString(),
             };
-
-            var walker = new UsingsCountMetric();
-            walker.Visit(root);
 
             foreach (var metric in Metrics)
             {

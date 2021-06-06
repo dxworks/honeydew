@@ -66,9 +66,9 @@ namespace HoneydewCoreTest.Extractors
         public void Extract_ShouldSetClassNameAndNamespace_WhenParsingText()
         {
             const string fileContent = @"        
-                                    namespace Models
+                                    namespace Models.Main.Items
                                     {
-                                      public class Item
+                                      public class MainItem
                                       {
                                       }
                                     }
@@ -78,8 +78,8 @@ namespace HoneydewCoreTest.Extractors
 
             var projectClass = (ClassModel) entity;
 
-            Assert.Equal("Models", projectClass.Namespace);
-            Assert.Equal("Item", projectClass.Name);
+            Assert.Equal("Models.Main.Items", projectClass.Namespace);
+            Assert.Equal("MainItem", projectClass.Name);
         }
 
         [Fact]
