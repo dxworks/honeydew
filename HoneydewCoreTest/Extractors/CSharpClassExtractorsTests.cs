@@ -1,16 +1,24 @@
-﻿using HoneydewCore.Extractors;
+﻿using System.Collections.Generic;
+using HoneydewCore.Extractors;
+using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Models;
 using Xunit;
 
 namespace HoneydewCoreTest.Extractors
 {
-    public class ClassExtractorsTests
+    public class CSharpClassExtractorsTests
     {
-        private readonly IExtractor _sut;
+        private readonly Extractor<CSharpMetricExtractor> _sut;
 
-        public ClassExtractorsTests()
+        public CSharpClassExtractorsTests()
         {
-            _sut = new ClassExtractor();
+            _sut = new CSharpClassExtractor(new List<CSharpMetricExtractor>());
+        }
+
+        [Fact]
+        public void FileType_ShouldReturnCS()
+        {
+            Assert.Equal(".cs", _sut.FileType());
         }
 
         [Theory]
@@ -53,11 +61,12 @@ namespace HoneydewCoreTest.Extractors
         {
             Assert.Throws<ExtractionException>(() => _sut.Extract(fileContent));
         }
-        
+
         [Fact]
         public void Extract_ShouldSetClassNameAndNamespace_WhenParsingText()
         {
-            const string fileContent = @"namespace Models
+            const string fileContent = @"        
+                                    namespace Models
                                     {
                                       public class Item
                                       {
@@ -65,12 +74,34 @@ namespace HoneydewCoreTest.Extractors
                                     }
                                     ";
             var entity = _sut.Extract(fileContent);
-            Assert.Equal(typeof(ProjectClass), entity.GetType());
+            Assert.Equal(typeof(ClassModel), entity.GetType());
 
-            var projectClass = (ProjectClass) entity;
+            var projectClass = (ClassModel) entity;
 
             Assert.Equal("Models", projectClass.Namespace);
             Assert.Equal("Item", projectClass.Name);
+        }
+
+        [Fact]
+        public void Extract_ShouldNotHaveMetrics_WhenGivenAnEmptyListOfMetrics()
+        {
+            const string fileContent = @"    
+
+                                    using System;
+                                    using System.Collections.Generic;    
+                                    namespace Models
+                                    {
+                                      public class Item
+                                      {
+                                      }
+                                    }
+                                    ";
+            var entity = _sut.Extract(fileContent);
+            Assert.Equal(typeof(ClassModel), entity.GetType());
+
+            var projectClass = (ClassModel) entity;
+
+            Assert.Empty(projectClass.Metrics);
         }
     }
 }

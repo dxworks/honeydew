@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.Extractors;
+using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Filters;
 using Moq;
@@ -16,7 +17,7 @@ namespace HoneydewCoreTest.Analyzers.IO.Readers
 
         public SolutionLoaderTests()
         {
-            _sut = new SolutionLoader(_fileReaderMock.Object, new List<IExtractor>());
+            _sut = new SolutionLoader(_fileReaderMock.Object, new List<Extractor<IMetricExtractor>>());
         }
 
         [Fact]

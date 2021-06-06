@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors;
+using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Models;
 
 namespace HoneydewCore.IO.Readers
@@ -7,9 +8,9 @@ namespace HoneydewCore.IO.Readers
     public class SolutionLoader : ISolutionLoader
     {
         private readonly IFileReader _fileReader;
-        private readonly IList<IExtractor> _extractors;
+        private readonly IList<Extractor<IMetricExtractor>> _extractors;
 
-        public SolutionLoader(IFileReader fileReader, IList<IExtractor> extractors)
+        public SolutionLoader(IFileReader fileReader, IList<Extractor<IMetricExtractor>> extractors)
         {
             _fileReader = fileReader;
             _extractors = extractors;

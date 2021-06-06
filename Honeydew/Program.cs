@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using HoneydewCore.Extractors;
+using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Filters;
 
@@ -17,7 +18,7 @@ namespace Honeydew
             var filters = new List<PathFilter>();
             filters.Add(path => path.EndsWith(".cs"));
 
-            var extractors = new List<IExtractor>();
+            var extractors = new List<Extractor<IMetricExtractor>>();
 
             ISolutionLoader solutionLoader = new SolutionLoader(new FileReader(filters), extractors);
 
