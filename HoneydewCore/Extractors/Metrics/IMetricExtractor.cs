@@ -4,6 +4,6 @@
     {
         string GetName();
 
-        int GetMetric();
+        IMetric GetMetric();
     }
 }

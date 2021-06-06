@@ -10,7 +10,6 @@ namespace HoneydewCoreTest.Extractors.Metrics
     {
         private Extractor<CSharpMetricExtractor> _sut;
 
-
         [Fact]
         public void Extract_ShouldHaveUsingsCountMetric_WhenGivenMultipleUsingsAtMultipleLevels()
         {
@@ -51,14 +50,23 @@ namespace HoneydewCoreTest.Extractors.Metrics
 
             _sut = new CSharpClassExtractor(metrics);
 
-            var entity = _sut.Extract(fileContent);
-            Assert.Equal(typeof(ClassModel), entity.GetType());
+            var entities = _sut.Extract(fileContent);
 
-            var projectClass = (ClassModel) entity;
+            foreach (var entity in entities)
+            {
+                Assert.Equal(typeof(ClassModel), entity.GetType());
 
-            Assert.NotEmpty(projectClass.Metrics);
-            Assert.True(projectClass.Metrics.TryGetValue(usingsCountMetric.GetName(), out var count));
-            Assert.Equal(12, count);
+                var projectClass = (ClassModel) entity;
+
+                Assert.NotEmpty(projectClass.Metrics);
+                Assert.True(projectClass.Metrics.TryGetValue(usingsCountMetric.GetName(), out var countMetric));
+
+                Assert.Equal(typeof(Metric<int>), countMetric.GetType());
+
+                var count = ((Metric<int>) countMetric).Value;
+
+                Assert.Equal(12, count);
+            }
         }
     }
 }

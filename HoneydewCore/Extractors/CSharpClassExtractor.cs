@@ -10,7 +10,7 @@ namespace HoneydewCore.Extractors
 {
     public class CSharpClassExtractor : Extractor<CSharpMetricExtractor>
     {
-        public CSharpClassExtractor(IList<CSharpMetricExtractor> metrics) : base(metrics)
+        public CSharpClassExtractor(IList<CSharpMetricExtractor> metricExtractors) : base(metricExtractors)
         {
         }
 
@@ -19,7 +19,7 @@ namespace HoneydewCore.Extractors
             return ".cs";
         }
 
-        public override ProjectEntity Extract(string fileContent)
+        public override IList<ProjectEntity> Extract(string fileContent)
         {
             if (string.IsNullOrWhiteSpace(fileContent))
             {
@@ -36,6 +36,8 @@ namespace HoneydewCore.Extractors
                 throw new ExtractionException();
             }
 
+            IList<ProjectEntity> entities = new List<ProjectEntity>();
+
             var namespaceDeclarationSyntax = root.DescendantNodes().OfType<NamespaceDeclarationSyntax>().First();
             var classDeclarationSyntax = root.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
 
@@ -45,13 +47,15 @@ namespace HoneydewCore.Extractors
                 Name = classDeclarationSyntax.Identifier.ToString(),
             };
 
-            foreach (var metric in Metrics)
+            foreach (var metric in MetricExtractors)
             {
                 metric.Visit(root);
                 projectClass.Metrics.Add(metric.GetName(), metric.GetMetric());
             }
+            
+            entities.Add(projectClass);
 
-            return projectClass;
+            return entities;
         }
     }
 }

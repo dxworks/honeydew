@@ -6,15 +6,15 @@ namespace HoneydewCore.Extractors
 {
     public abstract class Extractor<T> where T : IMetricExtractor
     {
-        protected readonly IList<T> Metrics;
+        protected readonly IList<T> MetricExtractors;
 
-        protected Extractor(IList<T> metrics)
+        protected Extractor(IList<T> metricExtractors)
         {
-            Metrics = metrics ?? new List<T>();
+            MetricExtractors = metricExtractors ?? new List<T>();
         }
 
         public abstract string FileType();
 
-        public abstract ProjectEntity Extract(string fileContent);
+        public abstract IList<ProjectEntity> Extract(string fileContent);
     }
 }

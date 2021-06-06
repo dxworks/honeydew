@@ -63,7 +63,7 @@ namespace HoneydewCoreTest.Extractors
         }
 
         [Fact]
-        public void Extract_ShouldSetClassNameAndNamespace_WhenParsingText()
+        public void Extract_ShouldSetClassNameAndNamespace_WhenParsingTextWithOneClass()
         {
             const string fileContent = @"        
                                     namespace Models.Main.Items
@@ -73,17 +73,77 @@ namespace HoneydewCoreTest.Extractors
                                       }
                                     }
                                     ";
-            var entity = _sut.Extract(fileContent);
-            Assert.Equal(typeof(ClassModel), entity.GetType());
+            var entities = _sut.Extract(fileContent);
 
-            var projectClass = (ClassModel) entity;
+            Assert.Equal(1, entities.Count);
+            
+            foreach (var entity in entities)
+            {
+                Assert.Equal(typeof(ClassModel), entity.GetType());
 
-            Assert.Equal("Models.Main.Items", projectClass.Namespace);
-            Assert.Equal("MainItem", projectClass.Name);
+                var projectClass = (ClassModel) entity;
+
+                Assert.Equal("Models.Main.Items", projectClass.Namespace);
+                Assert.Equal("MainItem", projectClass.Name);   
+            }
         }
 
         [Fact]
-        public void Extract_ShouldNotHaveMetrics_WhenGivenAnEmptyListOfMetrics()
+        public void Extract_ShouldSetClassNameAndNamespace_WhenParsingTextWithMultipleClasses()
+        {
+            
+            const string fileContent = @"using System;                                
+                                    using Microsoft.CodeAnalysis;
+                                    using Microsoft.CodeAnalysis.CSharp;
+
+                                    namespace TopLevel
+                                    {
+                                        using Microsoft;
+                                        using System.ComponentModel;
+
+                                        namespace Child1
+                                        {
+                                            using Microsoft.Win32;
+
+                                            class Foo { }
+                                        }
+
+                                        namespace Child2
+                                        {
+                                            using System.CodeDom;
+                                            using Microsoft.CSharp;
+
+                                            class Bar { }
+                                        }
+                                    }";
+
+            var classNames = new string[2];
+            classNames[0] = "Foo";
+            classNames[1] = "Barr";
+            
+            var classNamespaces = new string[2];
+            classNamespaces[0] = "TopLevel.Child1";
+            classNamespaces[1] = "TopLevel.Child2";
+            
+            var entities = _sut.Extract(fileContent);
+
+            Assert.Equal(2, entities.Count);
+            
+
+            for (var i = 0; i < entities.Count; i++)
+            {
+                var entity = entities[i];
+                Assert.Equal(typeof(ClassModel), entity.GetType());
+
+                var projectClass = (ClassModel) entity;
+
+                Assert.Equal(classNamespaces[i], projectClass.Namespace);
+                Assert.Equal(classNames[i], projectClass.Name);
+            }
+        }
+
+        [Fact]
+        public void Extract_ShouldNotHaveMetrics_WhenGivenAnEmptyListOfMetrics_ForOneClass()
         {
             const string fileContent = @"    
 
@@ -96,12 +156,16 @@ namespace HoneydewCoreTest.Extractors
                                       }
                                     }
                                     ";
-            var entity = _sut.Extract(fileContent);
-            Assert.Equal(typeof(ClassModel), entity.GetType());
+            var entities = _sut.Extract(fileContent);
 
-            var projectClass = (ClassModel) entity;
+            foreach (var entity in entities)
+            {
+                Assert.Equal(typeof(ClassModel), entity.GetType());
 
-            Assert.Empty(projectClass.Metrics);
+                var projectClass = (ClassModel) entity;
+
+                Assert.Empty(projectClass.Metrics);   
+            }
         }
     }
 }

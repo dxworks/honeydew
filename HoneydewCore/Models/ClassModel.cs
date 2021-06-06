@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Extractors.Metrics;
 
 namespace HoneydewCore.Models
 {
@@ -6,6 +7,6 @@ namespace HoneydewCore.Models
     {
         public string Namespace { get; init; }
 
-        public Dictionary<string, int> Metrics { get; } = new();
+        public Dictionary<string, IMetric> Metrics { get; } = new();
     }
 }
