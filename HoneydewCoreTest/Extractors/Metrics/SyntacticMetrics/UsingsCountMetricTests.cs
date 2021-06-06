@@ -28,6 +28,43 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal(MetricType.Syntactic, _sut.GetMetricType());
         }
         
+         
+        [Fact]
+        public void Extract_ShouldHaveUsingsCountMetric_WhenGivenOneUsingsLevel()
+        {
+            const string fileContent = @"using System;
+                                    using System.Collections.Generic;
+                                    using System.Linq;
+                                    using System.Text;
+                                    using Microsoft.CodeAnalysis;
+                                    using Microsoft.CodeAnalysis.CSharp;
+
+                                    namespace TopLevel
+                                    {
+                                        public class Foo { int a; public void f(); }                                        
+                                    }";
+
+            
+            var metrics = new List<CSharpMetricExtractor>()
+            {
+                _sut
+            };
+
+            _extractor = new CSharpClassExtractor(metrics);
+
+            var compilationUnitModel = _extractor.Extract(fileContent);
+
+            Assert.Equal(1, compilationUnitModel.SyntacticMetrics.Count);
+            
+            var metric = compilationUnitModel.SyntacticMetrics[_sut.GetName()];
+            Assert.Equal(typeof(Metric<int>), metric.GetType());
+
+
+            var count = ((Metric<int>) metric).Value;
+
+            Assert.Equal(6, count);
+        }
+        
         [Fact]
         public void Extract_ShouldHaveUsingsCountMetric_WhenGivenMultipleUsingsAtMultipleLevels()
         {
@@ -70,11 +107,10 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
 
             var compilationUnitModel = _extractor.Extract(fileContent);
 
-            Assert.Equal(1, compilationUnitModel.Metrics.Count);
+            Assert.Equal(1, compilationUnitModel.SyntacticMetrics.Count);
             
-            var metric = compilationUnitModel.Metrics[_sut.GetName()];
+            var metric = compilationUnitModel.SyntacticMetrics[_sut.GetName()];
             Assert.Equal(typeof(Metric<int>), metric.GetType());
-
 
             var count = ((Metric<int>) metric).Value;
 

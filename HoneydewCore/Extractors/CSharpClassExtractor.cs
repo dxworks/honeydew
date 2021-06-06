@@ -57,7 +57,7 @@ namespace HoneydewCore.Extractors
                 else
                 {
                     metric.Visit(root);
-                    compilationUnitModel.Metrics.Add(metric.GetName(), metric.GetMetric());
+                    compilationUnitModel.SyntacticMetrics.Add(metric.GetName(), metric.GetMetric());
                 }
             }
 

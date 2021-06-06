@@ -57,9 +57,9 @@ namespace HoneydewCoreTest.Extractors.Metrics
 
             var compilationUnitModel = _extractor.Extract(fileContent);
 
-            Assert.Equal(1, compilationUnitModel.Metrics.Count);
+            Assert.Equal(1, compilationUnitModel.SyntacticMetrics.Count);
 
-            var metric = compilationUnitModel.Metrics[_sut.GetName()];
+            var metric = compilationUnitModel.SyntacticMetrics[_sut.GetName()];
             Assert.Equal(typeof(Metric<int>), metric.GetType());
 
             var count = ((Metric<int>) metric).Value;
