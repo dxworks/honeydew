@@ -73,11 +73,11 @@ namespace HoneydewCoreTest.Extractors
                                       }
                                     }
                                     ";
-            var entities = _sut.Extract(fileContent);
+            var compilationUnitModel = _sut.Extract(fileContent);
 
-            Assert.Equal(1, entities.Count);
+            Assert.Equal(1, compilationUnitModel.Entities.Count);
             
-            foreach (var entity in entities)
+            foreach (var entity in compilationUnitModel.Entities)
             {
                 Assert.Equal(typeof(ClassModel), entity.GetType());
 
@@ -85,60 +85,6 @@ namespace HoneydewCoreTest.Extractors
 
                 Assert.Equal("Models.Main.Items", projectClass.Namespace);
                 Assert.Equal("MainItem", projectClass.Name);   
-            }
-        }
-
-        [Fact]
-        public void Extract_ShouldSetClassNameAndNamespace_WhenParsingTextWithMultipleClasses()
-        {
-            
-            const string fileContent = @"using System;                                
-                                    using Microsoft.CodeAnalysis;
-                                    using Microsoft.CodeAnalysis.CSharp;
-
-                                    namespace TopLevel
-                                    {
-                                        using Microsoft;
-                                        using System.ComponentModel;
-
-                                        namespace Child1
-                                        {
-                                            using Microsoft.Win32;
-
-                                            class Foo { }
-                                        }
-
-                                        namespace Child2
-                                        {
-                                            using System.CodeDom;
-                                            using Microsoft.CSharp;
-
-                                            class Bar { }
-                                        }
-                                    }";
-
-            var classNames = new string[2];
-            classNames[0] = "Foo";
-            classNames[1] = "Barr";
-            
-            var classNamespaces = new string[2];
-            classNamespaces[0] = "TopLevel.Child1";
-            classNamespaces[1] = "TopLevel.Child2";
-            
-            var entities = _sut.Extract(fileContent);
-
-            Assert.Equal(2, entities.Count);
-            
-
-            for (var i = 0; i < entities.Count; i++)
-            {
-                var entity = entities[i];
-                Assert.Equal(typeof(ClassModel), entity.GetType());
-
-                var projectClass = (ClassModel) entity;
-
-                Assert.Equal(classNamespaces[i], projectClass.Namespace);
-                Assert.Equal(classNames[i], projectClass.Name);
             }
         }
 
@@ -156,9 +102,9 @@ namespace HoneydewCoreTest.Extractors
                                       }
                                     }
                                     ";
-            var entities = _sut.Extract(fileContent);
+            var compilationUnitModel = _sut.Extract(fileContent);
 
-            foreach (var entity in entities)
+            foreach (var entity in compilationUnitModel.Entities)
             {
                 Assert.Equal(typeof(ClassModel), entity.GetType());
 

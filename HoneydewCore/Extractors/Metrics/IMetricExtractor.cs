@@ -2,6 +2,8 @@
 {
     public interface IMetricExtractor
     {
+        bool IsSemantic();
+
         string GetName();
 
         IMetric GetMetric();

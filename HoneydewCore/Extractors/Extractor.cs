@@ -15,6 +15,6 @@ namespace HoneydewCore.Extractors
 
         public abstract string FileType();
 
-        public abstract IList<ProjectEntity> Extract(string fileContent);
+        public abstract CompilationUnitModel Extract(string fileContent);
     }
 }

@@ -3,10 +3,9 @@ using HoneydewCore.Extractors.Metrics;
 
 namespace HoneydewCore.Models
 {
-    public class ClassModel : ProjectEntity
+    public class CompilationUnitModel
     {
-        public string Namespace { get; init; }
-
+        public IList<ClassModel> Entities { get; set; }
         public IDictionary<string, IMetric> Metrics { get; } = new Dictionary<string, IMetric>();
     }
 }

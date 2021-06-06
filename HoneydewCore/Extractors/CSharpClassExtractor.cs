@@ -19,7 +19,7 @@ namespace HoneydewCore.Extractors
             return ".cs";
         }
 
-        public override IList<ProjectEntity> Extract(string fileContent)
+        public override CompilationUnitModel Extract(string fileContent)
         {
             if (string.IsNullOrWhiteSpace(fileContent))
             {
@@ -36,26 +36,59 @@ namespace HoneydewCore.Extractors
                 throw new ExtractionException();
             }
 
-            IList<ProjectEntity> entities = new List<ProjectEntity>();
+            IList<ClassModel> entities = new List<ClassModel>();
 
-            var namespaceDeclarationSyntax = root.DescendantNodes().OfType<NamespaceDeclarationSyntax>().First();
-            var classDeclarationSyntax = root.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
+            CompilationUnitModel compilationUnitModel = new CompilationUnitModel();
 
-            var projectClass = new ClassModel
-            {
-                Namespace = namespaceDeclarationSyntax.Name.ToString(),
-                Name = classDeclarationSyntax.Identifier.ToString(),
-            };
+            var compilation = CSharpCompilation.Create("Compilation")
+                .AddReferences(MetadataReference.CreateFromFile(typeof(string).Assembly.Location))
+                .AddSyntaxTrees(tree);
+            var semanticModel = compilation.GetSemanticModel(tree);
+
+            IList<CSharpMetricExtractor> semanticMetricExtractors = new List<CSharpMetricExtractor>();
 
             foreach (var metric in MetricExtractors)
             {
-                metric.Visit(root);
-                projectClass.Metrics.Add(metric.GetName(), metric.GetMetric());
+                if (metric.IsSemantic())
+                {
+                    metric.SemanticModel = semanticModel;
+                    semanticMetricExtractors.Add(metric);
+                }
+                else
+                {
+                    metric.Visit(root);
+                    compilationUnitModel.Metrics.Add(metric.GetName(), metric.GetMetric());
+                }
             }
-            
-            entities.Add(projectClass);
 
-            return entities;
+            foreach (var classDeclarationSyntax in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
+            {
+                var declaredSymbol = semanticModel.GetDeclaredSymbol(classDeclarationSyntax);
+                if (declaredSymbol == null)
+                {
+                    continue;
+                }
+
+                var namespaceSymbol = declaredSymbol.ContainingNamespace;
+                var className = declaredSymbol.Name;
+
+                var projectClass = new ClassModel
+                {
+                    Namespace = namespaceSymbol.ToString(),
+                    Name = className
+                };
+
+                foreach (var metric in semanticMetricExtractors)
+                {
+                    metric.Visit(classDeclarationSyntax);
+                    projectClass.Metrics.Add(metric.GetName(), metric.GetMetric());
+                }
+
+                entities.Add(projectClass);
+            }
+
+            compilationUnitModel.Entities = entities;
+            return compilationUnitModel;
         }
     }
 }

@@ -1,23 +1,27 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics;
-using HoneydewCore.Models;
 using Xunit;
 
 namespace HoneydewCoreTest.Extractors.Metrics
 {
-    public class CSharpMetricsTests
+    public class CSharpMetricsTests // tests with multiple metrics
     {
-        private Extractor<CSharpMetricExtractor> _sut;
+        private readonly CSharpMetricExtractor _sut;
+        private Extractor<CSharpMetricExtractor> _extractor;
+
+        public CSharpMetricsTests()
+        {
+            _sut = new UsingsCountMetric();
+        }
 
         [Fact]
-        public void Extract_ShouldHaveUsingsCountMetric_WhenGivenMultipleUsingsAtMultipleLevels()
+        public void
+            Extract_ShouldHaveUsingsCountMetricAndCorrectClassNamesWithNamespaces_WhenGivenMultipleUsingsAtMultipleLevels()
         {
             const string fileContent = @"using System;
                                     using System.Collections.Generic;
                                     using System.Linq;
-                                    using System.Text;
-                                    using Microsoft.CodeAnalysis;
                                     using Microsoft.CodeAnalysis.CSharp;
 
                                     namespace TopLevel
@@ -30,7 +34,7 @@ namespace HoneydewCoreTest.Extractors.Metrics
                                             using Microsoft.Win32;
                                             using System.Runtime.InteropServices;
 
-                                            class Foo { }
+                                            public class Foo { }
                                         }
 
                                         namespace Child2
@@ -38,35 +42,37 @@ namespace HoneydewCoreTest.Extractors.Metrics
                                             using System.CodeDom;
                                             using Microsoft.CSharp;
 
-                                            class Bar { }
+                                            public class Bar { public void b(){} }
                                         }
                                     }";
 
-            var usingsCountMetric = new UsingsCountMetric();
+
             var metrics = new List<CSharpMetricExtractor>()
             {
-                usingsCountMetric
+                _sut
             };
 
-            _sut = new CSharpClassExtractor(metrics);
+            _extractor = new CSharpClassExtractor(metrics);
 
-            var entities = _sut.Extract(fileContent);
+            var compilationUnitModel = _extractor.Extract(fileContent);
 
-            foreach (var entity in entities)
-            {
-                Assert.Equal(typeof(ClassModel), entity.GetType());
+            Assert.Equal(1, compilationUnitModel.Metrics.Count);
 
-                var projectClass = (ClassModel) entity;
+            var metric = compilationUnitModel.Metrics[_sut.GetName()];
+            Assert.Equal(typeof(Metric<int>), metric.GetType());
 
-                Assert.NotEmpty(projectClass.Metrics);
-                Assert.True(projectClass.Metrics.TryGetValue(usingsCountMetric.GetName(), out var countMetric));
+            var count = ((Metric<int>) metric).Value;
+            Assert.Equal(10, count);
 
-                Assert.Equal(typeof(Metric<int>), countMetric.GetType());
-
-                var count = ((Metric<int>) countMetric).Value;
-
-                Assert.Equal(12, count);
-            }
+            Assert.Equal(2, compilationUnitModel.Entities.Count);
+            
+            var foo = compilationUnitModel.Entities[0];
+            Assert.Equal("Foo", foo.Name);
+            Assert.Equal("TopLevel.Child1", foo.Namespace);
+            
+            var bar = compilationUnitModel.Entities[1];
+            Assert.Equal("Bar", bar.Name);
+            Assert.Equal("TopLevel.Child2", bar.Namespace);
         }
     }
 }
