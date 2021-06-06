@@ -49,7 +49,7 @@ namespace HoneydewCore.Extractors
 
             foreach (var metric in MetricExtractors)
             {
-                if (metric.IsSemantic())
+                if (metric.GetMetricType() == MetricType.Semantic)
                 {
                     metric.SemanticModel = semanticModel;
                     semanticMetricExtractors.Add(metric);

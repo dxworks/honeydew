@@ -2,7 +2,7 @@
 {
     public interface IMetricExtractor
     {
-        bool IsSemantic();
+        MetricType GetMetricType();
 
         string GetName();
 

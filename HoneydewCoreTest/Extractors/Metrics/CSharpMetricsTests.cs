@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics;
+using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using Xunit;
 
 namespace HoneydewCoreTest.Extractors.Metrics

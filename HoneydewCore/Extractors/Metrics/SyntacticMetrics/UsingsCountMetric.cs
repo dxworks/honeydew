@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewCore.Extractors.Metrics
+namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
 {
     public class UsingsCountMetric : CSharpMetricExtractor
     {
@@ -16,19 +16,14 @@ namespace HoneydewCore.Extractors.Metrics
             return new Metric<int>(_usingsCount);
         }
 
-        public override bool IsSemantic()
+        public override MetricType GetMetricType()
         {
-            return false;
+            return MetricType.Syntactic;
         }
 
         public override void VisitUsingDirective(UsingDirectiveSyntax node)
         {
             _usingsCount++;
-        }
-
-        public override void VisitClassDeclaration(ClassDeclarationSyntax node)
-        {
-            base.VisitClassDeclaration(node);
         }
     }
 }

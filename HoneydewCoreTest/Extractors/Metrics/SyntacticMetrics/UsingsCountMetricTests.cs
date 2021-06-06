@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics;
-using HoneydewCore.Models;
+using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using Xunit;
 
-namespace HoneydewCoreTest.Extractors.Metrics
+namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
 {
     public class UsingsCountMetricTests
     {
@@ -23,9 +23,9 @@ namespace HoneydewCoreTest.Extractors.Metrics
         }
 
         [Fact]
-        public void IsSemantic_ShouldReturnFalse()
+        public void GetMetricType_ShouldReturnSyntactic()
         {
-            Assert.False(_sut.IsSemantic());
+            Assert.Equal(MetricType.Syntactic, _sut.GetMetricType());
         }
         
         [Fact]
