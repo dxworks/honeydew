@@ -81,7 +81,7 @@ namespace HoneydewCore.Extractors
                 foreach (var metric in semanticMetricExtractors)
                 {
                     metric.Visit(classDeclarationSyntax);
-                    projectClass.Metrics.Add(metric.GetName(), metric.GetMetric());
+                    projectClass.AddMetric(metric.GetName(), metric.GetMetric());
                 }
 
                 entities.Add(projectClass);

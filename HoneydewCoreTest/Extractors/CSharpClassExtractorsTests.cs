@@ -76,7 +76,7 @@ namespace HoneydewCoreTest.Extractors
             var compilationUnitModel = _sut.Extract(fileContent);
 
             Assert.Equal(1, compilationUnitModel.Entities.Count);
-            
+
             foreach (var entity in compilationUnitModel.Entities)
             {
                 Assert.Equal(typeof(ClassModel), entity.GetType());
@@ -84,7 +84,7 @@ namespace HoneydewCoreTest.Extractors
                 var projectClass = (ClassModel) entity;
 
                 Assert.Equal("Models.Main.Items", projectClass.Namespace);
-                Assert.Equal("MainItem", projectClass.Name);   
+                Assert.Equal("MainItem", projectClass.Name);
             }
         }
 
@@ -108,9 +108,7 @@ namespace HoneydewCoreTest.Extractors
             {
                 Assert.Equal(typeof(ClassModel), entity.GetType());
 
-                var projectClass = (ClassModel) entity;
-
-                Assert.Empty(projectClass.Metrics);   
+                Assert.False(entity.HasMetrics());
             }
         }
     }
