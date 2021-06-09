@@ -41,7 +41,7 @@ namespace HoneydewCore.Extractors
 
             IList<ClassModel> entities = new List<ClassModel>();
 
-            CompilationUnitModel compilationUnitModel = new CompilationUnitModel();
+            var compilationUnitModel = new CompilationUnitModel();
 
             var compilation = CSharpCompilation.Create("Compilation")
                 .AddReferences(MetadataReference.CreateFromFile(typeof(string).Assembly.Location))
@@ -90,7 +90,7 @@ namespace HoneydewCore.Extractors
                 entities.Add(projectClass);
             }
 
-            compilationUnitModel.Entities = entities;
+            compilationUnitModel.ClassModels = entities;
             return compilationUnitModel;
         }
     }

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Filters;
+using HoneydewCore.IO.Readers.Strategies;
 
 namespace Honeydew
 {
@@ -15,17 +17,21 @@ namespace Honeydew
 
             Console.WriteLine("Reading project from {0}...", pathToProject);
 
-            var filters = new List<PathFilter>();
-            filters.Add(path => path.EndsWith(".cs"));
-
             var extractors = new List<IFactExtractor>
             {
-                new CSharpClassFactExtractor(new List<CSharpMetricExtractor>())
+                new CSharpClassFactExtractor(new List<CSharpMetricExtractor>
+                {
+                })
             };
 
-            ISolutionLoader solutionLoader = new SolutionLoader(new FileReader(filters), extractors);
+            var filters = extractors
+                .Select(extractor => (PathFilter) (path => path.EndsWith(extractor.FileType())))
+                .ToList();
 
-            var projectModel = solutionLoader.LoadSolution(pathToProject);
+            ISolutionLoader solutionLoader = new SolutionLoader(new FileReader(filters), extractors);
+            ISolutionLoadingStrategy loadingStrategy = new DirectSolutionLoading();
+
+            var projectModel = solutionLoader.LoadSolution(pathToProject, loadingStrategy);
 
             Console.WriteLine("Project read");
             Console.WriteLine(projectModel);

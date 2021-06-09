@@ -4,7 +4,7 @@ namespace HoneydewCore.Models
 {
     public class CompilationUnitModel
     {
-        public IList<ClassModel> Entities { get; set; }
+        public IList<ClassModel> ClassModels { get; set; }
         public MetricsSet SyntacticMetrics { get; } = new();
     }
 }

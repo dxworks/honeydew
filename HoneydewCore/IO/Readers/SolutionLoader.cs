@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors;
+using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.Models;
 
 namespace HoneydewCore.IO.Readers
@@ -15,7 +16,7 @@ namespace HoneydewCore.IO.Readers
             _extractors = extractors;
         }
 
-        public SolutionModel LoadSolution(string projectPath)
+        public SolutionModel LoadSolution(string projectPath, ISolutionLoadingStrategy strategy)
         {
             var filePaths = _fileReader.ReadFilePaths(projectPath);
 
@@ -26,7 +27,7 @@ namespace HoneydewCore.IO.Readers
 
             SolutionModel solutionModel = new();
 
-            foreach (string path in filePaths)
+            foreach (var path in filePaths)
             {
                 var fileContent = _fileReader.ReadFile(path);
             }

@@ -63,13 +63,13 @@ namespace HoneydewCoreTest.Extractors.Metrics
             
             Assert.Equal(10, count);
 
-            Assert.Equal(2, compilationUnitModel.Entities.Count);
+            Assert.Equal(2, compilationUnitModel.ClassModels.Count);
 
-            var foo = compilationUnitModel.Entities[0];
+            var foo = compilationUnitModel.ClassModels[0];
             Assert.Equal("Foo", foo.Name);
             Assert.Equal("TopLevel.Child1", foo.Namespace);
 
-            var bar = compilationUnitModel.Entities[1];
+            var bar = compilationUnitModel.ClassModels[1];
             Assert.Equal("Bar", bar.Name);
             Assert.Equal("TopLevel.Child2", bar.Namespace);
         }
@@ -118,11 +118,11 @@ namespace HoneydewCoreTest.Extractors.Metrics
             var syntacticMetricOptional = compilationUnitModel.SyntacticMetrics.Get<BaseClassMetric>();
             Assert.False(syntacticMetricOptional.HasValue);
 
-            Assert.Equal(2, compilationUnitModel.Entities.Count);
-            var optional = compilationUnitModel.Entities[0].Metrics.Get<UsingsCountMetric>();
+            Assert.Equal(2, compilationUnitModel.ClassModels.Count);
+            var optional = compilationUnitModel.ClassModels[0].Metrics.Get<UsingsCountMetric>();
             Assert.False(optional.HasValue);
             
-            var optional1 = compilationUnitModel.Entities[1].Metrics.Get<UsingsCountMetric>();
+            var optional1 = compilationUnitModel.ClassModels[1].Metrics.Get<UsingsCountMetric>();
             Assert.False(optional1.HasValue);
         }
     }

@@ -75,16 +75,14 @@ namespace HoneydewCoreTest.Extractors
                                     ";
             var compilationUnitModel = _sut.Extract(fileContent);
 
-            Assert.Equal(1, compilationUnitModel.Entities.Count);
+            Assert.Equal(1, compilationUnitModel.ClassModels.Count);
 
-            foreach (var entity in compilationUnitModel.Entities)
+            foreach (var classModel in compilationUnitModel.ClassModels)
             {
-                Assert.Equal(typeof(ClassModel), entity.GetType());
+                Assert.Equal(typeof(ClassModel), classModel.GetType());
 
-                var projectClass = (ClassModel) entity;
-
-                Assert.Equal("Models.Main.Items", projectClass.Namespace);
-                Assert.Equal("MainItem", projectClass.Name);
+                Assert.Equal("Models.Main.Items", classModel.Namespace);
+                Assert.Equal("MainItem", classModel.Name);
             }
         }
 
@@ -104,11 +102,11 @@ namespace HoneydewCoreTest.Extractors
                                     ";
             var compilationUnitModel = _sut.Extract(fileContent);
 
-            foreach (var entity in compilationUnitModel.Entities)
+            foreach (var classModel in compilationUnitModel.ClassModels)
             {
-                Assert.Equal(typeof(ClassModel), entity.GetType());
+                Assert.Equal(typeof(ClassModel), classModel.GetType());
 
-                Assert.False(entity.Metrics.HasMetrics());
+                Assert.False(classModel.Metrics.HasMetrics());
             }
         }
     }

@@ -4,7 +4,7 @@ using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Filters;
 using Xunit;
 
-namespace HoneydewCoreTest.Analyzers.IO.Readers
+namespace HoneydewCoreTest.IO.Readers
 {
     public class FileReaderTests
     {
