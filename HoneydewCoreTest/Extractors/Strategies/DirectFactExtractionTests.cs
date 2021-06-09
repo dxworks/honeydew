@@ -19,14 +19,14 @@ namespace HoneydewCoreTest.Extractors.Strategies
         [Fact]
         public void Extract_ShouldReturnEmptyList_WhenGivenEmptyContentAndNullExtractors()
         {
-            var compilationUnitModels = _sut.Extract("", null);
+            var compilationUnitModels = _sut.Load("", null);
             Assert.Empty(compilationUnitModels);
         }
 
         [Fact]
         public void Extract_ShouldReturnEmptyList_WhenGivenEmptyContentAndNoExtractors()
         {
-            var compilationUnitModels = _sut.Extract("\t ", new List<IFactExtractor>());
+            var compilationUnitModels = _sut.Load("\t ", new List<IFactExtractor>());
             Assert.Empty(compilationUnitModels);
         }
 
@@ -37,7 +37,7 @@ namespace HoneydewCoreTest.Extractors.Strategies
                                     {
                                       public class Item { }
                                     }";
-            var compilationUnitModels = _sut.Extract(fileContent, new List<IFactExtractor>());
+            var compilationUnitModels = _sut.Load(fileContent, new List<IFactExtractor>());
             Assert.Empty(compilationUnitModels);
         }
 
@@ -53,7 +53,7 @@ namespace HoneydewCoreTest.Extractors.Strategies
             {
                 new CSharpClassFactExtractor(new List<CSharpMetricExtractor>())
             };
-            var compilationUnitModels = _sut.Extract(fileContent, extractors);
+            var compilationUnitModels = _sut.Load(fileContent, extractors);
 
             Assert.Equal(1, compilationUnitModels.Count);
             var compilationUnitModel = compilationUnitModels[0];
@@ -89,7 +89,7 @@ namespace HoneydewCoreTest.Extractors.Strategies
                     new UsingsCountMetric()
                 })
             };
-            var compilationUnitModels = _sut.Extract(fileContent, extractors);
+            var compilationUnitModels = _sut.Load(fileContent, extractors);
 
             Assert.Equal(1, compilationUnitModels.Count);
             var compilationUnitModel = compilationUnitModels[0];

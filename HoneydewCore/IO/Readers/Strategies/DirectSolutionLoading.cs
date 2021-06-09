@@ -7,7 +7,7 @@ namespace HoneydewCore.IO.Readers.Strategies
 {
     public class DirectSolutionLoading : ISolutionLoadingStrategy
     {
-        public IList<CompilationUnitModel> Extract(string fileContent, IList<IFactExtractor> extractors)
+        public IList<CompilationUnitModel> Load(string fileContent, IList<IFactExtractor> extractors)
         {
             extractors ??= new List<IFactExtractor>();
 

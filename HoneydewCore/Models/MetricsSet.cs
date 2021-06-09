@@ -7,6 +7,8 @@ namespace HoneydewCore.Models
 {
     public class MetricsSet
     {
+        public Dictionary<string, object> MetricValues { get; } = new();
+
         private readonly IDictionary<Type, IMetric> _metrics = new Dictionary<Type, IMetric>();
 
         public bool HasMetrics()
@@ -16,10 +18,18 @@ namespace HoneydewCore.Models
 
         public void Add(IMetricExtractor extractor)
         {
-            if (!_metrics.ContainsKey(extractor.GetType()))
+            var type = extractor.GetType();
+
+            if (_metrics.ContainsKey(type))
             {
-                _metrics.Add(extractor.GetType(), extractor.GetMetric());
+                return;
             }
+
+            var metric = extractor.GetMetric();
+
+            _metrics.Add(type, metric);
+
+            MetricValues.Add(type.ToString(), metric);
         }
 
         public Optional<IMetric> Get<T>() where T : IMetricExtractor

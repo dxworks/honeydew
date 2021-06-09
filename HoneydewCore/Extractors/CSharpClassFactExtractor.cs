@@ -39,7 +39,7 @@ namespace HoneydewCore.Extractors
                 throw new ExtractionException();
             }
 
-            IList<ClassModel> entities = new List<ClassModel>();
+            IList<ClassModel> classModels = new List<ClassModel>();
 
             var compilationUnitModel = new CompilationUnitModel();
 
@@ -87,10 +87,14 @@ namespace HoneydewCore.Extractors
                     projectClass.Metrics.Add(extractor);
                 }
 
-                entities.Add(projectClass);
+                classModels.Add(projectClass);
             }
 
-            compilationUnitModel.ClassModels = entities;
+            foreach (var model in classModels)
+            {
+                compilationUnitModel.ClassModels .Add(model);
+            }
+            
             return compilationUnitModel;
         }
     }

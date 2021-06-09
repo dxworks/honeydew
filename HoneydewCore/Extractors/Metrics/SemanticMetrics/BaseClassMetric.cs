@@ -4,11 +4,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 {
     /// <summary>
-    /// Retrieves The Base class and the interfaces 
+    /// Retrieves The Base class and the implemented interfaces 
     /// </summary>
     public class BaseClassMetric : CSharpMetricExtractor
     {
-        private InheritanceMetric _inheritanceMetric;
+        public InheritanceMetric InheritanceMetric { get; set; }
 
         public override MetricType GetMetricType()
         {
@@ -17,12 +17,12 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 
         public override IMetric GetMetric()
         {
-            return new Metric<InheritanceMetric>(_inheritanceMetric);
+            return new Metric<InheritanceMetric>(InheritanceMetric);
         }
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            _inheritanceMetric = new InheritanceMetric();
+            InheritanceMetric = new InheritanceMetric();
 
             var declaredSymbol = SemanticModel.GetDeclaredSymbol(node);
 
@@ -30,22 +30,22 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 
             if (typeSymbol.BaseType == null)
             {
-                _inheritanceMetric.BaseClassName = "Object";
+                InheritanceMetric.BaseClassName = "Object";
                 return;
             }
 
-            _inheritanceMetric.BaseClassName = typeSymbol.BaseType.Name;
+            InheritanceMetric.BaseClassName = typeSymbol.BaseType.Name;
 
             if (typeSymbol.BaseType.Constructors.IsEmpty)
             {
-                _inheritanceMetric.Interfaces.Add(typeSymbol.BaseType?.ToString());
-                _inheritanceMetric.BaseClassName = "Object";
+                InheritanceMetric.Interfaces.Add(typeSymbol.BaseType?.ToString());
+                InheritanceMetric.BaseClassName = "Object";
             }
 
 
             foreach (var i in typeSymbol.Interfaces)
             {
-                _inheritanceMetric.Interfaces.Add(i.ToString());
+                InheritanceMetric.Interfaces.Add(i.ToString());
             }
         }
     }

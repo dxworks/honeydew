@@ -6,6 +6,7 @@ using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Filters;
 using HoneydewCore.IO.Readers.Strategies;
+using HoneydewCore.IO.Writers;
 
 namespace Honeydew
 {
@@ -34,7 +35,7 @@ namespace Honeydew
             var projectModel = solutionLoader.LoadSolution(pathToProject, loadingStrategy);
 
             Console.WriteLine("Project read");
-            Console.WriteLine(projectModel);
+            Console.WriteLine(projectModel.Export(new RawModelExporter()));
 
             Console.WriteLine("Enter any key to exit ...");
             Console.ReadKey();

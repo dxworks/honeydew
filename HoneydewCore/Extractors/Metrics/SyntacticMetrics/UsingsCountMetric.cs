@@ -4,11 +4,11 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
 {
     public class UsingsCountMetric : CSharpMetricExtractor
     {
-        private int _usingsCount;
+        public int UsingsCount { get; private set; }
 
         public override IMetric GetMetric()
         {
-            return new Metric<int>(_usingsCount);
+            return new Metric<int>(UsingsCount);
         }
 
         public override MetricType GetMetricType()
@@ -18,7 +18,7 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
 
         public override void VisitUsingDirective(UsingDirectiveSyntax node)
         {
-            _usingsCount++;
+            UsingsCount++;
         }
     }
 }
