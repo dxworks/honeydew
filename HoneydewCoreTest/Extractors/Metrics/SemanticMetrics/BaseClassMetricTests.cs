@@ -55,12 +55,11 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             Assert.Equal("MyClass", classModel.Name);
 
-            var metric = classModel.Metrics.Get<InheritanceMetric>();
-
-            Assert.True(metric.HasValue);
-
-            var baseClassMetric = metric.Value;
-            var inheritanceMetric = baseClassMetric.Value;
+            var optional = classModel.Metrics.Get<BaseClassMetric>();
+            Assert.True(optional.HasValue);
+            var metric = (Metric<InheritanceMetric>) optional.Value;
+            
+            var inheritanceMetric = metric.Value;
 
             Assert.Equal(0, inheritanceMetric.Interfaces.Count);
             Assert.Equal("Object", inheritanceMetric.BaseClassName);
@@ -100,12 +99,11 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             Assert.Equal("MyClass", classModel.Name);
 
-            var metric = classModel.Metrics.Get<InheritanceMetric>();
+            var optional = classModel.Metrics.Get<BaseClassMetric>();
+            Assert.True(optional.HasValue);
+            var metric = (Metric<InheritanceMetric>) optional.Value;
 
-            Assert.True(metric.HasValue);
-
-            var baseClassMetric = metric.Value;
-            var inheritanceMetric = baseClassMetric.Value;
+            var inheritanceMetric = metric.Value;
 
             Assert.Equal(1, inheritanceMetric.Interfaces.Count);
             Assert.Equal("Object", inheritanceMetric.BaseClassName);
@@ -142,8 +140,11 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             Assert.Equal(2, compilationUnitModel.Entities.Count);
 
             var parentClassModel = compilationUnitModel.Entities[0];
+            
+            var parentOptional = parentClassModel.Metrics.Get<BaseClassMetric>();
+            Assert.True(parentOptional.HasValue);
 
-            var inheritanceMetric = parentClassModel.Metrics.Get<InheritanceMetric>().Value.Value;
+            var inheritanceMetric = ((Metric<InheritanceMetric>) parentOptional.Value).Value;
 
             Assert.Equal("Parent", parentClassModel.Name);
             Assert.Equal(0, inheritanceMetric.Interfaces.Count);
@@ -153,10 +154,11 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             Assert.Equal("ChildClass", classModel.Name);
 
-            var metric = classModel.Metrics.Get<InheritanceMetric>();
-            Assert.True(metric.HasValue);
+            var optional = classModel.Metrics.Get<BaseClassMetric>();
+            Assert.True(optional.HasValue);
+            var metric = (Metric<InheritanceMetric>) optional.Value;
 
-            var baseClassMetric = metric.Value.Value;
+            var baseClassMetric = metric.Value;
 
             Assert.Equal("Parent", baseClassMetric.BaseClassName);
             Assert.Equal(0, baseClassMetric.Interfaces.Count);
@@ -198,7 +200,11 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var parentClassModel = compilationUnitModel.Entities[0];
 
-            var inheritanceMetric = parentClassModel.Metrics.Get<InheritanceMetric>().Value.Value;
+            
+            var parentOptional = parentClassModel.Metrics.Get<BaseClassMetric>();
+            Assert.True(parentOptional.HasValue);
+
+            var inheritanceMetric = ((Metric<InheritanceMetric>) parentOptional.Value).Value;
 
             Assert.Equal("Parent", parentClassModel.Name);
             Assert.Equal(0, inheritanceMetric.Interfaces.Count);
@@ -208,10 +214,11 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             Assert.Equal("ChildClass", classModel.Name);
 
-            var metric = classModel.Metrics.Get<InheritanceMetric>();
-            Assert.True(metric.HasValue);
+            var optional = classModel.Metrics.Get<BaseClassMetric>();
+            Assert.True(optional.HasValue);
+            var metric = (Metric<InheritanceMetric>) optional.Value;
 
-            var baseClassMetric = metric.Value.Value;
+            var baseClassMetric = metric.Value;
 
             Assert.Equal("Parent", baseClassMetric.BaseClassName);
             Assert.Equal(2, baseClassMetric.Interfaces.Count);

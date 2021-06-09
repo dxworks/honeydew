@@ -6,11 +6,11 @@ using Xunit;
 
 namespace HoneydewCoreTest.Extractors
 {
-    public class CSharpClassExtractorsTests
+    public class CSharpClassFactExtractorsTests
     {
         private readonly IFactExtractor _sut;
 
-        public CSharpClassExtractorsTests()
+        public CSharpClassFactExtractorsTests()
         {
             _sut = new CSharpClassFactExtractor(new List<CSharpMetricExtractor>());
         }

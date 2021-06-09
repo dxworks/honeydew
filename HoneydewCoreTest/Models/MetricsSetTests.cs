@@ -22,7 +22,7 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void HasMetrics_ShouldReturnTrue_WhenOneMetricIsAdded()
         {
-            _sut.Add(new Metric<string>(""));
+            _sut.Add(new ValueExtractor<string>(""));
 
             Assert.True(_sut.HasMetrics());
         }
@@ -30,9 +30,9 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void HasMetrics_ShouldReturnTrue_WhenMultipleMetricsAreAdded()
         {
-            _sut.Add(new Metric<string>(""));
-            _sut.Add(new Metric<int>(0));
-            _sut.Add(new Metric<float>(0.0f));
+            _sut.Add(new ValueExtractor<string>(""));
+            _sut.Add(new ValueExtractor<int>(0));
+            _sut.Add(new ValueExtractor<float>(0.0f));
 
             Assert.True(_sut.HasMetrics());
         }
@@ -40,70 +40,92 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldAddTheCorrectMetric_WhenANewMetricIsAdded()
         {
-            var metric = new Metric<string>("Value");
-            _sut.Add(metric);
+            var extractor = new ValueExtractor<string>("Value");
+            _sut.Add(extractor);
 
-            var optional = _sut.Get<string>();
+            var optional = _sut.Get<ValueExtractor<string>>();
             Assert.True(optional.HasValue);
 
-            Assert.Equal(metric, optional.Value);
-            Assert.Equal("Value", optional.Value.Value);
+            Assert.Equal(extractor.GetMetric(), optional.Value);
+            Assert.Equal("Value", ((Metric<string>) optional.Value).Value);
         }
 
         [Fact]
         public void Get_ShouldGetEmptyOptional_WhenNoMetricIsAdded()
         {
-            var optional = _sut.Get<int>();
+            var optional = _sut.Get<ValueExtractor<int>>();
             Assert.False(optional.HasValue);
         }
 
         [Fact]
         public void Get_ShouldGetEmptyOptional_WhenMetricIsAddedButOtherMetricIsRequested()
         {
-            _sut.Add(new Metric<string>(""));
+            _sut.Add(new ValueExtractor<string>(""));
 
-            var optional = _sut.Get<int>();
+            var optional = _sut.Get<ValueExtractor<int>>();
             Assert.False(optional.HasValue);
         }
 
         [Fact]
         public void Get_ShouldGetCorrectMetrics_WhenMultipleMetricsAreAdded()
         {
-            var metric1 = new Metric<string>("Some");
-            var metric2 = new Metric<int>(10);
-            var metric3 = new Metric<object>(null);
-            _sut.Add(metric1);
-            _sut.Add(metric2);
-            _sut.Add(metric3);
+            var extractor1 = new ValueExtractor<string>("Some");
+            var extractor2 = new ValueExtractor<int>(10);
+            var extractor3 = new ValueExtractor<object>(null);
+            _sut.Add(extractor1);
+            _sut.Add(extractor2);
+            _sut.Add(extractor3);
 
-            var optional1 = _sut.Get<string>();
+            var optional1 = _sut.Get<ValueExtractor<string>>();
             Assert.True(optional1.HasValue);
-            Assert.Equal(metric1, optional1.Value);
-            Assert.Equal("Some", optional1.Value.Value);
+            Assert.Equal(extractor1.GetMetric(), optional1.Value);
+            Assert.Equal("Some", ((Metric<string>) optional1.Value).Value);
 
-            var optional2 = _sut.Get<int>();
+            var optional2 = _sut.Get<ValueExtractor<int>>();
             Assert.True(optional2.HasValue);
-            Assert.Equal(metric2, optional2.Value);
-            Assert.Equal(10, optional2.Value.Value);
+            Assert.Equal(extractor2.GetMetric(), optional2.Value);
+            Assert.Equal(10, ((Metric<int>)optional2.Value).Value);
 
-            var optional3 = _sut.Get<object>();
+            var optional3 = _sut.Get<ValueExtractor<object>>();
             Assert.True(optional3.HasValue);
-            Assert.Equal(metric3, optional3.Value);
-            Assert.Null(optional3.Value.Value);
+            Assert.Equal(extractor3.GetMetric(), optional3.Value);
+            Assert.Null(((Metric<object>)optional3.Value).Value);
         }
-        
+
         [Fact]
         public void Get_ShouldGetTheFirstMetric_WhenMultipleMetricsOfTheSameTypeIsGiven()
         {
-            var metric1 = new Metric<string>("Some");
-            var metric2 = new Metric<string>("Other Value");
-            _sut.Add(metric1);
-            _sut.Add(metric2);
+            var extractor1 = new ValueExtractor<string>("Some");
+            var extractor2 = new ValueExtractor<string>("Other Value");
+            _sut.Add(extractor1);
+            _sut.Add(extractor2);
 
-            var optional = _sut.Get<string>();
+            var optional = _sut.Get<ValueExtractor<string>>();
             Assert.True(optional.HasValue);
-            Assert.Equal(metric1, optional.Value);
-            Assert.Equal("Some", optional.Value.Value);
+            Assert.Equal(extractor1.GetMetric(), optional.Value);
+            Assert.Equal("Some", ((Metric<string>)optional.Value).Value);
+        }
+    }
+
+    internal class ValueExtractor<T> : IMetricExtractor
+    {
+        private readonly T _value;
+        private readonly MetricType _metricType;
+
+        public ValueExtractor(T value, MetricType metricType = MetricType.Syntactic)
+        {
+            _value = value;
+            _metricType = metricType;
+        }
+
+        public MetricType GetMetricType()
+        {
+            return _metricType;
+        }
+
+        public IMetric GetMetric()
+        {
+            return new Metric<T>(_value);
         }
     }
 }

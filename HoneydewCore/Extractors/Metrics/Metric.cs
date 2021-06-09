@@ -4,7 +4,7 @@
     {
     }
 
-    public class Metric<T> : IMetric
+    public record Metric<T> : IMetric
     {
         public T Value { get; }
 

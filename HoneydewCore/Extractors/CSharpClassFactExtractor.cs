@@ -50,17 +50,17 @@ namespace HoneydewCore.Extractors
 
             IList<CSharpMetricExtractor> semanticMetricExtractors = new List<CSharpMetricExtractor>();
 
-            foreach (var metric in _metricExtractors)
+            foreach (var extractor in _metricExtractors)
             {
-                if (metric.GetMetricType() == MetricType.Semantic)
+                if (extractor.GetMetricType() == MetricType.Semantic)
                 {
-                    metric.SemanticModel = semanticModel;
-                    semanticMetricExtractors.Add(metric);
+                    extractor.SemanticModel = semanticModel;
+                    semanticMetricExtractors.Add(extractor);
                 }
                 else
                 {
-                    metric.Visit(root);
-                    compilationUnitModel.SyntacticMetrics.Add(metric.GetMetric());
+                    extractor.Visit(root);
+                    compilationUnitModel.SyntacticMetrics.Add(extractor);
                 }
             }
 
@@ -81,10 +81,10 @@ namespace HoneydewCore.Extractors
                     Name = className
                 };
 
-                foreach (var metric in semanticMetricExtractors)
+                foreach (var extractor in semanticMetricExtractors)
                 {
-                    metric.Visit(classDeclarationSyntax);
-                    projectClass.Metrics.Add(metric.GetMetric());
+                    extractor.Visit(classDeclarationSyntax);
+                    projectClass.Metrics.Add(extractor);
                 }
 
                 entities.Add(projectClass);

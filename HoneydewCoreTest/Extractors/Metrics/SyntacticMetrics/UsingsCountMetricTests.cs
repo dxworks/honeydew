@@ -49,11 +49,10 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             var compilationUnitModel = _factExtractor.Extract(fileContent);
 
             Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
-
-            var optional = compilationUnitModel.SyntacticMetrics.Get<int>();
-            Assert.True(optional.HasValue);
             
-            var metric = optional.Value;
+            var optional = compilationUnitModel.SyntacticMetrics.Get<UsingsCountMetric>();
+            Assert.True(optional.HasValue);
+            var metric = (Metric<int>) optional.Value;
             var count = metric.Value;
 
             Assert.Equal(6, count);
@@ -103,11 +102,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
 
             Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
 
-            var optional = compilationUnitModel.SyntacticMetrics.Get<int>();
-
+            var optional = compilationUnitModel.SyntacticMetrics.Get<UsingsCountMetric>();
             Assert.True(optional.HasValue);
-            
-            var metric = optional.Value;
+            var metric = (Metric<int>) optional.Value;
 
             Assert.Equal(12, metric.Value);
         }
