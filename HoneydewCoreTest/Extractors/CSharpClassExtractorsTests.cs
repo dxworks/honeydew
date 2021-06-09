@@ -8,11 +8,11 @@ namespace HoneydewCoreTest.Extractors
 {
     public class CSharpClassExtractorsTests
     {
-        private readonly Extractor<CSharpMetricExtractor> _sut;
+        private readonly IFactExtractor _sut;
 
         public CSharpClassExtractorsTests()
         {
-            _sut = new CSharpClassExtractor(new List<CSharpMetricExtractor>());
+            _sut = new CSharpClassFactExtractor(new List<CSharpMetricExtractor>());
         }
 
         [Fact]

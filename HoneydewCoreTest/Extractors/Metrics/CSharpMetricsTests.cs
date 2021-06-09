@@ -9,7 +9,7 @@ namespace HoneydewCoreTest.Extractors.Metrics
 {
     public class CSharpMetricsTests // tests with multiple metrics
     {
-        private Extractor<CSharpMetricExtractor> _extractor;
+        private IFactExtractor _factExtractor;
 
         [Fact]
         public void
@@ -48,9 +48,9 @@ namespace HoneydewCoreTest.Extractors.Metrics
                 sut
             };
 
-            _extractor = new CSharpClassExtractor(metrics);
+            _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _extractor.Extract(fileContent);
+            var compilationUnitModel = _factExtractor.Extract(fileContent);
 
             Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
 
@@ -109,9 +109,9 @@ namespace HoneydewCoreTest.Extractors.Metrics
                 new UsingsCountMetric()
             };
 
-            _extractor = new CSharpClassExtractor(metrics);
+            _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _extractor.Extract(fileContent);
+            var compilationUnitModel = _factExtractor.Extract(fileContent);
 
             Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
             var syntacticMetricOptional = compilationUnitModel.SyntacticMetrics.Get<BaseClassMetric>();

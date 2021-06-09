@@ -9,7 +9,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
     public class BaseClassMetricTests
     {
         private readonly CSharpMetricExtractor _sut;
-        private Extractor<CSharpMetricExtractor> _extractor;
+        private IFactExtractor _factExtractor;
 
         public BaseClassMetricTests()
         {
@@ -43,9 +43,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                 _sut
             };
 
-            _extractor = new CSharpClassExtractor(metrics);
+            _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _extractor.Extract(fileContent);
+            var compilationUnitModel = _factExtractor.Extract(fileContent);
 
             Assert.False(compilationUnitModel.SyntacticMetrics.HasMetrics());
 
@@ -88,9 +88,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                 _sut
             };
 
-            _extractor = new CSharpClassExtractor(metrics);
+            _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _extractor.Extract(fileContent);
+            var compilationUnitModel = _factExtractor.Extract(fileContent);
 
             Assert.False(compilationUnitModel.SyntacticMetrics.HasMetrics());
 
@@ -133,9 +133,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                 _sut
             };
 
-            _extractor = new CSharpClassExtractor(metrics);
+            _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _extractor.Extract(fileContent);
+            var compilationUnitModel = _factExtractor.Extract(fileContent);
 
             Assert.False(compilationUnitModel.SyntacticMetrics.HasMetrics());
 
@@ -188,9 +188,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                 _sut
             };
 
-            _extractor = new CSharpClassExtractor(metrics);
+            _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _extractor.Extract(fileContent);
+            var compilationUnitModel = _factExtractor.Extract(fileContent);
 
             Assert.False(compilationUnitModel.SyntacticMetrics.HasMetrics());
 

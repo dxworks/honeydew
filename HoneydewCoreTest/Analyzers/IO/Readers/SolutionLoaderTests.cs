@@ -17,7 +17,7 @@ namespace HoneydewCoreTest.Analyzers.IO.Readers
 
         public SolutionLoaderTests()
         {
-            _sut = new SolutionLoader(_fileReaderMock.Object, new List<Extractor<IMetricExtractor>>());
+            _sut = new SolutionLoader(_fileReaderMock.Object, new List<IFactExtractor>());
         }
 
         [Fact]

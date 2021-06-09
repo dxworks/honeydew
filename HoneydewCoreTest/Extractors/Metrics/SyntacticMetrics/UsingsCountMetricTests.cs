@@ -9,7 +9,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
     public class UsingsCountMetricTests
     {
         private readonly CSharpMetricExtractor _sut;
-        private Extractor<CSharpMetricExtractor> _extractor;
+        private IFactExtractor _factExtractor;
 
         public UsingsCountMetricTests()
         {
@@ -44,9 +44,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                 _sut
             };
 
-            _extractor = new CSharpClassExtractor(metrics);
+            _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _extractor.Extract(fileContent);
+            var compilationUnitModel = _factExtractor.Extract(fileContent);
 
             Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
 
@@ -97,9 +97,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                 _sut
             };
 
-            _extractor = new CSharpClassExtractor(metrics);
+            _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _extractor.Extract(fileContent);
+            var compilationUnitModel = _factExtractor.Extract(fileContent);
 
             Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
 

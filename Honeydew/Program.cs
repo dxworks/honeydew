@@ -18,7 +18,10 @@ namespace Honeydew
             var filters = new List<PathFilter>();
             filters.Add(path => path.EndsWith(".cs"));
 
-            var extractors = new List<Extractor<IMetricExtractor>>();
+            var extractors = new List<IFactExtractor>
+            {
+                new CSharpClassFactExtractor(new List<CSharpMetricExtractor>())
+            };
 
             ISolutionLoader solutionLoader = new SolutionLoader(new FileReader(filters), extractors);
 

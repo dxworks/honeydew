@@ -8,18 +8,21 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewCore.Extractors
 {
-    public class CSharpClassExtractor : Extractor<CSharpMetricExtractor>
+    public class CSharpClassFactExtractor : IFactExtractor
     {
-        public CSharpClassExtractor(IList<CSharpMetricExtractor> metricExtractors) : base(metricExtractors)
+        private readonly IList<CSharpMetricExtractor> _metricExtractors;
+
+        public CSharpClassFactExtractor(IList<CSharpMetricExtractor> metricExtractors)
         {
+            _metricExtractors = metricExtractors ?? new List<CSharpMetricExtractor>();
         }
 
-        public override string FileType()
+        public string FileType()
         {
             return ".cs";
         }
 
-        public override CompilationUnitModel Extract(string fileContent)
+        public CompilationUnitModel Extract(string fileContent)
         {
             if (string.IsNullOrWhiteSpace(fileContent))
             {
@@ -47,7 +50,7 @@ namespace HoneydewCore.Extractors
 
             IList<CSharpMetricExtractor> semanticMetricExtractors = new List<CSharpMetricExtractor>();
 
-            foreach (var metric in MetricExtractors)
+            foreach (var metric in _metricExtractors)
             {
                 if (metric.GetMetricType() == MetricType.Semantic)
                 {
