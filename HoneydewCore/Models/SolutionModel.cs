@@ -32,9 +32,9 @@ namespace HoneydewCore.Models
 
         public string Export(IExporter exporter)
         {
-            if (typeof(ISolutionModelExporter) == exporter.GetType())
+            if (exporter is ISolutionModelExporter modelExporter)
             {
-                return ((ISolutionModelExporter) exporter).Export(this);
+                return modelExporter.Export(this);
             }
 
             return string.Empty;

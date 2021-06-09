@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics;
+using HoneydewCore.Extractors.Metrics.SemanticMetrics;
+using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Filters;
 using HoneydewCore.IO.Readers.Strategies;
@@ -22,6 +24,8 @@ namespace Honeydew
             {
                 new CSharpClassFactExtractor(new List<CSharpMetricExtractor>
                 {
+                    new BaseClassMetric(),
+                    new UsingsCountMetric()
                 })
             };
 
@@ -35,10 +39,12 @@ namespace Honeydew
             var projectModel = solutionLoader.LoadSolution(pathToProject, loadingStrategy);
 
             Console.WriteLine("Project read");
-            Console.WriteLine(projectModel.Export(new RawModelExporter()));
+            var exportedSolutionModel = projectModel.Export(new RawModelExporter());
 
-            Console.WriteLine("Enter any key to exit ...");
-            Console.ReadKey();
+            Console.WriteLine(exportedSolutionModel);
+
+            // Console.WriteLine("Enter any key to exit ...");
+            // Console.ReadKey();
         }
     }
 }

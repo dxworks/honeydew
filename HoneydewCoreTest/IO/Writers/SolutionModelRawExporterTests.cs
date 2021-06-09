@@ -21,8 +21,8 @@ namespace HoneydewCoreTest.IO.Writers
         {
             var solutionModel = new SolutionModel();
             const string expectedString = "{\"Projects\":null,\"ProjectClassModels\":[]}";
-
-            var exportString = _sut.Export(solutionModel);
+            
+            var exportString = solutionModel.Export(_sut);
 
             Assert.Equal(expectedString, exportString);
         }
@@ -48,8 +48,7 @@ namespace HoneydewCoreTest.IO.Writers
                 compilationUnitModels
             }, path);
 
-
-            var exportString = _sut.Export(solutionModel);
+            var exportString = solutionModel.Export(_sut);
 
             Assert.Equal(expectedString, exportString);
         }
@@ -89,8 +88,8 @@ namespace HoneydewCoreTest.IO.Writers
                 compilationUnitModels
             }, path);
 
-
-            var exportString = _sut.Export(solutionModel);
+            
+            var exportString = solutionModel.Export(_sut);
 
             Assert.Equal(expectedString, exportString);
         }

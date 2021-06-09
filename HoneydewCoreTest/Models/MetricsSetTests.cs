@@ -47,7 +47,7 @@ namespace HoneydewCoreTest.Models
             Assert.True(optional.HasValue);
 
             Assert.Equal(extractor.GetMetric(), optional.Value);
-            Assert.Equal("Value", ((Metric<string>) optional.Value).Value);
+            Assert.Equal("Value", (string) optional.Value.GetValue());
         }
 
         [Fact]
@@ -79,17 +79,17 @@ namespace HoneydewCoreTest.Models
             var optional1 = _sut.Get<ValueExtractor<string>>();
             Assert.True(optional1.HasValue);
             Assert.Equal(extractor1.GetMetric(), optional1.Value);
-            Assert.Equal("Some", ((Metric<string>) optional1.Value).Value);
+            Assert.Equal("Some", (string) optional1.Value.GetValue());
 
             var optional2 = _sut.Get<ValueExtractor<int>>();
             Assert.True(optional2.HasValue);
             Assert.Equal(extractor2.GetMetric(), optional2.Value);
-            Assert.Equal(10, ((Metric<int>)optional2.Value).Value);
+            Assert.Equal(10, (int)optional2.Value.GetValue());
 
             var optional3 = _sut.Get<ValueExtractor<object>>();
             Assert.True(optional3.HasValue);
             Assert.Equal(extractor3.GetMetric(), optional3.Value);
-            Assert.Null(((Metric<object>)optional3.Value).Value);
+            Assert.Null(optional3.Value.GetValue());
         }
 
         [Fact]
@@ -103,7 +103,35 @@ namespace HoneydewCoreTest.Models
             var optional = _sut.Get<ValueExtractor<string>>();
             Assert.True(optional.HasValue);
             Assert.Equal(extractor1.GetMetric(), optional.Value);
-            Assert.Equal("Some", ((Metric<string>)optional.Value).Value);
+            Assert.Equal("Some", (string)optional.Value.GetValue());
+        }
+
+        [Fact]
+        public void Get_ShouldGetSyntacticMetric_WhenGivenASyntacticMetric()
+        {
+            var extractor = new ValueExtractor<string>("Value");
+            _sut.Add(extractor);
+            
+            var optional = _sut.Get<ValueExtractor<string>>();
+            
+            Assert.Equal( MetricType.Syntactic,extractor.GetMetricType());
+            
+            Assert.Equal(extractor.GetMetric(), optional.Value);
+            Assert.Equal("Value", (string)optional.Value.GetValue());
+        }
+        
+        [Fact]
+        public void Get_ShouldGetSemanticMetric_WhenGivenASemanticMetric()
+        {
+            var extractor = new ValueExtractor<string>("Value", MetricType.Semantic);
+            _sut.Add(extractor);
+            
+            var optional = _sut.Get<ValueExtractor<string>>();
+            
+            Assert.Equal( MetricType.Semantic,extractor.GetMetricType());
+            
+            Assert.Equal(extractor.GetMetric(), optional.Value);
+            Assert.Equal("Value", (string)optional.Value.GetValue());
         }
     }
 

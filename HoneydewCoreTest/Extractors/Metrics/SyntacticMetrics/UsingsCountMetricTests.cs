@@ -21,8 +21,8 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
         {
             Assert.Equal(MetricType.Syntactic, _sut.GetMetricType());
         }
-        
-         
+
+
         [Fact]
         public void Extract_ShouldHaveUsingsCountMetric_WhenGivenOneUsingsLevel()
         {
@@ -38,7 +38,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                                         public class Foo { int a; public void f(); }                                        
                                     }";
 
-            
+
             var metrics = new List<CSharpMetricExtractor>()
             {
                 _sut
@@ -49,15 +49,14 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             var compilationUnitModel = _factExtractor.Extract(fileContent);
 
             Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
-            
+
             var optional = compilationUnitModel.SyntacticMetrics.Get<UsingsCountMetric>();
             Assert.True(optional.HasValue);
-            var metric = (Metric<int>) optional.Value;
-            var count = metric.Value;
+            var count = (int) optional.Value.GetValue();
 
             Assert.Equal(6, count);
         }
-        
+
         [Fact]
         public void Extract_ShouldHaveUsingsCountMetric_WhenGivenMultipleUsingsAtMultipleLevels()
         {
@@ -90,7 +89,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                                         }
                                     }";
 
-            
+
             var metrics = new List<CSharpMetricExtractor>()
             {
                 _sut
@@ -104,9 +103,8 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
 
             var optional = compilationUnitModel.SyntacticMetrics.Get<UsingsCountMetric>();
             Assert.True(optional.HasValue);
-            var metric = (Metric<int>) optional.Value;
 
-            Assert.Equal(12, metric.Value);
+            Assert.Equal(12, (int) optional.Value.GetValue());
         }
     }
 }

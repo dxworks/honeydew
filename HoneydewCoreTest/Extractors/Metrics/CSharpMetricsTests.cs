@@ -57,9 +57,8 @@ namespace HoneydewCoreTest.Extractors.Metrics
             
             var optional = compilationUnitModel.SyntacticMetrics.Get<UsingsCountMetric>();
             Assert.True(optional.HasValue);
-            var metric = (Metric<int>) optional.Value;
             
-            var count = metric.Value;
+            var count = (int) optional.Value.GetValue();
             
             Assert.Equal(10, count);
 

@@ -2,6 +2,9 @@
 {
     public interface IMetric
     {
+        string GetValueType();
+
+        object GetValue();
     }
 
     public record Metric<T> : IMetric
@@ -11,6 +14,16 @@
         public Metric(T value)
         {
             Value = value;
+        }
+
+        public string GetValueType()
+        {
+            return typeof(T).ToString();
+        }
+
+        public object GetValue()
+        {
+            return Value;
         }
     }
 }

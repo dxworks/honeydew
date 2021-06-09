@@ -97,8 +97,8 @@ namespace HoneydewCoreTest.Extractors.Strategies
             Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
             var optional = compilationUnitModel.SyntacticMetrics.Get<UsingsCountMetric>();
             Assert.True(optional.HasValue);
-            var metric = (Metric<int>) optional.Value;
-            Assert.Equal(4, metric.Value);
+            
+            Assert.Equal(4, (int) optional.Value.GetValue());
 
             Assert.Equal(1, compilationUnitModel.ClassModels.Count);
 
