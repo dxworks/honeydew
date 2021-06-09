@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors;
 using HoneydewCore.IO.Readers.Strategies;
-using HoneydewCore.IO.Writers;
 using HoneydewCore.Models;
 
 namespace HoneydewCore.IO.Readers
@@ -31,8 +30,12 @@ namespace HoneydewCore.IO.Readers
             foreach (var path in filePaths)
             {
                 var fileContent = _fileReader.ReadFile(path);
-                var compilationUnitModels = strategy.Load(fileContent, _extractors);
-                solutionModel.Add(compilationUnitModels, path);
+                var classModels = strategy.Load(fileContent, _extractors);
+
+                foreach (var classModel in classModels)
+                {
+                    solutionModel.Add(classModel);
+                }
             }
 
             return solutionModel;

@@ -53,19 +53,13 @@ namespace HoneydewCoreTest.Extractors.Strategies
             {
                 new CSharpClassFactExtractor(new List<CSharpMetricExtractor>())
             };
-            var compilationUnitModels = _sut.Load(fileContent, extractors);
+            var classModels = _sut.Load(fileContent, extractors);
 
-            Assert.Equal(1, compilationUnitModels.Count);
-            var compilationUnitModel = compilationUnitModels[0];
+            Assert.Equal(1, classModels.Count);
 
-            Assert.False(compilationUnitModel.SyntacticMetrics.HasMetrics());
-
-            Assert.Equal(1, compilationUnitModel.ClassModels.Count);
-
-            var classModel = compilationUnitModel.ClassModels[0];
-            Assert.Equal("Models", classModel.Namespace);
-            Assert.Equal("Item", classModel.Name);
-            Assert.False(classModel.Metrics.HasMetrics());
+            Assert.Equal("Models", classModels[0].Namespace);
+            Assert.Equal("Item", classModels[0].Name);
+            Assert.False(classModels[0].Metrics.HasMetrics());
         }
 
         [Fact]
@@ -89,23 +83,21 @@ namespace HoneydewCoreTest.Extractors.Strategies
                     new UsingsCountMetric()
                 })
             };
-            var compilationUnitModels = _sut.Load(fileContent, extractors);
+            var classModels = _sut.Load(fileContent, extractors);
 
-            Assert.Equal(1, compilationUnitModels.Count);
-            var compilationUnitModel = compilationUnitModels[0];
+            Assert.Equal(1, classModels.Count);
 
-            Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
-            var optional = compilationUnitModel.SyntacticMetrics.Get<UsingsCountMetric>();
-            Assert.True(optional.HasValue);
+            Assert.True(classModels[0].Metrics.HasMetrics());
+            Assert.Equal(1, classModels[0].Metrics.Count);
             
+            var optional = classModels[0].Metrics.Get<UsingsCountMetric>();
+            Assert.True(optional.HasValue);
             Assert.Equal(4, (int) optional.Value.GetValue());
 
-            Assert.Equal(1, compilationUnitModel.ClassModels.Count);
+            Assert.Equal(1, classModels.Count);
 
-            var classModel = compilationUnitModel.ClassModels[0];
-            Assert.Equal("Models", classModel.Namespace);
-            Assert.Equal("Item", classModel.Name);
-            Assert.False(classModel.Metrics.HasMetrics());
+            Assert.Equal("Models", classModels[0].Namespace);
+            Assert.Equal("Item", classModels[0].Name);
         }
     }
 }

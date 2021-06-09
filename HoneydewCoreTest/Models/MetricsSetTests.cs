@@ -1,5 +1,5 @@
 ﻿using HoneydewCore.Extractors.Metrics;
-using HoneydewCore.Models;
+using HoneydewCore.Extractors.Models;
 using Xunit;
 
 namespace HoneydewCoreTest.Models
@@ -37,6 +37,30 @@ namespace HoneydewCoreTest.Models
             Assert.True(_sut.HasMetrics());
         }
 
+        [Fact]
+        public void Count_ShouldReturn0_WhenNoMetricsAreAdded()
+        {
+            Assert.Equal(0,_sut.Count);
+        }
+
+        [Fact]
+        public void Count_ShouldReturnOne_WhenOneMetricIsAdded()
+        {
+            _sut.Add(new ValueExtractor<string>(""));
+
+            Assert.Equal(1, _sut.Count);
+        }
+
+        [Fact]
+        public void Count_ShouldReturnMetricCount_WhenMultipleMetricsAreAdded()
+        {
+            _sut.Add(new ValueExtractor<string>(""));
+            _sut.Add(new ValueExtractor<int>(0));
+            _sut.Add(new ValueExtractor<float>(0.0f));
+
+            Assert.Equal(3, _sut.Count);
+        }
+        
         [Fact]
         public void Add_ShouldAddTheCorrectMetric_WhenANewMetricIsAdded()
         {

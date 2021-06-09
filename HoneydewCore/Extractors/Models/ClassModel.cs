@@ -1,4 +1,4 @@
-﻿namespace HoneydewCore.Models
+﻿namespace HoneydewCore.Extractors.Models
 {
     public class ClassModel
     {

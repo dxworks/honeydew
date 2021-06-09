@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.Extractors;
+using HoneydewCore.Extractors.Models;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Filters;
 using HoneydewCore.IO.Readers.Strategies;
@@ -28,7 +29,8 @@ namespace HoneydewCoreTest.IO.Readers
             _fileReaderMock.Setup(reader => reader.ReadFilePaths(pathToProject)).Returns(new List<string>());
 
             var fileNotFoundException =
-                Assert.Throws<ProjectNotFoundException>(() => _sut.LoadSolution(pathToProject, _solutionLoadingStrategy.Object));
+                Assert.Throws<ProjectNotFoundException>(() =>
+                    _sut.LoadSolution(pathToProject, _solutionLoadingStrategy.Object));
             Assert.Equal("Project not found at specified Path", fileNotFoundException.Message);
         }
 
@@ -53,6 +55,12 @@ namespace HoneydewCoreTest.IO.Readers
             {
                 _fileReaderMock.Setup(reader => reader.ReadFile(path)).Returns("");
             }
+
+            _solutionLoadingStrategy.Setup(strategy => strategy.Load(string.Empty, new List<IFactExtractor>()))
+                .Returns(() => new List<ClassModel>
+                {
+                    new()
+                });
 
             var projectModel = _sut.LoadSolution(pathToProject, _solutionLoadingStrategy.Object);
 
@@ -89,6 +97,12 @@ namespace HoneydewCoreTest.IO.Readers
             {
                 _fileReaderMock.Setup(reader => reader.ReadFile(path)).Returns("");
             }
+
+            _solutionLoadingStrategy.Setup(strategy => strategy.Load(string.Empty, new List<IFactExtractor>()))
+                .Returns(() => new List<ClassModel>
+                {
+                    new()
+                });
 
             var projectModel = _sut.LoadSolution(pathToProject, _solutionLoadingStrategy.Object);
 
@@ -135,15 +149,18 @@ namespace HoneydewCoreTest.IO.Readers
             }
 
             _fileReaderMock.Setup(reader => reader.ReadFilePaths(pathToProject))
-                .Returns(pathsList.Where(path =>
-                {
-                    return filters.Any(filter => filter(path));
-                }).ToList());
+                .Returns(pathsList.Where(path => { return filters.Any(filter => filter(path)); }).ToList());
 
             foreach (string path in pathsList)
             {
                 _fileReaderMock.Setup(reader => reader.ReadFile(path)).Returns("");
             }
+
+            _solutionLoadingStrategy.Setup(strategy => strategy.Load(string.Empty, new List<IFactExtractor>()))
+                .Returns(() => new List<ClassModel>
+                {
+                    new()
+                });
 
             var projectModel = _sut.LoadSolution(pathToProject, _solutionLoadingStrategy.Object);
 
@@ -189,15 +206,18 @@ namespace HoneydewCoreTest.IO.Readers
             filters.Add(path => path.EndsWith(".config"));
 
             _fileReaderMock.Setup(reader => reader.ReadFilePaths(pathToProject))
-                .Returns(pathsList.Where(path =>
-                {
-                    return filters.Any(filter => filter(path));
-                }).ToList());
+                .Returns(pathsList.Where(path => { return filters.Any(filter => filter(path)); }).ToList());
 
             foreach (var path in pathsList)
             {
                 _fileReaderMock.Setup(reader => reader.ReadFile(path)).Returns("");
             }
+
+            _solutionLoadingStrategy.Setup(strategy => strategy.Load(string.Empty, new List<IFactExtractor>()))
+                .Returns(() => new List<ClassModel>
+                {
+                    new()
+                });
 
             var projectModel = _sut.LoadSolution(pathToProject, _solutionLoadingStrategy.Object);
 

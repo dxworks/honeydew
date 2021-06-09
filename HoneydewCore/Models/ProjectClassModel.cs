@@ -1,8 +1,10 @@
-﻿namespace HoneydewCore.Models
+﻿using System.Collections.Generic;
+
+namespace HoneydewCore.Models
 {
-    public class ProjectClassModel
+    public record ProjectClassModel
     {
-        public ClassModel Model { get; set; }
-        public string Path { get; set; }
+        public string FullName { get; set; }
+        public IList<ClassMetric> Metrics { get; set; } = new List<ClassMetric>();
     }
 }

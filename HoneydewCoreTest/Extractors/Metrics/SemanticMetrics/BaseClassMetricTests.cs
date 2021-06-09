@@ -45,13 +45,12 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-            Assert.False(compilationUnitModel.SyntacticMetrics.HasMetrics());
+            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classModels[0].Metrics.Count);
 
-            Assert.Equal(1, compilationUnitModel.ClassModels.Count);
-
-            var classModel = compilationUnitModel.ClassModels[0];
+            var classModel = classModels[0];
 
             Assert.Equal("MyClass", classModel.Name);
 
@@ -88,14 +87,14 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-            Assert.False(compilationUnitModel.SyntacticMetrics.HasMetrics());
+            Assert.Equal(1, classModels.Count);
 
-            Assert.Equal(1, compilationUnitModel.ClassModels.Count);
+            var classModel = classModels[0];
 
-            var classModel = compilationUnitModel.ClassModels[0];
-
+            Assert.Equal(1, classModel.Metrics.Count);
+            
             Assert.Equal("MyClass", classModel.Name);
 
             var optional = classModel.Metrics.Get<BaseClassMetric>();
@@ -131,15 +130,16 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-            Assert.False(compilationUnitModel.SyntacticMetrics.HasMetrics());
 
-            Assert.Equal(2, compilationUnitModel.ClassModels.Count);
+            Assert.Equal(2, classModels.Count);
 
-            var parentClassModel = compilationUnitModel.ClassModels[0];
+            var parentClassModel = classModels[0];
+            Assert.Equal(1, parentClassModel.Metrics.Count);
             
             var parentOptional = parentClassModel.Metrics.Get<BaseClassMetric>();
+            
             Assert.True(parentOptional.HasValue);
 
             var inheritanceMetric = (InheritanceMetric) parentOptional.Value.GetValue();
@@ -148,8 +148,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             Assert.Equal(0, inheritanceMetric.Interfaces.Count);
             Assert.Equal("Object", inheritanceMetric.BaseClassName);
 
-            var classModel = compilationUnitModel.ClassModels[1];
-
+            var classModel = classModels[1];
+            
+            Assert.Equal(1, classModel.Metrics.Count);
             Assert.Equal("ChildClass", classModel.Name);
 
             var optional = classModel.Metrics.Get<BaseClassMetric>();
@@ -189,14 +190,13 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-            Assert.False(compilationUnitModel.SyntacticMetrics.HasMetrics());
+            Assert.Equal(2, classModels.Count);
 
-            Assert.Equal(2, compilationUnitModel.ClassModels.Count);
-
-            var parentClassModel = compilationUnitModel.ClassModels[0];
-
+            var parentClassModel = classModels[0];
+            
+            Assert.Equal(1, parentClassModel.Metrics.Count);
             
             var parentOptional = parentClassModel.Metrics.Get<BaseClassMetric>();
             Assert.True(parentOptional.HasValue);
@@ -207,7 +207,8 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             Assert.Equal(0, inheritanceMetric.Interfaces.Count);
             Assert.Equal("Object", inheritanceMetric.BaseClassName);
 
-            var classModel = compilationUnitModel.ClassModels[1];
+            var classModel = classModels[1];
+            Assert.Equal(1, classModel.Metrics.Count);
 
             Assert.Equal("ChildClass", classModel.Name);
 

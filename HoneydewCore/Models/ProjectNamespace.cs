@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using HoneydewCore.Extractors.Models;
 
 namespace HoneydewCore.Models
 {
     public class ProjectNamespace
     {
         public string Name { get; set; }
-        public IList<FinalClassModel> ClassModels { get; set; } = new List<FinalClassModel>();
+        public IList<ProjectClassModel> ClassModels { get; set; } = new List<ProjectClassModel>();
 
         public void Add(ClassModel classModel)
         {
@@ -24,7 +25,7 @@ namespace HoneydewCore.Models
 
             Name = classModel.Namespace;
 
-            ClassModels.Add(new FinalClassModel
+            ClassModels.Add(new ProjectClassModel
             {
                 FullName = fullName,
                 Metrics = classModel.Metrics.Metrics.Select(metric => new ClassMetric()

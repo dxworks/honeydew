@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.Extractors.Metrics;
-using HoneydewCore.Models;
+using HoneydewCore.Extractors.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -22,7 +22,7 @@ namespace HoneydewCore.Extractors
             return ".cs";
         }
 
-        public CompilationUnitModel Extract(string fileContent)
+        public IList<ClassModel> Extract(string fileContent)
         {
             if (string.IsNullOrWhiteSpace(fileContent))
             {
@@ -41,7 +41,6 @@ namespace HoneydewCore.Extractors
 
             IList<ClassModel> classModels = new List<ClassModel>();
 
-            var compilationUnitModel = new CompilationUnitModel();
 
             var compilation = CSharpCompilation.Create("Compilation")
                 .AddReferences(MetadataReference.CreateFromFile(typeof(string).Assembly.Location))
@@ -49,6 +48,8 @@ namespace HoneydewCore.Extractors
             var semanticModel = compilation.GetSemanticModel(tree);
 
             IList<CSharpMetricExtractor> semanticMetricExtractors = new List<CSharpMetricExtractor>();
+
+            var metricsSet = new MetricsSet();
 
             foreach (var extractor in _metricExtractors)
             {
@@ -60,7 +61,7 @@ namespace HoneydewCore.Extractors
                 else
                 {
                     extractor.Visit(root);
-                    compilationUnitModel.SyntacticMetrics.Add(extractor);
+                    metricsSet.Add(extractor);
                 }
             }
 
@@ -92,10 +93,13 @@ namespace HoneydewCore.Extractors
 
             foreach (var model in classModels)
             {
-                compilationUnitModel.ClassModels .Add(model);
+                foreach (var (extractorType, metric) in metricsSet.Metrics)
+                {
+                    model.Metrics.AddValue(extractorType, metric);
+                }
             }
-            
-            return compilationUnitModel;
+
+            return classModels;
         }
     }
 }

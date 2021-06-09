@@ -1,33 +1,29 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using HoneydewCore.Extractors.Models;
 using HoneydewCore.IO.Writers;
 
 namespace HoneydewCore.Models
 {
     public class SolutionModel : IExportable
     {
-        public IList<ProjectModel> Projects { get; init; }
+        // Projects
 
-        public IList<ProjectClassModel> ProjectClassModels { get; } = new List<ProjectClassModel>();
+        public IList<ProjectNamespace> Namespaces { get; set; } = new List<ProjectNamespace>();
 
-        public void Add(IEnumerable<CompilationUnitModel> compilationUnitModels, string path)
+        public void Add(ClassModel classModel)
         {
-            if (compilationUnitModels == null) return;
-
-            foreach (var model in compilationUnitModels)
+            var firstOrDefault = Namespaces.FirstOrDefault(ns => ns.Name == classModel.Namespace);
+            if (firstOrDefault == default)
             {
-                foreach (var classModel in model.ClassModels)
-                {
-                    ProjectClassModels.Add(new ProjectClassModel
-                    {
-                        Model = classModel,
-                        Path = path
-                    });
-                }
+                var projectNamespace = new ProjectNamespace();
+                projectNamespace.Add(classModel);
+                Namespaces.Add(projectNamespace);
             }
-        }
-
-        public void MakeModel()
-        {
+            else
+            {
+                firstOrDefault.Add(classModel);
+            }
         }
 
         public string Export(IExporter exporter)

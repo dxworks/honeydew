@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
-using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
+using HoneydewCore.Extractors.Models;
 using HoneydewCore.IO.Writers;
 using HoneydewCore.Models;
 using Xunit;
@@ -20,8 +20,8 @@ namespace HoneydewCoreTest.IO.Writers
         public void Export_ShouldReturnRawModel_WhenModelHasNoCompilationUnits()
         {
             var solutionModel = new SolutionModel();
-            const string expectedString = "{\"Projects\":null,\"ProjectClassModels\":[]}";
-            
+            const string expectedString = "{\"Namespaces\":[]}";
+
             var exportString = solutionModel.Export(_sut);
 
             Assert.Equal(expectedString, exportString);
@@ -31,22 +31,18 @@ namespace HoneydewCoreTest.IO.Writers
         public void Export_ShouldReturnRawModel_WhenModelHasOneCompilationUnitWithOneClassAndNoMetrics()
         {
             var solutionModel = new SolutionModel();
-            var compilationUnitModels = new CompilationUnitModel();
-            compilationUnitModels.ClassModels.Add(new ClassModel
+            var classModels = new List<ClassModel>
             {
-                Name = "FirstClass",
-                Namespace = "SomeNamespace"
-            });
-            const string path = "pathToClass";
-
+                new() {Name = "FirstClass", Namespace = "SomeNamespace"}
+            };
 
             const string expectedString =
-                "{\"Projects\":null,\"ProjectClassModels\":[{\"Model\":{\"Metrics\":{\"MetricValues\":{}},\"Name\":\"FirstClass\",\"Namespace\":\"SomeNamespace\"},\"Path\":\"pathToClass\"}]}";
+                @"{""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""FullName"":""SomeNamespace.FirstClass"",""Metrics"":[]}]}]}";
 
-            solutionModel.Add(new List<CompilationUnitModel>()
+            foreach (var classModel in classModels)
             {
-                compilationUnitModels
-            }, path);
+                solutionModel.Add(classModel);
+            }
 
             var exportString = solutionModel.Export(_sut);
 
@@ -57,7 +53,6 @@ namespace HoneydewCoreTest.IO.Writers
         public void Export_ShouldReturnRawModel_WhenModelHasOneCompilationUnitWithOneClassAndMetrics()
         {
             var solutionModel = new SolutionModel();
-            var compilationUnitModels = new CompilationUnitModel();
 
             var classModel = new ClassModel
             {
@@ -66,29 +61,24 @@ namespace HoneydewCoreTest.IO.Writers
             };
             var baseClassMetric = new BaseClassMetric
             {
-                InheritanceMetric = new InheritanceMetric {Interfaces = {"Interface1"}, BaseClassName = "Object"}
+                InheritanceMetric = new InheritanceMetric {Interfaces = {"Interface1"}, BaseClassName = "SomeParent"}
             };
 
             classModel.Metrics.Add(baseClassMetric);
 
-            compilationUnitModels.ClassModels.Add(classModel);
-            compilationUnitModels.SyntacticMetrics.Add(new UsingsCountMetric()
+            var classModels = new List<ClassModel>
             {
-                
-            });
-
-            const string path = "pathToClass";
+                classModel
+            };
 
             const string expectedString =
-                @"{""Projects"":null,""ProjectClassModels"":[{""Model"":{""Metrics"":{""MetricValues"":{""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"":{""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""Object""}}}},""Name"":""FirstClass"",""Namespace"":""SomeNamespace""},""Path"":""pathToClass""}]}";
-
-
-            solutionModel.Add(new List<CompilationUnitModel>
-            {
-                compilationUnitModels
-            }, path);
-
+                @"{""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""FullName"":""SomeNamespace.FirstClass"",""Metrics"":[{""ExtractorName"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"",""ValueType"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}]}]}]}";
             
+            foreach (var model in classModels)
+            {
+                solutionModel.Add(model);
+            }
+
             var exportString = solutionModel.Export(_sut);
 
             Assert.Equal(expectedString, exportString);

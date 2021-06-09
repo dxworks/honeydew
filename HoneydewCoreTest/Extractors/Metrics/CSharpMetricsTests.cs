@@ -50,27 +50,26 @@ namespace HoneydewCoreTest.Extractors.Metrics
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-            Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
+            Assert.Equal(2, classModels.Count);
 
-            
-            var optional = compilationUnitModel.SyntacticMetrics.Get<UsingsCountMetric>();
-            Assert.True(optional.HasValue);
-            
-            var count = (int) optional.Value.GetValue();
-            
-            Assert.Equal(10, count);
-
-            Assert.Equal(2, compilationUnitModel.ClassModels.Count);
-
-            var foo = compilationUnitModel.ClassModels[0];
+            var foo = classModels[0];
             Assert.Equal("Foo", foo.Name);
             Assert.Equal("TopLevel.Child1", foo.Namespace);
+            Assert.Equal(1, foo.Metrics.Count);
+            var optional1 = foo.Metrics.Get<UsingsCountMetric>();
+            Assert.True(optional1.HasValue);
+            Assert.Equal(10, (int) optional1.Value.GetValue());
+            
 
-            var bar = compilationUnitModel.ClassModels[1];
+            var bar = classModels[1];
             Assert.Equal("Bar", bar.Name);
             Assert.Equal("TopLevel.Child2", bar.Namespace);
+            Assert.Equal(1, bar.Metrics.Count);
+            var optional2 = bar.Metrics.Get<UsingsCountMetric>();
+            Assert.True(optional2.HasValue);
+            Assert.Equal(10, (int) optional2.Value.GetValue());
         }
 
         [Fact]
@@ -111,17 +110,17 @@ namespace HoneydewCoreTest.Extractors.Metrics
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-            Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
-            var syntacticMetricOptional = compilationUnitModel.SyntacticMetrics.Get<BaseClassMetric>();
-            Assert.False(syntacticMetricOptional.HasValue);
+            // Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
+            // var syntacticMetricOptional = compilationUnitModel.SyntacticMetrics.Get<BaseClassMetric>();
+            // Assert.False(syntacticMetricOptional.HasValue);
 
-            Assert.Equal(2, compilationUnitModel.ClassModels.Count);
-            var optional = compilationUnitModel.ClassModels[0].Metrics.Get<UsingsCountMetric>();
+            Assert.Equal(2, classModels.Count);
+            var optional = classModels[0].Metrics.Get<IMetricExtractor>();
             Assert.False(optional.HasValue);
             
-            var optional1 = compilationUnitModel.ClassModels[1].Metrics.Get<UsingsCountMetric>();
+            var optional1 = classModels[1].Metrics.Get<IMetricExtractor>();
             Assert.False(optional1.HasValue);
         }
     }

@@ -1,4 +1,5 @@
-﻿using HoneydewCore.Models;
+﻿using System.Collections.Generic;
+using HoneydewCore.Extractors.Models;
 
 namespace HoneydewCore.Extractors
 {
@@ -6,6 +7,6 @@ namespace HoneydewCore.Extractors
     {
         string FileType();
 
-        CompilationUnitModel Extract(string fileContent);
+        IList<ClassModel> Extract(string fileContent);
     }
 }

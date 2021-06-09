@@ -1,5 +1,6 @@
 ﻿using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
+using HoneydewCore.Extractors.Models;
 using HoneydewCore.Models;
 using Xunit;
 

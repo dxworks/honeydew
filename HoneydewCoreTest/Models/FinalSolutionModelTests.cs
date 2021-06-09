@@ -1,15 +1,16 @@
-﻿using HoneydewCore.Models;
+﻿using HoneydewCore.Extractors.Models;
+using HoneydewCore.Models;
 using Xunit;
 
 namespace HoneydewCoreTest.Models
 {
     public class FinalSolutionModelTests
     {
-        private readonly FinalSolutionModel _sut;
+        private readonly SolutionModel _sut;
 
         public FinalSolutionModelTests()
         {
-            _sut = new FinalSolutionModel();
+            _sut = new SolutionModel();
         }
 
         [Fact]

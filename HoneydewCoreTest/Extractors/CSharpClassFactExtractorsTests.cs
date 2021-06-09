@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics;
+using HoneydewCore.Extractors.Models;
 using HoneydewCore.Models;
 using Xunit;
 
@@ -73,11 +74,11 @@ namespace HoneydewCoreTest.Extractors
                                       }
                                     }
                                     ";
-            var compilationUnitModel = _sut.Extract(fileContent);
+            var classModels = _sut.Extract(fileContent);
 
-            Assert.Equal(1, compilationUnitModel.ClassModels.Count);
+            Assert.Equal(1, classModels.Count);
 
-            foreach (var classModel in compilationUnitModel.ClassModels)
+            foreach (var classModel in classModels)
             {
                 Assert.Equal(typeof(ClassModel), classModel.GetType());
 
@@ -100,9 +101,9 @@ namespace HoneydewCoreTest.Extractors
                                       }
                                     }
                                     ";
-            var compilationUnitModel = _sut.Extract(fileContent);
+            var classModels = _sut.Extract(fileContent);
 
-            foreach (var classModel in compilationUnitModel.ClassModels)
+            foreach (var classModel in classModels)
             {
                 Assert.Equal(typeof(ClassModel), classModel.GetType());
 

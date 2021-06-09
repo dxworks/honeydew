@@ -46,11 +46,11 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-            Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
-
-            var optional = compilationUnitModel.SyntacticMetrics.Get<UsingsCountMetric>();
+            Assert.Equal(1, classModels.Count);
+            
+            var optional = classModels[0].Metrics.Get<UsingsCountMetric>();
             Assert.True(optional.HasValue);
             var count = (int) optional.Value.GetValue();
 
@@ -97,14 +97,16 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
 
-            var compilationUnitModel = _factExtractor.Extract(fileContent);
-
-            Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
-
-            var optional = compilationUnitModel.SyntacticMetrics.Get<UsingsCountMetric>();
-            Assert.True(optional.HasValue);
-
-            Assert.Equal(12, (int) optional.Value.GetValue());
+            var classModels = _factExtractor.Extract(fileContent);
+            Assert.Equal(2, classModels.Count);
+            
+            var optional1 = classModels[0].Metrics.Get<UsingsCountMetric>();
+            Assert.True(optional1.HasValue);
+            Assert.Equal(12, (int) optional1.Value.GetValue());
+            
+            var optional2 = classModels[0].Metrics.Get<UsingsCountMetric>();
+            Assert.True(optional2.HasValue);
+            Assert.Equal(12, (int) optional2.Value.GetValue());
         }
     }
 }

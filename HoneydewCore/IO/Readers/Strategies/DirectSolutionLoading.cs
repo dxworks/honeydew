@@ -1,17 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.Extractors;
-using HoneydewCore.Models;
+using HoneydewCore.Extractors.Models;
 
 namespace HoneydewCore.IO.Readers.Strategies
 {
     public class DirectSolutionLoading : ISolutionLoadingStrategy
     {
-        public IList<CompilationUnitModel> Load(string fileContent, IList<IFactExtractor> extractors)
+        public IList<ClassModel> Load(string fileContent, IList<IFactExtractor> extractors)
         {
             extractors ??= new List<IFactExtractor>();
 
-            return extractors.Select(extractor => extractor.Extract(fileContent)).ToList();
+            return extractors.SelectMany(extractor => extractor.Extract(fileContent)).ToList();
         }
     }
 }

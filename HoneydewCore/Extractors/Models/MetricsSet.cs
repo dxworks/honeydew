@@ -3,33 +3,34 @@ using System.Collections.Generic;
 using HoneydewCore.Extractors.Metrics;
 using Microsoft.CodeAnalysis;
 
-namespace HoneydewCore.Models
+namespace HoneydewCore.Extractors.Models
 {
     public class MetricsSet
     {
-        public Dictionary<string, object> MetricValues { get; } = new();
-
         public readonly IDictionary<Type, IMetric> Metrics = new Dictionary<Type, IMetric>();
+
+        public int Count => Metrics.Count;
 
         public bool HasMetrics()
         {
             return Metrics.Count > 0;
         }
 
-        public void Add(IMetricExtractor extractor)
+        public void AddValue(Type extractorType, IMetric metric)
         {
-            var type = extractor.GetType();
-
-            if (Metrics.ContainsKey(type))
+            if (Metrics.ContainsKey(extractorType))
             {
                 return;
             }
 
-            var metric = extractor.GetMetric();
+            Metrics.Add(extractorType, metric);
+        }
 
-            Metrics.Add(type, metric);
+        public void Add(IMetricExtractor extractor)
+        {
+            var type = extractor.GetType();
 
-            MetricValues.Add(type.ToString(), metric);
+            AddValue(type, extractor.GetMetric());
         }
 
         public Optional<IMetric> Get<T>() where T : IMetricExtractor

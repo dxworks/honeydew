@@ -16,7 +16,7 @@ namespace Honeydew
     {
         static void Main(string[] args)
         {
-            string pathToProject = "D:\\Work\\Visual Studio 2019\\CSharp\\Catan";
+            var pathToProject = "D:\\Work\\Visual Studio 2019\\CSharp\\Catan";
 
             Console.WriteLine("Reading project from {0}...", pathToProject);
 
