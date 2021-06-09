@@ -15,13 +15,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
         {
             _sut = new BaseClassMetric();
         }
-
-        [Fact]
-        public void Name_ShouldReturn_BaseClass()
-        {
-            Assert.Equal("Base Class", _sut.GetName());
-        }
-
+        
         [Fact]
         public void GetMetricType_ShouldReturnSemantic()
         {
@@ -53,7 +47,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var compilationUnitModel = _extractor.Extract(fileContent);
 
-            Assert.Empty(compilationUnitModel.SyntacticMetrics);
+            Assert.False(compilationUnitModel.SyntacticMetrics.HasMetrics());
 
             Assert.Equal(1, compilationUnitModel.Entities.Count);
 
@@ -61,7 +55,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             Assert.Equal("MyClass", classModel.Name);
 
-            var metric = classModel.GetMetric<InheritanceMetric>(_sut.GetName());
+            var metric = classModel.Metrics.Get<InheritanceMetric>();
 
             Assert.True(metric.HasValue);
 
@@ -98,7 +92,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var compilationUnitModel = _extractor.Extract(fileContent);
 
-            Assert.Empty(compilationUnitModel.SyntacticMetrics);
+            Assert.False(compilationUnitModel.SyntacticMetrics.HasMetrics());
 
             Assert.Equal(1, compilationUnitModel.Entities.Count);
 
@@ -106,7 +100,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             Assert.Equal("MyClass", classModel.Name);
 
-            var metric = classModel.GetMetric<InheritanceMetric>(_sut.GetName());
+            var metric = classModel.Metrics.Get<InheritanceMetric>();
 
             Assert.True(metric.HasValue);
 
@@ -114,7 +108,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             var inheritanceMetric = baseClassMetric.Value;
 
             Assert.Equal(1, inheritanceMetric.Interfaces.Count);
-            Assert.Equal("object", inheritanceMetric.BaseClassName);
+            Assert.Equal("Object", inheritanceMetric.BaseClassName);
             Assert.Equal("IMetric", inheritanceMetric.Interfaces[0]);
         }
 
@@ -143,13 +137,13 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var compilationUnitModel = _extractor.Extract(fileContent);
 
-            Assert.Empty(compilationUnitModel.SyntacticMetrics);
+            Assert.False(compilationUnitModel.SyntacticMetrics.HasMetrics());
 
             Assert.Equal(2, compilationUnitModel.Entities.Count);
 
             var parentClassModel = compilationUnitModel.Entities[0];
 
-            var inheritanceMetric = parentClassModel.GetMetric<InheritanceMetric>(_sut.GetName()).Value.Value;
+            var inheritanceMetric = parentClassModel.Metrics.Get<InheritanceMetric>().Value.Value;
 
             Assert.Equal("Parent", parentClassModel.Name);
             Assert.Equal(0, inheritanceMetric.Interfaces.Count);
@@ -159,7 +153,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             Assert.Equal("ChildClass", classModel.Name);
 
-            var metric = classModel.GetMetric<InheritanceMetric>(_sut.GetName());
+            var metric = classModel.Metrics.Get<InheritanceMetric>();
             Assert.True(metric.HasValue);
 
             var baseClassMetric = metric.Value.Value;
@@ -198,13 +192,13 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var compilationUnitModel = _extractor.Extract(fileContent);
 
-            Assert.Empty(compilationUnitModel.SyntacticMetrics);
+            Assert.False(compilationUnitModel.SyntacticMetrics.HasMetrics());
 
             Assert.Equal(2, compilationUnitModel.Entities.Count);
 
             var parentClassModel = compilationUnitModel.Entities[0];
 
-            var inheritanceMetric = parentClassModel.GetMetric<InheritanceMetric>(_sut.GetName()).Value.Value;
+            var inheritanceMetric = parentClassModel.Metrics.Get<InheritanceMetric>().Value.Value;
 
             Assert.Equal("Parent", parentClassModel.Name);
             Assert.Equal(0, inheritanceMetric.Interfaces.Count);
@@ -214,7 +208,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             Assert.Equal("ChildClass", classModel.Name);
 
-            var metric = classModel.GetMetric<InheritanceMetric>(_sut.GetName());
+            var metric = classModel.Metrics.Get<InheritanceMetric>();
             Assert.True(metric.HasValue);
 
             var baseClassMetric = metric.Value.Value;

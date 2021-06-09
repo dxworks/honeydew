@@ -17,12 +17,6 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
         }
 
         [Fact]
-        public void Name_ShouldReturn_UsingsCount()
-        {
-            Assert.Equal("Usings Count", _sut.GetName());
-        }
-
-        [Fact]
         public void GetMetricType_ShouldReturnSyntactic()
         {
             Assert.Equal(MetricType.Syntactic, _sut.GetMetricType());
@@ -54,13 +48,13 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
 
             var compilationUnitModel = _extractor.Extract(fileContent);
 
-            Assert.Equal(1, compilationUnitModel.SyntacticMetrics.Count);
+            Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
+
+            var optional = compilationUnitModel.SyntacticMetrics.Get<int>();
+            Assert.True(optional.HasValue);
             
-            var metric = compilationUnitModel.SyntacticMetrics[_sut.GetName()];
-            Assert.Equal(typeof(Metric<int>), metric.GetType());
-
-
-            var count = ((Metric<int>) metric).Value;
+            var metric = optional.Value;
+            var count = metric.Value;
 
             Assert.Equal(6, count);
         }
@@ -107,14 +101,15 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
 
             var compilationUnitModel = _extractor.Extract(fileContent);
 
-            Assert.Equal(1, compilationUnitModel.SyntacticMetrics.Count);
+            Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
+
+            var optional = compilationUnitModel.SyntacticMetrics.Get<int>();
+
+            Assert.True(optional.HasValue);
             
-            var metric = compilationUnitModel.SyntacticMetrics[_sut.GetName()];
-            Assert.Equal(typeof(Metric<int>), metric.GetType());
+            var metric = optional.Value;
 
-            var count = ((Metric<int>) metric).Value;
-
-            Assert.Equal(12, count);
+            Assert.Equal(12, metric.Value);
         }
     }
 }

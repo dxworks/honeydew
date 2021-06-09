@@ -108,7 +108,7 @@ namespace HoneydewCoreTest.Extractors
             {
                 Assert.Equal(typeof(ClassModel), entity.GetType());
 
-                Assert.False(entity.HasMetrics());
+                Assert.False(entity.Metrics.HasMetrics());
             }
         }
     }

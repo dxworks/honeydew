@@ -4,8 +4,6 @@
     {
         MetricType GetMetricType();
 
-        string GetName();
-
         IMetric GetMetric();
     }
 }

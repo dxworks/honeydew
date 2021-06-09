@@ -57,7 +57,7 @@ namespace HoneydewCore.Extractors
                 else
                 {
                     metric.Visit(root);
-                    compilationUnitModel.SyntacticMetrics.Add(metric.GetName(), metric.GetMetric());
+                    compilationUnitModel.SyntacticMetrics.Add(metric.GetMetric());
                 }
             }
 
@@ -81,7 +81,7 @@ namespace HoneydewCore.Extractors
                 foreach (var metric in semanticMetricExtractors)
                 {
                     metric.Visit(classDeclarationSyntax);
-                    projectClass.AddMetric(metric.GetName(), metric.GetMetric());
+                    projectClass.Metrics.Add(metric.GetMetric());
                 }
 
                 entities.Add(projectClass);

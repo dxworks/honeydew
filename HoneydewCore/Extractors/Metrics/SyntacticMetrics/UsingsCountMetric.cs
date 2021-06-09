@@ -6,11 +6,6 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
     {
         private int _usingsCount;
 
-        public override string GetName()
-        {
-            return "Usings Count";
-        }
-
         public override IMetric GetMetric()
         {
             return new Metric<int>(_usingsCount);

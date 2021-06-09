@@ -15,11 +15,6 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
             return MetricType.Semantic;
         }
 
-        public override string GetName()
-        {
-            return "Base Class";
-        }
-
         public override IMetric GetMetric()
         {
             return new Metric<InheritanceMetric>(_inheritanceMetric);
@@ -35,7 +30,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 
             if (typeSymbol.BaseType == null)
             {
-                _inheritanceMetric.BaseClassName = "object";
+                _inheritanceMetric.BaseClassName = "Object";
                 return;
             }
 
@@ -44,7 +39,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
             if (typeSymbol.BaseType.Constructors.IsEmpty)
             {
                 _inheritanceMetric.Interfaces.Add(typeSymbol.BaseType?.ToString());
-                _inheritanceMetric.BaseClassName = "object";
+                _inheritanceMetric.BaseClassName = "Object";
             }
 
 

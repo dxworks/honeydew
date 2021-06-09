@@ -8,7 +8,6 @@ namespace HoneydewCore.Extractors.Metrics
         public SemanticModel SemanticModel { get; set; }
 
         public abstract MetricType GetMetricType();
-        public abstract string GetName();
         public abstract IMetric GetMetric();
     }
 }
