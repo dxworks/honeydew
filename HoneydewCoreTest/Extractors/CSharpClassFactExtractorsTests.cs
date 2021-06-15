@@ -64,6 +64,30 @@ namespace HoneydewCoreTest.Extractors
         }
 
         [Fact]
+        public void Extract_ShouldSetInterfaceNameAndNamespace_WhenParsingTextWithOneInterface()
+        {
+            const string fileContent = @"        
+                                    namespace Services
+                                    {
+                                      public interface IService
+                                      {
+                                      }
+                                    }
+                                    ";
+            var classModels = _sut.Extract(fileContent);
+
+            Assert.Equal(1, classModels.Count);
+
+            foreach (var classModel in classModels)
+            {
+                Assert.Equal(typeof(ClassModel), classModel.GetType());
+
+                Assert.Equal("Services", classModel.Namespace);
+                Assert.Equal("IService", classModel.Name);
+            }
+        }
+        
+        [Fact]
         public void Extract_ShouldSetClassNameAndNamespace_WhenParsingTextWithOneClass()
         {
             const string fileContent = @"        
@@ -109,6 +133,37 @@ namespace HoneydewCoreTest.Extractors
 
                 Assert.False(classModel.Metrics.HasMetrics());
             }
+        }
+        
+        [Fact]
+        public void Extract_ShouldSetClassNameAndInterfaceAndNamespace_WhenParsingTextWithOneClassAndOneInterface()
+        {
+            const string fileContent = @"        
+                                    namespace Models.Main.Items
+                                    {
+                                      public class MainItem
+                                      {
+                                      }
+                                      public interface IInterface
+                                      {
+                                         void f ();
+                                      }
+                                    }
+                                    ";
+            var classModels = _sut.Extract(fileContent);
+
+            Assert.Equal(2, classModels.Count);
+
+            foreach (var classModel in classModels)
+            {
+                Assert.Equal(typeof(ClassModel), classModel.GetType());
+            }
+            
+            Assert.Equal("Models.Main.Items", classModels[0].Namespace);
+            Assert.Equal("MainItem",  classModels[0].Name);
+            
+            Assert.Equal("Models.Main.Items", classModels[1].Namespace);
+            Assert.Equal("IInterface",  classModels[1].Name);
         }
     }
 }

@@ -65,9 +65,19 @@ namespace HoneydewCore.Extractors
                 }
             }
 
-            foreach (var classDeclarationSyntax in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
+            var classDeclarationSyntaxes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
+            var interfaceDeclarationSyntaxes = root.DescendantNodes().OfType<InterfaceDeclarationSyntax>();
+
+            IList<TypeDeclarationSyntax> syntaxes = classDeclarationSyntaxes.Cast<TypeDeclarationSyntax>().ToList();
+
+            foreach (var syntax in interfaceDeclarationSyntaxes)
             {
-                var declaredSymbol = semanticModel.GetDeclaredSymbol(classDeclarationSyntax);
+                syntaxes.Add(syntax);
+            }
+
+            foreach (var declarationSyntax in syntaxes)
+            {
+                var declaredSymbol = semanticModel.GetDeclaredSymbol(declarationSyntax);
                 if (declaredSymbol == null)
                 {
                     continue;
@@ -84,12 +94,13 @@ namespace HoneydewCore.Extractors
 
                 foreach (var extractor in semanticMetricExtractors)
                 {
-                    extractor.Visit(classDeclarationSyntax);
+                    extractor.Visit(declarationSyntax);
                     projectClass.Metrics.Add(extractor);
                 }
 
                 classModels.Add(projectClass);
             }
+            
 
             foreach (var model in classModels)
             {
