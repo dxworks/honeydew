@@ -19,9 +19,8 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
         [Fact]
         public void GetMetricType_ShouldReturnSemantic()
         {
-            Assert.Equal(MetricType.Semantic, _sut.GetMetricType());
+            Assert.True(_sut is ISemanticMetric);
         }
-
 
         [Fact]
         public void Extract_ShouldHaveBaseClassObject_WhenClassDoesNotExtendsAnyClass()

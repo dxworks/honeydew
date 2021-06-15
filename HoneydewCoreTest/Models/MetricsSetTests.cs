@@ -138,7 +138,6 @@ namespace HoneydewCoreTest.Models
             
             var optional = _sut.Get<ValueExtractor<string>>();
             
-            Assert.Equal( MetricType.Syntactic,extractor.GetMetricType());
             
             Assert.Equal(extractor.GetMetric(), optional.Value);
             Assert.Equal("Value", (string)optional.Value.GetValue());
@@ -147,12 +146,10 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Get_ShouldGetSemanticMetric_WhenGivenASemanticMetric()
         {
-            var extractor = new ValueExtractor<string>("Value", MetricType.Semantic);
+            var extractor = new ValueExtractor<string>("Value");
             _sut.Add(extractor);
             
             var optional = _sut.Get<ValueExtractor<string>>();
-            
-            Assert.Equal( MetricType.Semantic,extractor.GetMetricType());
             
             Assert.Equal(extractor.GetMetric(), optional.Value);
             Assert.Equal("Value", (string)optional.Value.GetValue());
@@ -162,17 +159,10 @@ namespace HoneydewCoreTest.Models
     internal class ValueExtractor<T> : IMetricExtractor
     {
         private readonly T _value;
-        private readonly MetricType _metricType;
 
-        public ValueExtractor(T value, MetricType metricType = MetricType.Syntactic)
+        public ValueExtractor(T value)
         {
             _value = value;
-            _metricType = metricType;
-        }
-
-        public MetricType GetMetricType()
-        {
-            return _metricType;
         }
 
         public IMetric GetMetric()

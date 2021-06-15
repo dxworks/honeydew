@@ -2,8 +2,6 @@
 {
     public interface IMetricExtractor
     {
-        MetricType GetMetricType();
-
         IMetric GetMetric();
     }
 }

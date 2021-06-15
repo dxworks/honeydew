@@ -6,14 +6,9 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
     /// <summary>
     /// Retrieves The Base class and the implemented interfaces 
     /// </summary>
-    public class BaseClassMetric : CSharpMetricExtractor
+    public class BaseClassMetric : CSharpMetricExtractor, ISemanticMetric
     {
         public InheritanceMetric InheritanceMetric { get; set; }
-
-        public override MetricType GetMetricType()
-        {
-            return MetricType.Semantic;
-        }
 
         public override IMetric GetMetric()
         {

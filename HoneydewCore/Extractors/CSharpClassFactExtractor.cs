@@ -53,12 +53,13 @@ namespace HoneydewCore.Extractors
 
             foreach (var extractor in _metricExtractors)
             {
-                if (extractor.GetMetricType() == MetricType.Semantic)
+                if (extractor is ISemanticMetric)
                 {
                     extractor.SemanticModel = semanticModel;
                     semanticMetricExtractors.Add(extractor);
                 }
-                else
+                
+                if (extractor is ISyntacticMetric)
                 {
                     extractor.Visit(root);
                     metricsSet.Add(extractor);

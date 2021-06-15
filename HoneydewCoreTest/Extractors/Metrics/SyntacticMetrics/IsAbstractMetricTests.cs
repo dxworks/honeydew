@@ -19,7 +19,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
         [Fact]
         public void GetMetricType_ShouldReturnSyntactic()
         {
-            Assert.Equal(MetricType.Syntactic, _sut.GetMetricType());
+            Assert.True(_sut is ISyntacticMetric);
         }
 
         [Fact]

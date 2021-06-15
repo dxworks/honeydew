@@ -3,18 +3,13 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
 {
-    public class IsAbstractMetric : CSharpMetricExtractor
+    public class IsAbstractMetric : CSharpMetricExtractor, ISyntacticMetric
     {
         public bool IsAbstract { get; private set; }
 
         public override IMetric GetMetric()
         {
             return new Metric<bool>(IsAbstract);
-        }
-
-        public override MetricType GetMetricType()
-        {
-            return MetricType.Syntactic;
         }
 
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
