@@ -34,6 +34,7 @@ namespace HoneydewCore.IO.Readers
 
                 foreach (var classModel in classModels)
                 {
+                    classModel.FilePath = path;
                     solutionModel.Add(classModel);
                 }
             }

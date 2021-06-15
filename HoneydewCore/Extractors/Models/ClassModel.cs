@@ -6,5 +6,7 @@
 
         public string Name { get; init; }
         public string Namespace { get; init; }
+
+        public string FilePath { get; set; }
     }
 }

@@ -27,6 +27,7 @@ namespace HoneydewCore.Models
 
             ClassModels.Add(new ProjectClassModel
             {
+                Path = classModel.FilePath,
                 FullName = fullName,
                 Metrics = classModel.Metrics.Metrics.Select(metric => new ClassMetric()
                 {

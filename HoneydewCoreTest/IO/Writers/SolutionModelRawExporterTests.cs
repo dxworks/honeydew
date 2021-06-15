@@ -33,11 +33,16 @@ namespace HoneydewCoreTest.IO.Writers
             var solutionModel = new SolutionModel();
             var classModels = new List<ClassModel>
             {
-                new() {Name = "FirstClass", Namespace = "SomeNamespace"}
+                new()
+                {
+                    FilePath = "pathToClass",
+                    Name = "FirstClass",
+                    Namespace = "SomeNamespace",
+                }
             };
 
             const string expectedString =
-                @"{""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""FullName"":""SomeNamespace.FirstClass"",""Metrics"":[]}]}]}";
+                @"{""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""Path"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""Metrics"":[]}]}]}";
 
             foreach (var classModel in classModels)
             {
@@ -56,6 +61,7 @@ namespace HoneydewCoreTest.IO.Writers
 
             var classModel = new ClassModel
             {
+                FilePath = "SomePath",
                 Name = "FirstClass",
                 Namespace = "SomeNamespace"
             };
@@ -72,7 +78,7 @@ namespace HoneydewCoreTest.IO.Writers
             };
 
             const string expectedString =
-                @"{""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""FullName"":""SomeNamespace.FirstClass"",""Metrics"":[{""ExtractorName"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"",""ValueType"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}]}]}]}";
+                @"{""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""Path"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""Metrics"":[{""ExtractorName"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"",""ValueType"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}]}]}]}";
             
             foreach (var model in classModels)
             {
