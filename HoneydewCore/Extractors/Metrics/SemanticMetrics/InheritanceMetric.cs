@@ -4,7 +4,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 {
     public class InheritanceMetric
     {
-        public IList<string> Interfaces { get; } = new List<string>();
+        public IList<string> Interfaces { get; set; } = new List<string>();
         public string BaseClassName { get; set; }
     }
 }

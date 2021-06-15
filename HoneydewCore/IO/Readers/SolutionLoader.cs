@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.Json;
 using HoneydewCore.Extractors;
 using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.Models;
@@ -40,6 +42,45 @@ namespace HoneydewCore.IO.Readers
             }
 
             return solutionModel;
+        }
+
+        public SolutionModel LoadModelFromFile(string pathToModel)
+        {
+            var fileContent = _fileReader.ReadFile(pathToModel);
+
+            try
+            {
+                var solutionModel = JsonSerializer.Deserialize<SolutionModel>(fileContent);
+
+                if (solutionModel == null)
+                {
+                    return null;
+                }
+
+                foreach (var modelNamespace in solutionModel.Namespaces)
+                {
+                    foreach (var classModel in modelNamespace.ClassModels)
+                    {
+                        foreach (var metric in classModel.Metrics)
+                        {
+                            var returnType = Type.GetType(metric.ValueType);
+                            if (returnType == null)
+                            {
+                                continue;
+                            }
+                            
+                            metric.Value = JsonSerializer.Deserialize(((JsonElement) metric.Value).GetRawText(),
+                                returnType);
+                        }
+                    }
+                }
+
+                return solutionModel;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
     }
 }
