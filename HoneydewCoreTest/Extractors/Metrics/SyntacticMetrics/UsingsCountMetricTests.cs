@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
@@ -38,9 +39,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                                     }";
 
 
-            var metrics = new List<CSharpMetricExtractor>()
+            var metrics = new List<Type>()
             {
-                _sut
+                _sut.GetType()
             };
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
@@ -49,9 +50,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
 
             Assert.Equal(1, classModels.Count);
             
-            var optional = classModels[0].Metrics.Get<UsingsCountMetric>();
+            var optional = classModels[0].GetMetric<UsingsCountMetric>();
             Assert.True(optional.HasValue);
-            var count = (int) optional.Value.GetValue();
+            var count = (int) optional.Value;
 
             Assert.Equal(6, count);
         }
@@ -89,9 +90,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                                     }";
 
 
-            var metrics = new List<CSharpMetricExtractor>()
+            var metrics = new List<Type>()
             {
-                _sut
+                _sut.GetType()
             };
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
@@ -99,13 +100,13 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             var classModels = _factExtractor.Extract(fileContent);
             Assert.Equal(2, classModels.Count);
             
-            var optional1 = classModels[0].Metrics.Get<UsingsCountMetric>();
+            var optional1 = classModels[0].GetMetric<UsingsCountMetric>();
             Assert.True(optional1.HasValue);
-            Assert.Equal(12, (int) optional1.Value.GetValue());
+            Assert.Equal(12, (int) optional1.Value);
             
-            var optional2 = classModels[0].Metrics.Get<UsingsCountMetric>();
+            var optional2 = classModels[0].GetMetric<UsingsCountMetric>();
             Assert.True(optional2.HasValue);
-            Assert.Equal(12, (int) optional2.Value.GetValue());
+            Assert.Equal(12, (int) optional2.Value);
         }
     }
 }

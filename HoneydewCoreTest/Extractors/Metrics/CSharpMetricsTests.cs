@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using HoneydewCore.Extractors;
+﻿using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
@@ -9,7 +8,7 @@ namespace HoneydewCoreTest.Extractors.Metrics
 {
     public class CSharpMetricsTests // tests with multiple metrics
     {
-        private IFactExtractor _factExtractor;
+        private CSharpClassFactExtractor _factExtractor;
 
         [Fact]
         public void
@@ -41,35 +40,30 @@ namespace HoneydewCoreTest.Extractors.Metrics
                                             public class Bar { public void b(){} }
                                         }
                                     }";
-            var sut = new UsingsCountMetric();
 
-            var metrics = new List<CSharpMetricExtractor>()
-            {
-                sut
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
+            _factExtractor = new CSharpClassFactExtractor();
+            _factExtractor.AddMetric<UsingsCountMetric>();
 
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(2, classModels.Count);
 
             var foo = classModels[0];
-            Assert.Equal("Foo", foo.Name);
+            Assert.Equal("TopLevel.Child1.Foo", foo.FullName);
             Assert.Equal("TopLevel.Child1", foo.Namespace);
             Assert.Equal(1, foo.Metrics.Count);
-            var optional1 = foo.Metrics.Get<UsingsCountMetric>();
+            var optional1 = foo.GetMetric<UsingsCountMetric>();
             Assert.True(optional1.HasValue);
-            Assert.Equal(10, (int) optional1.Value.GetValue());
+            Assert.Equal(10, (int) optional1.Value);
             
 
             var bar = classModels[1];
-            Assert.Equal("Bar", bar.Name);
+            Assert.Equal("TopLevel.Child2.Bar", bar.FullName);
             Assert.Equal("TopLevel.Child2", bar.Namespace);
             Assert.Equal(1, bar.Metrics.Count);
-            var optional2 = bar.Metrics.Get<UsingsCountMetric>();
+            var optional2 = bar.GetMetric<UsingsCountMetric>();
             Assert.True(optional2.HasValue);
-            Assert.Equal(10, (int) optional2.Value.GetValue());
+            Assert.Equal(10, (int) optional2.Value);
         }
 
         [Fact]
@@ -102,25 +96,21 @@ namespace HoneydewCoreTest.Extractors.Metrics
                                         }
                                     }";
 
-            var metrics = new List<CSharpMetricExtractor>()
-            {
-                new BaseClassMetric(),
-                new UsingsCountMetric()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
+            _factExtractor = new CSharpClassFactExtractor();
+            _factExtractor.AddMetric<BaseClassMetric>();
+            _factExtractor.AddMetric<UsingsCountMetric>();
 
             var classModels = _factExtractor.Extract(fileContent);
 
             // Assert.True(compilationUnitModel.SyntacticMetrics.HasMetrics());
-            // var syntacticMetricOptional = compilationUnitModel.SyntacticMetrics.Get<BaseClassMetric>();
+            // var syntacticMetricOptional = compilationUnitModel.SyntacticGetMetric<BaseClassMetric>();
             // Assert.False(syntacticMetricOptional.HasValue);
 
             Assert.Equal(2, classModels.Count);
-            var optional = classModels[0].Metrics.Get<IMetricExtractor>();
+            var optional = classModels[0].GetMetric<IMetricExtractor>();
             Assert.False(optional.HasValue);
             
-            var optional1 = classModels[1].Metrics.Get<IMetricExtractor>();
+            var optional1 = classModels[1].GetMetric<IMetricExtractor>();
             Assert.False(optional1.HasValue);
         }
     }

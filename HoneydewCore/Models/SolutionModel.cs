@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using HoneydewCore.Extractors.Models;
 using HoneydewCore.IO.Writers;
 
 namespace HoneydewCore.Models
@@ -9,20 +7,25 @@ namespace HoneydewCore.Models
     {
         // Projects
 
-        public IList<ProjectNamespace> Namespaces { get; set; } = new List<ProjectNamespace>();
+        public IDictionary<string, ProjectNamespace> Namespaces { get; set; } =
+            new Dictionary<string, ProjectNamespace>();
 
-        public void Add(ClassModel classModel)
+        public void Add(ProjectClassModel classModel)
         {
-            var firstOrDefault = Namespaces.FirstOrDefault(ns => ns.Name == classModel.Namespace);
-            if (firstOrDefault == default)
+            if (string.IsNullOrEmpty(classModel.Namespace))
             {
-                var projectNamespace = new ProjectNamespace();
+                return;
+            }
+
+            if (Namespaces.TryGetValue(classModel.Namespace, out var projectNamespace))
+            {
                 projectNamespace.Add(classModel);
-                Namespaces.Add(projectNamespace);
             }
             else
             {
-                firstOrDefault.Add(classModel);
+                var p = new ProjectNamespace();
+                p.Add(classModel);
+                Namespaces.Add(classModel.Namespace, p);
             }
         }
 
@@ -34,6 +37,25 @@ namespace HoneydewCore.Models
             }
 
             return string.Empty;
+        }
+
+        public string FindClassFullNameInUsings(IList<string> usings, string className)
+        {
+            foreach (var usingName in usings)
+            {
+                if (Namespaces.TryGetValue(usingName, out var projectNamespace))
+                {
+                    foreach (var classModel in projectNamespace.ClassModels)
+                    {
+                        if (classModel.FullName == $"{usingName}.{className}")
+                        {
+                            return classModel.FullName;
+                        }
+                    }
+                }
+            }
+
+            return className;
         }
     }
 }

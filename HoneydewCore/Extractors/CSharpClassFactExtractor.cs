@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.Extractors.Metrics;
-using HoneydewCore.Extractors.Models;
+using HoneydewCore.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,11 +11,21 @@ namespace HoneydewCore.Extractors
 {
     public class CSharpClassFactExtractor : IFactExtractor
     {
-        private readonly IList<CSharpMetricExtractor> _metricExtractors;
+        private readonly IList<Type> _metricExtractorsTypes;
 
-        public CSharpClassFactExtractor(IList<CSharpMetricExtractor> metricExtractors)
+        public CSharpClassFactExtractor()
         {
-            _metricExtractors = metricExtractors ?? new List<CSharpMetricExtractor>();
+            _metricExtractorsTypes = new List<Type>();
+        }
+
+        public CSharpClassFactExtractor(IList<Type> metricExtractors)
+        {
+            _metricExtractorsTypes = metricExtractors ?? new List<Type>();
+        }
+
+        public void AddMetric<T>() where T : CSharpMetricExtractor
+        {
+            _metricExtractorsTypes.Add(typeof(T));
         }
 
         public string FileType()
@@ -22,7 +33,7 @@ namespace HoneydewCore.Extractors
             return ".cs";
         }
 
-        public IList<ClassModel> Extract(string fileContent)
+        public IList<ProjectClassModel> Extract(string fileContent)
         {
             if (string.IsNullOrWhiteSpace(fileContent))
             {
@@ -39,7 +50,7 @@ namespace HoneydewCore.Extractors
                 throw new ExtractionException();
             }
 
-            IList<ClassModel> classModels = new List<ClassModel>();
+            IList<ProjectClassModel> classModels = new List<ProjectClassModel>();
 
 
             var compilation = CSharpCompilation.Create("Compilation")
@@ -47,27 +58,6 @@ namespace HoneydewCore.Extractors
                 .AddSyntaxTrees(tree);
             var semanticModel = compilation.GetSemanticModel(tree);
 
-            IList<CSharpMetricExtractor> semanticMetricExtractors = new List<CSharpMetricExtractor>();
-
-            var metricsSet = new MetricsSet();
-
-            foreach (var extractor in _metricExtractors)
-            {
-                if (extractor is ISyntacticMetric)
-                {
-                    extractor.Visit(root);
-                    metricsSet.Add(extractor);
-                }
-
-                if (extractor is ISemanticMetric)
-                {
-                    extractor.SemanticModel = semanticModel;
-                    if (extractor is not ISyntacticMetric)
-                    {
-                        semanticMetricExtractors.Add(extractor);
-                    }
-                }
-            }
 
             var classDeclarationSyntaxes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
             var interfaceDeclarationSyntaxes = root.DescendantNodes().OfType<InterfaceDeclarationSyntax>();
@@ -90,28 +80,47 @@ namespace HoneydewCore.Extractors
                 var namespaceSymbol = declaredSymbol.ContainingNamespace;
                 var className = declaredSymbol.Name;
 
-                var projectClass = new ClassModel
+                var projectClass = new ProjectClassModel()
                 {
-                    Namespace = namespaceSymbol.ToString(),
-                    Name = className
+                    FullName = namespaceSymbol.ToString() + "." + className
                 };
 
-                foreach (var extractor in semanticMetricExtractors)
+                foreach (var extractorType in _metricExtractorsTypes)
                 {
-                    extractor.Visit(declarationSyntax);
-                    projectClass.Metrics.Add(extractor);
+                    var extractor = (CSharpMetricExtractor) Activator.CreateInstance(extractorType);
+
+                    if (extractor is ISyntacticMetric)
+                    {
+                        extractor.Visit(root);
+                        
+                        var metric = extractor.GetMetric();
+                        projectClass.Metrics.Add(new ClassMetric
+                        {
+                            ExtractorName = extractorType.FullName,
+                            Value = metric.GetValue(),
+                            ValueType = metric.GetValueType()
+                        });
+                    }
+
+                    if (extractor is ISemanticMetric)
+                    {
+                        extractor.SemanticModel = semanticModel;
+                        if (extractor is not ISyntacticMetric)
+                        {
+                            extractor.Visit(declarationSyntax);
+                            
+                            var metric = extractor.GetMetric();
+                            projectClass.Metrics.Add(new ClassMetric
+                            {
+                                ExtractorName = extractorType.FullName,
+                                Value = metric.GetValue(),
+                                ValueType = metric.GetValueType()
+                            });
+                        }
+                    }
                 }
 
                 classModels.Add(projectClass);
-            }
-
-
-            foreach (var model in classModels)
-            {
-                foreach (var (extractorType, metric) in metricsSet.Metrics)
-                {
-                    model.Metrics.AddValue(extractorType, metric);
-                }
             }
 
             return classModels;

@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.Extractors;
-using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Filters;
 using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.IO.Writers;
+using HoneydewCore.Models;
+using HoneydewCore.Processors;
 
 namespace Honeydew
 {
@@ -16,17 +17,19 @@ namespace Honeydew
     {
         static void Main(string[] args)
         {
-            var pathToProject = "D:\\Work\\Visual Studio 2019\\CSharp\\Catan";
+            const string pathToProject = "D:\\Work\\Visual Studio 2019\\CSharp\\Catan";
 
             Console.WriteLine("Reading project from {0}...", pathToProject);
 
+            var cSharpClassFactExtractor = new CSharpClassFactExtractor();
+            cSharpClassFactExtractor.AddMetric<BaseClassMetric>();
+            cSharpClassFactExtractor.AddMetric<UsingsCountMetric>();
+            cSharpClassFactExtractor.AddMetric<IsAbstractMetric>();
+            cSharpClassFactExtractor.AddMetric<ParameterDependenciesMetric>();
+
             var extractors = new List<IFactExtractor>
             {
-                new CSharpClassFactExtractor(new List<CSharpMetricExtractor>
-                {
-                    new BaseClassMetric(),
-                    new UsingsCountMetric()
-                })
+                cSharpClassFactExtractor
             };
 
             var filters = extractors
@@ -40,7 +43,11 @@ namespace Honeydew
 
             Console.WriteLine("Project read");
             var exportedSolutionModel = projectModel.Export(new RawModelExporter());
-
+            
+            var a = new ProcessorChain(IProcessable.Of(exportedSolutionModel))
+                .Process(new FullNameDependencyProcessor())
+                .Finish<SolutionModel>();
+            
             Console.WriteLine(exportedSolutionModel);
 
             // Console.WriteLine("Enter any key to exit ...");

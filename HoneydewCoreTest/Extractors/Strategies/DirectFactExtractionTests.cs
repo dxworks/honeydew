@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors;
-using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.IO.Readers.Strategies;
 using Xunit;
@@ -51,15 +50,15 @@ namespace HoneydewCoreTest.Extractors.Strategies
                                     }";
             var extractors = new List<IFactExtractor>
             {
-                new CSharpClassFactExtractor(new List<CSharpMetricExtractor>())
+                new CSharpClassFactExtractor()
             };
             var classModels = _sut.Load(fileContent, extractors);
 
             Assert.Equal(1, classModels.Count);
 
             Assert.Equal("Models", classModels[0].Namespace);
-            Assert.Equal("Item", classModels[0].Name);
-            Assert.False(classModels[0].Metrics.HasMetrics());
+            Assert.Equal("Models.Item", classModels[0].FullName);
+            Assert.Empty(classModels[0].Metrics);
         }
 
         [Fact]
@@ -76,28 +75,27 @@ namespace HoneydewCoreTest.Extractors.Strategies
                                     {
                                       public class Item { }
                                     }";
+            var cSharpClassFactExtractor = new CSharpClassFactExtractor();
+            cSharpClassFactExtractor.AddMetric<UsingsCountMetric>();
             var extractors = new List<IFactExtractor>
             {
-                new CSharpClassFactExtractor(new List<CSharpMetricExtractor>
-                {
-                    new UsingsCountMetric()
-                })
+                cSharpClassFactExtractor
             };
             var classModels = _sut.Load(fileContent, extractors);
 
             Assert.Equal(1, classModels.Count);
 
-            Assert.True(classModels[0].Metrics.HasMetrics());
+            Assert.NotEmpty(classModels[0].Metrics);
             Assert.Equal(1, classModels[0].Metrics.Count);
             
-            var optional = classModels[0].Metrics.Get<UsingsCountMetric>();
+            var optional = classModels[0].GetMetric<UsingsCountMetric>();
             Assert.True(optional.HasValue);
-            Assert.Equal(4, (int) optional.Value.GetValue());
+            Assert.Equal(4, (int) optional.Value);
 
             Assert.Equal(1, classModels.Count);
 
             Assert.Equal("Models", classModels[0].Namespace);
-            Assert.Equal("Item", classModels[0].Name);
+            Assert.Equal("Models.Item", classModels[0].FullName);
         }
     }
 }

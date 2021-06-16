@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
@@ -39,19 +40,19 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                     }";
 
 
-            var metrics = new List<CSharpMetricExtractor>()
+            var metrics = new List<Type>()
             {
-                _sut
+                _sut.GetType()
             };
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].Metrics.Get<ParameterDependenciesMetric>();
+            var optional = classModels[0].GetMetric<ParameterDependenciesMetric>();
             Assert.True(optional.HasValue);
 
-            var dependencies = (DependencyDataMetric) optional.Value.GetValue();
+            var dependencies = (DependencyDataMetric) optional.Value;
 
             Assert.Empty(dependencies.Dependencies);
             Assert.Empty(dependencies.Usings);
@@ -77,19 +78,19 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                     }";
 
 
-            var metrics = new List<CSharpMetricExtractor>()
+            var metrics = new List<Type>()
             {
-                _sut
+                _sut.GetType()
             };
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].Metrics.Get<ParameterDependenciesMetric>();
+            var optional = classModels[0].GetMetric<ParameterDependenciesMetric>();
             Assert.True(optional.HasValue);
 
-            var dependencies = (DependencyDataMetric) optional.Value.GetValue();
+            var dependencies = (DependencyDataMetric) optional.Value;
 
             Assert.Equal(1, dependencies.Usings.Count);
             Assert.Equal("System", dependencies.Usings[0]);
@@ -120,19 +121,19 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                     }";
 
 
-            var metrics = new List<CSharpMetricExtractor>()
+            var metrics = new List<Type>()
             {
-                _sut
+                _sut.GetType()
             };
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].Metrics.Get<ParameterDependenciesMetric>();
+            var optional = classModels[0].GetMetric<ParameterDependenciesMetric>();
             Assert.True(optional.HasValue);
 
-            var dependencies = (DependencyDataMetric) optional.Value.GetValue();
+            var dependencies = (DependencyDataMetric) optional.Value;
 
             Assert.Equal(1, dependencies.Usings.Count);
             Assert.Equal("System", dependencies.Usings[0]);
@@ -161,19 +162,19 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                     }";
 
 
-            var metrics = new List<CSharpMetricExtractor>()
+            var metrics = new List<Type>()
             {
-                _sut
+                _sut.GetType()
             };
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].Metrics.Get<ParameterDependenciesMetric>();
+            var optional = classModels[0].GetMetric<ParameterDependenciesMetric>();
             Assert.True(optional.HasValue);
 
-            var dependencies = (DependencyDataMetric) optional.Value.GetValue();
+            var dependencies = (DependencyDataMetric) optional.Value;
 
             Assert.Equal(4, dependencies.Usings.Count);
             Assert.Equal("System", dependencies.Usings[0]);
@@ -204,19 +205,19 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                     }";
 
 
-            var metrics = new List<CSharpMetricExtractor>()
+            var metrics = new List<Type>()
             {
-                _sut
+                _sut.GetType()
             };
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].Metrics.Get<ParameterDependenciesMetric>();
+            var optional = classModels[0].GetMetric<ParameterDependenciesMetric>();
             Assert.True(optional.HasValue);
 
-            var dependencies = (DependencyDataMetric) optional.Value.GetValue();
+            var dependencies = (DependencyDataMetric) optional.Value;
 
             Assert.Equal(3, dependencies.Usings.Count);
             Assert.Equal("System", dependencies.Usings[0]);

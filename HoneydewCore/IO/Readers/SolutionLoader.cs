@@ -57,9 +57,9 @@ namespace HoneydewCore.IO.Readers
                     return null;
                 }
 
-                foreach (var modelNamespace in solutionModel.Namespaces)
+                foreach (var (_, projectNamespace) in solutionModel.Namespaces)
                 {
-                    foreach (var classModel in modelNamespace.ClassModels)
+                    foreach (var classModel in projectNamespace.ClassModels)
                     {
                         foreach (var metric in classModel.Metrics)
                         {

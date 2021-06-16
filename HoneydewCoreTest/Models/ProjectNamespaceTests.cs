@@ -1,6 +1,5 @@
 ﻿using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
-using HoneydewCore.Extractors.Models;
 using HoneydewCore.Models;
 using Xunit;
 
@@ -18,7 +17,7 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldAddNewClass_WhenANewClassModelIsAdded()
         {
-            _sut.Add(new ClassModel {Name = "Class1", Namespace = "Models"});
+            _sut.Add(new ProjectClassModel {FullName = "Models.Class1"});
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(1, _sut.ClassModels.Count);
@@ -28,9 +27,9 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldAddNewClasses_WhenMultipleClassModelsAreAdded()
         {
-            _sut.Add(new ClassModel {Name = "Class1", Namespace = "Models"});
-            _sut.Add(new ClassModel {Name = "Class2", Namespace = "Models"});
-            _sut.Add(new ClassModel {Name = "Class3", Namespace = "Models"});
+            _sut.Add(new ProjectClassModel {FullName = "Models.Class1"});
+            _sut.Add(new ProjectClassModel {FullName = "Models.Class2"});
+            _sut.Add(new ProjectClassModel {FullName = "Models.Class3"});
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(3, _sut.ClassModels.Count);
@@ -42,9 +41,9 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldAddNewClassOnce_WhenTheSameClassModelsAdded()
         {
-            _sut.Add(new ClassModel {Name = "Class1", Namespace = "Models"});
-            _sut.Add(new ClassModel {Name = "Class2", Namespace = "Models"});
-            _sut.Add(new ClassModel {Name = "Class1", Namespace = "Models"});
+            _sut.Add(new ProjectClassModel {FullName = "Models.Class1"});
+            _sut.Add(new ProjectClassModel {FullName = "Models.Class2"});
+            _sut.Add(new ProjectClassModel {FullName = "Models.Class1"});
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(2, _sut.ClassModels.Count);
@@ -55,8 +54,8 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldNotAddClassOnce_WhenNamespaceIsDifferentInClass()
         {
-            _sut.Add(new ClassModel {Name = "Class1", Namespace = "Models"});
-            _sut.Add(new ClassModel {Name = "Class2", Namespace = "Models.Items"});
+            _sut.Add(new ProjectClassModel {FullName = "Models.Class1"});
+            _sut.Add(new ProjectClassModel {FullName = "Models.Items.Class2"});
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(1, _sut.ClassModels.Count);
@@ -66,12 +65,16 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldAddClassModelWithAllAttributes_WhenANewClassModelIsAdded()
         {
-            var classModel = new ClassModel
+            var classModel = new ProjectClassModel
             {
-                Name = "Pencil",
-                Namespace = "Items",
+                FullName = "Items.Pencil"
             };
-            classModel.Metrics.Add(new UsingsCountMetric());
+            classModel.Metrics.Add(new ClassMetric
+            {
+                Value = 0,
+                ExtractorName = typeof(UsingsCountMetric).FullName,
+                ValueType = typeof(int).FullName
+            });
 
             _sut.Add(classModel);
 
@@ -91,44 +94,56 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldAddClassModelWithAllAttributes_WhenMultipleClassModelsAreAdded()
         {
-            var classModel1 = new ClassModel
+            var classModel1 = new ProjectClassModel
             {
-                Name = "Pencil",
-                Namespace = "Items",
+                FullName = "Items.Pencil"
             };
-            classModel1.Metrics.Add(new UsingsCountMetric());
+            classModel1.Metrics.Add(new ClassMetric
+            {
+                Value = 0,
+                ExtractorName = typeof(UsingsCountMetric).FullName,
+                ValueType = typeof(int).FullName
+            });
 
             _sut.Add(classModel1);
 
-            var classModel2 = new ClassModel
+            var classModel2 = new ProjectClassModel
             {
-                Name = "Notebook",
-                Namespace = "Items",
+                FullName = "Items.Notebook"
             };
-            classModel2.Metrics.Add(new BaseClassMetric
+            classModel2.Metrics.Add(new ClassMetric
             {
-                InheritanceMetric = new InheritanceMetric
+                Value = new InheritanceMetric
                 {
                     BaseClassName = "Object"
-                }
+                },
+                ExtractorName = typeof(BaseClassMetric).FullName,
+                ValueType = typeof(InheritanceMetric).FullName
             });
 
             _sut.Add(classModel2);
 
-            var classModel3 = new ClassModel
+            var classModel3 = new ProjectClassModel
             {
-                Name = "IItemService",
-                Namespace = "Items",
+                FullName = "Items.IItemService"
             };
-            classModel3.Metrics.Add(new UsingsCountMetric());
-            classModel3.Metrics.Add(new BaseClassMetric
+            classModel3.Metrics.Add(new ClassMetric
             {
-                InheritanceMetric = new InheritanceMetric
+                Value = 0,
+                ExtractorName = typeof(UsingsCountMetric).FullName,
+                ValueType = typeof(int).FullName
+            });
+            classModel3.Metrics.Add(new ClassMetric
+            {
+                Value = new InheritanceMetric
                 {
                     BaseClassName = "BaseService",
                     Interfaces = {"IService"}
-                }
+                },
+                ExtractorName = typeof(BaseClassMetric).FullName,
+                ValueType = typeof(InheritanceMetric).FullName
             });
+
 
             _sut.Add(classModel3);
 

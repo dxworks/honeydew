@@ -8,7 +8,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
     /// </summary>
     public class BaseClassMetric : CSharpMetricExtractor, ISemanticMetric
     {
-        public InheritanceMetric InheritanceMetric { get; set; }
+        public InheritanceMetric InheritanceMetric { get; set; } = new InheritanceMetric();
 
         public override IMetric GetMetric()
         {
@@ -17,8 +17,6 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            InheritanceMetric = new InheritanceMetric();
-
             var declaredSymbol = SemanticModel.GetDeclaredSymbol(node);
 
             if (declaredSymbol is not ITypeSymbol typeSymbol) return;

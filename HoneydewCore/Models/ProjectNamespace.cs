@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using HoneydewCore.Extractors.Models;
 
 namespace HoneydewCore.Models
 {
@@ -9,33 +8,21 @@ namespace HoneydewCore.Models
         public string Name { get; set; }
         public IList<ProjectClassModel> ClassModels { get; set; } = new List<ProjectClassModel>();
 
-        public void Add(ClassModel classModel)
+        public void Add(ProjectClassModel classModel)
         {
             if (!string.IsNullOrEmpty(Name) && classModel.Namespace != Name)
             {
                 return;
             }
 
-            var fullName = $"{classModel.Namespace}.{classModel.Name}";
-
-            if (ClassModels.Any(model => model.FullName == fullName))
+            if (ClassModels.Any(model => model.FullName == classModel.FullName))
             {
                 return;
             }
 
             Name = classModel.Namespace;
 
-            ClassModels.Add(new ProjectClassModel
-            {
-                Path = classModel.FilePath,
-                FullName = fullName,
-                Metrics = classModel.Metrics.Metrics.Select(metric => new ClassMetric()
-                {
-                    ExtractorName = metric.Key.FullName,
-                    Value = metric.Value.GetValue(),
-                    ValueType = metric.Value.GetValueType()
-                }).ToList()
-            });
+            ClassModels.Add(classModel);
         }
     }
 }

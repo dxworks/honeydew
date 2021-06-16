@@ -2,10 +2,10 @@
 using System.Linq;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
-using HoneydewCore.Extractors.Models;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Filters;
 using HoneydewCore.IO.Readers.Strategies;
+using HoneydewCore.Models;
 using Moq;
 using Xunit;
 
@@ -52,13 +52,13 @@ namespace HoneydewCoreTest.IO.Readers
 
             _fileReaderMock.Setup(reader => reader.ReadFilePaths(pathToProject)).Returns(pathsList);
 
-            foreach (string path in pathsList)
+            foreach (var path in pathsList)
             {
                 _fileReaderMock.Setup(reader => reader.ReadFile(path)).Returns("");
             }
 
             _solutionLoadingStrategy.Setup(strategy => strategy.Load(string.Empty, new List<IFactExtractor>()))
-                .Returns(() => new List<ClassModel>
+                .Returns(() => new List<ProjectClassModel>
                 {
                     new()
                 });
@@ -101,7 +101,7 @@ namespace HoneydewCoreTest.IO.Readers
             }
 
             _solutionLoadingStrategy.Setup(strategy => strategy.Load(string.Empty, new List<IFactExtractor>()))
-                .Returns(() => new List<ClassModel>
+                .Returns(() => new List<ProjectClassModel>
                 {
                     new()
                 });
@@ -156,7 +156,7 @@ namespace HoneydewCoreTest.IO.Readers
             }
 
             _solutionLoadingStrategy.Setup(strategy => strategy.Load(string.Empty, new List<IFactExtractor>()))
-                .Returns(() => new List<ClassModel>
+                .Returns(() => new List<ProjectClassModel>
                 {
                     new()
                 });
@@ -215,7 +215,7 @@ namespace HoneydewCoreTest.IO.Readers
             }
 
             _solutionLoadingStrategy.Setup(strategy => strategy.Load(string.Empty, new List<IFactExtractor>()))
-                .Returns(() => new List<ClassModel>
+                .Returns(() => new List<ProjectClassModel>
                 {
                     new()
                 });
@@ -277,56 +277,56 @@ namespace HoneydewCoreTest.IO.Readers
             _fileReaderMock.Setup(reader => reader.ReadFile(serviceClassPath)).Returns(serviceClass);
 
             _solutionLoadingStrategy.Setup(strategy => strategy.Load(reader1Class, new List<IFactExtractor>()))
-                .Returns((() => new List<ClassModel>
+                .Returns((() => new List<ProjectClassModel>
                 {
                     new()
                     {
-                        Name = "Reader1", Namespace = "IO.Readers", FilePath = reader1ClassPath
+                        FullName = "IO.Readers.Reader1", FilePath = reader1ClassPath
                     }
                 }));
 
             _solutionLoadingStrategy.Setup(strategy => strategy.Load(reader2Class, new List<IFactExtractor>()))
-                .Returns((() => new List<ClassModel>
+                .Returns((() => new List<ProjectClassModel>
                 {
                     new()
                     {
-                        Name = "Reader2", Namespace = "IO.Readers", FilePath = reader2ClassPath
+                         FullName = "IO.Readers.Reader2", FilePath = reader2ClassPath
                     },
                 }));
 
             _solutionLoadingStrategy.Setup(strategy => strategy.Load(writerClass, new List<IFactExtractor>()))
-                .Returns((() => new List<ClassModel>
+                .Returns((() => new List<ProjectClassModel>
                 {
                     new()
                     {
-                        Name = "Writer", Namespace = "IO.Writers", FilePath = writerClassPath
+                        FullName = "IO.Writers.Writer", FilePath = writerClassPath
                     },
                 }));
 
             _solutionLoadingStrategy.Setup(strategy => strategy.Load(model1Class, new List<IFactExtractor>()))
-                .Returns((() => new List<ClassModel>
+                .Returns((() => new List<ProjectClassModel>
                 {
                     new()
                     {
-                        Name = "Model1", Namespace = "Models", FilePath = model1ClassPath
+                        FullName = "Models.Model1", FilePath = model1ClassPath
                     },
                 }));
 
             _solutionLoadingStrategy.Setup(strategy => strategy.Load(model2Class, new List<IFactExtractor>()))
-                .Returns((() => new List<ClassModel>
+                .Returns((() => new List<ProjectClassModel>
                 {
                     new()
                     {
-                        Name = "Model2", Namespace = "Models", FilePath = model2ClassPath
+                        FullName = "Models.Model2", FilePath = model2ClassPath
                     },
                 }));
 
             _solutionLoadingStrategy.Setup(strategy => strategy.Load(serviceClass, new List<IFactExtractor>()))
-                .Returns((() => new List<ClassModel>
+                .Returns((() => new List<ProjectClassModel>
                 {
                     new()
                     {
-                        Name = "Service", Namespace = "Services", FilePath = serviceClassPath
+                        FullName = "Services.Service", FilePath = serviceClassPath
                     },
                 }));
 
@@ -341,29 +341,33 @@ namespace HoneydewCoreTest.IO.Readers
 
             Assert.Equal(4, projectModel.Namespaces.Count);
 
-            Assert.Equal("IO.Readers", projectModel.Namespaces[0].Name);
-            Assert.Equal(2, projectModel.Namespaces[0].ClassModels.Count);
-            Assert.Equal("IO.Readers.Reader1", projectModel.Namespaces[0].ClassModels[0].FullName);
-            Assert.Equal(reader1ClassPath, projectModel.Namespaces[0].ClassModels[0].Path);
-            Assert.Equal("IO.Readers.Reader2", projectModel.Namespaces[0].ClassModels[1].FullName);
-            Assert.Equal(reader2ClassPath, projectModel.Namespaces[0].ClassModels[1].Path);
+            var ioReadersProjectNamespace = projectModel.Namespaces["IO.Readers"];
+            Assert.Equal("IO.Readers", ioReadersProjectNamespace.Name);
+            Assert.Equal(2, ioReadersProjectNamespace.ClassModels.Count);
+            Assert.Equal("IO.Readers.Reader1", ioReadersProjectNamespace.ClassModels[0].FullName);
+            Assert.Equal(reader1ClassPath, ioReadersProjectNamespace.ClassModels[0].FilePath);
+            Assert.Equal("IO.Readers.Reader2", ioReadersProjectNamespace.ClassModels[1].FullName);
+            Assert.Equal(reader2ClassPath, ioReadersProjectNamespace.ClassModels[1].FilePath);
 
-            Assert.Equal("IO.Writers", projectModel.Namespaces[1].Name);
-            Assert.Equal(1, projectModel.Namespaces[1].ClassModels.Count);
-            Assert.Equal("IO.Writers.Writer", projectModel.Namespaces[1].ClassModels[0].FullName);
-            Assert.Equal(writerClassPath, projectModel.Namespaces[1].ClassModels[0].Path);
+            var ioWritersProjectModelNamespace = projectModel.Namespaces["IO.Writers"];
+            Assert.Equal("IO.Writers", ioWritersProjectModelNamespace.Name);
+            Assert.Equal(1, ioWritersProjectModelNamespace.ClassModels.Count);
+            Assert.Equal("IO.Writers.Writer", ioWritersProjectModelNamespace.ClassModels[0].FullName);
+            Assert.Equal(writerClassPath, ioWritersProjectModelNamespace.ClassModels[0].FilePath);
 
-            Assert.Equal("Models", projectModel.Namespaces[2].Name);
-            Assert.Equal(2, projectModel.Namespaces[2].ClassModels.Count);
-            Assert.Equal("Models.Model1", projectModel.Namespaces[2].ClassModels[0].FullName);
-            Assert.Equal(model1ClassPath, projectModel.Namespaces[2].ClassModels[0].Path);
-            Assert.Equal("Models.Model2", projectModel.Namespaces[2].ClassModels[1].FullName);
-            Assert.Equal(model2ClassPath, projectModel.Namespaces[2].ClassModels[1].Path);
+            var modelsProjectModelNamespace = projectModel.Namespaces["Models"];
+            Assert.Equal("Models", modelsProjectModelNamespace.Name);
+            Assert.Equal(2, modelsProjectModelNamespace.ClassModels.Count);
+            Assert.Equal("Models.Model1", modelsProjectModelNamespace.ClassModels[0].FullName);
+            Assert.Equal(model1ClassPath, modelsProjectModelNamespace.ClassModels[0].FilePath);
+            Assert.Equal("Models.Model2", modelsProjectModelNamespace.ClassModels[1].FullName);
+            Assert.Equal(model2ClassPath, modelsProjectModelNamespace.ClassModels[1].FilePath);
 
-            Assert.Equal("Services", projectModel.Namespaces[3].Name);
-            Assert.Equal(1, projectModel.Namespaces[3].ClassModels.Count);
-            Assert.Equal("Services.Service", projectModel.Namespaces[3].ClassModels[0].FullName);
-            Assert.Equal(serviceClassPath, projectModel.Namespaces[3].ClassModels[0].Path);
+            var servicesProjectModelNamespace = projectModel.Namespaces["Services"];
+            Assert.Equal("Services", servicesProjectModelNamespace.Name);
+            Assert.Equal(1, servicesProjectModelNamespace.ClassModels.Count);
+            Assert.Equal("Services.Service", servicesProjectModelNamespace.ClassModels[0].FullName);
+            Assert.Equal(serviceClassPath, servicesProjectModelNamespace.ClassModels[0].FilePath);
         }
 
         [Fact]
@@ -398,23 +402,27 @@ namespace HoneydewCoreTest.IO.Readers
 
             _fileReaderMock.Setup(reader => reader.ReadFile(pathToModel))
                 .Returns(
-                    @"{""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""Path"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""Metrics"":[{""ExtractorName"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"",""ValueType"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}]}]}]}");
+                    @"{""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""Metrics"":[{""ExtractorName"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"",""ValueType"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}]}]}}}");
 
             var loadModelFromFile = _sut.LoadModelFromFile(pathToModel);
 
             Assert.NotNull(loadModelFromFile);
             Assert.Equal(1, loadModelFromFile.Namespaces.Count);
-            Assert.Equal("SomeNamespace", loadModelFromFile.Namespaces[0].Name);
-            Assert.Equal(1, loadModelFromFile.Namespaces[0].ClassModels.Count);
-            Assert.Equal("SomePath", loadModelFromFile.Namespaces[0].ClassModels[0].Path);
-            Assert.Equal("SomeNamespace.FirstClass", loadModelFromFile.Namespaces[0].ClassModels[0].FullName);
-            Assert.Equal(1, loadModelFromFile.Namespaces[0].ClassModels[0].Metrics.Count);
+            var projectNamespace = loadModelFromFile.Namespaces["SomeNamespace"];
+            
+            Assert.Equal("SomeNamespace", projectNamespace.Name);
+            Assert.Equal(1, projectNamespace.ClassModels.Count);
+            var projectNamespaceClassModel = projectNamespace.ClassModels[0];
+            
+            Assert.Equal("SomePath", projectNamespaceClassModel.FilePath);
+            Assert.Equal("SomeNamespace.FirstClass", projectNamespaceClassModel.FullName);
+            Assert.Equal(1, projectNamespaceClassModel.Metrics.Count);
             Assert.Equal("HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric",
-                loadModelFromFile.Namespaces[0].ClassModels[0].Metrics[0].ExtractorName);
+                projectNamespaceClassModel.Metrics[0].ExtractorName);
             Assert.Equal("HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric",
-                loadModelFromFile.Namespaces[0].ClassModels[0].Metrics[0].ValueType);
-            Assert.Equal(typeof(InheritanceMetric), loadModelFromFile.Namespaces[0].ClassModels[0].Metrics[0].Value.GetType());
-            var value = (InheritanceMetric) loadModelFromFile.Namespaces[0].ClassModels[0].Metrics[0].Value;
+                projectNamespaceClassModel.Metrics[0].ValueType);
+            Assert.Equal(typeof(InheritanceMetric), projectNamespaceClassModel.Metrics[0].Value.GetType());
+            var value = (InheritanceMetric) projectNamespaceClassModel.Metrics[0].Value;
             Assert.Equal(1, value.Interfaces.Count);
             Assert.Equal("Interface1", value.Interfaces[0]);
             Assert.Equal("SomeParent", value.BaseClassName);

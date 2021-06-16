@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using HoneydewCore.Extractors;
-using HoneydewCore.Extractors.Metrics;
-using HoneydewCore.Extractors.Models;
+﻿using HoneydewCore.Extractors;
 using HoneydewCore.Models;
 using Xunit;
 
@@ -13,7 +10,7 @@ namespace HoneydewCoreTest.Extractors
 
         public CSharpClassFactExtractorsTests()
         {
-            _sut = new CSharpClassFactExtractor(new List<CSharpMetricExtractor>());
+            _sut = new CSharpClassFactExtractor();
         }
 
         [Fact]
@@ -80,10 +77,10 @@ namespace HoneydewCoreTest.Extractors
 
             foreach (var classModel in classModels)
             {
-                Assert.Equal(typeof(ClassModel), classModel.GetType());
+                Assert.Equal(typeof(ProjectClassModel), classModel.GetType());
 
                 Assert.Equal("Services", classModel.Namespace);
-                Assert.Equal("IService", classModel.Name);
+                Assert.Equal("Services.IService", classModel.FullName);
             }
         }
         
@@ -104,10 +101,10 @@ namespace HoneydewCoreTest.Extractors
 
             foreach (var classModel in classModels)
             {
-                Assert.Equal(typeof(ClassModel), classModel.GetType());
+                Assert.Equal(typeof(ProjectClassModel), classModel.GetType());
 
                 Assert.Equal("Models.Main.Items", classModel.Namespace);
-                Assert.Equal("MainItem", classModel.Name);
+                Assert.Equal("Models.Main.Items.MainItem", classModel.FullName);
             }
         }
 
@@ -129,9 +126,9 @@ namespace HoneydewCoreTest.Extractors
 
             foreach (var classModel in classModels)
             {
-                Assert.Equal(typeof(ClassModel), classModel.GetType());
+                Assert.Equal(typeof(ProjectClassModel), classModel.GetType());
 
-                Assert.False(classModel.Metrics.HasMetrics());
+                Assert.Empty(classModel.Metrics);
             }
         }
         
@@ -156,14 +153,14 @@ namespace HoneydewCoreTest.Extractors
 
             foreach (var classModel in classModels)
             {
-                Assert.Equal(typeof(ClassModel), classModel.GetType());
+                Assert.Equal(typeof(ProjectClassModel), classModel.GetType());
             }
             
             Assert.Equal("Models.Main.Items", classModels[0].Namespace);
-            Assert.Equal("MainItem",  classModels[0].Name);
+            Assert.Equal("Models.Main.Items.MainItem",  classModels[0].FullName);
             
             Assert.Equal("Models.Main.Items", classModels[1].Namespace);
-            Assert.Equal("IInterface",  classModels[1].Name);
+            Assert.Equal("Models.Main.Items.IInterface",  classModels[1].FullName);
         }
     }
 }

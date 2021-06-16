@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
-using HoneydewCore.Extractors.Models;
 using HoneydewCore.IO.Writers;
 using HoneydewCore.Models;
 using Xunit;
@@ -20,7 +19,7 @@ namespace HoneydewCoreTest.IO.Writers
         public void Export_ShouldReturnRawModel_WhenModelHasNoCompilationUnits()
         {
             var solutionModel = new SolutionModel();
-            const string expectedString = "{\"Namespaces\":[]}";
+            const string expectedString = "{\"Namespaces\":{}}";
 
             var exportString = solutionModel.Export(_sut);
 
@@ -31,18 +30,17 @@ namespace HoneydewCoreTest.IO.Writers
         public void Export_ShouldReturnRawModel_WhenModelHasOneCompilationUnitWithOneClassAndNoMetrics()
         {
             var solutionModel = new SolutionModel();
-            var classModels = new List<ClassModel>
+            var classModels = new List<ProjectClassModel>
             {
                 new()
                 {
                     FilePath = "pathToClass",
-                    Name = "FirstClass",
-                    Namespace = "SomeNamespace",
+                    FullName = "SomeNamespace.FirstClass",
                 }
             };
 
             const string expectedString =
-                @"{""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""Path"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""Metrics"":[]}]}]}";
+                @"{""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""Metrics"":[],""Namespace"":""SomeNamespace""}]}}}";
 
             foreach (var classModel in classModels)
             {
@@ -59,26 +57,26 @@ namespace HoneydewCoreTest.IO.Writers
         {
             var solutionModel = new SolutionModel();
 
-            var classModel = new ClassModel
+            var classModel = new ProjectClassModel
             {
                 FilePath = "SomePath",
-                Name = "FirstClass",
-                Namespace = "SomeNamespace"
+                FullName = "SomeNamespace.FirstClass"
             };
-            var baseClassMetric = new BaseClassMetric
+
+            classModel.Metrics.Add(new ClassMetric()
             {
-                InheritanceMetric = new InheritanceMetric {Interfaces = {"Interface1"}, BaseClassName = "SomeParent"}
-            };
+                ExtractorName = typeof(BaseClassMetric).FullName,
+                ValueType = typeof(InheritanceMetric).FullName,
+                Value = new InheritanceMetric {Interfaces = {"Interface1"}, BaseClassName = "SomeParent"}
+            });
 
-            classModel.Metrics.Add(baseClassMetric);
-
-            var classModels = new List<ClassModel>
+            var classModels = new List<ProjectClassModel>
             {
                 classModel
             };
 
             const string expectedString =
-                @"{""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""Path"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""Metrics"":[{""ExtractorName"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"",""ValueType"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}]}]}]}";
+                @"{""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""Metrics"":[{""ExtractorName"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"",""ValueType"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}],""Namespace"":""SomeNamespace""}]}}}";
             
             foreach (var model in classModels)
             {

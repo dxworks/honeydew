@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
@@ -36,9 +37,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                                     }";
 
 
-            var metrics = new List<CSharpMetricExtractor>()
+            var metrics = new List<Type>()
             {
-                _sut
+                _sut.GetType()
             };
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
@@ -47,9 +48,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
 
             Assert.Equal(1, classModels.Count);
 
-            var optional = classModels[0].Metrics.Get<IsAbstractMetric>();
+            var optional = classModels[0].GetMetric<IsAbstractMetric>();
             Assert.True(optional.HasValue);
-            Assert.False((bool) optional.Value.GetValue());
+            Assert.False((bool) optional.Value);
         }
         
         [Fact]
@@ -62,9 +63,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                                     }";
 
 
-            var metrics = new List<CSharpMetricExtractor>()
+            var metrics = new List<Type>()
             {
-                _sut
+                _sut.GetType()
             };
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
@@ -72,9 +73,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, classModels.Count);
-            var optional = classModels[0].Metrics.Get<IsAbstractMetric>();
+            var optional = classModels[0].GetMetric<IsAbstractMetric>();
             Assert.True(optional.HasValue);
-            Assert.False((bool) optional.Value.GetValue());
+            Assert.False((bool) optional.Value);
         }
         
         [Fact]
@@ -87,19 +88,19 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                                     }";
 
 
-            var metrics = new List<CSharpMetricExtractor>()
+            var metrics = new List<Type>()
             {
-                _sut
+                _sut.GetType()
             };
-
+            
             _factExtractor = new CSharpClassFactExtractor(metrics);
 
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, classModels.Count);
-            var optional = classModels[0].Metrics.Get<IsAbstractMetric>();
+            var optional = classModels[0].GetMetric<IsAbstractMetric>();
             Assert.True(optional.HasValue);
-            Assert.True((bool) optional.Value.GetValue());
+            Assert.True((bool) optional.Value);
         }
         
         [Fact]
@@ -112,9 +113,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                                     }";
 
 
-            var metrics = new List<CSharpMetricExtractor>()
+            var metrics = new List<Type>()
             {
-                _sut
+                _sut.GetType()
             };
 
             _factExtractor = new CSharpClassFactExtractor(metrics);
@@ -122,9 +123,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, classModels.Count);
-            var optional = classModels[0].Metrics.Get<IsAbstractMetric>();
+            var optional = classModels[0].GetMetric<IsAbstractMetric>();
             Assert.True(optional.HasValue);
-            Assert.True((bool) optional.Value.GetValue());
+            Assert.True((bool) optional.Value);
         }
     }
 }
