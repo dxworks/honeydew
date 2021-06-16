@@ -82,5 +82,10 @@ namespace HoneydewCore.IO.Readers
                 return null;
             }
         }
+
+        public SolutionModel LoadSolution(string pathToSolution)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Filters;
-using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.IO.Writers;
 using HoneydewCore.Models;
 using HoneydewCore.Processors;
@@ -15,9 +15,9 @@ namespace Honeydew
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            const string pathToProject = "D:\\Work\\Visual Studio 2019\\CSharp\\Catan";
+            const string pathToProject = "D:\\Work\\Visual Studio 2019\\CSharp\\Catan\\Catan.sln";
 
             Console.WriteLine("Reading project from {0}...", pathToProject);
 
@@ -36,10 +36,11 @@ namespace Honeydew
                 .Select(extractor => (PathFilter) (path => path.EndsWith(extractor.FileType())))
                 .ToList();
 
-            ISolutionLoader solutionLoader = new SolutionLoader(new FileReader(filters), extractors);
-            ISolutionLoadingStrategy loadingStrategy = new DirectSolutionLoading();
+            // ISolutionLoader solutionLoader = new SolutionLoader(new FileReader(filters), extractors);
+            ISolutionLoader solutionLoader = new MsBuildSolutionReader(extractors);
+            // ISolutionLoadingStrategy loadingStrategy = new DirectSolutionLoading();
 
-            var projectModel = solutionLoader.LoadSolution(pathToProject, loadingStrategy);
+            var projectModel = solutionLoader.LoadSolution(pathToProject);
 
             Console.WriteLine("Project read");
             // raw export

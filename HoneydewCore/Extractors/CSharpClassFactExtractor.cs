@@ -33,14 +33,8 @@ namespace HoneydewCore.Extractors
             return ".cs";
         }
 
-        public IList<ProjectClassModel> Extract(string fileContent)
+        public IList<ProjectClassModel> Extract(SyntaxTree tree)
         {
-            if (string.IsNullOrWhiteSpace(fileContent))
-            {
-                throw new EmptyContentException();
-            }
-
-            var tree = CSharpSyntaxTree.ParseText(fileContent);
             var root = tree.GetCompilationUnitRoot();
 
             var diagnostics = root.GetDiagnostics();
@@ -92,7 +86,7 @@ namespace HoneydewCore.Extractors
                     if (extractor is ISyntacticMetric)
                     {
                         extractor.Visit(root);
-                        
+
                         var metric = extractor.GetMetric();
                         projectClass.Metrics.Add(new ClassMetric
                         {
@@ -108,7 +102,7 @@ namespace HoneydewCore.Extractors
                         if (extractor is not ISyntacticMetric)
                         {
                             extractor.Visit(declarationSyntax);
-                            
+
                             var metric = extractor.GetMetric();
                             projectClass.Metrics.Add(new ClassMetric
                             {
@@ -124,6 +118,18 @@ namespace HoneydewCore.Extractors
             }
 
             return classModels;
+        }
+
+        public IList<ProjectClassModel> Extract(string fileContent)
+        {
+            if (string.IsNullOrWhiteSpace(fileContent))
+            {
+                throw new EmptyContentException();
+            }
+
+            var tree = CSharpSyntaxTree.ParseText(fileContent);
+
+            return Extract(tree);
         }
     }
 }
