@@ -53,16 +53,19 @@ namespace HoneydewCore.Extractors
 
             foreach (var extractor in _metricExtractors)
             {
-                if (extractor is ISemanticMetric)
-                {
-                    extractor.SemanticModel = semanticModel;
-                    semanticMetricExtractors.Add(extractor);
-                }
-                
                 if (extractor is ISyntacticMetric)
                 {
                     extractor.Visit(root);
                     metricsSet.Add(extractor);
+                }
+
+                if (extractor is ISemanticMetric)
+                {
+                    extractor.SemanticModel = semanticModel;
+                    if (extractor is not ISyntacticMetric)
+                    {
+                        semanticMetricExtractors.Add(extractor);
+                    }
                 }
             }
 
@@ -101,7 +104,7 @@ namespace HoneydewCore.Extractors
 
                 classModels.Add(projectClass);
             }
-            
+
 
             foreach (var model in classModels)
             {

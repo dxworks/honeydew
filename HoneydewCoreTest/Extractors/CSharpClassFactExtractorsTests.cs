@@ -58,7 +58,7 @@ namespace HoneydewCoreTest.Extractors
                                       }
                                     }
                                     ")]
-        public void Extract_ShouldThrowExtractionException_WhenParsingTextWithCompilationErrors(string fileContent)
+        public void Extract_ShouldThrowExtractionException_WhenParsingTextWithParsingErrors(string fileContent)
         {
             Assert.Throws<ExtractionException>(() => _sut.Extract(fileContent));
         }
