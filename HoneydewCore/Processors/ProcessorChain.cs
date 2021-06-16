@@ -23,6 +23,11 @@ namespace HoneydewCore.Processors
             return this;
         }
 
+        public ProcessorChain Process<T, TR>(IProcessorFunction<T, TR> func)
+        {
+            return Process(func.GetFunction());
+        }
+
         public IProcessable Finish()
         {
             return _processable;

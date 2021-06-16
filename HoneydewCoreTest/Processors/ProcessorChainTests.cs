@@ -57,6 +57,44 @@ namespace HoneydewCoreTest.Processors
         }
 
         [Fact]
+        public void Process_ShouldGiveCorrectResult_WhenGivenProcessorFunctions()
+        {
+            var processableMock = new Mock<Processable<int>>();
+            var processableMock1 = new Mock<Processable<int>>();
+            var processableMock2 = new Mock<Processable<float>>();
+            var processableMock3 = new Mock<Processable<string>>();
+
+            var funcMock = new Mock<Func<Processable<int>, Processable<int>>>();
+            var funcMock1 = new Mock<Func<Processable<int>, Processable<float>>>();
+            var funcMock2 = new Mock<Func<Processable<float>, Processable<string>>>();
+            
+            funcMock.Setup(func => func(processableMock.Object)).Returns(processableMock1.Object);
+            funcMock1.Setup(func => func(processableMock1.Object)).Returns(processableMock2.Object);
+            funcMock2.Setup(func => func(processableMock2.Object)).Returns(processableMock3.Object);
+            
+            var mock = new Mock<IProcessorFunction<int, int>>();
+            var mock1 = new Mock<IProcessorFunction<int, float>>();
+            var mock2 = new Mock<IProcessorFunction<float, string>>();
+
+            mock.Setup(function => function.GetFunction()).Returns(funcMock.Object);
+            mock1.Setup(function => function.GetFunction()).Returns(funcMock1.Object);
+            mock2.Setup(function => function.GetFunction()).Returns(funcMock2.Object);
+
+            var sut = new ProcessorChain(processableMock.Object);
+
+            sut.Process(mock.Object);
+            sut.Process(mock1.Object)
+                .Process(mock2.Object);
+            var processable = sut.Finish();
+
+            funcMock.Verify(func => func.Invoke(processableMock.Object), Times.Once);
+            funcMock1.Verify(func => func.Invoke(processableMock1.Object), Times.Once);
+            funcMock2.Verify(func => func.Invoke(processableMock2.Object), Times.Once);
+
+            Assert.Equal(processableMock3.Object, processable);
+        }
+        
+        [Fact]
         public void Finish_ShouldReturnInputProcessable_WhenProcessingWithoutProcessors()
         {
             Mock<IProcessable> processableMock = new();
