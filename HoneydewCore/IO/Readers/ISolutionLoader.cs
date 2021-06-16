@@ -5,10 +5,8 @@ namespace HoneydewCore.IO.Readers
 {
     public interface ISolutionLoader
     {
-        SolutionModel LoadSolution(string pathToSolution);
+        SolutionModel LoadSolution(string pathToSolution, ISolutionLoadingStrategy solutionLoadingStrategy);
 
-        SolutionModel LoadSolution(string projectPath, ISolutionLoadingStrategy strategy);
-
-        SolutionModel LoadModelFromFile(string pathToModel);
+        SolutionModel LoadModelFromFile(IFileReader fileReader, string pathToModel);
     }
 }

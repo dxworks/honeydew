@@ -7,6 +7,7 @@ using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Filters;
+using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.IO.Writers;
 using HoneydewCore.Models;
 using HoneydewCore.Processors;
@@ -36,11 +37,10 @@ namespace Honeydew
                 .Select(extractor => (PathFilter) (path => path.EndsWith(extractor.FileType())))
                 .ToList();
 
-            // ISolutionLoader solutionLoader = new SolutionLoader(new FileReader(filters), extractors);
             ISolutionLoader solutionLoader = new MsBuildSolutionReader(extractors);
-            // ISolutionLoadingStrategy loadingStrategy = new DirectSolutionLoading();
+            ISolutionLoadingStrategy loadingStrategy = new DirectSolutionLoading();
 
-            var projectModel = solutionLoader.LoadSolution(pathToProject);
+            var projectModel = solutionLoader.LoadSolution(pathToProject, loadingStrategy);
 
             Console.WriteLine("Project read");
             // raw export
