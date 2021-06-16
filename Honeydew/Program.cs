@@ -42,13 +42,15 @@ namespace Honeydew
             var projectModel = solutionLoader.LoadSolution(pathToProject, loadingStrategy);
 
             Console.WriteLine("Project read");
-            var exportedSolutionModel = projectModel.Export(new RawModelExporter());
+            // raw export
+            // var exportedSolutionModel = projectModel.Export(new RawModelExporter());
+            // Console.WriteLine(exportedSolutionModel);
             
-            var a = new ProcessorChain(IProcessable.Of(exportedSolutionModel))
+            var a = new ProcessorChain(IProcessable.Of(projectModel))
                 .Process(new FullNameDependencyProcessor())
                 .Finish<SolutionModel>();
             
-            Console.WriteLine(exportedSolutionModel);
+            Console.WriteLine(a.Value.Export(new RawModelExporter()));
 
             // Console.WriteLine("Enter any key to exit ...");
             // Console.ReadKey();
