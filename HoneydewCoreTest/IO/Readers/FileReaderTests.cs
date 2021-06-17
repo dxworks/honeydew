@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using HoneydewCore.IO.Readers;
-using HoneydewCore.IO.Readers.Filters;
 using Xunit;
 
 namespace HoneydewCoreTest.IO.Readers
@@ -12,19 +10,13 @@ namespace HoneydewCoreTest.IO.Readers
 
         public FileReaderTests()
         {
-            _sut = new FileReader(new List<PathFilter>());
+            _sut = new FileReader();
         }
 
         [Fact]
         public void ReadFile_ShouldThrowFileNotFoundException_WhenGivenAnInvalidPath()
         {
             Assert.Throws<FileNotFoundException>(() => _sut.ReadFile("invalidPath.txt"));
-        }
-
-        [Fact]
-        public void ReadFilePaths_ShouldReturnEmptyList_WhenGivenAnInvalidPathToADirectory()
-        {
-            Assert.Empty(_sut.ReadFilePaths("pathToAnInvalidDir"));
         }
     }
 }

@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.IO.Readers;
-using HoneydewCore.IO.Readers.Filters;
 using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.Models;
 using Moq;
@@ -27,7 +25,6 @@ namespace HoneydewCoreTest.IO.Readers
         public void LoadSolution_ShouldThrowProjectNotFoundException_WhenGivenAnInvalidPath()
         {
             const string pathToProject = "invalidPathToProject";
-            _fileReaderMock.Setup(reader => reader.ReadFilePaths(pathToProject)).Returns(new List<string>());
 
             var fileNotFoundException =
                 Assert.Throws<ProjectNotFoundException>(() =>
@@ -39,23 +36,6 @@ namespace HoneydewCoreTest.IO.Readers
         public void LoadSolution_ShouldReadAllFilesFromFolder_WhenGivenAValidPathToAProject()
         {
             const string pathToProject = "validPathToProject";
-            var pathsList = new List<string>
-            {
-                "validPathToProject/file1.cs",
-                "validPathToProject/file2.cs",
-                "validPathToProject/file3.txt",
-                "validPathToProject/folder/f1.cs",
-                "validPathToProject/folder/f2.cs",
-                "validPathToProject/res/f3.cs",
-                "validPathToProject/res/images/img.png",
-            };
-
-            _fileReaderMock.Setup(reader => reader.ReadFilePaths(pathToProject)).Returns(pathsList);
-
-            foreach (var path in pathsList)
-            {
-                _fileReaderMock.Setup(reader => reader.ReadFile(path)).Returns("");
-            }
 
             _solutionLoadingStrategy.Setup(strategy => strategy.Load(string.Empty, new List<IFactExtractor>()))
                 .Returns(() => new List<ClassModel>
@@ -66,11 +46,6 @@ namespace HoneydewCoreTest.IO.Readers
             var projectModel = _sut.LoadSolution(pathToProject, _solutionLoadingStrategy.Object);
 
             Assert.NotNull(projectModel);
-
-            foreach (var path in pathsList)
-            {
-                _fileReaderMock.Verify(reader => reader.ReadFile(path), Times.Once);
-            }
         }
 
         [Fact(Skip = "RegisterInstance was called, but MSBuild assemblies were already loaded.")]
@@ -78,27 +53,6 @@ namespace HoneydewCoreTest.IO.Readers
         {
             const string pathToProject = "validPathToProject";
 
-            var pathsList = new List<string>
-            {
-                $"{pathToProject}/file1.cs",
-                $"{pathToProject}/file2.xml",
-                $"{pathToProject}/file.xaml",
-                $"{pathToProject}/file.xaml.cs",
-                $"{pathToProject}/.gitignore",
-                $"{pathToProject}/.vs",
-                $"{pathToProject}/folder/f1.cs",
-                $"{pathToProject}/folder/f2.cs",
-                $"{pathToProject}/res/f3.cs",
-                $"{pathToProject}/res/images/img.png",
-            };
-
-            _fileReaderMock.Setup(reader => reader.ReadFilePaths(pathToProject))
-                .Returns(pathsList.Where(path => path.EndsWith(".cs")).ToList());
-
-            foreach (var path in pathsList)
-            {
-                _fileReaderMock.Setup(reader => reader.ReadFile(path)).Returns("");
-            }
 
             _solutionLoadingStrategy.Setup(strategy => strategy.Load(string.Empty, new List<IFactExtractor>()))
                 .Returns(() => new List<ClassModel>
@@ -109,51 +63,15 @@ namespace HoneydewCoreTest.IO.Readers
             var projectModel = _sut.LoadSolution(pathToProject, _solutionLoadingStrategy.Object);
 
             Assert.NotNull(projectModel);
-
-            foreach (var path in pathsList)
-            {
-                if (path.EndsWith(".cs"))
-                {
-                    _fileReaderMock.Verify(reader => reader.ReadFile(path), Times.Once);
-                }
-                else
-                {
-                    _fileReaderMock.Verify(reader => reader.ReadFile(path), Times.Never);
-                }
-            }
         }
 
-        [Theory(Skip = "RegisterInstance was called, but MSBuild assemblies were already loaded.")]
-        [InlineData(new object[] {new[] {".cs", ".xml", ".xaml",}})]
-        [InlineData(new object[] {new[] {".vs", ".gitignore"}})]
-        public void LoadSolution_ShouldReadAllFilteredFilesWithExtensionFromFolder_WhenGivenValidPathToAProject(
-            string[] fileExtensions)
+        [Fact(Skip = "RegisterInstance was called, but MSBuild assemblies were already loaded.")]
+        // [InlineData(new object[] {new[] {".cs", ".xml", ".xaml",}})]
+        // [InlineData(new object[] {new[] {".vs", ".gitignore"}})]
+        public void LoadSolution_ShouldReadAllFilteredFilesWithExtensionFromFolder_WhenGivenValidPathToAProject()
         {
             const string pathToProject = "validPathToProject";
 
-            var pathsList = new List<string>
-            {
-                $"{pathToProject}/file1.cs",
-                $"{pathToProject}/file2.xml",
-                $"{pathToProject}/file.xaml",
-                $"{pathToProject}/file.xaml.cs",
-                $"{pathToProject}/.gitignore",
-                $"{pathToProject}/.vs",
-                $"{pathToProject}/folder/f1.cs",
-                $"{pathToProject}/folder/f2.cs",
-                $"{pathToProject}/res/f3.cs",
-                $"{pathToProject}/res/images/img.png",
-            };
-
-            var filters = fileExtensions.Select(extension => (PathFilter) (path => path.EndsWith(extension))).ToList();
-
-            _fileReaderMock.Setup(reader => reader.ReadFilePaths(pathToProject))
-                .Returns(pathsList.Where(path => { return filters.Any(filter => filter(path)); }).ToList());
-
-            foreach (var path in pathsList)
-            {
-                _fileReaderMock.Setup(reader => reader.ReadFile(path)).Returns("");
-            }
 
             _solutionLoadingStrategy.Setup(strategy => strategy.Load(string.Empty, new List<IFactExtractor>()))
                 .Returns(() => new List<ClassModel>
@@ -164,55 +82,12 @@ namespace HoneydewCoreTest.IO.Readers
             var projectModel = _sut.LoadSolution(pathToProject, _solutionLoadingStrategy.Object);
 
             Assert.NotNull(projectModel);
-
-            foreach (string path in pathsList)
-            {
-                if (fileExtensions.Any(extension => path.EndsWith(extension)))
-                {
-                    _fileReaderMock.Verify(reader => reader.ReadFile(path), Times.Once);
-                }
-                else
-                {
-                    _fileReaderMock.Verify(reader => reader.ReadFile(path), Times.Never);
-                }
-            }
         }
 
         [Fact(Skip = "RegisterInstance was called, but MSBuild assemblies were already loaded.")]
         public void LoadSolution_ShouldIgnoreFolderPathsFromFolder_WhenGivenValidPathToAProject()
         {
             const string pathToProject = "validPathToProject";
-            var pathsList = new List<string>
-            {
-                $"{pathToProject}/file1.cs",
-                $"{pathToProject}/folder",
-                $"{pathToProject}/folder/dir",
-                $"{pathToProject}/folder/Class.cs",
-                $"{pathToProject}/folder/Class2.cs",
-                $"{pathToProject}/folder/dir/dir2",
-                $"{pathToProject}/.gitignore",
-                $"{pathToProject}/.vs",
-                $"{pathToProject}/folder/f1.cs",
-                $"{pathToProject}/folder/f2.cs",
-                $"{pathToProject}/.config",
-                $"{pathToProject}/res/f3.cs",
-                $"{pathToProject}/res/images/img.png",
-            };
-
-            var filters = new List<PathFilter>
-            {
-                path => path.EndsWith(".cs"),
-                path => path.EndsWith(".png"),
-                path => path.EndsWith(".config")
-            };
-
-            _fileReaderMock.Setup(reader => reader.ReadFilePaths(pathToProject))
-                .Returns(pathsList.Where(path => { return filters.Any(filter => filter(path)); }).ToList());
-
-            foreach (var path in pathsList)
-            {
-                _fileReaderMock.Setup(reader => reader.ReadFile(path)).Returns("");
-            }
 
             _solutionLoadingStrategy.Setup(strategy => strategy.Load(string.Empty, new List<IFactExtractor>()))
                 .Returns(() => new List<ClassModel>
@@ -223,18 +98,6 @@ namespace HoneydewCoreTest.IO.Readers
             var projectModel = _sut.LoadSolution(pathToProject, _solutionLoadingStrategy.Object);
 
             Assert.NotNull(projectModel);
-
-            foreach (var path in pathsList)
-            {
-                if (path.EndsWith(".cs") || path.EndsWith(".png") || path.EndsWith(".config"))
-                {
-                    _fileReaderMock.Verify(reader => reader.ReadFile(path), Times.Once);
-                }
-                else
-                {
-                    _fileReaderMock.Verify(reader => reader.ReadFile(path), Times.Never);
-                }
-            }
         }
 
         [Fact(Skip = "RegisterInstance was called, but MSBuild assemblies were already loaded.")]
@@ -255,26 +118,6 @@ namespace HoneydewCoreTest.IO.Readers
             const string model1Class = "namespace Models {class Model1{}}";
             const string model2Class = "namespace Models {class Model2{}}";
             const string serviceClass = "namespace Services {class Service{}}";
-
-            var pathsList = new List<string>
-            {
-                reader1ClassPath,
-                reader2ClassPath,
-                writerClassPath,
-                model1ClassPath,
-                model2ClassPath,
-                serviceClassPath,
-            };
-
-            _fileReaderMock.Setup(reader => reader.ReadFilePaths(projectPath))
-                .Returns(pathsList);
-
-            _fileReaderMock.Setup(reader => reader.ReadFile(reader1ClassPath)).Returns(reader1Class);
-            _fileReaderMock.Setup(reader => reader.ReadFile(reader2ClassPath)).Returns(reader2Class);
-            _fileReaderMock.Setup(reader => reader.ReadFile(writerClassPath)).Returns(writerClass);
-            _fileReaderMock.Setup(reader => reader.ReadFile(model1ClassPath)).Returns(model1Class);
-            _fileReaderMock.Setup(reader => reader.ReadFile(model2ClassPath)).Returns(model2Class);
-            _fileReaderMock.Setup(reader => reader.ReadFile(serviceClassPath)).Returns(serviceClass);
 
             _solutionLoadingStrategy.Setup(strategy => strategy.Load(reader1Class, new List<IFactExtractor>()))
                 .Returns((() => new List<ClassModel>
@@ -334,11 +177,6 @@ namespace HoneydewCoreTest.IO.Readers
 
             Assert.NotNull(solutionModel);
 
-            foreach (var path in pathsList)
-            {
-                _fileReaderMock.Verify(reader => reader.ReadFile(path), Times.Once);
-            }
-
             Assert.Equal(1, solutionModel.Projects.Count);
 
             var projectModel = solutionModel.Projects[0];
@@ -377,8 +215,19 @@ namespace HoneydewCoreTest.IO.Readers
         public void LoadModelFromFile_ShouldReturnNull_WhenEmptyFileIsProvided()
         {
             const string pathToModel = "pathToModel";
-
             _fileReaderMock.Setup(reader => reader.ReadFile(pathToModel)).Returns("");
+
+            var loadModelFromFile = _sut.LoadModelFromFile(_fileReaderMock.Object, pathToModel);
+
+            Assert.Null(loadModelFromFile);
+        }
+        
+        [Fact]
+        public void LoadModelFromFile_ShouldReturnNull_WhenProvidedWithInvalidJsonFile()
+        {
+            const string pathToModel = "pathToModel";
+            
+            _fileReaderMock.Setup(reader => reader.ReadFile(pathToModel)).Returns(@"{Projects"":1");
 
             var loadModelFromFile = _sut.LoadModelFromFile(_fileReaderMock.Object, pathToModel);
 
@@ -397,7 +246,6 @@ namespace HoneydewCoreTest.IO.Readers
             Assert.Empty(loadModelFromFile.Projects);
         }
 
-
         [Fact]
         public void LoadModelFromFile_ShouldReturnModel_WhenProvidedCorrectContent()
         {
@@ -412,7 +260,7 @@ namespace HoneydewCoreTest.IO.Readers
             Assert.NotNull(loadModelFromFile);
             Assert.Equal(1, loadModelFromFile.Projects.Count);
             Assert.Equal("ProjectName", loadModelFromFile.Projects[0].Name);
-            
+
             Assert.Equal(1, loadModelFromFile.Projects[0].Namespaces.Count);
             var projectNamespace = loadModelFromFile.Projects[0].Namespaces["SomeNamespace"];
 

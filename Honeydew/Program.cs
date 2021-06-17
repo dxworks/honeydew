@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.IO.Readers;
-using HoneydewCore.IO.Readers.Filters;
 using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.IO.Writers;
 using HoneydewCore.Models;
@@ -16,7 +13,7 @@ namespace Honeydew
 {
     class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             const string pathToProject = "D:\\Work\\Visual Studio 2019\\CSharp\\Catan\\Catan.sln";
 
