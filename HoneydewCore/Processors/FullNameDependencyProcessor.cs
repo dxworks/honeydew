@@ -14,30 +14,35 @@ namespace HoneydewCore.Processors
             {
                 var solutionModel = solutionModelProcessable.Value;
 
-                foreach (var (_, projectNamespace) in solutionModel.Namespaces)
+                foreach (var projectModel in solutionModel.Projects)
                 {
-                    foreach (var classModel in projectNamespace.ClassModels)
+                    foreach (var (_, projectNamespace) in projectModel.Namespaces)
                     {
-                        var parameterDependenciesMetrics = classModel.Metrics.Where(metric =>
-                            metric.ExtractorName == typeof(ParameterDependenciesMetric).FullName);
-
-                        foreach (var metric in parameterDependenciesMetrics)
+                        foreach (var classModel in projectNamespace.ClassModels)
                         {
-                            var dependencyDataMetric = metric.Value as DependencyDataMetric;
-                            if (dependencyDataMetric == null)
-                            {
-                                continue;
-                            }
-                            
-                            IDictionary<string, int> fullNameDependencies = new Dictionary<string, int>();
-                            foreach (var (dependencyName, appearanceCount) in dependencyDataMetric.Dependencies)
-                            {
-                                var fullClassName = solutionModel.FindClassFullNameInUsings(dependencyDataMetric.Usings, dependencyName);
-                                fullNameDependencies.Add(fullClassName, appearanceCount);
-                            }
+                            var parameterDependenciesMetrics = classModel.Metrics.Where(metric =>
+                                metric.ExtractorName == typeof(ParameterDependenciesMetric).FullName);
 
-                            dependencyDataMetric.Dependencies = fullNameDependencies;
-                            metric.Value = dependencyDataMetric;
+                            foreach (var metric in parameterDependenciesMetrics)
+                            {
+                                var dependencyDataMetric = metric.Value as DependencyDataMetric;
+                                if (dependencyDataMetric == null)
+                                {
+                                    continue;
+                                }
+
+                                IDictionary<string, int> fullNameDependencies = new Dictionary<string, int>();
+                                foreach (var (dependencyName, appearanceCount) in dependencyDataMetric.Dependencies)
+                                {
+                                    var fullClassName =
+                                        solutionModel.FindClassFullNameInUsings(dependencyDataMetric.Usings,
+                                            dependencyName);
+                                    fullNameDependencies.Add(fullClassName, appearanceCount);
+                                }
+
+                                dependencyDataMetric.Dependencies = fullNameDependencies;
+                                metric.Value = dependencyDataMetric;
+                            }
                         }
                     }
                 }

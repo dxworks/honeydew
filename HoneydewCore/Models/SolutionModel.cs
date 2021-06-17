@@ -5,29 +5,7 @@ namespace HoneydewCore.Models
 {
     public class SolutionModel : IExportable
     {
-        // Projects
-
-        public IDictionary<string, ProjectNamespace> Namespaces { get; set; } =
-            new Dictionary<string, ProjectNamespace>();
-
-        public void Add(ProjectClassModel classModel)
-        {
-            if (string.IsNullOrEmpty(classModel.Namespace))
-            {
-                return;
-            }
-
-            if (Namespaces.TryGetValue(classModel.Namespace, out var projectNamespace))
-            {
-                projectNamespace.Add(classModel);
-            }
-            else
-            {
-                var p = new ProjectNamespace();
-                p.Add(classModel);
-                Namespaces.Add(classModel.Namespace, p);
-            }
-        }
+        public IList<ProjectModel> Projects { get; set; } = new List<ProjectModel>();
 
         public string Export(IExporter exporter)
         {
@@ -39,17 +17,21 @@ namespace HoneydewCore.Models
             return string.Empty;
         }
 
+
         public string FindClassFullNameInUsings(IList<string> usings, string className)
         {
             foreach (var usingName in usings)
             {
-                if (Namespaces.TryGetValue(usingName, out var projectNamespace))
+                foreach (var projectModel in Projects)
                 {
-                    foreach (var classModel in projectNamespace.ClassModels)
+                    if (projectModel.Namespaces.TryGetValue(usingName, out var projectNamespace))
                     {
-                        if (classModel.FullName == $"{usingName}.{className}")
+                        foreach (var classModel in projectNamespace.ClassModels)
                         {
-                            return classModel.FullName;
+                            if (classModel.FullName == $"{usingName}.{className}")
+                            {
+                                return classModel.FullName;
+                            }
                         }
                     }
                 }

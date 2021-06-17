@@ -7,17 +7,17 @@ namespace HoneydewCoreTest.Models
 {
     public class ProjectNamespaceTests
     {
-        private readonly ProjectNamespace _sut;
+        private readonly NamespaceModel _sut;
 
         public ProjectNamespaceTests()
         {
-            _sut = new ProjectNamespace();
+            _sut = new NamespaceModel();
         }
 
         [Fact]
         public void Add_ShouldAddNewClass_WhenANewClassModelIsAdded()
         {
-            _sut.Add(new ProjectClassModel {FullName = "Models.Class1"});
+            _sut.Add(new ClassModel {FullName = "Models.Class1"});
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(1, _sut.ClassModels.Count);
@@ -27,9 +27,9 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldAddNewClasses_WhenMultipleClassModelsAreAdded()
         {
-            _sut.Add(new ProjectClassModel {FullName = "Models.Class1"});
-            _sut.Add(new ProjectClassModel {FullName = "Models.Class2"});
-            _sut.Add(new ProjectClassModel {FullName = "Models.Class3"});
+            _sut.Add(new ClassModel {FullName = "Models.Class1"});
+            _sut.Add(new ClassModel {FullName = "Models.Class2"});
+            _sut.Add(new ClassModel {FullName = "Models.Class3"});
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(3, _sut.ClassModels.Count);
@@ -41,9 +41,9 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldAddNewClassOnce_WhenTheSameClassModelsAdded()
         {
-            _sut.Add(new ProjectClassModel {FullName = "Models.Class1"});
-            _sut.Add(new ProjectClassModel {FullName = "Models.Class2"});
-            _sut.Add(new ProjectClassModel {FullName = "Models.Class1"});
+            _sut.Add(new ClassModel {FullName = "Models.Class1"});
+            _sut.Add(new ClassModel {FullName = "Models.Class2"});
+            _sut.Add(new ClassModel {FullName = "Models.Class1"});
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(2, _sut.ClassModels.Count);
@@ -54,8 +54,8 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldNotAddClassOnce_WhenNamespaceIsDifferentInClass()
         {
-            _sut.Add(new ProjectClassModel {FullName = "Models.Class1"});
-            _sut.Add(new ProjectClassModel {FullName = "Models.Items.Class2"});
+            _sut.Add(new ClassModel {FullName = "Models.Class1"});
+            _sut.Add(new ClassModel {FullName = "Models.Items.Class2"});
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(1, _sut.ClassModels.Count);
@@ -65,7 +65,7 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldAddClassModelWithAllAttributes_WhenANewClassModelIsAdded()
         {
-            var classModel = new ProjectClassModel
+            var classModel = new ClassModel
             {
                 FullName = "Items.Pencil"
             };
@@ -94,7 +94,7 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldAddClassModelWithAllAttributes_WhenMultipleClassModelsAreAdded()
         {
-            var classModel1 = new ProjectClassModel
+            var classModel1 = new ClassModel
             {
                 FullName = "Items.Pencil"
             };
@@ -107,7 +107,7 @@ namespace HoneydewCoreTest.Models
 
             _sut.Add(classModel1);
 
-            var classModel2 = new ProjectClassModel
+            var classModel2 = new ClassModel
             {
                 FullName = "Items.Notebook"
             };
@@ -123,7 +123,7 @@ namespace HoneydewCoreTest.Models
 
             _sut.Add(classModel2);
 
-            var classModel3 = new ProjectClassModel
+            var classModel3 = new ClassModel
             {
                 FullName = "Items.IItemService"
             };

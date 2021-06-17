@@ -33,7 +33,7 @@ namespace HoneydewCore.Extractors
             return ".cs";
         }
 
-        public IList<ProjectClassModel> Extract(SyntaxTree tree)
+        public IList<ClassModel> Extract(SyntaxTree tree)
         {
             var root = tree.GetCompilationUnitRoot();
 
@@ -44,7 +44,7 @@ namespace HoneydewCore.Extractors
                 throw new ExtractionException();
             }
 
-            IList<ProjectClassModel> classModels = new List<ProjectClassModel>();
+            IList<ClassModel> classModels = new List<ClassModel>();
 
 
             var compilation = CSharpCompilation.Create("Compilation")
@@ -74,7 +74,7 @@ namespace HoneydewCore.Extractors
                 var namespaceSymbol = declaredSymbol.ContainingNamespace;
                 var className = declaredSymbol.Name;
 
-                var projectClass = new ProjectClassModel()
+                var projectClass = new ClassModel()
                 {
                     FullName = namespaceSymbol.ToString() + "." + className
                 };
@@ -120,7 +120,7 @@ namespace HoneydewCore.Extractors
             return classModels;
         }
 
-        public IList<ProjectClassModel> Extract(string fileContent)
+        public IList<ClassModel> Extract(string fileContent)
         {
             if (string.IsNullOrWhiteSpace(fileContent))
             {

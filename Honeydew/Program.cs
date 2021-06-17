@@ -16,7 +16,7 @@ namespace Honeydew
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             const string pathToProject = "D:\\Work\\Visual Studio 2019\\CSharp\\Catan\\Catan.sln";
 
@@ -32,10 +32,6 @@ namespace Honeydew
             {
                 cSharpClassFactExtractor
             };
-
-            var filters = extractors
-                .Select(extractor => (PathFilter) (path => path.EndsWith(extractor.FileType())))
-                .ToList();
 
             ISolutionLoader solutionLoader = new MsBuildSolutionReader(extractors);
             ISolutionLoadingStrategy loadingStrategy = new DirectSolutionLoading();

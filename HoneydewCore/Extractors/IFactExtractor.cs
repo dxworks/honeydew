@@ -8,8 +8,8 @@ namespace HoneydewCore.Extractors
     {
         string FileType();
 
-        IList<ProjectClassModel> Extract(string fileContent);
+        IList<ClassModel> Extract(string fileContent);
 
-        IList<ProjectClassModel> Extract(SyntaxTree fileContent);
+        IList<ClassModel> Extract(SyntaxTree fileContent);
     }
 }

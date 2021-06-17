@@ -3,12 +3,12 @@ using System.Linq;
 
 namespace HoneydewCore.Models
 {
-    public class ProjectNamespace
+    public class NamespaceModel
     {
         public string Name { get; set; }
-        public IList<ProjectClassModel> ClassModels { get; set; } = new List<ProjectClassModel>();
+        public IList<ClassModel> ClassModels { get; set; } = new List<ClassModel>();
 
-        public void Add(ProjectClassModel classModel)
+        public void Add(ClassModel classModel)
         {
             if (!string.IsNullOrEmpty(Name) && classModel.Namespace != Name)
             {

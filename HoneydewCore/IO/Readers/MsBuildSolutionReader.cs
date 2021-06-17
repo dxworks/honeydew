@@ -36,6 +36,8 @@ namespace HoneydewCore.IO.Readers
 
             foreach (var project in solution.Projects)
             {
+                var projectModel = new ProjectModel(project.Name);
+
                 foreach (var document in project.Documents)
                 {
                     var syntaxTree = document.GetSyntaxTreeAsync().Result;
@@ -45,9 +47,11 @@ namespace HoneydewCore.IO.Readers
                     foreach (var classModel in classModels)
                     {
                         classModel.FilePath = document.FilePath;
-                        solutionModel.Add(classModel);
+                        projectModel.Add(classModel);
                     }
                 }
+
+                solutionModel.Projects.Add(projectModel);
             }
 
             return solutionModel;
@@ -66,20 +70,23 @@ namespace HoneydewCore.IO.Readers
                     return null;
                 }
 
-                foreach (var (_, projectNamespace) in solutionModel.Namespaces)
+                foreach (var projectModel in solutionModel.Projects)
                 {
-                    foreach (var classModel in projectNamespace.ClassModels)
+                    foreach (var (_, projectNamespace) in projectModel.Namespaces)
                     {
-                        foreach (var metric in classModel.Metrics)
+                        foreach (var classModel in projectNamespace.ClassModels)
                         {
-                            var returnType = Type.GetType(metric.ValueType);
-                            if (returnType == null)
+                            foreach (var metric in classModel.Metrics)
                             {
-                                continue;
-                            }
+                                var returnType = Type.GetType(metric.ValueType);
+                                if (returnType == null)
+                                {
+                                    continue;
+                                }
 
-                            metric.Value = JsonSerializer.Deserialize(((JsonElement) metric.Value).GetRawText(),
-                                returnType);
+                                metric.Value = JsonSerializer.Deserialize(((JsonElement) metric.Value).GetRawText(),
+                                    returnType);
+                            }
                         }
                     }
                 }

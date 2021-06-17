@@ -6,6 +6,6 @@ namespace HoneydewCore.IO.Readers.Strategies
 {
     public interface ISolutionLoadingStrategy
     {
-        IList<ProjectClassModel> Load(string fileContent, IList<IFactExtractor> extractors);
+        IList<ClassModel> Load(string fileContent, IList<IFactExtractor> extractors);
     }
 }

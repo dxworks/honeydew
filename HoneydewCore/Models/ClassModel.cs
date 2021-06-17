@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace HoneydewCore.Models
 {
-    public record ProjectClassModel
+    public record ClassModel
     {
         private string _namespace = "";
 

@@ -77,7 +77,7 @@ namespace HoneydewCoreTest.Extractors
 
             foreach (var classModel in classModels)
             {
-                Assert.Equal(typeof(ProjectClassModel), classModel.GetType());
+                Assert.Equal(typeof(ClassModel), classModel.GetType());
 
                 Assert.Equal("Services", classModel.Namespace);
                 Assert.Equal("Services.IService", classModel.FullName);
@@ -101,7 +101,7 @@ namespace HoneydewCoreTest.Extractors
 
             foreach (var classModel in classModels)
             {
-                Assert.Equal(typeof(ProjectClassModel), classModel.GetType());
+                Assert.Equal(typeof(ClassModel), classModel.GetType());
 
                 Assert.Equal("Models.Main.Items", classModel.Namespace);
                 Assert.Equal("Models.Main.Items.MainItem", classModel.FullName);
@@ -126,7 +126,7 @@ namespace HoneydewCoreTest.Extractors
 
             foreach (var classModel in classModels)
             {
-                Assert.Equal(typeof(ProjectClassModel), classModel.GetType());
+                Assert.Equal(typeof(ClassModel), classModel.GetType());
 
                 Assert.Empty(classModel.Metrics);
             }
@@ -153,7 +153,7 @@ namespace HoneydewCoreTest.Extractors
 
             foreach (var classModel in classModels)
             {
-                Assert.Equal(typeof(ProjectClassModel), classModel.GetType());
+                Assert.Equal(typeof(ClassModel), classModel.GetType());
             }
             
             Assert.Equal("Models.Main.Items", classModels[0].Namespace);
