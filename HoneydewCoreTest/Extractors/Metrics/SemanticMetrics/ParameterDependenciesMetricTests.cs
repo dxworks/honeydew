@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using HoneydewCore.Extractors;
-using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using Xunit;
 
@@ -9,19 +8,12 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 {
     public class ParameterDependenciesMetricTests
     {
-        private readonly CSharpMetricExtractor _sut;
+        private readonly ParameterDependenciesMetric _sut;
         private IFactExtractor _factExtractor;
 
         public ParameterDependenciesMetricTests()
         {
             _sut = new ParameterDependenciesMetric();
-        }
-
-        [Fact]
-        public void GetMetricType_ShouldReturnSemanticAndSyntactic()
-        {
-            Assert.True(_sut is ISemanticMetric);
-            Assert.True(_sut is ISyntacticMetric);
         }
 
         [Fact]
@@ -229,6 +221,65 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             Assert.Equal(1, dependencies.Dependencies["IFactExtractor"]);
             Assert.Equal(2, dependencies.Dependencies["int"]);
             Assert.Equal(1, dependencies.Dependencies["string"]);
+        }
+
+        [Fact]
+        public void GetRelations_ShouldHaveNoRelations_WhenClassHasMethodsWithNoParameters()
+        {
+            var fileRelations = _sut.GetRelations(new DependencyDataMetric());
+
+            Assert.Empty(fileRelations);
+        }
+
+        [Fact]
+        public void GetRelations_ShouldHaveNoRelations_WhenDependenciesAreOnlyPrimitiveTypes()
+        {
+            var fileRelations = _sut.GetRelations(new DependencyDataMetric
+            {
+                Usings = {"System"},
+                Dependencies =
+                {
+                    {"int", 3},
+                    {"float", 2},
+                    {"string", 1}
+                }
+            });
+
+            Assert.Empty(fileRelations);
+        }
+
+        [Fact]
+        public void GetRelations_Extract_ShouldHaveRelations_WhenThereAreNonPrimitiveDependencies()
+        {
+            var fileRelations = _sut.GetRelations(new DependencyDataMetric
+            {
+                Usings =
+                {
+                    "System", "HoneydewCore.Extractors", "HoneydewCore.Extractors.Metrics",
+                    "HoneydewCore.Extractors.Metrics.SemanticMetrics"
+                },
+                Dependencies =
+                {
+                    {"int", 3},
+                    {"IFactExtractor", 2},
+                    {"CSharpMetricExtractor", 1}
+                }
+            });
+
+            Assert.NotEmpty(fileRelations);
+            Assert.Equal(2, fileRelations.Count);
+
+            var fileRelation1 = fileRelations[0];
+            Assert.Equal("",fileRelation1.FileSource);
+            Assert.Equal("IFactExtractor",fileRelation1.FileTarget);
+            Assert.Equal(typeof(ParameterDependenciesMetric).FullName,fileRelation1.RelationType);
+            Assert.Equal(2, fileRelation1.RelationCount);
+
+            var fileRelation2 = fileRelations[1];
+            Assert.Equal("",fileRelation2.FileSource);
+            Assert.Equal("CSharpMetricExtractor",fileRelation2.FileTarget);
+            Assert.Equal(typeof(ParameterDependenciesMetric).FullName,fileRelation2.RelationType);
+            Assert.Equal(1, fileRelation2.RelationCount);
         }
     }
 }

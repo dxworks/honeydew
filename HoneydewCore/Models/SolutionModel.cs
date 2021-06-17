@@ -39,5 +39,19 @@ namespace HoneydewCore.Models
 
             return className;
         }
+
+        public IEnumerable<ClassModel> GetEnumerable()
+        {
+            foreach (var projectModel in Projects)
+            {
+                foreach (var (_, namespaceModel) in projectModel.Namespaces)
+                {
+                    foreach (var classModel in namespaceModel.ClassModels)
+                    {
+                        yield return classModel;
+                    }
+                }
+            }
+        }
     }
 }
