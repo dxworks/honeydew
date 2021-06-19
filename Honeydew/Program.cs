@@ -5,7 +5,7 @@ using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Strategies;
-using HoneydewCore.IO.Writers;
+using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Models;
 using HoneydewCore.Processors;
 
@@ -39,11 +39,11 @@ namespace Honeydew
             // raw export
             // var exportedSolutionModel = projectModel.Export(new RawModelExporter());
             // Console.WriteLine(exportedSolutionModel);
-            
+
             var a = new ProcessorChain(IProcessable.Of(projectModel))
                 .Process(new FullNameDependencyProcessor())
                 .Finish<SolutionModel>();
-            
+
             Console.WriteLine(a.Value.Export(new RawModelExporter()));
 
             // Console.WriteLine("Enter any key to exit ...");

@@ -270,15 +270,13 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             Assert.Equal(2, fileRelations.Count);
 
             var fileRelation1 = fileRelations[0];
-            Assert.Equal("",fileRelation1.FileSource);
-            Assert.Equal("IFactExtractor",fileRelation1.FileTarget);
-            Assert.Equal(typeof(ParameterDependenciesMetric).FullName,fileRelation1.RelationType);
+            Assert.Equal("IFactExtractor", fileRelation1.FileTarget);
+            Assert.Equal(typeof(ParameterDependenciesMetric).FullName, fileRelation1.RelationType);
             Assert.Equal(2, fileRelation1.RelationCount);
 
             var fileRelation2 = fileRelations[1];
-            Assert.Equal("",fileRelation2.FileSource);
-            Assert.Equal("CSharpMetricExtractor",fileRelation2.FileTarget);
-            Assert.Equal(typeof(ParameterDependenciesMetric).FullName,fileRelation2.RelationType);
+            Assert.Equal("CSharpMetricExtractor", fileRelation2.FileTarget);
+            Assert.Equal(typeof(ParameterDependenciesMetric).FullName, fileRelation2.RelationType);
             Assert.Equal(1, fileRelation2.RelationCount);
         }
     }

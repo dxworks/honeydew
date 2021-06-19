@@ -55,12 +55,13 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
                         continue;
                     }
 
-                    fileRelations.Add(new FileRelation
+                    var fileRelation = new FileRelation
                     {
                         FileTarget = dependency,
                         RelationCount = count,
                         RelationType = relationType
-                    });
+                    };
+                    fileRelations.Add(fileRelation);
                 }
 
                 return fileRelations;
