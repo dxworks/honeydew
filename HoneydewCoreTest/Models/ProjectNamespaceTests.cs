@@ -15,6 +15,16 @@ namespace HoneydewCoreTest.Models
         }
 
         [Fact]
+        public void Add_ShouldAddNewClass_WhenClassIsFromDefaultNamespace()
+        {
+            _sut.Add(new ClassModel {FullName = "GlobalClass"});
+
+            Assert.Equal("", _sut.Name);
+            Assert.Equal(1, _sut.ClassModels.Count);
+            Assert.Equal("GlobalClass", _sut.ClassModels[0].FullName);
+        }
+
+        [Fact]
         public void Add_ShouldAddNewClass_WhenANewClassModelIsAdded()
         {
             _sut.Add(new ClassModel {FullName = "Models.Class1"});

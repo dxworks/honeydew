@@ -20,11 +20,6 @@ namespace HoneydewCore.Models
 
         public void Add(ClassModel classModel)
         {
-            if (string.IsNullOrEmpty(classModel.Namespace))
-            {
-                return;
-            }
-
             if (Namespaces.TryGetValue(classModel.Namespace, out var projectNamespace))
             {
                 projectNamespace.Add(classModel);

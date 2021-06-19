@@ -23,7 +23,7 @@ namespace HoneydewCore.Models
                 var lastIndexOf = FullName.LastIndexOf(".", StringComparison.Ordinal);
                 if (lastIndexOf < 0)
                 {
-                    return FullName;
+                    return "";
                 }
 
                 _namespace = FullName[..lastIndexOf];
