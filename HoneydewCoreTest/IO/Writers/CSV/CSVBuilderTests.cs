@@ -72,7 +72,7 @@ namespace HoneydewCoreTest.IO.Writers.CSV
         [Fact]
         public void CreateCSV_ShouldReturnCsvStringWithHeaders_WhenHeadersAreProvided()
         {
-            Assert.Equal("H1,H2,H3", new CsvBuilder(new[] {"H1", "H2", "H3"}).CreateCsv());
+            Assert.Equal(@"""H1"",""H2"",""H3""", new CsvBuilder(new[] {"H1", "H2", "H3"}).CreateCsv());
         }
 
         [Fact]
@@ -87,7 +87,7 @@ namespace HoneydewCoreTest.IO.Writers.CSV
             
             var newLine = Environment.NewLine;
 
-            var expectedCsv = "H1,H2,H3" + newLine + "V1,V2,V3" + newLine + "X1,X2,X3";
+            var expectedCsv = $@"""H1"",""H2"",""H3""{newLine}""V1"",""V2"",""V3""{newLine}""X1"",""X2"",""X3""";
             Assert.Equal(expectedCsv, _sut.CreateCsv());
         }
         
@@ -95,7 +95,7 @@ namespace HoneydewCoreTest.IO.Writers.CSV
         public void CreateCSV_ShouldReturnCsvStringWithHeaders_WhenHeadersAreProvided_WithOtherSeparator()
         {
             var csvBuilder = new CsvBuilder(new[] {"H1", "H2", "H3"},';');
-            Assert.Equal("H1;H2;H3", csvBuilder.CreateCsv());
+            Assert.Equal(@"""H1"";""H2"";""H3""", csvBuilder.CreateCsv());
         }
 
         [Fact]
@@ -111,7 +111,7 @@ namespace HoneydewCoreTest.IO.Writers.CSV
             
             var newLine = Environment.NewLine;
 
-            var expectedCsv = "H1;H2;H3" + newLine + "V1;V2;V3" + newLine + "X1;X2;X3";
+            var expectedCsv = $@"""H1"";""H2"";""H3""{newLine}""V1"";""V2"";""V3""{newLine}""X1"";""X2"";""X3""";
             Assert.Equal(expectedCsv, csvBuilder.CreateCsv());
         }
     }

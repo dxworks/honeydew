@@ -4,7 +4,7 @@ using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Models;
 using Xunit;
 
-namespace HoneydewCoreTest.IO.Writers
+namespace HoneydewCoreTest.IO.Writers.Exporters
 {
     public class SolutionModelRawExporterTests
     {

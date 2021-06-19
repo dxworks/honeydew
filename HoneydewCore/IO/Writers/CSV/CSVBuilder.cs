@@ -16,21 +16,21 @@ namespace HoneydewCore.IO.Writers.CSV
             _separator = separator;
         }
 
-        public CsvBuilder(string[] header, char separator = ',')
+        public CsvBuilder(IList<string> header, char separator = ',')
         {
             _separator = separator;
             AddHeader(header);
         }
 
-        public void AddHeader(string[] header)
+        public void AddHeader(IList<string> header)
         {
             _lines.Add(CreateCsvLine(header));
-            _headerSize = header.Length;
+            _headerSize = header.Count;
         }
 
-        public void Add(string[] values)
+        public void Add(IList<string> values)
         {
-            if (_headerSize != values.Length)
+            if (_headerSize != values.Count)
             {
                 throw new InvalidCsvLineLengthException();
             }
@@ -58,13 +58,16 @@ namespace HoneydewCore.IO.Writers.CSV
             return stringBuilder.ToString();
         }
 
-        private string CreateCsvLine(IReadOnlyList<string> values)
+        private string CreateCsvLine(IList<string> values)
         {
             var stringBuilder = new StringBuilder("");
 
             for (var i = 0; i < values.Count; i++)
             {
+                stringBuilder.Append('\"');
                 stringBuilder.Append(values[i]);
+                stringBuilder.Append('\"');
+
                 if (i != values.Count - 1)
                 {
                     stringBuilder.Append(_separator);
