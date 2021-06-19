@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.IO.Writers;
+using HoneydewCore.IO.Writers.Exporters;
 
 namespace HoneydewCore.Models
 {
@@ -16,7 +16,6 @@ namespace HoneydewCore.Models
 
             return string.Empty;
         }
-
 
         public string FindClassFullNameInUsings(IList<string> usings, string className)
         {

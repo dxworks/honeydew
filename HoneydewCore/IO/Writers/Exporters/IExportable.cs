@@ -1,4 +1,4 @@
-﻿namespace HoneydewCore.IO.Writers
+﻿namespace HoneydewCore.IO.Writers.Exporters
 {
     public interface IExportable
     {

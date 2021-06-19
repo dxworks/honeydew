@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using HoneydewCore.Models;
 
-namespace HoneydewCore.IO.Writers
+namespace HoneydewCore.IO.Writers.Exporters
 {
     public class RawModelExporter : ISolutionModelExporter
     {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
-using HoneydewCore.IO.Writers;
+using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Models;
 using Xunit;
 
@@ -47,7 +47,7 @@ namespace HoneydewCoreTest.IO.Writers
             {
                 projectModel.Add(classModel);
             }
-            
+
             solutionModel.Projects.Add(projectModel);
 
             var exportString = solutionModel.Export(_sut);
@@ -86,6 +86,7 @@ namespace HoneydewCoreTest.IO.Writers
             {
                 projectModel.Add(model);
             }
+
             solutionModel.Projects.Add(projectModel);
 
             var exportString = solutionModel.Export(_sut);

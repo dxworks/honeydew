@@ -42,6 +42,24 @@ namespace HoneydewCoreTest.Processors
         }
 
         [Fact]
+        public void GetFunction_ShouldReturnTotalCount0_WhenGivenInvalidSourceName()
+        {
+            var solutionModel = new SolutionModel();
+            var projectModel = new ProjectModel();
+
+            projectModel.Add(new ClassModel
+            {
+                FullName = "Models.Class", FilePath = "path/Model/Class.cs"
+            });
+
+            solutionModel.Projects.Add(projectModel);
+
+            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
+
+            Assert.Equal(0, processable.Value.TotalRelationsCount("InvalidClass", "InvalidTarget"));
+        }
+
+        [Fact]
         public void
             GetFunction_ShouldReturnRepresentationsWithNoRelations_WhenSolutionModelHasProjectWithOneClassWithNoRelations()
         {
@@ -58,13 +76,8 @@ namespace HoneydewCoreTest.Processors
             var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
             Assert.Equal(1, processable.Value.FileRelations.Count);
 
-            var fileRelation = processable.Value.FileRelations[0];
-
-            Assert.Equal("Models.Class", fileRelation.FileSource);
-            Assert.Equal("", fileRelation.FileTarget);
-            Assert.Equal("", fileRelation.RelationType);
-            Assert.Equal(0,fileRelation.RelationCount);
-            Assert.Equal(0, processable.Value.TotalRelationsCount(fileRelation.FileSource));
+            Assert.True(processable.Value.FileRelations.TryGetValue("Models.Class", out var targetDictionary));
+            Assert.Empty(targetDictionary);
         }
 
         [Fact]
@@ -90,18 +103,13 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal(classCount, processable.Value.FileRelations.Count);
             for (var i = 0; i < classCount; i++)
             {
-                var fileRelation = processable.Value.FileRelations[i];
-
-                Assert.Equal("Items.Item" + i, fileRelation.FileSource);
-                Assert.Equal("", fileRelation.FileTarget);
-                Assert.Equal("",fileRelation.RelationType);
-                Assert.Equal(0, fileRelation.RelationCount);
+                Assert.True(processable.Value.FileRelations.TryGetValue("Items.Item" + i, out var targetDictionary));
+                Assert.Empty(targetDictionary);
             }
 
-            foreach (var fileRelation in processable.Value.FileRelations)
+            foreach (var (key, _) in processable.Value.FileRelations)
             {
-                Assert.Equal(0, processable.Value.TotalRelationsCount(fileRelation.FileSource));
-
+                Assert.Equal(0, processable.Value.TotalRelationsCount(key, "invalidDependency"));
             }
         }
 
@@ -141,22 +149,22 @@ namespace HoneydewCoreTest.Processors
             solutionModel.Projects.Add(projectModel);
 
             var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
-            
+
             Assert.Equal(2, processable.Value.FileRelations.Count);
 
-            var fileRelation1 = processable.Value.FileRelations[0];
-            Assert.Equal("Models.Class1", fileRelation1.FileSource);
-            Assert.Equal("", fileRelation1.FileTarget);
-            Assert.Equal(0, fileRelation1.RelationCount);
+            Assert.True(processable.Value.FileRelations.TryGetValue("Models.Class1", out var targetDictionary1));
+            Assert.Empty(targetDictionary1);
 
-            var fileRelation2 = processable.Value.FileRelations[1];
-            Assert.Equal("Models.Class2", fileRelation2.FileSource);
-            Assert.Equal("Models.Class1", fileRelation2.FileTarget);
-            Assert.Equal(extractorName, fileRelation2.RelationType);
-            Assert.Equal(2,fileRelation2.RelationCount);
-            
-            Assert.Equal(0, processable.Value.TotalRelationsCount(fileRelation1.FileSource));
-            Assert.Equal(2, processable.Value.TotalRelationsCount(fileRelation2.FileSource));
+            Assert.True(processable.Value.FileRelations.TryGetValue("Models.Class2", out var targetDictionary2));
+            Assert.NotEmpty(targetDictionary2);
+            Assert.Equal(1, targetDictionary2.Count);
+
+            Assert.True(targetDictionary2.TryGetValue("Models.Class1", out var dependencyDictionary));
+            Assert.Equal(1, dependencyDictionary.Count);
+            Assert.True(dependencyDictionary.TryGetValue(extractorName!, out var count));
+            Assert.Equal(2, count);
+
+            Assert.Equal(2, processable.Value.TotalRelationsCount("Models.Class2", "Models.Class1"));
         }
     }
 }

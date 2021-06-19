@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.IO.Writers;
+using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Models;
 using Moq;
 using Xunit;
