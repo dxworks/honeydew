@@ -1,4 +1,7 @@
-﻿using HoneydewCore.Models.Representations;
+﻿using System;
+using HoneydewCore.IO.Writers.Exporters;
+using HoneydewCore.Models.Representations;
+using Moq;
 using Xunit;
 
 namespace HoneydewCoreTest.Models.Representations
@@ -11,7 +14,7 @@ namespace HoneydewCoreTest.Models.Representations
         {
             _sut = new FileRelationsRepresentation();
         }
-        
+
         [Theory]
         [InlineData(null)]
         [InlineData("")]
@@ -81,7 +84,7 @@ namespace HoneydewCoreTest.Models.Representations
             Assert.Equal(1, _sut.Dependencies.Count);
             Assert.True(_sut.Dependencies.Contains("dependency"));
         }
-        
+
         [Fact]
         public void Add_ShouldHaveRelation_WhenAddedTwoDependenciesForTheSameSourceAndTarget()
         {
@@ -102,7 +105,7 @@ namespace HoneydewCoreTest.Models.Representations
             Assert.True(_sut.Dependencies.Contains("dependency1"));
             Assert.True(_sut.Dependencies.Contains("dependency2"));
         }
-        
+
         [Fact]
         public void Add_ShouldHaveRelation_WhenAddedMultipleDependenciesForMultipleSourceAndTargets()
         {
@@ -113,17 +116,17 @@ namespace HoneydewCoreTest.Models.Representations
             _sut.Add("source1", "target1", "dependency1", 2);
             _sut.Add("source1", "target1", "dependency1", 2);
             _sut.Add("source1", "target2", "dependency2", 2);
-            
+
             _sut.Add("source2", "target2", "dependency1", 7);
             _sut.Add("source2", "target2", "dependency1", 12);
             _sut.Add("source2", "target2", "dependency4", 4);
 
             Assert.Equal(2, _sut.FileRelations.Count);
-            
-            
+
+
             Assert.True(_sut.FileRelations.TryGetValue("source1", out var targetDictionary1));
             Assert.Equal(2, targetDictionary1.Count);
-            
+
             Assert.True(targetDictionary1.TryGetValue("target1", out var dependenciesDictionary1));
             Assert.Equal(3, dependenciesDictionary1.Count);
             Assert.True(dependenciesDictionary1.TryGetValue("dependency1", out var count1));
@@ -139,11 +142,11 @@ namespace HoneydewCoreTest.Models.Representations
             Assert.Equal(8, count4);
             Assert.True(dependenciesDictionary2.TryGetValue("dependency2", out var count5));
             Assert.Equal(2, count5);
-            
+
 
             Assert.True(_sut.FileRelations.TryGetValue("source2", out var targetDictionary2));
             Assert.Equal(1, targetDictionary2.Count);
-            
+
             Assert.True(targetDictionary2.TryGetValue("target2", out var dependenciesDictionary3));
             Assert.Equal(2, dependenciesDictionary3.Count);
             Assert.True(dependenciesDictionary3.TryGetValue("dependency1", out var count6));
@@ -156,6 +159,42 @@ namespace HoneydewCoreTest.Models.Representations
             Assert.True(_sut.Dependencies.Contains("dependency2"));
             Assert.True(_sut.Dependencies.Contains("dependency3"));
             Assert.True(_sut.Dependencies.Contains("dependency4"));
+        }
+
+
+        [Fact]
+        public void Export_ShouldReturnEmptyString_WhenGivenEmptyRelations()
+        {
+            var exporterMock = new Mock<IFileRelationsRepresentationExporter>();
+            exporterMock.Setup(exporter => exporter.Export(_sut)).Returns(@"""Source"",""Target""");
+
+            Assert.Equal(@"""Source"",""Target""", _sut.Export(exporterMock.Object));
+        }
+
+        [Fact]
+        public void Export_ShouldReturnCsv_WhenGivenOneRelationRepresentation()
+        {
+            var newLine = Environment.NewLine;
+
+            var exporterMock = new Mock<IFileRelationsRepresentationExporter>();
+            exporterMock.Setup(exporter => exporter.Export(_sut))
+                .Returns($@"""Source"",""Target"",""dependency""{newLine}""source"",""target"",""4""");
+
+
+            _sut.Add("source", "target", "dependency", 4);
+
+            var expectedString = $@"""Source"",""Target"",""dependency""{newLine}""source"",""target"",""4""";
+
+
+            Assert.Equal(expectedString, _sut.Export(exporterMock.Object));
+        }
+
+        [Fact]
+        public void Export_ShouldReturnEmptyString_WhenGivenAWrongExporter()
+        {
+            var exporterMock = new Mock<IExporter>();
+            
+            Assert.Equal("", _sut.Export(exporterMock.Object));
         }
     }
 }

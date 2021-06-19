@@ -7,6 +7,7 @@ using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Models;
+using HoneydewCore.Models.Representations;
 using HoneydewCore.Processors;
 
 namespace Honeydew
@@ -40,11 +41,17 @@ namespace Honeydew
             // var exportedSolutionModel = projectModel.Export(new RawModelExporter());
             // Console.WriteLine(exportedSolutionModel);
 
-            var a = new ProcessorChain(IProcessable.Of(projectModel))
+            var processable = new ProcessorChain(IProcessable.Of(projectModel))
                 .Process(new FullNameDependencyProcessor())
                 .Finish<SolutionModel>();
 
-            Console.WriteLine(a.Value.Export(new RawModelExporter()));
+            // Console.WriteLine(processable.Value.Export(new RawModelExporter()));
+
+            var fileRelationsProcessable = new ProcessorChain(processable)
+                .Process(new SolutionModelToFileRelationsProcessor())
+                .Finish<FileRelationsRepresentation>();
+
+            Console.WriteLine(fileRelationsProcessable.Value.Export(new CsvModelExporter()));
 
             // Console.WriteLine("Enter any key to exit ...");
             // Console.ReadKey();

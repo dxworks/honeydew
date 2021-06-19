@@ -1,13 +1,24 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.IO.Writers.Exporters;
 
 namespace HoneydewCore.Models.Representations
 {
-    public class FileRelationsRepresentation
+    public class FileRelationsRepresentation : IExportable
     {
         public ISet<string> Dependencies { get; } = new HashSet<string>();
 
         public IDictionary<string, IDictionary<string, IDictionary<string, int>>> FileRelations { get; } =
             new Dictionary<string, IDictionary<string, IDictionary<string, int>>>();
+
+        public string Export(IExporter exporter)
+        {
+            if (exporter is IFileRelationsRepresentationExporter modelExporter)
+            {
+                return modelExporter.Export(this);
+            }
+
+            return string.Empty;
+        }
 
         public void Add(string sourceName, string targetName, string dependencyName, int dependencyValue)
         {
