@@ -6,7 +6,7 @@ namespace HoneydewCore.IO.Writers
     {
         public void WriteFile(string filePath, string fileContent)
         {
-            File.WriteAllText(fileContent, fileContent);
+            File.WriteAllText(filePath, fileContent);
         }
     }
 }

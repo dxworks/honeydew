@@ -1,41 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using HoneydewCore.Models.Representations;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 {
-    public class ParameterDependenciesMetric : CSharpMetricExtractor, ISemanticMetric, ISyntacticMetric, IRelationMetric
+    public abstract class DependencyMetric : CSharpMetricExtractor, IRelationMetric
     {
         public DependencyDataMetric DataMetric { get; set; } = new();
-
-        public override IMetric GetMetric()
-        {
-            return new Metric<DependencyDataMetric>(DataMetric);
-        }
-
-        public override void VisitUsingDirective(UsingDirectiveSyntax node)
-        {
-            DataMetric.Usings.Add(node.Name.ToString());
-        }
-
-        public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
-        {
-            foreach (var parameterSyntax in node.ParameterList.Parameters)
-            {
-                if (parameterSyntax.Type == null) continue;
-
-                var parameterType = parameterSyntax.Type.ToString();
-                if (DataMetric.Dependencies.ContainsKey(parameterType))
-                {
-                    DataMetric.Dependencies[parameterType]++;
-                }
-                else
-                {
-                    DataMetric.Dependencies.Add(parameterType, 1);
-                }
-            }
-        }
 
         public IList<FileRelation> GetRelations(object metricValue)
         {
@@ -45,8 +16,6 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 
                 IList<FileRelation> fileRelations = new List<FileRelation>();
 
-                var relationType = typeof(ParameterDependenciesMetric).FullName;
-
                 foreach (var (dependency, count) in dataMetric.Dependencies)
                 {
                     var type = Type.GetType(dependency);
@@ -55,6 +24,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
                         continue;
                     }
 
+                    var relationType = GetType().FullName;
                     var fileRelation = new FileRelation
                     {
                         FileTarget = dependency,

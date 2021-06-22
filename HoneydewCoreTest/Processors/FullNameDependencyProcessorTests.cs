@@ -26,7 +26,7 @@ namespace HoneydewCoreTest.Processors
             };
             classModel1.Metrics.Add(new ClassMetric
             {
-                ExtractorName = typeof(ParameterDependenciesMetric).FullName,
+                ExtractorName = typeof(ParameterDependencyMetric).FullName,
                 ValueType = typeof(DependencyDataMetric).FullName,
                 Value = new DependencyDataMetric
                 {
@@ -44,7 +44,7 @@ namespace HoneydewCoreTest.Processors
             };
             classModel2.Metrics.Add(new ClassMetric
             {
-                ExtractorName = typeof(ParameterDependenciesMetric).FullName,
+                ExtractorName = typeof(ParameterDependencyMetric).FullName,
                 ValueType = typeof(DependencyDataMetric).FullName,
                 Value = new DependencyDataMetric
                 {
@@ -62,7 +62,7 @@ namespace HoneydewCoreTest.Processors
             };
             classModel3.Metrics.Add(new ClassMetric
             {
-                ExtractorName = typeof(ParameterDependenciesMetric).FullName,
+                ExtractorName = typeof(ParameterDependencyMetric).FullName,
                 ValueType = typeof(DependencyDataMetric).FullName,
                 Value = new DependencyDataMetric
                 {
@@ -81,7 +81,7 @@ namespace HoneydewCoreTest.Processors
             };
             classModel4.Metrics.Add(new ClassMetric
             {
-                ExtractorName = typeof(ParameterDependenciesMetric).FullName,
+                ExtractorName = typeof(ParameterDependencyMetric).FullName,
                 ValueType = typeof(DependencyDataMetric).FullName,
                 Value = new DependencyDataMetric
                 {
@@ -99,7 +99,7 @@ namespace HoneydewCoreTest.Processors
             };
             classModel5.Metrics.Add(new ClassMetric
             {
-                ExtractorName = typeof(ParameterDependenciesMetric).FullName,
+                ExtractorName = typeof(ParameterDependencyMetric).FullName,
                 ValueType = typeof(DependencyDataMetric).FullName,
                 Value = new DependencyDataMetric
                 {
@@ -152,7 +152,7 @@ namespace HoneydewCoreTest.Processors
             };
             classModel1.Metrics.Add(new ClassMetric
             {
-                ExtractorName = typeof(ParameterDependenciesMetric).FullName,
+                ExtractorName = typeof(ParameterDependencyMetric).FullName,
                 ValueType = typeof(DependencyDataMetric).FullName,
                 Value = new DependencyDataMetric
                 {
@@ -167,7 +167,7 @@ namespace HoneydewCoreTest.Processors
             };
             classModel2.Metrics.Add(new ClassMetric
             {
-                ExtractorName = typeof(ParameterDependenciesMetric).FullName,
+                ExtractorName = typeof(ParameterDependencyMetric).FullName,
                 ValueType = typeof(DependencyDataMetric).FullName,
                 Value = new DependencyDataMetric
                 {
@@ -185,7 +185,7 @@ namespace HoneydewCoreTest.Processors
             };
             classModel3.Metrics.Add(new ClassMetric
             {
-                ExtractorName = typeof(ParameterDependenciesMetric).FullName,
+                ExtractorName = typeof(ParameterDependencyMetric).FullName,
                 ValueType = typeof(DependencyDataMetric).FullName,
                 Value = new DependencyDataMetric
                 {
@@ -204,7 +204,7 @@ namespace HoneydewCoreTest.Processors
             };
             classModel4.Metrics.Add(new ClassMetric
             {
-                ExtractorName = typeof(ParameterDependenciesMetric).FullName,
+                ExtractorName = typeof(ParameterDependencyMetric).FullName,
                 ValueType = typeof(DependencyDataMetric).FullName,
                 Value = new DependencyDataMetric
                 {
@@ -223,7 +223,7 @@ namespace HoneydewCoreTest.Processors
             };
             classModel5.Metrics.Add(new ClassMetric
             {
-                ExtractorName = typeof(ParameterDependenciesMetric).FullName,
+                ExtractorName = typeof(ParameterDependencyMetric).FullName,
                 ValueType = typeof(DependencyDataMetric).FullName,
                 Value = new DependencyDataMetric
                 {

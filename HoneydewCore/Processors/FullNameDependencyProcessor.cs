@@ -17,7 +17,7 @@ namespace HoneydewCore.Processors
                 foreach (var classModel in solutionModel.GetEnumerable())
                 {
                     var parameterDependenciesMetrics = classModel.Metrics.Where(metric =>
-                        metric.ExtractorName == typeof(ParameterDependenciesMetric).FullName);
+                        metric.ExtractorName == typeof(ParameterDependencyMetric).FullName);
 
                     foreach (var metric in parameterDependenciesMetrics)
                     {

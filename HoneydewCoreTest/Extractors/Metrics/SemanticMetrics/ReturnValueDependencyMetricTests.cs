@@ -6,18 +6,18 @@ using Xunit;
 
 namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 {
-    public class ParameterDependenciesMetricTests
+    public class ReturnValueDependencyMetricTests
     {
-        private readonly ParameterDependenciesMetric _sut;
+        private readonly ReturnValueDependencyMetric _sut;
         private IFactExtractor _factExtractor;
 
-        public ParameterDependenciesMetricTests()
+        public ReturnValueDependencyMetricTests()
         {
-            _sut = new ParameterDependenciesMetric();
+            _sut = new ReturnValueDependencyMetric();
         }
 
         [Fact]
-        public void Extract_ShouldHaveNoParameters_WhenClassHasMethodsWithNoParameters()
+        public void Extract_ShouldHaveVoidReturnValues_WhenClassHasMethodsThatReturnVoid()
         {
             const string fileContent = @"
                                     namespace App
@@ -41,17 +41,19 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ParameterDependenciesMetric>();
+            var optional = classModels[0].GetMetric<ReturnValueDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
-
-            Assert.Empty(dependencies.Dependencies);
+            
             Assert.Empty(dependencies.Usings);
+            
+            Assert.Equal(1, dependencies.Dependencies.Count);
+            Assert.Equal(2, dependencies.Dependencies["void"]);
         }
 
         [Fact]
-        public void Extract_ShouldHavePrimitiveParameters_WhenClassHasMethodsWithPrimitiveParameters()
+        public void Extract_ShouldHavePrimitiveReturnValues_WhenClassHasMethodsThatReturnPrimitiveValues()
         {
             const string fileContent = @"using System;
 
@@ -59,13 +61,13 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                     {                                       
                                         class MyClass
                                         {                                           
-                                            public void Foo(int a, float b, string c) { }
+                                            public int Foo(int a, float b, string c) { }
 
-                                            public void Bar(float a, int b) { }
+                                            public float Bar(float a, int b) { }
 
-                                            public void Zoo(int a) { }
+                                            public int Zoo(int a) { }
 
-                                            public void Goo() { }
+                                            public string Goo() { }
                                         }
                                     }";
 
@@ -79,7 +81,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ParameterDependenciesMetric>();
+            var optional = classModels[0].GetMetric<ReturnValueDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
@@ -88,13 +90,13 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             Assert.Equal("System", dependencies.Usings[0]);
 
             Assert.Equal(3, dependencies.Dependencies.Count);
-            Assert.Equal(3, dependencies.Dependencies["int"]);
-            Assert.Equal(2, dependencies.Dependencies["float"]);
+            Assert.Equal(2, dependencies.Dependencies["int"]);
+            Assert.Equal(1, dependencies.Dependencies["float"]);
             Assert.Equal(1, dependencies.Dependencies["string"]);
         }
 
         [Fact]
-        public void Extract_ShouldHavePrimitiveParameters_WhenInterfaceHasMethodsWithPrimitiveParameters()
+        public void Extract_ShouldHavePrimitiveReturnValues_WhenInterfaceHasMethodsWithPrimitiveReturnValues()
         {
             const string fileContent = @"using System;
 
@@ -102,7 +104,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                     {                                       
                                         public interface IInterface
                                         {                                           
-                                            public void Foo(int a, float b, string c);
+                                            public float Foo(int a, float b, string c);
 
                                             public void Bar(float a, int b);
 
@@ -122,7 +124,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ParameterDependenciesMetric>();
+            var optional = classModels[0].GetMetric<ReturnValueDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
@@ -130,14 +132,15 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             Assert.Equal(1, dependencies.Usings.Count);
             Assert.Equal("System", dependencies.Usings[0]);
 
-            Assert.Equal(3, dependencies.Dependencies.Count);
-            Assert.Equal(3, dependencies.Dependencies["int"]);
-            Assert.Equal(2, dependencies.Dependencies["float"]);
+            Assert.Equal(4, dependencies.Dependencies.Count);
+            Assert.Equal(1, dependencies.Dependencies["int"]);
+            Assert.Equal(1, dependencies.Dependencies["float"]);
             Assert.Equal(1, dependencies.Dependencies["string"]);
+            Assert.Equal(1, dependencies.Dependencies["void"]);
         }
 
         [Fact]
-        public void Extract_ShouldHaveDependenciesParameters_WhenInterfaceHasMethodsWithDependenciesParameters()
+        public void Extract_ShouldHaveDependenciesReturnValues_WhenInterfaceHasMethodsWithDependenciesReturnValues()
         {
             const string fileContent = @"using System;
                                     using HoneydewCore.Extractors;
@@ -147,9 +150,11 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                     {                                       
                                         public interface IInterface
                                         {                                           
-                                            public void Foo(int a, CSharpMetricExtractor extractor) ;
+                                            public CSharpMetricExtractor Foo(int a, CSharpMetricExtractor extractor) ;
 
-                                            public void Bar(IFactExtractor factExtractor,  CSharpMetricExtractor extractor) ;
+                                            public CSharpMetricExtractor Foo(int a) ;
+
+                                            public IFactExtractor Bar(CSharpMetricExtractor extractor) ;
                                         }
                                     }";
 
@@ -163,7 +168,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ParameterDependenciesMetric>();
+            var optional = classModels[0].GetMetric<ReturnValueDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
@@ -174,14 +179,13 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             Assert.Equal("HoneydewCore.Extractors.Metrics", dependencies.Usings[2]);
             Assert.Equal("HoneydewCore.Extractors.Metrics.SemanticMetrics", dependencies.Usings[3]);
 
-            Assert.Equal(3, dependencies.Dependencies.Count);
+            Assert.Equal(2, dependencies.Dependencies.Count);
             Assert.Equal(2, dependencies.Dependencies["CSharpMetricExtractor"]);
             Assert.Equal(1, dependencies.Dependencies["IFactExtractor"]);
-            Assert.Equal(1, dependencies.Dependencies["int"]);
         }
 
         [Fact]
-        public void Extract_ShouldHaveDependenciesParameters_WhenClassHasMethodsWithDependenciesParameters()
+        public void Extract_ShouldHaveDependenciesReturnValues_WhenClassHasMethodsWithDependenciesReturnValues()
         {
             const string fileContent = @"using System;
                                     using HoneydewCore.Extractors;
@@ -190,9 +194,11 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                     {                                       
                                         public class IInterface
                                         {                                           
-                                            public void Foo(int a, CSharpMetricExtractor extractor, string name) { }
+                                            public CSharpMetricExtractor Foo(int a, string name) { }
 
-                                            public void Bar(IFactExtractor factExtractor,  CSharpMetricExtractor extractor, int b) { }
+                                            public IFactExtractor Bar(CSharpMetricExtractor extractor, int b) { }
+
+                                            public IFactExtractor Goo(CSharpMetricExtractor extractor) { }
                                         }
                                     }";
 
@@ -206,7 +212,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ParameterDependenciesMetric>();
+            var optional = classModels[0].GetMetric<ReturnValueDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
@@ -216,15 +222,12 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             Assert.Equal("HoneydewCore.Extractors", dependencies.Usings[1]);
             Assert.Equal("HoneydewCore.Extractors.Metrics", dependencies.Usings[2]);
 
-            Assert.Equal(4, dependencies.Dependencies.Count);
-            Assert.Equal(2, dependencies.Dependencies["CSharpMetricExtractor"]);
-            Assert.Equal(1, dependencies.Dependencies["IFactExtractor"]);
-            Assert.Equal(2, dependencies.Dependencies["int"]);
-            Assert.Equal(1, dependencies.Dependencies["string"]);
-        }
+            Assert.Equal(2, dependencies.Dependencies.Count);
+            Assert.Equal(1, dependencies.Dependencies["CSharpMetricExtractor"]);
+            Assert.Equal(2, dependencies.Dependencies["IFactExtractor"]);        }
 
         [Fact]
-        public void GetRelations_ShouldHaveNoRelations_WhenClassHasMethodsWithNoParameters()
+        public void GetRelations_ShouldHaveNoRelations_WhenClassHasMethodsWithNoReturnValues()
         {
             var fileRelations = _sut.GetRelations(new DependencyDataMetric());
 
@@ -271,12 +274,12 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var fileRelation1 = fileRelations[0];
             Assert.Equal("IFactExtractor", fileRelation1.FileTarget);
-            Assert.Equal(typeof(ParameterDependenciesMetric).FullName, fileRelation1.RelationType);
+            Assert.Equal(typeof(ReturnValueDependencyMetric).FullName, fileRelation1.RelationType);
             Assert.Equal(2, fileRelation1.RelationCount);
 
             var fileRelation2 = fileRelations[1];
             Assert.Equal("CSharpMetricExtractor", fileRelation2.FileTarget);
-            Assert.Equal(typeof(ParameterDependenciesMetric).FullName, fileRelation2.RelationType);
+            Assert.Equal(typeof(ReturnValueDependencyMetric).FullName, fileRelation2.RelationType);
             Assert.Equal(1, fileRelation2.RelationCount);
         }
     }

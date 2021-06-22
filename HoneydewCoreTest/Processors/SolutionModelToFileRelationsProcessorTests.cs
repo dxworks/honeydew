@@ -125,7 +125,7 @@ namespace HoneydewCoreTest.Processors
                 FullName = "Models.Class1", FilePath = "path/Model/Class1.cs"
             });
 
-            var extractorName = typeof(ParameterDependenciesMetric).FullName;
+            var extractorName = typeof(ParameterDependencyMetric).FullName;
             projectModel.Add(new ClassModel
             {
                 FullName = "Models.Class2", FilePath = "path/Model/Class2.cs",

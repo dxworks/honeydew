@@ -5,6 +5,7 @@ using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Strategies;
+using HoneydewCore.IO.Writers;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Models;
 using HoneydewCore.Models.Representations;
@@ -16,7 +17,8 @@ namespace Honeydew
     {
         public static void Main(string[] args)
         {
-            const string pathToProject = "D:\\Work\\Visual Studio 2019\\CSharp\\Catan\\Catan.sln";
+            const string pathToProject = "D:\\Work\\Visual Studio 2019\\CSharp\\Risc-Commander\\Risc-Commander.sln";
+            // const string pathToProject = "D:\\Work\\Visual Studio 2019\\CSharp\\Catan\\Catan.sln";
 
             Console.WriteLine("Reading project from {0}...", pathToProject);
 
@@ -24,7 +26,8 @@ namespace Honeydew
             cSharpClassFactExtractor.AddMetric<BaseClassMetric>();
             cSharpClassFactExtractor.AddMetric<UsingsCountMetric>();
             cSharpClassFactExtractor.AddMetric<IsAbstractMetric>();
-            cSharpClassFactExtractor.AddMetric<ParameterDependenciesMetric>();
+            cSharpClassFactExtractor.AddMetric<ParameterDependencyMetric>();
+            cSharpClassFactExtractor.AddMetric<ReturnValueDependencyMetric>();
 
             var extractors = new List<IFactExtractor>
             {
@@ -37,21 +40,27 @@ namespace Honeydew
             var projectModel = solutionLoader.LoadSolution(pathToProject, loadingStrategy);
 
             Console.WriteLine("Project read");
+            Console.WriteLine();
             // raw export
             // var exportedSolutionModel = projectModel.Export(new RawModelExporter());
             // Console.WriteLine(exportedSolutionModel);
 
-            var processable = new ProcessorChain(IProcessable.Of(projectModel))
+            var solutionModelProcessable = new ProcessorChain(IProcessable.Of(projectModel))
                 .Process(new FullNameDependencyProcessor())
                 .Finish<SolutionModel>();
 
             // Console.WriteLine(processable.Value.Export(new RawModelExporter()));
 
-            var fileRelationsProcessable = new ProcessorChain(processable)
+            var fileRelationsProcessable = new ProcessorChain(solutionModelProcessable)
                 .Process(new SolutionModelToFileRelationsProcessor())
                 .Finish<FileRelationsRepresentation>();
 
-            Console.WriteLine(fileRelationsProcessable.Value.Export(new CsvModelExporter()));
+            var csvExport = fileRelationsProcessable.Value.Export(new CsvModelExporter());
+            Console.WriteLine(csvExport);
+
+            const string outputPath = "D:\\Downloads\\New Text Document.csv";
+            var fileWriter = new FileWriter();
+            fileWriter.WriteFile(outputPath, csvExport);
 
             // Console.WriteLine("Enter any key to exit ...");
             // Console.ReadKey();

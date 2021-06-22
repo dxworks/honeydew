@@ -25,7 +25,7 @@ namespace HoneydewCoreTest.Models.Representations
             _sut.Add(sourceName, "", "", 0);
 
             Assert.Empty(_sut.FileRelations);
-            Assert.Empty(_sut.Dependencies);
+            Assert.Empty(_sut.DependenciesType);
         }
 
         [Theory]
@@ -38,7 +38,7 @@ namespace HoneydewCoreTest.Models.Representations
             _sut.Add(sourceName);
 
             Assert.Empty(_sut.FileRelations);
-            Assert.Empty(_sut.Dependencies);
+            Assert.Empty(_sut.DependenciesType);
         }
 
         [Theory]
@@ -52,7 +52,7 @@ namespace HoneydewCoreTest.Models.Representations
 
             Assert.NotEmpty(_sut.FileRelations);
             Assert.Equal(1, _sut.FileRelations.Count);
-            Assert.Empty(_sut.Dependencies);
+            Assert.Empty(_sut.DependenciesType);
         }
 
         [Theory]
@@ -65,7 +65,7 @@ namespace HoneydewCoreTest.Models.Representations
             _sut.Add("sourceName", "targetName", dependencyName, 0);
 
             Assert.Empty(_sut.FileRelations);
-            Assert.Empty(_sut.Dependencies);
+            Assert.Empty(_sut.DependenciesType);
         }
 
         [Fact]
@@ -81,8 +81,8 @@ namespace HoneydewCoreTest.Models.Representations
             Assert.True(dependenciesDictionary.TryGetValue("dependency", out var count));
             Assert.Equal(2, count);
 
-            Assert.Equal(1, _sut.Dependencies.Count);
-            Assert.True(_sut.Dependencies.Contains("dependency"));
+            Assert.Equal(1, _sut.DependenciesType.Count);
+            Assert.True(_sut.DependenciesType.Contains("dependency"));
         }
 
         [Fact]
@@ -101,9 +101,9 @@ namespace HoneydewCoreTest.Models.Representations
             Assert.True(dependenciesDictionary.TryGetValue("dependency2", out var count2));
             Assert.Equal(5, count2);
 
-            Assert.Equal(2, _sut.Dependencies.Count);
-            Assert.True(_sut.Dependencies.Contains("dependency1"));
-            Assert.True(_sut.Dependencies.Contains("dependency2"));
+            Assert.Equal(2, _sut.DependenciesType.Count);
+            Assert.True(_sut.DependenciesType.Contains("dependency1"));
+            Assert.True(_sut.DependenciesType.Contains("dependency2"));
         }
 
         [Fact]
@@ -154,11 +154,11 @@ namespace HoneydewCoreTest.Models.Representations
             Assert.True(dependenciesDictionary3.TryGetValue("dependency4", out var count7));
             Assert.Equal(4, count7);
 
-            Assert.Equal(4, _sut.Dependencies.Count);
-            Assert.True(_sut.Dependencies.Contains("dependency1"));
-            Assert.True(_sut.Dependencies.Contains("dependency2"));
-            Assert.True(_sut.Dependencies.Contains("dependency3"));
-            Assert.True(_sut.Dependencies.Contains("dependency4"));
+            Assert.Equal(4, _sut.DependenciesType.Count);
+            Assert.True(_sut.DependenciesType.Contains("dependency1"));
+            Assert.True(_sut.DependenciesType.Contains("dependency2"));
+            Assert.True(_sut.DependenciesType.Contains("dependency3"));
+            Assert.True(_sut.DependenciesType.Contains("dependency4"));
         }
 
 

@@ -14,7 +14,7 @@ namespace HoneydewCore.IO.Writers.Exporters
             {
                 "Source", "Target"
             };
-            headers.AddRange(fileRelationsRepresentation.Dependencies);
+            headers.AddRange(fileRelationsRepresentation.DependenciesType);
 
             csvBuilder.AddHeader(headers);
 
@@ -28,7 +28,7 @@ namespace HoneydewCore.IO.Writers.Exporters
                         targetName
                     };
 
-                    values.AddRange(fileRelationsRepresentation.Dependencies
+                    values.AddRange(fileRelationsRepresentation.DependenciesType
                         .Select(relation => dependenciesDictionary.TryGetValue(relation, out var value)
                             ? value.ToString()
                             : ""));

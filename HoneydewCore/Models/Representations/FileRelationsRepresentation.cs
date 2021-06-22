@@ -5,7 +5,7 @@ namespace HoneydewCore.Models.Representations
 {
     public class FileRelationsRepresentation : IExportable
     {
-        public ISet<string> Dependencies { get; } = new HashSet<string>();
+        public ISet<string> DependenciesType { get; } = new HashSet<string>();
 
         public IDictionary<string, IDictionary<string, IDictionary<string, int>>> FileRelations { get; } =
             new Dictionary<string, IDictionary<string, IDictionary<string, int>>>();
@@ -20,7 +20,7 @@ namespace HoneydewCore.Models.Representations
             return string.Empty;
         }
 
-        public void Add(string sourceName, string targetName, string dependencyName, int dependencyValue)
+        public void Add(string sourceName, string targetName, string dependencyType, int dependencyValue)
         {
             if (string.IsNullOrWhiteSpace(sourceName))
             {
@@ -33,33 +33,33 @@ namespace HoneydewCore.Models.Representations
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(dependencyName))
+            if (string.IsNullOrWhiteSpace(dependencyType))
             {
                 return;
             }
 
-            Dependencies.Add(dependencyName);
+            DependenciesType.Add(dependencyType);
 
             if (!FileRelations.TryGetValue(sourceName, out var targetDictionary))
             {
                 FileRelations.Add(sourceName, new Dictionary<string, IDictionary<string, int>>
                 {
-                    {targetName, new Dictionary<string, int> {{dependencyName, dependencyValue}}}
+                    {targetName, new Dictionary<string, int> {{dependencyType, dependencyValue}}}
                 });
             }
             else
             {
                 if (targetDictionary.TryGetValue(targetName, out var dependenciesDictionary))
                 {
-                    if (!dependenciesDictionary.ContainsKey(dependencyName))
+                    if (!dependenciesDictionary.ContainsKey(dependencyType))
                     {
-                        dependenciesDictionary.Add(dependencyName, dependencyValue);
+                        dependenciesDictionary.Add(dependencyType, dependencyValue);
                     }
                 }
                 else
                 {
                     targetDictionary.Add(targetName, new Dictionary<string, int>
-                        {{dependencyName, dependencyValue}});
+                        {{dependencyType, dependencyValue}});
                 }
             }
         }
