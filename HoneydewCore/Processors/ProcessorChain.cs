@@ -17,6 +17,12 @@ namespace HoneydewCore.Processors
             return this;
         }
 
+        public ProcessorChain Peek<T>(Action<T> action)
+        {
+            action.Invoke(((Processable<T>) _processable).Value);
+            return this;
+        }
+
         public ProcessorChain Process<T, TR>(Func<Processable<T>, Processable<TR>> func)
         {
             _processable = func.Invoke((Processable<T>) _processable);

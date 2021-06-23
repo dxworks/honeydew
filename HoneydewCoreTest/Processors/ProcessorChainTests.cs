@@ -67,11 +67,11 @@ namespace HoneydewCoreTest.Processors
             var funcMock = new Mock<Func<Processable<int>, Processable<int>>>();
             var funcMock1 = new Mock<Func<Processable<int>, Processable<float>>>();
             var funcMock2 = new Mock<Func<Processable<float>, Processable<string>>>();
-            
+
             funcMock.Setup(func => func(processableMock.Object)).Returns(processableMock1.Object);
             funcMock1.Setup(func => func(processableMock1.Object)).Returns(processableMock2.Object);
             funcMock2.Setup(func => func(processableMock2.Object)).Returns(processableMock3.Object);
-            
+
             var mock = new Mock<IProcessorFunction<int, int>>();
             var mock1 = new Mock<IProcessorFunction<int, float>>();
             var mock2 = new Mock<IProcessorFunction<float, string>>();
@@ -93,7 +93,7 @@ namespace HoneydewCoreTest.Processors
 
             Assert.Equal(processableMock3.Object, processable);
         }
-        
+
         [Fact]
         public void Finish_ShouldReturnInputProcessable_WhenProcessingWithoutProcessors()
         {
@@ -174,6 +174,57 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal(input, processable);
         }
 
+        [Theory]
+        [InlineData(2)]
+        [InlineData("string")]
+        [InlineData(10.0)]
+        [InlineData('a')]
+        [InlineData(-12)]
+        [InlineData(-1.0f)]
+        public void Modify_ShouldModifyTheSameInstanceOfProcessable_WhenGivenProcessable(object input)
+        {
+            var processable = new ProcessorChain(IProcessable.Of(input))
+                .Peek<object>(value => Assert.Equal(input, value))
+                .Finish<object>();
+            Assert.Equal(input, processable.Value);
+        }
+
+        [Theory]
+        [InlineData(2)]
+        [InlineData(-5)]
+        [InlineData(10.0)]
+        [InlineData(200)]
+        [InlineData(-12)]
+        [InlineData(-1)]
+        public void Modify_ShouldModifyTheSameInstanceOfProcessable_WhenGivenProcessableOfIntValueClass(int input)
+        {
+            var processable = new ProcessorChain(IProcessable.Of(new IntValueClass {Value = input}))
+                .Peek<IntValueClass>(value => Assert.Equal(input, value.Value))
+                .Peek<IntValueClass>(value => value.Value *= 2)
+                .Finish<IntValueClass>();
+
+            Assert.Equal(input * 2, processable.Value.Value);
+        }
+
+        [Fact]
+        public void
+            Modify_ShouldModifyTheSameInstanceOfProcessable_WhenGivenProcessableOfIntValueClassAndAChainOfPeekOperations()
+        {
+            var processable = new ProcessorChain(IProcessable.Of(new IntValueClass {Value = 1}))
+                .Peek<IntValueClass>(value => value.Value *= 2)
+                .Peek<IntValueClass>(value => value.Value += 6)
+                .Peek<IntValueClass>(value =>
+                {
+                    value.Value -= 2;
+                    value.Value *= 4;
+                })
+                .Peek<IntValueClass>(_ => {})
+                .Peek<IntValueClass>(value => value.Value /= 2)
+                .Finish<IntValueClass>();
+
+            Assert.Equal(12, processable.Value.Value);
+        }
+
         private class IdentityProcessorClassData : IEnumerable<object[]>
         {
             public IEnumerator<object[]> GetEnumerator()
@@ -189,6 +240,11 @@ namespace HoneydewCoreTest.Processors
             {
                 return GetEnumerator();
             }
+        }
+
+        private class IntValueClass
+        {
+            public int Value { get; set; }
         }
     }
 }

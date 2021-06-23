@@ -29,12 +29,10 @@ namespace HoneydewCore.Processors
                         foreach (var classMetric in classModel.Metrics)
                         {
                             var extractorType = Type.GetType(classMetric.ExtractorName);
-                            if (extractorType == null)
+                            if (extractorType == null || !typeof(IRelationMetric).IsAssignableFrom(extractorType))
                             {
                                 continue;
                             }
-
-                            if (!typeof(IRelationMetric).IsAssignableFrom(extractorType)) continue;
 
                             var relationMetric = (IRelationMetric) Activator.CreateInstance(extractorType);
 

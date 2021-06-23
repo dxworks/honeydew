@@ -166,5 +166,35 @@ namespace HoneydewCoreTest.Processors
 
             Assert.Equal(2, processable.Value.TotalRelationsCount("Models.Class2", "Models.Class1"));
         }
+        
+         [Fact]
+        public void
+            GetFunction_ShouldReturnRepresentationsWithNoRelations_WhenSolutionModelHasProjectWithInvalidRelationMetric()
+        {
+            var solutionModel = new SolutionModel();
+            var projectModel = new ProjectModel();
+
+            const string extractorName = "some_string";
+            projectModel.Add(new ClassModel
+            {
+                FullName = "Models.Class2", FilePath = "path/Model/Class2.cs",
+                Metrics =
+                {
+                    new ClassMetric
+                    {
+                        ExtractorName = extractorName,
+                        ValueType = typeof(string).FullName,
+                        Value = ""
+                    }
+                }
+            });
+
+            solutionModel.Projects.Add(projectModel);
+
+            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
+
+            Assert.Equal(0, processable.Value.FileRelations.Count);
+            Assert.Equal(0, processable.Value.TotalRelationsCount("Models.Class2", "Models.Class1"));
+        }
     }
 }
