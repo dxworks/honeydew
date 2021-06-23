@@ -8,9 +8,5 @@ namespace HoneydewCore.IO.Readers
           public ProjectNotFoundException()
           {
           }
-
-          public ProjectNotFoundException(string message) : base(message)
-          {
-          }
      }
 }

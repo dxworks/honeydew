@@ -6,6 +6,7 @@ using HoneydewCore.Extractors;
 using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.Models;
 using Microsoft.Build.Locator;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 
 namespace HoneydewCore.IO.Readers
@@ -27,10 +28,18 @@ namespace HoneydewCore.IO.Readers
 
             if (!msBuildWorkspace.Diagnostics.IsEmpty)
             {
-                throw new ProjectNotFoundException("Project has Errors!");
+                throw new ProjectWithErrorsException();
             }
 
-            var solution = msBuildWorkspace.OpenSolutionAsync(pathToSolution).Result;
+            Solution solution;
+            try
+            {
+                solution = msBuildWorkspace.OpenSolutionAsync(pathToSolution).Result;
+            }
+            catch (Exception e)
+            {
+                throw new ProjectNotFoundException();
+            }
 
             SolutionModel solutionModel = new();
 
