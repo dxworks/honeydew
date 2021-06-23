@@ -3,5 +3,7 @@
     public interface IMetricExtractor
     {
         IMetric GetMetric();
+
+        string PrettyPrint();
     }
 }

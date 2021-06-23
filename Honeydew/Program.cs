@@ -53,6 +53,11 @@ namespace Honeydew
 
             var fileRelationsProcessable = new ProcessorChain(solutionModelProcessable)
                 .Process(new SolutionModelToFileRelationsProcessor())
+                .Process<FileRelationsRepresentation, FileRelationsRepresentation>(processable =>
+                {
+                    processable.Value.UsePrettyPrint = true;
+                    return processable;
+                })
                 .Finish<FileRelationsRepresentation>();
 
             var csvExport = fileRelationsProcessable.Value.Export(new CsvModelExporter());

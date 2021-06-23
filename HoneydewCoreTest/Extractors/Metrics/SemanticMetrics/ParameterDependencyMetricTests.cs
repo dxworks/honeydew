@@ -17,6 +17,12 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
         }
 
         [Fact]
+        public void PrettyPrint_ShouldReturnParameterDependency()
+        {
+            Assert.Equal("Parameter Dependency", _sut.PrettyPrint());
+        }
+        
+        [Fact]
         public void Extract_ShouldHaveNoParameters_WhenClassHasMethodsWithNoParameters()
         {
             const string fileContent = @"

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Models.Representations;
 using Moq;
@@ -185,7 +187,6 @@ namespace HoneydewCoreTest.Models.Representations
 
             var expectedString = $@"""Source"",""Target"",""dependency""{newLine}""source"",""target"",""4""";
 
-
             Assert.Equal(expectedString, _sut.Export(exporterMock.Object));
         }
 
@@ -193,8 +194,43 @@ namespace HoneydewCoreTest.Models.Representations
         public void Export_ShouldReturnEmptyString_WhenGivenAWrongExporter()
         {
             var exporterMock = new Mock<IExporter>();
-            
+
             Assert.Equal("", _sut.Export(exporterMock.Object));
+        }
+
+        [Fact]
+        public void GetDependenciesTypePretty_ShouldReturnTheDependencies_WhenUsePrettyIsFalse()
+        {
+            _sut.Add("source", "target", typeof(ParameterDependencyMetric).FullName, 4);
+
+            var dependenciesTypePretty = _sut.GetDependenciesTypePretty();
+
+            Assert.Single(dependenciesTypePretty);
+            Assert.Equal(typeof(ParameterDependencyMetric).FullName, dependenciesTypePretty.First());
+        }
+        
+        [Fact]
+        public void GetDependenciesTypePretty_ShouldReturnTheDependenciesPrettyPrint_WhenUsePrettyIsTrue()
+        {
+            _sut.Add("source", "target", typeof(ParameterDependencyMetric).FullName, 4);
+            _sut.UsePrettyPrint = true;
+
+            var dependenciesTypePretty = _sut.GetDependenciesTypePretty();
+
+            Assert.Single(dependenciesTypePretty);
+            Assert.Equal("Parameter Dependency", dependenciesTypePretty.First());
+        }
+        
+        [Fact]
+        public void GetDependenciesTypePretty_ShouldReturnTheDependencies_WhenUsePrettyIsTrueAndTheClassIsNotAMetric()
+        {
+            _sut.Add("source", "target", "string", 4);
+            _sut.UsePrettyPrint = true;
+
+            var dependenciesTypePretty = _sut.GetDependenciesTypePretty();
+
+            Assert.Single(dependenciesTypePretty);
+            Assert.Equal("string", dependenciesTypePretty.First());
         }
     }
 }

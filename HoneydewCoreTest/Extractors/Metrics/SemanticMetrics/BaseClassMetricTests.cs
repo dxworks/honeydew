@@ -22,6 +22,12 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
         {
             Assert.True(_sut is ISemanticMetric);
         }
+        
+        [Fact]
+        public void PrettyPrint_ShouldReturnInheritsClass()
+        {
+            Assert.Equal("Inherits Class", _sut.PrettyPrint());
+        }
 
         [Fact]
         public void Extract_ShouldHaveBaseClassObject_WhenClassDoesNotExtendsAnyClass()

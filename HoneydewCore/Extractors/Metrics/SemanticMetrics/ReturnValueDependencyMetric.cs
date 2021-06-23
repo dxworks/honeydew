@@ -9,6 +9,11 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
             return new Metric<DependencyDataMetric>(DataMetric);
         }
 
+        public override string PrettyPrint()
+        {
+            return "Return Value Dependency";
+        }
+
         public override void VisitUsingDirective(UsingDirectiveSyntax node)
         {
             DataMetric.Usings.Add(node.Name.ToString());

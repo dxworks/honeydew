@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
 {
@@ -10,6 +9,11 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
         public override IMetric GetMetric()
         {
             return new Metric<bool>(IsAbstract);
+        }
+
+        public override string PrettyPrint()
+        {
+            return "Is Abstract";
         }
 
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)

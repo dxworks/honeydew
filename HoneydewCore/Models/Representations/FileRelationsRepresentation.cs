@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using HoneydewCore.IO.Writers.Exporters;
 
 namespace HoneydewCore.Models.Representations
 {
-    public class FileRelationsRepresentation : IExportable
+    public class FileRelationsRepresentation : PrettyPrintRepresentation, IExportable
     {
         public ISet<string> DependenciesType { get; } = new HashSet<string>();
 
@@ -96,6 +97,11 @@ namespace HoneydewCore.Models.Representations
             }
 
             return sum;
+        }
+
+        protected override IList<string> StringsToPretty()
+        {
+            return DependenciesType.ToList();
         }
     }
 }

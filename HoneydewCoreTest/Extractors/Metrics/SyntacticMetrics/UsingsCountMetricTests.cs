@@ -24,6 +24,12 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
         }
 
         [Fact]
+        public void PrettyPrint_ShouldReturnUsingsCount()
+        {
+            Assert.Equal("Usings Count", _sut.PrettyPrint());
+        }
+        
+        [Fact]
         public void Extract_ShouldHaveUsingsCountMetric_WhenGivenOneUsingsLevel()
         {
             const string fileContent = @"using System;

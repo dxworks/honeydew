@@ -22,6 +22,12 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
         {
             Assert.True(_sut is ISyntacticMetric);
         }
+        
+        [Fact]
+        public void PrettyPrint_ShouldReturnIsAbstract()
+        {
+            Assert.Equal("Is Abstract", _sut.PrettyPrint());
+        }
 
         [Fact]
         public void Extract_ShouldReturnFalse_WhenGivenClassWithNoBaseClass()

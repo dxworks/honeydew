@@ -8,11 +8,16 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
     /// </summary>
     public class BaseClassMetric : CSharpMetricExtractor, ISemanticMetric
     {
-        public InheritanceMetric InheritanceMetric { get; set; } = new InheritanceMetric();
+        public InheritanceMetric InheritanceMetric { get; set; } = new();
 
         public override IMetric GetMetric()
         {
             return new Metric<InheritanceMetric>(InheritanceMetric);
+        }
+
+        public override string PrettyPrint()
+        {
+            return "Inherits Class";
         }
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)

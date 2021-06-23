@@ -17,6 +17,12 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
         }
 
         [Fact]
+        public void PrettyPrint_ShouldReturnReturnValueDependency()
+        {
+            Assert.Equal("Return Value Dependency", _sut.PrettyPrint());
+        }
+        
+        [Fact]
         public void Extract_ShouldHaveVoidReturnValues_WhenClassHasMethodsThatReturnVoid()
         {
             const string fileContent = @"

@@ -11,6 +11,11 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
             return new Metric<int>(UsingsCount);
         }
 
+        public override string PrettyPrint()
+        {
+            return "Usings Count";
+        }
+
         public override void VisitUsingDirective(UsingDirectiveSyntax node)
         {
             UsingsCount++;

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.IO.Writers.CSV;
 using HoneydewCore.Models.Representations;
@@ -14,7 +15,7 @@ namespace HoneydewCore.IO.Writers.Exporters
             {
                 "Source", "Target"
             };
-            headers.AddRange(fileRelationsRepresentation.DependenciesType);
+            headers.AddRange(fileRelationsRepresentation.GetDependenciesTypePretty());
 
             csvBuilder.AddHeader(headers);
 

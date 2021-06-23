@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using HoneydewCore.Models.Representations;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 {
@@ -9,6 +7,11 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
         public override IMetric GetMetric()
         {
             return new Metric<DependencyDataMetric>(DataMetric);
+        }
+
+        public override string PrettyPrint()
+        {
+            return "Parameter Dependency";
         }
 
         public override void VisitUsingDirective(UsingDirectiveSyntax node)
