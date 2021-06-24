@@ -8,6 +8,9 @@ namespace HoneydewCore.IO.Writers.Exporters
 {
     public class CsvModelExporter : IFileRelationsRepresentationExporter
     {
+        public IList<Tuple<string, Func<string, string>>> ColumnFunctionForEachRow =
+            new List<Tuple<string, Func<string, string>>>();
+        
         public string Export(FileRelationsRepresentation fileRelationsRepresentation)
         {
             var csvBuilder = new CsvBuilder();
@@ -34,8 +37,13 @@ namespace HoneydewCore.IO.Writers.Exporters
                             ? value.ToString()
                             : ""));
 
-                    csvBuilder.Add(values);
+                    csvBuilder.AddLine(values);
                 }
+            }
+
+            foreach (var (header, func) in ColumnFunctionForEachRow)
+            {
+                csvBuilder.AddColumnWithFormulaForEachRow(header, func);
             }
 
             return csvBuilder.CreateCsv();

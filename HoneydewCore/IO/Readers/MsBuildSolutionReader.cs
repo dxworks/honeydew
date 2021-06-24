@@ -51,12 +51,19 @@ namespace HoneydewCore.IO.Readers
                 {
                     var syntaxTree = document.GetSyntaxTreeAsync().Result;
 
-                    var classModels = _extractors.SelectMany(extractor => extractor.Extract(syntaxTree)).ToList();
-
-                    foreach (var classModel in classModels)
+                    try
                     {
-                        classModel.FilePath = document.FilePath;
-                        projectModel.Add(classModel);
+                        var classModels = _extractors.SelectMany(extractor => extractor.Extract(syntaxTree)).ToList();
+
+                        foreach (var classModel in classModels)
+                        {
+                            classModel.FilePath = document.FilePath;
+                            projectModel.Add(classModel);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine($"Could not extract from {document.FilePath}");
                     }
                 }
 

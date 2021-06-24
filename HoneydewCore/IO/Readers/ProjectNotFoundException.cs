@@ -2,11 +2,10 @@
 
 namespace HoneydewCore.IO.Readers
 {
-     [Serializable]
-     public class ProjectNotFoundException : Exception
-     {
-          public ProjectNotFoundException()
-          {
-          }
-     }
+    public class ProjectNotFoundException : Exception
+    {
+        public ProjectNotFoundException()
+        {
+        }
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace HoneydewCore.IO.Writers.CSV
@@ -28,7 +29,7 @@ namespace HoneydewCore.IO.Writers.CSV
             _headerSize = header.Count;
         }
 
-        public void Add(IList<string> values)
+        public void AddLine(IList<string> values)
         {
             if (_headerSize != values.Count)
             {
@@ -38,9 +39,32 @@ namespace HoneydewCore.IO.Writers.CSV
             _lines.Add(CreateCsvLine(values));
         }
 
-        public void Add(ICsvLine line)
+        public void AddColumn(IList<string> values)
         {
-            Add(line.GetCsvLine());
+            for (var i = 0; i < _lines.Count; i++)
+            {
+                if (i >= values.Count)
+                {
+                    return;
+                }
+
+                _lines[i] += @$",""{values[i]}""";
+            }
+        }
+
+        public void AddColumnWithFormulaForEachRow(Func<string, string> func)
+        {
+            AddColumn(_lines.Select(func.Invoke).ToList());
+        }
+        
+        public void AddColumnWithFormulaForEachRow(string header, Func<string, string> func)
+        {
+            var values = new List<string>
+            {
+                header
+            };
+            values.AddRange(_lines.Skip(1).Select(func.Invoke).ToList());
+            AddColumn(values);
         }
 
         public string CreateCsv()

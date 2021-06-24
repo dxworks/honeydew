@@ -55,8 +55,14 @@ namespace Honeydew
                 .Process(new SolutionModelToFileRelationsProcessor())
                 .Peek<FileRelationsRepresentation>(relationsRepresentation => relationsRepresentation.UsePrettyPrint = true)
                 .Finish<FileRelationsRepresentation>();
-
-            var csvExport = fileRelationsProcessable.Value.Export(new CsvModelExporter());
+            
+            var csvExport = fileRelationsProcessable.Value.Export(new CsvModelExporter
+            {
+                ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
+                {
+                    new("Total Count", ExportUtils.CsvSumPerLine)
+                }
+            });
             Console.WriteLine(csvExport);
 
             const string outputPath = "D:\\Downloads\\New Text Document.csv";

@@ -31,7 +31,7 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
 
             Assert.Equal(expectedString, _sut.Export(fileRelationsRepresentation));
         }
-        
+
         [Fact]
         public void Export_ShouldReturnCsv_WhenGivenOneRelationRepresentationWithMultipleDependencies()
         {
@@ -41,11 +41,12 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
             fileRelationsRepresentation.Add("source", "target", "dependency3", 1);
 
             var newLine = Environment.NewLine;
-            var expectedString = $@"""Source"",""Target"",""dependency1"",""dependency2"",""dependency3""{newLine}""source"",""target"",""4"",""6"",""1""";
+            var expectedString =
+                $@"""Source"",""Target"",""dependency1"",""dependency2"",""dependency3""{newLine}""source"",""target"",""4"",""6"",""1""";
 
             Assert.Equal(expectedString, _sut.Export(fileRelationsRepresentation));
         }
-        
+
         [Fact]
         public void Export_ShouldReturnCsv_WhenGivenMultipleRelationRepresentationOneDependency()
         {
@@ -53,13 +54,14 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
             fileRelationsRepresentation.Add("source1", "target1", "dependency", 4);
             fileRelationsRepresentation.Add("source2", "target2", "dependency", 5);
             fileRelationsRepresentation.Add("source3", "target3", "dependency", 1);
-            
+
             var newLine = Environment.NewLine;
-            var expectedString = $@"""Source"",""Target"",""dependency""{newLine}""source1"",""target1"",""4""{newLine}""source2"",""target2"",""5""{newLine}""source3"",""target3"",""1""";
+            var expectedString =
+                $@"""Source"",""Target"",""dependency""{newLine}""source1"",""target1"",""4""{newLine}""source2"",""target2"",""5""{newLine}""source3"",""target3"",""1""";
 
             Assert.Equal(expectedString, _sut.Export(fileRelationsRepresentation));
         }
-        
+
         [Fact]
         public void Export_ShouldReturnCsv_WhenGivenMultipleRelationRepresentationMultipleDependencies()
         {
@@ -68,11 +70,11 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
             fileRelationsRepresentation.Add("source1", "target2", "dependency2", 6);
             fileRelationsRepresentation.Add("source1", "target2", "dependency1", 2);
             fileRelationsRepresentation.Add("source1", "target3", "dependency3", 8);
-            
+
             fileRelationsRepresentation.Add("source2", "target3", "dependency2", 4);
             fileRelationsRepresentation.Add("source2", "target4", "dependency1", 8);
             fileRelationsRepresentation.Add("source2", "target5", "dependency1", 1);
-            
+
             fileRelationsRepresentation.Add("source3", "target1", "dependency1", 9);
             fileRelationsRepresentation.Add("source3", "target1", "dependency2", 12);
             fileRelationsRepresentation.Add("source3", "target1", "dependency3", 31);
@@ -82,13 +84,61 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
                                  $@"""source1"",""target1"",""4"","""",""""{newLine}" +
                                  $@"""source1"",""target2"",""2"",""6"",""""{newLine}" +
                                  $@"""source1"",""target3"","""","""",""8""{newLine}" +
-
                                  $@"""source2"",""target3"","""",""4"",""""{newLine}" +
                                  $@"""source2"",""target4"",""8"","""",""""{newLine}" +
                                  $@"""source2"",""target5"",""1"","""",""""{newLine}" +
-
                                  @"""source3"",""target1"",""9"",""12"",""31""";
-                
+
+
+            Assert.Equal(expectedString, _sut.Export(fileRelationsRepresentation));
+        }
+
+        [Fact]
+        public void
+            Export_ShouldReturnCsv_WhenGivenMultipleRelationRepresentationMultipleDependenciesWithColumnFunctions()
+        {
+            var fileRelationsRepresentation = new FileRelationsRepresentation();
+            fileRelationsRepresentation.Add("source1", "target1", "dependency1", 4);
+            fileRelationsRepresentation.Add("source1", "target2", "dependency2", 6);
+            fileRelationsRepresentation.Add("source1", "target2", "dependency1", 2);
+            fileRelationsRepresentation.Add("source1", "target3", "dependency3", 8);
+
+            fileRelationsRepresentation.Add("source2", "target3", "dependency2", 4);
+            fileRelationsRepresentation.Add("source2", "target4", "dependency1", 8);
+            fileRelationsRepresentation.Add("source2", "target5", "dependency1", 1);
+
+            fileRelationsRepresentation.Add("source3", "target1", "dependency1", 9);
+            fileRelationsRepresentation.Add("source3", "target1", "dependency2", 12);
+            fileRelationsRepresentation.Add("source3", "target1", "dependency3", 31);
+
+            var newLine = Environment.NewLine;
+            var expectedString = $@"""Source"",""Target"",""dependency1"",""dependency2"",""dependency3"",""Length"",""Count""{newLine}" +
+                                 $@"""source1"",""target1"",""4"","""","""",""29"",""33""{newLine}" +
+                                 $@"""source1"",""target2"",""2"",""6"","""",""30"",""38""{newLine}" +
+                                 $@"""source1"",""target3"","""","""",""8"",""29"",""37""{newLine}" +
+                                 $@"""source2"",""target3"","""",""4"","""",""29"",""33""{newLine}" +
+                                 $@"""source2"",""target4"",""8"","""","""",""29"",""37""{newLine}" +
+                                 $@"""source2"",""target5"",""1"","""","""",""29"",""30""{newLine}" +
+                                 @"""source3"",""target1"",""9"",""12"",""31"",""33"",""85""";
+
+
+            _sut.ColumnFunctionForEachRow.Add(
+                new Tuple<string, Func<string, string>>("Length", line => line.Length.ToString()));
+            _sut.ColumnFunctionForEachRow.Add(
+                new Tuple<string, Func<string, string>>("Count", line =>
+                {
+                    var sum = 0;
+                    foreach (var s in line.Split(","))
+                    {
+                        var trim = s.Trim('\"');
+                        if (int.TryParse(trim, out var v))
+                        {
+                            sum += v;
+                        }
+                    }
+
+                    return sum.ToString();
+                }));
 
             Assert.Equal(expectedString, _sut.Export(fileRelationsRepresentation));
         }
