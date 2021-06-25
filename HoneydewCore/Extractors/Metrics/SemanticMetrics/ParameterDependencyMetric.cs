@@ -2,21 +2,11 @@
 
 namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 {
-    public class ParameterDependencyMetric : DependencyMetric, ISemanticMetric, ISyntacticMetric
+    public class ParameterDependencyMetric : DependencyMetric
     {
-        public override IMetric GetMetric()
-        {
-            return new Metric<DependencyDataMetric>(DataMetric);
-        }
-
         public override string PrettyPrint()
         {
             return "Parameter Dependency";
-        }
-
-        public override void VisitUsingDirective(UsingDirectiveSyntax node)
-        {
-            DataMetric.Usings.Add(node.Name.ToString());
         }
 
         public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
@@ -26,14 +16,8 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
                 if (parameterSyntax.Type == null) continue;
 
                 var parameterType = parameterSyntax.Type.ToString();
-                if (DataMetric.Dependencies.ContainsKey(parameterType))
-                {
-                    DataMetric.Dependencies[parameterType]++;
-                }
-                else
-                {
-                    DataMetric.Dependencies.Add(parameterType, 1);
-                }
+                
+                AddDependency(parameterType);
             }
         }
     }

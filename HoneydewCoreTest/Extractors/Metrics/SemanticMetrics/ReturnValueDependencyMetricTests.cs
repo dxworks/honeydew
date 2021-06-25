@@ -9,11 +9,16 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
     public class ReturnValueDependencyMetricTests
     {
         private readonly ReturnValueDependencyMetric _sut;
-        private IFactExtractor _factExtractor;
+        private readonly IFactExtractor _factExtractor;
 
         public ReturnValueDependencyMetricTests()
         {
             _sut = new ReturnValueDependencyMetric();
+
+            _factExtractor = new CSharpClassFactExtractor(new List<Type>
+            {
+                _sut.GetType()
+            });
         }
 
         [Fact]
@@ -21,7 +26,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
         {
             Assert.Equal("Return Value Dependency", _sut.PrettyPrint());
         }
-        
+
         [Fact]
         public void Extract_ShouldHaveVoidReturnValues_WhenClassHasMethodsThatReturnVoid()
         {
@@ -33,17 +38,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                         {                                           
                                             public void Foo() { }
 
-                                            public void Foo() { }
+                                            public void Bar() { }
                                         }
                                     }";
-
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
 
             var classModels = _factExtractor.Extract(fileContent);
 
@@ -51,9 +48,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
-            
+
             Assert.Empty(dependencies.Usings);
-            
+
             Assert.Equal(1, dependencies.Dependencies.Count);
             Assert.Equal(2, dependencies.Dependencies["void"]);
         }
@@ -76,15 +73,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                             public string Goo() { }
                                         }
                                     }";
-
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
-
+            
             var classModels = _factExtractor.Extract(fileContent);
 
             var optional = classModels[0].GetMetric<ReturnValueDependencyMetric>();
@@ -119,15 +108,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                             public int Goo();
                                         }
                                     }";
-
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
-
+            
             var classModels = _factExtractor.Extract(fileContent);
 
             var optional = classModels[0].GetMetric<ReturnValueDependencyMetric>();
@@ -163,14 +144,6 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                             public IFactExtractor Bar(CSharpMetricExtractor extractor) ;
                                         }
                                     }";
-
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
 
             var classModels = _factExtractor.Extract(fileContent);
 
@@ -208,14 +181,6 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                         }
                                     }";
 
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
-
             var classModels = _factExtractor.Extract(fileContent);
 
             var optional = classModels[0].GetMetric<ReturnValueDependencyMetric>();
@@ -230,7 +195,8 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             Assert.Equal(2, dependencies.Dependencies.Count);
             Assert.Equal(1, dependencies.Dependencies["CSharpMetricExtractor"]);
-            Assert.Equal(2, dependencies.Dependencies["IFactExtractor"]);        }
+            Assert.Equal(2, dependencies.Dependencies["IFactExtractor"]);
+        }
 
         [Fact]
         public void GetRelations_ShouldHaveNoRelations_WhenClassHasMethodsWithNoReturnValues()

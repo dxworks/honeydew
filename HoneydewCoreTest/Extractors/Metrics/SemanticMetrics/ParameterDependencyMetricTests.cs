@@ -9,11 +9,16 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
     public class ParameterDependencyMetricTests
     {
         private readonly ParameterDependencyMetric _sut;
-        private IFactExtractor _factExtractor;
+        private readonly IFactExtractor _factExtractor;
 
         public ParameterDependencyMetricTests()
         {
             _sut = new ParameterDependencyMetric();
+
+            _factExtractor = new CSharpClassFactExtractor(new List<Type>
+            {
+                _sut.GetType()
+            });
         }
 
         [Fact]
@@ -21,7 +26,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
         {
             Assert.Equal("Parameter Dependency", _sut.PrettyPrint());
         }
-        
+
         [Fact]
         public void Extract_ShouldHaveNoParameters_WhenClassHasMethodsWithNoParameters()
         {
@@ -36,14 +41,6 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                             public void Foo() { }
                                         }
                                     }";
-
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
 
             var classModels = _factExtractor.Extract(fileContent);
 
@@ -75,13 +72,6 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                         }
                                     }";
 
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
 
             var classModels = _factExtractor.Extract(fileContent);
 
@@ -118,14 +108,6 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                         }
                                     }";
 
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
-
             var classModels = _factExtractor.Extract(fileContent);
 
             var optional = classModels[0].GetMetric<ParameterDependencyMetric>();
@@ -158,15 +140,6 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                             public void Bar(IFactExtractor factExtractor,  CSharpMetricExtractor extractor) ;
                                         }
                                     }";
-
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
-
             var classModels = _factExtractor.Extract(fileContent);
 
             var optional = classModels[0].GetMetric<ParameterDependencyMetric>();
@@ -201,14 +174,6 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                             public void Bar(IFactExtractor factExtractor,  CSharpMetricExtractor extractor, int b) { }
                                         }
                                     }";
-
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
 
             var classModels = _factExtractor.Extract(fileContent);
 

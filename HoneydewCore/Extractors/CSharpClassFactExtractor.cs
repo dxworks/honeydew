@@ -76,12 +76,16 @@ namespace HoneydewCore.Extractors
 
                 var projectClass = new ClassModel()
                 {
-                    FullName = namespaceSymbol.ToString() + "." + className
+                    FullName = namespaceSymbol + "." + className
                 };
 
                 foreach (var extractorType in _metricExtractorsTypes)
                 {
                     var extractor = (CSharpMetricExtractor) Activator.CreateInstance(extractorType);
+                    if (extractor is ISemanticMetric)
+                    {
+                        extractor.SemanticModel = semanticModel;
+                    }
 
                     if (extractor is ISyntacticMetric)
                     {
@@ -96,21 +100,17 @@ namespace HoneydewCore.Extractors
                         });
                     }
 
-                    if (extractor is ISemanticMetric)
+                    if (extractor is ISemanticMetric and not ISyntacticMetric)
                     {
-                        extractor.SemanticModel = semanticModel;
-                        if (extractor is not ISyntacticMetric)
-                        {
-                            extractor.Visit(declarationSyntax);
+                        extractor.Visit(declarationSyntax);
 
-                            var metric = extractor.GetMetric();
-                            projectClass.Metrics.Add(new ClassMetric
-                            {
-                                ExtractorName = extractorType.FullName,
-                                Value = metric.GetValue(),
-                                ValueType = metric.GetValueType()
-                            });
-                        }
+                        var metric = extractor.GetMetric();
+                        projectClass.Metrics.Add(new ClassMetric
+                        {
+                            ExtractorName = extractorType.FullName,
+                            Value = metric.GetValue(),
+                            ValueType = metric.GetValueType()
+                        });
                     }
                 }
 

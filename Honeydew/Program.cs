@@ -28,6 +28,7 @@ namespace Honeydew
             cSharpClassFactExtractor.AddMetric<IsAbstractMetric>();
             cSharpClassFactExtractor.AddMetric<ParameterDependencyMetric>();
             cSharpClassFactExtractor.AddMetric<ReturnValueDependencyMetric>();
+            cSharpClassFactExtractor.AddMetric<LocalVariablesDependencyMetric>();
 
             var extractors = new List<IFactExtractor>
             {

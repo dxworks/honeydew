@@ -36,7 +36,7 @@ namespace HoneydewCore.IO.Readers
             {
                 solution = msBuildWorkspace.OpenSolutionAsync(pathToSolution).Result;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw new ProjectNotFoundException();
             }
