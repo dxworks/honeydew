@@ -52,6 +52,29 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             Assert.Empty(dependencies.Dependencies);
             Assert.Empty(dependencies.Usings);
         }
+        
+        [Fact]
+        public void Extract_ShouldHaveNoParameters_WhenClassHasConstructorWithNoParameters()
+        {
+            const string fileContent = @"
+                                    namespace App
+                                    {                                       
+                                        class MyClass
+                                        {                                           
+                                            public MyClass() { }
+                                        }
+                                    }";
+
+            var classModels = _factExtractor.Extract(fileContent);
+
+            var optional = classModels[0].GetMetric<ParameterDependencyMetric>();
+            Assert.True(optional.HasValue);
+
+            var dependencies = (DependencyDataMetric) optional.Value;
+
+            Assert.Empty(dependencies.Dependencies);
+            Assert.Empty(dependencies.Usings);
+        }
 
         [Fact]
         public void Extract_ShouldHavePrimitiveParameters_WhenClassHasMethodsWithPrimitiveParameters()
@@ -167,11 +190,46 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                     using HoneydewCore.Extractors.Metrics;
                                     namespace App
                                     {                                       
-                                        public class IInterface
+                                        public class Class1
                                         {                                           
                                             public void Foo(int a, CSharpMetricExtractor extractor, string name) { }
 
                                             public void Bar(IFactExtractor factExtractor,  CSharpMetricExtractor extractor, int b) { }
+                                        }
+                                    }";
+
+            var classModels = _factExtractor.Extract(fileContent);
+
+            var optional = classModels[0].GetMetric<ParameterDependencyMetric>();
+            Assert.True(optional.HasValue);
+
+            var dependencies = (DependencyDataMetric) optional.Value;
+
+            Assert.Equal(3, dependencies.Usings.Count);
+            Assert.Equal("System", dependencies.Usings[0]);
+            Assert.Equal("HoneydewCore.Extractors", dependencies.Usings[1]);
+            Assert.Equal("HoneydewCore.Extractors.Metrics", dependencies.Usings[2]);
+
+            Assert.Equal(4, dependencies.Dependencies.Count);
+            Assert.Equal(2, dependencies.Dependencies["CSharpMetricExtractor"]);
+            Assert.Equal(1, dependencies.Dependencies["IFactExtractor"]);
+            Assert.Equal(2, dependencies.Dependencies["int"]);
+            Assert.Equal(1, dependencies.Dependencies["string"]);
+        }
+
+        [Fact]
+        public void Extract_ShouldHaveDependenciesParameters_WhenClassHasConstructorWithDependenciesParameters()
+        {
+            const string fileContent = @"using System;
+                                    using HoneydewCore.Extractors;
+                                    using HoneydewCore.Extractors.Metrics;
+                                    namespace App
+                                    {                                       
+                                        public class Class1
+                                        {                                           
+                                            public Class1(int a, CSharpMetricExtractor extractor, string name) { }
+
+                                            public Class1(IFactExtractor factExtractor,  CSharpMetricExtractor extractor, int b) { }
                                         }
                                     }";
 
