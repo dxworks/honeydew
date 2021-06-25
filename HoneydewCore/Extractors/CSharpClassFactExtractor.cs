@@ -41,7 +41,8 @@ namespace HoneydewCore.Extractors
 
             if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
             {
-                throw new ExtractionException();
+                var result = diagnostics.Aggregate("", (current, diagnostic) => current + diagnostic);
+                throw new ExtractionException(result);
             }
 
             IList<ClassModel> classModels = new List<ClassModel>();
