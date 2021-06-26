@@ -17,9 +17,14 @@ namespace Honeydew
     {
         public static void Main(string[] args)
         {
-            const string pathToProject = "D:\\Work\\Visual Studio 2019\\CSharp\\Risc-Commander\\Risc-Commander.sln";
-            // const string pathToProject = "D:\\Work\\Visual Studio 2019\\CSharp\\Catan\\Catan.sln";
+            if (args.Length != 1)
+            {
+                Console.WriteLine(
+                    $"Incorrect Argument Count! Usage {AppDomain.CurrentDomain.FriendlyName} <path_to_solution>");
+                return;
+            }
 
+            var pathToProject = args[0];
             Console.WriteLine("Reading project from {0}...", pathToProject);
 
             var cSharpClassFactExtractor = new CSharpClassFactExtractor();
@@ -54,9 +59,10 @@ namespace Honeydew
 
             var fileRelationsProcessable = new ProcessorChain(solutionModelProcessable)
                 .Process(new SolutionModelToFileRelationsProcessor())
-                .Peek<FileRelationsRepresentation>(relationsRepresentation => relationsRepresentation.UsePrettyPrint = true)
+                .Peek<FileRelationsRepresentation>(relationsRepresentation =>
+                    relationsRepresentation.UsePrettyPrint = true)
                 .Finish<FileRelationsRepresentation>();
-            
+
             var csvExport = fileRelationsProcessable.Value.Export(new CsvModelExporter
             {
                 ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
@@ -69,9 +75,6 @@ namespace Honeydew
             const string outputPath = "D:\\Downloads\\New Text Document.csv";
             var fileWriter = new FileWriter();
             fileWriter.WriteFile(outputPath, csvExport);
-
-            // Console.WriteLine("Enter any key to exit ...");
-            // Console.ReadKey();
         }
     }
 }
