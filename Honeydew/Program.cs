@@ -40,10 +40,9 @@ namespace Honeydew
                 cSharpClassFactExtractor
             };
 
-            ISolutionLoader solutionLoader = new MsBuildSolutionReader(extractors);
-            ISolutionLoadingStrategy loadingStrategy = new DirectSolutionLoading();
-
-            var projectModel = solutionLoader.LoadSolution(pathToProject, loadingStrategy);
+            ISolutionLoader solutionLoader =
+                new SolutionFileLoader(extractors, new MsBuildSolutionProvider(), new BasicSolutionLoadingStrategy());
+            var projectModel = solutionLoader.LoadSolution(pathToProject);
 
             Console.WriteLine("Project read");
             Console.WriteLine();

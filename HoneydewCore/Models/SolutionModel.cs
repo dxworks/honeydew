@@ -19,20 +19,12 @@ namespace HoneydewCore.Models
 
         public string FindClassFullNameInUsings(IList<string> usings, string className)
         {
-            foreach (var usingName in usings)
+            foreach (var projectModel in Projects)
             {
-                foreach (var projectModel in Projects)
+                var fullName = projectModel.FindClassFullNameInUsings(usings, className);
+                if (fullName != className)
                 {
-                    if (projectModel.Namespaces.TryGetValue(usingName, out var projectNamespace))
-                    {
-                        foreach (var classModel in projectNamespace.ClassModels)
-                        {
-                            if (classModel.FullName == $"{usingName}.{className}")
-                            {
-                                return classModel.FullName;
-                            }
-                        }
-                    }
+                    return fullName;
                 }
             }
 
