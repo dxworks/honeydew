@@ -10,11 +10,17 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
     public class IsAbstractMetricTests
     {
         private readonly CSharpMetricExtractor _sut;
-        private IFactExtractor _factExtractor;
+        private readonly IFactExtractor _factExtractor;
 
         public IsAbstractMetricTests()
         {
             _sut = new IsAbstractMetric();
+            var metrics = new List<Type>
+            {
+                _sut.GetType()
+            };
+
+            _factExtractor = new CSharpClassFactExtractor(metrics);
         }
 
         [Fact]
@@ -42,14 +48,6 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                                         public class Foo { int a; public void f(){} }                                        
                                     }";
 
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
-
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, classModels.Count);
@@ -68,14 +66,6 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                                         public class Foo : SomeClass, ISomeInterface { int a; public void f(){} }                                        
                                     }";
 
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
-
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, classModels.Count);
@@ -92,15 +82,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                                     {
                                         public interface Foo { public void f(); }                                        
                                     }";
-
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
             
-            _factExtractor = new CSharpClassFactExtractor(metrics);
-
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, classModels.Count);
@@ -117,14 +99,6 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                                     {
                                         public abstract class Foo { public void g(); }                                        
                                     }";
-
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
 
             var classModels = _factExtractor.Extract(fileContent);
 

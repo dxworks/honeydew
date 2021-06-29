@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace HoneydewCore.Models
 {
-    public class NamespaceModel
+    public record NamespaceModel
     {
         public string Name { get; set; }
         public IList<ClassModel> ClassModels { get; set; } = new List<ClassModel>();

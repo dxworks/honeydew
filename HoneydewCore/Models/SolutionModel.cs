@@ -3,7 +3,7 @@ using HoneydewCore.IO.Writers.Exporters;
 
 namespace HoneydewCore.Models
 {
-    public class SolutionModel : IExportable
+    public record SolutionModel : IExportable
     {
         public IList<ProjectModel> Projects { get; set; } = new List<ProjectModel>();
 

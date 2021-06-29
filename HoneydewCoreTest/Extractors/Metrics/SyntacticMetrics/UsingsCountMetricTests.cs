@@ -10,11 +10,17 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
     public class UsingsCountMetricTests
     {
         private readonly CSharpMetricExtractor _sut;
-        private IFactExtractor _factExtractor;
+        private readonly IFactExtractor _factExtractor;
 
         public UsingsCountMetricTests()
         {
             _sut = new UsingsCountMetric();
+            var metrics = new List<Type>
+            {
+                _sut.GetType()
+            };
+
+            _factExtractor = new CSharpClassFactExtractor(metrics);
         }
 
         [Fact]
@@ -28,7 +34,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
         {
             Assert.Equal("Usings Count", _sut.PrettyPrint());
         }
-        
+
         [Fact]
         public void Extract_ShouldHaveUsingsCountMetric_WhenGivenOneUsingsLevel()
         {
@@ -43,19 +49,11 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                                     {
                                         public class Foo { int a; public void f(); }                                        
                                     }";
-
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
-
+            
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, classModels.Count);
-            
+
             var optional = classModels[0].GetMetric<UsingsCountMetric>();
             Assert.True(optional.HasValue);
             var count = (int) optional.Value;
@@ -95,21 +93,13 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                                         }
                                     }";
 
-
-            var metrics = new List<Type>()
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
-
             var classModels = _factExtractor.Extract(fileContent);
             Assert.Equal(2, classModels.Count);
-            
+
             var optional1 = classModels[0].GetMetric<UsingsCountMetric>();
             Assert.True(optional1.HasValue);
             Assert.Equal(12, (int) optional1.Value);
-            
+
             var optional2 = classModels[0].GetMetric<UsingsCountMetric>();
             Assert.True(optional2.HasValue);
             Assert.Equal(12, (int) optional2.Value);
