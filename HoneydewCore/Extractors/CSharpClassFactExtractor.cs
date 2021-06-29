@@ -83,36 +83,31 @@ namespace HoneydewCore.Extractors
                 foreach (var extractorType in _metricExtractorsTypes)
                 {
                     var extractor = (CSharpMetricExtractor) Activator.CreateInstance(extractorType);
+                    if (extractor == null)
+                    {
+                        continue;
+                    }
                     if (extractor is ISemanticMetric)
                     {
                         extractor.SemanticModel = semanticModel;
                     }
 
-                    if (extractor is ISyntacticMetric)
+                    if (extractor is ICompilationUnitMetric)
                     {
                         extractor.Visit(root);
-
-                        var metric = extractor.GetMetric();
-                        projectClass.Metrics.Add(new ClassMetric
-                        {
-                            ExtractorName = extractorType.FullName,
-                            Value = metric.GetValue(),
-                            ValueType = metric.GetValueType()
-                        });
                     }
-
-                    if (extractor is ISemanticMetric and not ISyntacticMetric)
+                    else
                     {
                         extractor.Visit(declarationSyntax);
-
-                        var metric = extractor.GetMetric();
-                        projectClass.Metrics.Add(new ClassMetric
-                        {
-                            ExtractorName = extractorType.FullName,
-                            Value = metric.GetValue(),
-                            ValueType = metric.GetValueType()
-                        });
                     }
+                    
+                    var metric = extractor.GetMetric();
+                    projectClass.Metrics.Add(new ClassMetric
+                    {
+                        ExtractorName = extractorType.FullName,
+                        Value = metric.GetValue(),
+                        ValueType = metric.GetValueType()
+                    });
                 }
 
                 classModels.Add(projectClass);

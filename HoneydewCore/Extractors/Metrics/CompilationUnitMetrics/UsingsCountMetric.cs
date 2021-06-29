@@ -1,8 +1,8 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
+namespace HoneydewCore.Extractors.Metrics.CompilationUnitMetrics
 {
-    public class UsingsCountMetric : CSharpMetricExtractor, ISyntacticMetric
+    public class UsingsCountMetric : CSharpMetricExtractor, ICompilationUnitMetric
     {
         public int UsingsCount { get; private set; }
 

@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics;
-using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
+using HoneydewCore.Extractors.Metrics.CompilationUnitMetrics;
 using Xunit;
 
-namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
+namespace HoneydewCoreTest.Extractors.Metrics.CompilationUnitMetrics
 {
     public class UsingsCountMetricTests
     {
@@ -26,7 +26,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
         [Fact]
         public void GetMetricType_ShouldReturnSyntactic()
         {
-            Assert.True(_sut is ISyntacticMetric);
+            Assert.True(_sut is ICompilationUnitMetric);
         }
 
         [Fact]

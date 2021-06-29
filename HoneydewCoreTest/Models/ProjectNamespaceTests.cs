@@ -1,5 +1,5 @@
-﻿using HoneydewCore.Extractors.Metrics.SemanticMetrics;
-using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
+﻿using HoneydewCore.Extractors.Metrics.CompilationUnitMetrics;
+using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Models;
 using Xunit;
 
@@ -95,7 +95,7 @@ namespace HoneydewCoreTest.Models
 
             Assert.Equal(1, sutClassModel.Metrics.Count);
 
-            Assert.Equal("HoneydewCore.Extractors.Metrics.SyntacticMetrics.UsingsCountMetric",
+            Assert.Equal("HoneydewCore.Extractors.Metrics.CompilationUnitMetrics.UsingsCountMetric",
                 sutClassModel.Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", sutClassModel.Metrics[0].ValueType);
             Assert.Equal(0, (int) sutClassModel.Metrics[0].Value);
@@ -161,7 +161,7 @@ namespace HoneydewCoreTest.Models
 
             Assert.Equal("Items.Pencil", _sut.ClassModels[0].FullName);
             Assert.Equal(1, _sut.ClassModels[0].Metrics.Count);
-            Assert.Equal("HoneydewCore.Extractors.Metrics.SyntacticMetrics.UsingsCountMetric",
+            Assert.Equal("HoneydewCore.Extractors.Metrics.CompilationUnitMetrics.UsingsCountMetric",
                 _sut.ClassModels[0].Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", _sut.ClassModels[0].Metrics[0].ValueType);
             Assert.Equal(0, (int) _sut.ClassModels[0].Metrics[0].Value);
@@ -180,7 +180,7 @@ namespace HoneydewCoreTest.Models
 
             Assert.Equal("Items.IItemService", _sut.ClassModels[2].FullName);
             Assert.Equal(2, _sut.ClassModels[2].Metrics.Count);
-            Assert.Equal("HoneydewCore.Extractors.Metrics.SyntacticMetrics.UsingsCountMetric",
+            Assert.Equal("HoneydewCore.Extractors.Metrics.CompilationUnitMetrics.UsingsCountMetric",
                 _sut.ClassModels[2].Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", _sut.ClassModels[2].Metrics[0].ValueType);
             Assert.Equal(0, (int) _sut.ClassModels[2].Metrics[0].Value);

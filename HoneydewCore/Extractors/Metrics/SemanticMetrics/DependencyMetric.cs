@@ -5,7 +5,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 {
-    public abstract class DependencyMetric : CSharpMetricExtractor, ISemanticMetric, ISyntacticMetric, IRelationMetric
+    // ICompilationUnitMetric because The Metric uses the Usings statements
+    public abstract class DependencyMetric : CSharpMetricExtractor, ISemanticMetric, ICompilationUnitMetric, IRelationMetric 
     {
         public DependencyDataMetric DataMetric { get; set; } = new();
 

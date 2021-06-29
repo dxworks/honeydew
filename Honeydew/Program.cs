@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using HoneydewCore.Extractors;
+using HoneydewCore.Extractors.Metrics.CompilationUnitMetrics;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.IO.Readers;
