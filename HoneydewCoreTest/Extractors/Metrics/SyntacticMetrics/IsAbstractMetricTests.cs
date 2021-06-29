@@ -52,7 +52,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
 
             Assert.Equal(1, classModels.Count);
 
-            var optional = classModels[0].GetMetric<IsAbstractMetric>();
+            var optional = classModels[0].GetMetricValue<IsAbstractMetric>();
             Assert.True(optional.HasValue);
             Assert.False((bool) optional.Value);
         }
@@ -69,7 +69,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, classModels.Count);
-            var optional = classModels[0].GetMetric<IsAbstractMetric>();
+            var optional = classModels[0].GetMetricValue<IsAbstractMetric>();
             Assert.True(optional.HasValue);
             Assert.False((bool) optional.Value);
         }
@@ -86,7 +86,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, classModels.Count);
-            var optional = classModels[0].GetMetric<IsAbstractMetric>();
+            var optional = classModels[0].GetMetricValue<IsAbstractMetric>();
             Assert.True(optional.HasValue);
             Assert.True((bool) optional.Value);
         }
@@ -103,7 +103,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, classModels.Count);
-            var optional = classModels[0].GetMetric<IsAbstractMetric>();
+            var optional = classModels[0].GetMetricValue<IsAbstractMetric>();
             Assert.True(optional.HasValue);
             Assert.True((bool) optional.Value);
         }

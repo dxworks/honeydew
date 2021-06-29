@@ -60,7 +60,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             Assert.Equal("App.MyClass", classModel.FullName);
 
-            var optional = classModel.GetMetric<BaseClassMetric>();
+            var optional = classModel.GetMetricValue<BaseClassMetric>();
             Assert.True(optional.HasValue);
 
             var inheritanceMetric = (InheritanceMetric) optional.Value;
@@ -103,7 +103,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             
             Assert.Equal("App.Domain.MyClass", classModel.FullName);
 
-            var optional = classModel.GetMetric<BaseClassMetric>();
+            var optional = classModel.GetMetricValue<BaseClassMetric>();
             Assert.True(optional.HasValue);
 
             var inheritanceMetric = (InheritanceMetric)optional.Value;
@@ -144,7 +144,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             var parentClassModel = classModels[0];
             Assert.Equal(1, parentClassModel.Metrics.Count);
             
-            var parentOptional = parentClassModel.GetMetric<BaseClassMetric>();
+            var parentOptional = parentClassModel.GetMetricValue<BaseClassMetric>();
             
             Assert.True(parentOptional.HasValue);
 
@@ -159,7 +159,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             Assert.Equal(1, classModel.Metrics.Count);
             Assert.Equal("App.ChildClass", classModel.FullName);
 
-            var optional = classModel.GetMetric<BaseClassMetric>();
+            var optional = classModel.GetMetricValue<BaseClassMetric>();
             Assert.True(optional.HasValue);
 
             var baseClassMetric = (InheritanceMetric) optional.Value;
@@ -204,7 +204,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             
             Assert.Equal(1, parentClassModel.Metrics.Count);
             
-            var parentOptional = parentClassModel.GetMetric<BaseClassMetric>();
+            var parentOptional = parentClassModel.GetMetricValue<BaseClassMetric>();
             Assert.True(parentOptional.HasValue);
             
             var inheritanceMetric = (InheritanceMetric) parentOptional.Value;
@@ -218,7 +218,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             Assert.Equal("App.ChildClass", classModel.FullName);
 
-            var optional = classModel.GetMetric<BaseClassMetric>();
+            var optional = classModel.GetMetricValue<BaseClassMetric>();
             Assert.True(optional.HasValue);
 
             var baseClassMetric = (InheritanceMetric) optional.Value;

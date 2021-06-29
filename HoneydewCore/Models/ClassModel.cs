@@ -31,7 +31,7 @@ namespace HoneydewCore.Models
             }
         }
 
-        public Optional<object> GetMetric<T>() where T : IMetricExtractor
+        public Optional<object> GetMetricValue<T>() where T : IMetricExtractor
         {
             var firstOrDefault = Metrics.FirstOrDefault(metric => metric.ExtractorName == typeof(T).FullName);
             return firstOrDefault == default ? default(Optional<object>) : firstOrDefault.Value;

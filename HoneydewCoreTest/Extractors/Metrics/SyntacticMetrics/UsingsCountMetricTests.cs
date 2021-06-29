@@ -54,7 +54,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
 
             Assert.Equal(1, classModels.Count);
 
-            var optional = classModels[0].GetMetric<UsingsCountMetric>();
+            var optional = classModels[0].GetMetricValue<UsingsCountMetric>();
             Assert.True(optional.HasValue);
             var count = (int) optional.Value;
 
@@ -96,11 +96,11 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             var classModels = _factExtractor.Extract(fileContent);
             Assert.Equal(2, classModels.Count);
 
-            var optional1 = classModels[0].GetMetric<UsingsCountMetric>();
+            var optional1 = classModels[0].GetMetricValue<UsingsCountMetric>();
             Assert.True(optional1.HasValue);
             Assert.Equal(12, (int) optional1.Value);
 
-            var optional2 = classModels[0].GetMetric<UsingsCountMetric>();
+            var optional2 = classModels[0].GetMetricValue<UsingsCountMetric>();
             Assert.True(optional2.HasValue);
             Assert.Equal(12, (int) optional2.Value);
         }

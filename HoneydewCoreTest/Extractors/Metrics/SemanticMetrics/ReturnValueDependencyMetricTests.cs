@@ -44,7 +44,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ReturnValueDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<ReturnValueDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
@@ -76,7 +76,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ReturnValueDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<ReturnValueDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
@@ -111,7 +111,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
             
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ReturnValueDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<ReturnValueDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
@@ -147,7 +147,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ReturnValueDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<ReturnValueDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
@@ -183,7 +183,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ReturnValueDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<ReturnValueDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;

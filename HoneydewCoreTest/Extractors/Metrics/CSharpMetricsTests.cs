@@ -52,7 +52,7 @@ namespace HoneydewCoreTest.Extractors.Metrics
             Assert.Equal("TopLevel.Child1.Foo", foo.FullName);
             Assert.Equal("TopLevel.Child1", foo.Namespace);
             Assert.Equal(1, foo.Metrics.Count);
-            var optional1 = foo.GetMetric<UsingsCountMetric>();
+            var optional1 = foo.GetMetricValue<UsingsCountMetric>();
             Assert.True(optional1.HasValue);
             Assert.Equal(10, (int) optional1.Value);
             
@@ -61,7 +61,7 @@ namespace HoneydewCoreTest.Extractors.Metrics
             Assert.Equal("TopLevel.Child2.Bar", bar.FullName);
             Assert.Equal("TopLevel.Child2", bar.Namespace);
             Assert.Equal(1, bar.Metrics.Count);
-            var optional2 = bar.GetMetric<UsingsCountMetric>();
+            var optional2 = bar.GetMetricValue<UsingsCountMetric>();
             Assert.True(optional2.HasValue);
             Assert.Equal(10, (int) optional2.Value);
         }
@@ -107,10 +107,10 @@ namespace HoneydewCoreTest.Extractors.Metrics
             // Assert.False(syntacticMetricOptional.HasValue);
 
             Assert.Equal(2, classModels.Count);
-            var optional = classModels[0].GetMetric<IMetricExtractor>();
+            var optional = classModels[0].GetMetricValue<IMetricExtractor>();
             Assert.False(optional.HasValue);
             
-            var optional1 = classModels[1].GetMetric<IMetricExtractor>();
+            var optional1 = classModels[1].GetMetricValue<IMetricExtractor>();
             Assert.False(optional1.HasValue);
         }
     }

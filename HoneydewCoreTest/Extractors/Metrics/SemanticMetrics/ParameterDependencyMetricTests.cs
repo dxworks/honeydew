@@ -44,7 +44,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ParameterDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<ParameterDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
@@ -67,7 +67,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ParameterDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<ParameterDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
@@ -98,7 +98,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ParameterDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<ParameterDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
@@ -133,7 +133,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ParameterDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<ParameterDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
@@ -165,7 +165,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
                                     }";
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ParameterDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<ParameterDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
@@ -200,7 +200,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ParameterDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<ParameterDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
@@ -235,7 +235,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SemanticMetrics
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetric<ParameterDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<ParameterDependencyMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (DependencyDataMetric) optional.Value;
