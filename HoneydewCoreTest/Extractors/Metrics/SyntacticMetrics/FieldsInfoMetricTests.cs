@@ -94,19 +94,19 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal("A", fieldInfos[0].Name);
             Assert.Equal("int", fieldInfos[0].Type);
             Assert.Equal("readonly", fieldInfos[0].Modifier);
-            Assert.Equal("private", fieldInfos[0].Visibility);
+            Assert.Equal("private", fieldInfos[0].AccessModifier);
             Assert.False(fieldInfos[0].IsEvent);
 
             Assert.Equal("X", fieldInfos[1].Name);
             Assert.Equal("float", fieldInfos[1].Type);
             Assert.Equal("volatile", fieldInfos[1].Modifier);
-            Assert.Equal("private", fieldInfos[1].Visibility);
+            Assert.Equal("private", fieldInfos[1].AccessModifier);
             Assert.False(fieldInfos[1].IsEvent);
 
             Assert.Equal("Y", fieldInfos[2].Name);
             Assert.Equal("string", fieldInfos[2].Type);
             Assert.Equal("static", fieldInfos[2].Modifier);
-            Assert.Equal("private", fieldInfos[2].Visibility);
+            Assert.Equal("private", fieldInfos[2].AccessModifier);
             Assert.False(fieldInfos[2].IsEvent);
         }
 
@@ -142,31 +142,31 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal("AnimalNest", fieldInfos[0].Name);
             Assert.Equal("int", fieldInfos[0].Type);
             Assert.Equal("", fieldInfos[0].Modifier);
-            Assert.Equal(modifier, fieldInfos[0].Visibility);
+            Assert.Equal(modifier, fieldInfos[0].AccessModifier);
             Assert.False(fieldInfos[0].IsEvent);
 
             Assert.Equal("X", fieldInfos[1].Name);
             Assert.Equal("float", fieldInfos[1].Type);
             Assert.Equal("", fieldInfos[1].Modifier);
-            Assert.Equal(modifier, fieldInfos[1].Visibility);
+            Assert.Equal(modifier, fieldInfos[1].AccessModifier);
             Assert.False(fieldInfos[1].IsEvent);
 
             Assert.Equal("Yaz_fafa", fieldInfos[2].Name);
             Assert.Equal("float", fieldInfos[2].Type);
             Assert.Equal("", fieldInfos[2].Modifier);
-            Assert.Equal(modifier, fieldInfos[2].Visibility);
+            Assert.Equal(modifier, fieldInfos[2].AccessModifier);
             Assert.False(fieldInfos[2].IsEvent);
 
             Assert.Equal("_zxy", fieldInfos[3].Name);
             Assert.Equal("string", fieldInfos[3].Type);
             Assert.Equal("", fieldInfos[3].Modifier);
-            Assert.Equal(modifier, fieldInfos[3].Visibility);
+            Assert.Equal(modifier, fieldInfos[3].AccessModifier);
             Assert.False(fieldInfos[3].IsEvent);
 
             Assert.Equal("extractor", fieldInfos[4].Name);
             Assert.Equal("CSharpMetricExtractor", fieldInfos[4].Type);
             Assert.Equal("", fieldInfos[4].Modifier);
-            Assert.Equal(modifier, fieldInfos[4].Visibility);
+            Assert.Equal(modifier, fieldInfos[4].AccessModifier);
             Assert.False(fieldInfos[4].IsEvent);
         }
 
@@ -202,25 +202,25 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal("extractor", fieldInfos[0].Name);
             Assert.Equal("CSharpMetricExtractor", fieldInfos[0].Type);
             Assert.Equal("", fieldInfos[0].Modifier);
-            Assert.Equal(visibility, fieldInfos[0].Visibility);
+            Assert.Equal(visibility, fieldInfos[0].AccessModifier);
             Assert.True(fieldInfos[0].IsEvent);
 
             Assert.Equal("_some_event", fieldInfos[1].Name);
             Assert.Equal("int", fieldInfos[1].Type);
             Assert.Equal("", fieldInfos[1].Modifier);
-            Assert.Equal(visibility, fieldInfos[1].Visibility);
+            Assert.Equal(visibility, fieldInfos[1].AccessModifier);
             Assert.True(fieldInfos[1].IsEvent);
 
             Assert.Equal("MyAction1", fieldInfos[2].Name);
             Assert.Equal("Action", fieldInfos[2].Type);
             Assert.Equal("", fieldInfos[2].Modifier);
-            Assert.Equal(visibility, fieldInfos[2].Visibility);
+            Assert.Equal(visibility, fieldInfos[2].AccessModifier);
             Assert.True(fieldInfos[2].IsEvent);
 
             Assert.Equal("MyAction2", fieldInfos[3].Name);
             Assert.Equal("Action", fieldInfos[3].Type);
             Assert.Equal("", fieldInfos[3].Modifier);
-            Assert.Equal(visibility, fieldInfos[3].Visibility);
+            Assert.Equal(visibility, fieldInfos[3].AccessModifier);
             Assert.True(fieldInfos[3].IsEvent);
         }
 
@@ -255,31 +255,31 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal("AnimalNest", fieldInfos[0].Name);
             Assert.Equal("int", fieldInfos[0].Type);
             Assert.Equal(modifier, fieldInfos[0].Modifier);
-            Assert.Equal("public", fieldInfos[0].Visibility);
+            Assert.Equal("public", fieldInfos[0].AccessModifier);
             Assert.False(fieldInfos[0].IsEvent);
 
             Assert.Equal("X", fieldInfos[1].Name);
             Assert.Equal("float", fieldInfos[1].Type);
             Assert.Equal(modifier, fieldInfos[1].Modifier);
-            Assert.Equal("protected", fieldInfos[1].Visibility);
+            Assert.Equal("protected", fieldInfos[1].AccessModifier);
             Assert.False(fieldInfos[1].IsEvent);
 
             Assert.Equal("Yaz_fafa", fieldInfos[2].Name);
             Assert.Equal("float", fieldInfos[2].Type);
             Assert.Equal(modifier, fieldInfos[2].Modifier);
-            Assert.Equal("protected", fieldInfos[2].Visibility);
+            Assert.Equal("protected", fieldInfos[2].AccessModifier);
             Assert.False(fieldInfos[2].IsEvent);
 
             Assert.Equal("_zxy", fieldInfos[3].Name);
             Assert.Equal("string", fieldInfos[3].Type);
             Assert.Equal(modifier, fieldInfos[3].Modifier);
-            Assert.Equal("private", fieldInfos[3].Visibility);
+            Assert.Equal("private", fieldInfos[3].AccessModifier);
             Assert.False(fieldInfos[3].IsEvent);
 
             Assert.Equal("extractor", fieldInfos[4].Name);
             Assert.Equal("CSharpMetricExtractor", fieldInfos[4].Type);
             Assert.Equal(modifier, fieldInfos[4].Modifier);
-            Assert.Equal("private", fieldInfos[4].Visibility);
+            Assert.Equal("private", fieldInfos[4].AccessModifier);
             Assert.False(fieldInfos[4].IsEvent);
         }
     }

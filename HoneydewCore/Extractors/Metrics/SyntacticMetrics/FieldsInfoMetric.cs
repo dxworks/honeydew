@@ -31,7 +31,7 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
         private void AddFieldInfo(BaseFieldDeclarationSyntax node, bool isEvent)
         {
             var allModifiers = node.Modifiers.ToString();
-            var visibilityModifier = allModifiers;
+            var accessModifier = allModifiers;
             var modifier = "";
             string[] modifiers = {"readonly", "static", "volatile"};
             foreach (var m in modifiers)
@@ -39,21 +39,21 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
                 if (!allModifiers.Contains(m)) continue;
 
                 modifier = m;
-                visibilityModifier = allModifiers.Replace(m, "");
-                visibilityModifier = visibilityModifier.Trim();
+                accessModifier = allModifiers.Replace(m, "");
+                accessModifier = accessModifier.Trim();
                 break;
             }
 
-            if (string.IsNullOrEmpty(visibilityModifier))
+            if (string.IsNullOrEmpty(accessModifier))
             {
-                visibilityModifier = "private";
+                accessModifier = "private";
             }
 
             foreach (var variable in node.Declaration.Variables)
             {
                 FieldInfos.Add(new FieldModel
                 {
-                    Visibility = visibilityModifier,
+                    AccessModifier = accessModifier,
                     Modifier = modifier,
                     IsEvent = isEvent,
                     Type = node.Declaration.Type.ToString(),

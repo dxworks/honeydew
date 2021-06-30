@@ -57,12 +57,11 @@ namespace HoneydewCore.Extractors
 
                 var projectClass = new ClassModel
                 {
-                    FullName = $"{namespaceSymbol}.{className}"
+                    FullName = $"{namespaceSymbol}.{className}",
+                    Fields = ExtractFieldsInfo(declarationSyntax),
+                    Methods = ExtractMethodInfo(declarationSyntax, semanticModel)
                 };
 
-                var fieldsInfoMetric = new FieldsInfoMetric();
-                fieldsInfoMetric.Visit(declarationSyntax);
-                projectClass.Fields = fieldsInfoMetric.FieldInfos;
 
                 foreach (var extractorType in _metricExtractorsTypes)
                 {
@@ -126,10 +125,22 @@ namespace HoneydewCore.Extractors
         {
             var classDeclarationSyntaxes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
             var interfaceDeclarationSyntaxes = root.DescendantNodes().OfType<InterfaceDeclarationSyntax>();
+            var recordDeclarationSyntaxes = root.DescendantNodes().OfType<RecordDeclarationSyntax>();
+            var structDeclarationSyntaxes = root.DescendantNodes().OfType<StructDeclarationSyntax>();
 
             IList<TypeDeclarationSyntax> syntaxes = classDeclarationSyntaxes.Cast<TypeDeclarationSyntax>().ToList();
 
             foreach (var syntax in interfaceDeclarationSyntaxes)
+            {
+                syntaxes.Add(syntax);
+            }
+
+            foreach (var syntax in recordDeclarationSyntaxes)
+            {
+                syntaxes.Add(syntax);
+            }
+
+            foreach (var syntax in structDeclarationSyntaxes)
             {
                 syntaxes.Add(syntax);
             }
@@ -151,6 +162,23 @@ namespace HoneydewCore.Extractors
             }
 
             return root;
+        }
+
+        private static IList<FieldModel> ExtractFieldsInfo(SyntaxNode declarationSyntax)
+        {
+            var fieldsInfoMetric = new FieldsInfoMetric();
+            fieldsInfoMetric.Visit(declarationSyntax);
+            return fieldsInfoMetric.FieldInfos;
+        }
+
+        private static IList<MethodModel> ExtractMethodInfo(SyntaxNode declarationSyntax, SemanticModel semanticModel)
+        {
+            var fieldsInfoMetric = new MethodInfoMetric
+            {
+                SemanticModel = semanticModel
+            };
+            fieldsInfoMetric.Visit(declarationSyntax);
+            return fieldsInfoMetric.MethodInfos;
         }
     }
 }
