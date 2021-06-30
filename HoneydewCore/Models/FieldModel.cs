@@ -1,6 +1,6 @@
-﻿namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
+﻿namespace HoneydewCore.Models
 {
-    public record FieldInfo
+    public record FieldModel
     {
         public string Name { get; init; }
         public string Type { get; init; }

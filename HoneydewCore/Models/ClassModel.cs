@@ -12,6 +12,7 @@ namespace HoneydewCore.Models
 
         public string FilePath { get; set; }
         public string FullName { get; set; }
+        public IList<FieldModel> Fields { get; set; } = new List<FieldModel>();
         public IList<ClassMetric> Metrics { get; set; } = new List<ClassMetric>();
 
         public string Namespace

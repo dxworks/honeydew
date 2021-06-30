@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
 {
     public class FieldsInfoMetric : CSharpMetricExtractor, ISyntacticMetric
     {
-        public IList<FieldInfo> FieldInfos { get; private set; } = new List<FieldInfo>();
+        public IList<FieldModel> FieldInfos { get; } = new List<FieldModel>();
 
         public override IMetric GetMetric()
         {
-            return new Metric<IList<FieldInfo>>(FieldInfos);
+            return new Metric<IList<FieldModel>>(FieldInfos);
         }
 
         public override string PrettyPrint()
@@ -50,7 +51,7 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
 
             foreach (var variable in node.Declaration.Variables)
             {
-                FieldInfos.Add(new FieldInfo
+                FieldInfos.Add(new FieldModel
                 {
                     Visibility = visibilityModifier,
                     Modifier = modifier,

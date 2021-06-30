@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.Extractors.Metrics;
+using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -35,34 +36,13 @@ namespace HoneydewCore.Extractors
 
         public IList<ClassModel> Extract(SyntaxTree tree)
         {
-            var root = tree.GetCompilationUnitRoot();
-
-            var diagnostics = root.GetDiagnostics();
-
-            if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
-            {
-                var result = diagnostics.Aggregate("", (current, diagnostic) => current + diagnostic);
-                throw new ExtractionException(result);
-            }
+            var root = GetCompilationUnitSyntaxTree(tree);
 
             IList<ClassModel> classModels = new List<ClassModel>();
 
+            var semanticModel = CreateSemanticModel(tree);
 
-            var compilation = CSharpCompilation.Create("Compilation")
-                .AddReferences(MetadataReference.CreateFromFile(typeof(string).Assembly.Location))
-                .AddSyntaxTrees(tree);
-            var semanticModel = compilation.GetSemanticModel(tree);
-
-
-            var classDeclarationSyntaxes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
-            var interfaceDeclarationSyntaxes = root.DescendantNodes().OfType<InterfaceDeclarationSyntax>();
-
-            IList<TypeDeclarationSyntax> syntaxes = classDeclarationSyntaxes.Cast<TypeDeclarationSyntax>().ToList();
-
-            foreach (var syntax in interfaceDeclarationSyntaxes)
-            {
-                syntaxes.Add(syntax);
-            }
+            var syntaxes = GetClassAndInterfaceSyntaxes(root);
 
             foreach (var declarationSyntax in syntaxes)
             {
@@ -75,10 +55,14 @@ namespace HoneydewCore.Extractors
                 var namespaceSymbol = declaredSymbol.ContainingNamespace;
                 var className = declaredSymbol.Name;
 
-                var projectClass = new ClassModel()
+                var projectClass = new ClassModel
                 {
-                    FullName = namespaceSymbol + "." + className
+                    FullName = $"{namespaceSymbol}.{className}"
                 };
+
+                var fieldsInfoMetric = new FieldsInfoMetric();
+                fieldsInfoMetric.Visit(declarationSyntax);
+                projectClass.Fields = fieldsInfoMetric.FieldInfos;
 
                 foreach (var extractorType in _metricExtractorsTypes)
                 {
@@ -87,6 +71,7 @@ namespace HoneydewCore.Extractors
                     {
                         continue;
                     }
+
                     if (extractor is ISemanticMetric)
                     {
                         extractor.SemanticModel = semanticModel;
@@ -100,7 +85,7 @@ namespace HoneydewCore.Extractors
                     {
                         extractor.Visit(declarationSyntax);
                     }
-                    
+
                     var metric = extractor.GetMetric();
                     projectClass.Metrics.Add(new ClassMetric
                     {
@@ -126,6 +111,46 @@ namespace HoneydewCore.Extractors
             var tree = CSharpSyntaxTree.ParseText(fileContent);
 
             return Extract(tree);
+        }
+
+        private static SemanticModel CreateSemanticModel(SyntaxTree tree)
+        {
+            var compilation = CSharpCompilation.Create("Compilation")
+                .AddReferences(MetadataReference.CreateFromFile(typeof(string).Assembly.Location))
+                .AddSyntaxTrees(tree);
+            var semanticModel = compilation.GetSemanticModel(tree);
+            return semanticModel;
+        }
+
+        private static IList<TypeDeclarationSyntax> GetClassAndInterfaceSyntaxes(CompilationUnitSyntax root)
+        {
+            var classDeclarationSyntaxes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
+            var interfaceDeclarationSyntaxes = root.DescendantNodes().OfType<InterfaceDeclarationSyntax>();
+
+            IList<TypeDeclarationSyntax> syntaxes = classDeclarationSyntaxes.Cast<TypeDeclarationSyntax>().ToList();
+
+            foreach (var syntax in interfaceDeclarationSyntaxes)
+            {
+                syntaxes.Add(syntax);
+            }
+
+            return syntaxes;
+        }
+
+        private static CompilationUnitSyntax GetCompilationUnitSyntaxTree(SyntaxTree tree)
+        {
+            var root = tree.GetCompilationUnitRoot();
+
+            var diagnostics = root.GetDiagnostics();
+
+            var enumerable = diagnostics as Diagnostic[] ?? diagnostics.ToArray();
+            if (diagnostics != null && enumerable.Any(d => d.Severity == DiagnosticSeverity.Error))
+            {
+                var result = enumerable.Aggregate("", (current, diagnostic) => current + diagnostic);
+                throw new ExtractionException(result);
+            }
+
+            return root;
         }
     }
 }
