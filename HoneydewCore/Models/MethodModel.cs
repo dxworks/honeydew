@@ -11,7 +11,7 @@ namespace HoneydewCore.Models
         public string AccessModifier { get; init; }
         public IList<string> ParameterTypes { get; } = new List<string>();
 
-        public string ContainingClass { get; init; }
+        public string ContainingClassName { get; set; }
         public IList<MethodCallModel> CalledMethods { get; } = new List<MethodCallModel>();
     }
 }

@@ -110,7 +110,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal("int", classModels[0].Methods[0].ReturnType);
             Assert.Equal(1, classModels[0].Methods[0].ParameterTypes.Count);
             Assert.Equal("float", classModels[0].Methods[0].ParameterTypes[0]);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingClassName);
             Assert.Equal("protected", classModels[0].Methods[0].AccessModifier);
             Assert.Equal("", classModels[0].Methods[0].Modifier);
             Assert.Empty(classModels[0].Methods[0].CalledMethods);
@@ -118,7 +118,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal("H", classModels[0].Methods[1].Name);
             Assert.Equal("bool", classModels[0].Methods[1].ReturnType);
             Assert.Empty(classModels[0].Methods[1].ParameterTypes);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[1].AccessModifier);
             Assert.Equal("virtual", classModels[0].Methods[1].Modifier);
             Assert.Empty(classModels[0].Methods[1].CalledMethods);
@@ -126,7 +126,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal("X", classModels[0].Methods[2].Name);
             Assert.Equal("int", classModels[0].Methods[2].ReturnType);
             Assert.Empty(classModels[0].Methods[2].ParameterTypes);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[2].AccessModifier);
             Assert.Equal("abstract", classModels[0].Methods[2].Modifier);
             Assert.Empty(classModels[0].Methods[2].CalledMethods);
@@ -136,7 +136,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal("X", classModels[1].Methods[0].Name);
             Assert.Equal("int", classModels[1].Methods[0].ReturnType);
             Assert.Empty(classModels[1].Methods[0].ParameterTypes);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[0].ContainingClass);
+            Assert.Equal("TopLevel.Bar", classModels[1].Methods[0].ContainingClassName);
             Assert.Equal("public", classModels[1].Methods[0].AccessModifier);
             Assert.Equal("override", classModels[1].Methods[0].Modifier);
             Assert.Empty(classModels[1].Methods[0].CalledMethods);
@@ -144,7 +144,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal("H", classModels[1].Methods[1].Name);
             Assert.Equal("bool", classModels[1].Methods[1].ReturnType);
             Assert.Empty(classModels[0].Methods[1].ParameterTypes);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].ContainingClass);
+            Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].ContainingClassName);
             Assert.Equal("public", classModels[1].Methods[1].AccessModifier);
             Assert.Equal("override", classModels[1].Methods[1].Modifier);
             Assert.Empty(classModels[1].Methods[1].CalledMethods);
@@ -195,7 +195,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal("int", classModels[0].Methods[0].ReturnType);
             Assert.Equal(1, classModels[0].Methods[0].ParameterTypes.Count);
             Assert.Equal("float", classModels[0].Methods[0].ParameterTypes[0]);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingClassName);
             Assert.Equal("protected", classModels[0].Methods[0].AccessModifier);
             Assert.Equal("", classModels[0].Methods[0].Modifier);
             Assert.Empty(classModels[0].Methods[0].CalledMethods);
@@ -203,7 +203,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal("H", classModels[0].Methods[1].Name);
             Assert.Equal("bool", classModels[0].Methods[1].ReturnType);
             Assert.Empty(classModels[0].Methods[1].ParameterTypes);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[1].AccessModifier);
             Assert.Equal("virtual", classModels[0].Methods[1].Modifier);
             Assert.Empty(classModels[0].Methods[1].CalledMethods);
@@ -213,7 +213,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal("M", classModels[1].Methods[0].Name);
             Assert.Equal("int", classModels[1].Methods[0].ReturnType);
             Assert.Empty(classModels[1].Methods[0].ParameterTypes);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[0].ContainingClass);
+            Assert.Equal("TopLevel.Bar", classModels[1].Methods[0].ContainingClassName);
             Assert.Equal("private", classModels[1].Methods[0].AccessModifier);
             Assert.Equal("", classModels[1].Methods[0].Modifier);
             Assert.Empty(classModels[1].Methods[0].CalledMethods);
@@ -221,16 +221,16 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal("H", classModels[1].Methods[1].Name);
             Assert.Equal("bool", classModels[1].Methods[1].ReturnType);
             Assert.Empty(classModels[0].Methods[1].ParameterTypes);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].ContainingClass);
+            Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].ContainingClassName);
             Assert.Equal("public", classModels[1].Methods[1].AccessModifier);
             Assert.Equal("override", classModels[1].Methods[1].Modifier);
             Assert.Equal(3, classModels[1].Methods[1].CalledMethods.Count);
             Assert.Equal("G", classModels[1].Methods[1].CalledMethods[0].MethodName);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].CalledMethods[0].ContainingClass);
+            Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].CalledMethods[0].ContainingClassName);
             Assert.Equal("H", classModels[1].Methods[1].CalledMethods[1].MethodName);
-            Assert.Equal("TopLevel.Foo", classModels[1].Methods[1].CalledMethods[1].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[1].Methods[1].CalledMethods[1].ContainingClassName);
             Assert.Equal("M", classModels[1].Methods[1].CalledMethods[2].MethodName);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].CalledMethods[2].ContainingClass);
+            Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].CalledMethods[2].ContainingClassName);
         }
 
         [Fact]
@@ -278,7 +278,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal("int", classModels[0].Methods[0].ReturnType);
             Assert.Equal(1, classModels[0].Methods[0].ParameterTypes.Count);
             Assert.Equal("int", classModels[0].Methods[0].ParameterTypes[0]);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[0].AccessModifier);
             Assert.Equal("", classModels[0].Methods[0].Modifier);
             Assert.Empty(classModels[0].Methods[0].CalledMethods);
@@ -288,14 +288,14 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal(2, classModels[0].Methods[1].ParameterTypes.Count);
             Assert.Equal("int", classModels[0].Methods[1].ParameterTypes[0]);
             Assert.Equal("int", classModels[0].Methods[1].ParameterTypes[1]);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[1].AccessModifier);
             Assert.Equal("", classModels[0].Methods[1].Modifier);
             Assert.Equal(2, classModels[0].Methods[1].CalledMethods.Count);
             Assert.Equal("A", classModels[0].Methods[1].CalledMethods[0].MethodName);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[0].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[0].ContainingClassName);
             Assert.Equal("A", classModels[0].Methods[1].CalledMethods[1].MethodName);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[1].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[1].ContainingClassName);
 
             Assert.Equal(2, classModels[1].Methods.Count);
 
@@ -305,24 +305,24 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal("int", classModels[1].Methods[0].ParameterTypes[0]);
             Assert.Equal("int", classModels[1].Methods[0].ParameterTypes[1]);
             Assert.Equal("string", classModels[1].Methods[0].ParameterTypes[2]);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[0].ContainingClass);
+            Assert.Equal("TopLevel.Bar", classModels[1].Methods[0].ContainingClassName);
             Assert.Equal("public", classModels[1].Methods[0].AccessModifier);
             Assert.Equal("", classModels[1].Methods[0].Modifier);
             Assert.Equal(4, classModels[1].Methods[0].CalledMethods.Count);
             Assert.Equal("A", classModels[1].Methods[0].CalledMethods[0].MethodName);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[0].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[0].ContainingClassName);
             Assert.Equal("B", classModels[1].Methods[0].CalledMethods[1].MethodName);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[1].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[1].ContainingClassName);
             Assert.Equal("K", classModels[1].Methods[0].CalledMethods[2].MethodName);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[0].CalledMethods[2].ContainingClass);
+            Assert.Equal("TopLevel.Bar", classModels[1].Methods[0].CalledMethods[2].ContainingClassName);
             Assert.Equal("A", classModels[1].Methods[0].CalledMethods[3].MethodName);
-            Assert.Equal("TopLevel.Foo", classModels[1].Methods[0].CalledMethods[3].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[1].Methods[0].CalledMethods[3].ContainingClassName);
             
             Assert.Equal("K", classModels[1].Methods[1].Name);
             Assert.Equal("int", classModels[1].Methods[1].ReturnType);
             Assert.Equal(1, classModels[1].Methods[1].ParameterTypes.Count);
             Assert.Equal("string", classModels[1].Methods[1].ParameterTypes[0]);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].ContainingClass);
+            Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].ContainingClassName);
             Assert.Equal("private", classModels[1].Methods[1].AccessModifier);
             Assert.Equal("", classModels[1].Methods[1].Modifier);
             Assert.Empty(classModels[1].Methods[1].CalledMethods);

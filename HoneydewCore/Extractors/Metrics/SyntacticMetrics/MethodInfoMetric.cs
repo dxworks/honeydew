@@ -67,7 +67,7 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
             {
                 Name = node.Identifier.ToString(),
                 ReturnType = node.ReturnType.ToString(),
-                ContainingClass = _containingClassName,
+                ContainingClassName = _containingClassName,
                 Modifier = modifier,
                 AccessModifier = accessModifier,
             };
@@ -88,7 +88,7 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
                             methodModel.CalledMethods.Add(new MethodCallModel
                             {
                                 MethodName = invocationExpressionSyntax.Expression.ToString(),
-                                ContainingClass = _containingClassName
+                                ContainingClassName = _containingClassName
                             });
                             break;
                         case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
@@ -111,7 +111,7 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
                             methodModel.CalledMethods.Add(new MethodCallModel
                             {
                                 MethodName = memberAccessExpressionSyntax.Name.ToString(),
-                                ContainingClass = className
+                                ContainingClassName = className
                             });
                             break;
                         }

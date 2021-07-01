@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using HoneydewCore.IO.Writers.Exporters;
 
 namespace HoneydewCore.Models
@@ -43,6 +45,28 @@ namespace HoneydewCore.Models
                     }
                 }
             }
+        }
+
+        public ClassModel GetClassModelByFullName(string classFullName)
+        {
+            var lastIndexOf = classFullName.LastIndexOf(".", StringComparison.Ordinal);
+
+
+            var classNamespace = "";
+            if (lastIndexOf >= 0)
+            {
+                classNamespace = classFullName[..lastIndexOf];
+            }
+
+            foreach (var project in Projects)
+            {
+                if (project.Namespaces.TryGetValue(classNamespace, out var namespaceModel))
+                {
+                    return namespaceModel.ClassModels.FirstOrDefault(model => model.FullName == classFullName);
+                }
+            }
+
+            return default;
         }
     }
 }

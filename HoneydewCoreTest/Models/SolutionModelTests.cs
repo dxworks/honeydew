@@ -119,5 +119,34 @@ namespace HoneydewCoreTest.Models
 
             Assert.Equal("",_sut.Export(exporterMock.Object));
         }
+
+        [Fact]
+        public void GetClassModelByFullName_ShouldReturnClassModel_WhenGivenFullClassName()
+        {
+            var projectModel = new ProjectModel("Project");
+
+            string[] array =
+            {
+                "Project.Models.Model1",
+                "Project.Services.IService",
+                "Project.Services.Impl.Service",
+                "Project.Models.Model2",
+                "Project.Domain.Model.DTO.ModelDTO"
+            };
+
+            foreach (var className in array)
+            {
+                projectModel.Add(new ClassModel {FullName = className});    
+            }
+            
+            _sut.Projects.Add(projectModel);
+
+
+            Assert.Equal(_sut.Projects[0].Namespaces["Project.Models"].ClassModels[0],_sut.GetClassModelByFullName(array[0]));
+            Assert.Equal(_sut.Projects[0].Namespaces["Project.Services"].ClassModels[0],_sut.GetClassModelByFullName(array[1]));
+            Assert.Equal(_sut.Projects[0].Namespaces["Project.Services.Impl"].ClassModels[0],_sut.GetClassModelByFullName(array[2]));
+            Assert.Equal(_sut.Projects[0].Namespaces["Project.Models"].ClassModels[1],_sut.GetClassModelByFullName(array[3]));
+            Assert.Equal(_sut.Projects[0].Namespaces["Project.Domain.Model.DTO"].ClassModels[0],_sut.GetClassModelByFullName(array[4]));
+        }
     }
 }

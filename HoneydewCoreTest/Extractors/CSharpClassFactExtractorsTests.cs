@@ -465,7 +465,7 @@ namespace HoneydewCoreTest.Extractors
             Assert.Equal("CSharpExtractor", classModels[0].Methods[0].ReturnType);
             Assert.Equal(1, classModels[0].Methods[0].ParameterTypes.Count);
             Assert.Equal("int", classModels[0].Methods[0].ParameterTypes[0]);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[0].AccessModifier);
             Assert.Equal("abstract", classModels[0].Methods[0].Modifier);
             Assert.Empty(classModels[0].Methods[0].CalledMethods);
@@ -474,7 +474,7 @@ namespace HoneydewCoreTest.Extractors
             Assert.Equal("int", classModels[0].Methods[1].ReturnType);
             Assert.Equal(1, classModels[0].Methods[1].ParameterTypes.Count);
             Assert.Equal("CSharpExtractor", classModels[0].Methods[1].ParameterTypes[0]);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[1].AccessModifier);
             Assert.Equal("abstract", classModels[0].Methods[1].Modifier);
             Assert.Empty(classModels[0].Methods[1].CalledMethods);
@@ -484,7 +484,7 @@ namespace HoneydewCoreTest.Extractors
             Assert.Equal(2, classModels[0].Methods[2].ParameterTypes.Count);
             Assert.Equal("float", classModels[0].Methods[2].ParameterTypes[0]);
             Assert.Equal("CSharpExtractor", classModels[0].Methods[2].ParameterTypes[1]);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[2].AccessModifier);
             Assert.Equal("abstract", classModels[0].Methods[2].Modifier);
             Assert.Empty(classModels[0].Methods[2].CalledMethods);
@@ -512,7 +512,7 @@ namespace HoneydewCoreTest.Extractors
             Assert.Equal("void", classModels[0].Methods[0].ReturnType);
             Assert.Equal(1, classModels[0].Methods[0].ParameterTypes.Count);
             Assert.Equal("int", classModels[0].Methods[0].ParameterTypes[0]);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[0].AccessModifier);
             Assert.Equal("static", classModels[0].Methods[0].Modifier);
             Assert.Empty(classModels[0].Methods[0].CalledMethods);
@@ -521,26 +521,26 @@ namespace HoneydewCoreTest.Extractors
             Assert.Equal("int", classModels[0].Methods[1].ReturnType);
             Assert.Equal(1, classModels[0].Methods[1].ParameterTypes.Count);
             Assert.Equal("CSharpExtractor", classModels[0].Methods[1].ParameterTypes[0]);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingClassName);
             Assert.Equal("private", classModels[0].Methods[1].AccessModifier);
             Assert.Equal("", classModels[0].Methods[1].Modifier);
             Assert.Equal(1, classModels[0].Methods[1].CalledMethods.Count);
             Assert.Equal("f", classModels[0].Methods[1].CalledMethods[0].MethodName);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[0].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[0].ContainingClassName);
 
             Assert.Equal("h", classModels[0].Methods[2].Name);
             Assert.Equal("string", classModels[0].Methods[2].ReturnType);
             Assert.Equal(2, classModels[0].Methods[2].ParameterTypes.Count);
             Assert.Equal("float", classModels[0].Methods[2].ParameterTypes[0]);
             Assert.Equal("CSharpExtractor", classModels[0].Methods[2].ParameterTypes[1]);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].ContainingClassName);
             Assert.Equal("protected", classModels[0].Methods[2].AccessModifier);
             Assert.Equal("", classModels[0].Methods[2].Modifier);
             Assert.Equal(2, classModels[0].Methods[2].CalledMethods.Count);
             Assert.Equal("g", classModels[0].Methods[2].CalledMethods[0].MethodName);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].CalledMethods[0].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].CalledMethods[0].ContainingClassName);
             Assert.Equal("f", classModels[0].Methods[2].CalledMethods[1].MethodName);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].CalledMethods[1].ContainingClass);
+            Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].CalledMethods[1].ContainingClassName);
         }
     }
 }

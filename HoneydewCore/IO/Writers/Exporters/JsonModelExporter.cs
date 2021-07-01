@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Text.Json;
 using HoneydewCore.Models;
 
 namespace HoneydewCore.IO.Writers.Exporters
@@ -7,7 +7,7 @@ namespace HoneydewCore.IO.Writers.Exporters
     {
         public string Export(SolutionModel model)
         {
-            throw new NotImplementedException();
+            return JsonSerializer.Serialize(model);
         }
     }
 }

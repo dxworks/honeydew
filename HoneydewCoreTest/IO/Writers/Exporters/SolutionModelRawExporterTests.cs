@@ -12,7 +12,7 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
 
         public SolutionModelRawExporterTests()
         {
-            _sut = new RawModelExporter();
+            _sut = new JsonModelExporter();
         }
 
         [Fact]
@@ -26,7 +26,7 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
             Assert.Equal(expectedString, exportString);
         }
 
-        [Fact(Skip = "Revise Later")]
+        [Fact]
         public void Export_ShouldReturnRawModel_WhenModelHasOneCompilationUnitWithOneClassAndNoMetrics()
         {
             var solutionModel = new SolutionModel();
@@ -40,7 +40,7 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""Projects"":[{""Name"":""A Project"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""Metrics"":[],""Namespace"":""SomeNamespace""}]}}}]}";
+                @"{""Projects"":[{""Name"":""A Project"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""Fields"":[],""Methods"":[],""Metrics"":[],""Namespace"":""SomeNamespace""}]}}}]}";
 
             var projectModel = new ProjectModel("A Project");
             foreach (var classModel in classModels)
@@ -55,7 +55,7 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
             Assert.Equal(expectedString, exportString);
         }
 
-        [Fact(Skip = "Revise Later")]
+        [Fact]
         public void Export_ShouldReturnRawModel_WhenModelHasOneCompilationUnitWithOneClassAndMetrics()
         {
             var solutionModel = new SolutionModel();
@@ -79,12 +79,61 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""Projects"":[{""Name"":""ProjectName"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""Metrics"":[{""ExtractorName"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"",""ValueType"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}],""Namespace"":""SomeNamespace""}]}}}]}";
+                @"{""Projects"":[{""Name"":""ProjectName"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""Fields"":[],""Methods"":[],""Metrics"":[{""ExtractorName"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"",""ValueType"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}],""Namespace"":""SomeNamespace""}]}}}]}";
 
             var projectModel = new ProjectModel("ProjectName");
             foreach (var model in classModels)
             {
                 projectModel.Add(model);
+            }
+
+            solutionModel.Projects.Add(projectModel);
+
+            var exportString = solutionModel.Export(_sut);
+
+            Assert.Equal(expectedString, exportString);
+        }
+
+        [Fact]
+        public void Export_ShouldReturnRawModel_WhenModelHasOneCompilationUnitWithOneClassAndMethodCalls()
+        {
+            var solutionModel = new SolutionModel();
+            var classModels = new List<ClassModel>
+            {
+                new()
+                {
+                    FilePath = "pathToClass",
+                    FullName = "SomeNamespace.FirstClass",
+                    Methods = new List<MethodModel>
+                    {
+                        new()
+                        {
+                            Name = "Method1",
+                            ReturnType = "int",
+                            Modifier = "static",
+                            AccessModifier = "public",
+                            ContainingClassName = "SomeNamespace.FirstClass",
+                            CalledMethods =
+                            {
+                                new MethodCallModel
+                                {
+                                    MethodName = "Parse",
+                                    ContainingClassName = "int"
+                                }
+                            },
+                            ParameterTypes = { "string"}
+                        }
+                    }
+                }
+            };
+
+            const string expectedString =
+                @"{""Projects"":[{""Name"":""A Project"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""Fields"":[],""Methods"":[{""Name"":""Method1"",""ReturnType"":""int"",""Modifier"":""static"",""AccessModifier"":""public"",""ParameterTypes"":[""string""],""ContainingClassName"":""SomeNamespace.FirstClass"",""CalledMethods"":[{""MethodName"":""Parse"",""ContainingClassName"":""int""}]}],""Metrics"":[],""Namespace"":""SomeNamespace""}]}}}]}";
+
+            var projectModel = new ProjectModel("A Project");
+            foreach (var classModel in classModels)
+            {
+                projectModel.Add(classModel);
             }
 
             solutionModel.Projects.Add(projectModel);
