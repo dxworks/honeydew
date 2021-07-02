@@ -49,14 +49,18 @@ honeydew <path_to_solution> <output_file_path>
 honeydew <path_to_solution> <output_file_path> -r class_relations -e csv
 ```
 
-## Run
-
-```
-dotnet run  
-```
-
 ## Build Project
 
+### Self-contained application
+
+#### For macOs 64-bit
+
 ```
-dotnet build
+dotnet publish -r osx-x64
+```
+
+#### For Windows 64-bit
+
+```
+dotnet publish -r win-x64
 ```
