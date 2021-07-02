@@ -6,23 +6,23 @@ using HoneydewCore.Models.Representations;
 
 namespace HoneydewCore.IO.Writers.Exporters
 {
-    public class CsvModelExporter : IFileRelationsRepresentationExporter
+    public class CsvModelExporter : IClassRelationsRepresentationExporter
     {
         public IList<Tuple<string, Func<string, string>>> ColumnFunctionForEachRow =
             new List<Tuple<string, Func<string, string>>>();
         
-        public string Export(FileRelationsRepresentation fileRelationsRepresentation)
+        public string Export(ClassRelationsRepresentation classRelationsRepresentation)
         {
             var csvBuilder = new CsvBuilder();
             var headers = new List<string>
             {
                 "Source", "Target"
             };
-            headers.AddRange(fileRelationsRepresentation.GetDependenciesTypePretty());
+            headers.AddRange(classRelationsRepresentation.GetDependenciesTypePretty());
 
             csvBuilder.AddHeader(headers);
 
-            foreach (var (sourceName, targetDictionary) in fileRelationsRepresentation.FileRelations)
+            foreach (var (sourceName, targetDictionary) in classRelationsRepresentation.ClassRelations)
             {
                 foreach (var (targetName, dependenciesDictionary) in targetDictionary)
                 {
@@ -32,7 +32,7 @@ namespace HoneydewCore.IO.Writers.Exporters
                         targetName
                     };
 
-                    values.AddRange(fileRelationsRepresentation.DependenciesType
+                    values.AddRange(classRelationsRepresentation.DependenciesType
                         .Select(relation => dependenciesDictionary.TryGetValue(relation, out var value)
                             ? value.ToString()
                             : ""));

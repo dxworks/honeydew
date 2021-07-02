@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CommandLine;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics.CompilationUnitMetrics;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
@@ -17,59 +18,104 @@ namespace Honeydew
     {
         public static void Main(string[] args)
         {
-            if (args.Length != 1)
+            Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed(options =>
             {
-                Console.WriteLine(
-                    $"Incorrect Argument Count! Usage {AppDomain.CurrentDomain.FriendlyName} <path_to_solution>");
-                return;
-            }
+                var useClassRelationsRepresentation = false;
+                IFileWriter writer;
+                IExporter exporter = new JsonModelExporter();
 
-            var pathToProject = args[0];
-            Console.WriteLine("Reading project from {0}...", pathToProject);
+                var pathToSolution = options.InputFilePath;
+                var outputPath = options.OutputFilePath;
+                var representationType = options.RepresentationType;
+                var exportType = options.ExportType;
 
-            var cSharpClassFactExtractor = new CSharpClassFactExtractor();
-            cSharpClassFactExtractor.AddMetric<BaseClassMetric>();
-            cSharpClassFactExtractor.AddMetric<UsingsCountMetric>();
-            cSharpClassFactExtractor.AddMetric<IsAbstractMetric>();
-            cSharpClassFactExtractor.AddMetric<ParameterDependencyMetric>();
-            cSharpClassFactExtractor.AddMetric<ReturnValueDependencyMetric>();
-            cSharpClassFactExtractor.AddMetric<LocalVariablesDependencyMetric>();
 
-            var extractors = new List<IFactExtractor>
-            {
-                cSharpClassFactExtractor
-            };
-
-            ISolutionLoader solutionLoader =
-                new SolutionFileLoader(extractors, new MsBuildSolutionProvider(), new BasicSolutionLoadingStrategy());
-            var projectModel = solutionLoader.LoadSolution(pathToProject);
-
-            Console.WriteLine("Project read");
-            Console.WriteLine();
-            // raw export
-            // var exportedSolutionModel = projectModel.Export(new RawModelExporter());
-            // Console.WriteLine(exportedSolutionModel);
-
-            // Console.WriteLine(solutionModelProcessable.Value.Export(new RawModelExporter()));
-
-            var fileRelationsProcessable = new ProcessorChain(IProcessable.Of(projectModel))
-                .Process(new SolutionModelToFileRelationsProcessor())
-                .Peek<FileRelationsRepresentation>(relationsRepresentation =>
-                    relationsRepresentation.UsePrettyPrint = true)
-                .Finish<FileRelationsRepresentation>();
-
-            var csvExport = fileRelationsProcessable.Value.Export(new CsvModelExporter
-            {
-                ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
+                if (string.IsNullOrWhiteSpace(outputPath))
                 {
-                    new("Total Count", ExportUtils.CsvSumPerLine)
+                    writer = new ConsoleWriter();
+                }
+                else
+                {
+                    if (exportType == "json")
+                    {
+                        if (outputPath.EndsWith(".csv"))
+                        {
+                            exportType = "csv";
+                        }
+                    }
+
+                    writer = new FileWriter();
+                }
+
+                if (representationType == "class_relations")
+                {
+                    useClassRelationsRepresentation = true;
+                }
+
+                if (exportType == "csv")
+                {
+                    // add formulas for each row for the csv export
+                    exporter = new CsvModelExporter
+                    {
+                        ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
+                        {
+                            new("Total Count", ExportUtils.CsvSumPerLine)
+                        }
+                    };
+                }
+
+                // add the metrics that will be run after the solution is loaded
+
+                var cSharpClassFactExtractor = new CSharpClassFactExtractor();
+                cSharpClassFactExtractor.AddMetric<BaseClassMetric>();
+                cSharpClassFactExtractor.AddMetric<UsingsCountMetric>();
+                cSharpClassFactExtractor.AddMetric<IsAbstractMetric>();
+                cSharpClassFactExtractor.AddMetric<ParameterDependencyMetric>();
+                cSharpClassFactExtractor.AddMetric<ReturnValueDependencyMetric>();
+                cSharpClassFactExtractor.AddMetric<LocalVariablesDependencyMetric>();
+
+                var extractors = new List<IFactExtractor>
+                {
+                    cSharpClassFactExtractor
+                };
+
+                // Load solution model from path
+                ISolutionLoader solutionLoader =
+                    new SolutionFileLoader(extractors, new MsBuildSolutionProvider(),
+                        new BasicSolutionLoadingStrategy());
+                var solutionModel = solutionLoader.LoadSolution(pathToSolution);
+
+                string exportString;
+
+                if (useClassRelationsRepresentation)
+                {
+                    // transform solution model to Class Relations Representation
+                    var classRelationsProcessable = new ProcessorChain(IProcessable.Of(solutionModel))
+                        .Process(new SolutionModelToClassRelationsProcessor())
+                        .Peek<ClassRelationsRepresentation>(relationsRepresentation =>
+                            relationsRepresentation.UsePrettyPrint = true)
+                        .Finish<ClassRelationsRepresentation>();
+                    exportString = classRelationsProcessable.Value.Export(exporter);
+                }
+                else
+                {
+                    exportString = solutionModel.Export(exporter);
+                }
+
+                if (string.IsNullOrEmpty(exportString))
+                {
+                    Console.WriteLine(
+                        $"Export type '{exportType}' not supported for the '{representationType}' representation !");
+                    return;
+                }
+
+                writer.WriteFile(outputPath, exportString);
+                if (writer is not ConsoleWriter)
+                {
+                    Console.WriteLine("Extraction Complete!");
+                    Console.WriteLine($"Output File will be found at {outputPath}");
                 }
             });
-            Console.WriteLine(csvExport);
-
-            const string outputPath = "D:\\Downloads\\New Text Document.csv";
-            var fileWriter = new FileWriter();
-            fileWriter.WriteFile(outputPath, csvExport);
         }
     }
 }
