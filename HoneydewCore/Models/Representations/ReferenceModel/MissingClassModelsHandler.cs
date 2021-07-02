@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace HoneydewCore.Models.Representations.ReferenceModel
 {
-    public class MissingClassModelsHandler : IMissingClassModelsHandler
+    internal class MissingClassModelsHandler : IMissingClassModelsHandler
     {
         private readonly IDictionary<string, ReferenceClassModel> _classModels =
             new Dictionary<string, ReferenceClassModel>();

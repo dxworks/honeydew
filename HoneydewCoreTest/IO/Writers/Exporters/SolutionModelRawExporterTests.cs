@@ -118,7 +118,8 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
                                 new MethodCallModel
                                 {
                                     MethodName = "Parse",
-                                    ContainingClassName = "int"
+                                    ContainingClassName = "int",
+                                    ParameterTypes = {"string"}
                                 }
                             },
                             ParameterTypes = { "string"}
@@ -128,7 +129,7 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""Projects"":[{""Name"":""A Project"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""Fields"":[],""Methods"":[{""Name"":""Method1"",""ReturnType"":""int"",""Modifier"":""static"",""AccessModifier"":""public"",""ParameterTypes"":[""string""],""ContainingClassName"":""SomeNamespace.FirstClass"",""CalledMethods"":[{""MethodName"":""Parse"",""ContainingClassName"":""int""}]}],""Metrics"":[],""Namespace"":""SomeNamespace""}]}}}]}";
+                @"{""Projects"":[{""Name"":""A Project"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""Fields"":[],""Methods"":[{""Name"":""Method1"",""ReturnType"":""int"",""Modifier"":""static"",""AccessModifier"":""public"",""ParameterTypes"":[""string""],""ContainingClassName"":""SomeNamespace.FirstClass"",""CalledMethods"":[{""MethodName"":""Parse"",""ContainingClassName"":""int"",""ParameterTypes"":[""string""]}]}],""Metrics"":[],""Namespace"":""SomeNamespace""}]}}}]}";
 
             var projectModel = new ProjectModel("A Project");
             foreach (var classModel in classModels)
