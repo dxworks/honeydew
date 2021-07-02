@@ -6,27 +6,27 @@ using Xunit;
 
 namespace HoneydewCoreTest.Processors
 {
-    public class SolutionModelToFileRelationsProcessorTests
+    public class SolutionModelToClassRelationsProcessorTests
     {
-        private readonly SolutionModelToFileRelationsProcessor _sut;
+        private readonly SolutionModelToClassRelationsProcessor _sut;
 
-        public SolutionModelToFileRelationsProcessorTests()
+        public SolutionModelToClassRelationsProcessorTests()
         {
-            _sut = new SolutionModelToFileRelationsProcessor();
+            _sut = new SolutionModelToClassRelationsProcessor();
         }
 
         [Fact]
         public void GetFunction_ShouldReturnEmptyRepresentation_WhenSolutionModelIsNull()
         {
             var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(null));
-            Assert.Empty(processable.Value.FileRelations);
+            Assert.Empty(processable.Value.ClassRelations);
         }
 
         [Fact]
         public void GetFunction_ShouldReturnEmptyRepresentation_WhenSolutionModelIsEmpty()
         {
             var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(new SolutionModel()));
-            Assert.Empty(processable.Value.FileRelations);
+            Assert.Empty(processable.Value.ClassRelations);
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace HoneydewCoreTest.Processors
             solutionModel.Projects.Add(new ProjectModel());
 
             var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
-            Assert.Empty(processable.Value.FileRelations);
+            Assert.Empty(processable.Value.ClassRelations);
         }
 
         [Fact]
@@ -74,9 +74,9 @@ namespace HoneydewCoreTest.Processors
             solutionModel.Projects.Add(projectModel);
 
             var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
-            Assert.Equal(1, processable.Value.FileRelations.Count);
+            Assert.Equal(1, processable.Value.ClassRelations.Count);
 
-            Assert.True(processable.Value.FileRelations.TryGetValue("Models.Class", out var targetDictionary));
+            Assert.True(processable.Value.ClassRelations.TryGetValue("Models.Class", out var targetDictionary));
             Assert.Empty(targetDictionary);
         }
 
@@ -100,14 +100,14 @@ namespace HoneydewCoreTest.Processors
             solutionModel.Projects.Add(projectModel);
 
             var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
-            Assert.Equal(classCount, processable.Value.FileRelations.Count);
+            Assert.Equal(classCount, processable.Value.ClassRelations.Count);
             for (var i = 0; i < classCount; i++)
             {
-                Assert.True(processable.Value.FileRelations.TryGetValue("Items.Item" + i, out var targetDictionary));
+                Assert.True(processable.Value.ClassRelations.TryGetValue("Items.Item" + i, out var targetDictionary));
                 Assert.Empty(targetDictionary);
             }
 
-            foreach (var (key, _) in processable.Value.FileRelations)
+            foreach (var (key, _) in processable.Value.ClassRelations)
             {
                 Assert.Equal(0, processable.Value.TotalRelationsCount(key, "invalidDependency"));
             }
@@ -150,12 +150,12 @@ namespace HoneydewCoreTest.Processors
 
             var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
 
-            Assert.Equal(2, processable.Value.FileRelations.Count);
+            Assert.Equal(2, processable.Value.ClassRelations.Count);
 
-            Assert.True(processable.Value.FileRelations.TryGetValue("Models.Class1", out var targetDictionary1));
+            Assert.True(processable.Value.ClassRelations.TryGetValue("Models.Class1", out var targetDictionary1));
             Assert.Empty(targetDictionary1);
 
-            Assert.True(processable.Value.FileRelations.TryGetValue("Models.Class2", out var targetDictionary2));
+            Assert.True(processable.Value.ClassRelations.TryGetValue("Models.Class2", out var targetDictionary2));
             Assert.NotEmpty(targetDictionary2);
             Assert.Equal(1, targetDictionary2.Count);
 
@@ -193,7 +193,7 @@ namespace HoneydewCoreTest.Processors
 
             var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
 
-            Assert.Equal(0, processable.Value.FileRelations.Count);
+            Assert.Equal(0, processable.Value.ClassRelations.Count);
             Assert.Equal(0, processable.Value.TotalRelationsCount("Models.Class2", "Models.Class1"));
         }
     }

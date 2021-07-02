@@ -4,16 +4,16 @@ using HoneydewCore.IO.Writers.Exporters;
 
 namespace HoneydewCore.Models.Representations
 {
-    public class FileRelationsRepresentation : PrettyPrintRepresentation, IExportable
+    public class ClassRelationsRepresentation : PrettyPrintRepresentation, IExportable
     {
         public ISet<string> DependenciesType { get; } = new HashSet<string>();
 
-        public IDictionary<string, IDictionary<string, IDictionary<string, int>>> FileRelations { get; } =
+        public IDictionary<string, IDictionary<string, IDictionary<string, int>>> ClassRelations { get; } =
             new Dictionary<string, IDictionary<string, IDictionary<string, int>>>();
 
         public string Export(IExporter exporter)
         {
-            if (exporter is IFileRelationsRepresentationExporter modelExporter)
+            if (exporter is IClassRelationsRepresentationExporter modelExporter)
             {
                 return modelExporter.Export(this);
             }
@@ -41,9 +41,9 @@ namespace HoneydewCore.Models.Representations
 
             DependenciesType.Add(dependencyType);
 
-            if (!FileRelations.TryGetValue(sourceName, out var targetDictionary))
+            if (!ClassRelations.TryGetValue(sourceName, out var targetDictionary))
             {
-                FileRelations.Add(sourceName, new Dictionary<string, IDictionary<string, int>>
+                ClassRelations.Add(sourceName, new Dictionary<string, IDictionary<string, int>>
                 {
                     {targetName, new Dictionary<string, int> {{dependencyType, dependencyValue}}}
                 });
@@ -72,15 +72,15 @@ namespace HoneydewCore.Models.Representations
                 return;
             }
 
-            if (!FileRelations.ContainsKey(sourceName))
+            if (!ClassRelations.ContainsKey(sourceName))
             {
-                FileRelations.Add(sourceName, new Dictionary<string, IDictionary<string, int>>());
+                ClassRelations.Add(sourceName, new Dictionary<string, IDictionary<string, int>>());
             }
         }
 
         public int TotalRelationsCount(string sourceName, string targetName)
         {
-            if (!FileRelations.TryGetValue(sourceName, out var targetDictionary))
+            if (!ClassRelations.TryGetValue(sourceName, out var targetDictionary))
             {
                 return 0;
             }

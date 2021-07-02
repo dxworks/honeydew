@@ -8,13 +8,13 @@ using Xunit;
 
 namespace HoneydewCoreTest.Models.Representations
 {
-    public class FileRelationsRepresentationTests
+    public class ClassRelationsRepresentationTests
     {
-        private readonly FileRelationsRepresentation _sut;
+        private readonly ClassRelationsRepresentation _sut;
 
-        public FileRelationsRepresentationTests()
+        public ClassRelationsRepresentationTests()
         {
-            _sut = new FileRelationsRepresentation();
+            _sut = new ClassRelationsRepresentation();
         }
 
         [Theory]
@@ -26,7 +26,7 @@ namespace HoneydewCoreTest.Models.Representations
         {
             _sut.Add(sourceName, "", "", 0);
 
-            Assert.Empty(_sut.FileRelations);
+            Assert.Empty(_sut.ClassRelations);
             Assert.Empty(_sut.DependenciesType);
         }
 
@@ -39,7 +39,7 @@ namespace HoneydewCoreTest.Models.Representations
         {
             _sut.Add(sourceName);
 
-            Assert.Empty(_sut.FileRelations);
+            Assert.Empty(_sut.ClassRelations);
             Assert.Empty(_sut.DependenciesType);
         }
 
@@ -52,8 +52,8 @@ namespace HoneydewCoreTest.Models.Representations
         {
             _sut.Add("sourceName", targetName, "", 0);
 
-            Assert.NotEmpty(_sut.FileRelations);
-            Assert.Equal(1, _sut.FileRelations.Count);
+            Assert.NotEmpty(_sut.ClassRelations);
+            Assert.Equal(1, _sut.ClassRelations.Count);
             Assert.Empty(_sut.DependenciesType);
         }
 
@@ -66,7 +66,7 @@ namespace HoneydewCoreTest.Models.Representations
         {
             _sut.Add("sourceName", "targetName", dependencyName, 0);
 
-            Assert.Empty(_sut.FileRelations);
+            Assert.Empty(_sut.ClassRelations);
             Assert.Empty(_sut.DependenciesType);
         }
 
@@ -75,8 +75,8 @@ namespace HoneydewCoreTest.Models.Representations
         {
             _sut.Add("source", "target", "dependency", 2);
 
-            Assert.Equal(1, _sut.FileRelations.Count);
-            Assert.True(_sut.FileRelations.TryGetValue("source", out var targetDictionary));
+            Assert.Equal(1, _sut.ClassRelations.Count);
+            Assert.True(_sut.ClassRelations.TryGetValue("source", out var targetDictionary));
             Assert.Equal(1, targetDictionary.Count);
             Assert.True(targetDictionary.TryGetValue("target", out var dependenciesDictionary));
             Assert.Equal(1, dependenciesDictionary.Count);
@@ -93,8 +93,8 @@ namespace HoneydewCoreTest.Models.Representations
             _sut.Add("source", "target", "dependency1", 2);
             _sut.Add("source", "target", "dependency2", 5);
 
-            Assert.Equal(1, _sut.FileRelations.Count);
-            Assert.True(_sut.FileRelations.TryGetValue("source", out var targetDictionary));
+            Assert.Equal(1, _sut.ClassRelations.Count);
+            Assert.True(_sut.ClassRelations.TryGetValue("source", out var targetDictionary));
             Assert.Equal(1, targetDictionary.Count);
             Assert.True(targetDictionary.TryGetValue("target", out var dependenciesDictionary));
             Assert.Equal(2, dependenciesDictionary.Count);
@@ -123,10 +123,10 @@ namespace HoneydewCoreTest.Models.Representations
             _sut.Add("source2", "target2", "dependency1", 12);
             _sut.Add("source2", "target2", "dependency4", 4);
 
-            Assert.Equal(2, _sut.FileRelations.Count);
+            Assert.Equal(2, _sut.ClassRelations.Count);
 
 
-            Assert.True(_sut.FileRelations.TryGetValue("source1", out var targetDictionary1));
+            Assert.True(_sut.ClassRelations.TryGetValue("source1", out var targetDictionary1));
             Assert.Equal(2, targetDictionary1.Count);
 
             Assert.True(targetDictionary1.TryGetValue("target1", out var dependenciesDictionary1));
@@ -146,7 +146,7 @@ namespace HoneydewCoreTest.Models.Representations
             Assert.Equal(2, count5);
 
 
-            Assert.True(_sut.FileRelations.TryGetValue("source2", out var targetDictionary2));
+            Assert.True(_sut.ClassRelations.TryGetValue("source2", out var targetDictionary2));
             Assert.Equal(1, targetDictionary2.Count);
 
             Assert.True(targetDictionary2.TryGetValue("target2", out var dependenciesDictionary3));
@@ -167,7 +167,7 @@ namespace HoneydewCoreTest.Models.Representations
         [Fact]
         public void Export_ShouldReturnEmptyString_WhenGivenEmptyRelations()
         {
-            var exporterMock = new Mock<IFileRelationsRepresentationExporter>();
+            var exporterMock = new Mock<IClassRelationsRepresentationExporter>();
             exporterMock.Setup(exporter => exporter.Export(_sut)).Returns(@"""Source"",""Target""");
 
             Assert.Equal(@"""Source"",""Target""", _sut.Export(exporterMock.Object));
@@ -178,7 +178,7 @@ namespace HoneydewCoreTest.Models.Representations
         {
             var newLine = Environment.NewLine;
 
-            var exporterMock = new Mock<IFileRelationsRepresentationExporter>();
+            var exporterMock = new Mock<IClassRelationsRepresentationExporter>();
             exporterMock.Setup(exporter => exporter.Export(_sut))
                 .Returns($@"""Source"",""Target"",""dependency""{newLine}""source"",""target"",""4""");
 

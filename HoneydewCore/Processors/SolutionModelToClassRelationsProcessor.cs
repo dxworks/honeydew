@@ -5,24 +5,24 @@ using HoneydewCore.Models.Representations;
 
 namespace HoneydewCore.Processors
 {
-    public class SolutionModelToFileRelationsProcessor : IProcessorFunction<SolutionModel, FileRelationsRepresentation>
+    public class SolutionModelToClassRelationsProcessor : IProcessorFunction<SolutionModel, ClassRelationsRepresentation>
     {
-        public Func<Processable<SolutionModel>, Processable<FileRelationsRepresentation>> GetFunction()
+        public Func<Processable<SolutionModel>, Processable<ClassRelationsRepresentation>> GetFunction()
         {
             return processable =>
             {
                 var solutionModel = processable.Value;
 
-                var fileRelationsRepresentation = new FileRelationsRepresentation();
+                var classRelationsRepresentation = new ClassRelationsRepresentation();
 
                 if (solutionModel == null)
-                    return new Processable<FileRelationsRepresentation>(fileRelationsRepresentation);
+                    return new Processable<ClassRelationsRepresentation>(classRelationsRepresentation);
 
                 foreach (var classModel in solutionModel.GetEnumerable())
                 {
                     if (classModel.Metrics.Count == 0)
                     {
-                        fileRelationsRepresentation.Add(classModel.FullName);
+                        classRelationsRepresentation.Add(classModel.FullName);
                     }
                     else
                     {
@@ -41,14 +41,14 @@ namespace HoneydewCore.Processors
                             var relations = relationMetric.GetRelations(classMetric.Value);
                             foreach (var relation in relations)
                             {
-                                fileRelationsRepresentation.Add(classModel.FullName, relation.FileTarget,
+                                classRelationsRepresentation.Add(classModel.FullName, relation.FileTarget,
                                     relation.RelationType, relation.RelationCount);
                             }
                         }
                     }
                 }
 
-                return new Processable<FileRelationsRepresentation>(fileRelationsRepresentation);
+                return new Processable<ClassRelationsRepresentation>(classRelationsRepresentation);
             };
         }
     }

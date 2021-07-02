@@ -17,67 +17,67 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
         [Fact]
         public void Export_ShouldReturnEmptyString_WhenGivenEmptyRelations()
         {
-            Assert.Equal(@"""Source"",""Target""", _sut.Export(new FileRelationsRepresentation()));
+            Assert.Equal(@"""Source"",""Target""", _sut.Export(new ClassRelationsRepresentation()));
         }
 
         [Fact]
         public void Export_ShouldReturnCsv_WhenGivenOneRelationRepresentation()
         {
-            var fileRelationsRepresentation = new FileRelationsRepresentation();
-            fileRelationsRepresentation.Add("source", "target", "dependency", 4);
+            var classRelationsRepresentation = new ClassRelationsRepresentation();
+            classRelationsRepresentation.Add("source", "target", "dependency", 4);
 
             var newLine = Environment.NewLine;
             var expectedString = $@"""Source"",""Target"",""dependency""{newLine}""source"",""target"",""4""";
 
-            Assert.Equal(expectedString, _sut.Export(fileRelationsRepresentation));
+            Assert.Equal(expectedString, _sut.Export(classRelationsRepresentation));
         }
 
         [Fact]
         public void Export_ShouldReturnCsv_WhenGivenOneRelationRepresentationWithMultipleDependencies()
         {
-            var fileRelationsRepresentation = new FileRelationsRepresentation();
-            fileRelationsRepresentation.Add("source", "target", "dependency1", 4);
-            fileRelationsRepresentation.Add("source", "target", "dependency2", 6);
-            fileRelationsRepresentation.Add("source", "target", "dependency3", 1);
+            var classRelationsRepresentation = new ClassRelationsRepresentation();
+            classRelationsRepresentation.Add("source", "target", "dependency1", 4);
+            classRelationsRepresentation.Add("source", "target", "dependency2", 6);
+            classRelationsRepresentation.Add("source", "target", "dependency3", 1);
 
             var newLine = Environment.NewLine;
             var expectedString =
                 $@"""Source"",""Target"",""dependency1"",""dependency2"",""dependency3""{newLine}""source"",""target"",""4"",""6"",""1""";
 
-            Assert.Equal(expectedString, _sut.Export(fileRelationsRepresentation));
+            Assert.Equal(expectedString, _sut.Export(classRelationsRepresentation));
         }
 
         [Fact]
         public void Export_ShouldReturnCsv_WhenGivenMultipleRelationRepresentationOneDependency()
         {
-            var fileRelationsRepresentation = new FileRelationsRepresentation();
-            fileRelationsRepresentation.Add("source1", "target1", "dependency", 4);
-            fileRelationsRepresentation.Add("source2", "target2", "dependency", 5);
-            fileRelationsRepresentation.Add("source3", "target3", "dependency", 1);
+            var classRelationsRepresentation = new ClassRelationsRepresentation();
+            classRelationsRepresentation.Add("source1", "target1", "dependency", 4);
+            classRelationsRepresentation.Add("source2", "target2", "dependency", 5);
+            classRelationsRepresentation.Add("source3", "target3", "dependency", 1);
 
             var newLine = Environment.NewLine;
             var expectedString =
                 $@"""Source"",""Target"",""dependency""{newLine}""source1"",""target1"",""4""{newLine}""source2"",""target2"",""5""{newLine}""source3"",""target3"",""1""";
 
-            Assert.Equal(expectedString, _sut.Export(fileRelationsRepresentation));
+            Assert.Equal(expectedString, _sut.Export(classRelationsRepresentation));
         }
 
         [Fact]
         public void Export_ShouldReturnCsv_WhenGivenMultipleRelationRepresentationMultipleDependencies()
         {
-            var fileRelationsRepresentation = new FileRelationsRepresentation();
-            fileRelationsRepresentation.Add("source1", "target1", "dependency1", 4);
-            fileRelationsRepresentation.Add("source1", "target2", "dependency2", 6);
-            fileRelationsRepresentation.Add("source1", "target2", "dependency1", 2);
-            fileRelationsRepresentation.Add("source1", "target3", "dependency3", 8);
+            var classRelationsRepresentation = new ClassRelationsRepresentation();
+            classRelationsRepresentation.Add("source1", "target1", "dependency1", 4);
+            classRelationsRepresentation.Add("source1", "target2", "dependency2", 6);
+            classRelationsRepresentation.Add("source1", "target2", "dependency1", 2);
+            classRelationsRepresentation.Add("source1", "target3", "dependency3", 8);
 
-            fileRelationsRepresentation.Add("source2", "target3", "dependency2", 4);
-            fileRelationsRepresentation.Add("source2", "target4", "dependency1", 8);
-            fileRelationsRepresentation.Add("source2", "target5", "dependency1", 1);
+            classRelationsRepresentation.Add("source2", "target3", "dependency2", 4);
+            classRelationsRepresentation.Add("source2", "target4", "dependency1", 8);
+            classRelationsRepresentation.Add("source2", "target5", "dependency1", 1);
 
-            fileRelationsRepresentation.Add("source3", "target1", "dependency1", 9);
-            fileRelationsRepresentation.Add("source3", "target1", "dependency2", 12);
-            fileRelationsRepresentation.Add("source3", "target1", "dependency3", 31);
+            classRelationsRepresentation.Add("source3", "target1", "dependency1", 9);
+            classRelationsRepresentation.Add("source3", "target1", "dependency2", 12);
+            classRelationsRepresentation.Add("source3", "target1", "dependency3", 31);
 
             var newLine = Environment.NewLine;
             var expectedString = $@"""Source"",""Target"",""dependency1"",""dependency2"",""dependency3""{newLine}" +
@@ -90,26 +90,26 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
                                  @"""source3"",""target1"",""9"",""12"",""31""";
 
 
-            Assert.Equal(expectedString, _sut.Export(fileRelationsRepresentation));
+            Assert.Equal(expectedString, _sut.Export(classRelationsRepresentation));
         }
 
         [Fact]
         public void
             Export_ShouldReturnCsv_WhenGivenMultipleRelationRepresentationMultipleDependenciesWithColumnFunctions()
         {
-            var fileRelationsRepresentation = new FileRelationsRepresentation();
-            fileRelationsRepresentation.Add("source1", "target1", "dependency1", 4);
-            fileRelationsRepresentation.Add("source1", "target2", "dependency2", 6);
-            fileRelationsRepresentation.Add("source1", "target2", "dependency1", 2);
-            fileRelationsRepresentation.Add("source1", "target3", "dependency3", 8);
+            var classRelationsRepresentation = new ClassRelationsRepresentation();
+            classRelationsRepresentation.Add("source1", "target1", "dependency1", 4);
+            classRelationsRepresentation.Add("source1", "target2", "dependency2", 6);
+            classRelationsRepresentation.Add("source1", "target2", "dependency1", 2);
+            classRelationsRepresentation.Add("source1", "target3", "dependency3", 8);
 
-            fileRelationsRepresentation.Add("source2", "target3", "dependency2", 4);
-            fileRelationsRepresentation.Add("source2", "target4", "dependency1", 8);
-            fileRelationsRepresentation.Add("source2", "target5", "dependency1", 1);
+            classRelationsRepresentation.Add("source2", "target3", "dependency2", 4);
+            classRelationsRepresentation.Add("source2", "target4", "dependency1", 8);
+            classRelationsRepresentation.Add("source2", "target5", "dependency1", 1);
 
-            fileRelationsRepresentation.Add("source3", "target1", "dependency1", 9);
-            fileRelationsRepresentation.Add("source3", "target1", "dependency2", 12);
-            fileRelationsRepresentation.Add("source3", "target1", "dependency3", 31);
+            classRelationsRepresentation.Add("source3", "target1", "dependency1", 9);
+            classRelationsRepresentation.Add("source3", "target1", "dependency2", 12);
+            classRelationsRepresentation.Add("source3", "target1", "dependency3", 31);
 
             var newLine = Environment.NewLine;
             var expectedString = $@"""Source"",""Target"",""dependency1"",""dependency2"",""dependency3"",""Length"",""Count""{newLine}" +
@@ -140,7 +140,7 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
                     return sum.ToString();
                 }));
 
-            Assert.Equal(expectedString, _sut.Export(fileRelationsRepresentation));
+            Assert.Equal(expectedString, _sut.Export(classRelationsRepresentation));
         }
     }
 }
