@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - "ghactions"
+    tags:
+      - "v*"
+      - "!*-voyager"
+
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
+
+      - name: Release for Windows
+        run: dotnet release -r win-x64
+
+      - name: Release for Linux
+        run: dotnet release -r linux-x64
+
+      - name: Release for Mac
+        run: dotnet release -r osx-x64
+
+      - name: Print All assets
+        run: |
+          ls -al
+
+      # - name: Prepare Assets
+      #   run: |
+      #     mkdir honeydew
+      #     cp README.md honeydew/README.md
+
+      # - name: Create Archive
+      #   run: zip -r honeydew.zip honeydew
+
+      # - name: Create Release
+      #   id: create_release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: ${{ github.ref }}
+      #     release_name: Honeydew ${{ github.ref }}
+      #     draft: false
+      #     prerelease: false
+      # - name: Upload Release Asset
+      #   id: upload-release-asset
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ./honeydew.zip
+      #     asset_name: honeydew.zip
+      #     asset_content_type: application/zip
+
