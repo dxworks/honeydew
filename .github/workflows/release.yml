@@ -32,7 +32,7 @@ jobs:
 
       - name: Print All assets
         run: |
-          ls -al
+          ls -R -al
 
       # - name: Prepare Assets
       #   run: |
