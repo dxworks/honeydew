@@ -37,6 +37,7 @@ jobs:
       - name: Prepare Assets
         run: |
           mkdir honeydew
+          mkdir honeydew/bin
           cp README.md honeydew/README.md
           cp Honeydew/bin/Debug/net5.0/* honeydew/bin
 
