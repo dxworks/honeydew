@@ -227,10 +227,14 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal(3, classModels[1].Methods[1].CalledMethods.Count);
             Assert.Equal("G", classModels[1].Methods[1].CalledMethods[0].MethodName);
             Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].CalledMethods[0].ContainingClassName);
+            Assert.Equal(1, classModels[1].Methods[1].CalledMethods[0].ParameterTypes.Count);
+            Assert.Equal("float", classModels[1].Methods[1].CalledMethods[0].ParameterTypes[0]);
             Assert.Equal("H", classModels[1].Methods[1].CalledMethods[1].MethodName);
             Assert.Equal("TopLevel.Foo", classModels[1].Methods[1].CalledMethods[1].ContainingClassName);
+            Assert.Empty(classModels[1].Methods[1].CalledMethods[1].ParameterTypes);
             Assert.Equal("M", classModels[1].Methods[1].CalledMethods[2].MethodName);
             Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].CalledMethods[2].ContainingClassName);
+            Assert.Empty(classModels[1].Methods[1].CalledMethods[2].ParameterTypes);
         }
 
         [Fact]
@@ -294,38 +298,53 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.Equal(2, classModels[0].Methods[1].CalledMethods.Count);
             Assert.Equal("A", classModels[0].Methods[1].CalledMethods[0].MethodName);
             Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[0].ContainingClassName);
+            Assert.Equal(1, classModels[0].Methods[1].CalledMethods[0].ParameterTypes.Count);
+            Assert.Equal("int", classModels[0].Methods[1].CalledMethods[0].ParameterTypes[0]);
             Assert.Equal("A", classModels[0].Methods[1].CalledMethods[1].MethodName);
             Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[1].ContainingClassName);
+            Assert.Equal(1, classModels[0].Methods[1].CalledMethods[1].ParameterTypes.Count);
+            Assert.Equal("int", classModels[0].Methods[1].CalledMethods[1].ParameterTypes[0]);
 
             Assert.Equal(2, classModels[1].Methods.Count);
 
-            Assert.Equal("F", classModels[1].Methods[0].Name);
-            Assert.Equal("int", classModels[1].Methods[0].ReturnType);
-            Assert.Equal(3, classModels[1].Methods[0].ParameterTypes.Count);
-            Assert.Equal("int", classModels[1].Methods[0].ParameterTypes[0]);
-            Assert.Equal("int", classModels[1].Methods[0].ParameterTypes[1]);
-            Assert.Equal("string", classModels[1].Methods[0].ParameterTypes[2]);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[0].ContainingClassName);
-            Assert.Equal("public", classModels[1].Methods[0].AccessModifier);
-            Assert.Equal("", classModels[1].Methods[0].Modifier);
-            Assert.Equal(4, classModels[1].Methods[0].CalledMethods.Count);
-            Assert.Equal("A", classModels[1].Methods[0].CalledMethods[0].MethodName);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[0].ContainingClassName);
-            Assert.Equal("B", classModels[1].Methods[0].CalledMethods[1].MethodName);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[1].ContainingClassName);
-            Assert.Equal("K", classModels[1].Methods[0].CalledMethods[2].MethodName);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[0].CalledMethods[2].ContainingClassName);
-            Assert.Equal("A", classModels[1].Methods[0].CalledMethods[3].MethodName);
-            Assert.Equal("TopLevel.Foo", classModels[1].Methods[0].CalledMethods[3].ContainingClassName);
-            
-            Assert.Equal("K", classModels[1].Methods[1].Name);
-            Assert.Equal("int", classModels[1].Methods[1].ReturnType);
-            Assert.Equal(1, classModels[1].Methods[1].ParameterTypes.Count);
-            Assert.Equal("string", classModels[1].Methods[1].ParameterTypes[0]);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].ContainingClassName);
-            Assert.Equal("private", classModels[1].Methods[1].AccessModifier);
-            Assert.Equal("", classModels[1].Methods[1].Modifier);
-            Assert.Empty(classModels[1].Methods[1].CalledMethods);
+            var methodModelF = classModels[1].Methods[0];
+            Assert.Equal("F", methodModelF.Name);
+            Assert.Equal("int", methodModelF.ReturnType);
+            Assert.Equal(3, methodModelF.ParameterTypes.Count);
+            Assert.Equal("int", methodModelF.ParameterTypes[0]);
+            Assert.Equal("int", methodModelF.ParameterTypes[1]);
+            Assert.Equal("string", methodModelF.ParameterTypes[2]);
+            Assert.Equal("TopLevel.Bar", methodModelF.ContainingClassName);
+            Assert.Equal("public", methodModelF.AccessModifier);
+            Assert.Equal("", methodModelF.Modifier);
+            Assert.Equal(4, methodModelF.CalledMethods.Count);
+            Assert.Equal("A", methodModelF.CalledMethods[0].MethodName);
+            Assert.Equal("TopLevel.Foo", methodModelF.CalledMethods[0].ContainingClassName);
+            Assert.Equal(1, methodModelF.CalledMethods[0].ParameterTypes.Count);
+            Assert.Equal("int", methodModelF.CalledMethods[0].ParameterTypes[0]);
+            Assert.Equal("B", methodModelF.CalledMethods[1].MethodName);
+            Assert.Equal("TopLevel.Foo", methodModelF.CalledMethods[1].ContainingClassName);
+            Assert.Equal(2, methodModelF.CalledMethods[1].ParameterTypes.Count);
+            Assert.Equal("int", methodModelF.CalledMethods[1].ParameterTypes[0]);
+            Assert.Equal("int", methodModelF.CalledMethods[1].ParameterTypes[1]);
+            Assert.Equal("K", methodModelF.CalledMethods[2].MethodName);
+            Assert.Equal("TopLevel.Bar", methodModelF.CalledMethods[2].ContainingClassName);
+            Assert.Equal(1, methodModelF.CalledMethods[2].ParameterTypes.Count);
+            Assert.Equal("string", methodModelF.CalledMethods[2].ParameterTypes[0]);
+            Assert.Equal("A", methodModelF.CalledMethods[3].MethodName);
+            Assert.Equal("TopLevel.Foo", methodModelF.CalledMethods[3].ContainingClassName);
+            Assert.Equal(1, methodModelF.CalledMethods[3].ParameterTypes.Count);
+            Assert.Equal("int", methodModelF.CalledMethods[3].ParameterTypes[0]);
+
+            var methodModelK = classModels[1].Methods[1];
+            Assert.Equal("K", methodModelK.Name);
+            Assert.Equal("int", methodModelK.ReturnType);
+            Assert.Equal(1, methodModelK.ParameterTypes.Count);
+            Assert.Equal("string", methodModelK.ParameterTypes[0]);
+            Assert.Equal("TopLevel.Bar", methodModelK.ContainingClassName);
+            Assert.Equal("private", methodModelK.AccessModifier);
+            Assert.Equal("", methodModelK.Modifier);
+            Assert.Empty(methodModelK.CalledMethods);
         }
     }
 }

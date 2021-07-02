@@ -2,6 +2,7 @@
 using System.Linq;
 using HoneydewCore.Models;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
@@ -48,7 +49,7 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
         private void AddInfoForNode(TypeDeclarationSyntax node)
         {
             _containingClassName = SemanticModel.GetDeclaredSymbol(node)?.ToDisplayString();
-            _baseTypeName = (SemanticModel.GetDeclaredSymbol(node) as ITypeSymbol)?.BaseType?.ToDisplayString();
+            _baseTypeName = SemanticModel.GetDeclaredSymbol(node)?.BaseType?.ToDisplayString();
 
             foreach (var memberDeclarationSyntax in node.Members)
             {
@@ -88,13 +89,14 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
                             methodModel.CalledMethods.Add(new MethodCallModel
                             {
                                 MethodName = invocationExpressionSyntax.Expression.ToString(),
-                                ContainingClassName = _containingClassName
+                                ContainingClassName = _containingClassName,
+                                ParameterTypes = GetParameterTypes(invocationExpressionSyntax)
                             });
                             break;
                         case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
                         {
                             var className = _containingClassName;
-                            
+
                             if (memberAccessExpressionSyntax.Expression.ToFullString() == "base")
                             {
                                 className = _baseTypeName;
@@ -106,12 +108,17 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
                                 {
                                     className = localSymbol.Type.ToDisplayString();
                                 }
+                                else if (symbolInfo.Symbol != null)
+                                {
+                                    className = symbolInfo.Symbol.ToString();
+                                }
                             }
 
                             methodModel.CalledMethods.Add(new MethodCallModel
                             {
                                 MethodName = memberAccessExpressionSyntax.Name.ToString(),
-                                ContainingClassName = className
+                                ContainingClassName = className,
+                                ParameterTypes = GetParameterTypes(invocationExpressionSyntax)
                             });
                             break;
                         }
@@ -120,6 +127,22 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
             }
 
             MethodInfos.Add(methodModel);
+        }
+
+        private IList<string> GetParameterTypes(ExpressionSyntax invocationExpressionSyntax)
+        {
+            IList<string> parameterTypes = new List<string>();
+
+            var symbolInfo = SemanticModel.GetSymbolInfo(invocationExpressionSyntax);
+            if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
+            {
+                foreach (var parameter in methodSymbol.Parameters)
+                {
+                    parameterTypes.Add(parameter.ToString());
+                }
+            }
+
+            return parameterTypes;
         }
 
         private void GetModifiersForNode(MemberDeclarationSyntax node, out string accessModifier, out string modifier)
