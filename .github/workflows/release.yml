@@ -22,13 +22,13 @@ jobs:
           dotnet-version: '5.0.x'
 
       - name: Release for Windows
-        run: dotnet release -r win-x64
+        run: dotnet publish -r win-x64
 
       - name: Release for Linux
-        run: dotnet release -r linux-x64
+        run: dotnet publish -r linux-x64
 
       - name: Release for Mac
-        run: dotnet release -r osx-x64
+        run: dotnet publish -r osx-x64
 
       - name: Print All assets
         run: |
