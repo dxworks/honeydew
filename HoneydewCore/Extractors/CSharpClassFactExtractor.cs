@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
-using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -63,7 +62,7 @@ namespace HoneydewCore.Extractors
                 var projectClass = new ClassModel
                 {
                     FullName = $"{namespaceSymbol}.{className}",
-                    Fields = ExtractFieldsInfo(declarationSyntax),
+                    Fields = ExtractFieldsInfo(declarationSyntax, semanticModel),
                     Methods = ExtractMethodInfo(declarationSyntax, semanticModel),
                     BaseClassFullName = baseClassName,
                     BaseInterfaces = baseInterfaces
@@ -79,7 +78,7 @@ namespace HoneydewCore.Extractors
 
                     if (extractor is ISemanticMetric)
                     {
-                        extractor.SemanticModel = semanticModel;
+                        extractor.ExtractorSemanticModel = semanticModel;
                     }
 
                     if (extractor is ICompilationUnitMetric)
@@ -195,9 +194,12 @@ namespace HoneydewCore.Extractors
             return root;
         }
 
-        private static IList<FieldModel> ExtractFieldsInfo(SyntaxNode declarationSyntax)
+        private static IList<FieldModel> ExtractFieldsInfo(SyntaxNode declarationSyntax, SemanticModel semanticModel)
         {
-            var fieldsInfoMetric = new FieldsInfoMetric();
+            var fieldsInfoMetric = new FieldsInfoMetric
+            {
+                ExtractorSemanticModel = semanticModel
+            };
             fieldsInfoMetric.Visit(declarationSyntax);
             return fieldsInfoMetric.FieldInfos;
         }
@@ -206,7 +208,7 @@ namespace HoneydewCore.Extractors
         {
             var fieldsInfoMetric = new MethodInfoMetric
             {
-                SemanticModel = semanticModel
+                ExtractorSemanticModel = semanticModel
             };
             fieldsInfoMetric.Visit(declarationSyntax);
             return fieldsInfoMetric.MethodInfos;
@@ -217,7 +219,7 @@ namespace HoneydewCore.Extractors
         {
             var fieldsInfoMetric = new BaseClassMetric
             {
-                SemanticModel = semanticModel
+                ExtractorSemanticModel = semanticModel
             };
             fieldsInfoMetric.Visit(declarationSyntax);
 

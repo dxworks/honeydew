@@ -6,8 +6,6 @@ using HoneydewCore.Models.Representations.ReferenceModel;
 
 namespace HoneydewCore.Processors
 {
-
-
     public class
         SolutionModelToReferenceSolutionModelProcessor : IProcessorFunction<SolutionModel, ReferenceSolutionModel>
     {

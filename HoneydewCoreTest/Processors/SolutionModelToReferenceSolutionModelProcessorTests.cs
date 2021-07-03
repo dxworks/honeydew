@@ -119,12 +119,21 @@ namespace HoneydewCoreTest.Processors
                                         new()
                                         {
                                             FullName = "Project1.Services.CreateService",
-                                            FilePath = "validPathToProject/Project1/Services/CreateService.cs",
+                                            FilePath = "validPathToProject/Project1/Services/CreateService.cs"
                                         },
                                         new()
                                         {
                                             FullName = "Project1.Services.RetrieveService",
                                             FilePath = "validPathToProject/Project1/Services/RetrieveService.cs",
+                                            Metrics = new List<ClassMetric>
+                                            {
+                                                new()
+                                                {
+                                                    Value = "0",
+                                                    ExtractorName = "SomeExtractor",
+                                                    ValueType = "int"
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -170,11 +179,16 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("Project1.Services.CreateService", referenceClassModel1.Name);
             Assert.Equal("validPathToProject/Project1/Services/CreateService.cs", referenceClassModel1.FilePath);
             Assert.Equal(referenceNamespaceModel1, referenceClassModel1.NamespaceReference);
+            Assert.Empty(referenceClassModel1.Metrics);
 
             var referenceClassModel2 = referenceNamespaceModel1.ClassModels[1];
             Assert.Equal("Project1.Services.RetrieveService", referenceClassModel2.Name);
             Assert.Equal("validPathToProject/Project1/Services/RetrieveService.cs", referenceClassModel2.FilePath);
             Assert.Equal(referenceNamespaceModel1, referenceClassModel2.NamespaceReference);
+            Assert.Equal(1,referenceClassModel2.Metrics.Count);
+            Assert.Equal("0", referenceClassModel2.Metrics[0].Value);
+            Assert.Equal("int", referenceClassModel2.Metrics[0].ValueType);
+            Assert.Equal("SomeExtractor", referenceClassModel2.Metrics[0].ExtractorName);
 
             var referenceNamespaceModel2 = projectModel1.Namespaces[1];
             Assert.Equal("Project1.Models", referenceNamespaceModel2.Name);
@@ -185,6 +199,7 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("Project1.Models.MyModel", referenceClassModel3.Name);
             Assert.Equal("validPathToProject/Project1/Models/MyModel.cs", referenceClassModel3.FilePath);
             Assert.Equal(referenceNamespaceModel2, referenceClassModel3.NamespaceReference);
+            Assert.Empty(referenceClassModel3.Metrics);
         }
 
         [Fact]
@@ -702,8 +717,8 @@ namespace Project1.Services
             var referenceSolutionModel = processable.Value;
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-            Assert.Equal(1,referenceSolutionModel.ClassModelsNotDeclaredInSolution.Count);
-            Assert.Equal(intClassModel,referenceSolutionModel.ClassModelsNotDeclaredInSolution[0]);
+            Assert.Equal(1, referenceSolutionModel.ClassModelsNotDeclaredInSolution.Count);
+            Assert.Equal(intClassModel, referenceSolutionModel.ClassModelsNotDeclaredInSolution[0]);
 
             var projectModel1 = referenceSolutionModel.Projects[0];
 
@@ -735,7 +750,7 @@ namespace Project1.Services
             Assert.Equal(referenceNamespaceModels, referenceClassMyModel.NamespaceReference);
             Assert.Empty(referenceClassMyModel.Methods);
             Assert.Equal(2, referenceClassMyModel.Fields.Count);
-            
+
             var valueFieldModel = referenceClassMyModel.Fields[0];
             Assert.Equal("_value", valueFieldModel.Name);
             Assert.Equal(intClassModel, valueFieldModel.Type);
@@ -743,7 +758,7 @@ namespace Project1.Services
             Assert.Equal("readonly", valueFieldModel.Modifier);
             Assert.Equal("private", valueFieldModel.AccessModifier);
             Assert.False(valueFieldModel.IsEvent);
-            
+
             var valueEventFieldModel = referenceClassMyModel.Fields[1];
             Assert.Equal("ValueEvent", valueEventFieldModel.Name);
             Assert.Equal(intClassModel, valueEventFieldModel.Type);

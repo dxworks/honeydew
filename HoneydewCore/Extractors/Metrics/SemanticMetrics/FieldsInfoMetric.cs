@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Models;
 using HoneydewCore.Utils;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
+namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 {
-    public class FieldsInfoMetric : CSharpMetricExtractor, ISyntacticMetric
+    public class FieldsInfoMetric : CSharpMetricExtractor, ISemanticMetric
     {
         public IList<FieldModel> FieldInfos { get; } = new List<FieldModel>();
 
@@ -34,7 +35,6 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
             var allModifiers = node.Modifiers.ToString();
             var accessModifier = CSharpConstants.DefaultFieldAccessModifier;
             var modifier = allModifiers;
-
             
             foreach (var m in CSharpConstants.AccessModifiers)
             {
@@ -44,7 +44,14 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
                 modifier = allModifiers.Replace(m, "").Trim();
                 break;
             }
-
+            
+            var typeName = node.Declaration.Type.ToString();
+            var nodeSymbol = ExtractorSemanticModel.GetSymbolInfo(node.Declaration.Type).Symbol;
+            if (nodeSymbol != null)
+            {
+                typeName = nodeSymbol.ToString();
+            }
+            
             foreach (var variable in node.Declaration.Variables)
             {
                 FieldInfos.Add(new FieldModel
@@ -52,7 +59,7 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
                     AccessModifier = accessModifier,
                     Modifier = modifier,
                     IsEvent = isEvent,
-                    Type = node.Declaration.Type.ToString(),
+                    Type = typeName,
                     Name = variable.Identifier.ToString(),
                 });
             }

@@ -23,7 +23,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
         {
-            var declaredSymbol = SemanticModel.GetDeclaredSymbol(node);
+            var declaredSymbol = ExtractorSemanticModel.GetDeclaredSymbol(node);
 
             if (declaredSymbol is not ITypeSymbol typeSymbol) return;
             InheritanceMetric.BaseClassName = null;
@@ -36,7 +36,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            var declaredSymbol = SemanticModel.GetDeclaredSymbol(node);
+            var declaredSymbol = ExtractorSemanticModel.GetDeclaredSymbol(node);
 
             if (declaredSymbol is not ITypeSymbol typeSymbol) return;
 

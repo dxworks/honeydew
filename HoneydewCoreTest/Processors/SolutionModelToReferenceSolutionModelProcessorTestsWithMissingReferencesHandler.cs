@@ -493,142 +493,206 @@ namespace HoneydewCoreTest.Processors
         public void
             GetFunction_ShouldReturnReferenceSolutionModelWithAllMethodReferences_WhenGivenASolutionModelWithClassesWithMethodReferencesWithClassHierarchyAsParameter_UsingCSharpClassFactExtractor()
         {
-//             const string fileContent = @"
-//         namespace Project1.MyNamespace
-//         {
-//             public class BaseClass
-//             {
-//                 public int X;
-//             }
-//
-//             public class ChildClass1 : BaseClass
-//             {
-//             }
-//
-//             public class ChildClass2 : BaseClass
-//             {
-//                 public float Z;
-//             }
-//
-//             public class Model
-//             {
-//             }
-//
-//             public class ChildClass3 : ChildClass1
-//             {
-//                 private readonly Model _model;
-//             }
-//
-//             public class Caller
-//             {
-//                 public void Call(BaseClass c)
-//                 {
-//                 }
-//
-//                 public static void Call()
-//                 {
-//                     var caller = new Caller();
-//                     
-//                     caller.Call(new BaseClass());
-//                     caller.Call(new ChildClass1());
-//                     caller.Call(new ChildClass2());
-//                     caller.Call(new ChildClass3());
-//
-//                     BaseClass a = new ChildClass1();
-//                     caller.Call(a);
-//                     a = new ChildClass3();
-//                     caller.Call(a);
-//                 }
-//             }
-//         }";
-//
-//             var extractor = new CSharpClassFactExtractor();
-//             var classModels = extractor.Extract(fileContent);
-//
-//             var solutionModel = new SolutionModel
-//             {
-//                 Projects =
-//                 {
-//                     new ProjectModel
-//                     {
-//                         Name = "Project1",
-//                         Namespaces =
-//                         {
-//                             {
-//                                 "Project1.MyNamespace", new NamespaceModel
-//                                 {
-//                                     Name = "Project1.MyNamespace",
-//                                     ClassModels = classModels,
-//                                 }
-//                             }
-//                         }
-//                     }
-//                 }
-//             };
-//
-//
-//             var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
-//
-//             var referenceSolutionModel = processable.Value;
-//
-//             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-//             Assert.Equal(5, referenceSolutionModel.ClassModelsNotDeclaredInSolution.Count);
-//
-//             var intClassModel =
-//                 referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "int");
-//             var floatClassModel =
-//                 referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "float");
-//
-//             var voidClassModel =
-//                 referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "void");
-//
-//             Assert.NotNull(intClassModel);
-//             Assert.NotNull(floatClassModel);
-//             Assert.NotNull(voidClassModel);
-//
-//             Assert.Equal("int", intClassModel.Name);
-//             Assert.Equal("float", floatClassModel.Name);
-//             Assert.Equal("void", voidClassModel.Name);
-//
-//             var referenceNamespaceServices = referenceSolutionModel.Projects[0].Namespaces[0];
-//             var baseClass = referenceNamespaceServices.ClassModels[0];
-//             var childClass1 = referenceNamespaceServices.ClassModels[1];
-//             var childClass2 = referenceNamespaceServices.ClassModels[2];
-//             var modelClass = referenceNamespaceServices.ClassModels[3];
-//             var childClass3 = referenceNamespaceServices.ClassModels[4];
-//             var callerClass = referenceNamespaceServices.ClassModels[5];
-//
-//             Assert.Equal(6, referenceNamespaceServices.ClassModels.Count);
-//
-//             Assert.Equal("Project1.MyNamespace.BaseClass", baseClass.Name);
-//             Assert.Equal(referenceNamespaceServices, baseClass.NamespaceReference);
-//             Assert.Empty(baseClass.Methods);
-//             Assert.Empty(baseClass.Metrics);
-//             Assert.Equal(1, baseClass.Fields.Count);
-//
-//             var baseClassFieldX = baseClass.Fields[0];
-//             Assert.Equal("X", baseClassFieldX.Name);
-//             Assert.Equal(baseClass, baseClassFieldX.ContainingClass);
-//             Assert.Equal(intClassModel, baseClassFieldX.Type);
-//             Assert.Equal("", baseClassFieldX.Modifier);
-//             Assert.Equal("public", baseClassFieldX.AccessModifier);
-//             Assert.False(baseClassFieldX.Inherited);
-//             Assert.False(baseClassFieldX.IsEvent);
-//
-//             Assert.Equal("Project1.MyNamespace.ChildClass1", baseClass.Name);
-//             Assert.Equal(referenceNamespaceServices, baseClass.NamespaceReference);
-//             Assert.Empty(baseClass.Methods);
-//             Assert.Empty(baseClass.Metrics);
-//             Assert.Equal(1, baseClass.Fields.Count);
-//
-//             var baseClassFieldX = baseClass.Fields[0];
-//             Assert.Equal("X", baseClassFieldX.Name);
-//             Assert.Equal(baseClass, baseClassFieldX.ContainingClass);
-//             Assert.Equal(intClassModel, baseClassFieldX.Type);
-//             Assert.Equal("", baseClassFieldX.Modifier);
-//             Assert.Equal("public", baseClassFieldX.AccessModifier);
-//             Assert.False(baseClassFieldX.Inherited);
-//             Assert.False(baseClassFieldX.IsEvent);
+            const string fileContent = @"
+         namespace Project1.MyNamespace
+         {
+             public class BaseClass
+             {
+                 public int X;
+             }
+
+             public class ChildClass1 : BaseClass
+             {
+             }
+
+             public class ChildClass2 : BaseClass
+             {
+                 public float Z;
+             }
+
+             public class Model
+             {
+             }
+
+             public class ChildClass3 : ChildClass1
+             {
+                 private readonly Model _model;
+             }
+
+             public class Caller
+             {
+                 public void Call(BaseClass c)
+                 {
+                 }
+
+                 public static void Call()
+                 {
+                     var caller = new Caller();
+                     
+                     caller.Call(new BaseClass());
+                     caller.Call(new ChildClass1());
+                     caller.Call(new ChildClass2());
+                     caller.Call(new ChildClass3());
+
+                     BaseClass a = new ChildClass1();
+                     caller.Call(a);
+                     a = new ChildClass3();
+                     caller.Call(a);
+                 }
+             }
+         }";
+
+            var extractor = new CSharpClassFactExtractor();
+            var classModels = extractor.Extract(fileContent);
+
+            var solutionModel = new SolutionModel
+            {
+                Projects =
+                {
+                    new ProjectModel
+                    {
+                        Name = "Project1",
+                        Namespaces =
+                        {
+                            {
+                                "Project1.MyNamespace", new NamespaceModel
+                                {
+                                    Name = "Project1.MyNamespace",
+                                    ClassModels = classModels,
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+
+            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
+
+            var referenceSolutionModel = processable.Value;
+
+            Assert.Equal(1, referenceSolutionModel.Projects.Count);
+            Assert.Equal(4, referenceSolutionModel.ClassModelsNotDeclaredInSolution.Count);
+
+            var objectClassModel =
+                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "object");
+            var intClassModel =
+                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "int");
+            var floatClassModel =
+                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "float");
+
+            var voidClassModel =
+                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "void");
+
+            Assert.NotNull(objectClassModel);
+            Assert.NotNull(intClassModel);
+            Assert.NotNull(floatClassModel);
+            Assert.NotNull(voidClassModel);
+
+            Assert.Equal("object", objectClassModel.Name);
+            Assert.Equal("int", intClassModel.Name);
+            Assert.Equal("float", floatClassModel.Name);
+            Assert.Equal("void", voidClassModel.Name);
+
+            var referenceNamespaceServices = referenceSolutionModel.Projects[0].Namespaces[0];
+            var baseClass = referenceNamespaceServices.ClassModels[0];
+            var childClass1 = referenceNamespaceServices.ClassModels[1];
+            var childClass2 = referenceNamespaceServices.ClassModels[2];
+            var modelClass = referenceNamespaceServices.ClassModels[3];
+            var childClass3 = referenceNamespaceServices.ClassModels[4];
+            var callerClass = referenceNamespaceServices.ClassModels[5];
+
+            Assert.Equal(6, referenceNamespaceServices.ClassModels.Count);
+
+            Assert.Equal("Project1.MyNamespace.BaseClass", baseClass.Name);
+            Assert.Equal(referenceNamespaceServices, baseClass.NamespaceReference);
+            Assert.Empty(baseClass.Methods);
+            Assert.Empty(baseClass.Metrics);
+            Assert.Equal(1, baseClass.Fields.Count);
+
+            var baseClassFieldX = baseClass.Fields[0];
+            Assert.Equal("X", baseClassFieldX.Name);
+            Assert.Equal(baseClass, baseClassFieldX.ContainingClass);
+            Assert.Equal(intClassModel, baseClassFieldX.Type);
+            Assert.Equal("", baseClassFieldX.Modifier);
+            Assert.Equal("public", baseClassFieldX.AccessModifier);
+            Assert.False(baseClassFieldX.IsEvent);
+
+
+            Assert.Equal("Project1.MyNamespace.ChildClass1", childClass1.Name);
+            Assert.Equal(referenceNamespaceServices, childClass1.NamespaceReference);
+            Assert.Empty(childClass1.Methods);
+            Assert.Empty(childClass1.Metrics);
+            Assert.Empty(childClass1.Fields);
+
+
+            Assert.Equal("Project1.MyNamespace.ChildClass2", childClass2.Name);
+            Assert.Equal(referenceNamespaceServices, childClass2.NamespaceReference);
+            Assert.Empty(childClass2.Methods);
+            Assert.Empty(childClass2.Metrics);
+            Assert.Equal(1, childClass2.Fields.Count);
+
+            var childClass2FieldZ = childClass2.Fields[0];
+            Assert.Equal("Z", childClass2FieldZ.Name);
+            Assert.Equal(childClass2, childClass2FieldZ.ContainingClass);
+            Assert.Equal(floatClassModel, childClass2FieldZ.Type);
+            Assert.Equal("", childClass2FieldZ.Modifier);
+            Assert.Equal("public", childClass2FieldZ.AccessModifier);
+            Assert.False(childClass2FieldZ.IsEvent);
+
+
+            Assert.Equal("Project1.MyNamespace.Model", modelClass.Name);
+            Assert.Equal(referenceNamespaceServices, modelClass.NamespaceReference);
+            Assert.Empty(modelClass.Methods);
+            Assert.Empty(modelClass.Metrics);
+            Assert.Empty(modelClass.Fields);
+
+
+            Assert.Equal("Project1.MyNamespace.ChildClass3", childClass3.Name);
+            Assert.Equal(referenceNamespaceServices, childClass3.NamespaceReference);
+            Assert.Empty(childClass3.Methods);
+            Assert.Empty(childClass3.Metrics);
+            Assert.Equal(1, childClass3.Fields.Count);
+
+            var childClass3ModelField = childClass3.Fields[0];
+            Assert.Equal("_model", childClass3ModelField.Name);
+            Assert.Equal(childClass3, childClass3ModelField.ContainingClass);
+            Assert.Equal(modelClass, childClass3ModelField.Type);
+            Assert.Equal("readonly", childClass3ModelField.Modifier);
+            Assert.Equal("private", childClass3ModelField.AccessModifier);
+            Assert.False(childClass3ModelField.IsEvent);
+
+
+            Assert.Equal("Project1.MyNamespace.Caller", callerClass.Name);
+            Assert.Equal(referenceNamespaceServices, callerClass.NamespaceReference);
+            Assert.Empty(callerClass.Fields);
+            Assert.Empty(callerClass.Metrics);
+            Assert.Equal(2, callerClass.Methods.Count);
+
+            var callMethod0 = callerClass.Methods[0];
+            Assert.Equal("Call", callMethod0.Name);
+            Assert.Equal(callerClass, callMethod0.ContainingClass);
+            Assert.Equal("", callMethod0.Modifier);
+            Assert.Equal("public", callMethod0.AccessModifier);
+            Assert.Equal(voidClassModel, callMethod0.ReturnTypeReferenceClassModel);
+            Assert.Equal(1, callMethod0.ParameterTypes.Count);
+            Assert.Equal(baseClass, callMethod0.ParameterTypes[0]);
+            Assert.Empty(callMethod0.CalledMethods);
+
+
+            var callMethod1 = callerClass.Methods[1];
+            Assert.Equal("Call", callMethod1.Name);
+            Assert.Equal(callerClass, callMethod1.ContainingClass);
+            Assert.Equal("static", callMethod1.Modifier);
+            Assert.Equal("public", callMethod1.AccessModifier);
+            Assert.Equal(voidClassModel, callMethod1.ReturnTypeReferenceClassModel);
+            Assert.Empty(callMethod1.ParameterTypes);
+            Assert.Equal(6, callMethod1.CalledMethods.Count);
+
+            foreach (var calledMethod in callMethod1.CalledMethods)
+            {
+                Assert.Equal(callMethod0, calledMethod);
+            }
         }
     }
 }

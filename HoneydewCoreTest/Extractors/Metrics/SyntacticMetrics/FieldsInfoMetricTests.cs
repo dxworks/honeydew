@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics;
+using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.Models;
 using Xunit;
@@ -26,9 +27,9 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
         }
 
         [Fact]
-        public void GetMetricType_ShouldReturnSyntactic()
+        public void GetMetricType_ShouldReturnSemantic()
         {
-            Assert.True(_sut is ISyntacticMetric);
+            Assert.True(_sut is ISemanticMetric);
         }
 
         [Fact]
@@ -212,13 +213,13 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             Assert.True(fieldInfos[1].IsEvent);
 
             Assert.Equal("MyAction1", fieldInfos[2].Name);
-            Assert.Equal("Action", fieldInfos[2].Type);
+            Assert.Equal("System.Action", fieldInfos[2].Type);
             Assert.Equal("", fieldInfos[2].Modifier);
             Assert.Equal(visibility, fieldInfos[2].AccessModifier);
             Assert.True(fieldInfos[2].IsEvent);
 
             Assert.Equal("MyAction2", fieldInfos[3].Name);
-            Assert.Equal("Action", fieldInfos[3].Type);
+            Assert.Equal("System.Action", fieldInfos[3].Type);
             Assert.Equal("", fieldInfos[3].Modifier);
             Assert.Equal(visibility, fieldInfos[3].AccessModifier);
             Assert.True(fieldInfos[3].IsEvent);

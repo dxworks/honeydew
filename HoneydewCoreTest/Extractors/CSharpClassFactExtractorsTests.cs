@@ -342,13 +342,13 @@ namespace HoneydewCoreTest.Extractors
             Assert.True(fieldInfos[1].IsEvent);
 
             Assert.Equal("MyAction1", fieldInfos[2].Name);
-            Assert.Equal("Action", fieldInfos[2].Type);
+            Assert.Equal("System.Action", fieldInfos[2].Type);
             Assert.Equal("", fieldInfos[2].Modifier);
             Assert.Equal(visibility, fieldInfos[2].AccessModifier);
             Assert.True(fieldInfos[2].IsEvent);
 
             Assert.Equal("MyAction2", fieldInfos[3].Name);
-            Assert.Equal("Action", fieldInfos[3].Type);
+            Assert.Equal("System.Action", fieldInfos[3].Type);
             Assert.Equal("", fieldInfos[3].Modifier);
             Assert.Equal(visibility, fieldInfos[3].AccessModifier);
             Assert.True(fieldInfos[3].IsEvent);

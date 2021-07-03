@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
+namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 {
     public class MethodInfoMetric : CSharpMetricExtractor, ISemanticMetric
     {
@@ -49,8 +49,8 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
 
         private void AddInfoForNode(TypeDeclarationSyntax node)
         {
-            _containingClassName = SemanticModel.GetDeclaredSymbol(node)?.ToDisplayString();
-            _baseTypeName = SemanticModel.GetDeclaredSymbol(node)?.BaseType?.ToDisplayString();
+            _containingClassName = ExtractorSemanticModel.GetDeclaredSymbol(node)?.ToDisplayString();
+            _baseTypeName = ExtractorSemanticModel.GetDeclaredSymbol(node)?.BaseType?.ToDisplayString();
 
             foreach (var memberDeclarationSyntax in node.Members)
             {
@@ -76,7 +76,15 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
 
             foreach (var parameter in node.ParameterList.Parameters)
             {
-                methodModel.ParameterTypes.Add(parameter.Type?.ToString());
+                var parameterSymbol = ExtractorSemanticModel.GetDeclaredSymbol(parameter);
+                if (parameterSymbol != null)
+                {
+                    methodModel.ParameterTypes.Add(parameterSymbol.ToString());
+                }
+                else if (parameter.Type != null)
+                {
+                    methodModel.ParameterTypes.Add(parameter.Type.ToString());
+                }
             }
 
             if (node.Body != null)
@@ -105,7 +113,7 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
                             }
                             else
                             {
-                                var symbolInfo = SemanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression);
+                                var symbolInfo = ExtractorSemanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression);
                                 if (symbolInfo.Symbol is ILocalSymbol localSymbol)
                                 {
                                     className = localSymbol.Type.ToDisplayString();
@@ -135,7 +143,7 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
         {
             IList<string> parameterTypes = new List<string>();
 
-            var symbolInfo = SemanticModel.GetSymbolInfo(invocationExpressionSyntax);
+            var symbolInfo = ExtractorSemanticModel.GetSymbolInfo(invocationExpressionSyntax);
             if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
             {
                 foreach (var parameter in methodSymbol.Parameters)
