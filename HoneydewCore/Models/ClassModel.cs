@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.Extractors.Metrics;
+using HoneydewCore.Utils;
 using Microsoft.CodeAnalysis;
 
 namespace HoneydewCore.Models
@@ -12,7 +13,7 @@ namespace HoneydewCore.Models
 
         public string FullName { get; set; }
 
-        public string BaseClassFullName { get; set; } = "object";
+        public string BaseClassFullName { get; set; } = CSharpConstants.ObjectIdentifier;
 
         public IList<string> BaseInterfaces { get; init; } = new List<string>();
 

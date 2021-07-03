@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using HoneydewCore.Utils;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
 {
@@ -26,7 +27,7 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
             var any = false;
             foreach (var m in node.Modifiers)
             {
-                if (m.ValueText != "abstract") continue;
+                if (m.ValueText != CSharpConstants.AbstractIdentifier) continue;
                 any = true;
                 break;
             }

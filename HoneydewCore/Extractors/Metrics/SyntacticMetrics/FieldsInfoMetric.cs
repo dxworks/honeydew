@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Models;
+using HoneydewCore.Utils;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
@@ -31,12 +32,11 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
         private void AddFieldInfo(BaseFieldDeclarationSyntax node, bool isEvent)
         {
             var allModifiers = node.Modifiers.ToString();
-            var accessModifier = "private";
+            var accessModifier = CSharpConstants.DefaultFieldAccessModifier;
             var modifier = allModifiers;
 
-            var allAccessModifiers = new[]
-                {"private protected", "protected internal", "public", "private", "protected", "internal"};
-            foreach (var m in allAccessModifiers)
+            
+            foreach (var m in CSharpConstants.AccessModifiers)
             {
                 if (!allModifiers.Contains(m)) continue;
 

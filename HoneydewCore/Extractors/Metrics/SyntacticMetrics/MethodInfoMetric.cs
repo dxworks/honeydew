@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.Models;
+using HoneydewCore.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,7 +13,7 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
         public IList<MethodModel> MethodInfos { get; } = new List<MethodModel>();
 
         private string _containingClassName = "";
-        private string _baseTypeName = "object";
+        private string _baseTypeName = CSharpConstants.ObjectIdentifier;
         private bool _isInterface;
 
         public override IMetric GetMetric()
@@ -97,7 +98,8 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
                         {
                             var className = _containingClassName;
 
-                            if (memberAccessExpressionSyntax.Expression.ToFullString() == "base")
+                            if (memberAccessExpressionSyntax.Expression.ToFullString() ==
+                                CSharpConstants.BaseClassIdentifier)
                             {
                                 className = _baseTypeName;
                             }
@@ -149,12 +151,12 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
         {
             var allModifiers = node.Modifiers.ToString();
 
-            accessModifier = _isInterface ? "public" : "private";
-            modifier = _isInterface ? "abstract" : allModifiers;
+            accessModifier = _isInterface
+                ? CSharpConstants.DefaultInterfaceMethodAccessModifier
+                : CSharpConstants.DefaultClassMethodAccessModifier;
+            modifier = _isInterface ? CSharpConstants.DefaultInterfaceMethodModifier : allModifiers;
 
-            var allAccessModifiers = new[]
-                {"private protected", "protected internal", "public", "private", "protected", "internal"};
-            foreach (var m in allAccessModifiers)
+            foreach (var m in CSharpConstants.AccessModifiers)
             {
                 if (!allModifiers.Contains(m)) continue;
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using HoneydewCore.Utils;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
@@ -41,7 +42,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 
             if (typeSymbol.BaseType == null)
             {
-                InheritanceMetric.BaseClassName = "object";
+                InheritanceMetric.BaseClassName = CSharpConstants.ObjectIdentifier;
                 return;
             }
 
@@ -50,7 +51,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
             if (typeSymbol.BaseType.Constructors.IsEmpty)
             {
                 InheritanceMetric.Interfaces.Add(typeSymbol.BaseType?.ToString());
-                InheritanceMetric.BaseClassName = "object";
+                InheritanceMetric.BaseClassName = CSharpConstants.ObjectIdentifier;
             }
 
             foreach (var interfaceSymbol in typeSymbol.Interfaces)
