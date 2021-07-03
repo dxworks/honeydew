@@ -14,7 +14,7 @@ namespace HoneydewCore.Models
 
         public string BaseClassFullName { get; set; } = "object";
 
-        public IList<string> BaseInterfaces { get; set; } = new List<string>();
+        public IList<string> BaseInterfaces { get; init; } = new List<string>();
 
         public IList<FieldModel> Fields { get; init; } = new List<FieldModel>();
 

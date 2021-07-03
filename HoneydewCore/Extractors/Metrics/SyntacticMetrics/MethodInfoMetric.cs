@@ -148,29 +148,19 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
         private void GetModifiersForNode(MemberDeclarationSyntax node, out string accessModifier, out string modifier)
         {
             var allModifiers = node.Modifiers.ToString();
-            accessModifier = allModifiers;
-            modifier = "";
-            string[] modifiers = {"virtual", "static", "override", "abstract"};
-            foreach (var m in modifiers)
+
+            accessModifier = _isInterface ? "public" : "private";
+            modifier = _isInterface ? "abstract" : allModifiers;
+
+            var allAccessModifiers = new[]
+                {"private protected", "protected internal", "public", "private", "protected", "internal"};
+            foreach (var m in allAccessModifiers)
             {
                 if (!allModifiers.Contains(m)) continue;
 
-                modifier = m;
-                accessModifier = allModifiers.Replace(m, "");
-                accessModifier = accessModifier.Trim();
+                accessModifier = m;
+                modifier = allModifiers.Replace(m, "").Trim();
                 break;
-            }
-
-            if (string.IsNullOrEmpty(accessModifier))
-            {
-                accessModifier = _isInterface ? "public" : "private";
-                if (_isInterface)
-                {
-                    if (string.IsNullOrEmpty(modifier))
-                    {
-                        modifier = "abstract";
-                    }
-                }
             }
         }
     }

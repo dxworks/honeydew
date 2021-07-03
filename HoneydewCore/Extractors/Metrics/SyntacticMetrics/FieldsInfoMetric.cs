@@ -31,22 +31,18 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
         private void AddFieldInfo(BaseFieldDeclarationSyntax node, bool isEvent)
         {
             var allModifiers = node.Modifiers.ToString();
-            var accessModifier = allModifiers;
-            var modifier = "";
-            string[] modifiers = {"readonly", "static", "volatile"};
-            foreach (var m in modifiers)
+            var accessModifier = "private";
+            var modifier = allModifiers;
+
+            var allAccessModifiers = new[]
+                {"private protected", "protected internal", "public", "private", "protected", "internal"};
+            foreach (var m in allAccessModifiers)
             {
                 if (!allModifiers.Contains(m)) continue;
 
-                modifier = m;
-                accessModifier = allModifiers.Replace(m, "");
-                accessModifier = accessModifier.Trim();
+                accessModifier = m;
+                modifier = allModifiers.Replace(m, "").Trim();
                 break;
-            }
-
-            if (string.IsNullOrEmpty(accessModifier))
-            {
-                accessModifier = "private";
             }
 
             foreach (var variable in node.Declaration.Variables)

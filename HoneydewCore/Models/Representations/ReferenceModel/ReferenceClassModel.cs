@@ -16,6 +16,6 @@ namespace HoneydewCore.Models.Representations.ReferenceModel
 
         public IList<ReferenceMethodModel> Methods { get; } = new List<ReferenceMethodModel>();
 
-        public IList<ClassMetric> Metrics { get; init; } = new List<ClassMetric>(); 
+        public IList<ClassMetric> Metrics { get; init; } = new List<ClassMetric>();
     }
 }
