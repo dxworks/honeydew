@@ -93,18 +93,19 @@ namespace HoneydewCoreTest.Processors
             var referenceSolutionModel = processable.Value;
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-            Assert.Equal(5, referenceSolutionModel.ClassModelsNotDeclaredInSolution.Count);
+            var allCreatedReferences = referenceSolutionModel.GetAllCreatedReferences();
+            Assert.Equal(5, allCreatedReferences.Count);
 
             var objectClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "object");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "object");
             var intClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "int");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "int");
             var stringClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "string");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "string");
             var floatClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "float");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "float");
             var voidClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "void");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "void");
 
             Assert.NotNull(objectClassModel);
             Assert.NotNull(intClassModel);
@@ -273,20 +274,21 @@ namespace HoneydewCoreTest.Processors
             var referenceSolutionModel = processable.Value;
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-            Assert.Equal(6, referenceSolutionModel.ClassModelsNotDeclaredInSolution.Count);
+            var allCreatedReferences = referenceSolutionModel.GetAllCreatedReferences();
+            Assert.Equal(6, allCreatedReferences.Count);
 
             var objectClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "object");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "object");
             var intClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "int");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "int");
             var shortClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "short");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "short");
             var longClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "long");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "long");
             var byteClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "byte");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "byte");
             var voidClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "void");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "void");
 
             Assert.NotNull(objectClassModel);
             Assert.NotNull(intClassModel);
@@ -422,10 +424,11 @@ namespace HoneydewCoreTest.Processors
             var referenceSolutionModel = processable.Value;
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-            Assert.Equal(1, referenceSolutionModel.ClassModelsNotDeclaredInSolution.Count);
+            var allCreatedReferences = referenceSolutionModel.GetAllCreatedReferences();
+            Assert.Equal(1, allCreatedReferences.Count);
 
             var objectClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "object");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "object");
 
             Assert.NotNull(objectClassModel);
             Assert.Equal("object", objectClassModel.Name);
@@ -593,17 +596,18 @@ namespace HoneydewCoreTest.Processors
             var referenceSolutionModel = processable.Value;
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-            Assert.Equal(4, referenceSolutionModel.ClassModelsNotDeclaredInSolution.Count);
+            var allCreatedReferences = referenceSolutionModel.GetAllCreatedReferences();
+            Assert.Equal(4, allCreatedReferences.Count);
 
             var objectClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "object");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "object");
             var intClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "int");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "int");
             var floatClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "float");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "float");
 
             var voidClassModel =
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "void");
+                allCreatedReferences.SingleOrDefault(a => a.Name == "void");
 
             Assert.NotNull(objectClassModel);
             Assert.NotNull(intClassModel);

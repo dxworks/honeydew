@@ -9,18 +9,6 @@ namespace HoneydewCore.Processors
     public class
         SolutionModelToReferenceSolutionModelProcessor : IProcessorFunction<SolutionModel, ReferenceSolutionModel>
     {
-        private readonly IClassModelCacheHandler _classModelCacheHandler;
-
-        public SolutionModelToReferenceSolutionModelProcessor(IClassModelCacheHandler classModelCacheHandler)
-        {
-            _classModelCacheHandler = classModelCacheHandler;
-        }
-
-        public SolutionModelToReferenceSolutionModelProcessor()
-        {
-            _classModelCacheHandler = new ClassModelCacheHandler();
-        }
-
         public Func<Processable<SolutionModel>, Processable<ReferenceSolutionModel>> GetFunction()
         {
             return processable =>
@@ -33,22 +21,12 @@ namespace HoneydewCore.Processors
                     return new Processable<ReferenceSolutionModel>(referenceSolutionModel);
 
                 PopulateModelWithProjectNamespacesAndClasses(solutionModel, referenceSolutionModel);
-
-                var classModels = (from projectModel in referenceSolutionModel.Projects
-                    from namespaceModel in projectModel.Namespaces
-                    from classModel in namespaceModel.ClassModels
-                    select classModel).ToList();
-
-                _classModelCacheHandler.AddAll(classModels);
-
+                
                 PopulateModelWithBaseClassesAndInterfaces(solutionModel, referenceSolutionModel);
 
                 PopulateModelWithMethodsAndFields(solutionModel, referenceSolutionModel);
 
                 PopulateModelWithMethodReferences(solutionModel, referenceSolutionModel);
-
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution =
-                    _classModelCacheHandler.GetAllCreatedReferences();
 
                 return new Processable<ReferenceSolutionModel>(referenceSolutionModel);
             };
@@ -243,7 +221,7 @@ namespace HoneydewCore.Processors
                 return (ReferenceClassModel) referenceEntity;
             }
 
-            return _classModelCacheHandler.GetAndAddReference(className);
+            return referenceSolutionModel.FindOrCreateClassModel(className);
         }
     }
 }
