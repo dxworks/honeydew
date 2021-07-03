@@ -77,8 +77,11 @@ namespace HoneydewCore.Processors
                     {
                         var referenceClassModel = new ReferenceClassModel
                         {
+                            ClassType = classModel.ClassType,
                             Name = classModel.FullName,
                             FilePath = classModel.FilePath,
+                            AccessModifier = classModel.AccessModifier,
+                            Modifier = classModel.Modifier,
                             NamespaceReference = referenceNamespaceModel,
                             Metrics = classModel.Metrics
                         };

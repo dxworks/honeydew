@@ -432,14 +432,14 @@ namespace HoneydewCoreTest.Processors
 
             var referenceNamespaceServices = referenceSolutionModel.Projects[0].Namespaces[0];
 
-            var referenceBaseClass = referenceNamespaceServices.ClassModels[0];
-            var referenceChildClass1 = referenceNamespaceServices.ClassModels[1];
-            var referenceChildClass2 = referenceNamespaceServices.ClassModels[2];
-            var referenceModel = referenceNamespaceServices.ClassModels[3];
-            var referenceChildClass3 = referenceNamespaceServices.ClassModels[4];
-            var referenceIInterface = referenceNamespaceServices.ClassModels[5];
-            var referenceMyInterface = referenceNamespaceServices.ClassModels[6];
-            var referenceOtherInterface = referenceNamespaceServices.ClassModels[7];
+            var referenceIInterface = referenceNamespaceServices.ClassModels[0];
+            var referenceMyInterface = referenceNamespaceServices.ClassModels[1];
+            var referenceOtherInterface = referenceNamespaceServices.ClassModels[2];
+            var referenceBaseClass = referenceNamespaceServices.ClassModels[3];
+            var referenceChildClass1 = referenceNamespaceServices.ClassModels[4];
+            var referenceChildClass2 = referenceNamespaceServices.ClassModels[5];
+            var referenceModel = referenceNamespaceServices.ClassModels[6];
+            var referenceChildClass3 = referenceNamespaceServices.ClassModels[7];
 
             Assert.Equal(8, referenceNamespaceServices.ClassModels.Count);
 
@@ -450,28 +450,43 @@ namespace HoneydewCoreTest.Processors
 
             Assert.Equal("Project1.MyNamespace.MyInterface", referenceMyInterface.Name);
             Assert.Equal(referenceNamespaceServices, referenceMyInterface.NamespaceReference);
+            Assert.Equal("interface", referenceMyInterface.ClassType);
+            Assert.Equal("public", referenceMyInterface.AccessModifier);
+            Assert.Equal("", referenceMyInterface.Modifier);
             Assert.Null(referenceMyInterface.BaseClass);
             Assert.Equal(1, referenceMyInterface.BaseInterfaces.Count);
             Assert.Equal(referenceIInterface, referenceMyInterface.BaseInterfaces[0]);
 
             Assert.Equal("Project1.MyNamespace.OtherInterface", referenceOtherInterface.Name);
             Assert.Equal(referenceNamespaceServices, referenceOtherInterface.NamespaceReference);
+            Assert.Equal("interface", referenceOtherInterface.ClassType);
+            Assert.Equal("public", referenceOtherInterface.AccessModifier);
+            Assert.Equal("", referenceOtherInterface.Modifier);
             Assert.Null(referenceOtherInterface.BaseClass);
             Assert.Empty(referenceOtherInterface.BaseInterfaces);
 
             Assert.Equal("Project1.MyNamespace.BaseClass", referenceBaseClass.Name);
             Assert.Equal(referenceNamespaceServices, referenceBaseClass.NamespaceReference);
+            Assert.Equal("class", referenceBaseClass.ClassType);
+            Assert.Equal("public", referenceBaseClass.AccessModifier);
+            Assert.Equal("", referenceBaseClass.Modifier);
             Assert.Equal(objectClassModel, referenceBaseClass.BaseClass);
             Assert.Empty(referenceBaseClass.BaseInterfaces);
 
             Assert.Equal("Project1.MyNamespace.ChildClass1", referenceChildClass1.Name);
             Assert.Equal(referenceNamespaceServices, referenceChildClass1.NamespaceReference);
+            Assert.Equal("class", referenceChildClass1.ClassType);
+            Assert.Equal("public", referenceChildClass1.AccessModifier);
+            Assert.Equal("", referenceChildClass1.Modifier);
             Assert.Equal(referenceBaseClass, referenceChildClass1.BaseClass);
             Assert.Equal(1, referenceChildClass1.BaseInterfaces.Count);
             Assert.Equal(referenceIInterface, referenceChildClass1.BaseInterfaces[0]);
 
             Assert.Equal("Project1.MyNamespace.ChildClass2", referenceChildClass2.Name);
             Assert.Equal(referenceNamespaceServices, referenceChildClass2.NamespaceReference);
+            Assert.Equal("class", referenceChildClass2.ClassType);
+            Assert.Equal("public", referenceChildClass2.AccessModifier);
+            Assert.Equal("", referenceChildClass2.Modifier);
             Assert.Equal(referenceBaseClass, referenceChildClass2.BaseClass);
             Assert.Equal(2, referenceChildClass2.BaseInterfaces.Count);
             Assert.Equal(referenceMyInterface, referenceChildClass2.BaseInterfaces[0]);
@@ -479,12 +494,18 @@ namespace HoneydewCoreTest.Processors
 
             Assert.Equal("Project1.MyNamespace.Model", referenceModel.Name);
             Assert.Equal(referenceNamespaceServices, referenceModel.NamespaceReference);
+            Assert.Equal("class", referenceModel.ClassType);
+            Assert.Equal("public", referenceModel.AccessModifier);
+            Assert.Equal("", referenceModel.Modifier);
             Assert.Equal(objectClassModel, referenceModel.BaseClass);
             Assert.Equal(1, referenceModel.BaseInterfaces.Count);
             Assert.Equal(referenceOtherInterface, referenceModel.BaseInterfaces[0]);
 
             Assert.Equal("Project1.MyNamespace.ChildClass3", referenceChildClass3.Name);
             Assert.Equal(referenceNamespaceServices, referenceChildClass3.NamespaceReference);
+            Assert.Equal("class", referenceChildClass3.ClassType);
+            Assert.Equal("public", referenceChildClass3.AccessModifier);
+            Assert.Equal("", referenceChildClass3.Modifier);
             Assert.Equal(referenceChildClass1, referenceChildClass3.BaseClass);
             Assert.Empty(referenceChildClass3.BaseInterfaces);
         }

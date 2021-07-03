@@ -9,9 +9,15 @@ namespace HoneydewCore.Models
 {
     public record ClassModel
     {
+        public string ClassType { get; init; }
+
         public string FilePath { get; set; }
 
         public string FullName { get; set; }
+
+        public string AccessModifier { get; init; }
+
+        public string Modifier { get; init; } = "";
 
         public string BaseClassFullName { get; set; } = CSharpConstants.ObjectIdentifier;
 
@@ -21,7 +27,7 @@ namespace HoneydewCore.Models
 
         public IList<MethodModel> Methods { get; init; } = new List<MethodModel>();
 
-        public IList<ClassMetric> Metrics { get; set; } = new List<ClassMetric>();
+        public IList<ClassMetric> Metrics { get; init; } = new List<ClassMetric>();
 
 
         public string Namespace

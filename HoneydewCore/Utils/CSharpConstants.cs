@@ -2,9 +2,7 @@
 {
     public static class CSharpConstants
     {
-        public static readonly string[] AccessModifiers =
-            {"private protected", "protected internal", "public", "private", "protected", "internal"};
-
+        public const string DefaultClassAccessModifier = "private";
         public const string DefaultFieldAccessModifier = "private";
         public const string DefaultClassMethodAccessModifier = "private";
         public const string DefaultInterfaceMethodAccessModifier = "public";
@@ -14,6 +12,21 @@
         public const string BaseClassIdentifier = "base";
         public const string ObjectIdentifier = "object";
         public const string VarIdentifier = "var";
+
+        private static readonly string[] AccessModifiers =
+            {"private protected", "protected internal", "public", "private", "protected", "internal"};
+
+        public static void SetModifiers(string allModifiers, ref string accessModifier, ref string modifier)
+        {
+            foreach (var m in AccessModifiers)
+            {
+                if (!allModifiers.Contains(m)) continue;
+
+                accessModifier = m;
+                modifier = allModifiers.Replace(m, "").Trim();
+                break;
+            }
+        }
 
         public static bool IsPrimitive(string type)
         {

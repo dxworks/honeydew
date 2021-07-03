@@ -113,7 +113,8 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
                             }
                             else
                             {
-                                var symbolInfo = ExtractorSemanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression);
+                                var symbolInfo =
+                                    ExtractorSemanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression);
                                 if (symbolInfo.Symbol is ILocalSymbol localSymbol)
                                 {
                                     className = localSymbol.Type.ToDisplayString();
@@ -164,14 +165,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
                 : CSharpConstants.DefaultClassMethodAccessModifier;
             modifier = _isInterface ? CSharpConstants.DefaultInterfaceMethodModifier : allModifiers;
 
-            foreach (var m in CSharpConstants.AccessModifiers)
-            {
-                if (!allModifiers.Contains(m)) continue;
-
-                accessModifier = m;
-                modifier = allModifiers.Replace(m, "").Trim();
-                break;
-            }
+            CSharpConstants.SetModifiers(allModifiers, ref accessModifier, ref modifier);
         }
     }
 }

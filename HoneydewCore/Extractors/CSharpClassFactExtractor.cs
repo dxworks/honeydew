@@ -5,6 +5,7 @@ using System.Linq;
 using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Models;
+using HoneydewCore.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -43,7 +44,7 @@ namespace HoneydewCore.Extractors
 
             var semanticModel = CreateSemanticModel(tree);
 
-            var syntaxes = GetClassAndInterfaceSyntaxes(root);
+            var syntaxes = root.DescendantNodes().OfType<BaseTypeDeclarationSyntax>().ToList();
 
             foreach (var declarationSyntax in syntaxes)
             {
@@ -53,15 +54,21 @@ namespace HoneydewCore.Extractors
                     continue;
                 }
 
-                var namespaceSymbol = declaredSymbol.ContainingNamespace;
-                var className = declaredSymbol.Name;
-
                 ExtractBaseClassAndBaseInterfaces(declarationSyntax, semanticModel, out var baseClassName,
                     out var baseInterfaces);
 
+                var classType = declarationSyntax.Kind().ToString().Replace("Declaration", "").ToLower();
+
+                var accessModifier = CSharpConstants.DefaultClassAccessModifier;
+                var modifier = "";
+                CSharpConstants.SetModifiers(declarationSyntax.Modifiers.ToString(), ref accessModifier, ref modifier);
+
                 var projectClass = new ClassModel
                 {
-                    FullName = $"{namespaceSymbol}.{className}",
+                    ClassType = classType,
+                    AccessModifier = accessModifier,
+                    Modifier = modifier,
+                    FullName = declaredSymbol.ToDisplayString(),
                     Fields = ExtractFieldsInfo(declarationSyntax, semanticModel),
                     Methods = ExtractMethodInfo(declarationSyntax, semanticModel),
                     BaseClassFullName = baseClassName,
@@ -149,33 +156,6 @@ namespace HoneydewCore.Extractors
 
             var semanticModel = compilation.GetSemanticModel(tree);
             return semanticModel;
-        }
-
-        private static IList<TypeDeclarationSyntax> GetClassAndInterfaceSyntaxes(CompilationUnitSyntax root)
-        {
-            var classDeclarationSyntaxes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
-            var interfaceDeclarationSyntaxes = root.DescendantNodes().OfType<InterfaceDeclarationSyntax>();
-            var recordDeclarationSyntaxes = root.DescendantNodes().OfType<RecordDeclarationSyntax>();
-            var structDeclarationSyntaxes = root.DescendantNodes().OfType<StructDeclarationSyntax>();
-
-            IList<TypeDeclarationSyntax> syntaxes = classDeclarationSyntaxes.Cast<TypeDeclarationSyntax>().ToList();
-
-            foreach (var syntax in interfaceDeclarationSyntaxes)
-            {
-                syntaxes.Add(syntax);
-            }
-
-            foreach (var syntax in recordDeclarationSyntaxes)
-            {
-                syntaxes.Add(syntax);
-            }
-
-            foreach (var syntax in structDeclarationSyntaxes)
-            {
-                syntaxes.Add(syntax);
-            }
-
-            return syntaxes;
         }
 
         private static CompilationUnitSyntax GetCompilationUnitSyntaxTree(SyntaxTree tree)

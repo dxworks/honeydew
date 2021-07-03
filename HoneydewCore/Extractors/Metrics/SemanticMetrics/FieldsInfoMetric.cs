@@ -36,15 +36,8 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
             var accessModifier = CSharpConstants.DefaultFieldAccessModifier;
             var modifier = allModifiers;
             
-            foreach (var m in CSharpConstants.AccessModifiers)
-            {
-                if (!allModifiers.Contains(m)) continue;
+            CSharpConstants.SetModifiers(allModifiers, ref accessModifier, ref modifier);
 
-                accessModifier = m;
-                modifier = allModifiers.Replace(m, "").Trim();
-                break;
-            }
-            
             var typeName = node.Declaration.Type.ToString();
             var nodeSymbol = ExtractorSemanticModel.GetSymbolInfo(node.Declaration.Type).Symbol;
             if (nodeSymbol != null)
