@@ -8,13 +8,20 @@ namespace HoneydewCore.Models
 {
     public record ClassModel
     {
-        private string _namespace = "";
-
         public string FilePath { get; set; }
+
         public string FullName { get; set; }
-        public IList<FieldModel> Fields { get; set; } = new List<FieldModel>();
-        public IList<MethodModel> Methods { get; set; } = new List<MethodModel>();
+
+        public string BaseClassFullName { get; set; } = "object";
+
+        public IList<string> BaseInterfaces { get; set; } = new List<string>();
+
+        public IList<FieldModel> Fields { get; init; } = new List<FieldModel>();
+
+        public IList<MethodModel> Methods { get; init; } = new List<MethodModel>();
+
         public IList<ClassMetric> Metrics { get; set; } = new List<ClassMetric>();
+
 
         public string Namespace
         {
@@ -32,6 +39,8 @@ namespace HoneydewCore.Models
                 return _namespace;
             }
         }
+
+        private string _namespace = "";
 
         public Optional<object> GetMetricValue<T>() where T : IMetricExtractor
         {

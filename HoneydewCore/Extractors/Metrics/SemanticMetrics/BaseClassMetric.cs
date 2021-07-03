@@ -20,6 +20,19 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
             return "Inherits Class";
         }
 
+        public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
+        {
+            var declaredSymbol = SemanticModel.GetDeclaredSymbol(node);
+
+            if (declaredSymbol is not ITypeSymbol typeSymbol) return;
+            InheritanceMetric.BaseClassName = null;
+
+            foreach (var interfaceSymbol in typeSymbol.Interfaces)
+            {
+                InheritanceMetric.Interfaces.Add(interfaceSymbol.ToString());
+            }
+        }
+
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             var declaredSymbol = SemanticModel.GetDeclaredSymbol(node);
@@ -28,22 +41,21 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 
             if (typeSymbol.BaseType == null)
             {
-                InheritanceMetric.BaseClassName = "Object";
+                InheritanceMetric.BaseClassName = "object";
                 return;
             }
 
-            InheritanceMetric.BaseClassName = typeSymbol.BaseType.Name;
+            InheritanceMetric.BaseClassName = typeSymbol.BaseType.ToString();
 
             if (typeSymbol.BaseType.Constructors.IsEmpty)
             {
                 InheritanceMetric.Interfaces.Add(typeSymbol.BaseType?.ToString());
-                InheritanceMetric.BaseClassName = "Object";
+                InheritanceMetric.BaseClassName = "object";
             }
 
-
-            foreach (var i in typeSymbol.Interfaces)
+            foreach (var interfaceSymbol in typeSymbol.Interfaces)
             {
-                InheritanceMetric.Interfaces.Add(i.ToString());
+                InheritanceMetric.Interfaces.Add(interfaceSymbol.ToString());
             }
         }
     }

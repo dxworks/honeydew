@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using HoneydewCore.Extractors.Metrics;
+using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.Models;
 using Microsoft.CodeAnalysis;
@@ -56,13 +57,17 @@ namespace HoneydewCore.Extractors
                 var namespaceSymbol = declaredSymbol.ContainingNamespace;
                 var className = declaredSymbol.Name;
 
+                ExtractBaseClassAndBaseInterfaces(declarationSyntax, semanticModel, out var baseClassName,
+                    out var baseInterfaces);
+
                 var projectClass = new ClassModel
                 {
                     FullName = $"{namespaceSymbol}.{className}",
                     Fields = ExtractFieldsInfo(declarationSyntax),
-                    Methods = ExtractMethodInfo(declarationSyntax, semanticModel)
+                    Methods = ExtractMethodInfo(declarationSyntax, semanticModel),
+                    BaseClassFullName = baseClassName,
+                    BaseInterfaces = baseInterfaces
                 };
-
 
                 foreach (var extractorType in _metricExtractorsTypes)
                 {
@@ -91,7 +96,7 @@ namespace HoneydewCore.Extractors
                     {
                         ExtractorName = extractorType.FullName,
                         Value = metric.GetValue(),
-                        ValueType = metric.GetValueType()
+                        ValueType = metric.GetValueType(),
                     });
                 }
 
@@ -136,7 +141,7 @@ namespace HoneydewCore.Extractors
                 }
             }
             // if 'systemReference' is empty means that the System.dll Location is accessible with Reflection
-            else 
+            else
             {
                 compilation = compilation.AddReferences(MetadataReference.CreateFromFile(systemReference));
             }
@@ -205,6 +210,19 @@ namespace HoneydewCore.Extractors
             };
             fieldsInfoMetric.Visit(declarationSyntax);
             return fieldsInfoMetric.MethodInfos;
+        }
+
+        private void ExtractBaseClassAndBaseInterfaces(SyntaxNode declarationSyntax,
+            SemanticModel semanticModel, out string baseClass, out IList<string> baseInterfaces)
+        {
+            var fieldsInfoMetric = new BaseClassMetric
+            {
+                SemanticModel = semanticModel
+            };
+            fieldsInfoMetric.Visit(declarationSyntax);
+
+            baseClass = fieldsInfoMetric.InheritanceMetric.BaseClassName;
+            baseInterfaces = fieldsInfoMetric.InheritanceMetric.Interfaces;
         }
     }
 }

@@ -40,7 +40,7 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""Projects"":[{""Name"":""A Project"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""Fields"":[],""Methods"":[],""Metrics"":[],""Namespace"":""SomeNamespace""}]}}}]}";
+                @"{""Projects"":[{""Name"":""A Project"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""BaseClassFullName"":""object"",""BaseInterfaces"":[],""Fields"":[],""Methods"":[],""Metrics"":[],""Namespace"":""SomeNamespace""}]}}}]}";
 
             var projectModel = new ProjectModel("A Project");
             foreach (var classModel in classModels)
@@ -79,7 +79,7 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""Projects"":[{""Name"":""ProjectName"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""Fields"":[],""Methods"":[],""Metrics"":[{""ExtractorName"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"",""ValueType"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}],""Namespace"":""SomeNamespace""}]}}}]}";
+                @"{""Projects"":[{""Name"":""ProjectName"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""BaseClassFullName"":""object"",""BaseInterfaces"":[],""Fields"":[],""Methods"":[],""Metrics"":[{""ExtractorName"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"",""ValueType"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}],""Namespace"":""SomeNamespace""}]}}}]}";
 
             var projectModel = new ProjectModel("ProjectName");
             foreach (var model in classModels)
@@ -129,7 +129,7 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""Projects"":[{""Name"":""A Project"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""Fields"":[],""Methods"":[{""Name"":""Method1"",""ReturnType"":""int"",""Modifier"":""static"",""AccessModifier"":""public"",""ParameterTypes"":[""string""],""ContainingClassName"":""SomeNamespace.FirstClass"",""CalledMethods"":[{""MethodName"":""Parse"",""ContainingClassName"":""int"",""ParameterTypes"":[""string""]}]}],""Metrics"":[],""Namespace"":""SomeNamespace""}]}}}]}";
+                @"{""Projects"":[{""Name"":""A Project"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""BaseClassFullName"":""object"",""BaseInterfaces"":[],""Fields"":[],""Methods"":[{""Name"":""Method1"",""ReturnType"":""int"",""Modifier"":""static"",""AccessModifier"":""public"",""ParameterTypes"":[""string""],""ContainingClassName"":""SomeNamespace.FirstClass"",""CalledMethods"":[{""MethodName"":""Parse"",""ContainingClassName"":""int"",""ParameterTypes"":[""string""]}]}],""Metrics"":[],""Namespace"":""SomeNamespace""}]}}}]}";
 
             var projectModel = new ProjectModel("A Project");
             foreach (var classModel in classModels)

@@ -93,8 +93,10 @@ namespace HoneydewCoreTest.Processors
             var referenceSolutionModel = processable.Value;
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-            Assert.Equal(4, referenceSolutionModel.ClassModelsNotDeclaredInSolution.Count);
+            Assert.Equal(5, referenceSolutionModel.ClassModelsNotDeclaredInSolution.Count);
 
+            var objectClassModel =
+                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "object");
             var intClassModel =
                 referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "int");
             var stringClassModel =
@@ -104,11 +106,13 @@ namespace HoneydewCoreTest.Processors
             var voidClassModel =
                 referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "void");
 
+            Assert.NotNull(objectClassModel);
             Assert.NotNull(intClassModel);
             Assert.NotNull(stringClassModel);
             Assert.NotNull(floatClassModel);
             Assert.NotNull(voidClassModel);
 
+            Assert.Equal("object", objectClassModel.Name);
             Assert.Equal("int", intClassModel.Name);
             Assert.Equal("string", stringClassModel.Name);
             Assert.Equal("float", floatClassModel.Name);
@@ -202,7 +206,7 @@ namespace HoneydewCoreTest.Processors
 
         [Fact]
         public void
-            GetFunction_ShouldReturnReferenceSolutionModelWithAllMethodReferences_WhenGivenASolutionModelWithClassesWithMethodReferencesOnlyWithNumericesAsParameters_UsingCSharpClassFactExtractor()
+            GetFunction_ShouldReturnReferenceSolutionModelWithAllMethodReferences_WhenGivenASolutionModelWithClassesWithMethodReferencesOnlyWithNumericValesAsParameters_UsingCSharpClassFactExtractor()
         {
             const string fileContent = @"
         namespace Project1.Services
@@ -269,8 +273,10 @@ namespace HoneydewCoreTest.Processors
             var referenceSolutionModel = processable.Value;
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-            Assert.Equal(5, referenceSolutionModel.ClassModelsNotDeclaredInSolution.Count);
+            Assert.Equal(6, referenceSolutionModel.ClassModelsNotDeclaredInSolution.Count);
 
+            var objectClassModel =
+                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "object");
             var intClassModel =
                 referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "int");
             var shortClassModel =
@@ -282,12 +288,14 @@ namespace HoneydewCoreTest.Processors
             var voidClassModel =
                 referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "void");
 
+            Assert.NotNull(objectClassModel);
             Assert.NotNull(intClassModel);
             Assert.NotNull(shortClassModel);
             Assert.NotNull(longClassModel);
             Assert.NotNull(byteClassModel);
             Assert.NotNull(voidClassModel);
 
+            Assert.Equal("object", objectClassModel.Name);
             Assert.Equal("int", intClassModel.Name);
             Assert.Equal("short", shortClassModel.Name);
             Assert.Equal("long", longClassModel.Name);
@@ -357,6 +365,128 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal(1, printByte.ParameterTypes.Count);
             Assert.Equal(byteClassModel, printByte.ParameterTypes[0]);
             Assert.Empty(printByte.CalledMethods);
+        }
+
+        [Fact]
+        public void
+            GetFunction_ShouldReturnReferenceSolutionModelWithAllClassReferences_WhenGivenASolutionModelWithClassHierarchy_UsingCSharpClassFactExtractor()
+        {
+            const string fileContent = @"
+         namespace Project1.MyNamespace
+         {
+             public interface IInterface {}
+
+             public interface MyInterface : IInterface {}
+
+             public interface OtherInterface {}
+
+             public class BaseClass {}
+
+             public class ChildClass1 : BaseClass, IInterface {}
+
+             public class ChildClass2 : BaseClass, MyInterface, OtherInterface {}
+
+             public class Model : OtherInterface {}
+
+             public class ChildClass3 : ChildClass1 {}
+         }";
+
+
+            var extractor = new CSharpClassFactExtractor();
+            var classModels = extractor.Extract(fileContent);
+
+            var solutionModel = new SolutionModel
+            {
+                Projects =
+                {
+                    new ProjectModel
+                    {
+                        Name = "Project1",
+                        Namespaces =
+                        {
+                            {
+                                "Project1.Services", new NamespaceModel
+                                {
+                                    Name = "Project1.Services",
+                                    ClassModels = classModels,
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+
+            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
+
+            var referenceSolutionModel = processable.Value;
+
+            Assert.Equal(1, referenceSolutionModel.Projects.Count);
+            Assert.Equal(1, referenceSolutionModel.ClassModelsNotDeclaredInSolution.Count);
+
+            var objectClassModel =
+                referenceSolutionModel.ClassModelsNotDeclaredInSolution.SingleOrDefault(a => a.Name == "object");
+
+            Assert.NotNull(objectClassModel);
+            Assert.Equal("object", objectClassModel.Name);
+
+            var referenceNamespaceServices = referenceSolutionModel.Projects[0].Namespaces[0];
+
+            var referenceBaseClass = referenceNamespaceServices.ClassModels[0];
+            var referenceChildClass1 = referenceNamespaceServices.ClassModels[1];
+            var referenceChildClass2 = referenceNamespaceServices.ClassModels[2];
+            var referenceModel = referenceNamespaceServices.ClassModels[3];
+            var referenceChildClass3 = referenceNamespaceServices.ClassModels[4];
+            var referenceIInterface = referenceNamespaceServices.ClassModels[5];
+            var referenceMyInterface = referenceNamespaceServices.ClassModels[6];
+            var referenceOtherInterface = referenceNamespaceServices.ClassModels[7];
+
+            Assert.Equal(8, referenceNamespaceServices.ClassModels.Count);
+
+            Assert.Equal("Project1.MyNamespace.IInterface", referenceIInterface.Name);
+            Assert.Equal(referenceNamespaceServices, referenceIInterface.NamespaceReference);
+            Assert.Null(referenceIInterface.BaseClass);
+            Assert.Empty(referenceIInterface.BaseInterfaces);
+
+            Assert.Equal("Project1.MyNamespace.MyInterface", referenceMyInterface.Name);
+            Assert.Equal(referenceNamespaceServices, referenceMyInterface.NamespaceReference);
+            Assert.Null(referenceMyInterface.BaseClass);
+            Assert.Equal(1, referenceMyInterface.BaseInterfaces.Count);
+            Assert.Equal(referenceIInterface, referenceMyInterface.BaseInterfaces[0]);
+
+            Assert.Equal("Project1.MyNamespace.OtherInterface", referenceOtherInterface.Name);
+            Assert.Equal(referenceNamespaceServices, referenceOtherInterface.NamespaceReference);
+            Assert.Null(referenceOtherInterface.BaseClass);
+            Assert.Empty(referenceOtherInterface.BaseInterfaces);
+
+            Assert.Equal("Project1.MyNamespace.BaseClass", referenceBaseClass.Name);
+            Assert.Equal(referenceNamespaceServices, referenceBaseClass.NamespaceReference);
+            Assert.Equal(objectClassModel, referenceBaseClass.BaseClass);
+            Assert.Empty(referenceBaseClass.BaseInterfaces);
+
+            Assert.Equal("Project1.MyNamespace.ChildClass1", referenceChildClass1.Name);
+            Assert.Equal(referenceNamespaceServices, referenceChildClass1.NamespaceReference);
+            Assert.Equal(referenceBaseClass, referenceChildClass1.BaseClass);
+            Assert.Equal(1, referenceChildClass1.BaseInterfaces.Count);
+            Assert.Equal(referenceIInterface, referenceChildClass1.BaseInterfaces[0]);
+
+            Assert.Equal("Project1.MyNamespace.ChildClass2", referenceChildClass2.Name);
+            Assert.Equal(referenceNamespaceServices, referenceChildClass2.NamespaceReference);
+            Assert.Equal(referenceBaseClass, referenceChildClass2.BaseClass);
+            Assert.Equal(2, referenceChildClass2.BaseInterfaces.Count);
+            Assert.Equal(referenceMyInterface, referenceChildClass2.BaseInterfaces[0]);
+            Assert.Equal(referenceOtherInterface, referenceChildClass2.BaseInterfaces[1]);
+
+            Assert.Equal("Project1.MyNamespace.Model", referenceModel.Name);
+            Assert.Equal(referenceNamespaceServices, referenceModel.NamespaceReference);
+            Assert.Equal(objectClassModel, referenceModel.BaseClass);
+            Assert.Equal(1, referenceModel.BaseInterfaces.Count);
+            Assert.Equal(referenceOtherInterface, referenceModel.BaseInterfaces[0]);
+
+            Assert.Equal("Project1.MyNamespace.ChildClass3", referenceChildClass3.Name);
+            Assert.Equal(referenceNamespaceServices, referenceChildClass3.NamespaceReference);
+            Assert.Equal(referenceChildClass1, referenceChildClass3.BaseClass);
+            Assert.Empty(referenceChildClass3.BaseInterfaces);
         }
 
         [Fact]

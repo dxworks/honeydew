@@ -6,22 +6,21 @@ using HoneydewCore.Models.Representations.ReferenceModel;
 
 namespace HoneydewCore.Processors
 {
-    // todo add test case for calling methods with concrete types for method with abstract type
-    // todo add test case for metrics
+
 
     public class
         SolutionModelToReferenceSolutionModelProcessor : IProcessorFunction<SolutionModel, ReferenceSolutionModel>
     {
-        private readonly IMissingClassModelsHandler _missingClassModelsHandler;
+        private readonly IClassModelCacheHandler _classModelCacheHandler;
 
-        public SolutionModelToReferenceSolutionModelProcessor(IMissingClassModelsHandler missingClassModelsHandler)
+        public SolutionModelToReferenceSolutionModelProcessor(IClassModelCacheHandler classModelCacheHandler)
         {
-            _missingClassModelsHandler = missingClassModelsHandler;
+            _classModelCacheHandler = classModelCacheHandler;
         }
 
         public SolutionModelToReferenceSolutionModelProcessor()
         {
-            _missingClassModelsHandler = new MissingClassModelsHandler();
+            _classModelCacheHandler = new ClassModelCacheHandler();
         }
 
         public Func<Processable<SolutionModel>, Processable<ReferenceSolutionModel>> GetFunction()
@@ -37,17 +36,66 @@ namespace HoneydewCore.Processors
 
                 PopulateModelWithProjectNamespacesAndClasses(solutionModel, referenceSolutionModel);
 
+                var classModels = (from projectModel in referenceSolutionModel.Projects
+                    from namespaceModel in projectModel.Namespaces
+                    from classModel in namespaceModel.ClassModels
+                    select classModel).ToList();
+
+                _classModelCacheHandler.AddAll(classModels);
+
+                PopulateModelWithBaseClassesAndInterfaces(solutionModel, referenceSolutionModel);
+
                 PopulateModelWithMethodsAndFields(solutionModel, referenceSolutionModel);
 
                 PopulateModelWithMethodReferences(solutionModel, referenceSolutionModel);
 
-                referenceSolutionModel.ClassModelsNotDeclaredInSolution = _missingClassModelsHandler.GetAllReferences();
+                referenceSolutionModel.ClassModelsNotDeclaredInSolution =
+                    _classModelCacheHandler.GetAllCreatedReferences();
 
                 return new Processable<ReferenceSolutionModel>(referenceSolutionModel);
             };
         }
 
-        private void PopulateModelWithMethodReferences(SolutionModel solutionModel,
+        private static void PopulateModelWithProjectNamespacesAndClasses(SolutionModel solutionModel,
+            ReferenceSolutionModel referenceSolutionModel)
+        {
+            foreach (var projectModel in solutionModel.Projects)
+            {
+                var referenceProjectModel = new ReferenceProjectModel
+                {
+                    Name = projectModel.Name,
+                    SolutionReference = referenceSolutionModel
+                };
+
+                foreach (var (namespaceName, namespaceModel) in projectModel.Namespaces)
+                {
+                    var referenceNamespaceModel = new ReferenceNamespaceModel
+                    {
+                        Name = namespaceName,
+                        ProjectReference = referenceProjectModel
+                    };
+
+                    foreach (var classModel in namespaceModel.ClassModels)
+                    {
+                        var referenceClassModel = new ReferenceClassModel
+                        {
+                            Name = classModel.FullName,
+                            FilePath = classModel.FilePath,
+                            NamespaceReference = referenceNamespaceModel,
+                            Metrics = classModel.Metrics
+                        };
+
+                        referenceNamespaceModel.ClassModels.Add(referenceClassModel);
+                    }
+
+                    referenceProjectModel.Namespaces.Add(referenceNamespaceModel);
+                }
+
+                referenceSolutionModel.Projects.Add(referenceProjectModel);
+            }
+        }
+
+        private void PopulateModelWithBaseClassesAndInterfaces(SolutionModel solutionModel,
             ReferenceSolutionModel referenceSolutionModel)
         {
             foreach (var classModel in solutionModel.GetEnumerable())
@@ -58,22 +106,13 @@ namespace HoneydewCore.Processors
                 if (referenceEntity == null) continue;
                 var referenceClassModel = (ReferenceClassModel) referenceEntity;
 
-                foreach (var methodModel in classModel.Methods)
+                referenceClassModel.BaseClass =
+                    GetClassReferenceByName(referenceSolutionModel, classModel.BaseClassFullName);
+
+                foreach (var interfaceName in classModel.BaseInterfaces)
                 {
-                    var referenceMethodModel = GetMethodReference(referenceSolutionModel, referenceClassModel,
-                        methodModel.Name,
-                        methodModel.ParameterTypes);
-
-                    foreach (var calledMethod in methodModel.CalledMethods)
-                    {
-                        var calledMethodClass = GetClassReferenceByName(referenceSolutionModel,
-                            calledMethod.ContainingClassName);
-                        var calledReferenceMethodModel = GetMethodReference(referenceSolutionModel,
-                            calledMethodClass,
-                            calledMethod.MethodName, calledMethod.ParameterTypes);
-
-                        referenceMethodModel.CalledMethods.Add(calledReferenceMethodModel);
-                    }
+                    referenceClassModel.BaseInterfaces.Add(GetClassReferenceByName(referenceSolutionModel,
+                        interfaceName));
                 }
             }
         }
@@ -124,42 +163,34 @@ namespace HoneydewCore.Processors
             }
         }
 
-        private static void PopulateModelWithProjectNamespacesAndClasses(SolutionModel solutionModel,
+        private void PopulateModelWithMethodReferences(SolutionModel solutionModel,
             ReferenceSolutionModel referenceSolutionModel)
         {
-            foreach (var projectModel in solutionModel.Projects)
+            foreach (var classModel in solutionModel.GetEnumerable())
             {
-                var referenceProjectModel = new ReferenceProjectModel
+                var referenceEntity = referenceSolutionModel.FindFirst(entity =>
+                    entity is ReferenceClassModel && entity.Name == classModel.FullName);
+
+                if (referenceEntity == null) continue;
+                var referenceClassModel = (ReferenceClassModel) referenceEntity;
+
+                foreach (var methodModel in classModel.Methods)
                 {
-                    Name = projectModel.Name,
-                    SolutionReference = referenceSolutionModel
-                };
+                    var referenceMethodModel = GetMethodReference(referenceSolutionModel, referenceClassModel,
+                        methodModel.Name,
+                        methodModel.ParameterTypes);
 
-                foreach (var (namespaceName, namespaceModel) in projectModel.Namespaces)
-                {
-                    var referenceNamespaceModel = new ReferenceNamespaceModel
+                    foreach (var calledMethod in methodModel.CalledMethods)
                     {
-                        Name = namespaceName,
-                        ProjectReference = referenceProjectModel
-                    };
+                        var calledMethodClass = GetClassReferenceByName(referenceSolutionModel,
+                            calledMethod.ContainingClassName);
+                        var calledReferenceMethodModel = GetMethodReference(referenceSolutionModel,
+                            calledMethodClass,
+                            calledMethod.MethodName, calledMethod.ParameterTypes);
 
-                    foreach (var classModel in namespaceModel.ClassModels)
-                    {
-                        var referenceClassModel = new ReferenceClassModel
-                        {
-                            Name = classModel.FullName,
-                            FilePath = classModel.FilePath,
-                            NamespaceReference = referenceNamespaceModel,
-                            Metrics = classModel.Metrics
-                        };
-
-                        referenceNamespaceModel.ClassModels.Add(referenceClassModel);
+                        referenceMethodModel.CalledMethods.Add(calledReferenceMethodModel);
                     }
-
-                    referenceProjectModel.Namespaces.Add(referenceNamespaceModel);
                 }
-
-                referenceSolutionModel.Projects.Add(referenceProjectModel);
             }
         }
 
@@ -211,7 +242,7 @@ namespace HoneydewCore.Processors
                 return (ReferenceClassModel) referenceEntity;
             }
 
-            return _missingClassModelsHandler.GetAndAddReference(className);
+            return _classModelCacheHandler.GetAndAddReference(className);
         }
     }
 }

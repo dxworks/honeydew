@@ -27,23 +27,23 @@ namespace HoneydewCore.Processors
 
                 foreach (var classModel in solutionModel.GetEnumerable())
                 {
+                    classModel.BaseClassFullName =
+                        solutionModel.GetClassFullName(classModel.BaseClassFullName);
+                    for (var i = 0; i < classModel.BaseInterfaces.Count; i++)
+                    {
+                        classModel.BaseInterfaces[i] =
+                            solutionModel.GetClassFullName(classModel.BaseInterfaces[i]);
+                    }
+                    
                     foreach (var methodModel in classModel.Methods)
                     {
-                        var modelByFullName = solutionModel
-                            .GetClassModelByFullName(methodModel.ContainingClassName);
-                        if (modelByFullName != null)
-                        {
-                            methodModel.ContainingClassName = modelByFullName.FullName;
-                        }
+                        methodModel.ContainingClassName =
+                            solutionModel.GetClassFullName(methodModel.ContainingClassName);
 
                         foreach (var methodModelCalledMethod in methodModel.CalledMethods)
                         {
-                            var classModelByFullName = solutionModel
-                                .GetClassModelByFullName(methodModelCalledMethod.ContainingClassName);
-                            if (classModelByFullName != null)
-                            {
-                                methodModelCalledMethod.ContainingClassName = classModelByFullName.FullName;
-                            }
+                            methodModelCalledMethod.ContainingClassName = solutionModel
+                                .GetClassFullName(methodModelCalledMethod.ContainingClassName);
                         }
                     }
                 }

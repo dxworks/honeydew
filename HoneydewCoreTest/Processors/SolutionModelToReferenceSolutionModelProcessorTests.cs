@@ -11,7 +11,7 @@ namespace HoneydewCoreTest.Processors
     public class SolutionModelToReferenceSolutionModelProcessorTests
     {
         private readonly SolutionModelToReferenceSolutionModelProcessor _sut;
-        private readonly Mock<IMissingClassModelsHandler> _missingClassReferenceMock = new();
+        private readonly Mock<IClassModelCacheHandler> _missingClassReferenceMock = new();
 
         public SolutionModelToReferenceSolutionModelProcessorTests()
         {
@@ -308,7 +308,7 @@ namespace HoneydewCoreTest.Processors
                 }
             };
 
-            _missingClassReferenceMock.Setup(handler => handler.GetAllReferences())
+            _missingClassReferenceMock.Setup(handler => handler.GetAllCreatedReferences())
                 .Returns(new List<ReferenceClassModel>());
 
             var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
@@ -490,7 +490,7 @@ namespace Project1.Services
             _missingClassReferenceMock.Setup(handler => handler.GetAndAddReference("float")).Returns(floatClassModel);
             _missingClassReferenceMock.Setup(handler => handler.GetAndAddReference("void")).Returns(voidClassModel);
 
-            _missingClassReferenceMock.Setup(handler => handler.GetAllReferences())
+            _missingClassReferenceMock.Setup(handler => handler.GetAllCreatedReferences())
                 .Returns(new List<ReferenceClassModel>
                 {
                     intClassModel,
@@ -694,7 +694,7 @@ namespace Project1.Services
 
             _missingClassReferenceMock.Setup(handler => handler.GetAndAddReference("int"))
                 .Returns(intClassModel);
-            _missingClassReferenceMock.Setup(handler => handler.GetAllReferences())
+            _missingClassReferenceMock.Setup(handler => handler.GetAllCreatedReferences())
                 .Returns(new List<ReferenceClassModel> {intClassModel});
 
             var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));

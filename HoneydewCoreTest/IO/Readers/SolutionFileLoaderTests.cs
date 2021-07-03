@@ -85,6 +85,8 @@ namespace HoneydewCoreTest.IO.Readers
                                         {
                                             FullName = "CreateService",
                                             FilePath = "validPathToProject/Project1/Services/CreateService.cs",
+                                            BaseClassFullName = "object",
+                                            BaseInterfaces = {"IService"},
                                             Methods = new List<MethodModel>
                                             {
                                                 new()
@@ -149,7 +151,10 @@ namespace HoneydewCoreTest.IO.Readers
 
             var classModel = namespaceModel.ClassModels[0];
             Assert.Equal("Project1.Services.CreateService", classModel.FullName);
-            Assert.Equal("Project1.Services", classModel.Namespace);
+            Assert.Equal("object", classModel.BaseClassFullName);
+            Assert.Equal("Project1.Services.CreateService", classModel.FullName);
+            Assert.Equal(1, classModel.BaseInterfaces.Count);
+            Assert.Equal("IService", classModel.BaseInterfaces[0]);
             Assert.Equal("validPathToProject/Project1/Services/CreateService.cs", classModel.FilePath);
             Assert.Empty(classModel.Fields);
             Assert.Empty(classModel.Metrics);
