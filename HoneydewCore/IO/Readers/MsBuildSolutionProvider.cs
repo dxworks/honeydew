@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
@@ -7,7 +8,7 @@ namespace HoneydewCore.IO.Readers
 {
     public class MsBuildSolutionProvider : ISolutionProvider
     {
-        public Solution GetSolution(string path)
+        public Task<Solution> GetSolution(string path)
         {
             MSBuildLocator.RegisterDefaults();
 
@@ -20,7 +21,7 @@ namespace HoneydewCore.IO.Readers
 
             try
             {
-                return msBuildWorkspace.OpenSolutionAsync(path).Result;
+                return msBuildWorkspace.OpenSolutionAsync(path);
             }
             catch (Exception)
             {

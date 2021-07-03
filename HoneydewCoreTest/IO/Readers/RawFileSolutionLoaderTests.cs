@@ -1,4 +1,5 @@
-﻿using HoneydewCore.Extractors.Metrics.SemanticMetrics;
+﻿using System.Threading.Tasks;
+using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.IO.Readers;
 using Moq;
 using Xunit;
@@ -41,19 +42,19 @@ namespace HoneydewCoreTest.IO.Readers
         }
 
         [Fact]
-        public void LoadModelFromFile_ShouldReturnEmptyModel_WhenProvidedContentToOtherJSON()
+        public async Task LoadModelFromFile_ShouldReturnEmptyModel_WhenProvidedContentToOtherJSON()
         {
             const string pathToModel = "pathToModel";
 
             _fileReaderMock.Setup(reader => reader.ReadFile(pathToModel)).Returns(@"{""a"":1}");
 
-            var loadModelFromFile = _sut.LoadSolution(pathToModel);
+            var loadModelFromFile = await _sut.LoadSolution(pathToModel);
 
             Assert.Empty(loadModelFromFile.Projects);
         }
 
         [Fact]
-        public void LoadModelFromFile_ShouldReturnModel_WhenProvidedCorrectContent()
+        public async Task LoadModelFromFile_ShouldReturnModel_WhenProvidedCorrectContent()
         {
             const string pathToModel = "pathToModel";
 
@@ -61,7 +62,7 @@ namespace HoneydewCoreTest.IO.Readers
                 .Returns(
                     @"{""Projects"":[{""Name"":""ProjectName"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""Metrics"":[{""ExtractorName"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"",""ValueType"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}]}]}}}]}");
 
-            var loadModelFromFile = _sut.LoadSolution(pathToModel);
+            var loadModelFromFile = await _sut.LoadSolution(pathToModel);
 
             Assert.NotNull(loadModelFromFile);
             Assert.Equal(1, loadModelFromFile.Projects.Count);

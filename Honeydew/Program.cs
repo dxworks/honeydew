@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using CommandLine;
 using HoneydewCore.Extractors;
 using HoneydewCore.Extractors.Metrics.CompilationUnitMetrics;
@@ -16,9 +17,11 @@ namespace Honeydew
 {
     class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed(options =>
+            var result = Parser.Default.ParseArguments<CommandLineOptions>(args);
+
+            await result.MapResult(async options =>
             {
                 var useClassRelationsRepresentation = false;
                 IFileWriter writer;
@@ -83,7 +86,7 @@ namespace Honeydew
                 ISolutionLoader solutionLoader =
                     new SolutionFileLoader(extractors, new MsBuildSolutionProvider(),
                         new BasicSolutionLoadingStrategy());
-                var solutionModel = solutionLoader.LoadSolution(pathToSolution);
+                var solutionModel = await solutionLoader.LoadSolution(pathToSolution);
 
                 string exportString;
 
@@ -115,7 +118,7 @@ namespace Honeydew
                     Console.WriteLine("Extraction Complete!");
                     Console.WriteLine($"Output File will be found at {outputPath}");
                 }
-            });
+            }, errors => Task.FromResult("Some Error Occurred"));
         }
     }
 }
