@@ -6,11 +6,11 @@ namespace HoneydewCore.Models.Representations.ReferenceModel
     {
         public ReferenceClassModel ContainingClass { get; init; }
 
-        public string Modifier { get; init; } = "";
+        public string Modifier { get; set; } = "";
 
-        public string AccessModifier { get; init; }
+        public string AccessModifier { get; set; }
 
-        public ReferenceClassModel ReturnTypeReferenceClassModel { get; init; }
+        public ReferenceClassModel ReturnTypeReferenceClassModel { get; set; }
 
         public IList<ReferenceClassModel> ParameterTypes { get; init; } = new List<ReferenceClassModel>();
 

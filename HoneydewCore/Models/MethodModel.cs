@@ -5,7 +5,7 @@ namespace HoneydewCore.Models
     public record MethodModel
     {
         public string Name { get; init; }
-        public string ReturnType { get; init; }
+        public string ReturnType { get; set; }
 
         public string Modifier { get; init; } = "";
         public string AccessModifier { get; init; }

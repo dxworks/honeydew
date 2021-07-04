@@ -5,7 +5,7 @@ namespace HoneydewCore.Extractors.Metrics
 {
     public abstract class CSharpMetricExtractor : CSharpSyntaxWalker, IMetricExtractor
     {
-        public SemanticModel SemanticModel { get; set; }
+        public SemanticModel ExtractorSemanticModel { get; set; }
 
         public abstract IMetric GetMetric();
         public abstract string PrettyPrint();

@@ -3,9 +3,9 @@
     public record ReferenceFieldModel : ReferenceEntity
     {
         public ReferenceClassModel ContainingClass { get; init; }
-        public ReferenceClassModel Type { get; init; }
-        public string Modifier { get; init; } = "";
-        public string AccessModifier { get; init; }
-        public bool IsEvent { get; init; }
+        public ReferenceClassModel Type { get; set; }
+        public string Modifier { get; set; } = "";
+        public string AccessModifier { get; set; }
+        public bool IsEvent { get; set; }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Models;
+using HoneydewCore.Utils;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
+namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 {
-    public class FieldsInfoMetric : CSharpMetricExtractor, ISyntacticMetric
+    public class FieldsInfoMetric : CSharpMetricExtractor, ISemanticMetric
     {
         public IList<FieldModel> FieldInfos { get; } = new List<FieldModel>();
 
@@ -31,24 +33,18 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
         private void AddFieldInfo(BaseFieldDeclarationSyntax node, bool isEvent)
         {
             var allModifiers = node.Modifiers.ToString();
-            var accessModifier = allModifiers;
-            var modifier = "";
-            string[] modifiers = {"readonly", "static", "volatile"};
-            foreach (var m in modifiers)
+            var accessModifier = CSharpConstants.DefaultFieldAccessModifier;
+            var modifier = allModifiers;
+            
+            CSharpConstants.SetModifiers(allModifiers, ref accessModifier, ref modifier);
+
+            var typeName = node.Declaration.Type.ToString();
+            var nodeSymbol = ExtractorSemanticModel.GetSymbolInfo(node.Declaration.Type).Symbol;
+            if (nodeSymbol != null)
             {
-                if (!allModifiers.Contains(m)) continue;
-
-                modifier = m;
-                accessModifier = allModifiers.Replace(m, "");
-                accessModifier = accessModifier.Trim();
-                break;
+                typeName = nodeSymbol.ToString();
             }
-
-            if (string.IsNullOrEmpty(accessModifier))
-            {
-                accessModifier = "private";
-            }
-
+            
             foreach (var variable in node.Declaration.Variables)
             {
                 FieldInfos.Add(new FieldModel
@@ -56,7 +52,7 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
                     AccessModifier = accessModifier,
                     Modifier = modifier,
                     IsEvent = isEvent,
-                    Type = node.Declaration.Type.ToString(),
+                    Type = typeName,
                     Name = variable.Identifier.ToString(),
                 });
             }

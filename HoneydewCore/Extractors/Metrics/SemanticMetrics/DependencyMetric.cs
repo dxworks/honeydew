@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using HoneydewCore.Models.Representations;
+using HoneydewCore.Utils;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
@@ -31,7 +32,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
                 foreach (var (dependency, count) in dataMetric.Dependencies)
                 {
                     var type = Type.GetType(dependency);
-                    if (type is {IsPrimitive: true} || IsPrimitive(dependency))
+                    if (type is {IsPrimitive: true} || CSharpConstants.IsPrimitive(dependency))
                     {
                         continue;
                     }
@@ -64,12 +65,6 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
             {
                 DataMetric.Dependencies.Add(dependencyName, 1);
             }
-        }
-        
-        private static bool IsPrimitive(string dependency)
-        {
-            return dependency is "object" or "string" or "bool" or "byte" or "char" or "decimal" or "double" or "short"
-                or "int" or "long" or "sbyte" or "float" or "ushort" or "uint" or "ulong" or "void";
         }
     }
 }
