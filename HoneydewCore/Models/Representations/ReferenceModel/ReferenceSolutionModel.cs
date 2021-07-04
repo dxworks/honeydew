@@ -41,11 +41,6 @@ namespace HoneydewCore.Models.Representations.ReferenceModel
             return _createdClassModels;
         }
 
-        public IList<ReferenceClassModel> GetAllReferences()
-        {
-            return _classModels.Select(pair => pair.Value).ToList();
-        }
-
         public ReferenceEntity FindFirst(Func<ReferenceEntity, bool> predicate)
         {
             foreach (var projectModel in Projects)

@@ -49,6 +49,11 @@ namespace HoneydewCore.Models
 
         public ClassModel GetClassModelByFullName(string className)
         {
+            if (className == null)
+            {
+                return null;
+            }
+
             var lastIndexOf = className.LastIndexOf(".", StringComparison.Ordinal);
 
 
@@ -66,13 +71,13 @@ namespace HoneydewCore.Models
                 }
             }
 
-            return default;
+            return GetEnumerable().FirstOrDefault(classModel => classModel.FullName.Contains(className));
         }
-        
+
         public string GetClassFullName(string className)
         {
             var classModel = GetClassModelByFullName(className);
-            
+
             return classModel == default ? className : classModel.FullName;
         }
     }

@@ -37,6 +37,8 @@ namespace HoneydewCore.Processors
                     
                     foreach (var methodModel in classModel.Methods)
                     {
+                        methodModel.ReturnType = solutionModel.GetClassFullName(methodModel.ReturnType);
+                        
                         methodModel.ContainingClassName =
                             solutionModel.GetClassFullName(methodModel.ContainingClassName);
 

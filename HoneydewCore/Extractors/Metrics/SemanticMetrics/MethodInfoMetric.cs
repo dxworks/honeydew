@@ -65,10 +65,18 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
         {
             GetModifiersForNode(node, out var accessModifier, out var modifier);
 
+            var returnType = node.ReturnType.ToString();
+
+            var returnValueSymbol = ExtractorSemanticModel.GetDeclaredSymbol(node.ReturnType);
+            if (returnValueSymbol != null)
+            {
+                returnType = returnValueSymbol.ToString();
+            }
+
             var methodModel = new MethodModel
             {
                 Name = node.Identifier.ToString(),
-                ReturnType = node.ReturnType.ToString(),
+                ReturnType = returnType,
                 ContainingClassName = _containingClassName,
                 Modifier = modifier,
                 AccessModifier = accessModifier,

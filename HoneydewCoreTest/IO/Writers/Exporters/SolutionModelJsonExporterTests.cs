@@ -6,11 +6,11 @@ using Xunit;
 
 namespace HoneydewCoreTest.IO.Writers.Exporters
 {
-    public class SolutionModelRawExporterTests
+    public class SolutionModelJsonExporterTests
     {
         private readonly ISolutionModelExporter _sut;
 
-        public SolutionModelRawExporterTests()
+        public SolutionModelJsonExporterTests()
         {
             _sut = new JsonModelExporter();
         }
@@ -128,7 +128,7 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
                                 {
                                     MethodName = "Parse",
                                     ContainingClassName = "int",
-                                    ParameterTypes = {"string"}
+                                    ParameterTypes = {"string"},
                                 }
                             },
                             ParameterTypes = { "string"}
