@@ -1,6 +1,6 @@
 ﻿namespace HoneydewCore.IO.Writers.JSON
 {
-    internal class EntitySerializedInfo
+    internal record EntitySerializedInfo
     {
         public int Id { get; init; }
         public string Name { get; init; }

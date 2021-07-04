@@ -9,13 +9,6 @@ namespace HoneydewCore.IO.Writers.JSON
 {
     public class JsonReferenceSolutionModelSerializer
     {
-        private const string ProjectIdentifier = "project";
-        private const string NamespaceIdentifier = "namespace";
-        private const string ClassIdentifier = "class";
-        private const string FieldIdentifier = "field";
-        private const string MethodIdentifier = "method";
-        private const string OtherClassIdentifier = "other-class";
-
         private readonly Dictionary<ReferenceEntity, int> _serializedEntities = new();
         private int _currentId;
 
@@ -59,30 +52,35 @@ namespace HoneydewCore.IO.Writers.JSON
             foreach (var projectModel in model.Projects)
             {
                 var projectId = _currentId;
-                entities.Add(AddEntitySerializedInfo(projectModel, ProjectIdentifier, null));
+                entities.Add(AddEntitySerializedInfo(projectModel,
+                    JsonReferenceSolutionModelsConstants.ProjectIdentifier, null));
 
                 foreach (var namespaceModel in projectModel.Namespaces)
                 {
                     var namespaceId = _currentId;
-                    entities.Add(AddEntitySerializedInfo(namespaceModel, NamespaceIdentifier, projectId));
+                    entities.Add(AddEntitySerializedInfo(namespaceModel,
+                        JsonReferenceSolutionModelsConstants.NamespaceIdentifier, projectId));
 
                     foreach (var classModel in namespaceModel.ClassModels)
                     {
                         var classId = _currentId;
-                        entities.Add(AddEntitySerializedInfo(classModel, ClassIdentifier, namespaceId));
+                        entities.Add(AddEntitySerializedInfo(classModel,
+                            JsonReferenceSolutionModelsConstants.ClassIdentifier, namespaceId));
 
                         entities.AddRange(classModel.Fields.Select(fieldModel =>
-                            AddEntitySerializedInfo(fieldModel, FieldIdentifier, classId)));
+                            AddEntitySerializedInfo(fieldModel, JsonReferenceSolutionModelsConstants.FieldIdentifier,
+                                classId)));
 
                         entities.AddRange(classModel.Methods.Select(methodModel =>
-                            AddEntitySerializedInfo(methodModel, MethodIdentifier, classId)));
+                            AddMethodSerializedInfo(methodModel, JsonReferenceSolutionModelsConstants.MethodIdentifier,
+                                classId)));
                     }
                 }
             }
 
             var createdReferences = model.GetAllCreatedReferences();
             entities.AddRange(createdReferences.Select(classModel =>
-                AddEntitySerializedInfo(classModel, OtherClassIdentifier, null)));
+                AddEntitySerializedInfo(classModel, JsonReferenceSolutionModelsConstants.OtherClassIdentifier, null)));
 
             EntitySerializedInfo AddEntitySerializedInfo(ReferenceEntity referenceEntity, string type, int? container)
             {
@@ -100,12 +98,27 @@ namespace HoneydewCore.IO.Writers.JSON
                 return serializedInfo;
             }
 
+            EntitySerializedInfo AddMethodSerializedInfo(ReferenceMethodModel methodModel, string type, int? container)
+            {
+                var serializedInfo = new EntitySerializedInfo
+                {
+                    Id = _currentId,
+                    Name = ScrambleMethodName(methodModel),
+                    Type = type,
+                    Container = container,
+                };
+                _serializedEntities.Add(methodModel, _currentId);
+
+                _currentId++;
+
+                return serializedInfo;
+            }
+
 
             stringBuilder.Append(JsonSerializer.Serialize(entities));
 
             return stringBuilder.ToString();
         }
-
 
         private string SerializeProject(ReferenceProjectModel model)
         {
@@ -215,7 +228,7 @@ namespace HoneydewCore.IO.Writers.JSON
             var containingClassId = _serializedEntities[model.ContainingClass];
             var typeId = _serializedEntities[model.Type];
             var isEvent = model.IsEvent ? "true" : "false";
-            
+
             stringBuilder.Append($@"{{""Name"":""{model.Name}"",""ContainingClass"":{containingClassId}");
             stringBuilder.Append(
                 $@",""Type"":{typeId},""Modifier"":""{model.Modifier}"",""AccessModifier"":""{model.AccessModifier}""");
@@ -231,7 +244,8 @@ namespace HoneydewCore.IO.Writers.JSON
             var containingClassId = _serializedEntities[model.ContainingClass];
             var returnTypeId = _serializedEntities[model.ReturnTypeReferenceClassModel];
 
-            stringBuilder.Append($@"{{""Name"":""{model.Name}"",""ContainingClass"":{containingClassId}");
+            stringBuilder.Append(
+                $@"{{""Name"":""{ScrambleMethodName(model)}"",""ContainingClass"":{containingClassId}");
             stringBuilder.Append($@",""Modifier"":""{model.Modifier}"",""AccessModifier"":""{model.AccessModifier}""");
             stringBuilder.Append($@",""ReturnTypeReferenceClassModel"":{returnTypeId}");
 
@@ -271,6 +285,20 @@ namespace HoneydewCore.IO.Writers.JSON
 
 
             return stringBuilder.ToString();
+        }
+
+
+        private static string ScrambleMethodName(ReferenceMethodModel methodModel)
+        {
+            var methodNameWithParameters = new StringBuilder(methodModel.Name);
+
+            foreach (var referenceClassModel in methodModel.ParameterTypes)
+            {
+                methodNameWithParameters.Append('_');
+                methodNameWithParameters.Append(referenceClassModel.Name);
+            }
+
+            return methodNameWithParameters.ToString();
         }
     }
 }

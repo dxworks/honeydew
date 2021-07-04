@@ -93,7 +93,7 @@ namespace Project1.Services
                 Value = "some_metric",
                 ValueType = "string"
             });
-            
+
             solutionModel.Projects[0].Namespaces["Project1.Models"].ClassModels[0].Metrics.Add(new ClassMetric
             {
                 ExtractorName = "SomeOtherExtractor",
@@ -178,7 +178,7 @@ namespace Project1.Services
         },
         {
             ""Id"":11,
-            ""Name"":""Set"",
+            ""Name"":""Set_int_int"",
             ""Type"":""method"",
             ""Container"":9
         },
@@ -196,7 +196,7 @@ namespace Project1.Services
         },
         {
             ""Id"":14,
-            ""Name"":""Set"",
+            ""Name"":""Set_int_int"",
             ""Type"":""method"",
             ""Container"":12
         },
@@ -331,7 +331,7 @@ namespace Project1.Services
                             ""CalledMethods"":[]
                         },
                         {
-                         ""Name"":""Set"",
+                         ""Name"":""Set_int_int"",
                          ""ContainingClass"":9,
                          ""Modifier"":""abstract"",
                          ""AccessModifier"":""public"",
@@ -361,7 +361,7 @@ namespace Project1.Services
                             ""CalledMethods"":[14,14]
                         },
                         {
-                         ""Name"":""Set"",
+                         ""Name"":""Set_int_int"",
                          ""ContainingClass"":12,
                          ""Modifier"":"""",
                          ""AccessModifier"":""public"",

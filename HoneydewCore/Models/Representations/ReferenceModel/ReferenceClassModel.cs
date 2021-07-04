@@ -4,13 +4,13 @@ namespace HoneydewCore.Models.Representations.ReferenceModel
 {
     public record ReferenceClassModel : ReferenceEntity
     {
-        public string ClassType { get; init; }
+        public string ClassType { get; set; }
         
-        public string FilePath { get; init; }
+        public string FilePath { get; set; }
         
-        public string AccessModifier { get; init; }
+        public string AccessModifier { get; set; }
 
-        public string Modifier { get; init; } = "";
+        public string Modifier { get; set; } = "";
         
         public ReferenceNamespaceModel NamespaceReference { get; init; }
 
