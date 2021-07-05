@@ -2,8 +2,6 @@ name: Release
 
 on:
   push:
-    branches:
-      - 'ghactions'
     tags:
       - 'v*'
       - '!*-voyager'
@@ -56,7 +54,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: test-${{ github.run_number }}
+          tag_name: ${{ github.ref }}
           release_name: Honeydew ${{ github.ref }}
           draft: false
           prerelease: false
