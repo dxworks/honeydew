@@ -22,13 +22,19 @@ jobs:
           dotnet-version: '5.0.x'
 
       - name: Release for Windows
-        run: dotnet publish -r win-x64 --self-contained true -p:PublishSingleFile=true Honeydew/Honeydew.csproj
+        run: |
+          mkdir bin/windows
+          dotnet publish -r win-x64 --self-contained true -p:PublishSingleFile=true -o bin/windows -c Release Honeydew/Honeydew.csproj
 
       - name: Release for Linux
-        run: dotnet publish -r linux-x64 --self-contained true -p:PublishSingleFile=true Honeydew/Honeydew.csproj
+        run: |
+          mkdir bin/linux
+          dotnet publish -r linux-x64 --self-contained true -p:PublishSingleFile=true -o bin/linux -c Release Honeydew/Honeydew.csproj
 
       - name: Release for Mac
-        run: dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true Honeydew/Honeydew.csproj
+        run: |
+          mkdir bin/mac
+          dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin/mac -c Release Honeydew/Honeydew.csproj
 
       - name: Print All assets
         run: |
@@ -39,7 +45,7 @@ jobs:
           mkdir honeydew
           mkdir honeydew/bin
           cp README.md honeydew/README.md
-          cp -r Honeydew/bin/Debug/net5.0 honeydew/bin
+          cp -r bin honeydew/bin
 
       - name: Create Archive
         run: zip -r honeydew.zip honeydew
@@ -50,7 +56,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${GITHUB_REF#refs/heads/}
+          tag_name: test-${$GITHUB_RUN_NUMBER}
           release_name: Honeydew ${{ github.ref }}
           draft: false
           prerelease: false
