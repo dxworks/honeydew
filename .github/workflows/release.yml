@@ -64,8 +64,7 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v2
 
-      - name: Upload Release Asset
-        id: upload-release-asset
+      - name: Upload Windows Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -75,8 +74,7 @@ jobs:
           asset_name: honeydew-win.zip
           asset_content_type: application/zip
 
-      - name: Upload Release Asset
-        id: upload-release-asset
+      - name: Upload Linux Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -86,8 +84,7 @@ jobs:
           asset_name: honeydew-linux.zip
           asset_content_type: application/zip
 
-      - name: Upload Release Asset
-        id: upload-release-asset
+      - name: Upload MacOS Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
