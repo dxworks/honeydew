@@ -25,7 +25,7 @@ namespace HoneydewCoreTest.IO.Readers
         }
 
         [Fact]
-        public  void LoadSolution_ShouldThrowProjectNotFoundException_WhenGivenAnInvalidPath()
+        public void LoadSolution_ShouldThrowProjectNotFoundException_WhenGivenAnInvalidPath()
         {
             const string pathToSolution = "invalidPathToProject";
 
@@ -52,7 +52,8 @@ namespace HoneydewCoreTest.IO.Readers
             const string pathToSolution = "validPathToProject";
             var solutionModelMock = new Mock<SolutionModel>();
 
-            _solutionProviderMock.Setup(provider => provider.GetSolution(pathToSolution)).Returns(It.IsAny<Task<Solution>>());
+            _solutionProviderMock.Setup(provider => provider.GetSolution(pathToSolution))
+                .Returns(It.IsAny<Task<Solution>>());
             _solutionLoadingStrategyMock
                 .Setup(strategy => strategy.Load(It.IsAny<Solution>(), new List<IFactExtractor>()))
                 .ReturnsAsync(solutionModelMock.Object);
@@ -94,7 +95,13 @@ namespace HoneydewCoreTest.IO.Readers
                                                     Name = "A",
                                                     Modifier = "",
                                                     AccessModifier = "public",
-                                                    ParameterTypes = {"string"},
+                                                    ParameterTypes =
+                                                    {
+                                                        new ParameterModel
+                                                        {
+                                                            Type = "string"
+                                                        }
+                                                    },
                                                     ReturnType = "int",
                                                     ContainingClassName = "Project1.Services.CreateService",
                                                     CalledMethods =
@@ -111,7 +118,13 @@ namespace HoneydewCoreTest.IO.Readers
                                                     Name = "Convert",
                                                     Modifier = "static",
                                                     AccessModifier = "public",
-                                                    ParameterTypes = {"string"},
+                                                    ParameterTypes =
+                                                    {
+                                                        new ParameterModel
+                                                        {
+                                                            Type = "string"
+                                                        }
+                                                    },
                                                     ReturnType = "int",
                                                     ContainingClassName = "Project1.Services.CreateService",
                                                     CalledMethods =
@@ -133,7 +146,8 @@ namespace HoneydewCoreTest.IO.Readers
                 }
             };
 
-            _solutionProviderMock.Setup(provider => provider.GetSolution(pathToSolution)).ReturnsAsync(It.IsAny<Solution>());
+            _solutionProviderMock.Setup(provider => provider.GetSolution(pathToSolution))
+                .ReturnsAsync(It.IsAny<Solution>());
             _solutionLoadingStrategyMock
                 .Setup(strategy => strategy.Load(It.IsAny<Solution>(), new List<IFactExtractor>()))
                 .ReturnsAsync(solutionModelMock);
@@ -165,7 +179,9 @@ namespace HoneydewCoreTest.IO.Readers
             Assert.Equal("", methodA.Modifier);
             Assert.Equal("public", methodA.AccessModifier);
             Assert.Equal(1, methodA.ParameterTypes.Count);
-            Assert.Equal("string", methodA.ParameterTypes[0]);
+            Assert.Equal("string", methodA.ParameterTypes[0].Type);
+            Assert.Equal("", methodA.ParameterTypes[0].Modifier);
+            Assert.Null(methodA.ParameterTypes[0].DefaultValue);
             Assert.Equal("int", methodA.ReturnType);
             Assert.Equal("Project1.Services.CreateService", methodA.ContainingClassName);
             Assert.Equal(1, methodA.CalledMethods.Count);
@@ -177,7 +193,9 @@ namespace HoneydewCoreTest.IO.Readers
             Assert.Equal("static", methodConvert.Modifier);
             Assert.Equal("public", methodConvert.AccessModifier);
             Assert.Equal(1, methodConvert.ParameterTypes.Count);
-            Assert.Equal("string", methodConvert.ParameterTypes[0]);
+            Assert.Equal("string", methodConvert.ParameterTypes[0].Type);
+            Assert.Equal("", methodConvert.ParameterTypes[0].Modifier);
+            Assert.Null(methodConvert.ParameterTypes[0].DefaultValue);
             Assert.Equal("int", methodConvert.ReturnType);
             Assert.Equal("Project1.Services.CreateService", methodConvert.ContainingClassName);
             Assert.Equal(1, methodConvert.CalledMethods.Count);

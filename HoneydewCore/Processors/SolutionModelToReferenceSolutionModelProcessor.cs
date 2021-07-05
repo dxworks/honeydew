@@ -21,7 +21,7 @@ namespace HoneydewCore.Processors
                     return new Processable<ReferenceSolutionModel>(referenceSolutionModel);
 
                 PopulateModelWithProjectNamespacesAndClasses(solutionModel, referenceSolutionModel);
-                
+
                 PopulateModelWithBaseClassesAndInterfaces(solutionModel, referenceSolutionModel);
 
                 PopulateModelWithMethodsAndFields(solutionModel, referenceSolutionModel);
@@ -109,9 +109,8 @@ namespace HoneydewCore.Processors
 
                 foreach (var methodModel in classModel.Methods)
                 {
-                    IList<ReferenceClassModel> referenceClassModels = methodModel.ParameterTypes
-                        .Select(methodModelParameterType =>
-                            GetClassReferenceByName(referenceSolutionModel, methodModelParameterType)).ToList();
+                    IList<ReferenceParameterModel> referenceClassModels =
+                        ExtractParameterModels(referenceSolutionModel, methodModel.ParameterTypes);
 
                     var referenceMethodModel = new ReferenceMethodModel
                     {
@@ -174,7 +173,7 @@ namespace HoneydewCore.Processors
         }
 
         private ReferenceMethodModel GetMethodReference(ReferenceSolutionModel referenceSolutionModel,
-            ReferenceClassModel referenceClassModel, string methodName, IList<string> parameterTypes)
+            ReferenceClassModel referenceClassModel, string methodName, IList<ParameterModel> parameterTypes)
         {
             var methodReference = referenceClassModel.Methods.FirstOrDefault(method =>
             {
@@ -183,7 +182,7 @@ namespace HoneydewCore.Processors
 
                 for (var i = 0; i < method.ParameterTypes.Count; i++)
                 {
-                    if (method.ParameterTypes[i].Name != parameterTypes[i])
+                    if (method.ParameterTypes[i].Type.Name != parameterTypes[i].Type)
                     {
                         return false;
                     }
@@ -203,12 +202,28 @@ namespace HoneydewCore.Processors
             {
                 ContainingClass = referenceClassModel,
                 Name = methodName,
-                ParameterTypes = parameterTypes
-                    .Select(parameterType => GetClassReferenceByName(referenceSolutionModel, parameterType)).ToList()
+                ParameterTypes = ExtractParameterModels(referenceSolutionModel, parameterTypes)
             };
             referenceClassModel.Methods.Add(newlyAddReferenceMethodModel);
 
             return newlyAddReferenceMethodModel;
+        }
+
+        private List<ReferenceParameterModel> ExtractParameterModels(ReferenceSolutionModel referenceSolutionModel,
+            IEnumerable<ParameterModel> parameterModels)
+        {
+            return parameterModels
+                .Select(parameterModel =>
+                {
+                    var classReferenceByName =
+                        GetClassReferenceByName(referenceSolutionModel, parameterModel.Type);
+                    return new ReferenceParameterModel
+                    {
+                        Type = classReferenceByName,
+                        Modifier = parameterModel.Modifier,
+                        DefaultValue = parameterModel.DefaultValue
+                    };
+                }).ToList();
         }
 
         private ReferenceClassModel GetClassReferenceByName(ReferenceSolutionModel referenceSolutionModel,

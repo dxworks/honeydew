@@ -252,8 +252,7 @@ namespace HoneydewCore.IO.Writers.JSON
             stringBuilder.Append(@",""ParameterTypes"":[");
             for (var index = 0; index < model.ParameterTypes.Count; index++)
             {
-                var parameterId = _serializedEntities[model.ParameterTypes[index]];
-                stringBuilder.Append(parameterId);
+                stringBuilder.Append(SerializeParameterModel(model.ParameterTypes[index]));
                 if (index != model.ParameterTypes.Count - 1)
                 {
                     stringBuilder.Append(',');
@@ -272,6 +271,25 @@ namespace HoneydewCore.IO.Writers.JSON
             }
 
             stringBuilder.Append("]}");
+
+            return stringBuilder.ToString();
+        }
+
+        private string SerializeParameterModel(ReferenceParameterModel parameterModel)
+        {
+            var stringBuilder = new StringBuilder();
+
+            var parameterId = _serializedEntities[parameterModel.Type];
+            var defaultValue = "null";
+            if (parameterModel.DefaultValue != null)
+            {
+                defaultValue = $@"""{parameterModel.DefaultValue}""";
+            }
+
+            stringBuilder.Append(@"{""Type"":");
+            stringBuilder.Append(parameterId);
+            stringBuilder.Append(
+                $@",""Modifier"":""{parameterModel.Modifier}"",""DefaultValue"":{defaultValue}}}");
 
             return stringBuilder.ToString();
         }
@@ -295,7 +313,7 @@ namespace HoneydewCore.IO.Writers.JSON
             foreach (var referenceClassModel in methodModel.ParameterTypes)
             {
                 methodNameWithParameters.Append('_');
-                methodNameWithParameters.Append(referenceClassModel.Name);
+                methodNameWithParameters.Append(referenceClassModel.Type.Name);
             }
 
             return methodNameWithParameters.ToString();

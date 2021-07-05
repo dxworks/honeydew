@@ -12,7 +12,7 @@ namespace HoneydewCore.Models.Representations.ReferenceModel
 
         public ReferenceClassModel ReturnTypeReferenceClassModel { get; set; }
 
-        public IList<ReferenceClassModel> ParameterTypes { get; init; } = new List<ReferenceClassModel>();
+        public IList<ReferenceParameterModel> ParameterTypes { get; init; } = new List<ReferenceParameterModel>();
 
         public IList<ReferenceMethodModel> CalledMethods { get; } = new List<ReferenceMethodModel>();
     }

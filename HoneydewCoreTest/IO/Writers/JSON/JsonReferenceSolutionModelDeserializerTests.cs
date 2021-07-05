@@ -22,7 +22,7 @@ namespace HoneydewCoreTest.IO.Writers.JSON
             Assert.Empty(referenceSolutionModel.Projects);
             Assert.Empty(referenceSolutionModel.GetAllCreatedReferences());
         }
-        
+
         [Fact]
         public void Deserialize_ShouldReturnCorrectReferenceSolutionModel_WhenGivenAJsonString()
         {
@@ -255,7 +255,17 @@ namespace HoneydewCoreTest.IO.Writers.JSON
                          ""Modifier"":""abstract"",
                          ""AccessModifier"":""public"",
                          ""ReturnTypeReferenceClassModel"":2,
-                         ""ParameterTypes"":[17,17],
+                         ""ParameterTypes"":[ 
+                            {
+                                ""Type"":17,
+                                ""Modifier"":"""",
+                                ""DefaultValue"":null
+                            },
+                            {
+                                ""Type"":17,
+                                ""Modifier"":"""",
+                                ""DefaultValue"":""2""
+                            }],
                          ""CalledMethods"":[]
                         }],
                         ""Metrics"":[]                    
@@ -285,7 +295,17 @@ namespace HoneydewCoreTest.IO.Writers.JSON
                          ""Modifier"":"""",
                          ""AccessModifier"":""public"",
                          ""ReturnTypeReferenceClassModel"":2,
-                         ""ParameterTypes"":[17,17],
+                         ""ParameterTypes"":[
+                            {
+                                ""Type"":17,
+                                ""Modifier"":"""",
+                                ""DefaultValue"":null
+                            },
+                            {
+                                ""Type"":17,
+                                ""Modifier"":"""",
+                                ""DefaultValue"":""2""
+                            }],
                          ""CalledMethods"":[]
                         }],
                         ""Metrics"":[]                    
@@ -312,7 +332,7 @@ namespace HoneydewCoreTest.IO.Writers.JSON
 
             Assert.Equal("object", objectType.Name);
             Assert.Equal("int", intType.Name);
-            
+
             Assert.Equal(2, referenceSolutionModel.Projects.Count);
 
             var referenceProjectModel = referenceSolutionModel.Projects[0];
@@ -439,8 +459,12 @@ namespace HoneydewCoreTest.IO.Writers.JSON
             Assert.Equal(myModelReference, setMethodInterface.ReturnTypeReferenceClassModel);
             Assert.Empty(setMethodInterface.CalledMethods);
             Assert.Equal(2, setMethodInterface.ParameterTypes.Count);
-            Assert.Equal(intType, setMethodInterface.ParameterTypes[0]);
-            Assert.Equal(intType, setMethodInterface.ParameterTypes[1]);
+            Assert.Equal(intType, setMethodInterface.ParameterTypes[0].Type);
+            Assert.Equal("", setMethodInterface.ParameterTypes[0].Modifier);
+            Assert.Null(setMethodInterface.ParameterTypes[0].DefaultValue);
+            Assert.Equal(intType, setMethodInterface.ParameterTypes[1].Type);
+            Assert.Equal("", setMethodInterface.ParameterTypes[1].Modifier);
+            Assert.Equal("2", setMethodInterface.ParameterTypes[1].DefaultValue);
 
             var myServiceReference = servicesNamespace.ClassModels[2];
             Assert.Equal("Project1.Services.MyService", myServiceReference.Name);
@@ -465,8 +489,12 @@ namespace HoneydewCoreTest.IO.Writers.JSON
             Assert.Equal(myModelReference, setMethodClass.ReturnTypeReferenceClassModel);
             Assert.Empty(setMethodClass.CalledMethods);
             Assert.Equal(2, setMethodClass.ParameterTypes.Count);
-            Assert.Equal(intType, setMethodClass.ParameterTypes[0]);
-            Assert.Equal(intType, setMethodClass.ParameterTypes[1]);
+            Assert.Equal(intType, setMethodClass.ParameterTypes[0].Type);
+            Assert.Equal("", setMethodClass.ParameterTypes[0].Modifier);
+            Assert.Null(setMethodClass.ParameterTypes[0].DefaultValue);
+            Assert.Equal(intType, setMethodClass.ParameterTypes[1].Type);
+            Assert.Equal("", setMethodClass.ParameterTypes[1].Modifier);
+            Assert.Equal("2", setMethodClass.ParameterTypes[1].DefaultValue);
 
             var getMethodClass = myServiceReference.Methods[0];
             Assert.Equal("Get", getMethodClass.Name);

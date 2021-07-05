@@ -36,7 +36,7 @@ namespace Project1.Services
     public interface IService 
     {
         MyModel Get();
-        MyModel Set(int value, int value);
+        MyModel Set(int value1, int value=2);
     }
     
     public class MyService : IService1, IService  
@@ -47,9 +47,9 @@ namespace Project1.Services
             return Set(0,0);
         }
 
-        public MyModel Set(int value, int value)
+        public MyModel Set(int value1, int value=2)
         {
-            return new MyChildModel{Value=value};
+            return new MyChildModel{Value=value1};
         }
     }
 }";
@@ -336,7 +336,17 @@ namespace Project1.Services
                          ""Modifier"":""abstract"",
                          ""AccessModifier"":""public"",
                          ""ReturnTypeReferenceClassModel"":2,
-                         ""ParameterTypes"":[17,17],
+                         ""ParameterTypes"":[ 
+                            {
+                                ""Type"":17,
+                                ""Modifier"":"""",
+                                ""DefaultValue"":null
+                            },
+                            {
+                                ""Type"":17,
+                                ""Modifier"":"""",
+                                ""DefaultValue"":""2""
+                            }],
                          ""CalledMethods"":[]
                         }],
                         ""Metrics"":[]                    
@@ -366,7 +376,17 @@ namespace Project1.Services
                          ""Modifier"":"""",
                          ""AccessModifier"":""public"",
                          ""ReturnTypeReferenceClassModel"":2,
-                         ""ParameterTypes"":[17,17],
+                         ""ParameterTypes"":[
+                            {
+                                ""Type"":17,
+                                ""Modifier"":"""",
+                                ""DefaultValue"":null
+                            },
+                            {
+                                ""Type"":17,
+                                ""Modifier"":"""",
+                                ""DefaultValue"":""2""
+                            }],
                          ""CalledMethods"":[]
                         }],
                         ""Metrics"":[]                    

@@ -85,14 +85,18 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
             foreach (var parameter in node.ParameterList.Parameters)
             {
                 var parameterSymbol = ExtractorSemanticModel.GetDeclaredSymbol(parameter);
+                var parameterType = parameter.Type?.ToString();
                 if (parameterSymbol != null)
                 {
-                    methodModel.ParameterTypes.Add(parameterSymbol.ToString());
+                    parameterType = parameterSymbol.Type.ToDisplayString();
                 }
-                else if (parameter.Type != null)
+
+                methodModel.ParameterTypes.Add(new ParameterModel
                 {
-                    methodModel.ParameterTypes.Add(parameter.Type.ToString());
-                }
+                    Type = parameterType,
+                    Modifier = parameter.Modifiers.ToString(),
+                    DefaultValue = parameter.Default?.Value.ToString()
+                });
             }
 
             if (node.Body != null)
@@ -148,16 +152,19 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
             MethodInfos.Add(methodModel);
         }
 
-        private IList<string> GetParameterTypes(ExpressionSyntax invocationExpressionSyntax)
+        private IList<ParameterModel> GetParameterTypes(ExpressionSyntax invocationExpressionSyntax)
         {
-            IList<string> parameterTypes = new List<string>();
+            IList<ParameterModel> parameterTypes = new List<ParameterModel>();
 
             var symbolInfo = ExtractorSemanticModel.GetSymbolInfo(invocationExpressionSyntax);
             if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
             {
                 foreach (var parameter in methodSymbol.Parameters)
                 {
-                    parameterTypes.Add(parameter.ToString());
+                    parameterTypes.Add(new ParameterModel
+                    {
+                        Type = parameter.ToString()
+                    });
                 }
             }
 

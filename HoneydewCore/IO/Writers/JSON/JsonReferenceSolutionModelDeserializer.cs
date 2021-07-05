@@ -164,8 +164,7 @@ namespace HoneydewCore.IO.Writers.JSON
                         value = Convert.ChangeType(value, type);
                     }
                 }
-
-
+                
                 classModel.Metrics.Add(new ClassMetric
                 {
                     ExtractorName = metricElement.GetProperty("ExtractorName").GetString(),
@@ -198,8 +197,13 @@ namespace HoneydewCore.IO.Writers.JSON
             var parameterTypesArray = methodElement.GetProperty("ParameterTypes");
             foreach (var parameterElement in parameterTypesArray.EnumerateArray())
             {
-                var parameterId = parameterElement.GetInt32();
-                methodModel.ParameterTypes.Add((ReferenceClassModel) _deserializedEntities[parameterId]);
+                var parameterId = parameterElement.GetProperty("Type").GetInt32();
+                methodModel.ParameterTypes.Add(new ReferenceParameterModel
+                {
+                    Type = (ReferenceClassModel) _deserializedEntities[parameterId],
+                    Modifier = parameterElement.GetProperty("Modifier").GetString(),
+                    DefaultValue = parameterElement.GetProperty("DefaultValue").GetString(),
+                });
             }
 
             var calledMethodsArray = methodElement.GetProperty("CalledMethods");

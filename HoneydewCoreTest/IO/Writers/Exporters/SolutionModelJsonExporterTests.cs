@@ -112,7 +112,7 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
                     FullName = "SomeNamespace.FirstClass",
                     ClassType = "class",
                     AccessModifier = "protected",
-                    
+
                     Methods = new List<MethodModel>
                     {
                         new()
@@ -128,17 +128,29 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
                                 {
                                     MethodName = "Parse",
                                     ContainingClassName = "int",
-                                    ParameterTypes = {"string"},
+                                    ParameterTypes =
+                                    {
+                                        new ParameterModel
+                                        {
+                                            Type = "string"
+                                        }
+                                    },
                                 }
                             },
-                            ParameterTypes = { "string"}
+                            ParameterTypes =
+                            {
+                                new ParameterModel
+                                {
+                                    Type = "string"
+                                }
+                            }
                         }
                     }
                 }
             };
 
             const string expectedString =
-                @"{""Projects"":[{""Name"":""A Project"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""AccessModifier"":""protected"",""Modifier"":"""",""BaseClassFullName"":""object"",""BaseInterfaces"":[],""Fields"":[],""Methods"":[{""Name"":""Method1"",""ReturnType"":""int"",""Modifier"":""static"",""AccessModifier"":""public"",""ParameterTypes"":[""string""],""ContainingClassName"":""SomeNamespace.FirstClass"",""CalledMethods"":[{""MethodName"":""Parse"",""ContainingClassName"":""int"",""ParameterTypes"":[""string""]}]}],""Metrics"":[],""Namespace"":""SomeNamespace""}]}}}]}";
+                @"{""Projects"":[{""Name"":""A Project"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""AccessModifier"":""protected"",""Modifier"":"""",""BaseClassFullName"":""object"",""BaseInterfaces"":[],""Fields"":[],""Methods"":[{""Name"":""Method1"",""ReturnType"":""int"",""Modifier"":""static"",""AccessModifier"":""public"",""ParameterTypes"":[{""Type"":""string"",""Modifier"":"""",""DefaultValue"":null}],""ContainingClassName"":""SomeNamespace.FirstClass"",""CalledMethods"":[{""MethodName"":""Parse"",""ContainingClassName"":""int"",""ParameterTypes"":[{""Type"":""string"",""Modifier"":"""",""DefaultValue"":null}]}]}],""Metrics"":[],""Namespace"":""SomeNamespace""}]}}}]}";
 
             var projectModel = new ProjectModel("A Project");
             foreach (var classModel in classModels)

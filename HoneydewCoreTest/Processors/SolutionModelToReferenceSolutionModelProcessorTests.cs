@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors;
 using HoneydewCore.Models;
-using HoneydewCore.Models.Representations.ReferenceModel;
 using HoneydewCore.Processors;
-using Moq;
 using Xunit;
 
 namespace HoneydewCoreTest.Processors
@@ -239,7 +237,13 @@ namespace HoneydewCoreTest.Processors
                                                     Name = "Convert",
                                                     Modifier = "",
                                                     AccessModifier = "public",
-                                                    ParameterTypes = {"Project1.Models.MyModel"},
+                                                    ParameterTypes =
+                                                    {
+                                                        new ParameterModel
+                                                        {
+                                                            Type = "Project1.Models.MyModel"
+                                                        }
+                                                    },
                                                     ReturnType = "Project1.Models.MyModel",
                                                     ContainingClassName = "Project1.Services.CreateService",
                                                     CalledMethods =
@@ -256,7 +260,13 @@ namespace HoneydewCoreTest.Processors
                                                     Name = "Convert",
                                                     Modifier = "",
                                                     AccessModifier = "public",
-                                                    ParameterTypes = {"Project1.Models.OtherModel"},
+                                                    ParameterTypes =
+                                                    {
+                                                        new ParameterModel
+                                                        {
+                                                            Type = "Project1.Models.OtherModel"
+                                                        }
+                                                    },
                                                     ReturnType = "Project1.Models.MyModel",
                                                     ContainingClassName = "Project1.Services.CreateService",
                                                     CalledMethods =
@@ -265,7 +275,13 @@ namespace HoneydewCoreTest.Processors
                                                         {
                                                             ContainingClassName = "Project1.Services.CreateService",
                                                             MethodName = "Convert",
-                                                            ParameterTypes = {"Project1.Models.MyModel"}
+                                                            ParameterTypes =
+                                                            {
+                                                                new ParameterModel
+                                                                {
+                                                                    Type = "Project1.Models.MyModel"
+                                                                }
+                                                            }
                                                         }
                                                     }
                                                 },
@@ -275,7 +291,16 @@ namespace HoneydewCoreTest.Processors
                                                     Modifier = "",
                                                     AccessModifier = "public",
                                                     ParameterTypes =
-                                                        {"Project1.Models.MyModel", "Project1.Models.MyModel"},
+                                                    {
+                                                        new ParameterModel
+                                                        {
+                                                            Type = "Project1.Models.MyModel",
+                                                        },
+                                                        new ParameterModel
+                                                        {
+                                                            Type = "Project1.Models.MyModel"
+                                                        }
+                                                    },
                                                     ReturnType = "Project1.Models.MyModel",
                                                     ContainingClassName = "Project1.Services.CreateService",
                                                     CalledMethods =
@@ -289,7 +314,13 @@ namespace HoneydewCoreTest.Processors
                                                         {
                                                             ContainingClassName = "Project1.Services.CreateService",
                                                             MethodName = "Convert",
-                                                            ParameterTypes = {"Project1.Models.OtherModel"}
+                                                            ParameterTypes =
+                                                            {
+                                                                new ParameterModel
+                                                                {
+                                                                    Type = "Project1.Models.OtherModel"
+                                                                }
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -328,7 +359,7 @@ namespace HoneydewCoreTest.Processors
             var referenceSolutionModel = processable.Value;
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-            
+
             var allCreatedReferences = referenceSolutionModel.GetAllCreatedReferences();
             Assert.Equal(1, allCreatedReferences.Count);
             var objectClassModel = allCreatedReferences[0];
@@ -377,7 +408,9 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("public", referenceConvertMethodModel1.AccessModifier);
             Assert.Equal(referenceClassMyModel, referenceConvertMethodModel1.ReturnTypeReferenceClassModel);
             Assert.Equal(1, referenceConvertMethodModel1.ParameterTypes.Count);
-            Assert.Equal(referenceClassMyModel, referenceConvertMethodModel1.ParameterTypes[0]);
+            Assert.Equal(referenceClassMyModel, referenceConvertMethodModel1.ParameterTypes[0].Type);
+            Assert.Equal("", referenceConvertMethodModel1.ParameterTypes[0].Modifier);
+            Assert.Null(referenceConvertMethodModel1.ParameterTypes[0].DefaultValue);
             Assert.Equal(1, referenceConvertMethodModel1.CalledMethods.Count);
             Assert.Equal(referenceCreateMethodModel, referenceConvertMethodModel1.CalledMethods[0]);
 
@@ -387,7 +420,9 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("public", referenceConvertMethodModel2.AccessModifier);
             Assert.Equal(referenceClassMyModel, referenceConvertMethodModel2.ReturnTypeReferenceClassModel);
             Assert.Equal(1, referenceConvertMethodModel2.ParameterTypes.Count);
-            Assert.Equal(referenceClassOtherModel, referenceConvertMethodModel2.ParameterTypes[0]);
+            Assert.Equal(referenceClassOtherModel, referenceConvertMethodModel2.ParameterTypes[0].Type);
+            Assert.Equal("", referenceConvertMethodModel2.ParameterTypes[0].Modifier);
+            Assert.Null(referenceConvertMethodModel2.ParameterTypes[0].DefaultValue);
             Assert.Equal(1, referenceConvertMethodModel2.CalledMethods.Count);
             Assert.Equal(referenceConvertMethodModel1, referenceConvertMethodModel2.CalledMethods[0]);
 
@@ -397,8 +432,9 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("public", referenceProcessMethodModel.AccessModifier);
             Assert.Equal(referenceClassMyModel, referenceProcessMethodModel.ReturnTypeReferenceClassModel);
             Assert.Equal(2, referenceProcessMethodModel.ParameterTypes.Count);
-            Assert.Equal(referenceClassMyModel, referenceProcessMethodModel.ParameterTypes[0]);
-            Assert.Equal(referenceClassMyModel, referenceProcessMethodModel.ParameterTypes[0]);
+            Assert.Equal(referenceClassMyModel, referenceProcessMethodModel.ParameterTypes[0].Type);
+            Assert.Equal("", referenceProcessMethodModel.ParameterTypes[0].Modifier);
+            Assert.Null(referenceProcessMethodModel.ParameterTypes[0].DefaultValue);
             Assert.Equal(2, referenceProcessMethodModel.CalledMethods.Count);
             Assert.Equal(referenceCreateMethodModel, referenceProcessMethodModel.CalledMethods[0]);
             Assert.Equal(referenceConvertMethodModel2, referenceProcessMethodModel.CalledMethods[1]);
@@ -517,7 +553,9 @@ namespace Project1.Services
 
             Assert.Equal("Parse", intParseMethodReference.Name);
             Assert.Equal(1, intParseMethodReference.ParameterTypes.Count);
-            Assert.Equal(stringClassModel, intParseMethodReference.ParameterTypes[0]);
+            Assert.Equal(stringClassModel, intParseMethodReference.ParameterTypes[0].Type);
+            Assert.Equal("", intParseMethodReference.ParameterTypes[0].Modifier);
+            Assert.Null(intParseMethodReference.ParameterTypes[0].DefaultValue);
 
             var projectModel1 = referenceSolutionModel.Projects[0];
 
@@ -543,8 +581,12 @@ namespace Project1.Services
             Assert.Equal("public", methodFunction1.AccessModifier);
             Assert.Equal(floatClassModel, methodFunction1.ReturnTypeReferenceClassModel);
             Assert.Equal(2, methodFunction1.ParameterTypes.Count);
-            Assert.Equal(intClassModel, methodFunction1.ParameterTypes[0]);
-            Assert.Equal(intClassModel, methodFunction1.ParameterTypes[1]);
+            Assert.Equal(intClassModel, methodFunction1.ParameterTypes[0].Type);
+            Assert.Equal("", methodFunction1.ParameterTypes[0].Modifier);
+            Assert.Null(methodFunction1.ParameterTypes[0].DefaultValue);
+            Assert.Equal(intClassModel, methodFunction1.ParameterTypes[1].Type);
+            Assert.Equal("", methodFunction1.ParameterTypes[1].Modifier);
+            Assert.Null(methodFunction1.ParameterTypes[1].DefaultValue);
             Assert.Equal(5, methodFunction1.CalledMethods.Count);
             Assert.Equal(methodFunction3, methodFunction1.CalledMethods[0]);
             Assert.Equal(methodFunction3, methodFunction1.CalledMethods[1]);
@@ -558,7 +600,9 @@ namespace Project1.Services
             Assert.Equal("public", methodFunction2.AccessModifier);
             Assert.Equal(intClassModel, methodFunction2.ReturnTypeReferenceClassModel);
             Assert.Equal(1, methodFunction2.ParameterTypes.Count);
-            Assert.Equal(stringClassModel, methodFunction2.ParameterTypes[0]);
+            Assert.Equal(stringClassModel, methodFunction2.ParameterTypes[0].Type);
+            Assert.Equal("", methodFunction2.ParameterTypes[0].Modifier);
+            Assert.Null(methodFunction2.ParameterTypes[0].DefaultValue);
             Assert.Equal(1, methodFunction2.CalledMethods.Count);
             Assert.Equal(intParseMethodReference, methodFunction2.CalledMethods[0]);
 
@@ -568,7 +612,9 @@ namespace Project1.Services
             Assert.Equal("public", methodFunction3.AccessModifier);
             Assert.Equal(stringClassModel, methodFunction3.ReturnTypeReferenceClassModel);
             Assert.Equal(1, methodFunction3.ParameterTypes.Count);
-            Assert.Equal(intClassModel, methodFunction3.ParameterTypes[0]);
+            Assert.Equal(intClassModel, methodFunction3.ParameterTypes[0].Type);
+            Assert.Equal("", methodFunction3.ParameterTypes[0].Modifier);
+            Assert.Null(methodFunction3.ParameterTypes[0].DefaultValue);
             Assert.Equal(1, methodFunction3.CalledMethods.Count);
             Assert.Equal(intToStringReferenceMethod, methodFunction3.CalledMethods[0]);
 
@@ -578,7 +624,9 @@ namespace Project1.Services
             Assert.Equal("private", methodPrint1.AccessModifier);
             Assert.Equal(voidClassModel, methodPrint1.ReturnTypeReferenceClassModel);
             Assert.Equal(1, methodPrint1.ParameterTypes.Count);
-            Assert.Equal(floatClassModel, methodPrint1.ParameterTypes[0]);
+            Assert.Equal(floatClassModel, methodPrint1.ParameterTypes[0].Type);
+            Assert.Equal("", methodPrint1.ParameterTypes[0].Modifier);
+            Assert.Null(methodPrint1.ParameterTypes[0].DefaultValue);
             Assert.Empty(methodPrint1.CalledMethods);
 
             Assert.Equal("Print", methodPrint2.Name);
@@ -587,7 +635,9 @@ namespace Project1.Services
             Assert.Equal("private", methodPrint2.AccessModifier);
             Assert.Equal(voidClassModel, methodPrint2.ReturnTypeReferenceClassModel);
             Assert.Equal(1, methodPrint2.ParameterTypes.Count);
-            Assert.Equal(intClassModel, methodPrint2.ParameterTypes[0]);
+            Assert.Equal(intClassModel, methodPrint2.ParameterTypes[0].Type);
+            Assert.Equal("", methodPrint2.ParameterTypes[0].Modifier);
+            Assert.Null(methodPrint2.ParameterTypes[0].DefaultValue);
             Assert.Equal(1, methodPrint2.CalledMethods.Count);
             Assert.Equal(methodPrint2, methodPrint2.CalledMethods[0]);
         }
