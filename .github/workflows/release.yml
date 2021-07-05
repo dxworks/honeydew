@@ -3,16 +3,19 @@ name: Release
 on:
   push:
     branches:
-      - "ghactions"
+      - 'ghactions'
     tags:
-      - "v*"
-      - "!*-voyager"
-
+      - 'v*'
+      - '!*-voyager'
 
 jobs:
-  release:
-    name: Release
+  build-and-publish:
+    name: Build and Publish
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [win, linux, osx]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -21,45 +24,46 @@ jobs:
         with:
           dotnet-version: '5.0.x'
 
-      - name: Release for Windows
+      - name: Release for OS
         run: |
-          mkdir -p bin/windows
-          dotnet publish -r win-x64 --self-contained true -p:PublishSingleFile=true -o bin/windows -c Release Honeydew/Honeydew.csproj
-
-      - name: Release for Linux
-        run: |
-          mkdir -p bin/linux
-          dotnet publish -r linux-x64 --self-contained true -p:PublishSingleFile=true -o bin/linux -c Release Honeydew/Honeydew.csproj
-
-      - name: Release for Mac
-        run: |
-          mkdir -p bin/mac
-          dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin/mac -c Release Honeydew/Honeydew.csproj
-
-      - name: Print All assets
-        run: |
-          ls -R -al
+          mkdir bin
+          dotnet publish -r ${{matrix.os}}-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
 
       - name: Prepare Assets
         run: |
-          mkdir honeydew
-          mkdir honeydew/bin
+          mkdir -p honeydew/results
           cp README.md honeydew/README.md
-          cp -r bin honeydew/bin
+          rm bin/*.pdb
+          cp -R bin honeydew
 
       - name: Create Archive
-        run: zip -r honeydew.zip honeydew
+        run: zip -r honeydew-${{ matrix.os }}.zip honeydew
 
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: honeydew-${{ matrix.os }}.zip
+          path: honeydew-${{ matrix.os }}.zip
+
+  release-and-upload:
+    name: Release and Update
+    runs-on: ubuntu-latest
+    needs: build-and-publish
+    steps:
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: test-${$GITHUB_RUN_NUMBER}
+          tag_name: test-${{ github.run_number }}
           release_name: Honeydew ${{ github.ref }}
           draft: false
           prerelease: false
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
@@ -67,7 +71,28 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./honeydew.zip
-          asset_name: honeydew.zip
+          asset_path: ./honeydew-win/honeydew-win.zip
+          asset_name: honeydew-win.zip
           asset_content_type: application/zip
 
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./honeydew-linux/honeydew-linux.zip
+          asset_name: honeydew-linux.zip
+          asset_content_type: application/zip
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./honeydew-osx/honeydew-osx.zip
+          asset_name: honeydew-osx.zip
+          asset_content_type: application/zip
