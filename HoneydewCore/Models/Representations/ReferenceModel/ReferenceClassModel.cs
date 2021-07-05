@@ -21,6 +21,8 @@ namespace HoneydewCore.Models.Representations.ReferenceModel
         public IList<ReferenceFieldModel> Fields { get; } = new List<ReferenceFieldModel>();
 
         public IList<ReferenceMethodModel> Methods { get; } = new List<ReferenceMethodModel>();
+        
+        public IList<ReferenceMethodModel> Constructors { get; } = new List<ReferenceMethodModel>();
 
         public IList<ClassMetric> Metrics { get; init; } = new List<ClassMetric>();
     }

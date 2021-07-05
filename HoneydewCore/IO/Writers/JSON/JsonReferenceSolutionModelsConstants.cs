@@ -7,6 +7,7 @@
         internal const string ClassIdentifier = "class";
         internal const string FieldIdentifier = "field";
         internal const string MethodIdentifier = "method";
+        internal const string ConstructorIdentifier = "constructor";
         internal const string OtherClassIdentifier = "other-class";
     }
 }

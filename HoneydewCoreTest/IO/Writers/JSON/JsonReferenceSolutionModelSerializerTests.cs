@@ -20,6 +20,10 @@ namespace Project1.Models
     public class MyModel {
         public int Value;
         public int Value2;   
+
+        public MyModel() {}
+
+        public MyModel(int a) {}
     }
     
     public class MyChildModel : MyModel { }
@@ -36,7 +40,7 @@ namespace Project1.Services
     public interface IService 
     {
         MyModel Get();
-        MyModel Set(int value, int value);
+        MyModel Set(int value1, int value=2);
     }
     
     public class MyService : IService1, IService  
@@ -47,9 +51,9 @@ namespace Project1.Services
             return Set(0,0);
         }
 
-        public MyModel Set(int value, int value)
+        public MyModel Set(int value1, int value=2)
         {
-            return new MyChildModel{Value=value};
+            return new MyChildModel{Value=value1};
         }
     }
 }";
@@ -91,14 +95,14 @@ namespace Project1.Services
             {
                 ExtractorName = "SomeExtractor",
                 Value = "some_metric",
-                ValueType = "string"
+                ValueType = "System.String"
             });
 
             solutionModel.Projects[0].Namespaces["Project1.Models"].ClassModels[0].Metrics.Add(new ClassMetric
             {
                 ExtractorName = "SomeOtherExtractor",
                 Value = 0,
-                ValueType = "int"
+                ValueType = "System.Int32"
             });
 
             var referenceSolutionModel = new ProcessorChain(IProcessable.Of(solutionModel))
@@ -142,78 +146,90 @@ namespace Project1.Services
         },
         {
             ""Id"":5,
+            ""Name"":""MyModel"",
+            ""Type"":""constructor"",
+            ""Container"":2
+        },
+        {
+            ""Id"":6,
+            ""Name"":""MyModel_int"",
+            ""Type"":""constructor"",
+            ""Container"":2
+        },
+        {
+            ""Id"":7,
             ""Name"":""Project1.Models.MyChildModel"",
             ""Type"":""class"",
             ""Container"":1
         },
         {
-            ""Id"":6,
+            ""Id"":8,
             ""Name"":""Project1.Models.MyRecord"",
             ""Type"":""class"",
             ""Container"":1
         },
         {
-            ""Id"":7,
+            ""Id"":9,
             ""Name"":""Project1.Services"",
             ""Type"":""namespace"",
             ""Container"":0
         },
         {
-            ""Id"":8,
+            ""Id"":10,
             ""Name"":""Project1.Services.IService1"",
             ""Type"":""class"",
-            ""Container"":7
-        },
-        {
-            ""Id"":9,
-            ""Name"":""Project1.Services.IService"",
-            ""Type"":""class"",
-            ""Container"":7
-        },
-        {
-            ""Id"":10,
-            ""Name"":""Get"",
-            ""Type"":""method"",
             ""Container"":9
         },
         {
             ""Id"":11,
-            ""Name"":""Set_int_int"",
-            ""Type"":""method"",
+            ""Name"":""Project1.Services.IService"",
+            ""Type"":""class"",
             ""Container"":9
         },
         {
             ""Id"":12,
-            ""Name"":""Project1.Services.MyService"",
-            ""Type"":""class"",
-            ""Container"":7
+            ""Name"":""Get"",
+            ""Type"":""method"",
+            ""Container"":11
         },
         {
             ""Id"":13,
-            ""Name"":""Get"",
+            ""Name"":""Set_int_int"",
             ""Type"":""method"",
-            ""Container"":12
+            ""Container"":11
         },
         {
             ""Id"":14,
+            ""Name"":""Project1.Services.MyService"",
+            ""Type"":""class"",
+            ""Container"":9
+        },
+        {
+            ""Id"":15,
+            ""Name"":""Get"",
+            ""Type"":""method"",
+            ""Container"":14
+        },
+        {
+            ""Id"":16,
             ""Name"":""Set_int_int"",
             ""Type"":""method"",
-            ""Container"":12
+            ""Container"":14
         },
         {   
-            ""Id"":15,
+            ""Id"":17,
             ""Name"":""Project2"",
             ""Type"":""project"",
             ""Container"":null  
         }, 
         {
-            ""Id"":16,
+            ""Id"":18,
             ""Name"":""object"",
             ""Type"":""other-class"",
             ""Container"":null
         },
         {
-            ""Id"":17,
+            ""Id"":19,
             ""Name"":""int"",
             ""Type"":""other-class"",
             ""Container"":null
@@ -235,34 +251,62 @@ namespace Project1.Services
                         ""AccessModifier"":""public"",
                         ""Modifier"":"""",        
                         ""NamespaceReference"":1,
-                        ""BaseClass"":16,
+                        ""BaseClass"":18,
                         ""BaseInterfaces"":[],
                         ""Fields"":[{
                             ""Name"":""Value"",
                             ""ContainingClass"":2,
-                            ""Type"":17,
+                            ""Type"":19,
                             ""Modifier"":"""",
                             ""AccessModifier"":""public"",
                             ""IsEvent"":false
-                        },{
+                         },
+                         {
                             ""Name"":""Value2"",
                             ""ContainingClass"":2,
-                            ""Type"":17,
+                            ""Type"":19,
                             ""Modifier"":"""",
                             ""AccessModifier"":""public"",
                             ""IsEvent"":false
                         }],
+                        ""Constructors"":[
+                        {
+                            ""Name"":""MyModel"",
+                            ""IsConstructor"":true,
+                            ""ContainingClass"":2,
+                            ""Modifier"":"""",
+                            ""AccessModifier"":""public"",
+                            ""ReturnTypeReferenceClassModel"":null,
+                            ""ParameterTypes"":[],
+                            ""CalledMethods"":[]
+                        },
+                        {
+                         ""Name"":""MyModel_int"",
+                        ""IsConstructor"":true,
+                         ""ContainingClass"":2,
+                         ""Modifier"":"""",
+                         ""AccessModifier"":""public"",
+                         ""ReturnTypeReferenceClassModel"":null,
+                         ""ParameterTypes"":[ 
+                            {
+                                ""Type"":19,
+                                ""Modifier"":"""",
+                                ""DefaultValue"":null
+                            }],
+                         ""CalledMethods"":[]
+                        }
+                        ],
                         ""Methods"":[],
                         ""Metrics"":[
                          {
                             ""ExtractorName"":""SomeExtractor"",
                             ""Value"":""some_metric"",
-                            ""ValueType"":""string""
+                            ""ValueType"":""System.String""
                         },
                         {
                             ""ExtractorName"":""SomeOtherExtractor"",
                             ""Value"":""0"",
-                            ""ValueType"":""int""
+                            ""ValueType"":""System.Int32""
                         }
                         ]                    
                     },
@@ -276,6 +320,7 @@ namespace Project1.Services
                         ""BaseClass"":2,
                         ""BaseInterfaces"":[],
                         ""Fields"":[],
+                        ""Constructors"":[],
                         ""Methods"":[],
                         ""Metrics"":[]                    
                     },
@@ -289,6 +334,7 @@ namespace Project1.Services
                         ""BaseClass"":null,
                         ""BaseInterfaces"":[],
                         ""Fields"":[],
+                        ""Constructors"":[],
                         ""Methods"":[],
                         ""Metrics"":[]                    
                     }
@@ -304,10 +350,11 @@ namespace Project1.Services
                         ""FilePath"":"""",        
                         ""AccessModifier"":""public"",
                         ""Modifier"":"""",        
-                        ""NamespaceReference"":7,
+                        ""NamespaceReference"":9,
                         ""BaseClass"":null,
                         ""BaseInterfaces"":[],
                         ""Fields"":[],
+                        ""Constructors"":[],
                         ""Methods"":[],
                         ""Metrics"":[]                    
                     },
@@ -317,13 +364,15 @@ namespace Project1.Services
                         ""FilePath"":"""",        
                         ""AccessModifier"":""public"",
                         ""Modifier"":"""",        
-                        ""NamespaceReference"":7,
+                        ""NamespaceReference"":9,
                         ""BaseClass"":null,
                         ""BaseInterfaces"":[],
                         ""Fields"":[],
+                        ""Constructors"":[],
                         ""Methods"":[{
                             ""Name"":""Get"",
-                            ""ContainingClass"":9,
+                            ""IsConstructor"":false,
+                            ""ContainingClass"":11,
                             ""Modifier"":""abstract"",
                             ""AccessModifier"":""public"",
                             ""ReturnTypeReferenceClassModel"":2,
@@ -332,11 +381,22 @@ namespace Project1.Services
                         },
                         {
                          ""Name"":""Set_int_int"",
-                         ""ContainingClass"":9,
+                         ""IsConstructor"":false,
+                         ""ContainingClass"":11,
                          ""Modifier"":""abstract"",
                          ""AccessModifier"":""public"",
                          ""ReturnTypeReferenceClassModel"":2,
-                         ""ParameterTypes"":[17,17],
+                         ""ParameterTypes"":[ 
+                            {
+                                ""Type"":19,
+                                ""Modifier"":"""",
+                                ""DefaultValue"":null
+                            },
+                            {
+                                ""Type"":19,
+                                ""Modifier"":"""",
+                                ""DefaultValue"":""2""
+                            }],
                          ""CalledMethods"":[]
                         }],
                         ""Metrics"":[]                    
@@ -347,26 +407,39 @@ namespace Project1.Services
                         ""FilePath"":"""",        
                         ""AccessModifier"":""public"",
                         ""Modifier"":"""",        
-                        ""NamespaceReference"":7,
-                        ""BaseClass"":16,
-                        ""BaseInterfaces"":[8,9],
+                        ""NamespaceReference"":9,
+                        ""BaseClass"":18,
+                        ""BaseInterfaces"":[10,11],
                         ""Fields"":[],
+                        ""Constructors"":[],
                         ""Methods"":[{
                             ""Name"":""Get"",
-                            ""ContainingClass"":12,
+                            ""IsConstructor"":false,
+                            ""ContainingClass"":14,
                             ""Modifier"":"""",
                             ""AccessModifier"":""public"",
                             ""ReturnTypeReferenceClassModel"":2,
                             ""ParameterTypes"":[],
-                            ""CalledMethods"":[14,14]
+                            ""CalledMethods"":[16,16]
                         },
                         {
                          ""Name"":""Set_int_int"",
-                         ""ContainingClass"":12,
+                         ""IsConstructor"":false,
+                         ""ContainingClass"":14,
                          ""Modifier"":"""",
                          ""AccessModifier"":""public"",
                          ""ReturnTypeReferenceClassModel"":2,
-                         ""ParameterTypes"":[17,17],
+                         ""ParameterTypes"":[
+                            {
+                                ""Type"":19,
+                                ""Modifier"":"""",
+                                ""DefaultValue"":null
+                            },
+                            {
+                                ""Type"":19,
+                                ""Modifier"":"""",
+                                ""DefaultValue"":""2""
+                            }],
                          ""CalledMethods"":[]
                         }],
                         ""Metrics"":[]                    

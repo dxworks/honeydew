@@ -8,6 +8,6 @@ namespace HoneydewCore.Models
 
         public string ContainingClassName { get; set; }
 
-        public IList<string> ParameterTypes { get; init; } = new List<string>();
+        public IList<ParameterModel> ParameterTypes { get; init; } = new List<ParameterModel>();
     }
 }

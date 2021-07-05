@@ -25,6 +25,8 @@ namespace HoneydewCore.Models
 
         public IList<FieldModel> Fields { get; init; } = new List<FieldModel>();
 
+        public IList<MethodModel> Constructors { get; init; } = new List<MethodModel>();
+        
         public IList<MethodModel> Methods { get; init; } = new List<MethodModel>();
 
         public IList<ClassMetric> Metrics { get; init; } = new List<ClassMetric>();
