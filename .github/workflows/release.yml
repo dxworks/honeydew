@@ -75,7 +75,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./honeydew-win.zip
+          asset_path: ./honeydew-win.zip/honeydew-win.zip
           asset_name: honeydew-win.zip
           asset_content_type: application/zip
 
@@ -85,7 +85,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./honeydew-linux.zip
+          asset_path: ./honeydew-linux.zip/honeydew-linux.zip
           asset_name: honeydew-linux.zip
           asset_content_type: application/zip
 
@@ -95,6 +95,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./honeydew-osx.zip
+          asset_path: ./honeydew-osx.zip/honeydew-osx.zip
           asset_name: honeydew-osx.zip
           asset_content_type: application/zip

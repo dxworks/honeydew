@@ -1,0 +1,63 @@
+name: Release Voyager
+
+on:
+  push:
+    branches:
+      - 'ghactions'
+    tags:
+      - 'v*-voyager'
+
+jobs:
+  release-voyager:
+    name: Release Voyager
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [win, linux, osx]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
+
+      - name: Publish for All OS
+        run: |
+          mkdir bin
+          dotnet publish -r win-x64 --self-contained true -p:PublishSingleFile=true -o bin/win -c Release Honeydew/Honeydew.csproj
+          dotnet publish -r linux-x64 --self-contained true -p:PublishSingleFile=true -o bin/linux -c Release Honeydew/Honeydew.csproj
+          dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin/osx -c Release Honeydew/Honeydew.csproj
+
+      - name: Prepare Assets
+        run: |
+          mkdir -p honeydew/results
+          cp README.md honeydew/README.md
+          rm bin/**/*.pdb
+          cp -R bin honeydew
+          ls -R -al honeydew
+
+      - name: Create Archive
+        run: zip -r honeydew.zip honeydew
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: test-voyager-${{ github.run_number }}
+          release_name: Honeydew ${{ github.ref }} (Voyager)
+          draft: false
+          prerelease: false
+
+      - name: Upload Windows Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./honeydew.zip
+          asset_name: honeydew.zip
+          asset_content_type: application/zip
