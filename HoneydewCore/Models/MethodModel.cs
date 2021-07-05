@@ -5,6 +5,9 @@ namespace HoneydewCore.Models
     public record MethodModel
     {
         public string Name { get; init; }
+
+        public bool IsConstructor { get; init; } = false;
+
         public string ReturnType { get; set; }
 
         public string Modifier { get; init; } = "";

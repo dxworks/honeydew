@@ -122,7 +122,6 @@ namespace HoneydewCoreTest.Extractors
         [InlineData("in")]
         [InlineData("out")]
         [InlineData("ref")]
-        [InlineData("this")]
         public void Extract_ShouldSetParameters_WhenParsingTextWithOneClassWithMethodWithParameterWithModifiers(
             string parameterModifier)
         {
@@ -132,8 +131,49 @@ namespace HoneydewCoreTest.Extractors
                                       public class MainItem
                                       {{
                                             public void Method({parameterModifier} int a) {{}}
+
+                                            public MainItem({parameterModifier} int a) {{ }}
                                       }}
                                     }}
+                                    ";
+            var classModels = _sut.Extract(fileContent);
+
+            Assert.Equal(1, classModels.Count);
+
+            foreach (var classModel in classModels)
+            {
+                Assert.Equal("Models.Main.Items", classModel.Namespace);
+                Assert.Equal("Models.Main.Items.MainItem", classModel.FullName);
+
+                Assert.Equal(1, classModel.Methods.Count);
+                Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
+                Assert.False(classModel.Methods[0].IsConstructor);
+                var parameterModel = classModel.Methods[0].ParameterTypes[0];
+                Assert.Equal("int", parameterModel.Type);
+                Assert.Equal(parameterModifier, parameterModel.Modifier);
+                Assert.Null(parameterModel.DefaultValue);
+
+                Assert.Equal(1, classModel.Constructors.Count);
+                Assert.Equal(1, classModel.Constructors[0].ParameterTypes.Count);
+                Assert.True(classModel.Constructors[0].IsConstructor);
+                var parameterModelConstructor = classModel.Constructors[0].ParameterTypes[0];
+                Assert.Equal("int", parameterModelConstructor.Type);
+                Assert.Equal(parameterModifier, parameterModelConstructor.Modifier);
+                Assert.Null(parameterModelConstructor.DefaultValue);
+            }
+        }
+
+        [Fact]
+        public void Extract_ShouldSetParameters_WhenParsingTextWithOneClassWithExtensionMethod()
+        {
+            const string fileContent = @"        
+                                    namespace Models.Main.Items
+                                    {
+                                      public class MainItem
+                                      {
+                                            public void Method(this int a) {}
+                                      }
+                                    }
                                     ";
             var classModels = _sut.Extract(fileContent);
 
@@ -147,7 +187,7 @@ namespace HoneydewCoreTest.Extractors
                 Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
                 var parameterModel = classModel.Methods[0].ParameterTypes[0];
                 Assert.Equal("int", parameterModel.Type);
-                Assert.Equal(parameterModifier, parameterModel.Modifier);
+                Assert.Equal("this", parameterModel.Modifier);
                 Assert.Null(parameterModel.DefaultValue);
             }
         }
@@ -161,6 +201,8 @@ namespace HoneydewCoreTest.Extractors
                                       public class MainItem
                                       {{
                                             public void Method(params int[] a) {{}}
+
+                                            public MainItem(params int[] a) {{}}
                                       }}
                                     }}
                                     ";
@@ -172,12 +214,22 @@ namespace HoneydewCoreTest.Extractors
             {
                 Assert.Equal("Models.Main.Items", classModel.Namespace);
                 Assert.Equal("Models.Main.Items.MainItem", classModel.FullName);
+
                 Assert.Equal(1, classModel.Methods.Count);
                 Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
+                Assert.False(classModel.Methods[0].IsConstructor);
                 var parameterModel = classModel.Methods[0].ParameterTypes[0];
                 Assert.Equal("int[]", parameterModel.Type);
                 Assert.Equal("params", parameterModel.Modifier);
                 Assert.Null(parameterModel.DefaultValue);
+
+                Assert.Equal(1, classModel.Constructors.Count);
+                Assert.Equal(1, classModel.Constructors[0].ParameterTypes.Count);
+                Assert.True(classModel.Constructors[0].IsConstructor);
+                var parameterModelConstructor = classModel.Constructors[0].ParameterTypes[0];
+                Assert.Equal("int[]", parameterModelConstructor.Type);
+                Assert.Equal("params", parameterModelConstructor.Modifier);
+                Assert.Null(parameterModelConstructor.DefaultValue);
             }
         }
 
@@ -238,12 +290,12 @@ namespace HoneydewCoreTest.Extractors
                 Assert.Equal("int", method4Parameter1.Type);
                 Assert.Equal("in", method4Parameter1.Modifier);
                 Assert.Equal("15", method4Parameter1.DefaultValue);
-                
+
                 var method4Parameter2 = classModel.Methods[4].ParameterTypes[2];
                 Assert.Equal("string", method4Parameter2.Type);
                 Assert.Equal("", method4Parameter2.Modifier);
                 Assert.Equal("\"\"", method4Parameter2.DefaultValue);
-                
+
                 Assert.Equal(1, classModel.Methods[5].ParameterTypes.Count);
                 var method5Parameter = classModel.Methods[5].ParameterTypes[0];
                 Assert.Equal("string", method5Parameter.Type);

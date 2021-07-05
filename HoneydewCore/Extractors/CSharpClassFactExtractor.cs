@@ -63,6 +63,7 @@ namespace HoneydewCore.Extractors
                 var modifier = "";
                 CSharpConstants.SetModifiers(declarationSyntax.Modifiers.ToString(), ref accessModifier, ref modifier);
 
+                var methodInfoDataMetric = ExtractMethodInfo(declarationSyntax, semanticModel);
                 var projectClass = new ClassModel
                 {
                     ClassType = classType,
@@ -70,7 +71,8 @@ namespace HoneydewCore.Extractors
                     Modifier = modifier,
                     FullName = declaredSymbol.ToDisplayString(),
                     Fields = ExtractFieldsInfo(declarationSyntax, semanticModel),
-                    Methods = ExtractMethodInfo(declarationSyntax, semanticModel),
+                    Methods = methodInfoDataMetric.MethodInfos,
+                    Constructors = methodInfoDataMetric.ConstructorInfos,
                     BaseClassFullName = baseClassName,
                     BaseInterfaces = baseInterfaces
                 };
@@ -184,14 +186,14 @@ namespace HoneydewCore.Extractors
             return fieldsInfoMetric.FieldInfos;
         }
 
-        private static IList<MethodModel> ExtractMethodInfo(SyntaxNode declarationSyntax, SemanticModel semanticModel)
+        private static MethodInfoDataMetric ExtractMethodInfo(SyntaxNode declarationSyntax, SemanticModel semanticModel)
         {
             var fieldsInfoMetric = new MethodInfoMetric
             {
                 ExtractorSemanticModel = semanticModel
             };
             fieldsInfoMetric.Visit(declarationSyntax);
-            return fieldsInfoMetric.MethodInfos;
+            return fieldsInfoMetric.DataMetric;
         }
 
         private void ExtractBaseClassAndBaseInterfaces(SyntaxNode declarationSyntax,
