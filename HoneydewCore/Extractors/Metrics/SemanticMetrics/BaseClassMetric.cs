@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using HoneydewCore.Utils;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
@@ -20,30 +21,42 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
             return "Inherits Class";
         }
 
+        public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
+        {
+            var declaredSymbol = ExtractorSemanticModel.GetDeclaredSymbol(node);
+
+            if (declaredSymbol is not ITypeSymbol typeSymbol) return;
+            InheritanceMetric.BaseClassName = null;
+
+            foreach (var interfaceSymbol in typeSymbol.Interfaces)
+            {
+                InheritanceMetric.Interfaces.Add(interfaceSymbol.ToString());
+            }
+        }
+
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            var declaredSymbol = SemanticModel.GetDeclaredSymbol(node);
+            var declaredSymbol = ExtractorSemanticModel.GetDeclaredSymbol(node);
 
             if (declaredSymbol is not ITypeSymbol typeSymbol) return;
 
             if (typeSymbol.BaseType == null)
             {
-                InheritanceMetric.BaseClassName = "Object";
+                InheritanceMetric.BaseClassName = CSharpConstants.ObjectIdentifier;
                 return;
             }
 
-            InheritanceMetric.BaseClassName = typeSymbol.BaseType.Name;
+            InheritanceMetric.BaseClassName = typeSymbol.BaseType.ToString();
 
             if (typeSymbol.BaseType.Constructors.IsEmpty)
             {
                 InheritanceMetric.Interfaces.Add(typeSymbol.BaseType?.ToString());
-                InheritanceMetric.BaseClassName = "Object";
+                InheritanceMetric.BaseClassName = CSharpConstants.ObjectIdentifier;
             }
 
-
-            foreach (var i in typeSymbol.Interfaces)
+            foreach (var interfaceSymbol in typeSymbol.Interfaces)
             {
-                InheritanceMetric.Interfaces.Add(i.ToString());
+                InheritanceMetric.Interfaces.Add(interfaceSymbol.ToString());
             }
         }
     }

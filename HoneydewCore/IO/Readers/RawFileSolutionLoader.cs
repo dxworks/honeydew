@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json;
+using System.Threading.Tasks;
 using HoneydewCore.Models;
 
 namespace HoneydewCore.IO.Readers
@@ -13,7 +14,7 @@ namespace HoneydewCore.IO.Readers
             _fileReader = fileReader;
         }
 
-        public SolutionModel LoadSolution(string pathToFile)
+        public Task<SolutionModel> LoadSolution(string pathToFile)
         {
             var fileContent = _fileReader.ReadFile(pathToFile);
 
@@ -47,7 +48,7 @@ namespace HoneydewCore.IO.Readers
                     }
                 }
 
-                return solutionModel;
+                return Task.FromResult(solutionModel);
             }
             catch (Exception)
             {

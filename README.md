@@ -24,7 +24,7 @@ If `output_path` is not provided, the resulted model will be printed at the stan
 This Representation has all the information that Honeydew had extracted about the solution
 
 ```
-honeydew <path_to_solution> [output_file_path] -r normal
+.\Honeydew.exe <path_to_solution> [output_file_path] -r normal
 ```
 
 ### Class Relations Representation
@@ -32,7 +32,7 @@ honeydew <path_to_solution> [output_file_path] -r normal
 This Representation indicates the dependencies between all the classes of the solution
 
 ```
-honeydew <path_to_solution> [output_file_path] -r class_relations
+.\Honeydew.exe <path_to_solution> [output_file_path] -r class_relations
 ```
 
 ### Examples
@@ -40,27 +40,53 @@ honeydew <path_to_solution> [output_file_path] -r class_relations
 #### Normal Representation to a JSON File
 
 ```
-honeydew <path_to_solution> <output_file_path>
+.\Honeydew.exe <path_to_solution> <output_file_path>
 ```
 
 #### Class Relation Representation to a CSV File
 
 ```
-honeydew <path_to_solution> <output_file_path> -r class_relations -e csv
+.\Honeydew.exe <path_to_solution> <output_file_path> -r class_relations -e csv
 ```
 
 ## Build Project
 
-### Self-contained application
+### Self-contained application - Single-file app
+
+#### For Windows 64-bit
+
+```
+dotnet publish -r win-x64 --self-contained true -p:PublishSingleFile=true 
+```
+
+#### For Linux 64-bit
+
+```
+dotnet publish -r linux-x64 --self-contained true -p:PublishSingleFile=true 
+```
 
 #### For macOs 64-bit
 
 ```
-dotnet publish -r osx-x64
+dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true 
 ```
+
+### Self-contained application
 
 #### For Windows 64-bit
 
 ```
 dotnet publish -r win-x64
+```
+
+#### For Linux 64-bit
+
+```
+dotnet publish -r linux-x64
+```
+
+#### For macOs 64-bit
+
+```
+dotnet publish -r osx-x64
 ```

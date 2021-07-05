@@ -11,11 +11,10 @@ namespace HoneydewCoreTest.Processors
     public class SolutionModelToReferenceSolutionModelProcessorTests
     {
         private readonly SolutionModelToReferenceSolutionModelProcessor _sut;
-        private readonly Mock<IMissingClassModelsHandler> _missingClassReferenceMock = new();
 
         public SolutionModelToReferenceSolutionModelProcessorTests()
         {
-            _sut = new SolutionModelToReferenceSolutionModelProcessor(_missingClassReferenceMock.Object);
+            _sut = new SolutionModelToReferenceSolutionModelProcessor();
         }
 
         [Fact]
@@ -119,12 +118,21 @@ namespace HoneydewCoreTest.Processors
                                         new()
                                         {
                                             FullName = "Project1.Services.CreateService",
-                                            FilePath = "validPathToProject/Project1/Services/CreateService.cs",
+                                            FilePath = "validPathToProject/Project1/Services/CreateService.cs"
                                         },
                                         new()
                                         {
                                             FullName = "Project1.Services.RetrieveService",
                                             FilePath = "validPathToProject/Project1/Services/RetrieveService.cs",
+                                            Metrics = new List<ClassMetric>
+                                            {
+                                                new()
+                                                {
+                                                    Value = "0",
+                                                    ExtractorName = "SomeExtractor",
+                                                    ValueType = "int"
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -170,11 +178,16 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("Project1.Services.CreateService", referenceClassModel1.Name);
             Assert.Equal("validPathToProject/Project1/Services/CreateService.cs", referenceClassModel1.FilePath);
             Assert.Equal(referenceNamespaceModel1, referenceClassModel1.NamespaceReference);
+            Assert.Empty(referenceClassModel1.Metrics);
 
             var referenceClassModel2 = referenceNamespaceModel1.ClassModels[1];
             Assert.Equal("Project1.Services.RetrieveService", referenceClassModel2.Name);
             Assert.Equal("validPathToProject/Project1/Services/RetrieveService.cs", referenceClassModel2.FilePath);
             Assert.Equal(referenceNamespaceModel1, referenceClassModel2.NamespaceReference);
+            Assert.Equal(1, referenceClassModel2.Metrics.Count);
+            Assert.Equal("0", referenceClassModel2.Metrics[0].Value);
+            Assert.Equal("int", referenceClassModel2.Metrics[0].ValueType);
+            Assert.Equal("SomeExtractor", referenceClassModel2.Metrics[0].ExtractorName);
 
             var referenceNamespaceModel2 = projectModel1.Namespaces[1];
             Assert.Equal("Project1.Models", referenceNamespaceModel2.Name);
@@ -185,6 +198,7 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("Project1.Models.MyModel", referenceClassModel3.Name);
             Assert.Equal("validPathToProject/Project1/Models/MyModel.cs", referenceClassModel3.FilePath);
             Assert.Equal(referenceNamespaceModel2, referenceClassModel3.NamespaceReference);
+            Assert.Empty(referenceClassModel3.Metrics);
         }
 
         [Fact]
@@ -308,15 +322,17 @@ namespace HoneydewCoreTest.Processors
                 }
             };
 
-            _missingClassReferenceMock.Setup(handler => handler.GetAllReferences())
-                .Returns(new List<ReferenceClassModel>());
 
             var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
 
             var referenceSolutionModel = processable.Value;
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-            Assert.Empty(referenceSolutionModel.ClassModelsNotDeclaredInSolution);
+            
+            var allCreatedReferences = referenceSolutionModel.GetAllCreatedReferences();
+            Assert.Equal(1, allCreatedReferences.Count);
+            var objectClassModel = allCreatedReferences[0];
+            Assert.Equal("object", objectClassModel.Name);
 
             var projectModel1 = referenceSolutionModel.Projects[0];
 
@@ -448,57 +464,6 @@ namespace Project1.Services
         }
     }
 }";
-
-            var voidClassModel = new ReferenceClassModel
-            {
-                Name = "void"
-            };
-
-            var stringClassModel = new ReferenceClassModel
-            {
-                Name = "string",
-            };
-
-            var floatClassModel = new ReferenceClassModel
-            {
-                Name = "float",
-            };
-
-            var intToStringReferenceMethod = new ReferenceMethodModel()
-            {
-                Name = "ToString",
-                ReturnTypeReferenceClassModel = stringClassModel
-            };
-            var intClassModel = new ReferenceClassModel
-            {
-                Name = "int",
-                Methods =
-                {
-                    intToStringReferenceMethod
-                }
-            };
-            var intParseMethodReference = new ReferenceMethodModel
-            {
-                Name = "Parse",
-                ParameterTypes = {stringClassModel},
-                ReturnTypeReferenceClassModel = intClassModel
-            };
-            intClassModel.Methods.Add(intParseMethodReference);
-
-            _missingClassReferenceMock.Setup(handler => handler.GetAndAddReference("int")).Returns(intClassModel);
-            _missingClassReferenceMock.Setup(handler => handler.GetAndAddReference("string")).Returns(stringClassModel);
-            _missingClassReferenceMock.Setup(handler => handler.GetAndAddReference("float")).Returns(floatClassModel);
-            _missingClassReferenceMock.Setup(handler => handler.GetAndAddReference("void")).Returns(voidClassModel);
-
-            _missingClassReferenceMock.Setup(handler => handler.GetAllReferences())
-                .Returns(new List<ReferenceClassModel>
-                {
-                    intClassModel,
-                    stringClassModel,
-                    floatClassModel,
-                    voidClassModel
-                });
-
             var extractor = new CSharpClassFactExtractor();
             var classModels = extractor.Extract(fileContent);
 
@@ -529,11 +494,30 @@ namespace Project1.Services
             var referenceSolutionModel = processable.Value;
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-            Assert.Equal(4, referenceSolutionModel.ClassModelsNotDeclaredInSolution.Count);
-            Assert.Equal(intClassModel, referenceSolutionModel.ClassModelsNotDeclaredInSolution[0]);
-            Assert.Equal(stringClassModel, referenceSolutionModel.ClassModelsNotDeclaredInSolution[1]);
-            Assert.Equal(floatClassModel, referenceSolutionModel.ClassModelsNotDeclaredInSolution[2]);
-            Assert.Equal(voidClassModel, referenceSolutionModel.ClassModelsNotDeclaredInSolution[3]);
+            var allCreatedReferences = referenceSolutionModel.GetAllCreatedReferences();
+            Assert.Equal(5, allCreatedReferences.Count);
+
+            var objectClassModel = allCreatedReferences[0];
+            var intClassModel = allCreatedReferences[1];
+            var floatClassModel = allCreatedReferences[2];
+            var stringClassModel = allCreatedReferences[3];
+            var voidClassModel = allCreatedReferences[4];
+
+            Assert.Equal("int", intClassModel.Name);
+            Assert.Equal("object", objectClassModel.Name);
+            Assert.Equal("string", stringClassModel.Name);
+            Assert.Equal("float", floatClassModel.Name);
+            Assert.Equal("void", voidClassModel.Name);
+
+            var intParseMethodReference = intClassModel.Methods[0];
+            var intToStringReferenceMethod = intClassModel.Methods[1];
+
+            Assert.Equal("ToString", intToStringReferenceMethod.Name);
+            Assert.Empty(intToStringReferenceMethod.ParameterTypes);
+
+            Assert.Equal("Parse", intParseMethodReference.Name);
+            Assert.Equal(1, intParseMethodReference.ParameterTypes.Count);
+            Assert.Equal(stringClassModel, intParseMethodReference.ParameterTypes[0]);
 
             var projectModel1 = referenceSolutionModel.Projects[0];
 
@@ -687,23 +671,19 @@ namespace Project1.Services
                 }
             };
 
-            var intClassModel = new ReferenceClassModel
-            {
-                Name = "int"
-            };
-
-            _missingClassReferenceMock.Setup(handler => handler.GetAndAddReference("int"))
-                .Returns(intClassModel);
-            _missingClassReferenceMock.Setup(handler => handler.GetAllReferences())
-                .Returns(new List<ReferenceClassModel> {intClassModel});
-
             var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
 
             var referenceSolutionModel = processable.Value;
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-            Assert.Equal(1,referenceSolutionModel.ClassModelsNotDeclaredInSolution.Count);
-            Assert.Equal(intClassModel,referenceSolutionModel.ClassModelsNotDeclaredInSolution[0]);
+            var allCreatedReferences = referenceSolutionModel.GetAllCreatedReferences();
+            Assert.Equal(2, allCreatedReferences.Count);
+
+            var objectClassModel = allCreatedReferences[0];
+            var intClassModel = allCreatedReferences[1];
+
+            Assert.Equal("int", intClassModel.Name);
+            Assert.Equal("object", objectClassModel.Name);
 
             var projectModel1 = referenceSolutionModel.Projects[0];
 
@@ -735,7 +715,7 @@ namespace Project1.Services
             Assert.Equal(referenceNamespaceModels, referenceClassMyModel.NamespaceReference);
             Assert.Empty(referenceClassMyModel.Methods);
             Assert.Equal(2, referenceClassMyModel.Fields.Count);
-            
+
             var valueFieldModel = referenceClassMyModel.Fields[0];
             Assert.Equal("_value", valueFieldModel.Name);
             Assert.Equal(intClassModel, valueFieldModel.Type);
@@ -743,7 +723,7 @@ namespace Project1.Services
             Assert.Equal("readonly", valueFieldModel.Modifier);
             Assert.Equal("private", valueFieldModel.AccessModifier);
             Assert.False(valueFieldModel.IsEvent);
-            
+
             var valueEventFieldModel = referenceClassMyModel.Fields[1];
             Assert.Equal("ValueEvent", valueEventFieldModel.Name);
             Assert.Equal(intClassModel, valueEventFieldModel.Type);

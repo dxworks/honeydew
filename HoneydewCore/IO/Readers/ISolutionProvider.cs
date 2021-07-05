@@ -1,9 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 
 namespace HoneydewCore.IO.Readers
 {
     public interface ISolutionProvider
     {
-        Solution GetSolution(string path);
+        Task<Solution> GetSolution(string path);
     }
 }

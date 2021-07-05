@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using HoneydewCore.Extractors;
 using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.Models;
@@ -21,11 +22,11 @@ namespace HoneydewCore.IO.Readers
             this._solutionLoadingStrategy = solutionLoadingStrategy;
         }
 
-        public SolutionModel LoadSolution(string pathToFile)
+        public async Task<SolutionModel> LoadSolution(string pathToFile)
         {
-            var solution = _solutionProvider.GetSolution(pathToFile);
+            var solution = await _solutionProvider.GetSolution(pathToFile);
 
-            var solutionModel = _solutionLoadingStrategy.Load(solution, _extractors);
+            var solutionModel = await _solutionLoadingStrategy.Load(solution, _extractors);
 
             solutionModel = AddFullNameToDependencies(solutionModel);
 

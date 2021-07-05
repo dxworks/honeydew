@@ -47,26 +47,38 @@ namespace HoneydewCore.Models
             }
         }
 
-        public ClassModel GetClassModelByFullName(string classFullName)
+        public ClassModel GetClassModelByFullName(string className)
         {
-            var lastIndexOf = classFullName.LastIndexOf(".", StringComparison.Ordinal);
+            if (className == null)
+            {
+                return null;
+            }
+
+            var lastIndexOf = className.LastIndexOf(".", StringComparison.Ordinal);
 
 
             var classNamespace = "";
             if (lastIndexOf >= 0)
             {
-                classNamespace = classFullName[..lastIndexOf];
+                classNamespace = className[..lastIndexOf];
             }
 
             foreach (var project in Projects)
             {
                 if (project.Namespaces.TryGetValue(classNamespace, out var namespaceModel))
                 {
-                    return namespaceModel.ClassModels.FirstOrDefault(model => model.FullName == classFullName);
+                    return namespaceModel.ClassModels.FirstOrDefault(model => model.FullName == className);
                 }
             }
 
-            return default;
+            return GetEnumerable().FirstOrDefault(classModel => classModel.FullName.Contains(className));
+        }
+
+        public string GetClassFullName(string className)
+        {
+            var classModel = GetClassModelByFullName(className);
+
+            return classModel == default ? className : classModel.FullName;
         }
     }
 }

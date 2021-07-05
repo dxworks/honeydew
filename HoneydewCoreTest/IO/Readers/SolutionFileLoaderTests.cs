@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using HoneydewCore.Extractors;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.Strategies;
@@ -24,14 +25,14 @@ namespace HoneydewCoreTest.IO.Readers
         }
 
         [Fact]
-        public void LoadSolution_ShouldThrowProjectNotFoundException_WhenGivenAnInvalidPath()
+        public  void LoadSolution_ShouldThrowProjectNotFoundException_WhenGivenAnInvalidPath()
         {
             const string pathToSolution = "invalidPathToProject";
 
             _solutionProviderMock.Setup(provider => provider.GetSolution(pathToSolution))
                 .Throws<ProjectNotFoundException>();
 
-            Assert.Throws<ProjectNotFoundException>(() => _sut.LoadSolution(pathToSolution));
+            Assert.ThrowsAsync<ProjectNotFoundException>(() => _sut.LoadSolution(pathToSolution));
         }
 
         [Fact]
@@ -42,7 +43,7 @@ namespace HoneydewCoreTest.IO.Readers
             _solutionProviderMock.Setup(provider => provider.GetSolution(pathToSolution))
                 .Throws<ProjectWithErrorsException>();
 
-            Assert.Throws<ProjectWithErrorsException>(() => _sut.LoadSolution(pathToSolution));
+            Assert.ThrowsAsync<ProjectWithErrorsException>(() => _sut.LoadSolution(pathToSolution));
         }
 
         [Fact]
@@ -51,10 +52,10 @@ namespace HoneydewCoreTest.IO.Readers
             const string pathToSolution = "validPathToProject";
             var solutionModelMock = new Mock<SolutionModel>();
 
-            _solutionProviderMock.Setup(provider => provider.GetSolution(pathToSolution)).Returns(It.IsAny<Solution>());
+            _solutionProviderMock.Setup(provider => provider.GetSolution(pathToSolution)).Returns(It.IsAny<Task<Solution>>());
             _solutionLoadingStrategyMock
                 .Setup(strategy => strategy.Load(It.IsAny<Solution>(), new List<IFactExtractor>()))
-                .Returns(solutionModelMock.Object);
+                .ReturnsAsync(solutionModelMock.Object);
 
             var loadSolution = _sut.LoadSolution(pathToSolution);
 
@@ -62,7 +63,7 @@ namespace HoneydewCoreTest.IO.Readers
         }
 
         [Fact]
-        public void LoadSolution_ShouldReturnCorrectSolutionModelWithMethodReferences_WhenGivenAPathToSolution()
+        public async Task LoadSolution_ShouldReturnCorrectSolutionModelWithMethodReferences_WhenGivenAPathToSolution()
         {
             const string pathToSolution = "validPathToProject";
             var solutionModelMock = new SolutionModel
@@ -84,6 +85,8 @@ namespace HoneydewCoreTest.IO.Readers
                                         {
                                             FullName = "CreateService",
                                             FilePath = "validPathToProject/Project1/Services/CreateService.cs",
+                                            BaseClassFullName = "object",
+                                            BaseInterfaces = {"IService"},
                                             Methods = new List<MethodModel>
                                             {
                                                 new()
@@ -130,12 +133,12 @@ namespace HoneydewCoreTest.IO.Readers
                 }
             };
 
-            _solutionProviderMock.Setup(provider => provider.GetSolution(pathToSolution)).Returns(It.IsAny<Solution>());
+            _solutionProviderMock.Setup(provider => provider.GetSolution(pathToSolution)).ReturnsAsync(It.IsAny<Solution>());
             _solutionLoadingStrategyMock
                 .Setup(strategy => strategy.Load(It.IsAny<Solution>(), new List<IFactExtractor>()))
-                .Returns(solutionModelMock);
+                .ReturnsAsync(solutionModelMock);
 
-            var loadSolution = _sut.LoadSolution(pathToSolution);
+            var loadSolution = await _sut.LoadSolution(pathToSolution);
 
             Assert.NotNull(loadSolution);
             Assert.Equal(1, loadSolution.Projects.Count);
@@ -148,7 +151,10 @@ namespace HoneydewCoreTest.IO.Readers
 
             var classModel = namespaceModel.ClassModels[0];
             Assert.Equal("Project1.Services.CreateService", classModel.FullName);
-            Assert.Equal("Project1.Services", classModel.Namespace);
+            Assert.Equal("object", classModel.BaseClassFullName);
+            Assert.Equal("Project1.Services.CreateService", classModel.FullName);
+            Assert.Equal(1, classModel.BaseInterfaces.Count);
+            Assert.Equal("IService", classModel.BaseInterfaces[0]);
             Assert.Equal("validPathToProject/Project1/Services/CreateService.cs", classModel.FilePath);
             Assert.Empty(classModel.Fields);
             Assert.Empty(classModel.Metrics);

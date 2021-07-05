@@ -1,18 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.Models;
+using HoneydewCore.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
+namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 {
     public class MethodInfoMetric : CSharpMetricExtractor, ISemanticMetric
     {
         public IList<MethodModel> MethodInfos { get; } = new List<MethodModel>();
 
         private string _containingClassName = "";
-        private string _baseTypeName = "object";
+        private string _baseTypeName = CSharpConstants.ObjectIdentifier;
         private bool _isInterface;
 
         public override IMetric GetMetric()
@@ -48,8 +49,8 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
 
         private void AddInfoForNode(TypeDeclarationSyntax node)
         {
-            _containingClassName = SemanticModel.GetDeclaredSymbol(node)?.ToDisplayString();
-            _baseTypeName = SemanticModel.GetDeclaredSymbol(node)?.BaseType?.ToDisplayString();
+            _containingClassName = ExtractorSemanticModel.GetDeclaredSymbol(node)?.ToDisplayString();
+            _baseTypeName = ExtractorSemanticModel.GetDeclaredSymbol(node)?.BaseType?.ToDisplayString();
 
             foreach (var memberDeclarationSyntax in node.Members)
             {
@@ -64,10 +65,18 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
         {
             GetModifiersForNode(node, out var accessModifier, out var modifier);
 
+            var returnType = node.ReturnType.ToString();
+
+            var returnValueSymbol = ExtractorSemanticModel.GetDeclaredSymbol(node.ReturnType);
+            if (returnValueSymbol != null)
+            {
+                returnType = returnValueSymbol.ToString();
+            }
+
             var methodModel = new MethodModel
             {
                 Name = node.Identifier.ToString(),
-                ReturnType = node.ReturnType.ToString(),
+                ReturnType = returnType,
                 ContainingClassName = _containingClassName,
                 Modifier = modifier,
                 AccessModifier = accessModifier,
@@ -75,7 +84,15 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
 
             foreach (var parameter in node.ParameterList.Parameters)
             {
-                methodModel.ParameterTypes.Add(parameter.Type?.ToString());
+                var parameterSymbol = ExtractorSemanticModel.GetDeclaredSymbol(parameter);
+                if (parameterSymbol != null)
+                {
+                    methodModel.ParameterTypes.Add(parameterSymbol.ToString());
+                }
+                else if (parameter.Type != null)
+                {
+                    methodModel.ParameterTypes.Add(parameter.Type.ToString());
+                }
             }
 
             if (node.Body != null)
@@ -97,13 +114,15 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
                         {
                             var className = _containingClassName;
 
-                            if (memberAccessExpressionSyntax.Expression.ToFullString() == "base")
+                            if (memberAccessExpressionSyntax.Expression.ToFullString() ==
+                                CSharpConstants.BaseClassIdentifier)
                             {
                                 className = _baseTypeName;
                             }
                             else
                             {
-                                var symbolInfo = SemanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression);
+                                var symbolInfo =
+                                    ExtractorSemanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression);
                                 if (symbolInfo.Symbol is ILocalSymbol localSymbol)
                                 {
                                     className = localSymbol.Type.ToDisplayString();
@@ -133,7 +152,7 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
         {
             IList<string> parameterTypes = new List<string>();
 
-            var symbolInfo = SemanticModel.GetSymbolInfo(invocationExpressionSyntax);
+            var symbolInfo = ExtractorSemanticModel.GetSymbolInfo(invocationExpressionSyntax);
             if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
             {
                 foreach (var parameter in methodSymbol.Parameters)
@@ -148,30 +167,13 @@ namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
         private void GetModifiersForNode(MemberDeclarationSyntax node, out string accessModifier, out string modifier)
         {
             var allModifiers = node.Modifiers.ToString();
-            accessModifier = allModifiers;
-            modifier = "";
-            string[] modifiers = {"virtual", "static", "override", "abstract"};
-            foreach (var m in modifiers)
-            {
-                if (!allModifiers.Contains(m)) continue;
 
-                modifier = m;
-                accessModifier = allModifiers.Replace(m, "");
-                accessModifier = accessModifier.Trim();
-                break;
-            }
+            accessModifier = _isInterface
+                ? CSharpConstants.DefaultInterfaceMethodAccessModifier
+                : CSharpConstants.DefaultClassMethodAccessModifier;
+            modifier = _isInterface ? CSharpConstants.DefaultInterfaceMethodModifier : allModifiers;
 
-            if (string.IsNullOrEmpty(accessModifier))
-            {
-                accessModifier = _isInterface ? "public" : "private";
-                if (_isInterface)
-                {
-                    if (string.IsNullOrEmpty(modifier))
-                    {
-                        modifier = "abstract";
-                    }
-                }
-            }
+            CSharpConstants.SetModifiers(allModifiers, ref accessModifier, ref modifier);
         }
     }
 }

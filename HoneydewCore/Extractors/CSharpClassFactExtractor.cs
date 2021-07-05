@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using HoneydewCore.Extractors.Metrics;
-using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
+using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Models;
+using HoneydewCore.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -42,7 +44,7 @@ namespace HoneydewCore.Extractors
 
             var semanticModel = CreateSemanticModel(tree);
 
-            var syntaxes = GetClassAndInterfaceSyntaxes(root);
+            var syntaxes = root.DescendantNodes().OfType<BaseTypeDeclarationSyntax>().ToList();
 
             foreach (var declarationSyntax in syntaxes)
             {
@@ -52,16 +54,26 @@ namespace HoneydewCore.Extractors
                     continue;
                 }
 
-                var namespaceSymbol = declaredSymbol.ContainingNamespace;
-                var className = declaredSymbol.Name;
+                ExtractBaseClassAndBaseInterfaces(declarationSyntax, semanticModel, out var baseClassName,
+                    out var baseInterfaces);
+
+                var classType = declarationSyntax.Kind().ToString().Replace("Declaration", "").ToLower();
+
+                var accessModifier = CSharpConstants.DefaultClassAccessModifier;
+                var modifier = "";
+                CSharpConstants.SetModifiers(declarationSyntax.Modifiers.ToString(), ref accessModifier, ref modifier);
 
                 var projectClass = new ClassModel
                 {
-                    FullName = $"{namespaceSymbol}.{className}",
-                    Fields = ExtractFieldsInfo(declarationSyntax),
-                    Methods = ExtractMethodInfo(declarationSyntax, semanticModel)
+                    ClassType = classType,
+                    AccessModifier = accessModifier,
+                    Modifier = modifier,
+                    FullName = declaredSymbol.ToDisplayString(),
+                    Fields = ExtractFieldsInfo(declarationSyntax, semanticModel),
+                    Methods = ExtractMethodInfo(declarationSyntax, semanticModel),
+                    BaseClassFullName = baseClassName,
+                    BaseInterfaces = baseInterfaces
                 };
-
 
                 foreach (var extractorType in _metricExtractorsTypes)
                 {
@@ -73,7 +85,7 @@ namespace HoneydewCore.Extractors
 
                     if (extractor is ISemanticMetric)
                     {
-                        extractor.SemanticModel = semanticModel;
+                        extractor.ExtractorSemanticModel = semanticModel;
                     }
 
                     if (extractor is ICompilationUnitMetric)
@@ -90,7 +102,7 @@ namespace HoneydewCore.Extractors
                     {
                         ExtractorName = extractorType.FullName,
                         Value = metric.GetValue(),
-                        ValueType = metric.GetValueType()
+                        ValueType = metric.GetValueType(),
                     });
                 }
 
@@ -114,38 +126,36 @@ namespace HoneydewCore.Extractors
 
         private static SemanticModel CreateSemanticModel(SyntaxTree tree)
         {
-            var compilation = CSharpCompilation.Create("Compilation")
-                .AddReferences(MetadataReference.CreateFromFile(typeof(string).Assembly.Location))
-                .AddSyntaxTrees(tree);
+            var compilation = CSharpCompilation.Create("Compilation");
+
+            // try to add a reference to the System assembly
+            var systemReference = typeof(object).Assembly.Location;
+
+            // if 'systemReference' is empty means that the build is a single-file app and should look in the dlls to search for the System.dll 
+            if (string.IsNullOrEmpty(systemReference))
+            {
+                var value = (string) AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES");
+                if (value != null)
+                {
+                    var pathToDlls = value.Split(Path.PathSeparator);
+                    var pathToSystem = pathToDlls.FirstOrDefault(path => path.Contains("System.dll"));
+
+                    if (!string.IsNullOrEmpty(pathToSystem))
+                    {
+                        compilation = compilation.AddReferences(MetadataReference.CreateFromFile(pathToSystem));
+                    }
+                }
+            }
+            // if 'systemReference' is empty means that the System.dll Location is accessible with Reflection
+            else
+            {
+                compilation = compilation.AddReferences(MetadataReference.CreateFromFile(systemReference));
+            }
+
+            compilation = compilation.AddSyntaxTrees(tree);
+
             var semanticModel = compilation.GetSemanticModel(tree);
             return semanticModel;
-        }
-
-        private static IList<TypeDeclarationSyntax> GetClassAndInterfaceSyntaxes(CompilationUnitSyntax root)
-        {
-            var classDeclarationSyntaxes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
-            var interfaceDeclarationSyntaxes = root.DescendantNodes().OfType<InterfaceDeclarationSyntax>();
-            var recordDeclarationSyntaxes = root.DescendantNodes().OfType<RecordDeclarationSyntax>();
-            var structDeclarationSyntaxes = root.DescendantNodes().OfType<StructDeclarationSyntax>();
-
-            IList<TypeDeclarationSyntax> syntaxes = classDeclarationSyntaxes.Cast<TypeDeclarationSyntax>().ToList();
-
-            foreach (var syntax in interfaceDeclarationSyntaxes)
-            {
-                syntaxes.Add(syntax);
-            }
-
-            foreach (var syntax in recordDeclarationSyntaxes)
-            {
-                syntaxes.Add(syntax);
-            }
-
-            foreach (var syntax in structDeclarationSyntaxes)
-            {
-                syntaxes.Add(syntax);
-            }
-
-            return syntaxes;
         }
 
         private static CompilationUnitSyntax GetCompilationUnitSyntaxTree(SyntaxTree tree)
@@ -164,9 +174,12 @@ namespace HoneydewCore.Extractors
             return root;
         }
 
-        private static IList<FieldModel> ExtractFieldsInfo(SyntaxNode declarationSyntax)
+        private static IList<FieldModel> ExtractFieldsInfo(SyntaxNode declarationSyntax, SemanticModel semanticModel)
         {
-            var fieldsInfoMetric = new FieldsInfoMetric();
+            var fieldsInfoMetric = new FieldsInfoMetric
+            {
+                ExtractorSemanticModel = semanticModel
+            };
             fieldsInfoMetric.Visit(declarationSyntax);
             return fieldsInfoMetric.FieldInfos;
         }
@@ -175,10 +188,23 @@ namespace HoneydewCore.Extractors
         {
             var fieldsInfoMetric = new MethodInfoMetric
             {
-                SemanticModel = semanticModel
+                ExtractorSemanticModel = semanticModel
             };
             fieldsInfoMetric.Visit(declarationSyntax);
             return fieldsInfoMetric.MethodInfos;
+        }
+
+        private void ExtractBaseClassAndBaseInterfaces(SyntaxNode declarationSyntax,
+            SemanticModel semanticModel, out string baseClass, out IList<string> baseInterfaces)
+        {
+            var fieldsInfoMetric = new BaseClassMetric
+            {
+                ExtractorSemanticModel = semanticModel
+            };
+            fieldsInfoMetric.Visit(declarationSyntax);
+
+            baseClass = fieldsInfoMetric.InheritanceMetric.BaseClassName;
+            baseInterfaces = fieldsInfoMetric.InheritanceMetric.Interfaces;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using HoneydewCore.Extractors;
 using HoneydewCore.Models;
 using Microsoft.CodeAnalysis;
@@ -9,7 +10,7 @@ namespace HoneydewCore.IO.Readers.Strategies
 {
     public class BasicSolutionLoadingStrategy : ISolutionLoadingStrategy
     {
-        public SolutionModel Load(Solution solution, IList<IFactExtractor> extractors)
+        public async Task<SolutionModel> Load(Solution solution, IList<IFactExtractor> extractors)
         {
             SolutionModel solutionModel = new();
 
@@ -19,8 +20,8 @@ namespace HoneydewCore.IO.Readers.Strategies
 
                 foreach (var document in project.Documents)
                 {
-                    var syntaxTree = document.GetSyntaxTreeAsync().Result;
-
+                    var syntaxTree = await document.GetSyntaxTreeAsync();
+                    
                     try
                     {
                         var classModels = extractors.SelectMany(extractor => extractor.Extract(syntaxTree)).ToList();
@@ -31,9 +32,9 @@ namespace HoneydewCore.IO.Readers.Strategies
                             projectModel.Add(classModel);
                         }
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
-                        Console.WriteLine($"Could not extract from {document.FilePath}");
+                        Console.WriteLine($"Could not extract from {document.FilePath} because {e}");
                     }
                 }
 

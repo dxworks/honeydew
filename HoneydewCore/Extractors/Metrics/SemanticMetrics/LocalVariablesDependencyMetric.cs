@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using HoneydewCore.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -30,10 +31,10 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
             foreach (var variableDeclarationSyntax in body.DescendantNodes()
                 .OfType<VariableDeclarationSyntax>())
             {
-                var dependencySymbolInfo = SemanticModel.GetSymbolInfo(variableDeclarationSyntax.Type);
+                var dependencySymbolInfo = ExtractorSemanticModel.GetSymbolInfo(variableDeclarationSyntax.Type);
                 if (dependencySymbolInfo.Symbol == null)
                 {
-                    if (variableDeclarationSyntax.Type.ToString() == "var")
+                    if (variableDeclarationSyntax.Type.ToString() == CSharpConstants.VarIdentifier)
                     {
                         foreach (var declarationVariable in variableDeclarationSyntax.Variables)
                         {

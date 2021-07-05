@@ -60,16 +60,21 @@ namespace HoneydewCoreTest.Extractors
             Assert.Throws<ExtractionException>(() => _sut.Extract(fileContent));
         }
 
-        [Fact]
-        public void Extract_ShouldSetInterfaceNameAndNamespace_WhenParsingTextWithOneInterface()
+        [Theory]
+        [InlineData("class")]
+        [InlineData("interface")]
+        [InlineData("record")]
+        [InlineData("struct")]
+        [InlineData("enum")]
+        public void Extract_ShouldSetClassNameAndNamespace_WhenParsingTextWithOneEntity(string entityType)
         {
-            const string fileContent = @"        
-                                    namespace Services
-                                    {
-                                      public interface IService
-                                      {
-                                      }
-                                    }
+            var fileContent = $@"        
+                                    namespace Models.Main.Items
+                                    {{
+                                      public {entityType} MainItem
+                                      {{
+                                      }}
+                                    }}
                                     ";
             var classModels = _sut.Extract(fileContent);
 
@@ -77,23 +82,28 @@ namespace HoneydewCoreTest.Extractors
 
             foreach (var classModel in classModels)
             {
-                Assert.Equal(typeof(ClassModel), classModel.GetType());
-
-                Assert.Equal("Services", classModel.Namespace);
-                Assert.Equal("Services.IService", classModel.FullName);
+                Assert.Equal(entityType, classModel.ClassType);
+                Assert.Equal("Models.Main.Items", classModel.Namespace);
+                Assert.Equal("Models.Main.Items.MainItem", classModel.FullName);
             }
         }
 
-        [Fact]
-        public void Extract_ShouldSetClassNameAndNamespace_WhenParsingTextWithOneClass()
+        [Theory]
+        [InlineData("public", "static")]
+        [InlineData("private protected", "sealed")]
+        [InlineData("protected internal", "")]
+        [InlineData("private", "")]
+        [InlineData("protected", "abstract")]
+        [InlineData("internal", "new")]
+        public void Extract_ShouldSetClassModifiers_WhenParsingTextWithOneEntity(string accessModifier, string modifier)
         {
-            const string fileContent = @"        
+            var fileContent = $@"        
                                     namespace Models.Main.Items
-                                    {
-                                      public class MainItem
-                                      {
-                                      }
-                                    }
+                                    {{
+                                      {accessModifier} {modifier} class MainItem
+                                      {{
+                                      }}
+                                    }}
                                     ";
             var classModels = _sut.Extract(fileContent);
 
@@ -101,10 +111,10 @@ namespace HoneydewCoreTest.Extractors
 
             foreach (var classModel in classModels)
             {
-                Assert.Equal(typeof(ClassModel), classModel.GetType());
-
                 Assert.Equal("Models.Main.Items", classModel.Namespace);
                 Assert.Equal("Models.Main.Items.MainItem", classModel.FullName);
+                Assert.Equal(accessModifier, classModel.AccessModifier);
+                Assert.Equal(modifier, classModel.Modifier);
             }
         }
 
@@ -342,13 +352,13 @@ namespace HoneydewCoreTest.Extractors
             Assert.True(fieldInfos[1].IsEvent);
 
             Assert.Equal("MyAction1", fieldInfos[2].Name);
-            Assert.Equal("Action", fieldInfos[2].Type);
+            Assert.Equal("System.Action", fieldInfos[2].Type);
             Assert.Equal("", fieldInfos[2].Modifier);
             Assert.Equal(visibility, fieldInfos[2].AccessModifier);
             Assert.True(fieldInfos[2].IsEvent);
 
             Assert.Equal("MyAction2", fieldInfos[3].Name);
-            Assert.Equal("Action", fieldInfos[3].Type);
+            Assert.Equal("System.Action", fieldInfos[3].Type);
             Assert.Equal("", fieldInfos[3].Modifier);
             Assert.Equal(visibility, fieldInfos[3].AccessModifier);
             Assert.True(fieldInfos[3].IsEvent);

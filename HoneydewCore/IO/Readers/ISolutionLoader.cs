@@ -1,9 +1,10 @@
-﻿using HoneydewCore.Models;
+﻿using System.Threading.Tasks;
+using HoneydewCore.Models;
 
 namespace HoneydewCore.IO.Readers
 {
     public interface ISolutionLoader
     {
-        SolutionModel LoadSolution(string pathToFile);
+        Task<SolutionModel> LoadSolution(string pathToFile);
     }
 }
