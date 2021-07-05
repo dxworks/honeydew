@@ -34,7 +34,7 @@ jobs:
           mkdir -p honeydew/results
           cp README.md honeydew/README.md
           rm bin/*.pdb
-          cp -R bin honeydew
+          cp -R bin/* honeydew
 
       - name: Create Archive
         run: zip -r honeydew-${{ matrix.os }}.zip honeydew

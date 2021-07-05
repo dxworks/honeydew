@@ -11,10 +11,6 @@ jobs:
   release-voyager:
     name: Release Voyager
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        os: [win, linux, osx]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -35,7 +31,7 @@ jobs:
           mkdir -p honeydew/results
           cp README.md honeydew/README.md
           rm bin/**/*.pdb
-          cp -R bin honeydew
+          cp -R bin/* honeydew
           ls -R -al honeydew
 
       - name: Create Archive
