@@ -23,17 +23,17 @@ jobs:
 
       - name: Release for Windows
         run: |
-          mkdir bin/windows
+          mkdir -p bin/windows
           dotnet publish -r win-x64 --self-contained true -p:PublishSingleFile=true -o bin/windows -c Release Honeydew/Honeydew.csproj
 
       - name: Release for Linux
         run: |
-          mkdir bin/linux
+          mkdir -p bin/linux
           dotnet publish -r linux-x64 --self-contained true -p:PublishSingleFile=true -o bin/linux -c Release Honeydew/Honeydew.csproj
 
       - name: Release for Mac
         run: |
-          mkdir bin/mac
+          mkdir -p bin/mac
           dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin/mac -c Release Honeydew/Honeydew.csproj
 
       - name: Print All assets
