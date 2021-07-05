@@ -74,6 +74,11 @@ namespace HoneydewCore.IO.Writers.JSON
                         entities.AddRange(classModel.Methods.Select(methodModel =>
                             AddMethodSerializedInfo(methodModel, JsonReferenceSolutionModelsConstants.MethodIdentifier,
                                 classId)));
+
+                        entities.AddRange(classModel.Constructors.Select(constructorModel =>
+                            AddMethodSerializedInfo(constructorModel,
+                                JsonReferenceSolutionModelsConstants.ConstructorIdentifier,
+                                classId)));
                     }
                 }
             }
@@ -195,6 +200,16 @@ namespace HoneydewCore.IO.Writers.JSON
                 }
             }
 
+            stringBuilder.Append(@"],""Constructors"":[");
+            for (var index = 0; index < model.Constructors.Count; index++)
+            {
+                stringBuilder.Append(SerializeMethod(model.Constructors[index]));
+                if (index != model.Constructors.Count - 1)
+                {
+                    stringBuilder.Append(',');
+                }
+            }
+
             stringBuilder.Append(@"],""Methods"":[");
             for (var index = 0; index < model.Methods.Count; index++)
             {
@@ -242,12 +257,20 @@ namespace HoneydewCore.IO.Writers.JSON
             var stringBuilder = new StringBuilder();
 
             var containingClassId = _serializedEntities[model.ContainingClass];
-            var returnTypeId = _serializedEntities[model.ReturnTypeReferenceClassModel];
+
+            var returnTypeValue = "null";
+            if (!model.IsConstructor)
+            {
+                var returnTypeId = _serializedEntities[model.ReturnTypeReferenceClassModel];
+                returnTypeValue = returnTypeId.ToString();
+            }
+            
+            var isConstructor = model.IsConstructor ? "true" : "false";
 
             stringBuilder.Append(
-                $@"{{""Name"":""{ScrambleMethodName(model)}"",""ContainingClass"":{containingClassId}");
+                $@"{{""Name"":""{ScrambleMethodName(model)}"",""IsConstructor"":{isConstructor},""ContainingClass"":{containingClassId}");
             stringBuilder.Append($@",""Modifier"":""{model.Modifier}"",""AccessModifier"":""{model.AccessModifier}""");
-            stringBuilder.Append($@",""ReturnTypeReferenceClassModel"":{returnTypeId}");
+            stringBuilder.Append($@",""ReturnTypeReferenceClassModel"":{returnTypeValue}");
 
             stringBuilder.Append(@",""ParameterTypes"":[");
             for (var index = 0; index < model.ParameterTypes.Count; index++)

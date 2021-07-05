@@ -107,24 +107,10 @@ namespace HoneydewCore.Processors
                 if (referenceEntity == null) continue;
                 var referenceClassModel = (ReferenceClassModel) referenceEntity;
 
-                foreach (var methodModel in classModel.Methods)
-                {
-                    IList<ReferenceParameterModel> referenceClassModels =
-                        ExtractParameterModels(referenceSolutionModel, methodModel.ParameterTypes);
+                PopulateWithMethodModels(classModel.Methods, referenceClassModel, referenceClassModel.Methods);
 
-                    var referenceMethodModel = new ReferenceMethodModel
-                    {
-                        Modifier = methodModel.Modifier,
-                        Name = methodModel.Name,
-                        AccessModifier = methodModel.AccessModifier,
-                        ContainingClass = referenceClassModel,
-                        ReturnTypeReferenceClassModel =
-                            GetClassReferenceByName(referenceSolutionModel, methodModel.ReturnType),
-                        ParameterTypes = referenceClassModels
-                    };
-
-                    referenceClassModel.Methods.Add(referenceMethodModel);
-                }
+                PopulateWithMethodModels(classModel.Constructors, referenceClassModel,
+                    referenceClassModel.Constructors);
 
                 foreach (var fieldModel in classModel.Fields)
                 {
@@ -137,6 +123,30 @@ namespace HoneydewCore.Processors
                         ContainingClass = referenceClassModel,
                         Type = GetClassReferenceByName(referenceSolutionModel, fieldModel.Type)
                     });
+                }
+            }
+
+            void PopulateWithMethodModels(IEnumerable<MethodModel> methodModels,
+                ReferenceClassModel referenceClassModel, ICollection<ReferenceMethodModel> outputList)
+            {
+                foreach (var constructorModel in methodModels)
+                {
+                    IList<ReferenceParameterModel> referenceClassModels =
+                        ExtractParameterModels(referenceSolutionModel, constructorModel.ParameterTypes);
+
+                    var referenceMethodModel = new ReferenceMethodModel
+                    {
+                        Modifier = constructorModel.Modifier,
+                        Name = constructorModel.Name,
+                        IsConstructor = constructorModel.IsConstructor,
+                        AccessModifier = constructorModel.AccessModifier,
+                        ContainingClass = referenceClassModel,
+                        ReturnTypeReferenceClassModel =
+                            GetClassReferenceByName(referenceSolutionModel, constructorModel.ReturnType),
+                        ParameterTypes = referenceClassModels
+                    };
+
+                    outputList.Add(referenceMethodModel);
                 }
             }
         }

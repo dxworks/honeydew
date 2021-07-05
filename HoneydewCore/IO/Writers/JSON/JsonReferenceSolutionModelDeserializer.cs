@@ -144,6 +144,12 @@ namespace HoneydewCore.IO.Writers.JSON
                 DeserializeFieldModel(classModel, fieldElement);
             }
 
+            var constructorsArray = classElement.GetProperty("Constructors");
+            foreach (var methodElement in constructorsArray.EnumerateArray())
+            {
+                DeserializeConstructorModel(classModel, methodElement);
+            }
+            
             var methodsArray = classElement.GetProperty("Methods");
             foreach (var methodElement in methodsArray.EnumerateArray())
             {
@@ -189,10 +195,28 @@ namespace HoneydewCore.IO.Writers.JSON
         {
             var methodName = methodElement.GetProperty("Name").GetString();
             var methodModel = classModel.Methods.First(model => model.Name == methodName);
+            DeserializeMethodInfo(methodElement, methodModel);
+        }
+        
+        private void DeserializeConstructorModel(ReferenceClassModel classModel, JsonElement methodElement)
+        {
+            var methodName = methodElement.GetProperty("Name").GetString();
+            var methodModel = classModel.Constructors.First(model => model.Name == methodName);
+            DeserializeMethodInfo(methodElement, methodModel);
+        }
+
+        private void DeserializeMethodInfo(JsonElement methodElement, ReferenceMethodModel methodModel)
+        {
             methodModel.AccessModifier = methodElement.GetProperty("AccessModifier").GetString();
             methodModel.Modifier = methodElement.GetProperty("Modifier").GetString();
-            var returnTypeId = methodElement.GetProperty("ReturnTypeReferenceClassModel").GetInt32();
-            methodModel.ReturnTypeReferenceClassModel = (ReferenceClassModel) _deserializedEntities[returnTypeId];
+            methodModel.IsConstructor = methodElement.GetProperty("IsConstructor").GetBoolean();
+            
+            var returnTypeText = methodElement.GetProperty("ReturnTypeReferenceClassModel").GetRawText();
+            if (returnTypeText != "null")
+            {
+                var returnTypeId = methodElement.GetProperty("ReturnTypeReferenceClassModel").GetInt32();
+                methodModel.ReturnTypeReferenceClassModel = (ReferenceClassModel) _deserializedEntities[returnTypeId];
+            }
 
             var parameterTypesArray = methodElement.GetProperty("ParameterTypes");
             foreach (var parameterElement in parameterTypesArray.EnumerateArray())
@@ -293,6 +317,22 @@ namespace HoneydewCore.IO.Writers.JSON
                             };
                             _deserializedEntities.Add(entitySerializedInfo.Id, referenceMethodModel);
                             referenceClassModel.Methods.Add(referenceMethodModel);
+                            _referenceMethodModels.Add(referenceMethodModel);
+                        }
+                            break;
+                        
+                        case JsonReferenceSolutionModelsConstants.ConstructorIdentifier:
+                        {
+                            var referenceClassModel =
+                                (ReferenceClassModel) _deserializedEntities[(int) entitySerializedInfo.Container!];
+
+                            var referenceMethodModel = new ReferenceMethodModel
+                            {
+                                Name = entitySerializedInfo.Name,
+                                ContainingClass = referenceClassModel
+                            };
+                            _deserializedEntities.Add(entitySerializedInfo.Id, referenceMethodModel);
+                            referenceClassModel.Constructors.Add(referenceMethodModel);
                             _referenceMethodModels.Add(referenceMethodModel);
                         }
                             break;

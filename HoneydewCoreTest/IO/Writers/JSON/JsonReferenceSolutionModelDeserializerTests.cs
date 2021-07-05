@@ -61,78 +61,90 @@ namespace HoneydewCoreTest.IO.Writers.JSON
         },
         {
             ""Id"":5,
+            ""Name"":""MyModel"",
+            ""Type"":""constructor"",
+            ""Container"":2
+        },
+        {
+            ""Id"":6,
+            ""Name"":""MyModel_int"",
+            ""Type"":""constructor"",
+            ""Container"":2
+        },
+        {
+            ""Id"":7,
             ""Name"":""Project1.Models.MyChildModel"",
             ""Type"":""class"",
             ""Container"":1
         },
         {
-            ""Id"":6,
+            ""Id"":8,
             ""Name"":""Project1.Models.MyRecord"",
             ""Type"":""class"",
             ""Container"":1
         },
         {
-            ""Id"":7,
+            ""Id"":9,
             ""Name"":""Project1.Services"",
             ""Type"":""namespace"",
             ""Container"":0
         },
         {
-            ""Id"":8,
+            ""Id"":10,
             ""Name"":""Project1.Services.IService1"",
             ""Type"":""class"",
-            ""Container"":7
-        },
-        {
-            ""Id"":9,
-            ""Name"":""Project1.Services.IService"",
-            ""Type"":""class"",
-            ""Container"":7
-        },
-        {
-            ""Id"":10,
-            ""Name"":""Get"",
-            ""Type"":""method"",
             ""Container"":9
         },
         {
             ""Id"":11,
-            ""Name"":""Set_int_int"",
-            ""Type"":""method"",
+            ""Name"":""Project1.Services.IService"",
+            ""Type"":""class"",
             ""Container"":9
         },
         {
             ""Id"":12,
-            ""Name"":""Project1.Services.MyService"",
-            ""Type"":""class"",
-            ""Container"":7
+            ""Name"":""Get"",
+            ""Type"":""method"",
+            ""Container"":11
         },
         {
             ""Id"":13,
-            ""Name"":""Get"",
+            ""Name"":""Set_int_int"",
             ""Type"":""method"",
-            ""Container"":12
+            ""Container"":11
         },
         {
             ""Id"":14,
+            ""Name"":""Project1.Services.MyService"",
+            ""Type"":""class"",
+            ""Container"":9
+        },
+        {
+            ""Id"":15,
+            ""Name"":""Get"",
+            ""Type"":""method"",
+            ""Container"":14
+        },
+        {
+            ""Id"":16,
             ""Name"":""Set_int_int"",
             ""Type"":""method"",
-            ""Container"":12
+            ""Container"":14
         },
         {   
-            ""Id"":15,
+            ""Id"":17,
             ""Name"":""Project2"",
             ""Type"":""project"",
             ""Container"":null  
         }, 
         {
-            ""Id"":16,
+            ""Id"":18,
             ""Name"":""object"",
             ""Type"":""other-class"",
             ""Container"":null
         },
         {
-            ""Id"":17,
+            ""Id"":19,
             ""Name"":""int"",
             ""Type"":""other-class"",
             ""Container"":null
@@ -154,23 +166,51 @@ namespace HoneydewCoreTest.IO.Writers.JSON
                         ""AccessModifier"":""public"",
                         ""Modifier"":"""",        
                         ""NamespaceReference"":1,
-                        ""BaseClass"":16,
+                        ""BaseClass"":18,
                         ""BaseInterfaces"":[],
                         ""Fields"":[{
                             ""Name"":""Value"",
                             ""ContainingClass"":2,
-                            ""Type"":17,
+                            ""Type"":19,
                             ""Modifier"":"""",
                             ""AccessModifier"":""public"",
                             ""IsEvent"":false
-                        },{
+                         },
+                         {
                             ""Name"":""Value2"",
                             ""ContainingClass"":2,
-                            ""Type"":17,
+                            ""Type"":19,
                             ""Modifier"":"""",
                             ""AccessModifier"":""public"",
                             ""IsEvent"":false
                         }],
+                        ""Constructors"":[
+                        {
+                            ""Name"":""MyModel"",
+                            ""IsConstructor"":true,
+                            ""ContainingClass"":2,
+                            ""Modifier"":"""",
+                            ""AccessModifier"":""public"",
+                            ""ReturnTypeReferenceClassModel"":null,
+                            ""ParameterTypes"":[],
+                            ""CalledMethods"":[]
+                        },
+                        {
+                         ""Name"":""MyModel_int"",
+                        ""IsConstructor"":true,
+                         ""ContainingClass"":2,
+                         ""Modifier"":"""",
+                         ""AccessModifier"":""public"",
+                         ""ReturnTypeReferenceClassModel"":null,
+                         ""ParameterTypes"":[ 
+                            {
+                                ""Type"":19,
+                                ""Modifier"":"""",
+                                ""DefaultValue"":null
+                            }],
+                         ""CalledMethods"":[]
+                        }
+                        ],
                         ""Methods"":[],
                         ""Metrics"":[
                          {
@@ -195,6 +235,7 @@ namespace HoneydewCoreTest.IO.Writers.JSON
                         ""BaseClass"":2,
                         ""BaseInterfaces"":[],
                         ""Fields"":[],
+                        ""Constructors"":[],
                         ""Methods"":[],
                         ""Metrics"":[]                    
                     },
@@ -208,6 +249,7 @@ namespace HoneydewCoreTest.IO.Writers.JSON
                         ""BaseClass"":null,
                         ""BaseInterfaces"":[],
                         ""Fields"":[],
+                        ""Constructors"":[],
                         ""Methods"":[],
                         ""Metrics"":[]                    
                     }
@@ -223,10 +265,11 @@ namespace HoneydewCoreTest.IO.Writers.JSON
                         ""FilePath"":"""",        
                         ""AccessModifier"":""public"",
                         ""Modifier"":"""",        
-                        ""NamespaceReference"":7,
+                        ""NamespaceReference"":9,
                         ""BaseClass"":null,
                         ""BaseInterfaces"":[],
                         ""Fields"":[],
+                        ""Constructors"":[],
                         ""Methods"":[],
                         ""Metrics"":[]                    
                     },
@@ -236,13 +279,15 @@ namespace HoneydewCoreTest.IO.Writers.JSON
                         ""FilePath"":"""",        
                         ""AccessModifier"":""public"",
                         ""Modifier"":"""",        
-                        ""NamespaceReference"":7,
+                        ""NamespaceReference"":9,
                         ""BaseClass"":null,
                         ""BaseInterfaces"":[],
                         ""Fields"":[],
+                        ""Constructors"":[],
                         ""Methods"":[{
                             ""Name"":""Get"",
-                            ""ContainingClass"":9,
+                            ""IsConstructor"":false,
+                            ""ContainingClass"":11,
                             ""Modifier"":""abstract"",
                             ""AccessModifier"":""public"",
                             ""ReturnTypeReferenceClassModel"":2,
@@ -251,18 +296,19 @@ namespace HoneydewCoreTest.IO.Writers.JSON
                         },
                         {
                          ""Name"":""Set_int_int"",
-                         ""ContainingClass"":9,
+                         ""IsConstructor"":false,
+                         ""ContainingClass"":11,
                          ""Modifier"":""abstract"",
                          ""AccessModifier"":""public"",
                          ""ReturnTypeReferenceClassModel"":2,
                          ""ParameterTypes"":[ 
                             {
-                                ""Type"":17,
+                                ""Type"":19,
                                 ""Modifier"":"""",
                                 ""DefaultValue"":null
                             },
                             {
-                                ""Type"":17,
+                                ""Type"":19,
                                 ""Modifier"":"""",
                                 ""DefaultValue"":""2""
                             }],
@@ -276,33 +322,36 @@ namespace HoneydewCoreTest.IO.Writers.JSON
                         ""FilePath"":"""",        
                         ""AccessModifier"":""public"",
                         ""Modifier"":"""",        
-                        ""NamespaceReference"":7,
-                        ""BaseClass"":16,
-                        ""BaseInterfaces"":[8,9],
+                        ""NamespaceReference"":9,
+                        ""BaseClass"":18,
+                        ""BaseInterfaces"":[10,11],
                         ""Fields"":[],
+                        ""Constructors"":[],
                         ""Methods"":[{
                             ""Name"":""Get"",
-                            ""ContainingClass"":12,
+                            ""IsConstructor"":false,
+                            ""ContainingClass"":14,
                             ""Modifier"":"""",
                             ""AccessModifier"":""public"",
                             ""ReturnTypeReferenceClassModel"":2,
                             ""ParameterTypes"":[],
-                            ""CalledMethods"":[14,14]
+                            ""CalledMethods"":[16,16]
                         },
                         {
                          ""Name"":""Set_int_int"",
-                         ""ContainingClass"":12,
+                         ""IsConstructor"":false,
+                         ""ContainingClass"":14,
                          ""Modifier"":"""",
                          ""AccessModifier"":""public"",
                          ""ReturnTypeReferenceClassModel"":2,
                          ""ParameterTypes"":[
                             {
-                                ""Type"":17,
+                                ""Type"":19,
                                 ""Modifier"":"""",
                                 ""DefaultValue"":null
                             },
                             {
-                                ""Type"":17,
+                                ""Type"":19,
                                 ""Modifier"":"""",
                                 ""DefaultValue"":""2""
                             }],
@@ -371,6 +420,31 @@ namespace HoneydewCoreTest.IO.Writers.JSON
             Assert.Equal(intType, myModelReference.Fields[1].Type);
             Assert.False(myModelReference.Fields[1].IsEvent);
 
+            Assert.Equal(2, myModelReference.Constructors.Count);
+
+            var noArgMyModelConstructor = myModelReference.Constructors[0];
+            Assert.Equal("MyModel", noArgMyModelConstructor.Name);
+            Assert.Equal(myModelReference, noArgMyModelConstructor.ContainingClass);
+            Assert.Equal("", noArgMyModelConstructor.Modifier);
+            Assert.Equal("public", noArgMyModelConstructor.AccessModifier);
+            Assert.True(noArgMyModelConstructor.IsConstructor);
+            Assert.Empty(noArgMyModelConstructor.CalledMethods);
+            Assert.Empty(noArgMyModelConstructor.ParameterTypes);
+            Assert.Null(noArgMyModelConstructor.ReturnTypeReferenceClassModel);
+
+            var intArgMyModelConstructor = myModelReference.Constructors[1];
+            Assert.Equal("MyModel", intArgMyModelConstructor.Name);
+            Assert.Equal(myModelReference, intArgMyModelConstructor.ContainingClass);
+            Assert.Equal("", intArgMyModelConstructor.Modifier);
+            Assert.Equal("public", intArgMyModelConstructor.AccessModifier);
+            Assert.True(intArgMyModelConstructor.IsConstructor);
+            Assert.Empty(intArgMyModelConstructor.CalledMethods);
+            Assert.Equal(1, intArgMyModelConstructor.ParameterTypes.Count);
+            Assert.Equal(intType, intArgMyModelConstructor.ParameterTypes[0].Type);
+            Assert.Equal("", intArgMyModelConstructor.ParameterTypes[0].Modifier);
+            Assert.Null(intArgMyModelConstructor.ParameterTypes[0].DefaultValue);
+            Assert.Null(intArgMyModelConstructor.ReturnTypeReferenceClassModel);
+
             Assert.Equal(2, myModelReference.Metrics.Count);
 
             Assert.Equal("SomeExtractor", myModelReference.Metrics[0].ExtractorName);
@@ -391,6 +465,7 @@ namespace HoneydewCoreTest.IO.Writers.JSON
             Assert.Equal("public", myChildModelReference.AccessModifier);
             Assert.Equal("class", myChildModelReference.ClassType);
             Assert.Equal("", myChildModelReference.FilePath);
+            Assert.Empty(myChildModelReference.Constructors);
             Assert.Empty(myChildModelReference.Methods);
             Assert.Empty(myChildModelReference.Fields);
             Assert.Empty(myChildModelReference.Metrics);
@@ -405,6 +480,7 @@ namespace HoneydewCoreTest.IO.Writers.JSON
             Assert.Equal("public", myRecordReference.AccessModifier);
             Assert.Equal("record", myRecordReference.ClassType);
             Assert.Equal("", myRecordReference.FilePath);
+            Assert.Empty(myRecordReference.Constructors);
             Assert.Empty(myRecordReference.Methods);
             Assert.Empty(myRecordReference.Fields);
             Assert.Empty(myRecordReference.Metrics);
@@ -424,6 +500,7 @@ namespace HoneydewCoreTest.IO.Writers.JSON
             Assert.Equal("public", iService1Reference.AccessModifier);
             Assert.Equal("interface", iService1Reference.ClassType);
             Assert.Equal("", iService1Reference.FilePath);
+            Assert.Empty(iService1Reference.Constructors);
             Assert.Empty(iService1Reference.Methods);
             Assert.Empty(iService1Reference.Fields);
             Assert.Empty(iService1Reference.Metrics);
@@ -440,9 +517,11 @@ namespace HoneydewCoreTest.IO.Writers.JSON
             Assert.Equal("", iServiceReference.FilePath);
             Assert.Empty(iServiceReference.Fields);
             Assert.Empty(iServiceReference.Metrics);
+            Assert.Empty(iServiceReference.Constructors);
             Assert.Equal(2, iServiceReference.Methods.Count);
 
             var getMethodInterface = iServiceReference.Methods[0];
+            Assert.False(getMethodInterface.IsConstructor);
             Assert.Equal("Get", getMethodInterface.Name);
             Assert.Equal(iServiceReference, getMethodInterface.ContainingClass);
             Assert.Equal("abstract", getMethodInterface.Modifier);
@@ -452,6 +531,7 @@ namespace HoneydewCoreTest.IO.Writers.JSON
             Assert.Empty(getMethodInterface.CalledMethods);
 
             var setMethodInterface = iServiceReference.Methods[1];
+            Assert.False(setMethodInterface.IsConstructor);
             Assert.Equal("Set", setMethodInterface.Name);
             Assert.Equal(iServiceReference, setMethodInterface.ContainingClass);
             Assert.Equal("abstract", setMethodInterface.Modifier);
@@ -478,10 +558,12 @@ namespace HoneydewCoreTest.IO.Writers.JSON
             Assert.Equal("class", myServiceReference.ClassType);
             Assert.Equal("", myServiceReference.FilePath);
             Assert.Empty(myServiceReference.Fields);
+            Assert.Empty(myServiceReference.Constructors);
             Assert.Empty(myServiceReference.Metrics);
             Assert.Equal(2, myServiceReference.Methods.Count);
 
             var setMethodClass = myServiceReference.Methods[1];
+            Assert.False(setMethodClass.IsConstructor);
             Assert.Equal("Set", setMethodClass.Name);
             Assert.Equal(myServiceReference, setMethodClass.ContainingClass);
             Assert.Equal("", setMethodClass.Modifier);
@@ -497,6 +579,7 @@ namespace HoneydewCoreTest.IO.Writers.JSON
             Assert.Equal("2", setMethodClass.ParameterTypes[1].DefaultValue);
 
             var getMethodClass = myServiceReference.Methods[0];
+            Assert.False(getMethodClass.IsConstructor);
             Assert.Equal("Get", getMethodClass.Name);
             Assert.Equal(myServiceReference, getMethodClass.ContainingClass);
             Assert.Equal("", getMethodClass.Modifier);

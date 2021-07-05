@@ -6,6 +6,8 @@ namespace HoneydewCore.Models.Representations.ReferenceModel
     {
         public ReferenceClassModel ContainingClass { get; init; }
 
+        public bool IsConstructor { get; set; }
+        
         public string Modifier { get; set; } = "";
 
         public string AccessModifier { get; set; }

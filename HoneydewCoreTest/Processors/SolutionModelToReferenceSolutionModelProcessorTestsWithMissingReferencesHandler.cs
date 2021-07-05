@@ -545,6 +545,8 @@ namespace HoneydewCoreTest.Processors
              public class BaseClass
              {
                  public int X;
+
+                 public BaseClass() {}
              }
 
              public class ChildClass1 : BaseClass
@@ -653,6 +655,15 @@ namespace HoneydewCoreTest.Processors
 
             Assert.Equal("Project1.MyNamespace.BaseClass", baseClass.Name);
             Assert.Equal(referenceNamespaceServices, baseClass.NamespaceReference);
+            Assert.Equal(1, baseClass.Constructors.Count);
+            Assert.Equal("BaseClass", baseClass.Constructors[0].Name);
+            Assert.Equal("", baseClass.Constructors[0].Modifier);
+            Assert.Equal("public", baseClass.Constructors[0].AccessModifier);
+            Assert.Empty(baseClass.Constructors[0].CalledMethods);
+            Assert.Equal(baseClass, baseClass.Constructors[0].ContainingClass);
+            Assert.True(baseClass.Constructors[0].IsConstructor);
+            Assert.Empty(baseClass.Constructors[0].ParameterTypes);
+            Assert.Null(baseClass.Constructors[0].ReturnTypeReferenceClassModel);
             Assert.Empty(baseClass.Methods);
             Assert.Empty(baseClass.Metrics);
             Assert.Equal(1, baseClass.Fields.Count);
@@ -727,6 +738,7 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("", callMethod0.ParameterTypes[0].Modifier);
             Assert.Null(callMethod0.ParameterTypes[0].DefaultValue);
             Assert.Empty(callMethod0.CalledMethods);
+            Assert.False(callMethod0.IsConstructor);
 
 
             var callMethod1 = callerClass.Methods[1];
@@ -737,6 +749,7 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal(voidClassModel, callMethod1.ReturnTypeReferenceClassModel);
             Assert.Empty(callMethod1.ParameterTypes);
             Assert.Equal(6, callMethod1.CalledMethods.Count);
+            Assert.False(callMethod1.IsConstructor);
 
             foreach (var calledMethod in callMethod1.CalledMethods)
             {
