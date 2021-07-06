@@ -17,10 +17,7 @@ namespace HoneydewCore.Processors
                     {
                         foreach (var classModel in namespaceModel.ClassModels)
                         {
-                            if (!classModel.FullName.Contains("."))
-                            {
-                                classModel.FullName = $"{namespaceName}.{classModel.FullName}";
-                            }
+                            classModel.FullName = solutionModel.GetClassFullName(namespaceName, classModel.FullName);
                         }
                     }
                 }
@@ -28,24 +25,41 @@ namespace HoneydewCore.Processors
                 foreach (var classModel in solutionModel.GetEnumerable())
                 {
                     classModel.BaseClassFullName =
-                        solutionModel.GetClassFullName(classModel.BaseClassFullName);
+                        solutionModel.GetClassFullName(classModel.Namespace, classModel.BaseClassFullName);
                     for (var i = 0; i < classModel.BaseInterfaces.Count; i++)
                     {
                         classModel.BaseInterfaces[i] =
-                            solutionModel.GetClassFullName(classModel.BaseInterfaces[i]);
+                            solutionModel.GetClassFullName(classModel.Namespace, classModel.BaseInterfaces[i]);
                     }
-                    
+
                     foreach (var methodModel in classModel.Methods)
                     {
-                        methodModel.ReturnType = solutionModel.GetClassFullName(methodModel.ReturnType);
+                        methodModel.ReturnType =
+                            solutionModel.GetClassFullName(classModel.Namespace, methodModel.ReturnType);
                         
-                        methodModel.ContainingClassName =
-                            solutionModel.GetClassFullName(methodModel.ContainingClassName);
+                        SetContainingClassAndCalledMethodsFullName(methodModel, classModel);
+                    }
 
-                        foreach (var methodModelCalledMethod in methodModel.CalledMethods)
+                    foreach (var methodModel in classModel.Constructors)
+                    {
+                        SetContainingClassAndCalledMethodsFullName(methodModel, classModel);
+                    }
+                }
+
+                void SetContainingClassAndCalledMethodsFullName(MethodModel methodModel, ClassModel classModel)
+                {
+                    methodModel.ContainingClassName =
+                        solutionModel.GetClassFullName(classModel.Namespace, methodModel.ContainingClassName);
+
+                    foreach (var methodModelCalledMethod in methodModel.CalledMethods)
+                    {
+                        methodModelCalledMethod.ContainingClassName = solutionModel
+                            .GetClassFullName(classModel.Namespace, methodModelCalledMethod.ContainingClassName);
+
+                        foreach (var parameterModel in methodModelCalledMethod.ParameterTypes)
                         {
-                            methodModelCalledMethod.ContainingClassName = solutionModel
-                                .GetClassFullName(methodModelCalledMethod.ContainingClassName);
+                            parameterModel.Type =
+                                solutionModel.GetClassFullName(classModel.Namespace, parameterModel.Type);
                         }
                     }
                 }

@@ -94,6 +94,7 @@ namespace Honeydew
                 {
                     // transform solution model to Class Relations Representation
                     var classRelationsProcessable = new ProcessorChain(IProcessable.Of(solutionModel))
+                        .Process(new FullNameDependencyProcessor())
                         .Process(new SolutionModelToClassRelationsProcessor())
                         .Peek<ClassRelationsRepresentation>(relationsRepresentation =>
                             relationsRepresentation.UsePrettyPrint = true)
