@@ -7,9 +7,9 @@ using HoneydewCore.Extractors.Metrics.CompilationUnitMetrics;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.IO.Readers;
-using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.IO.Writers;
 using HoneydewCore.IO.Writers.Exporters;
+using HoneydewCore.Models;
 using HoneydewCore.Models.Representations;
 using HoneydewCore.Processors;
 
@@ -23,36 +23,79 @@ namespace Honeydew
 
             await result.MapResult(async options =>
             {
-                var useClassRelationsRepresentation = false;
-                IFileWriter writer;
-                IExporter exporter = new JsonModelExporter();
-
-                var pathToSolution = options.InputFilePath;
+                var inputPath = options.InputFilePath;
                 var outputPath = options.OutputFilePath;
                 var representationType = options.RepresentationType;
                 var exportType = options.ExportType;
 
+                RepositoryModel repositoryModel;
+                switch (options.Command)
+                {
+                    case "load":
+                    {
+                        repositoryModel = await LoadModel(inputPath);
+                    }
+                        break;
 
+                    case "extract":
+                    case "":
+                    {
+                        var extractors = LoadExtractors();
+                        repositoryModel = await ExtractModel(inputPath, extractors);
+                    }
+                        break;
+
+                    default:
+                    {
+                        await Console.Error.WriteLineAsync("Invalid Command!");
+                        return;
+                    }
+                }
+
+                // change representation
+                IExportable exportable = repositoryModel;
+                switch (representationType)
+                {
+                    case "class_relations":
+                    {
+                        var classRelationsProcessable = new ProcessorChain(IProcessable.Of(repositoryModel))
+                            .Process(new FullNameDependencyProcessor())
+                            .Process(new RepositoryModelToClassRelationsProcessor())
+                            .Peek<ClassRelationsRepresentation>(relationsRepresentation =>
+                                relationsRepresentation.UsePrettyPrint = true)
+                            .Finish<ClassRelationsRepresentation>();
+                        exportable = classRelationsProcessable.Value;
+                    }
+                        break;
+
+                    default:
+                    {
+                    }
+                        break;
+                }
+                
+                IFileWriter writer;
+                IExporter exporter = new JsonModelExporter();
+                
                 if (string.IsNullOrWhiteSpace(outputPath))
                 {
                     writer = new ConsoleWriter();
                 }
                 else
                 {
-                    if (exportType == "json")
+                    writer = new FileWriter();
+
+                    if (string.IsNullOrEmpty(exportType))
                     {
                         if (outputPath.EndsWith(".csv"))
                         {
                             exportType = "csv";
                         }
+                        else
+                        {
+                            exportType = "json";
+                        }
                     }
-
-                    writer = new FileWriter();
-                }
-
-                if (representationType == "class_relations")
-                {
-                    useClassRelationsRepresentation = true;
                 }
 
                 if (exportType == "csv")
@@ -67,44 +110,7 @@ namespace Honeydew
                     };
                 }
 
-                // add the metrics that will be run after the solution is loaded
-
-                var cSharpClassFactExtractor = new CSharpClassFactExtractor();
-                cSharpClassFactExtractor.AddMetric<BaseClassMetric>();
-                cSharpClassFactExtractor.AddMetric<UsingsCountMetric>();
-                cSharpClassFactExtractor.AddMetric<IsAbstractMetric>();
-                cSharpClassFactExtractor.AddMetric<ParameterDependencyMetric>();
-                cSharpClassFactExtractor.AddMetric<ReturnValueDependencyMetric>();
-                cSharpClassFactExtractor.AddMetric<LocalVariablesDependencyMetric>();
-
-                var extractors = new List<IFactExtractor>
-                {
-                    cSharpClassFactExtractor
-                };
-
-                // Load solution model from path
-                ISolutionLoader solutionLoader =
-                    new SolutionFileLoader(extractors, new MsBuildSolutionProvider(),
-                        new BasicSolutionLoadingStrategy());
-                var solutionModel = await solutionLoader.LoadSolution(pathToSolution);
-
-                string exportString;
-
-                if (useClassRelationsRepresentation)
-                {
-                    // transform solution model to Class Relations Representation
-                    var classRelationsProcessable = new ProcessorChain(IProcessable.Of(solutionModel))
-                        .Process(new FullNameDependencyProcessor())
-                        .Process(new SolutionModelToClassRelationsProcessor())
-                        .Peek<ClassRelationsRepresentation>(relationsRepresentation =>
-                            relationsRepresentation.UsePrettyPrint = true)
-                        .Finish<ClassRelationsRepresentation>();
-                    exportString = classRelationsProcessable.Value.Export(exporter);
-                }
-                else
-                {
-                    exportString = solutionModel.Export(exporter);
-                }
+                var exportString = exportable.Export(exporter);
 
                 if (string.IsNullOrEmpty(exportString))
                 {
@@ -119,7 +125,46 @@ namespace Honeydew
                     Console.WriteLine("Extraction Complete!");
                     Console.WriteLine($"Output File will be found at {outputPath}");
                 }
-            }, errors => Task.FromResult("Some Error Occurred"));
+                else
+                {
+                    // write to result folder
+                }
+            }, _ => Task.FromResult("Some Error Occurred"));
+        }
+
+        private static IList<IFactExtractor> LoadExtractors()
+        {
+            var cSharpClassFactExtractor = new CSharpClassFactExtractor();
+            cSharpClassFactExtractor.AddMetric<BaseClassMetric>();
+            cSharpClassFactExtractor.AddMetric<UsingsCountMetric>();
+            cSharpClassFactExtractor.AddMetric<IsAbstractMetric>();
+            cSharpClassFactExtractor.AddMetric<ParameterDependencyMetric>();
+            cSharpClassFactExtractor.AddMetric<ReturnValueDependencyMetric>();
+            cSharpClassFactExtractor.AddMetric<LocalVariablesDependencyMetric>();
+
+            var extractors = new List<IFactExtractor>
+            {
+                cSharpClassFactExtractor
+            };
+
+            return extractors;
+        }
+
+        private static async Task<RepositoryModel> LoadModel(string inputPath)
+        {
+            // Load repository model from path
+            IRepositoryLoader repositoryLoader = new RawFileRepositoryLoader(new FileReader());
+            var repositoryModel = await repositoryLoader.Load(inputPath);
+            return repositoryModel;
+        }
+
+        private static async Task<RepositoryModel> ExtractModel(string inputPath, IList<IFactExtractor> extractors)
+        {
+            // Create repository model from path
+            IRepositoryLoader repositoryLoader = new RepositoryLoader(extractors);
+            var repositoryModel = await repositoryLoader.Load(inputPath);
+
+            return repositoryModel;
         }
     }
 }

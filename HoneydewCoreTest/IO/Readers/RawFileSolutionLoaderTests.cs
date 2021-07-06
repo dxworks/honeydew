@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.IO.Readers;
+using HoneydewCore.IO.Readers.SolutionRead;
 using Moq;
 using Xunit;
 

@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 
-namespace HoneydewCore.IO.Readers
+namespace HoneydewCore.IO.Readers.SolutionRead
 {
     public interface ISolutionProvider
     {

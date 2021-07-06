@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using HoneydewCore.Extractors;
 using HoneydewCore.Models;
@@ -10,33 +8,20 @@ namespace HoneydewCore.IO.Readers.Strategies
 {
     public class BasicSolutionLoadingStrategy : ISolutionLoadingStrategy
     {
+        private readonly IProjectLoadingStrategy _projectLoadingStrategy;
+
+        public BasicSolutionLoadingStrategy(IProjectLoadingStrategy projectLoadingStrategy)
+        {
+            _projectLoadingStrategy = projectLoadingStrategy;
+        }
+
         public async Task<SolutionModel> Load(Solution solution, IList<IFactExtractor> extractors)
         {
             SolutionModel solutionModel = new();
 
             foreach (var project in solution.Projects)
             {
-                var projectModel = new ProjectModel(project.Name);
-
-                foreach (var document in project.Documents)
-                {
-                    var syntaxTree = await document.GetSyntaxTreeAsync();
-                    
-                    try
-                    {
-                        var classModels = extractors.SelectMany(extractor => extractor.Extract(syntaxTree)).ToList();
-
-                        foreach (var classModel in classModels)
-                        {
-                            classModel.FilePath = document.FilePath;
-                            projectModel.Add(classModel);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine($"Could not extract from {document.FilePath} because {e}");
-                    }
-                }
+                var projectModel = await _projectLoadingStrategy.Load(project, extractors);
 
                 solutionModel.Projects.Add(projectModel);
             }

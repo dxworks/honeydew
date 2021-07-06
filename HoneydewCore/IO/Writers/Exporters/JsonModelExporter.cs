@@ -6,7 +6,8 @@ using HoneydewCore.Models.Representations.ReferenceModel;
 
 namespace HoneydewCore.IO.Writers.Exporters
 {
-    public class JsonModelExporter : ISolutionModelExporter, IClassRelationsRepresentationExporter, IReferenceSolutionModelExporter
+    public class JsonModelExporter : ISolutionModelExporter, IClassRelationsRepresentationExporter,
+        IReferenceSolutionModelExporter, IRepositoryModelExporter
     {
         public string Export(SolutionModel model)
         {
@@ -21,6 +22,11 @@ namespace HoneydewCore.IO.Writers.Exporters
         public string Export(ReferenceSolutionModel model)
         {
             return JsonReferenceSolutionModelSerializer.Serialize(model);
+        }
+
+        public string Export(RepositoryModel model)
+        {
+            return JsonSerializer.Serialize(model);
         }
     }
 }

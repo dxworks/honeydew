@@ -5,20 +5,21 @@ using HoneydewCore.Models.Representations;
 
 namespace HoneydewCore.Processors
 {
-    public class SolutionModelToClassRelationsProcessor : IProcessorFunction<SolutionModel, ClassRelationsRepresentation>
+    public class
+        RepositoryModelToClassRelationsProcessor : IProcessorFunction<RepositoryModel, ClassRelationsRepresentation>
     {
-        public Func<Processable<SolutionModel>, Processable<ClassRelationsRepresentation>> GetFunction()
+        public Func<Processable<RepositoryModel>, Processable<ClassRelationsRepresentation>> GetFunction()
         {
             return processable =>
             {
-                var solutionModel = processable.Value;
+                var repositoryModel = processable.Value;
 
                 var classRelationsRepresentation = new ClassRelationsRepresentation();
 
-                if (solutionModel == null)
+                if (repositoryModel == null)
                     return new Processable<ClassRelationsRepresentation>(classRelationsRepresentation);
 
-                foreach (var classModel in solutionModel.GetEnumerable())
+                foreach (var classModel in repositoryModel.GetEnumerable())
                 {
                     if (classModel.Metrics.Count == 0)
                     {

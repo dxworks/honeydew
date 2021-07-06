@@ -4,13 +4,16 @@ using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 
-namespace HoneydewCore.IO.Readers
+namespace HoneydewCore.IO.Readers.ProjectRead
 {
-    public class MsBuildSolutionProvider : ISolutionProvider
+    public class MsBuildProjectProvider : IProjectProvider
     {
-        public Task<Solution> GetSolution(string path)
+        public Task<Project> GetProject(string path)
         {
-            MSBuildLocator.RegisterDefaults();
+            if (!MSBuildLocator.IsRegistered)
+            {
+                MSBuildLocator.RegisterDefaults();
+            }
 
             var msBuildWorkspace = MSBuildWorkspace.Create();
 
@@ -21,7 +24,7 @@ namespace HoneydewCore.IO.Readers
 
             try
             {
-                return msBuildWorkspace.OpenSolutionAsync(path);
+                return msBuildWorkspace.OpenProjectAsync(path);
             }
             catch (Exception)
             {

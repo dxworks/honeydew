@@ -6,44 +6,48 @@ using Xunit;
 
 namespace HoneydewCoreTest.Processors
 {
-    public class SolutionModelToClassRelationsProcessorTests
+    public class RepositoryModelToClassRelationsProcessorTests
     {
-        private readonly SolutionModelToClassRelationsProcessor _sut;
+        private readonly RepositoryModelToClassRelationsProcessor _sut;
 
-        public SolutionModelToClassRelationsProcessorTests()
+        public RepositoryModelToClassRelationsProcessorTests()
         {
-            _sut = new SolutionModelToClassRelationsProcessor();
+            _sut = new RepositoryModelToClassRelationsProcessor();
         }
 
         [Fact]
         public void GetFunction_ShouldReturnEmptyRepresentation_WhenSolutionModelIsNull()
         {
-            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(null));
+            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(null));
             Assert.Empty(processable.Value.ClassRelations);
         }
 
         [Fact]
         public void GetFunction_ShouldReturnEmptyRepresentation_WhenSolutionModelIsEmpty()
         {
-            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(new SolutionModel()));
+            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(new RepositoryModel()));
             Assert.Empty(processable.Value.ClassRelations);
         }
 
         [Fact]
         public void GetFunction_ShouldReturnEmptyRepresentation_WhenSolutionModelHasProjectsWithoutFiles()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
             solutionModel.Projects.Add(new ProjectModel());
             solutionModel.Projects.Add(new ProjectModel());
             solutionModel.Projects.Add(new ProjectModel());
+            
+            repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
+            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(repositoryModel));
             Assert.Empty(processable.Value.ClassRelations);
         }
 
         [Fact]
         public void GetFunction_ShouldReturnTotalCount0_WhenGivenInvalidSourceName()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
             var projectModel = new ProjectModel();
 
@@ -51,10 +55,11 @@ namespace HoneydewCoreTest.Processors
             {
                 FullName = "Models.Class", FilePath = "path/Model/Class.cs"
             });
-
+            
             solutionModel.Projects.Add(projectModel);
+            repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
+            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(repositoryModel));
 
             Assert.Equal(0, processable.Value.TotalRelationsCount("InvalidClass", "InvalidTarget"));
         }
@@ -63,6 +68,7 @@ namespace HoneydewCoreTest.Processors
         public void
             GetFunction_ShouldReturnRepresentationsWithNoRelations_WhenSolutionModelHasProjectWithOneClassWithNoRelations()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
             var projectModel = new ProjectModel();
 
@@ -72,8 +78,9 @@ namespace HoneydewCoreTest.Processors
             });
 
             solutionModel.Projects.Add(projectModel);
+            repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
+            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(repositoryModel));
             Assert.Equal(1, processable.Value.ClassRelations.Count);
 
             Assert.True(processable.Value.ClassRelations.TryGetValue("Models.Class", out var targetDictionary));
@@ -84,6 +91,7 @@ namespace HoneydewCoreTest.Processors
         public void
             GetFunction_ShouldReturnRepresentationsWithNoRelations_WhenSolutionModelHasProjectWithMultipleClassesWithNoRelations()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
             var projectModel = new ProjectModel();
 
@@ -98,8 +106,9 @@ namespace HoneydewCoreTest.Processors
             }
 
             solutionModel.Projects.Add(projectModel);
+            repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
+            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(repositoryModel));
             Assert.Equal(classCount, processable.Value.ClassRelations.Count);
             for (var i = 0; i < classCount; i++)
             {
@@ -117,6 +126,7 @@ namespace HoneydewCoreTest.Processors
         public void
             GetFunction_ShouldReturnRepresentationsWithRelations_WhenSolutionModelHasProjectWithTwoClassesAndRelationsBetweenThem()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
             var projectModel = new ProjectModel();
 
@@ -147,8 +157,9 @@ namespace HoneydewCoreTest.Processors
             });
 
             solutionModel.Projects.Add(projectModel);
+            repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
+            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(repositoryModel));
 
             Assert.Equal(2, processable.Value.ClassRelations.Count);
 
@@ -171,6 +182,7 @@ namespace HoneydewCoreTest.Processors
         public void
             GetFunction_ShouldReturnRepresentationsWithNoRelations_WhenSolutionModelHasProjectWithInvalidRelationMetric()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
             var projectModel = new ProjectModel();
 
@@ -190,8 +202,9 @@ namespace HoneydewCoreTest.Processors
             });
 
             solutionModel.Projects.Add(projectModel);
+            repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
+            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(repositoryModel));
 
             Assert.Equal(0, processable.Value.ClassRelations.Count);
             Assert.Equal(0, processable.Value.TotalRelationsCount("Models.Class2", "Models.Class1"));
