@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using HoneydewCore.Extractors;
 using HoneydewCore.IO.Readers.ProjectRead;
@@ -54,41 +54,37 @@ namespace HoneydewCore.IO.Readers
             else if (Directory.Exists(path))
             {
                 var solutionPaths = Directory.GetFiles(path, $"*{SlnExtension}", SearchOption.AllDirectories);
-                if (solutionPaths.Length > 0)
+
+                foreach (var solutionPath in solutionPaths)
                 {
-                    foreach (var solutionPath in solutionPaths)
-                    {
-                        var solutionLoader =
-                            new SolutionFileLoader(_extractors, new MsBuildSolutionProvider(),
-                                new BasicSolutionLoadingStrategy(new BasicProjectLoadingStrategy()));
-                        var solutionModel = await solutionLoader.LoadSolution(solutionPath);
-                        repositoryModel.Solutions.Add(solutionModel);
-                    }
-                }
-                else
-                {
-                    await Console.Error.WriteLineAsync(
-                        $"No {SlnExtension} files found, searching for {CsprojExtension} files");
-                    
-                    var solutionModel = new SolutionModel();
-                    var projectPaths = Directory.GetFiles(path, $"*{CsprojExtension}", SearchOption.AllDirectories);
-
-                    if (projectPaths.Length <= 0)
-                    {
-                        throw new SolutionNotFoundException();
-                    }
-
-                    foreach (var projectPath in projectPaths)
-                    {
-                        var projectLoader = new ProjectLoader(_extractors, new MsBuildProjectProvider(),
-                            new BasicProjectLoadingStrategy());
-                        var projectModel = await projectLoader.Load(projectPath);
-                        solutionModel.Projects.Add(projectModel);
-                    }
-
-                    solutionModel = AddFullNameToDependencies(solutionModel);
-
+                    var solutionLoader =
+                        new SolutionFileLoader(_extractors, new MsBuildSolutionProvider(),
+                            new BasicSolutionLoadingStrategy(new BasicProjectLoadingStrategy()));
+                    var solutionModel = await solutionLoader.LoadSolution(solutionPath);
                     repositoryModel.Solutions.Add(solutionModel);
+                }
+
+                var defaultSolutionModel = new SolutionModel();
+                var projectPaths = Directory.GetFiles(path, $"*{CsprojExtension}", SearchOption.AllDirectories);
+
+                foreach (var projectPath in projectPaths)
+                {
+                    var isUsedInASolution = repositoryModel.Solutions.Any(solutionModel =>
+                        solutionModel.Projects.Any(project => project.FilePath == projectPath));
+
+                    if (isUsedInASolution) continue;
+
+                    var projectLoader = new ProjectLoader(_extractors, new MsBuildProjectProvider(),
+                        new BasicProjectLoadingStrategy());
+                    var projectModel = await projectLoader.Load(projectPath);
+                    defaultSolutionModel.Projects.Add(projectModel);
+                }
+
+                if (defaultSolutionModel.Projects.Count > 0)
+                {
+                    defaultSolutionModel = AddFullNameToDependencies(defaultSolutionModel);
+
+                    repositoryModel.Solutions.Add(defaultSolutionModel);
                 }
             }
 

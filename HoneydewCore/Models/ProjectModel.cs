@@ -6,6 +6,8 @@ namespace HoneydewCore.Models
     {
         public string Name { get; set; }
 
+        public string FilePath { get; set; }
+
         public ProjectModel()
         {
         }
