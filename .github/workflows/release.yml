@@ -52,28 +52,20 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '5.0.x'
+          dotnet-version: '6.0.x'
+          include-prerelease: true
+
 
       - name: dotnet publish
         run: |
           mkdir bin
-          ls -al
           dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
-          ls -R -al bin
 
       - name: Prepare Assets
         run: |
-          pwd
-          ls -al
           mkdir -p honeydew-release/results
-          ls -al bin
-          echo copy readme
           cp README.md honeydew-release/README.md
-          ls -al honeydew-release
-          echo removing *.pdb
           rm ./bin/*.pdb
-          ls -al bin
-          echo copying honeydew executable
           cp ./bin/Honeydew honeydew-release/Honeydew
           chmod +x honeydew-release/Honeydew
           ls -R -al honeydew-release
