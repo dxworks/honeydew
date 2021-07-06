@@ -2,7 +2,7 @@
 {
     public record ParameterModel
     {
-        public string Type { get; init; }
+        public string Type { get; set; }
 
         public string Modifier { get; init; } = "";
 

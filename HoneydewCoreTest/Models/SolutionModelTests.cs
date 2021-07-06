@@ -69,20 +69,20 @@ namespace HoneydewCoreTest.Models
                 "Models",
                 "Services"
             };
-        
+
             var projectModel = new ProjectModel("Project");
 
             projectModel.Add(new ClassModel {FullName = "Models.Model1"});
             projectModel.Add(new ClassModel {FullName = "Services.IService"});
             projectModel.Add(new ClassModel {FullName = "Models.Model2"});
-            
+
             _sut.Projects.Add(projectModel);
-        
+
             var fullName = _sut.FindClassFullNameInUsings(usingsList, "IService");
-        
+
             Assert.Equal("Services.IService", fullName);
         }
-        
+
         [Fact]
         public void
             FindClassFullNameInUsings_ShouldReturnTheSameName_WhenGivenAClassNameThatCanBeFoundInUsings_NamespaceHasMultipleevels()
@@ -95,7 +95,7 @@ namespace HoneydewCoreTest.Models
                 "Services.Impl",
                 "Domain.Model.DTO"
             };
-            
+
             var projectModel = new ProjectModel("Project");
 
             projectModel.Add(new ClassModel {FullName = "Models.Model1"});
@@ -103,21 +103,21 @@ namespace HoneydewCoreTest.Models
             projectModel.Add(new ClassModel {FullName = "Services.Impl.Service"});
             projectModel.Add(new ClassModel {FullName = "Models.Model2"});
             projectModel.Add(new ClassModel {FullName = "Domain.Model.DTO.ModelDTO"});
-            
+
             _sut.Projects.Add(projectModel);
-        
+
             var fullName = _sut.FindClassFullNameInUsings(usingsList, "ModelDTO");
-        
+
             Assert.Equal("Domain.Model.DTO.ModelDTO", fullName);
         }
-        
-        
+
+
         [Fact]
         public void Export_ShouldReturnEmptyString_WhenExporterIsNotASolutionModelExporter()
         {
             var exporterMock = new Mock<IExporter>();
 
-            Assert.Equal("",_sut.Export(exporterMock.Object));
+            Assert.Equal("", _sut.Export(exporterMock.Object));
         }
 
         [Fact]
@@ -136,17 +136,22 @@ namespace HoneydewCoreTest.Models
 
             foreach (var className in array)
             {
-                projectModel.Add(new ClassModel {FullName = className});    
+                projectModel.Add(new ClassModel {FullName = className});
             }
-            
+
             _sut.Projects.Add(projectModel);
 
 
-            Assert.Equal(_sut.Projects[0].Namespaces["Project.Models"].ClassModels[0],_sut.GetClassModelByFullName(array[0]));
-            Assert.Equal(_sut.Projects[0].Namespaces["Project.Services"].ClassModels[0],_sut.GetClassModelByFullName(array[1]));
-            Assert.Equal(_sut.Projects[0].Namespaces["Project.Services.Impl"].ClassModels[0],_sut.GetClassModelByFullName(array[2]));
-            Assert.Equal(_sut.Projects[0].Namespaces["Project.Models"].ClassModels[1],_sut.GetClassModelByFullName(array[3]));
-            Assert.Equal(_sut.Projects[0].Namespaces["Project.Domain.Model.DTO"].ClassModels[0],_sut.GetClassModelByFullName(array[4]));
+            Assert.Equal(_sut.Projects[0].Namespaces["Project.Models"].ClassModels[0],
+                _sut.GetClassModelByFullName(array[0]));
+            Assert.Equal(_sut.Projects[0].Namespaces["Project.Services"].ClassModels[0],
+                _sut.GetClassModelByFullName(array[1]));
+            Assert.Equal(_sut.Projects[0].Namespaces["Project.Services.Impl"].ClassModels[0],
+                _sut.GetClassModelByFullName(array[2]));
+            Assert.Equal(_sut.Projects[0].Namespaces["Project.Models"].ClassModels[1],
+                _sut.GetClassModelByFullName(array[3]));
+            Assert.Equal(_sut.Projects[0].Namespaces["Project.Domain.Model.DTO"].ClassModels[0],
+                _sut.GetClassModelByFullName(array[4]));
         }
     }
 }

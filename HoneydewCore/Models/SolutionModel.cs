@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.IO.Writers.Exporters;
 
@@ -19,18 +18,35 @@ namespace HoneydewCore.Models
             return string.Empty;
         }
 
-        public string FindClassFullNameInUsings(IList<string> usings, string className)
+        public string FindClassFullNameInUsings(IList<string> usings, string className, string classModelNamespace = "")
         {
-            foreach (var projectModel in Projects)
+            if (string.IsNullOrEmpty(classModelNamespace))
             {
-                var fullName = projectModel.FindClassFullNameInUsings(usings, className);
-                if (fullName != className)
+                if (FindClassName(className) != null)
                 {
-                    return fullName;
+                    return className;
+                }
+            }
+            else
+            {
+                var classModel = FindClassName($"{classModelNamespace}.{className}");
+                if (classModel != null)
+                {
+                    return classModel.FullName;
                 }
             }
 
-            return className;
+            foreach (var usingName in usings)
+            {
+                var classModel = FindClassName($"{usingName}.{className}");
+                if (classModel != null)
+                {
+                    return classModel.FullName;
+                }
+            }
+
+            var firstOrDefault = GetEnumerable().FirstOrDefault(classModel => classModel.FullName.Contains(className));
+            return firstOrDefault == null ? className : firstOrDefault.FullName;
         }
 
         public IEnumerable<ClassModel> GetEnumerable()
@@ -54,31 +70,102 @@ namespace HoneydewCore.Models
                 return null;
             }
 
-            var lastIndexOf = className.LastIndexOf(".", StringComparison.Ordinal);
+            if (!className.Contains("."))
+                return GetEnumerable().FirstOrDefault(model => model.FullName.Contains(className));
 
+            var classModel = FindClassName(className);
 
-            var classNamespace = "";
-            if (lastIndexOf >= 0)
+            return classModel != null
+                ? classModel
+                : GetEnumerable().FirstOrDefault(model => model.FullName.Contains(className));
+        }
+
+        public string GetClassFullName(string namespaceNameToStartSearchFrom, string className)
+        {
+            if (className == null)
             {
-                classNamespace = className[..lastIndexOf];
+                return null;
             }
 
-            foreach (var project in Projects)
+            if (className.Contains(namespaceNameToStartSearchFrom))
             {
-                if (project.Namespaces.TryGetValue(classNamespace, out var namespaceModel))
+                return className;
+            }
+
+            ClassModel findClassName;
+            if (string.IsNullOrEmpty(namespaceNameToStartSearchFrom) || className.Contains("."))
+            {
+                findClassName = FindClassName(className);
+                if (findClassName != null)
                 {
-                    return namespaceModel.ClassModels.FirstOrDefault(model => model.FullName == className);
+                    return findClassName.FullName;
                 }
             }
 
-            return GetEnumerable().FirstOrDefault(classModel => classModel.FullName.Contains(className));
+            if (!string.IsNullOrEmpty(namespaceNameToStartSearchFrom))
+            {
+                foreach (var projectModel in Projects)
+                {
+                    if (!projectModel.Namespaces.TryGetValue(namespaceNameToStartSearchFrom, out var namespaceModel))
+                        continue;
+
+                    if (namespaceModel.ClassModels.Any(model => model.FullName.Equals(className)))
+                    {
+                        return $"{namespaceNameToStartSearchFrom}.{className}";
+                    }
+                }
+            }
+
+            findClassName = FindClassName($"{namespaceNameToStartSearchFrom}.{className}");
+            if (findClassName != null)
+            {
+                return findClassName.FullName;
+            }
+
+            var firstOrDefault = GetEnumerable().FirstOrDefault(classModel => classModel.FullName.Contains(className));
+            return firstOrDefault == null ? className : firstOrDefault.FullName;
         }
 
-        public string GetClassFullName(string className)
-        {
-            var classModel = GetClassModelByFullName(className);
 
-            return classModel == default ? className : classModel.FullName;
+        private ClassModel FindClassName(string classNameToSearch)
+        {
+            IReadOnlyList<string> parts = classNameToSearch.Split(".");
+
+            foreach (var project in Projects)
+            {
+                var namespaceName = "";
+                var namespaceIndex = 0;
+                while (namespaceIndex < parts.Count)
+                {
+                    namespaceName += parts[namespaceIndex];
+
+                    if (project.Namespaces.TryGetValue(namespaceName, out var namespaceModel))
+                    {
+                        var className = "";
+                        var classIndex = namespaceIndex + 1;
+                        while (classIndex < parts.Count)
+                        {
+                            className += parts[classIndex];
+                            className += '.';
+                            classIndex++;
+                        }
+
+                        className = className.Remove(className.Length - 1);
+
+                        var classModel = namespaceModel.ClassModels.FirstOrDefault(model =>
+                            model.FullName == $"{namespaceName}.{className}");
+                        if (classModel != null)
+                        {
+                            return classModel;
+                        }
+                    }
+
+                    namespaceIndex++;
+                    namespaceName += '.';
+                }
+            }
+
+            return null;
         }
     }
 }

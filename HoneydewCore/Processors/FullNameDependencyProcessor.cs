@@ -17,7 +17,7 @@ namespace HoneydewCore.Processors
                 foreach (var classModel in solutionModel.GetEnumerable())
                 {
                     var parameterDependenciesMetrics = classModel.Metrics.Where(metric =>
-                        metric.ExtractorName == typeof(ParameterDependencyMetric).FullName);
+                        typeof(DependencyMetric).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
 
                     foreach (var metric in parameterDependenciesMetrics)
                     {
@@ -32,7 +32,7 @@ namespace HoneydewCore.Processors
                         {
                             var fullClassName =
                                 solutionModel.FindClassFullNameInUsings(dependencyDataMetric.Usings,
-                                    dependencyName);
+                                    dependencyName, classModel.Namespace);
                             fullNameDependencies.Add(fullClassName, appearanceCount);
                         }
 
