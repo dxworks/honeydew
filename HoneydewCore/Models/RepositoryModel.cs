@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using HoneydewCore.IO.Writers.Exporters;
 
 namespace HoneydewCore.Models
@@ -15,6 +16,23 @@ namespace HoneydewCore.Models
             }
 
             return string.Empty;
+        }
+
+        public IEnumerable<ClassModel> GetEnumerable()
+        {
+            foreach (var solutionModel in Solutions)
+            {
+                foreach (var projectModel in solutionModel.Projects)
+                {
+                    foreach (var (_, namespaceModel) in projectModel.Namespaces)
+                    {
+                        foreach (var classModel in namespaceModel.ClassModels)
+                        {
+                            yield return classModel;
+                        }
+                    }
+                }
+            }
         }
     }
 }
