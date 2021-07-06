@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [win, linux, osx]
+        os: [win, linux]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -43,10 +43,53 @@ jobs:
           name: honeydew-${{ matrix.os }}.zip
           path: honeydew-${{ matrix.os }}.zip
 
+  build-publish-and-sign-for-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
+
+      - name: dotnet publish
+        run: dotnet publish -r ${{matrix.os}}-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
+
+      - name: Prepare Assets
+        run: |
+          mkdir -p honeydew/results
+          cp README.md honeydew/README.md
+          rm bin/*.pdb
+          cp -R bin/* honeydew
+          chmod +x honeydew/Honeydew
+
+      - name: Add Cert to Keychain
+        uses: apple-actions/import-codesign-certs@v1
+        with:
+          p12-file-base64: ${{ secrets.MAC_CERT_BASE64 }}
+          p12-password: ${{ secrets.MAC_CERT_PASSWORD }}
+
+      - name: Sign Binaries
+        run: "sh macSigningScripts/SignMac.sh \"honeydew/Honeydew\" \"honeydew/*\" \"Developer ID Application: Andrei Mario Rivis (3L7BS894T6)\" \"macSigningScripts/entitlements.plist\""
+
+      - name: Zip Binary for Notarizing
+        run:
+          zip -r honeydew-osx.zip honeydew
+
+      - name: Notarize Binaries
+        run: "sh macSigningScripts/Notarize.sh \"mario.rivis@gmail.com\" \"${{ secrets.MAC_DEV_PASSWORD }}\" \"group.org.dxworks\" \"3L7BS894T6\" \"./honeydew-osx.zip\""
+
+      - name: Upload artifact
+        uses: actions\upload-artifact@v2
+        with:
+          name: honeydew-osx.zip
+          path: honeydew-osx.zip
+
   release-and-upload:
     name: Release and Update
     runs-on: ubuntu-latest
-    needs: build-and-publish
+    needs: [build-and-publish, build-publish-and-sign-for-mac]
     steps:
       - name: Create Release
         id: create_release
