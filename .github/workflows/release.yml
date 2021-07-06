@@ -62,7 +62,11 @@ jobs:
 
       - name: Prepare Assets
         run: |
+          pwd
+          ls -al
           mkdir -p honeydew/results
+          ls -R -al
+          ls -al bin
           cp README.md honeydew/README.md
           rm bin/*.pdb
           cp -R bin/* honeydew
