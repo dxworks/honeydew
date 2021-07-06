@@ -83,7 +83,7 @@ jobs:
           p12-password: ${{ secrets.MAC_CERT_PASSWORD }}
 
       - name: Sign Binaries
-        run: "sh macSigningScripts/SignMac.sh \"honeydew/Honeydew\" \"honeydew/*\" \"Developer ID Application: Andrei Mario Rivis (3L7BS894T6)\" \"macSigningScripts/entitlements.plist\""
+        run: "sh macSigningScripts/SignMac.sh \"honeydew-release/Honeydew\" \"honeydew-release/*\" \"Developer ID Application: Andrei Mario Rivis (3L7BS894T6)\" \"macSigningScripts/entitlements.plist\""
 
       - name: Zip Binary for Notarizing
         run:
