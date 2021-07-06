@@ -57,6 +57,9 @@ jobs:
       - name: dotnet publish
         run: |
           mkdir bin
+          ls -al
+          dotnet clean
+          dotnet restore
           dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
           ls -R -al bin
 
@@ -64,14 +67,14 @@ jobs:
         run: |
           pwd
           ls -al
-          mkdir -p honeydew/results
+          mkdir -p honeydew-release/results
           ls -R -al
           ls -al bin
-          cp README.md honeydew/README.md
+          cp README.md honeydew-release/README.md
           rm bin/*.pdb
-          cp -R bin/* honeydew
-          chmod +x honeydew/Honeydew
-          ls -R -al honeydew
+          cp -R ./bin/* honeydew-release
+          chmod +x honeydew-release/Honeydew
+          ls -R -al honeydew-release
 
       - name: Add Cert to Keychain
         uses: apple-actions/import-codesign-certs@v1
@@ -84,7 +87,7 @@ jobs:
 
       - name: Zip Binary for Notarizing
         run:
-          zip -r honeydew-osx.zip honeydew
+          zip -r honeydew-osx.zip honeydew-release
 
       - name: Notarize Binaries
         run: "sh macSigningScripts/Notarize.sh \"mario.rivis@gmail.com\" \"${{ secrets.MAC_DEV_PASSWORD }}\" \"group.org.dxworks\" \"3L7BS894T6\" \"./honeydew-osx.zip\""
