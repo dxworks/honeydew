@@ -67,8 +67,10 @@ namespace HoneydewCore.IO.Readers
                 var defaultSolutionModel = new SolutionModel();
                 var projectPaths = Directory.GetFiles(path, $"*{CsprojExtension}", SearchOption.AllDirectories);
 
-                foreach (var projectPath in projectPaths)
+                foreach (var relativeProjectPath in projectPaths)
                 {
+                    var projectPath = Path.GetFullPath(relativeProjectPath);
+                    
                     var isUsedInASolution = repositoryModel.Solutions.Any(solutionModel =>
                         solutionModel.Projects.Any(project => project.FilePath == projectPath));
 
