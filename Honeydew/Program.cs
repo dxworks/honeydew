@@ -7,7 +7,6 @@ using HoneydewCore.Extractors.Metrics.CompilationUnitMetrics;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.IO.Readers;
-using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.IO.Writers;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Models.Representations;
@@ -82,18 +81,22 @@ namespace Honeydew
                     cSharpClassFactExtractor
                 };
 
-                // Load solution model from path
-                ISolutionLoader solutionLoader =
-                    new SolutionFileLoader(extractors, new MsBuildSolutionProvider(),
-                        new BasicSolutionLoadingStrategy());
-                var solutionModel = await solutionLoader.LoadSolution(pathToSolution);
+                // Load repository model from path
+                IRepositoryLoader repositoryLoader =
+                    new RepositoryLoader(extractors);
+                var repositoryModel = await repositoryLoader.Load(pathToSolution);
 
                 string exportString;
 
                 if (useClassRelationsRepresentation)
                 {
                     // transform solution model to Class Relations Representation
-                    var classRelationsProcessable = new ProcessorChain(IProcessable.Of(solutionModel))
+                    foreach (var solutionModel in repositoryModel.Solutions)
+                    {
+                        
+                    }
+                    
+                    var classRelationsProcessable = new ProcessorChain(IProcessable.Of(repositoryModel))
                         .Process(new FullNameDependencyProcessor())
                         .Process(new SolutionModelToClassRelationsProcessor())
                         .Peek<ClassRelationsRepresentation>(relationsRepresentation =>
@@ -103,7 +106,7 @@ namespace Honeydew
                 }
                 else
                 {
-                    exportString = solutionModel.Export(exporter);
+                    exportString = repositoryModel.Export(exporter);
                 }
 
                 if (string.IsNullOrEmpty(exportString))
@@ -119,7 +122,7 @@ namespace Honeydew
                     Console.WriteLine("Extraction Complete!");
                     Console.WriteLine($"Output File will be found at {outputPath}");
                 }
-            }, errors => Task.FromResult("Some Error Occurred"));
+            }, _ => Task.FromResult("Some Error Occurred"));
         }
     }
 }

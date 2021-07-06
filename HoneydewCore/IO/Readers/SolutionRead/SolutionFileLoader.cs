@@ -5,7 +5,7 @@ using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.Models;
 using HoneydewCore.Processors;
 
-namespace HoneydewCore.IO.Readers
+namespace HoneydewCore.IO.Readers.SolutionRead
 {
     public class SolutionFileLoader : ISolutionLoader
     {
@@ -19,7 +19,7 @@ namespace HoneydewCore.IO.Readers
         {
             _extractors = extractors;
             _solutionProvider = solutionProvider;
-            this._solutionLoadingStrategy = solutionLoadingStrategy;
+            _solutionLoadingStrategy = solutionLoadingStrategy;
         }
 
         public async Task<SolutionModel> LoadSolution(string pathToFile)

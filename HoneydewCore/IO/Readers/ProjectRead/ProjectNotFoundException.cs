@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HoneydewCore.IO.Readers
+namespace HoneydewCore.IO.Readers.ProjectRead
 {
     public class ProjectNotFoundException : Exception
     {
