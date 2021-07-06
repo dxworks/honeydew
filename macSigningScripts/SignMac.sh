@@ -19,7 +19,10 @@ do
         echo "Runtime Signing $f"
         codesign --timestamp --sign "$3" $f --options=runtime --no-strict --entitlements $4
     else
-        echo "Signing $f"
-        codesign --timestamp --sign "$3" $f --no-strict
+        if [ ! -d "$f" ]
+        then
+            echo "Signing $f"
+            codesign --timestamp --sign "$3" $f --no-strict
+        fi
     fi
 done
