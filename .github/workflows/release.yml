@@ -44,6 +44,7 @@ jobs:
           path: honeydew-${{ matrix.os }}.zip
 
   build-publish-and-sign-for-mac:
+    name: Build, Publish and Sign (osx)
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
@@ -54,7 +55,7 @@ jobs:
           dotnet-version: '5.0.x'
 
       - name: dotnet publish
-        run: dotnet publish -r ${{matrix.os}}-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
+        run: dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
 
       - name: Prepare Assets
         run: |
