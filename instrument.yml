@@ -1,0 +1,10 @@
+name: Honeydew
+
+results:
+  - dir: ${instrument}/results
+
+commands:
+  - name: run honeydew
+    win: .\bin\win\Honeydew.exe extract ${repo}
+    unix: ./bin/linux/Honeydew extract ${repo}
+
