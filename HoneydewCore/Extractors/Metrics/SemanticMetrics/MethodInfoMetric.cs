@@ -260,7 +260,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
                 string defaultValue = null;
                 if (parameter.HasExplicitDefaultValue)
                 {
-                    defaultValue = parameter.ExplicitDefaultValue!.ToString();
+                    defaultValue = parameter.ExplicitDefaultValue?.ToString();
                 }
 
                 parameterTypes.Add(new ParameterModel
