@@ -24,8 +24,4 @@
     <ProjectReference Include="..\HoneydewCore\HoneydewCore.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Analyzers" />
-  </ItemGroup>
-
 </Project>

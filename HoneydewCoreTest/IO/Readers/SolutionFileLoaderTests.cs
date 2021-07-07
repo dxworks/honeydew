@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using HoneydewCore.Extractors;
-using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.ProjectRead;
 using HoneydewCore.IO.Readers.SolutionRead;
 using HoneydewCore.IO.Readers.Strategies;
+using HoneydewCore.Logging;
 using HoneydewCore.Models;
 using Microsoft.CodeAnalysis;
 using Moq;
@@ -16,13 +16,14 @@ namespace HoneydewCoreTest.IO.Readers
     {
         private readonly ISolutionLoader _sut;
 
-        private readonly Mock<IFileReader> _fileReaderMock = new();
         private readonly Mock<ISolutionProvider> _solutionProviderMock = new();
         private readonly Mock<ISolutionLoadingStrategy> _solutionLoadingStrategyMock = new();
+        private readonly Mock<IProgressLogger> _progressLoggerMock = new();
 
         public SolutionFileLoaderTests()
         {
-            _sut = new SolutionFileLoader(new List<IFactExtractor>(), _solutionProviderMock.Object,
+            _sut = new SolutionFileLoader(_progressLoggerMock.Object, new List<IFactExtractor>(),
+                _solutionProviderMock.Object,
                 _solutionLoadingStrategyMock.Object);
         }
 
@@ -147,6 +148,7 @@ namespace HoneydewCoreTest.IO.Readers
                     }
                 }
             };
+
 
             _solutionProviderMock.Setup(provider => provider.GetSolution(pathToSolution))
                 .ReturnsAsync(It.IsAny<Solution>());
