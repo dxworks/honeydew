@@ -6,6 +6,8 @@ namespace HoneydewCore.Models
     {
         public string Name { get; set; }
 
+        public string FilePath { get; set; }
+
         public ProjectModel()
         {
         }
@@ -30,26 +32,6 @@ namespace HoneydewCore.Models
                 p.Add(classModel);
                 Namespaces.Add(classModel.Namespace, p);
             }
-        }
-
-
-        public string FindClassFullNameInUsings(IList<string> usings, string className)
-        {
-            foreach (var usingName in usings)
-            {
-                if (Namespaces.TryGetValue(usingName, out var projectNamespace))
-                {
-                    foreach (var classModel in projectNamespace.ClassModels)
-                    {
-                        if (classModel.FullName == $"{usingName}.{className}")
-                        {
-                            return classModel.FullName;
-                        }
-                    }
-                }
-            }
-
-            return className;
         }
     }
 }

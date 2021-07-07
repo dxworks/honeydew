@@ -118,6 +118,192 @@ namespace HoneydewCoreTest.Extractors
             }
         }
 
+        [Theory]
+        [InlineData("in")]
+        [InlineData("out")]
+        [InlineData("ref")]
+        public void Extract_ShouldSetParameters_WhenParsingTextWithOneClassWithMethodWithParameterWithModifiers(
+            string parameterModifier)
+        {
+            var fileContent = $@"        
+                                    namespace Models.Main.Items
+                                    {{
+                                      public class MainItem
+                                      {{
+                                            public void Method({parameterModifier} int a) {{}}
+
+                                            public MainItem({parameterModifier} int a) {{ }}
+                                      }}
+                                    }}
+                                    ";
+            var classModels = _sut.Extract(fileContent);
+
+            Assert.Equal(1, classModels.Count);
+
+            foreach (var classModel in classModels)
+            {
+                Assert.Equal("Models.Main.Items", classModel.Namespace);
+                Assert.Equal("Models.Main.Items.MainItem", classModel.FullName);
+
+                Assert.Equal(1, classModel.Methods.Count);
+                Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
+                Assert.False(classModel.Methods[0].IsConstructor);
+                var parameterModel = classModel.Methods[0].ParameterTypes[0];
+                Assert.Equal("int", parameterModel.Type);
+                Assert.Equal(parameterModifier, parameterModel.Modifier);
+                Assert.Null(parameterModel.DefaultValue);
+
+                Assert.Equal(1, classModel.Constructors.Count);
+                Assert.Equal(1, classModel.Constructors[0].ParameterTypes.Count);
+                Assert.True(classModel.Constructors[0].IsConstructor);
+                var parameterModelConstructor = classModel.Constructors[0].ParameterTypes[0];
+                Assert.Equal("int", parameterModelConstructor.Type);
+                Assert.Equal(parameterModifier, parameterModelConstructor.Modifier);
+                Assert.Null(parameterModelConstructor.DefaultValue);
+            }
+        }
+
+        [Fact]
+        public void Extract_ShouldSetParameters_WhenParsingTextWithOneClassWithExtensionMethod()
+        {
+            const string fileContent = @"        
+                                    namespace Models.Main.Items
+                                    {
+                                      public class MainItem
+                                      {
+                                            public void Method(this int a) {}
+                                      }
+                                    }
+                                    ";
+            var classModels = _sut.Extract(fileContent);
+
+            Assert.Equal(1, classModels.Count);
+
+            foreach (var classModel in classModels)
+            {
+                Assert.Equal("Models.Main.Items", classModel.Namespace);
+                Assert.Equal("Models.Main.Items.MainItem", classModel.FullName);
+                Assert.Equal(1, classModel.Methods.Count);
+                Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
+                var parameterModel = classModel.Methods[0].ParameterTypes[0];
+                Assert.Equal("int", parameterModel.Type);
+                Assert.Equal("this", parameterModel.Modifier);
+                Assert.Null(parameterModel.DefaultValue);
+            }
+        }
+
+        [Fact]
+        public void Extract_ShouldSetParameters_WhenParsingTextWithOneClassWithMethodWithParameterWithParamsModifiers()
+        {
+            var fileContent = $@"        
+                                    namespace Models.Main.Items
+                                    {{
+                                      public class MainItem
+                                      {{
+                                            public void Method(params int[] a) {{}}
+
+                                            public MainItem(params int[] a) {{}}
+                                      }}
+                                    }}
+                                    ";
+            var classModels = _sut.Extract(fileContent);
+
+            Assert.Equal(1, classModels.Count);
+
+            foreach (var classModel in classModels)
+            {
+                Assert.Equal("Models.Main.Items", classModel.Namespace);
+                Assert.Equal("Models.Main.Items.MainItem", classModel.FullName);
+
+                Assert.Equal(1, classModel.Methods.Count);
+                Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
+                Assert.False(classModel.Methods[0].IsConstructor);
+                var parameterModel = classModel.Methods[0].ParameterTypes[0];
+                Assert.Equal("int[]", parameterModel.Type);
+                Assert.Equal("params", parameterModel.Modifier);
+                Assert.Null(parameterModel.DefaultValue);
+
+                Assert.Equal(1, classModel.Constructors.Count);
+                Assert.Equal(1, classModel.Constructors[0].ParameterTypes.Count);
+                Assert.True(classModel.Constructors[0].IsConstructor);
+                var parameterModelConstructor = classModel.Constructors[0].ParameterTypes[0];
+                Assert.Equal("int[]", parameterModelConstructor.Type);
+                Assert.Equal("params", parameterModelConstructor.Modifier);
+                Assert.Null(parameterModelConstructor.DefaultValue);
+            }
+        }
+
+        [Fact]
+        public void Extract_ShouldSetParameters_WhenParsingTextWithOneClassWithMethodWithParameterWithDefaultValues()
+        {
+            var fileContent = $@"        
+                                    namespace Models.Main.Items
+                                    {{
+                                      public class MainItem
+                                      {{
+                                            public void Method() {{}}
+                                            public void Method1(object a=null) {{}}
+                                            public void Method2(int a=15) {{}}
+                                            public void Method3(int a, int b) {{}}
+                                            public void Method4(int a,in int b=15, string c="""") {{}}
+                                            public void Method5(string c=""null"") {{}}
+                                      }}
+                                    }}
+                                    ";
+            var classModels = _sut.Extract(fileContent);
+
+            Assert.Equal(1, classModels.Count);
+
+            foreach (var classModel in classModels)
+            {
+                Assert.Equal(6, classModel.Methods.Count);
+
+                Assert.Empty(classModel.Methods[0].ParameterTypes);
+
+                Assert.Equal(1, classModel.Methods[1].ParameterTypes.Count);
+                var method1Parameter = classModel.Methods[1].ParameterTypes[0];
+                Assert.Equal("object", method1Parameter.Type);
+                Assert.Equal("", method1Parameter.Modifier);
+                Assert.Equal("null", method1Parameter.DefaultValue);
+
+                Assert.Equal(1, classModel.Methods[2].ParameterTypes.Count);
+                var method2Parameter = classModel.Methods[2].ParameterTypes[0];
+                Assert.Equal("int", method2Parameter.Type);
+                Assert.Equal("", method2Parameter.Modifier);
+                Assert.Equal("15", method2Parameter.DefaultValue);
+
+                Assert.Equal(2, classModel.Methods[3].ParameterTypes.Count);
+                foreach (var parameterType in classModel.Methods[3].ParameterTypes)
+                {
+                    Assert.Equal("int", parameterType.Type);
+                    Assert.Equal("", parameterType.Modifier);
+                    Assert.Null(parameterType.DefaultValue);
+                }
+
+                Assert.Equal(3, classModel.Methods[4].ParameterTypes.Count);
+                var method4Parameter0 = classModel.Methods[4].ParameterTypes[0];
+                Assert.Equal("int", method4Parameter0.Type);
+                Assert.Equal("", method4Parameter0.Modifier);
+                Assert.Null(method4Parameter0.DefaultValue);
+
+                var method4Parameter1 = classModel.Methods[4].ParameterTypes[1];
+                Assert.Equal("int", method4Parameter1.Type);
+                Assert.Equal("in", method4Parameter1.Modifier);
+                Assert.Equal("15", method4Parameter1.DefaultValue);
+
+                var method4Parameter2 = classModel.Methods[4].ParameterTypes[2];
+                Assert.Equal("string", method4Parameter2.Type);
+                Assert.Equal("", method4Parameter2.Modifier);
+                Assert.Equal("\"\"", method4Parameter2.DefaultValue);
+
+                Assert.Equal(1, classModel.Methods[5].ParameterTypes.Count);
+                var method5Parameter = classModel.Methods[5].ParameterTypes[0];
+                Assert.Equal("string", method5Parameter.Type);
+                Assert.Equal("", method5Parameter.Modifier);
+                Assert.Equal("\"null\"", method5Parameter.DefaultValue);
+            }
+        }
+
         [Fact]
         public void Extract_ShouldNotHaveMetrics_WhenGivenAnEmptyListOfMetrics_ForOneClass()
         {
@@ -474,7 +660,9 @@ namespace HoneydewCoreTest.Extractors
             Assert.Equal("f", classModels[0].Methods[0].Name);
             Assert.Equal("CSharpExtractor", classModels[0].Methods[0].ReturnType);
             Assert.Equal(1, classModels[0].Methods[0].ParameterTypes.Count);
-            Assert.Equal("int", classModels[0].Methods[0].ParameterTypes[0]);
+            Assert.Equal("int", classModels[0].Methods[0].ParameterTypes[0].Type);
+            Assert.Equal("", classModels[0].Methods[0].ParameterTypes[0].Modifier);
+            Assert.Null(classModels[0].Methods[0].ParameterTypes[0].DefaultValue);
             Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[0].AccessModifier);
             Assert.Equal("abstract", classModels[0].Methods[0].Modifier);
@@ -483,7 +671,9 @@ namespace HoneydewCoreTest.Extractors
             Assert.Equal("g", classModels[0].Methods[1].Name);
             Assert.Equal("int", classModels[0].Methods[1].ReturnType);
             Assert.Equal(1, classModels[0].Methods[1].ParameterTypes.Count);
-            Assert.Equal("CSharpExtractor", classModels[0].Methods[1].ParameterTypes[0]);
+            Assert.Equal("CSharpExtractor", classModels[0].Methods[1].ParameterTypes[0].Type);
+            Assert.Equal("", classModels[0].Methods[1].ParameterTypes[0].Modifier);
+            Assert.Null(classModels[0].Methods[1].ParameterTypes[0].DefaultValue);
             Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[1].AccessModifier);
             Assert.Equal("abstract", classModels[0].Methods[1].Modifier);
@@ -492,8 +682,12 @@ namespace HoneydewCoreTest.Extractors
             Assert.Equal("h", classModels[0].Methods[2].Name);
             Assert.Equal("string", classModels[0].Methods[2].ReturnType);
             Assert.Equal(2, classModels[0].Methods[2].ParameterTypes.Count);
-            Assert.Equal("float", classModels[0].Methods[2].ParameterTypes[0]);
-            Assert.Equal("CSharpExtractor", classModels[0].Methods[2].ParameterTypes[1]);
+            Assert.Equal("float", classModels[0].Methods[2].ParameterTypes[0].Type);
+            Assert.Equal("", classModels[0].Methods[2].ParameterTypes[0].Modifier);
+            Assert.Null(classModels[0].Methods[2].ParameterTypes[0].DefaultValue);
+            Assert.Equal("CSharpExtractor", classModels[0].Methods[2].ParameterTypes[1].Type);
+            Assert.Equal("", classModels[0].Methods[2].ParameterTypes[1].Modifier);
+            Assert.Null(classModels[0].Methods[2].ParameterTypes[1].DefaultValue);
             Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[2].AccessModifier);
             Assert.Equal("abstract", classModels[0].Methods[2].Modifier);
@@ -521,7 +715,9 @@ namespace HoneydewCoreTest.Extractors
             Assert.Equal("f", classModels[0].Methods[0].Name);
             Assert.Equal("void", classModels[0].Methods[0].ReturnType);
             Assert.Equal(1, classModels[0].Methods[0].ParameterTypes.Count);
-            Assert.Equal("int", classModels[0].Methods[0].ParameterTypes[0]);
+            Assert.Equal("int", classModels[0].Methods[0].ParameterTypes[0].Type);
+            Assert.Equal("", classModels[0].Methods[0].ParameterTypes[0].Modifier);
+            Assert.Null(classModels[0].Methods[0].ParameterTypes[0].DefaultValue);
             Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[0].AccessModifier);
             Assert.Equal("static", classModels[0].Methods[0].Modifier);
@@ -530,7 +726,9 @@ namespace HoneydewCoreTest.Extractors
             Assert.Equal("g", classModels[0].Methods[1].Name);
             Assert.Equal("int", classModels[0].Methods[1].ReturnType);
             Assert.Equal(1, classModels[0].Methods[1].ParameterTypes.Count);
-            Assert.Equal("CSharpExtractor", classModels[0].Methods[1].ParameterTypes[0]);
+            Assert.Equal("CSharpExtractor", classModels[0].Methods[1].ParameterTypes[0].Type);
+            Assert.Equal("", classModels[0].Methods[1].ParameterTypes[0].Modifier);
+            Assert.Null(classModels[0].Methods[1].ParameterTypes[0].DefaultValue);
             Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingClassName);
             Assert.Equal("private", classModels[0].Methods[1].AccessModifier);
             Assert.Equal("", classModels[0].Methods[1].Modifier);
@@ -541,8 +739,12 @@ namespace HoneydewCoreTest.Extractors
             Assert.Equal("h", classModels[0].Methods[2].Name);
             Assert.Equal("string", classModels[0].Methods[2].ReturnType);
             Assert.Equal(2, classModels[0].Methods[2].ParameterTypes.Count);
-            Assert.Equal("float", classModels[0].Methods[2].ParameterTypes[0]);
-            Assert.Equal("CSharpExtractor", classModels[0].Methods[2].ParameterTypes[1]);
+            Assert.Equal("float", classModels[0].Methods[2].ParameterTypes[0].Type);
+            Assert.Equal("", classModels[0].Methods[2].ParameterTypes[0].Modifier);
+            Assert.Null(classModels[0].Methods[2].ParameterTypes[0].DefaultValue);
+            Assert.Equal("CSharpExtractor", classModels[0].Methods[2].ParameterTypes[1].Type);
+            Assert.Equal("", classModels[0].Methods[2].ParameterTypes[1].Modifier);
+            Assert.Null(classModels[0].Methods[2].ParameterTypes[1].DefaultValue);
             Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].ContainingClassName);
             Assert.Equal("protected", classModels[0].Methods[2].AccessModifier);
             Assert.Equal("", classModels[0].Methods[2].Modifier);

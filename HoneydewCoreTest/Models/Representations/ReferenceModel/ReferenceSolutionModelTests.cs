@@ -76,7 +76,7 @@ namespace HoneydewCoreTest.Models.Representations.ReferenceModel
 
             Assert.Equal(name, referenceEntity.Name);
         }
-        
+
         [Theory]
         [InlineData("Calculate")]
         [InlineData("Recalculate")]
@@ -104,7 +104,7 @@ namespace HoneydewCoreTest.Models.Representations.ReferenceModel
 
             Assert.Equal(name, referenceEntity.Name);
         }
-        
+
         private void AddDataToModel()
         {
             _sut.Projects.Add(new ReferenceProjectModel
@@ -207,9 +207,13 @@ namespace HoneydewCoreTest.Models.Representations.ReferenceModel
                                         },
                                         ParameterTypes =
                                         {
-                                            new ReferenceClassModel
+                                            new ReferenceParameterModel
                                             {
-                                                Name = "int"
+                                                Type =
+                                                    new ReferenceClassModel
+                                                    {
+                                                        Name = "int"
+                                                    }
                                             }
                                         }
                                     }

@@ -10,7 +10,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 {
     public class MethodInfoMetric : CSharpMetricExtractor, ISemanticMetric
     {
-        public IList<MethodModel> MethodInfos { get; } = new List<MethodModel>();
+        public MethodInfoDataMetric DataMetric { get; set; } = new();
 
         private string _containingClassName = "";
         private string _baseTypeName = CSharpConstants.ObjectIdentifier;
@@ -18,7 +18,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 
         public override IMetric GetMetric()
         {
-            return new Metric<IList<MethodModel>>(MethodInfos);
+            return new Metric<MethodInfoDataMetric>(DataMetric);
         }
 
         public override string PrettyPrint()
@@ -54,20 +54,48 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 
             foreach (var memberDeclarationSyntax in node.Members)
             {
-                if (memberDeclarationSyntax is MethodDeclarationSyntax syntax)
+                switch (memberDeclarationSyntax)
                 {
-                    AddMethodInfo(syntax);
+                    case MethodDeclarationSyntax syntax:
+                        AddMethodInfo(syntax);
+                        break;
+                    case ConstructorDeclarationSyntax constructorSyntax:
+                        AddMethodInfo(constructorSyntax);
+                        break;
                 }
             }
         }
 
-        private void AddMethodInfo(MethodDeclarationSyntax node)
+        private void AddMethodInfo(ConstructorDeclarationSyntax syntax)
         {
-            GetModifiersForNode(node, out var accessModifier, out var modifier);
+            GetModifiersForNode(syntax, out var accessModifier, out var modifier);
 
-            var returnType = node.ReturnType.ToString();
+            var methodModel = new MethodModel
+            {
+                Name = syntax.Identifier.ToString(),
+                ReturnType = null,
+                ContainingClassName = _containingClassName,
+                Modifier = modifier,
+                AccessModifier = accessModifier,
+                IsConstructor = true
+            };
 
-            var returnValueSymbol = ExtractorSemanticModel.GetDeclaredSymbol(node.ReturnType);
+            ExtractInfoAboutParameters(syntax, methodModel);
+
+            ExtractInfoAboutConstructorCalls(syntax, methodModel);
+
+            ExtractInfoAboutCalledMethods(syntax, methodModel);
+
+            DataMetric.ConstructorInfos.Add(methodModel);
+        }
+
+        private void AddMethodInfo(MethodDeclarationSyntax syntax)
+        {
+            GetModifiersForNode(syntax, out var accessModifier, out var modifier);
+
+            var returnType = syntax.ReturnType.ToString();
+
+            var returnValueSymbol = ExtractorSemanticModel.GetDeclaredSymbol(syntax.ReturnType);
             if (returnValueSymbol != null)
             {
                 returnType = returnValueSymbol.ToString();
@@ -75,90 +103,172 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 
             var methodModel = new MethodModel
             {
-                Name = node.Identifier.ToString(),
+                Name = syntax.Identifier.ToString(),
                 ReturnType = returnType,
                 ContainingClassName = _containingClassName,
                 Modifier = modifier,
                 AccessModifier = accessModifier,
             };
 
-            foreach (var parameter in node.ParameterList.Parameters)
+            ExtractInfoAboutParameters(syntax, methodModel);
+
+            ExtractInfoAboutCalledMethods(syntax, methodModel);
+
+            DataMetric.MethodInfos.Add(methodModel);
+        }
+
+        private void ExtractInfoAboutParameters(BaseMethodDeclarationSyntax syntax, MethodModel methodModel)
+        {
+            foreach (var parameter in syntax.ParameterList.Parameters)
             {
                 var parameterSymbol = ExtractorSemanticModel.GetDeclaredSymbol(parameter);
+                var parameterType = parameter.Type?.ToString();
                 if (parameterSymbol != null)
                 {
-                    methodModel.ParameterTypes.Add(parameterSymbol.ToString());
+                    parameterType = parameterSymbol.Type.ToDisplayString();
                 }
-                else if (parameter.Type != null)
+
+                methodModel.ParameterTypes.Add(new ParameterModel
                 {
-                    methodModel.ParameterTypes.Add(parameter.Type.ToString());
-                }
+                    Type = parameterType,
+                    Modifier = parameter.Modifiers.ToString(),
+                    DefaultValue = parameter.Default?.Value.ToString()
+                });
+            }
+        }
+
+        private void ExtractInfoAboutCalledMethods(BaseMethodDeclarationSyntax syntax, MethodModel methodModel)
+        {
+            if (syntax.Body == null)
+            {
+                return;
             }
 
-            if (node.Body != null)
+            foreach (var invocationExpressionSyntax in syntax.Body.DescendantNodes()
+                .OfType<InvocationExpressionSyntax>())
             {
-                foreach (var invocationExpressionSyntax in node.Body.DescendantNodes()
-                    .OfType<InvocationExpressionSyntax>())
+                switch (invocationExpressionSyntax.Expression)
                 {
-                    switch (invocationExpressionSyntax.Expression)
-                    {
-                        case IdentifierNameSyntax:
-                            methodModel.CalledMethods.Add(new MethodCallModel
-                            {
-                                MethodName = invocationExpressionSyntax.Expression.ToString(),
-                                ContainingClassName = _containingClassName,
-                                ParameterTypes = GetParameterTypes(invocationExpressionSyntax)
-                            });
-                            break;
-                        case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
+                    case IdentifierNameSyntax:
+                        methodModel.CalledMethods.Add(new MethodCallModel
                         {
-                            var className = _containingClassName;
+                            MethodName = invocationExpressionSyntax.Expression.ToString(),
+                            ContainingClassName = _containingClassName,
+                            ParameterTypes = GetParameterTypes(invocationExpressionSyntax)
+                        });
+                        break;
+                    case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
+                    {
+                        var className = _containingClassName;
 
-                            if (memberAccessExpressionSyntax.Expression.ToFullString() ==
-                                CSharpConstants.BaseClassIdentifier)
-                            {
-                                className = _baseTypeName;
-                            }
-                            else
-                            {
-                                var symbolInfo =
-                                    ExtractorSemanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression);
-                                if (symbolInfo.Symbol is ILocalSymbol localSymbol)
-                                {
-                                    className = localSymbol.Type.ToDisplayString();
-                                }
-                                else if (symbolInfo.Symbol != null)
-                                {
-                                    className = symbolInfo.Symbol.ToString();
-                                }
-                            }
-
-                            methodModel.CalledMethods.Add(new MethodCallModel
-                            {
-                                MethodName = memberAccessExpressionSyntax.Name.ToString(),
-                                ContainingClassName = className,
-                                ParameterTypes = GetParameterTypes(invocationExpressionSyntax)
-                            });
-                            break;
+                        if (memberAccessExpressionSyntax.Expression.ToFullString() ==
+                            CSharpConstants.BaseClassIdentifier)
+                        {
+                            className = _baseTypeName;
                         }
+                        else
+                        {
+                            var symbolInfo =
+                                ExtractorSemanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression);
+                            if (symbolInfo.Symbol is ILocalSymbol localSymbol)
+                            {
+                                className = localSymbol.Type.ToDisplayString();
+                            }
+                            else if (symbolInfo.Symbol != null)
+                            {
+                                className = symbolInfo.Symbol.ToString();
+                            }
+                        }
+
+                        methodModel.CalledMethods.Add(new MethodCallModel
+                        {
+                            MethodName = memberAccessExpressionSyntax.Name.ToString(),
+                            ContainingClassName = className,
+                            ParameterTypes = GetParameterTypes(invocationExpressionSyntax)
+                        });
+                        break;
                     }
                 }
             }
-
-            MethodInfos.Add(methodModel);
         }
 
-        private IList<string> GetParameterTypes(ExpressionSyntax invocationExpressionSyntax)
+        private void ExtractInfoAboutConstructorCalls(ConstructorDeclarationSyntax syntax, MethodModel methodModel)
         {
-            IList<string> parameterTypes = new List<string>();
-
-            var symbolInfo = ExtractorSemanticModel.GetSymbolInfo(invocationExpressionSyntax);
-            if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
+            if (syntax.Initializer == null)
             {
-                foreach (var parameter in methodSymbol.Parameters)
+                return;
+            }
+
+            var containingClassName = _containingClassName;
+
+            var methodName = syntax.Identifier.ToString();
+            if (syntax.Initializer.ThisOrBaseKeyword.ValueText == "base")
+            {
+                containingClassName = _baseTypeName;
+                methodName = _baseTypeName;
+            }
+
+            IList<ParameterModel> parameterModels = new List<ParameterModel>();
+
+
+            var symbol = ExtractorSemanticModel.GetSymbolInfo(syntax.Initializer).Symbol;
+            if (symbol is IMethodSymbol methodSymbol)
+            {
+                parameterModels = GetParameterTypes(methodSymbol);
+                methodName = methodSymbol.ContainingType.Name;
+            }
+
+            methodModel.CalledMethods.Add(new MethodCallModel
+            {
+                MethodName = methodName,
+                ContainingClassName = containingClassName,
+                ParameterTypes = parameterModels
+            });
+        }
+
+        private IList<ParameterModel> GetParameterTypes(ExpressionSyntax invocationExpressionSyntax)
+        {
+            var symbolInfo = ExtractorSemanticModel.GetSymbolInfo(invocationExpressionSyntax);
+            return symbolInfo.Symbol is not IMethodSymbol methodSymbol
+                ? new List<ParameterModel>()
+                : GetParameterTypes(methodSymbol);
+        }
+
+        private static IList<ParameterModel> GetParameterTypes(IMethodSymbol methodSymbol)
+        {
+            IList<ParameterModel> parameterTypes = new List<ParameterModel>();
+            foreach (var parameter in methodSymbol.Parameters)
+            {
+                var modifier = parameter.RefKind switch
                 {
-                    parameterTypes.Add(parameter.ToString());
+                    RefKind.In => "in",
+                    RefKind.Out => "out",
+                    RefKind.Ref => "ref",
+                    _ => ""
+                };
+
+                if (parameter.IsParams)
+                {
+                    modifier = "params";
                 }
+
+                if (parameter.IsThis)
+                {
+                    modifier = "this";
+                }
+
+                string defaultValue = null;
+                if (parameter.HasExplicitDefaultValue)
+                {
+                    defaultValue = parameter.ExplicitDefaultValue?.ToString();
+                }
+
+                parameterTypes.Add(new ParameterModel
+                {
+                    Type = parameter.Type.ToString(),
+                    Modifier = modifier,
+                    DefaultValue = defaultValue
+                });
             }
 
             return parameterTypes;
