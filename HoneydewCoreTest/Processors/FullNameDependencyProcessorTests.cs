@@ -103,26 +103,28 @@ namespace HoneydewCoreTest.Processors
                 ValueType = typeof(DependencyDataMetric).FullName,
                 Value = new DependencyDataMetric
                 {
-                    Dependencies = new Dictionary<string, int>(),
-                    Usings = { }
+                    Dependencies = new Dictionary<string, int>()
                 }
             });
 
             var projectModel = new ProjectModel();
-            
-           projectModel.Add(classModel1);
-           projectModel.Add(classModel2);
-           projectModel.Add(classModel3);
-           projectModel.Add(classModel4);
-           projectModel.Add(classModel5);
-            
+
+            projectModel.Add(classModel1);
+            projectModel.Add(classModel2);
+            projectModel.Add(classModel3);
+            projectModel.Add(classModel4);
+            projectModel.Add(classModel5);
+
             solutionModel.Projects.Add(projectModel);
 
-            var processable = new ProcessorChain(IProcessable.Of(solutionModel))
-                .Process(_sut)
-                .Finish<SolutionModel>();
+            var repositoryModel = new RepositoryModel();
+            repositoryModel.Solutions.Add(solutionModel);
 
-            var processedProjectModel = processable.Value.Projects[0];
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
+                .Process(_sut)
+                .Finish<RepositoryModel>();
+
+            var processedProjectModel = processable.Value.Solutions[0].Projects[0];
 
             Assert.False(
                 ((DependencyDataMetric) processedProjectModel.Namespaces["Models"].ClassModels[0].Metrics[0].Value)
@@ -239,14 +241,17 @@ namespace HoneydewCoreTest.Processors
             projectModel.Add(classModel3);
             projectModel.Add(classModel4);
             projectModel.Add(classModel5);
-            
+
             solutionModel.Projects.Add(projectModel);
 
-            var processable = new ProcessorChain(IProcessable.Of(solutionModel))
-                .Process(_sut)
-                .Finish<SolutionModel>();
+            var repositoryModel = new RepositoryModel();
+            repositoryModel.Solutions.Add(solutionModel);
 
-            var processedProjectModel = processable.Value.Projects[0];
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
+                .Process(_sut)
+                .Finish<RepositoryModel>();
+
+            var processedProjectModel = processable.Value.Solutions[0].Projects[0];
 
             Assert.Empty(
                 ((DependencyDataMetric) processedProjectModel.Namespaces["Models"].ClassModels[0].Metrics[0].Value)
@@ -265,7 +270,7 @@ namespace HoneydewCoreTest.Processors
                 ((DependencyDataMetric) processedProjectModel.Namespaces["Controllers"].ClassModels[0].Metrics[0]
                     .Value).Dependencies.TryGetValue("Services.Class2", out var depCount3));
             Assert.Equal(2, depCount3);
-            
+
             Assert.True(
                 ((DependencyDataMetric) processedProjectModel.Namespaces["Domain.Data"].ClassModels[0].Metrics[0]
                     .Value).Dependencies.TryGetValue("Controllers.Class3", out var depCount4));
