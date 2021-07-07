@@ -6,57 +6,6 @@ on:
       - 'v*-voyager'
 
 jobs:
-  release-voyager:
-    name: Release Voyager
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '5.0.x'
-
-      - name: Publish for All OS
-        run: |
-          mkdir bin
-          dotnet publish -r win-x64 --self-contained true -p:PublishSingleFile=true -o bin/win -c Release Honeydew/Honeydew.csproj
-          dotnet publish -r linux-x64 --self-contained true -p:PublishSingleFile=true -o bin/linux -c Release Honeydew/Honeydew.csproj
-          dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin/osx -c Release Honeydew/Honeydew.csproj
-
-      - name: Prepare Assets
-        run: |
-          mkdir -p honeydew/results
-          cp README.md honeydew/README.md
-          rm bin/**/*.pdb
-          cp -R bin/* honeydew
-          ls -R -al honeydew
-
-      - name: Create Archive
-        run: zip -r honeydew.zip honeydew
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Honeydew ${{ github.ref }} (Voyager)
-          draft: false
-          prerelease: false
-
-      - name: Upload Windows Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./honeydew.zip
-          asset_name: honeydew.zip
-          asset_content_type: application/zip
-
-
   build-and-publish:
     name: Build and Publish
     runs-on: ubuntu-latest
@@ -96,7 +45,8 @@ jobs:
     name: Build, Publish and Sign (osx)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v1
@@ -140,19 +90,15 @@ jobs:
           path: honeydew-osx.zip
 
   release-and-upload:
-    name: Release and Upload
+    name: Release Honeydew for Voyager
     runs-on: ubuntu-latest
     needs: [build-and-publish, build-publish-and-sign-for-mac]
     steps:
-
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Download all artifacts
         uses: actions/download-artifact@v2
-
-      - name: List all downloads
-        run: |
-            echo "Running in directory $PWD"
 
       - name: Prepare Assets
         run: |
@@ -168,7 +114,12 @@ jobs:
 
           ls -al -R honeydew
 
-          chmod +x macos/Honeydew
+          chmod +x honeydew/bin/win/Honeydew.exe
+          chmod +x honeydew/bin/linux/Honeydew
+          chmod +x honeydew/bin/macos/Honeydew
+
+      - name: Zip Voyager Release
+        run: zip -rl honeydew.zip honeydew
 
       - name: Create Release
         id: create_release
@@ -181,33 +132,12 @@ jobs:
           draft: false
           prerelease: false
 
-
       - name: Upload Windows Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./honeydew-win.zip/honeydew-win.zip
-          asset_name: honeydew-win.zip
-          asset_content_type: application/zip
-
-      - name: Upload Linux Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./honeydew-linux.zip/honeydew-linux.zip
-          asset_name: honeydew-linux.zip
-          asset_content_type: application/zip
-
-      - name: Upload MacOS Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./honeydew-osx.zip/honeydew-osx.zip
-          asset_name: honeydew-osx.zip
+          asset_path: ./honeydew.zip
+          asset_name: honeydew.zip
           asset_content_type: application/zip

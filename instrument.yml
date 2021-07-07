@@ -1,11 +1,10 @@
 name: Honeydew
-run: onEach
+
 results:
   - dir: ${instrument}/results
-    files:
-      - "*.json"
+
 commands:
   - name: run honeydew
-    win: honeydew.exe extract ${repo} results/model.json
-    unix: honeydew extract ${repo} results/model.json
+    win: bin\win\Honeydew.exe extract ${repo}
+    unix: ./bin/linux/honeydew extract ${repo}
 
