@@ -18,7 +18,6 @@
 
     <ItemGroup>
         <Folder Include="Extractors\" />
-        <Folder Include="Analyzers\" />
         <Folder Include="IO\Writers\" />
     </ItemGroup>
 

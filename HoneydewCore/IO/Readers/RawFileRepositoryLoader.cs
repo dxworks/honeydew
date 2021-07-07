@@ -1,21 +1,26 @@
 ﻿using System;
 using System.Text.Json;
 using System.Threading.Tasks;
+using HoneydewCore.Logging;
 using HoneydewCore.Models;
 
 namespace HoneydewCore.IO.Readers
 {
     public class RawFileRepositoryLoader : IRepositoryLoader
     {
+        private readonly IProgressLogger _progressLogger;
         private readonly IFileReader _fileReader;
 
-        public RawFileRepositoryLoader(IFileReader fileReader)
+        public RawFileRepositoryLoader(IProgressLogger progressLogger, IFileReader fileReader)
         {
+            _progressLogger = progressLogger;
             _fileReader = fileReader;
         }
 
         public Task<RepositoryModel> Load(string path)
         {
+            _progressLogger.LogLine($"Opening File at {path}");
+
             var fileContent = _fileReader.ReadFile(path);
 
             try
@@ -50,6 +55,8 @@ namespace HoneydewCore.IO.Readers
                         }
                     }
                 }
+
+                _progressLogger.LogLine("Model Loaded");
 
                 return Task.FromResult(repositoryModel);
             }
