@@ -10,6 +10,7 @@ using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Writers;
 using HoneydewCore.IO.Writers.Exporters;
+using HoneydewCore.Logging;
 using HoneydewCore.Models;
 using HoneydewCore.Models.Representations;
 using HoneydewCore.Processors;
@@ -27,26 +28,27 @@ namespace Honeydew
             await result.MapResult(async options =>
             {
                 var inputPath = options.InputFilePath;
+                var progressLogger = new ConsoleProgressLogger();
 
                 RepositoryModel repositoryModel;
                 switch (options.Command)
                 {
                     case "load":
                     {
-                        repositoryModel = await LoadModel(inputPath);
+                        repositoryModel = await LoadModel(progressLogger, inputPath);
                     }
                         break;
 
                     case "extract":
                     {
                         var extractors = LoadExtractors();
-                        repositoryModel = await ExtractModel(inputPath, extractors);
+                        repositoryModel = await ExtractModel(progressLogger, inputPath, extractors);
                     }
                         break;
 
                     default:
                     {
-                        await Console.Error.WriteLineAsync("Invalid Command!");
+                        await Console.Error.WriteLineAsync("Invalid Command! Please use extract or load");
                         return;
                     }
                 }
@@ -76,18 +78,19 @@ namespace Honeydew
             return extractors;
         }
 
-        private static async Task<RepositoryModel> LoadModel(string inputPath)
+        private static async Task<RepositoryModel> LoadModel(IProgressLogger progressLogger, string inputPath)
         {
             // Load repository model from path
-            IRepositoryLoader repositoryLoader = new RawFileRepositoryLoader(new FileReader());
+            IRepositoryLoader repositoryLoader = new RawFileRepositoryLoader(progressLogger, new FileReader());
             var repositoryModel = await repositoryLoader.Load(inputPath);
             return repositoryModel;
         }
 
-        private static async Task<RepositoryModel> ExtractModel(string inputPath, IList<IFactExtractor> extractors)
+        private static async Task<RepositoryModel> ExtractModel(IProgressLogger progressLogger, string inputPath,
+            IList<IFactExtractor> extractors)
         {
             // Create repository model from path
-            IRepositoryLoader repositoryLoader = new RepositoryLoader(extractors);
+            IRepositoryLoader repositoryLoader = new RepositoryLoader(progressLogger, extractors);
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;

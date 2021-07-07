@@ -7,7 +7,7 @@ namespace HoneydewCoreTest.Extractors
     public class CSharpClassFactExtractorsTests
     {
         private readonly IFactExtractor _sut;
-
+        
         public CSharpClassFactExtractorsTests()
         {
             _sut = new CSharpClassFactExtractor();
