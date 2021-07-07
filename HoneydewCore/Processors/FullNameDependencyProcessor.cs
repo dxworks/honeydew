@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Models;
 
 namespace HoneydewCore.Processors
 {
-    public class FullNameDependencyProcessor : IProcessorFunction<SolutionModel, SolutionModel>
+    public class FullNameDependencyProcessor : IProcessorFunction<RepositoryModel, RepositoryModel>
     {
-        public Func<Processable<SolutionModel>, Processable<SolutionModel>> GetFunction()
+        public Func<Processable<RepositoryModel>, Processable<RepositoryModel>> GetFunction()
         {
             return solutionModelProcessable =>
             {
-                var solutionModel = solutionModelProcessable.Value;
+                var repositoryModel = solutionModelProcessable.Value;
 
-                foreach (var classModel in solutionModel.GetEnumerable())
+                foreach (var classModel in repositoryModel.GetEnumerable())
                 {
                     var parameterDependenciesMetrics = classModel.Metrics.Where(metric =>
                         typeof(DependencyMetric).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
@@ -30,10 +31,23 @@ namespace HoneydewCore.Processors
                         IDictionary<string, int> fullNameDependencies = new Dictionary<string, int>();
                         foreach (var (dependencyName, appearanceCount) in dependencyDataMetric.Dependencies)
                         {
-                            var fullClassName =
-                                solutionModel.FindClassFullNameInUsings(dependencyDataMetric.Usings,
-                                    dependencyName, classModel.Namespace);
-                            fullNameDependencies.Add(fullClassName, appearanceCount);
+                            bool wasSet = false;
+                            foreach (var solutionModel in repositoryModel.Solutions)
+                            {
+                                var fullClassName =
+                                    solutionModel.FindClassFullNameInUsings(dependencyDataMetric.Usings,
+                                        dependencyName, classModel.Namespace);
+                                if (fullClassName != dependencyName)
+                                {
+                                    fullNameDependencies.Add(fullClassName, appearanceCount);
+                                    wasSet = true;
+                                }
+                            }
+
+                            if (!wasSet)
+                            {
+                                fullNameDependencies.Add(dependencyName, appearanceCount);
+                            }
                         }
 
                         dependencyDataMetric.Dependencies = fullNameDependencies;

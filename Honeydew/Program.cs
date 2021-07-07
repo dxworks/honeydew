@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using CommandLine;
 using HoneydewCore.Extractors;
@@ -17,6 +18,8 @@ namespace Honeydew
 {
     class Program
     {
+        private const string DefaultPathForAllRepresentations = "results";
+
         public static async Task Main(string[] args)
         {
             var result = Parser.Default.ParseArguments<CommandLineOptions>(args);
@@ -24,9 +27,6 @@ namespace Honeydew
             await result.MapResult(async options =>
             {
                 var inputPath = options.InputFilePath;
-                var outputPath = options.OutputFilePath;
-                var representationType = options.RepresentationType;
-                var exportType = options.ExportType;
 
                 RepositoryModel repositoryModel;
                 switch (options.Command)
@@ -38,7 +38,6 @@ namespace Honeydew
                         break;
 
                     case "extract":
-                    case "":
                     {
                         var extractors = LoadExtractors();
                         repositoryModel = await ExtractModel(inputPath, extractors);
@@ -52,83 +51,10 @@ namespace Honeydew
                     }
                 }
 
-                // change representation
-                IExportable exportable = repositoryModel;
-                switch (representationType)
-                {
-                    case "class_relations":
-                    {
-                        var classRelationsProcessable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                            .Process(new FullNameDependencyProcessor())
-                            .Process(new RepositoryModelToClassRelationsProcessor())
-                            .Peek<ClassRelationsRepresentation>(relationsRepresentation =>
-                                relationsRepresentation.UsePrettyPrint = true)
-                            .Finish<ClassRelationsRepresentation>();
-                        exportable = classRelationsProcessable.Value;
-                    }
-                        break;
+                WriteAllRepresentations(repositoryModel, DefaultPathForAllRepresentations);
 
-                    default:
-                    {
-                    }
-                        break;
-                }
-                
-                IFileWriter writer;
-                IExporter exporter = new JsonModelExporter();
-                
-                if (string.IsNullOrWhiteSpace(outputPath))
-                {
-                    writer = new ConsoleWriter();
-                }
-                else
-                {
-                    writer = new FileWriter();
-
-                    if (string.IsNullOrEmpty(exportType))
-                    {
-                        if (outputPath.EndsWith(".csv"))
-                        {
-                            exportType = "csv";
-                        }
-                        else
-                        {
-                            exportType = "json";
-                        }
-                    }
-                }
-
-                if (exportType == "csv")
-                {
-                    // add formulas for each row for the csv export
-                    exporter = new CsvModelExporter
-                    {
-                        ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
-                        {
-                            new("Total Count", ExportUtils.CsvSumPerLine)
-                        }
-                    };
-                }
-
-                var exportString = exportable.Export(exporter);
-
-                if (string.IsNullOrEmpty(exportString))
-                {
-                    Console.WriteLine(
-                        $"Export type '{exportType}' not supported for the '{representationType}' representation !");
-                    return;
-                }
-
-                writer.WriteFile(outputPath, exportString);
-                if (writer is not ConsoleWriter)
-                {
-                    Console.WriteLine("Extraction Complete!");
-                    Console.WriteLine($"Output File will be found at {outputPath}");
-                }
-                else
-                {
-                    // write to result folder
-                }
+                Console.WriteLine("Extraction Complete!");
+                Console.WriteLine($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
@@ -165,6 +91,36 @@ namespace Honeydew
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;
+        }
+
+        private static void WriteAllRepresentations(RepositoryModel repositoryModel, string outputPath)
+        {
+            var writer = new FileWriter();
+
+            writer.WriteFile(Path.Combine(outputPath, "honeydew.json"),
+                repositoryModel.Export(new JsonModelExporter()));
+
+            var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
+            writer.WriteFile(Path.Combine(outputPath, "honeydew.csv"),
+                classRelationsRepresentation.Export(new CsvModelExporter
+                {
+                    ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
+                    {
+                        new("Total Count", ExportUtils.CsvSumPerLine)
+                    }
+                }));
+        }
+
+        private static IExportable GetClassRelationsRepresentation(RepositoryModel repositoryModel)
+        {
+            var classRelationsProcessable = new ProcessorChain(IProcessable.Of(repositoryModel))
+                .Process(new FullNameDependencyProcessor())
+                .Process(new RepositoryModelToClassRelationsProcessor())
+                .Peek<ClassRelationsRepresentation>(relationsRepresentation =>
+                    relationsRepresentation.UsePrettyPrint = true)
+                .Finish<ClassRelationsRepresentation>();
+            IExportable exportable = classRelationsProcessable.Value;
+            return exportable;
         }
     }
 }
