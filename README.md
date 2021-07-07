@@ -1,52 +1,30 @@
 ﻿# Honeydew
 
-Honeydew is a tool that extracts facts from a C# Solution
+Honeydew is a tool that extracts facts from a C# Solution or C# Project
 
-## Load Solution
+## Extraction
 
-```
-honeydew <path_to_solution> [output_file_path] [-r representation_type=normal] [-e export_type=json]
-```
-
-If `output_path` is provided, the resulted model will be written to a file at the specified location.
-
-If `output_path` is not provided, the resulted model will be printed at the standard output
-
-#### Supported Export Types
-
-| Representation Type | JSON | CSV |
-|----|----|----|
-| normal | YES | NO |
-| class_relations | YES | YES |
-
-### Normal Representation
-
-This Representation has all the information that Honeydew had extracted about the solution
+For extracting information about a solution or project use the following command:
 
 ```
-.\Honeydew.exe <path_to_solution> [output_file_path] -r normal
+.\Honeydew extract <input_path>
 ```
 
-### Class Relations Representation
+If `input_path` is a path to a solution file (.sln), Honeydew will extract facts from that solution file
 
-This Representation indicates the dependencies between all the classes of the solution
+If `input_path` is a path to a C# project file (.csproj), Honeydew will extract facts from that project
 
-```
-.\Honeydew.exe <path_to_solution> [output_file_path] -r class_relations
-```
+If `input_path` is a path to a folder, Honeydew will find all the solution files and C# project files and extract facts
+from those
 
-### Examples
+The output files will be places in a folder named `results`
 
-#### Normal Representation to a JSON File
+## Load Model from file
 
-```
-.\Honeydew.exe <path_to_solution> <output_file_path>
-```
-
-#### Class Relation Representation to a CSV File
+For loading a model from a json file
 
 ```
-.\Honeydew.exe <path_to_solution> <output_file_path> -r class_relations -e csv
+.\Honeydew load <path_to_json_model> 
 ```
 
 ## Build Project
