@@ -926,5 +926,22 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
                 Assert.Equal("", constructorModel.Modifier);
             }
         }
+
+        [Fact]
+        public void Extract_ShouldExtractNullDefaultValue()
+        {
+            const string fileContent = @"using System;
+                                     using HoneydewCore.Extractors;
+                                     namespace TopLevel
+                                     {
+                                            public class Bar
+                                            {
+                                                int MethodWithNullableDefault(string? p = null) {return 2;}
+                                            }                                  
+                                     }";
+
+            var classModels = _factExtractor.Extract(fileContent);
+            Assert.Equal("null", classModels[0].Methods[0].ParameterTypes[0].DefaultValue);
+        }
     }
 }
