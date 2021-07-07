@@ -8,18 +8,18 @@ namespace HoneydewCoreTest.Processors
 {
     public class FullNameDependencyProcessorTests
     {
-        private readonly FullNameDependencyProcessor _sut;
-
+        private readonly FullNameModelProcessor _sut;
+    
         public FullNameDependencyProcessorTests()
         {
-            _sut = new FullNameDependencyProcessor();
+            _sut = new FullNameModelProcessor();
         }
-
+    
         [Fact]
         public void GetFunction_ShouldReturnTheSameClassNames_WhenGivenClassNamesThatCouldNotBeLocatedInSolution()
         {
             var solutionModel = new SolutionModel();
-
+    
             ClassModel classModel1 = new()
             {
                 FullName = "Models.Class1", FilePath = "path/Models/Class1.cs"
@@ -37,7 +37,7 @@ namespace HoneydewCoreTest.Processors
                     Usings = {"System"}
                 }
             });
-
+    
             ClassModel classModel2 = new()
             {
                 FullName = "Services.Class2", FilePath = "path/Services/Class2.cs"
@@ -55,7 +55,7 @@ namespace HoneydewCoreTest.Processors
                     Usings = {"System", "Xunit"}
                 }
             });
-
+    
             ClassModel classModel3 = new()
             {
                 FullName = "Controllers.Class3", FilePath = "path/Controllers/Class3.cs"
@@ -74,7 +74,7 @@ namespace HoneydewCoreTest.Processors
                     Usings = {"Xunit"}
                 }
             });
-
+    
             ClassModel classModel4 = new()
             {
                 FullName = "Domain.Data.Class4", FilePath = "path/Domain/Data/Class4.cs"
@@ -92,7 +92,7 @@ namespace HoneydewCoreTest.Processors
                     Usings = {"System", "Xunit"}
                 }
             });
-
+    
             ClassModel classModel5 = new()
             {
                 FullName = "Controllers.Class5", FilePath = "path/Controllers/Class5.cs"
@@ -106,26 +106,26 @@ namespace HoneydewCoreTest.Processors
                     Dependencies = new Dictionary<string, int>()
                 }
             });
-
+    
             var projectModel = new ProjectModel();
-
+    
             projectModel.Add(classModel1);
             projectModel.Add(classModel2);
             projectModel.Add(classModel3);
             projectModel.Add(classModel4);
             projectModel.Add(classModel5);
-
+    
             solutionModel.Projects.Add(projectModel);
-
+    
             var repositoryModel = new RepositoryModel();
             repositoryModel.Solutions.Add(solutionModel);
-
+    
             var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
                 .Process(_sut)
                 .Finish<RepositoryModel>();
-
+    
             var processedProjectModel = processable.Value.Solutions[0].Projects[0];
-
+    
             Assert.False(
                 ((DependencyDataMetric) processedProjectModel.Namespaces["Models"].ClassModels[0].Metrics[0].Value)
                 .Dependencies.TryGetValue("Full.Path.Dependency1", out _));
@@ -142,12 +142,12 @@ namespace HoneydewCoreTest.Processors
                 ((DependencyDataMetric) processedProjectModel.Namespaces["Domain.Data"].ClassModels[0].Metrics[0]
                     .Value).Dependencies.TryGetValue("Full.Path.Dependency2", out _));
         }
-
+    
         [Fact]
         public void GetFunction_ShouldReturnTheFullClassNames_WhenGivenClassNamesThatCanBeLocatedInSolution()
         {
             var solutionModel = new SolutionModel();
-
+    
             ClassModel classModel1 = new()
             {
                 FullName = "Models.Class1", FilePath = "path/Models/Class1.cs"
@@ -162,7 +162,7 @@ namespace HoneydewCoreTest.Processors
                     Usings = {"System"}
                 }
             });
-
+    
             ClassModel classModel2 = new()
             {
                 FullName = "Services.Class2", FilePath = "path/Services/Class2.cs"
@@ -180,7 +180,7 @@ namespace HoneydewCoreTest.Processors
                     Usings = {"System", "Models"}
                 }
             });
-
+    
             ClassModel classModel3 = new()
             {
                 FullName = "Controllers.Class3", FilePath = "path/Controllers/Class3.cs"
@@ -199,7 +199,7 @@ namespace HoneydewCoreTest.Processors
                     Usings = {"Models", "Services"}
                 }
             });
-
+    
             ClassModel classModel4 = new()
             {
                 FullName = "Domain.Data.Class4", FilePath = "path/Domain/Data/Class4.cs"
@@ -218,7 +218,7 @@ namespace HoneydewCoreTest.Processors
                     Usings = {"Controllers"}
                 }
             });
-
+    
             ClassModel classModel5 = new()
             {
                 FullName = "Controllers.Class5", FilePath = "path/Controllers/Class5.cs"
@@ -233,35 +233,35 @@ namespace HoneydewCoreTest.Processors
                     Usings = { }
                 }
             });
-
+    
             var projectModel = new ProjectModel();
-
+    
             projectModel.Add(classModel1);
             projectModel.Add(classModel2);
             projectModel.Add(classModel3);
             projectModel.Add(classModel4);
             projectModel.Add(classModel5);
-
+    
             solutionModel.Projects.Add(projectModel);
-
+    
             var repositoryModel = new RepositoryModel();
             repositoryModel.Solutions.Add(solutionModel);
-
+    
             var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
                 .Process(_sut)
                 .Finish<RepositoryModel>();
-
+    
             var processedProjectModel = processable.Value.Solutions[0].Projects[0];
-
+    
             Assert.Empty(
                 ((DependencyDataMetric) processedProjectModel.Namespaces["Models"].ClassModels[0].Metrics[0].Value)
                 .Dependencies);
-
+    
             Assert.True(
                 ((DependencyDataMetric) processedProjectModel.Namespaces["Services"].ClassModels[0].Metrics[0].Value)
                 .Dependencies.TryGetValue("Models.Class1", out var depCount1));
             Assert.Equal(2, depCount1);
-
+    
             Assert.True(
                 ((DependencyDataMetric) processedProjectModel.Namespaces["Controllers"].ClassModels[0].Metrics[0]
                     .Value).Dependencies.TryGetValue("Models.Class1", out var depCount2));
@@ -270,7 +270,7 @@ namespace HoneydewCoreTest.Processors
                 ((DependencyDataMetric) processedProjectModel.Namespaces["Controllers"].ClassModels[0].Metrics[0]
                     .Value).Dependencies.TryGetValue("Services.Class2", out var depCount3));
             Assert.Equal(2, depCount3);
-
+    
             Assert.True(
                 ((DependencyDataMetric) processedProjectModel.Namespaces["Domain.Data"].ClassModels[0].Metrics[0]
                     .Value).Dependencies.TryGetValue("Controllers.Class3", out var depCount4));

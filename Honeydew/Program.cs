@@ -53,10 +53,17 @@ namespace Honeydew
                     }
                 }
 
+                progressLogger.LogLine("Resolving Full Name Dependencies");
+
+                // Set fully qualified names to classes
+                repositoryModel = new ProcessorChain(IProcessable.Of(repositoryModel))
+                    .Process(new FullNameModelProcessor())
+                    .Finish<RepositoryModel>().Value;
+
                 WriteAllRepresentations(repositoryModel, DefaultPathForAllRepresentations);
 
-                Console.WriteLine("Extraction Complete!");
-                Console.WriteLine($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
+                progressLogger.LogLine("Extraction Complete!");
+                progressLogger.LogLine($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
@@ -117,7 +124,6 @@ namespace Honeydew
         private static IExportable GetClassRelationsRepresentation(RepositoryModel repositoryModel)
         {
             var classRelationsProcessable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                .Process(new FullNameDependencyProcessor())
                 .Process(new RepositoryModelToClassRelationsProcessor())
                 .Peek<ClassRelationsRepresentation>(relationsRepresentation =>
                     relationsRepresentation.UsePrettyPrint = true)

@@ -38,21 +38,8 @@ namespace HoneydewCore.IO.Readers.SolutionRead
             _progressLogger.LogLine($"Found {solution?.Projects.Count()} C# Projects in solution {pathToFile}");
 
             var solutionModel = await _solutionLoadingStrategy.Load(solution, _extractors);
-
-            _progressLogger.LogLine("Resolving Full Name Dependencies");
-
-            solutionModel = AddFullNameToDependencies(solutionModel);
-
+            
             return solutionModel;
-        }
-
-        private static SolutionModel AddFullNameToDependencies(SolutionModel solutionModel)
-        {
-            var solutionModelProcessable = new ProcessorChain(IProcessable.Of(solutionModel))
-                .Process(new FullNameModelProcessor())
-                .Finish<SolutionModel>();
-
-            return solutionModelProcessable.Value;
         }
     }
 }

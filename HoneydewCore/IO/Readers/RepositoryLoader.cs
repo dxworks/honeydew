@@ -107,23 +107,12 @@ namespace HoneydewCore.IO.Readers
                 {
                     _progressLogger.LogLine(
                         $"{defaultSolutionModel.Projects.Count} C# Projects were found that didn't belong to any solution file");
-
-                    defaultSolutionModel = AddFullNameToDependencies(defaultSolutionModel);
-
+                    
                     repositoryModel.Solutions.Add(defaultSolutionModel);
                 }
             }
 
             return repositoryModel;
-        }
-
-        private static SolutionModel AddFullNameToDependencies(SolutionModel solutionModel)
-        {
-            var solutionModelProcessable = new ProcessorChain(IProcessable.Of(solutionModel))
-                .Process(new FullNameModelProcessor())
-                .Finish<SolutionModel>();
-
-            return solutionModelProcessable.Value;
         }
     }
 }

@@ -16,8 +16,8 @@ namespace HoneydewCoreTest.Processors
         [Fact]
         public void GetFunction_ShouldReturnTheFullClassNames_WhenGivenClassModels()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
-
             var projectModel1 = new ProjectModel();
 
             projectModel1.Namespaces.Add("Models", new NamespaceModel
@@ -46,7 +46,7 @@ namespace HoneydewCoreTest.Processors
 
             projectModel1.Namespaces.Add("Controllers", new NamespaceModel
             {
-                Name = "Models",
+                Name = "Controllers",
                 ClassModels =
                 {
                     new ClassModel
@@ -78,28 +78,31 @@ namespace HoneydewCoreTest.Processors
 
             solutionModel.Projects.Add(projectModel2);
 
-            var processable = new ProcessorChain(IProcessable.Of(solutionModel))
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
                 .Process(_sut)
-                .Finish<SolutionModel>();
+                .Finish<RepositoryModel>();
 
             var actualSolutionModel = processable.Value;
 
-            Assert.Equal("Models.Class1", actualSolutionModel.Projects[0].Namespaces["Models"].ClassModels[0].FullName);
+            Assert.Equal("Models.Class1",
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models"].ClassModels[0].FullName);
             Assert.Equal("Services.Class2",
-                actualSolutionModel.Projects[0].Namespaces["Services"].ClassModels[0].FullName);
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Services"].ClassModels[0].FullName);
             Assert.Equal("Controllers.Class3",
-                actualSolutionModel.Projects[0].Namespaces["Controllers"].ClassModels[0].FullName);
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Controllers"].ClassModels[0].FullName);
             Assert.Equal("Controllers.Class4",
-                actualSolutionModel.Projects[0].Namespaces["Controllers"].ClassModels[1].FullName);
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Controllers"].ClassModels[1].FullName);
             Assert.Equal("Domain.Data.Class5",
-                actualSolutionModel.Projects[1].Namespaces["Domain.Data"].ClassModels[0].FullName);
+                actualSolutionModel.Solutions[0].Projects[1].Namespaces["Domain.Data"].ClassModels[0].FullName);
         }
 
         [Fact]
         public void GetFunction_ShouldReturnTheFullClassName_WhenGivenClassWithInnerClass()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
-
             var projectModel1 = new ProjectModel();
 
             projectModel1.Namespaces.Add("Project1.Models", new NamespaceModel
@@ -124,13 +127,15 @@ namespace HoneydewCoreTest.Processors
 
             solutionModel.Projects.Add(projectModel1);
 
-            var processable = new ProcessorChain(IProcessable.Of(solutionModel))
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
                 .Process(_sut)
-                .Finish<SolutionModel>();
+                .Finish<RepositoryModel>();
 
             var actualSolutionModel = processable.Value;
 
-            var namespaceModel = actualSolutionModel.Projects[0].Namespaces["Project1.Models"];
+            var namespaceModel = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Project1.Models"];
             Assert.Equal("Project1.Models.Class1", namespaceModel.ClassModels[0].FullName);
             Assert.Equal("Project1.Models.Class1.InnerClass1", namespaceModel.ClassModels[1].FullName);
             Assert.Equal("Project1.Models.Class1.InnerClass1.InnerClass2", namespaceModel.ClassModels[2].FullName);
@@ -139,8 +144,8 @@ namespace HoneydewCoreTest.Processors
         [Fact]
         public void GetFunction_ShouldReturnTheFullBaseClassNames_WhenGivenClassModels()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
-
             var projectModel1 = new ProjectModel();
 
             projectModel1.Namespaces.Add("Models", new NamespaceModel
@@ -217,34 +222,36 @@ namespace HoneydewCoreTest.Processors
             });
 
             solutionModel.Projects.Add(projectModel2);
+            repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = new ProcessorChain(IProcessable.Of(solutionModel))
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
                 .Process(_sut)
-                .Finish<SolutionModel>();
+                .Finish<RepositoryModel>();
 
             var actualSolutionModel = processable.Value;
 
-            var modelsNamespace = actualSolutionModel.Projects[0].Namespaces["Models"];
+            var modelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models"];
             Assert.Equal("object", modelsNamespace.ClassModels[0].BaseClassFullName);
             Assert.Equal("Models.Class1", modelsNamespace.ClassModels[1].BaseClassFullName);
             Assert.Equal("Models.Class1", modelsNamespace.ClassModels[2].BaseClassFullName);
             Assert.Equal("Models.Class3", modelsNamespace.ClassModels[3].BaseClassFullName);
 
-            var otherModelsNamespace = actualSolutionModel.Projects[0].Namespaces["Models.Other"];
+            var otherModelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models.Other"];
             Assert.Equal("Models.Other.Class2", otherModelsNamespace.ClassModels[0].BaseClassFullName);
             Assert.Equal("Models.Class1", otherModelsNamespace.ClassModels[1].BaseClassFullName);
             Assert.Equal("Models.TheClass", otherModelsNamespace.ClassModels[2].BaseClassFullName);
             Assert.Equal("Models.Other.Class3", otherModelsNamespace.ClassModels[3].BaseClassFullName);
 
             Assert.Equal("Models.Other.SuperClass",
-                actualSolutionModel.Projects[1].Namespaces["MyNamespace"].ClassModels[0].BaseClassFullName);
+                actualSolutionModel.Solutions[0].Projects[1].Namespaces["MyNamespace"].ClassModels[0]
+                    .BaseClassFullName);
         }
 
         [Fact]
         public void GetFunction_ShouldReturnTheFullBaseInterfacesNames_WhenGivenClassModels()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
-
             var projectModel1 = new ProjectModel();
 
 
@@ -316,19 +323,21 @@ namespace HoneydewCoreTest.Processors
 
             solutionModel.Projects.Add(projectModel2);
 
-            var processable = new ProcessorChain(IProcessable.Of(solutionModel))
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
                 .Process(_sut)
-                .Finish<SolutionModel>();
+                .Finish<RepositoryModel>();
 
             var actualSolutionModel = processable.Value;
 
-            var modelInterfacesNamespace = actualSolutionModel.Projects[0].Namespaces["Models.Interfaces"];
+            var modelInterfacesNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models.Interfaces"];
             Assert.Empty(modelInterfacesNamespace.ClassModels[0].BaseInterfaces);
             Assert.Equal("Models.Interfaces.IInterface1", modelInterfacesNamespace.ClassModels[1].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface1", modelInterfacesNamespace.ClassModels[2].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface2", modelInterfacesNamespace.ClassModels[2].BaseInterfaces[1]);
 
-            var modelsNamespace = actualSolutionModel.Projects[0].Namespaces["Models"];
+            var modelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models"];
             Assert.Equal("Models.Interfaces.IInterface3", modelsNamespace.ClassModels[0].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[1].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[2].BaseInterfaces[0]);
@@ -337,20 +346,21 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[3].BaseInterfaces[0]);
             Assert.Equal("MyNamespace.AInterface", modelsNamespace.ClassModels[3].BaseInterfaces[1]);
 
-            Assert.Empty(actualSolutionModel.Projects[1].Namespaces["MyNamespace"].ClassModels[0].BaseInterfaces);
+            Assert.Empty(actualSolutionModel.Solutions[0].Projects[1].Namespaces["MyNamespace"].ClassModels[0]
+                .BaseInterfaces);
         }
 
         [Fact]
         public void GetFunction_ShouldReturnTheFullNamesOfContainingClassNameOfMethods_WhenGivenClassModelsWithMethods()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
-
             var projectModel1 = new ProjectModel();
 
 
             projectModel1.Namespaces.Add("Project1.Models.Classes", new NamespaceModel
             {
-                Name = "Project1.Models.Interfaces",
+                Name = "Project1.Models.Classes",
                 ClassModels =
                 {
                     new ClassModel
@@ -403,16 +413,17 @@ namespace HoneydewCoreTest.Processors
                     }
                 }
             });
-            
-            solutionModel.Projects.Add(projectModel1);
 
-            var processable = new ProcessorChain(IProcessable.Of(solutionModel))
+            solutionModel.Projects.Add(projectModel1);
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
                 .Process(_sut)
-                .Finish<SolutionModel>();
+                .Finish<RepositoryModel>();
 
             var actualSolutionModel = processable.Value;
 
-            var modelInterfacesNamespace = actualSolutionModel.Projects[0].Namespaces["Project1.Models.Classes"];
+            var modelInterfacesNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Project1.Models.Classes"];
 
             Assert.Empty(modelInterfacesNamespace.ClassModels[0].Constructors);
             Assert.Equal(2, modelInterfacesNamespace.ClassModels[0].Methods.Count);
