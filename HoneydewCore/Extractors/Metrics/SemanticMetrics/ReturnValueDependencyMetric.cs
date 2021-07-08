@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 {
@@ -11,8 +12,17 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
         
         public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
-            var parameterType = node.ReturnType.ToString();
-            AddDependency(parameterType);
+            var dependencySymbolInfo = ExtractorSemanticModel.GetSymbolInfo(node.ReturnType);
+
+            if (dependencySymbolInfo.Symbol == null)
+            {
+                var parameterType = node.ReturnType.ToString();
+                AddDependency(parameterType);
+            }
+            else
+            {
+                AddDependency(dependencySymbolInfo.Symbol.ToString());
+            }
         }
     }
 }
