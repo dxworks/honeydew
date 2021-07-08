@@ -28,7 +28,6 @@ jobs:
         env:
           TAG: ${{ github.ref }}
 
-
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '5.0.x'
