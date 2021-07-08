@@ -8,6 +8,11 @@ namespace HoneydewCore.Models
 
         public string FilePath { get; set; }
 
+        public IList<string> ProjectReferences { get; set; } = new List<string>();
+
+        public IDictionary<string, NamespaceModel> Namespaces { get; set; } =
+            new Dictionary<string, NamespaceModel>();
+
         public ProjectModel()
         {
         }
@@ -17,8 +22,6 @@ namespace HoneydewCore.Models
             Name = name;
         }
 
-        public IDictionary<string, NamespaceModel> Namespaces { get; set; } =
-            new Dictionary<string, NamespaceModel>();
 
         public void Add(ClassModel classModel)
         {
