@@ -18,6 +18,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Extract Semver
+        id: semver_parser
+        run: |
+          semver=${TAG#"refs/tags/v"}
+          semver=${semver%"-voyager"}
+
+          echo ::set-output name=semver::$semver
+        env:
+          TAG: ${{ github.ref }}
+
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '5.0.x'
@@ -25,7 +35,7 @@ jobs:
       - name: Release for OS
         run: |
           mkdir bin
-          dotnet publish -r ${{matrix.os}}-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
+          dotnet publish -r ${{matrix.os}}-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
 
       - name: Prepare Assets
         run: |
@@ -55,11 +65,20 @@ jobs:
           dotnet-version: '6.0.x'
           include-prerelease: true
 
+      - name: Extract Semver
+        id: semver_parser
+        run: |
+          semver=${TAG#"refs/tags/v"}
+          semver=${semver%"-voyager"}
+
+          echo ::set-output name=semver::$semver
+        env:
+          TAG: ${{ github.ref }}
 
       - name: dotnet publish
         run: |
           mkdir bin
-          dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
+          dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
 
       - name: Prepare Assets
         run: |
