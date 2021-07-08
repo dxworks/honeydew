@@ -22,7 +22,9 @@ namespace HoneydewCore.IO.Readers.Strategies
         {
             var projectModel = new ProjectModel(project.Name)
             {
-                FilePath = project.FilePath
+                FilePath = project.FilePath,
+                ProjectReferences = project.AllProjectReferences
+                    .Select(reference => reference.ProjectId.ToString()).ToList()
             };
 
             var i = 1;

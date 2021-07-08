@@ -5,6 +5,7 @@ namespace HoneydewCore.Models
 {
     public record SolutionModel : IExportable
     {
+        public string FilePath { get; set; }
         public IList<ProjectModel> Projects { get; set; } = new List<ProjectModel>();
 
         public string Export(IExporter exporter)

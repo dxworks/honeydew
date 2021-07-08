@@ -22,8 +22,11 @@ namespace HoneydewCore.IO.Readers.Strategies
 
         public async Task<SolutionModel> Load(Solution solution, IList<IFactExtractor> extractors)
         {
-            SolutionModel solutionModel = new();
-            
+            SolutionModel solutionModel = new()
+            {
+                FilePath = solution.FilePath
+            };
+
             var i = 1;
             var projectCount = solution.Projects.Count();
             foreach (var project in solution.Projects)
