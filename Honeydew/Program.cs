@@ -55,12 +55,13 @@ namespace Honeydew
 
                 progressLogger.LogLine("Resolving Full Name Dependencies");
 
+                ConsoleLoggerWithHistory consoleLoggerWithHistory = new(new ConsoleProgressLogger());
                 // Set fully qualified names to classes
                 repositoryModel = new ProcessorChain(IProcessable.Of(repositoryModel))
-                    .Process(new FullNameModelProcessor(progressLogger))
+                    .Process(new FullNameModelProcessor(consoleLoggerWithHistory))
                     .Finish<RepositoryModel>().Value;
 
-                WriteAllRepresentations(repositoryModel, DefaultPathForAllRepresentations);
+                WriteAllRepresentations(repositoryModel, consoleLoggerWithHistory, DefaultPathForAllRepresentations);
 
                 progressLogger.LogLine("Extraction Complete!");
                 progressLogger.LogLine($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
@@ -103,7 +104,8 @@ namespace Honeydew
             return repositoryModel;
         }
 
-        private static void WriteAllRepresentations(RepositoryModel repositoryModel, string outputPath)
+        private static void WriteAllRepresentations(RepositoryModel repositoryModel,
+            ConsoleLoggerWithHistory consoleLoggerWithHistory, string outputPath)
         {
             var writer = new FileWriter();
 
@@ -119,6 +121,13 @@ namespace Honeydew
                         new("Total Count", ExportUtils.CsvSumPerLine)
                     }
                 }));
+
+
+            var ambiguousHistory = consoleLoggerWithHistory.GetHistory();
+            if (!string.IsNullOrEmpty(ambiguousHistory))
+            {
+                writer.WriteFile(Path.Combine(outputPath, "honeydew_ambiguous.txt"), ambiguousHistory);
+            }
         }
 
         private static IExportable GetClassRelationsRepresentation(RepositoryModel repositoryModel)
