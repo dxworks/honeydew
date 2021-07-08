@@ -57,7 +57,7 @@ namespace Honeydew
 
                 // Set fully qualified names to classes
                 repositoryModel = new ProcessorChain(IProcessable.Of(repositoryModel))
-                    .Process(new FullNameModelProcessor())
+                    .Process(new FullNameModelProcessor(progressLogger))
                     .Finish<RepositoryModel>().Value;
 
                 WriteAllRepresentations(repositoryModel, DefaultPathForAllRepresentations);
