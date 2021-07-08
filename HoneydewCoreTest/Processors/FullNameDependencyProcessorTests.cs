@@ -1,18 +1,21 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
+using HoneydewCore.Logging;
 using HoneydewCore.Models;
 using HoneydewCore.Processors;
+using Moq;
 using Xunit;
 
 namespace HoneydewCoreTest.Processors
 {
     public class FullNameDependencyProcessorTests
     {
-        private readonly FullNameDependencyProcessor _sut;
+        private readonly FullNameModelProcessor _sut;
+        private readonly Mock<IProgressLogger> _progressLoggerMock = new();
 
         public FullNameDependencyProcessorTests()
         {
-            _sut = new FullNameDependencyProcessor();
+            _sut = new FullNameModelProcessor(_progressLoggerMock.Object);
         }
 
         [Fact]
@@ -229,8 +232,7 @@ namespace HoneydewCoreTest.Processors
                 ValueType = typeof(DependencyDataMetric).FullName,
                 Value = new DependencyDataMetric
                 {
-                    Dependencies = new Dictionary<string, int>(),
-                    Usings = { }
+                    Dependencies = new Dictionary<string, int>()
                 }
             });
 

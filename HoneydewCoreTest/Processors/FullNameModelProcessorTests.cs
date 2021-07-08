@@ -1,5 +1,9 @@
-﻿using HoneydewCore.Models;
+﻿using System.Collections.Generic;
+using HoneydewCore.Extractors.Metrics.SemanticMetrics;
+using HoneydewCore.Logging;
+using HoneydewCore.Models;
 using HoneydewCore.Processors;
+using Moq;
 using Xunit;
 
 namespace HoneydewCoreTest.Processors
@@ -7,17 +11,18 @@ namespace HoneydewCoreTest.Processors
     public class FullNameModelProcessorTests
     {
         private readonly FullNameModelProcessor _sut;
+        private readonly Mock<IProgressLogger> _progressLoggerMock = new();
 
         public FullNameModelProcessorTests()
         {
-            _sut = new FullNameModelProcessor();
+            _sut = new FullNameModelProcessor(_progressLoggerMock.Object);
         }
 
         [Fact]
         public void GetFunction_ShouldReturnTheFullClassNames_WhenGivenClassModels()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
-
             var projectModel1 = new ProjectModel();
 
             projectModel1.Namespaces.Add("Models", new NamespaceModel
@@ -46,7 +51,7 @@ namespace HoneydewCoreTest.Processors
 
             projectModel1.Namespaces.Add("Controllers", new NamespaceModel
             {
-                Name = "Models",
+                Name = "Controllers",
                 ClassModels =
                 {
                     new ClassModel
@@ -78,28 +83,31 @@ namespace HoneydewCoreTest.Processors
 
             solutionModel.Projects.Add(projectModel2);
 
-            var processable = new ProcessorChain(IProcessable.Of(solutionModel))
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
                 .Process(_sut)
-                .Finish<SolutionModel>();
+                .Finish<RepositoryModel>();
 
             var actualSolutionModel = processable.Value;
 
-            Assert.Equal("Models.Class1", actualSolutionModel.Projects[0].Namespaces["Models"].ClassModels[0].FullName);
+            Assert.Equal("Models.Class1",
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models"].ClassModels[0].FullName);
             Assert.Equal("Services.Class2",
-                actualSolutionModel.Projects[0].Namespaces["Services"].ClassModels[0].FullName);
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Services"].ClassModels[0].FullName);
             Assert.Equal("Controllers.Class3",
-                actualSolutionModel.Projects[0].Namespaces["Controllers"].ClassModels[0].FullName);
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Controllers"].ClassModels[0].FullName);
             Assert.Equal("Controllers.Class4",
-                actualSolutionModel.Projects[0].Namespaces["Controllers"].ClassModels[1].FullName);
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Controllers"].ClassModels[1].FullName);
             Assert.Equal("Domain.Data.Class5",
-                actualSolutionModel.Projects[1].Namespaces["Domain.Data"].ClassModels[0].FullName);
+                actualSolutionModel.Solutions[0].Projects[1].Namespaces["Domain.Data"].ClassModels[0].FullName);
         }
 
         [Fact]
         public void GetFunction_ShouldReturnTheFullClassName_WhenGivenClassWithInnerClass()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
-
             var projectModel1 = new ProjectModel();
 
             projectModel1.Namespaces.Add("Project1.Models", new NamespaceModel
@@ -124,13 +132,15 @@ namespace HoneydewCoreTest.Processors
 
             solutionModel.Projects.Add(projectModel1);
 
-            var processable = new ProcessorChain(IProcessable.Of(solutionModel))
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
                 .Process(_sut)
-                .Finish<SolutionModel>();
+                .Finish<RepositoryModel>();
 
             var actualSolutionModel = processable.Value;
 
-            var namespaceModel = actualSolutionModel.Projects[0].Namespaces["Project1.Models"];
+            var namespaceModel = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Project1.Models"];
             Assert.Equal("Project1.Models.Class1", namespaceModel.ClassModels[0].FullName);
             Assert.Equal("Project1.Models.Class1.InnerClass1", namespaceModel.ClassModels[1].FullName);
             Assert.Equal("Project1.Models.Class1.InnerClass1.InnerClass2", namespaceModel.ClassModels[2].FullName);
@@ -139,8 +149,8 @@ namespace HoneydewCoreTest.Processors
         [Fact]
         public void GetFunction_ShouldReturnTheFullBaseClassNames_WhenGivenClassModels()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
-
             var projectModel1 = new ProjectModel();
 
             projectModel1.Namespaces.Add("Models", new NamespaceModel
@@ -217,34 +227,36 @@ namespace HoneydewCoreTest.Processors
             });
 
             solutionModel.Projects.Add(projectModel2);
+            repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = new ProcessorChain(IProcessable.Of(solutionModel))
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
                 .Process(_sut)
-                .Finish<SolutionModel>();
+                .Finish<RepositoryModel>();
 
             var actualSolutionModel = processable.Value;
 
-            var modelsNamespace = actualSolutionModel.Projects[0].Namespaces["Models"];
+            var modelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models"];
             Assert.Equal("object", modelsNamespace.ClassModels[0].BaseClassFullName);
             Assert.Equal("Models.Class1", modelsNamespace.ClassModels[1].BaseClassFullName);
             Assert.Equal("Models.Class1", modelsNamespace.ClassModels[2].BaseClassFullName);
             Assert.Equal("Models.Class3", modelsNamespace.ClassModels[3].BaseClassFullName);
 
-            var otherModelsNamespace = actualSolutionModel.Projects[0].Namespaces["Models.Other"];
+            var otherModelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models.Other"];
             Assert.Equal("Models.Other.Class2", otherModelsNamespace.ClassModels[0].BaseClassFullName);
             Assert.Equal("Models.Class1", otherModelsNamespace.ClassModels[1].BaseClassFullName);
             Assert.Equal("Models.TheClass", otherModelsNamespace.ClassModels[2].BaseClassFullName);
             Assert.Equal("Models.Other.Class3", otherModelsNamespace.ClassModels[3].BaseClassFullName);
 
             Assert.Equal("Models.Other.SuperClass",
-                actualSolutionModel.Projects[1].Namespaces["MyNamespace"].ClassModels[0].BaseClassFullName);
+                actualSolutionModel.Solutions[0].Projects[1].Namespaces["MyNamespace"].ClassModels[0]
+                    .BaseClassFullName);
         }
 
         [Fact]
         public void GetFunction_ShouldReturnTheFullBaseInterfacesNames_WhenGivenClassModels()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
-
             var projectModel1 = new ProjectModel();
 
 
@@ -316,19 +328,21 @@ namespace HoneydewCoreTest.Processors
 
             solutionModel.Projects.Add(projectModel2);
 
-            var processable = new ProcessorChain(IProcessable.Of(solutionModel))
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
                 .Process(_sut)
-                .Finish<SolutionModel>();
+                .Finish<RepositoryModel>();
 
             var actualSolutionModel = processable.Value;
 
-            var modelInterfacesNamespace = actualSolutionModel.Projects[0].Namespaces["Models.Interfaces"];
+            var modelInterfacesNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models.Interfaces"];
             Assert.Empty(modelInterfacesNamespace.ClassModels[0].BaseInterfaces);
             Assert.Equal("Models.Interfaces.IInterface1", modelInterfacesNamespace.ClassModels[1].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface1", modelInterfacesNamespace.ClassModels[2].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface2", modelInterfacesNamespace.ClassModels[2].BaseInterfaces[1]);
 
-            var modelsNamespace = actualSolutionModel.Projects[0].Namespaces["Models"];
+            var modelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models"];
             Assert.Equal("Models.Interfaces.IInterface3", modelsNamespace.ClassModels[0].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[1].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[2].BaseInterfaces[0]);
@@ -337,20 +351,21 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[3].BaseInterfaces[0]);
             Assert.Equal("MyNamespace.AInterface", modelsNamespace.ClassModels[3].BaseInterfaces[1]);
 
-            Assert.Empty(actualSolutionModel.Projects[1].Namespaces["MyNamespace"].ClassModels[0].BaseInterfaces);
+            Assert.Empty(actualSolutionModel.Solutions[0].Projects[1].Namespaces["MyNamespace"].ClassModels[0]
+                .BaseInterfaces);
         }
 
         [Fact]
         public void GetFunction_ShouldReturnTheFullNamesOfContainingClassNameOfMethods_WhenGivenClassModelsWithMethods()
         {
+            var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
-
             var projectModel1 = new ProjectModel();
 
 
             projectModel1.Namespaces.Add("Project1.Models.Classes", new NamespaceModel
             {
-                Name = "Project1.Models.Interfaces",
+                Name = "Project1.Models.Classes",
                 ClassModels =
                 {
                     new ClassModel
@@ -403,16 +418,18 @@ namespace HoneydewCoreTest.Processors
                     }
                 }
             });
-            
-            solutionModel.Projects.Add(projectModel1);
 
-            var processable = new ProcessorChain(IProcessable.Of(solutionModel))
+            solutionModel.Projects.Add(projectModel1);
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
                 .Process(_sut)
-                .Finish<SolutionModel>();
+                .Finish<RepositoryModel>();
 
             var actualSolutionModel = processable.Value;
 
-            var modelInterfacesNamespace = actualSolutionModel.Projects[0].Namespaces["Project1.Models.Classes"];
+            var modelInterfacesNamespace =
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Project1.Models.Classes"];
 
             Assert.Empty(modelInterfacesNamespace.ClassModels[0].Constructors);
             Assert.Equal(2, modelInterfacesNamespace.ClassModels[0].Methods.Count);
@@ -434,6 +451,541 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal(1, modelInterfacesNamespace.ClassModels[2].Constructors.Count);
             Assert.Equal("Project1.Models.Classes.Class3",
                 modelInterfacesNamespace.ClassModels[2].Constructors[0].ContainingClassName);
+        }
+
+        [Fact]
+        public void
+            GetFunction_ShouldHaveFindClassInOtherProject_WhenGivenAClassThatCouldNotBeenFoundInCurrentProject()
+        {
+            var repositoryModel = new RepositoryModel();
+            var solutionModel = new SolutionModel();
+            var projectModel1 = new ProjectModel();
+
+            projectModel1.Namespaces.Add("Models", new NamespaceModel
+            {
+                Name = "Models",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "SomeModel"
+                    }
+                }
+            });
+
+            solutionModel.Projects.Add(projectModel1);
+
+            var projectModel2 = new ProjectModel();
+            projectModel2.Namespaces.Add("Services", new NamespaceModel
+            {
+                Name = "Services",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "Service",
+                        Fields =
+                        {
+                            new FieldModel
+                            {
+                                Type = "SomeModel"
+                            }
+                        }
+                    }
+                }
+            });
+
+
+            solutionModel.Projects.Add(projectModel2);
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
+                .Process(_sut)
+                .Finish<RepositoryModel>();
+
+            var actualSolutionModel = processable.Value;
+
+            Assert.Equal("Models.SomeModel",
+                actualSolutionModel.Solutions[0].Projects[1].Namespaces["Services"].ClassModels[0].Fields[0].Type);
+        }
+
+        [Fact]
+        public void
+            GetFunction_ShouldHaveFindClassInOtherSolution_WhenGivenAClassThatCouldNotBeenFoundInCurrentSolution()
+        {
+            var repositoryModel = new RepositoryModel();
+            var solutionModel1 = new SolutionModel();
+            var projectModel1 = new ProjectModel();
+
+            projectModel1.Namespaces.Add("Models", new NamespaceModel
+            {
+                Name = "Models",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "SomeModel"
+                    }
+                }
+            });
+
+            solutionModel1.Projects.Add(projectModel1);
+
+            var projectModel2 = new ProjectModel();
+            projectModel2.Namespaces.Add("Services", new NamespaceModel
+            {
+                Name = "Services",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "Service",
+                    }
+                }
+            });
+
+            solutionModel1.Projects.Add(projectModel2);
+
+            var solutionModel2 = new SolutionModel();
+            var projectModel3 = new ProjectModel();
+
+            projectModel3.Namespaces.Add("OtherSolutionNamespace", new NamespaceModel
+            {
+                Name = "OtherSolutionNamespace",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "Controller",
+                        Fields =
+                        {
+                            new FieldModel
+                            {
+                                Type = "SomeModel"
+                            },
+                        },
+                        Methods =
+                        {
+                            new MethodModel
+                            {
+                                ReturnType = "Service"
+                            }
+                        }
+                    }
+                }
+            });
+
+            solutionModel2.Projects.Add(projectModel3);
+            
+            repositoryModel.Solutions.Add(solutionModel1);
+            repositoryModel.Solutions.Add(solutionModel2);
+
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
+                .Process(_sut)
+                .Finish<RepositoryModel>();
+
+            var actualSolutionModel = processable.Value;
+
+            Assert.Equal("Models.SomeModel",
+                actualSolutionModel.Solutions[1].Projects[0].Namespaces["OtherSolutionNamespace"].ClassModels[0]
+                    .Fields[0].Type);
+            Assert.Equal("Services.Service",
+                actualSolutionModel.Solutions[1].Projects[0].Namespaces["OtherSolutionNamespace"].ClassModels[0]
+                    .Methods[0].ReturnType);
+        }
+
+        [Fact]
+        public void
+            GetFunction_ShouldHavePropertiesWithAmbiguousTypesAndLogThem_WhenGivenClassesWithTheSameNameInTheSameProject()
+        {
+            var repositoryModel = new RepositoryModel();
+            var solutionModel = new SolutionModel();
+            var projectModel = new ProjectModel();
+
+            projectModel.Namespaces.Add("Models", new NamespaceModel
+            {
+                Name = "Models",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "AmbiguousClass"
+                    }
+                }
+            });
+
+            projectModel.Namespaces.Add("Services", new NamespaceModel
+            {
+                Name = "Services",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "AmbiguousClass"
+                    }
+                }
+            });
+
+            projectModel.Namespaces.Add("Controllers", new NamespaceModel
+            {
+                Name = "Controllers",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "AmbiguousClass"
+                    }
+                }
+            });
+
+            projectModel.Namespaces.Add("SomeNamespace", new NamespaceModel
+            {
+                Name = "SomeNamespace",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "SomeClass",
+                        BaseClassFullName = "AmbiguousClass",
+                        BaseInterfaces =
+                        {
+                            "AmbiguousClass"
+                        },
+                        Fields =
+                        {
+                            new FieldModel
+                            {
+                                Type = "AmbiguousClass"
+                            }
+                        },
+                        Constructors =
+                        {
+                            new MethodModel
+                            {
+                                ParameterTypes =
+                                {
+                                    new ParameterModel
+                                    {
+                                        Type = "AmbiguousClass"
+                                    }
+                                }
+                            }
+                        },
+                        Methods =
+                        {
+                            new MethodModel
+                            {
+                                ParameterTypes =
+                                {
+                                    new ParameterModel
+                                    {
+                                        Type = "AmbiguousClass"
+                                    }
+                                },
+                                CalledMethods =
+                                {
+                                    new MethodCallModel
+                                    {
+                                        ContainingClassName = "AmbiguousClass",
+                                        ParameterTypes =
+                                        {
+                                            new ParameterModel
+                                            {
+                                                Type = "AmbiguousClass"
+                                            }
+                                        },
+                                    }
+                                }
+                            }
+                        },
+                        Metrics =
+                        {
+                            new ClassMetric
+                            {
+                                ExtractorName = typeof(ParameterDependencyMetric).FullName,
+                                ValueType = typeof(DependencyDataMetric).FullName,
+                                Value = new DependencyDataMetric
+                                {
+                                    Dependencies = new Dictionary<string, int>()
+                                    {
+                                        {"AmbiguousClass", 2}
+                                    },
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            solutionModel.Projects.Add(projectModel);
+
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
+                .Process(_sut)
+                .Finish<RepositoryModel>();
+
+            var actualSolutionModel = processable.Value;
+
+            Assert.Equal("Models.AmbiguousClass",
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models"].ClassModels[0].FullName);
+            Assert.Equal("Services.AmbiguousClass",
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Services"].ClassModels[0].FullName);
+            Assert.Equal("Controllers.AmbiguousClass",
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Controllers"].ClassModels[0].FullName);
+
+            var someClassModel =
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces["SomeNamespace"].ClassModels[0];
+            Assert.Equal("SomeNamespace.SomeClass",
+                someClassModel.FullName);
+
+            Assert.Equal("AmbiguousClass", someClassModel.BaseClassFullName);
+            Assert.Equal("AmbiguousClass", someClassModel.BaseInterfaces[0]);
+            Assert.Equal("AmbiguousClass", someClassModel.Constructors[0].ParameterTypes[0].Type);
+            Assert.Equal("AmbiguousClass", someClassModel.Methods[0].ParameterTypes[0].Type);
+            Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].ContainingClassName);
+            Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].ParameterTypes[0].Type);
+            Assert.Equal("AmbiguousClass", someClassModel.Fields[0].Type);
+            var metricDependencies = ((DependencyDataMetric) someClassModel.Metrics[0].Value).Dependencies;
+            Assert.Equal(1, metricDependencies.Count);
+            Assert.True(metricDependencies.ContainsKey("AmbiguousClass"));
+
+            _progressLoggerMock.Verify(logger => logger.LogLine($"Multiple full names found for AmbiguousClass: "),
+                Times.Once);
+            _progressLoggerMock.Verify(logger => logger.LogLine($"Models.AmbiguousClass"));
+            _progressLoggerMock.Verify(logger => logger.LogLine($"Services.AmbiguousClass"));
+            _progressLoggerMock.Verify(logger => logger.LogLine($"Controllers.AmbiguousClass"));
+        }
+
+        [Fact]
+        public void
+            GetFunction_ShouldHavePropertiesWithAmbiguousNamesAndLogThem_WhenGivenClassesWithTheSameNameInTheSameSolution()
+        {
+            var repositoryModel = new RepositoryModel();
+            var solutionModel = new SolutionModel();
+            var projectModel1 = new ProjectModel();
+
+            projectModel1.Namespaces.Add("Project1.Services", new NamespaceModel
+            {
+                Name = "Project1.Services",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "MyService"
+                    }
+                }
+            });
+
+            var projectModel2 = new ProjectModel();
+            projectModel2.Namespaces.Add("Project2.Services", new NamespaceModel
+            {
+                Name = "Project2.Services",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "MyService"
+                    }
+                }
+            });
+
+            var projectModel3 = new ProjectModel();
+            projectModel3.Namespaces.Add("Controllers", new NamespaceModel
+            {
+                Name = "Controllers",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "MyController",
+                        Fields =
+                        {
+                            new FieldModel
+                            {
+                                Type = "MyService"
+                            }
+                        }
+                    }
+                }
+            });
+
+            solutionModel.Projects.Add(projectModel1);
+            solutionModel.Projects.Add(projectModel2);
+            solutionModel.Projects.Add(projectModel3);
+
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
+                .Process(_sut)
+                .Finish<RepositoryModel>();
+
+            var actualSolutionModel = processable.Value;
+
+            Assert.Equal("MyService",
+                actualSolutionModel.Solutions[0].Projects[2].Namespaces["Controllers"].ClassModels[0].Fields[0].Type);
+
+            _progressLoggerMock.Verify(logger => logger.LogLine($"Multiple full names found for MyService: "),
+                Times.Once);
+            _progressLoggerMock.Verify(logger => logger.LogLine($"Project1.Services.MyService"));
+            _progressLoggerMock.Verify(logger => logger.LogLine($"Project2.Services.MyService"));
+        }
+        
+         [Fact]
+        public void
+            GetFunction_ShouldHavePropertiesWithAmbiguousNamesAndLogThem_WhenGivenClassesWithTheSameNameInTheSameRepository()
+        {
+            var repositoryModel = new RepositoryModel();
+            
+            var solutionModel1 = new SolutionModel();
+            var projectModel1 = new ProjectModel();
+
+            projectModel1.Namespaces.Add("Project1.Services", new NamespaceModel
+            {
+                Name = "Project1.Services",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "MyService"
+                    }
+                }
+            });
+
+            solutionModel1.Projects.Add(projectModel1);
+            
+            var solutionModel2 = new SolutionModel();
+            var projectModel2 = new ProjectModel();
+            projectModel2.Namespaces.Add("Project2.Services", new NamespaceModel
+            {
+                Name = "Project2.Services",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "MyService"
+                    }
+                }
+            });
+
+            
+            solutionModel2.Projects.Add(projectModel2);
+
+            var solutionModel3 = new SolutionModel();
+            var projectModel3 = new ProjectModel();
+            projectModel3.Namespaces.Add("NamespaceName", new NamespaceModel
+            {
+                Name = "NamespaceName",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "MyController",
+                        Fields =
+                        {
+                            new FieldModel
+                            {
+                                Type = "MyService"
+                            }
+                        }
+                    }
+                }
+            });
+            solutionModel3.Projects.Add(projectModel3);
+            
+            repositoryModel.Solutions.Add(solutionModel1);
+            repositoryModel.Solutions.Add(solutionModel2);
+            repositoryModel.Solutions.Add(solutionModel3);
+            
+            
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
+                .Process(_sut)
+                .Finish<RepositoryModel>();
+
+            var actualSolutionModel = processable.Value;
+
+            Assert.Equal("MyService",
+                actualSolutionModel.Solutions[2].Projects[0].Namespaces["NamespaceName"].ClassModels[0].Fields[0].Type);
+
+            _progressLoggerMock.Verify(logger => logger.LogLine($"Multiple full names found for MyService: "),
+                Times.Once);
+            _progressLoggerMock.Verify(logger => logger.LogLine($"Project1.Services.MyService"));
+            _progressLoggerMock.Verify(logger => logger.LogLine($"Project2.Services.MyService"));
+        }
+        
+            [Fact]
+        public void
+            GetFunction_ShouldHaveClassNameTheSame_WhenClassNameDoesNotExistInRepository()
+        {
+            var repositoryModel = new RepositoryModel();
+            var solutionModel1 = new SolutionModel();
+            var projectModel1 = new ProjectModel();
+
+            projectModel1.Namespaces.Add("Project1.Services", new NamespaceModel
+            {
+                Name = "Project1.Services",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "MyService"
+                    }
+                }
+            });
+
+            var projectModel2 = new ProjectModel();
+            projectModel2.Namespaces.Add("Project2.Services", new NamespaceModel
+            {
+                Name = "Project2.Services",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "MyService"
+                    }
+                }
+            });
+
+            var projectModel3 = new ProjectModel();
+            projectModel3.Namespaces.Add("Controllers", new NamespaceModel
+            {
+                Name = "Controllers",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "MyController",
+                        Fields =
+                        {
+                            new FieldModel
+                            {
+                                Type = "OutOfRepositoryClass"
+                            }
+                        }
+                    }
+                }
+            });
+            
+            solutionModel1.Projects.Add(projectModel1);
+            solutionModel1.Projects.Add(projectModel2);
+
+
+            var solutionModel2 = new SolutionModel();
+            solutionModel2.Projects.Add(projectModel3);
+            repositoryModel.Solutions.Add(solutionModel1);
+            repositoryModel.Solutions.Add(solutionModel2);
+
+            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
+                .Process(_sut)
+                .Finish<RepositoryModel>();
+
+            var actualSolutionModel = processable.Value;
+
+            Assert.Equal("OutOfRepositoryClass",
+                actualSolutionModel.Solutions[1].Projects[0].Namespaces["Controllers"].ClassModels[0].Fields[0].Type);
+
+            _progressLoggerMock.Verify(logger => logger.LogLine($"Multiple full names found for MyService: "),
+                Times.Never);
         }
     }
 }

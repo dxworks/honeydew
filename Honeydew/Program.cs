@@ -53,10 +53,18 @@ namespace Honeydew
                     }
                 }
 
-                WriteAllRepresentations(repositoryModel, DefaultPathForAllRepresentations);
+                progressLogger.LogLine("Resolving Full Name Dependencies");
 
-                Console.WriteLine("Extraction Complete!");
-                Console.WriteLine($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
+                ConsoleLoggerWithHistory consoleLoggerWithHistory = new(new ConsoleProgressLogger());
+                // Set fully qualified names to classes
+                repositoryModel = new ProcessorChain(IProcessable.Of(repositoryModel))
+                    .Process(new FullNameModelProcessor(consoleLoggerWithHistory))
+                    .Finish<RepositoryModel>().Value;
+
+                WriteAllRepresentations(repositoryModel, consoleLoggerWithHistory, DefaultPathForAllRepresentations);
+
+                progressLogger.LogLine("Extraction Complete!");
+                progressLogger.LogLine($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
@@ -96,7 +104,8 @@ namespace Honeydew
             return repositoryModel;
         }
 
-        private static void WriteAllRepresentations(RepositoryModel repositoryModel, string outputPath)
+        private static void WriteAllRepresentations(RepositoryModel repositoryModel,
+            ConsoleLoggerWithHistory consoleLoggerWithHistory, string outputPath)
         {
             var writer = new FileWriter();
 
@@ -112,12 +121,18 @@ namespace Honeydew
                         new("Total Count", ExportUtils.CsvSumPerLine)
                     }
                 }));
+
+
+            var ambiguousHistory = consoleLoggerWithHistory.GetHistory();
+            if (!string.IsNullOrEmpty(ambiguousHistory))
+            {
+                writer.WriteFile(Path.Combine(outputPath, "honeydew_ambiguous.txt"), ambiguousHistory);
+            }
         }
 
         private static IExportable GetClassRelationsRepresentation(RepositoryModel repositoryModel)
         {
             var classRelationsProcessable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                .Process(new FullNameDependencyProcessor())
                 .Process(new RepositoryModelToClassRelationsProcessor())
                 .Peek<ClassRelationsRepresentation>(relationsRepresentation =>
                     relationsRepresentation.UsePrettyPrint = true)

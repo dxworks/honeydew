@@ -168,9 +168,9 @@ namespace HoneydewCoreTest.IO.Readers
             Assert.Equal(1, namespaceModel.ClassModels.Count);
 
             var classModel = namespaceModel.ClassModels[0];
-            Assert.Equal("Project1.Services.CreateService", classModel.FullName);
+            Assert.Equal("CreateService", classModel.FullName);
             Assert.Equal("object", classModel.BaseClassFullName);
-            Assert.Equal("Project1.Services.CreateService", classModel.FullName);
+            Assert.Equal("CreateService", classModel.FullName);
             Assert.Equal(1, classModel.BaseInterfaces.Count);
             Assert.Equal("IService", classModel.BaseInterfaces[0]);
             Assert.Equal("validPathToProject/Project1/Services/CreateService.cs", classModel.FilePath);
