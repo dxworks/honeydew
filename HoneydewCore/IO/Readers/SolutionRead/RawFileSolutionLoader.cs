@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text.Json;
 using System.Threading.Tasks;
-using HoneydewCore.Models;
 using HoneydewModels;
 
 namespace HoneydewCore.IO.Readers.SolutionRead
@@ -30,7 +29,7 @@ namespace HoneydewCore.IO.Readers.SolutionRead
 
                 foreach (var projectModel in solutionModel.Projects)
                 {
-                    foreach (var (_, projectNamespace) in projectModel.Namespaces)
+                    foreach (var projectNamespace in projectModel.Namespaces)
                     {
                         foreach (var classModel in projectNamespace.ClassModels)
                         {

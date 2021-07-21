@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors;
-using HoneydewCore.Models;
 using HoneydewCore.Processors;
 using HoneydewModels;
 using Xunit;
@@ -43,11 +42,9 @@ namespace HoneydewCoreTest.Processors
                         Name = "Project1",
                         Namespaces =
                         {
+                            new NamespaceModel
                             {
-                                "Project1.Services", new NamespaceModel
-                                {
-                                    Name = "Project1.Services"
-                                }
+                                Name = "Project1.Services"
                             }
                         }
                     },
@@ -56,17 +53,13 @@ namespace HoneydewCoreTest.Processors
                         Name = "Project2",
                         Namespaces =
                         {
+                            new NamespaceModel
                             {
-                                "Project2.Services", new NamespaceModel
-                                {
-                                    Name = "Project2.Services"
-                                }
+                                Name = "Project2.Services"
                             },
+                            new NamespaceModel
                             {
-                                "Project2.Models", new NamespaceModel
-                                {
-                                    Name = "Project2.Models"
-                                }
+                                Name = "Project2.Models"
                             }
                         }
                     }
@@ -108,45 +101,41 @@ namespace HoneydewCoreTest.Processors
                         Name = "Project1",
                         Namespaces =
                         {
+                            new NamespaceModel
                             {
-                                "Project1.Services", new NamespaceModel
+                                Name = "Project1.Services",
+                                ClassModels = new List<ClassModel>
                                 {
-                                    Name = "Project1.Services",
-                                    ClassModels = new List<ClassModel>
+                                    new()
                                     {
-                                        new()
+                                        FullName = "Project1.Services.CreateService",
+                                        FilePath = "validPathToProject/Project1/Services/CreateService.cs"
+                                    },
+                                    new()
+                                    {
+                                        FullName = "Project1.Services.RetrieveService",
+                                        FilePath = "validPathToProject/Project1/Services/RetrieveService.cs",
+                                        Metrics = new List<ClassMetric>
                                         {
-                                            FullName = "Project1.Services.CreateService",
-                                            FilePath = "validPathToProject/Project1/Services/CreateService.cs"
-                                        },
-                                        new()
-                                        {
-                                            FullName = "Project1.Services.RetrieveService",
-                                            FilePath = "validPathToProject/Project1/Services/RetrieveService.cs",
-                                            Metrics = new List<ClassMetric>
+                                            new()
                                             {
-                                                new()
-                                                {
-                                                    Value = "0",
-                                                    ExtractorName = "SomeExtractor",
-                                                    ValueType = "int"
-                                                }
+                                                Value = "0",
+                                                ExtractorName = "SomeExtractor",
+                                                ValueType = "int"
                                             }
                                         }
                                     }
                                 }
                             },
+                            new NamespaceModel
                             {
-                                "Project1.Models", new NamespaceModel
+                                Name = "Project1.Models",
+                                ClassModels = new List<ClassModel>
                                 {
-                                    Name = "Project1.Models",
-                                    ClassModels = new List<ClassModel>
+                                    new()
                                     {
-                                        new()
-                                        {
-                                            FullName = "Project1.Models.MyModel",
-                                            FilePath = "validPathToProject/Project1/Models/MyModel.cs",
-                                        }
+                                        FullName = "Project1.Models.MyModel",
+                                        FilePath = "validPathToProject/Project1/Models/MyModel.cs",
                                     }
                                 }
                             }
@@ -213,139 +202,135 @@ namespace HoneydewCoreTest.Processors
                         Name = "Project1",
                         Namespaces =
                         {
+                            new NamespaceModel
                             {
-                                "Project1.Services", new NamespaceModel
+                                Name = "Project1.Services",
+                                ClassModels = new List<ClassModel>
                                 {
-                                    Name = "Project1.Services",
-                                    ClassModels = new List<ClassModel>
+                                    new()
                                     {
-                                        new()
+                                        FullName = "Project1.Services.CreateService",
+                                        FilePath = "validPathToProject/Project1/Services/CreateService.cs",
+                                        Methods = new List<MethodModel>
                                         {
-                                            FullName = "Project1.Services.CreateService",
-                                            FilePath = "validPathToProject/Project1/Services/CreateService.cs",
-                                            Methods = new List<MethodModel>
+                                            new()
                                             {
-                                                new()
+                                                Name = "Create",
+                                                Modifier = "",
+                                                AccessModifier = "public",
+                                                ReturnType = "Project1.Models.MyModel",
+                                                ContainingClassName = "Project1.Services.CreateService",
+                                            },
+                                            new()
+                                            {
+                                                Name = "Convert",
+                                                Modifier = "",
+                                                AccessModifier = "public",
+                                                ParameterTypes =
                                                 {
-                                                    Name = "Create",
-                                                    Modifier = "",
-                                                    AccessModifier = "public",
-                                                    ReturnType = "Project1.Models.MyModel",
-                                                    ContainingClassName = "Project1.Services.CreateService",
-                                                },
-                                                new()
-                                                {
-                                                    Name = "Convert",
-                                                    Modifier = "",
-                                                    AccessModifier = "public",
-                                                    ParameterTypes =
+                                                    new ParameterModel
                                                     {
-                                                        new ParameterModel
-                                                        {
-                                                            Type = "Project1.Models.MyModel"
-                                                        }
-                                                    },
-                                                    ReturnType = "Project1.Models.MyModel",
-                                                    ContainingClassName = "Project1.Services.CreateService",
-                                                    CalledMethods =
-                                                    {
-                                                        new MethodCallModel
-                                                        {
-                                                            ContainingClassName = "Project1.Services.CreateService",
-                                                            MethodName = "Create"
-                                                        }
+                                                        Type = "Project1.Models.MyModel"
                                                     }
                                                 },
-                                                new()
+                                                ReturnType = "Project1.Models.MyModel",
+                                                ContainingClassName = "Project1.Services.CreateService",
+                                                CalledMethods =
                                                 {
-                                                    Name = "Convert",
-                                                    Modifier = "",
-                                                    AccessModifier = "public",
-                                                    ParameterTypes =
+                                                    new MethodCallModel
                                                     {
-                                                        new ParameterModel
-                                                        {
-                                                            Type = "Project1.Models.OtherModel"
-                                                        }
-                                                    },
-                                                    ReturnType = "Project1.Models.MyModel",
-                                                    ContainingClassName = "Project1.Services.CreateService",
-                                                    CalledMethods =
+                                                        ContainingClassName = "Project1.Services.CreateService",
+                                                        MethodName = "Create"
+                                                    }
+                                                }
+                                            },
+                                            new()
+                                            {
+                                                Name = "Convert",
+                                                Modifier = "",
+                                                AccessModifier = "public",
+                                                ParameterTypes =
+                                                {
+                                                    new ParameterModel
                                                     {
-                                                        new MethodCallModel
+                                                        Type = "Project1.Models.OtherModel"
+                                                    }
+                                                },
+                                                ReturnType = "Project1.Models.MyModel",
+                                                ContainingClassName = "Project1.Services.CreateService",
+                                                CalledMethods =
+                                                {
+                                                    new MethodCallModel
+                                                    {
+                                                        ContainingClassName = "Project1.Services.CreateService",
+                                                        MethodName = "Convert",
+                                                        ParameterTypes =
                                                         {
-                                                            ContainingClassName = "Project1.Services.CreateService",
-                                                            MethodName = "Convert",
-                                                            ParameterTypes =
+                                                            new ParameterModel
                                                             {
-                                                                new ParameterModel
-                                                                {
-                                                                    Type = "Project1.Models.MyModel"
-                                                                }
+                                                                Type = "Project1.Models.MyModel"
                                                             }
                                                         }
                                                     }
-                                                },
-                                                new()
+                                                }
+                                            },
+                                            new()
+                                            {
+                                                Name = "Process",
+                                                Modifier = "",
+                                                AccessModifier = "public",
+                                                ParameterTypes =
                                                 {
-                                                    Name = "Process",
-                                                    Modifier = "",
-                                                    AccessModifier = "public",
-                                                    ParameterTypes =
+                                                    new ParameterModel
                                                     {
-                                                        new ParameterModel
-                                                        {
-                                                            Type = "Project1.Models.MyModel",
-                                                        },
-                                                        new ParameterModel
-                                                        {
-                                                            Type = "Project1.Models.MyModel"
-                                                        }
+                                                        Type = "Project1.Models.MyModel",
                                                     },
-                                                    ReturnType = "Project1.Models.MyModel",
-                                                    ContainingClassName = "Project1.Services.CreateService",
-                                                    CalledMethods =
+                                                    new ParameterModel
                                                     {
-                                                        new MethodCallModel
+                                                        Type = "Project1.Models.MyModel"
+                                                    }
+                                                },
+                                                ReturnType = "Project1.Models.MyModel",
+                                                ContainingClassName = "Project1.Services.CreateService",
+                                                CalledMethods =
+                                                {
+                                                    new MethodCallModel
+                                                    {
+                                                        ContainingClassName = "Project1.Services.CreateService",
+                                                        MethodName = "Create"
+                                                    },
+                                                    new MethodCallModel
+                                                    {
+                                                        ContainingClassName = "Project1.Services.CreateService",
+                                                        MethodName = "Convert",
+                                                        ParameterTypes =
                                                         {
-                                                            ContainingClassName = "Project1.Services.CreateService",
-                                                            MethodName = "Create"
-                                                        },
-                                                        new MethodCallModel
-                                                        {
-                                                            ContainingClassName = "Project1.Services.CreateService",
-                                                            MethodName = "Convert",
-                                                            ParameterTypes =
+                                                            new ParameterModel
                                                             {
-                                                                new ParameterModel
-                                                                {
-                                                                    Type = "Project1.Models.OtherModel"
-                                                                }
+                                                                Type = "Project1.Models.OtherModel"
                                                             }
                                                         }
                                                     }
                                                 }
                                             }
-                                        },
-                                    }
+                                        }
+                                    },
                                 }
                             },
+                            new NamespaceModel
                             {
-                                "Project1.Models", new NamespaceModel
+                                Name = "Project1.Models",
+                                ClassModels = new List<ClassModel>
                                 {
-                                    Name = "Project1.Models",
-                                    ClassModels = new List<ClassModel>
+                                    new()
                                     {
-                                        new()
-                                        {
-                                            FullName = "Project1.Models.MyModel",
-                                            FilePath = "validPathToProject/Project1/Models/MyModel.cs",
-                                        },
-                                        new()
-                                        {
-                                            FullName = "Project1.Models.OtherModel",
-                                            FilePath = "validPathToProject/Project1/Models/OtherModel.cs",
-                                        }
+                                        FullName = "Project1.Models.MyModel",
+                                        FilePath = "validPathToProject/Project1/Models/MyModel.cs",
+                                    },
+                                    new()
+                                    {
+                                        FullName = "Project1.Models.OtherModel",
+                                        FilePath = "validPathToProject/Project1/Models/OtherModel.cs",
                                     }
                                 }
                             }
@@ -513,12 +498,10 @@ namespace Project1.Services
                         Name = "Project1",
                         Namespaces =
                         {
+                            new NamespaceModel
                             {
-                                "Project1.Services", new NamespaceModel
-                                {
-                                    Name = "Project1.Services",
-                                    ClassModels = classModels,
-                                }
+                                Name = "Project1.Services",
+                                ClassModels = classModels,
                             }
                         }
                     }
@@ -656,64 +639,60 @@ namespace Project1.Services
                         Name = "Project1",
                         Namespaces =
                         {
+                            new NamespaceModel
                             {
-                                "Project1.Services", new NamespaceModel
+                                Name = "Project1.Services",
+                                ClassModels = new List<ClassModel>
                                 {
-                                    Name = "Project1.Services",
-                                    ClassModels = new List<ClassModel>
+                                    new()
                                     {
-                                        new()
+                                        FullName = "Project1.Services.CreateService",
+                                        FilePath = "validPathToProject/Project1/Services/CreateService.cs",
+                                        Fields = new List<FieldModel>
                                         {
-                                            FullName = "Project1.Services.CreateService",
-                                            FilePath = "validPathToProject/Project1/Services/CreateService.cs",
-                                            Fields = new List<FieldModel>
+                                            new()
                                             {
-                                                new()
-                                                {
-                                                    Name = "Model",
-                                                    Type = "Project1.Models.MyModel",
-                                                    AccessModifier = "private",
-                                                    IsEvent = false
-                                                }
+                                                Name = "Model",
+                                                Type = "Project1.Models.MyModel",
+                                                AccessModifier = "private",
+                                                IsEvent = false
                                             }
-                                        },
-                                    }
+                                        }
+                                    },
                                 }
                             },
+                            new NamespaceModel
                             {
-                                "Project1.Models", new NamespaceModel
+                                Name = "Project1.Models",
+                                ClassModels = new List<ClassModel>
                                 {
-                                    Name = "Project1.Models",
-                                    ClassModels = new List<ClassModel>
+                                    new()
                                     {
-                                        new()
+                                        FullName = "Project1.Models.MyModel",
+                                        FilePath = "validPathToProject/Project1/Models/MyModel.cs",
+                                        Fields = new List<FieldModel>
                                         {
-                                            FullName = "Project1.Models.MyModel",
-                                            FilePath = "validPathToProject/Project1/Models/MyModel.cs",
-                                            Fields = new List<FieldModel>
+                                            new()
                                             {
-                                                new()
-                                                {
-                                                    Name = "_value",
-                                                    Type = "int",
-                                                    Modifier = "readonly",
-                                                    AccessModifier = "private"
-                                                },
-                                                new()
-                                                {
-                                                    Name = "ValueEvent",
-                                                    Type = "int",
-                                                    Modifier = "",
-                                                    AccessModifier = "public",
-                                                    IsEvent = true
-                                                }
+                                                Name = "_value",
+                                                Type = "int",
+                                                Modifier = "readonly",
+                                                AccessModifier = "private"
+                                            },
+                                            new()
+                                            {
+                                                Name = "ValueEvent",
+                                                Type = "int",
+                                                Modifier = "",
+                                                AccessModifier = "public",
+                                                IsEvent = true
                                             }
-                                        },
-                                        new()
-                                        {
-                                            FullName = "Project1.Models.OtherModel",
-                                            FilePath = "validPathToProject/Project1/Models/OtherModel.cs",
                                         }
+                                    },
+                                    new()
+                                    {
+                                        FullName = "Project1.Models.OtherModel",
+                                        FilePath = "validPathToProject/Project1/Models/OtherModel.cs",
                                     }
                                 }
                             }

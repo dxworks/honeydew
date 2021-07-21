@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Logging;
-using HoneydewCore.Models;
 using HoneydewCore.Processors;
 using HoneydewModels;
 using Moq;
@@ -26,7 +25,7 @@ namespace HoneydewCoreTest.Processors
             var solutionModel = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add("Models", new NamespaceModel
+            projectModel1.Namespaces.Add(new NamespaceModel
             {
                 Name = "Models",
                 ClassModels =
@@ -38,7 +37,7 @@ namespace HoneydewCoreTest.Processors
                 }
             });
 
-            projectModel1.Namespaces.Add("Services", new NamespaceModel
+            projectModel1.Namespaces.Add(new NamespaceModel
             {
                 Name = "Services",
                 ClassModels =
@@ -50,7 +49,7 @@ namespace HoneydewCoreTest.Processors
                 }
             });
 
-            projectModel1.Namespaces.Add("Controllers", new NamespaceModel
+            projectModel1.Namespaces.Add(new NamespaceModel
             {
                 Name = "Controllers",
                 ClassModels =
@@ -70,7 +69,7 @@ namespace HoneydewCoreTest.Processors
 
             var projectModel2 = new ProjectModel();
 
-            projectModel2.Namespaces.Add("Domain.Data", new NamespaceModel
+            projectModel2.Namespaces.Add(new NamespaceModel
             {
                 Name = "Domain.Data",
                 ClassModels =
@@ -93,15 +92,15 @@ namespace HoneydewCoreTest.Processors
             var actualSolutionModel = processable.Value;
 
             Assert.Equal("Models.Class1",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models"].ClassModels[0].FullName);
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FullName);
             Assert.Equal("Services.Class2",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Services"].ClassModels[0].FullName);
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].FullName);
             Assert.Equal("Controllers.Class3",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Controllers"].ClassModels[0].FullName);
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].FullName);
             Assert.Equal("Controllers.Class4",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Controllers"].ClassModels[1].FullName);
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[1].FullName);
             Assert.Equal("Domain.Data.Class5",
-                actualSolutionModel.Solutions[0].Projects[1].Namespaces["Domain.Data"].ClassModels[0].FullName);
+                actualSolutionModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].FullName);
         }
 
         [Fact]
@@ -111,7 +110,7 @@ namespace HoneydewCoreTest.Processors
             var solutionModel = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add("Project1.Models", new NamespaceModel
+            projectModel1.Namespaces.Add(new NamespaceModel
             {
                 Name = "Project1.Models",
                 ClassModels =
@@ -141,7 +140,7 @@ namespace HoneydewCoreTest.Processors
 
             var actualSolutionModel = processable.Value;
 
-            var namespaceModel = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Project1.Models"];
+            var namespaceModel = actualSolutionModel.Solutions[0].Projects[0].Namespaces[0];
             Assert.Equal("Project1.Models.Class1", namespaceModel.ClassModels[0].FullName);
             Assert.Equal("Project1.Models.Class1.InnerClass1", namespaceModel.ClassModels[1].FullName);
             Assert.Equal("Project1.Models.Class1.InnerClass1.InnerClass2", namespaceModel.ClassModels[2].FullName);
@@ -154,7 +153,7 @@ namespace HoneydewCoreTest.Processors
             var solutionModel = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add("Models", new NamespaceModel
+            projectModel1.Namespaces.Add(new NamespaceModel
             {
                 Name = "Models",
                 ClassModels =
@@ -182,7 +181,7 @@ namespace HoneydewCoreTest.Processors
                 }
             });
 
-            projectModel1.Namespaces.Add("Models.Other", new NamespaceModel
+            projectModel1.Namespaces.Add(new NamespaceModel
             {
                 Name = "Models.Other",
                 ClassModels =
@@ -214,7 +213,7 @@ namespace HoneydewCoreTest.Processors
 
             var projectModel2 = new ProjectModel();
 
-            projectModel2.Namespaces.Add("MyNamespace", new NamespaceModel
+            projectModel2.Namespaces.Add(new NamespaceModel
             {
                 Name = "MyNamespace",
                 ClassModels =
@@ -236,20 +235,20 @@ namespace HoneydewCoreTest.Processors
 
             var actualSolutionModel = processable.Value;
 
-            var modelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models"];
+            var modelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces[0];
             Assert.Equal("object", modelsNamespace.ClassModels[0].BaseClassFullName);
             Assert.Equal("Models.Class1", modelsNamespace.ClassModels[1].BaseClassFullName);
             Assert.Equal("Models.Class1", modelsNamespace.ClassModels[2].BaseClassFullName);
             Assert.Equal("Models.Class3", modelsNamespace.ClassModels[3].BaseClassFullName);
 
-            var otherModelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models.Other"];
+            var otherModelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces[1];
             Assert.Equal("Models.Other.Class2", otherModelsNamespace.ClassModels[0].BaseClassFullName);
             Assert.Equal("Models.Class1", otherModelsNamespace.ClassModels[1].BaseClassFullName);
             Assert.Equal("Models.TheClass", otherModelsNamespace.ClassModels[2].BaseClassFullName);
             Assert.Equal("Models.Other.Class3", otherModelsNamespace.ClassModels[3].BaseClassFullName);
 
             Assert.Equal("Models.Other.SuperClass",
-                actualSolutionModel.Solutions[0].Projects[1].Namespaces["MyNamespace"].ClassModels[0]
+                actualSolutionModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0]
                     .BaseClassFullName);
         }
 
@@ -261,7 +260,7 @@ namespace HoneydewCoreTest.Processors
             var projectModel1 = new ProjectModel();
 
 
-            projectModel1.Namespaces.Add("Models.Interfaces", new NamespaceModel
+            projectModel1.Namespaces.Add(new NamespaceModel
             {
                 Name = "Models.Interfaces",
                 ClassModels =
@@ -283,7 +282,7 @@ namespace HoneydewCoreTest.Processors
                 }
             });
 
-            projectModel1.Namespaces.Add("Models", new NamespaceModel
+            projectModel1.Namespaces.Add(new NamespaceModel
             {
                 Name = "Models",
                 ClassModels =
@@ -315,7 +314,7 @@ namespace HoneydewCoreTest.Processors
 
             var projectModel2 = new ProjectModel();
 
-            projectModel2.Namespaces.Add("MyNamespace", new NamespaceModel
+            projectModel2.Namespaces.Add(new NamespaceModel
             {
                 Name = "MyNamespace",
                 ClassModels =
@@ -337,13 +336,13 @@ namespace HoneydewCoreTest.Processors
 
             var actualSolutionModel = processable.Value;
 
-            var modelInterfacesNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models.Interfaces"];
+            var modelInterfacesNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces[0];
             Assert.Empty(modelInterfacesNamespace.ClassModels[0].BaseInterfaces);
             Assert.Equal("Models.Interfaces.IInterface1", modelInterfacesNamespace.ClassModels[1].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface1", modelInterfacesNamespace.ClassModels[2].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface2", modelInterfacesNamespace.ClassModels[2].BaseInterfaces[1]);
 
-            var modelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models"];
+            var modelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces[1];
             Assert.Equal("Models.Interfaces.IInterface3", modelsNamespace.ClassModels[0].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[1].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[2].BaseInterfaces[0]);
@@ -352,7 +351,7 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[3].BaseInterfaces[0]);
             Assert.Equal("MyNamespace.AInterface", modelsNamespace.ClassModels[3].BaseInterfaces[1]);
 
-            Assert.Empty(actualSolutionModel.Solutions[0].Projects[1].Namespaces["MyNamespace"].ClassModels[0]
+            Assert.Empty(actualSolutionModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0]
                 .BaseInterfaces);
         }
 
@@ -364,7 +363,7 @@ namespace HoneydewCoreTest.Processors
             var projectModel1 = new ProjectModel();
 
 
-            projectModel1.Namespaces.Add("Project1.Models.Classes", new NamespaceModel
+            projectModel1.Namespaces.Add(new NamespaceModel
             {
                 Name = "Project1.Models.Classes",
                 ClassModels =
@@ -430,7 +429,7 @@ namespace HoneydewCoreTest.Processors
             var actualSolutionModel = processable.Value;
 
             var modelInterfacesNamespace =
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Project1.Models.Classes"];
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces[0];
 
             Assert.Empty(modelInterfacesNamespace.ClassModels[0].Constructors);
             Assert.Equal(2, modelInterfacesNamespace.ClassModels[0].Methods.Count);
@@ -462,7 +461,7 @@ namespace HoneydewCoreTest.Processors
             var solutionModel = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add("Models", new NamespaceModel
+            projectModel1.Namespaces.Add(new NamespaceModel
             {
                 Name = "Models",
                 ClassModels =
@@ -477,7 +476,7 @@ namespace HoneydewCoreTest.Processors
             solutionModel.Projects.Add(projectModel1);
 
             var projectModel2 = new ProjectModel();
-            projectModel2.Namespaces.Add("Services", new NamespaceModel
+            projectModel2.Namespaces.Add(new NamespaceModel
             {
                 Name = "Services",
                 ClassModels =
@@ -507,7 +506,7 @@ namespace HoneydewCoreTest.Processors
             var actualSolutionModel = processable.Value;
 
             Assert.Equal("Models.SomeModel",
-                actualSolutionModel.Solutions[0].Projects[1].Namespaces["Services"].ClassModels[0].Fields[0].Type);
+                actualSolutionModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].Fields[0].Type);
         }
 
         [Fact]
@@ -518,7 +517,7 @@ namespace HoneydewCoreTest.Processors
             var solutionModel1 = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add("Models", new NamespaceModel
+            projectModel1.Namespaces.Add(new NamespaceModel
             {
                 Name = "Models",
                 ClassModels =
@@ -533,7 +532,7 @@ namespace HoneydewCoreTest.Processors
             solutionModel1.Projects.Add(projectModel1);
 
             var projectModel2 = new ProjectModel();
-            projectModel2.Namespaces.Add("Services", new NamespaceModel
+            projectModel2.Namespaces.Add(new NamespaceModel
             {
                 Name = "Services",
                 ClassModels =
@@ -550,7 +549,7 @@ namespace HoneydewCoreTest.Processors
             var solutionModel2 = new SolutionModel();
             var projectModel3 = new ProjectModel();
 
-            projectModel3.Namespaces.Add("OtherSolutionNamespace", new NamespaceModel
+            projectModel3.Namespaces.Add(new NamespaceModel
             {
                 Name = "OtherSolutionNamespace",
                 ClassModels =
@@ -577,7 +576,7 @@ namespace HoneydewCoreTest.Processors
             });
 
             solutionModel2.Projects.Add(projectModel3);
-            
+
             repositoryModel.Solutions.Add(solutionModel1);
             repositoryModel.Solutions.Add(solutionModel2);
 
@@ -588,10 +587,10 @@ namespace HoneydewCoreTest.Processors
             var actualSolutionModel = processable.Value;
 
             Assert.Equal("Models.SomeModel",
-                actualSolutionModel.Solutions[1].Projects[0].Namespaces["OtherSolutionNamespace"].ClassModels[0]
+                actualSolutionModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0]
                     .Fields[0].Type);
             Assert.Equal("Services.Service",
-                actualSolutionModel.Solutions[1].Projects[0].Namespaces["OtherSolutionNamespace"].ClassModels[0]
+                actualSolutionModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0]
                     .Methods[0].ReturnType);
         }
 
@@ -603,7 +602,7 @@ namespace HoneydewCoreTest.Processors
             var solutionModel = new SolutionModel();
             var projectModel = new ProjectModel();
 
-            projectModel.Namespaces.Add("Models", new NamespaceModel
+            projectModel.Namespaces.Add(new NamespaceModel
             {
                 Name = "Models",
                 ClassModels =
@@ -615,7 +614,7 @@ namespace HoneydewCoreTest.Processors
                 }
             });
 
-            projectModel.Namespaces.Add("Services", new NamespaceModel
+            projectModel.Namespaces.Add(new NamespaceModel
             {
                 Name = "Services",
                 ClassModels =
@@ -627,7 +626,7 @@ namespace HoneydewCoreTest.Processors
                 }
             });
 
-            projectModel.Namespaces.Add("Controllers", new NamespaceModel
+            projectModel.Namespaces.Add(new NamespaceModel
             {
                 Name = "Controllers",
                 ClassModels =
@@ -639,7 +638,7 @@ namespace HoneydewCoreTest.Processors
                 }
             });
 
-            projectModel.Namespaces.Add("SomeNamespace", new NamespaceModel
+            projectModel.Namespaces.Add(new NamespaceModel
             {
                 Name = "SomeNamespace",
                 ClassModels =
@@ -729,14 +728,14 @@ namespace HoneydewCoreTest.Processors
             var actualSolutionModel = processable.Value;
 
             Assert.Equal("Models.AmbiguousClass",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Models"].ClassModels[0].FullName);
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FullName);
             Assert.Equal("Services.AmbiguousClass",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Services"].ClassModels[0].FullName);
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].FullName);
             Assert.Equal("Controllers.AmbiguousClass",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces["Controllers"].ClassModels[0].FullName);
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].FullName);
 
             var someClassModel =
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces["SomeNamespace"].ClassModels[0];
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces[3].ClassModels[0];
             Assert.Equal("SomeNamespace.SomeClass",
                 someClassModel.FullName);
 
@@ -766,7 +765,7 @@ namespace HoneydewCoreTest.Processors
             var solutionModel = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add("Project1.Services", new NamespaceModel
+            projectModel1.Namespaces.Add(new NamespaceModel
             {
                 Name = "Project1.Services",
                 ClassModels =
@@ -779,7 +778,7 @@ namespace HoneydewCoreTest.Processors
             });
 
             var projectModel2 = new ProjectModel();
-            projectModel2.Namespaces.Add("Project2.Services", new NamespaceModel
+            projectModel2.Namespaces.Add(new NamespaceModel
             {
                 Name = "Project2.Services",
                 ClassModels =
@@ -792,7 +791,7 @@ namespace HoneydewCoreTest.Processors
             });
 
             var projectModel3 = new ProjectModel();
-            projectModel3.Namespaces.Add("Controllers", new NamespaceModel
+            projectModel3.Namespaces.Add(new NamespaceModel
             {
                 Name = "Controllers",
                 ClassModels =
@@ -824,24 +823,24 @@ namespace HoneydewCoreTest.Processors
             var actualSolutionModel = processable.Value;
 
             Assert.Equal("MyService",
-                actualSolutionModel.Solutions[0].Projects[2].Namespaces["Controllers"].ClassModels[0].Fields[0].Type);
+                actualSolutionModel.Solutions[0].Projects[2].Namespaces[0].ClassModels[0].Fields[0].Type);
 
             _progressLoggerMock.Verify(logger => logger.LogLine($"Multiple full names found for MyService: "),
                 Times.Once);
             _progressLoggerMock.Verify(logger => logger.LogLine($"Project1.Services.MyService"));
             _progressLoggerMock.Verify(logger => logger.LogLine($"Project2.Services.MyService"));
         }
-        
-         [Fact]
+
+        [Fact]
         public void
             GetFunction_ShouldHavePropertiesWithAmbiguousNamesAndLogThem_WhenGivenClassesWithTheSameNameInTheSameRepository()
         {
             var repositoryModel = new RepositoryModel();
-            
+
             var solutionModel1 = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add("Project1.Services", new NamespaceModel
+            projectModel1.Namespaces.Add(new NamespaceModel
             {
                 Name = "Project1.Services",
                 ClassModels =
@@ -854,10 +853,10 @@ namespace HoneydewCoreTest.Processors
             });
 
             solutionModel1.Projects.Add(projectModel1);
-            
+
             var solutionModel2 = new SolutionModel();
             var projectModel2 = new ProjectModel();
-            projectModel2.Namespaces.Add("Project2.Services", new NamespaceModel
+            projectModel2.Namespaces.Add(new NamespaceModel
             {
                 Name = "Project2.Services",
                 ClassModels =
@@ -869,12 +868,12 @@ namespace HoneydewCoreTest.Processors
                 }
             });
 
-            
+
             solutionModel2.Projects.Add(projectModel2);
 
             var solutionModel3 = new SolutionModel();
             var projectModel3 = new ProjectModel();
-            projectModel3.Namespaces.Add("NamespaceName", new NamespaceModel
+            projectModel3.Namespaces.Add(new NamespaceModel
             {
                 Name = "NamespaceName",
                 ClassModels =
@@ -893,12 +892,12 @@ namespace HoneydewCoreTest.Processors
                 }
             });
             solutionModel3.Projects.Add(projectModel3);
-            
+
             repositoryModel.Solutions.Add(solutionModel1);
             repositoryModel.Solutions.Add(solutionModel2);
             repositoryModel.Solutions.Add(solutionModel3);
-            
-            
+
+
             var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
                 .Process(_sut)
                 .Finish<RepositoryModel>();
@@ -906,15 +905,15 @@ namespace HoneydewCoreTest.Processors
             var actualSolutionModel = processable.Value;
 
             Assert.Equal("MyService",
-                actualSolutionModel.Solutions[2].Projects[0].Namespaces["NamespaceName"].ClassModels[0].Fields[0].Type);
+                actualSolutionModel.Solutions[2].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
 
             _progressLoggerMock.Verify(logger => logger.LogLine($"Multiple full names found for MyService: "),
                 Times.Once);
             _progressLoggerMock.Verify(logger => logger.LogLine($"Project1.Services.MyService"));
             _progressLoggerMock.Verify(logger => logger.LogLine($"Project2.Services.MyService"));
         }
-        
-            [Fact]
+
+        [Fact]
         public void
             GetFunction_ShouldHaveClassNameTheSame_WhenClassNameDoesNotExistInRepository()
         {
@@ -922,7 +921,7 @@ namespace HoneydewCoreTest.Processors
             var solutionModel1 = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add("Project1.Services", new NamespaceModel
+            projectModel1.Namespaces.Add(new NamespaceModel
             {
                 Name = "Project1.Services",
                 ClassModels =
@@ -935,7 +934,7 @@ namespace HoneydewCoreTest.Processors
             });
 
             var projectModel2 = new ProjectModel();
-            projectModel2.Namespaces.Add("Project2.Services", new NamespaceModel
+            projectModel2.Namespaces.Add(new NamespaceModel
             {
                 Name = "Project2.Services",
                 ClassModels =
@@ -948,7 +947,7 @@ namespace HoneydewCoreTest.Processors
             });
 
             var projectModel3 = new ProjectModel();
-            projectModel3.Namespaces.Add("Controllers", new NamespaceModel
+            projectModel3.Namespaces.Add(new NamespaceModel
             {
                 Name = "Controllers",
                 ClassModels =
@@ -966,7 +965,7 @@ namespace HoneydewCoreTest.Processors
                     }
                 }
             });
-            
+
             solutionModel1.Projects.Add(projectModel1);
             solutionModel1.Projects.Add(projectModel2);
 
@@ -983,7 +982,7 @@ namespace HoneydewCoreTest.Processors
             var actualSolutionModel = processable.Value;
 
             Assert.Equal("OutOfRepositoryClass",
-                actualSolutionModel.Solutions[1].Projects[0].Namespaces["Controllers"].ClassModels[0].Fields[0].Type);
+                actualSolutionModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
 
             _progressLoggerMock.Verify(logger => logger.LogLine($"Multiple full names found for MyService: "),
                 Times.Never);

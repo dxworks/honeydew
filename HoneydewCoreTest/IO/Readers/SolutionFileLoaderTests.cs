@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using HoneydewCore.Extractors;
 using HoneydewCore.IO.Readers.ProjectRead;
 using HoneydewCore.IO.Readers.SolutionRead;
 using HoneydewCore.IO.Readers.Strategies;
@@ -10,7 +9,6 @@ using HoneydewModels;
 using Microsoft.CodeAnalysis;
 using Moq;
 using Xunit;
-using IFactExtractor = HoneydewExtractors.IFactExtractor;
 
 namespace HoneydewCoreTest.IO.Readers
 {
@@ -82,64 +80,62 @@ namespace HoneydewCoreTest.IO.Readers
                         Name = "Project1",
                         Namespaces =
                         {
+                            new NamespaceModel
                             {
-                                "Project1.Services", new NamespaceModel
+                                Name = "Project1.Services",
+                                ClassModels = new List<ClassModel>
                                 {
-                                    Name = "Project1.Services",
-                                    ClassModels = new List<ClassModel>
+                                    new()
                                     {
-                                        new()
+                                        FullName = "CreateService",
+                                        FilePath = "validPathToProject/Project1/Services/CreateService.cs",
+                                        BaseClassFullName = "object",
+                                        BaseInterfaces = {"IService"},
+                                        Methods = new List<MethodModel>
                                         {
-                                            FullName = "CreateService",
-                                            FilePath = "validPathToProject/Project1/Services/CreateService.cs",
-                                            BaseClassFullName = "object",
-                                            BaseInterfaces = {"IService"},
-                                            Methods = new List<MethodModel>
+                                            new()
                                             {
-                                                new()
+                                                Name = "A",
+                                                Modifier = "",
+                                                AccessModifier = "public",
+                                                ParameterTypes =
                                                 {
-                                                    Name = "A",
-                                                    Modifier = "",
-                                                    AccessModifier = "public",
-                                                    ParameterTypes =
+                                                    new ParameterModel
                                                     {
-                                                        new ParameterModel
-                                                        {
-                                                            Type = "string"
-                                                        }
-                                                    },
-                                                    ReturnType = "int",
-                                                    ContainingClassName = "Project1.Services.CreateService",
-                                                    CalledMethods =
-                                                    {
-                                                        new MethodCallModel
-                                                        {
-                                                            ContainingClassName = "Project1.Services.CreateService",
-                                                            MethodName = "Convert"
-                                                        }
+                                                        Type = "string"
                                                     }
                                                 },
-                                                new()
+                                                ReturnType = "int",
+                                                ContainingClassName = "Project1.Services.CreateService",
+                                                CalledMethods =
                                                 {
-                                                    Name = "Convert",
-                                                    Modifier = "static",
-                                                    AccessModifier = "public",
-                                                    ParameterTypes =
+                                                    new MethodCallModel
                                                     {
-                                                        new ParameterModel
-                                                        {
-                                                            Type = "string"
-                                                        }
-                                                    },
-                                                    ReturnType = "int",
-                                                    ContainingClassName = "Project1.Services.CreateService",
-                                                    CalledMethods =
+                                                        ContainingClassName = "Project1.Services.CreateService",
+                                                        MethodName = "Convert"
+                                                    }
+                                                }
+                                            },
+                                            new()
+                                            {
+                                                Name = "Convert",
+                                                Modifier = "static",
+                                                AccessModifier = "public",
+                                                ParameterTypes =
+                                                {
+                                                    new ParameterModel
                                                     {
-                                                        new MethodCallModel
-                                                        {
-                                                            ContainingClassName = "int",
-                                                            MethodName = "Parse"
-                                                        }
+                                                        Type = "string"
+                                                    }
+                                                },
+                                                ReturnType = "int",
+                                                ContainingClassName = "Project1.Services.CreateService",
+                                                CalledMethods =
+                                                {
+                                                    new MethodCallModel
+                                                    {
+                                                        ContainingClassName = "int",
+                                                        MethodName = "Parse"
                                                     }
                                                 }
                                             }
@@ -166,7 +162,7 @@ namespace HoneydewCoreTest.IO.Readers
             Assert.Equal("Project1", loadSolution.Projects[0].Name);
             Assert.Equal(1, loadSolution.Projects[0].Namespaces.Count);
 
-            var namespaceModel = loadSolution.Projects[0].Namespaces["Project1.Services"];
+            var namespaceModel = loadSolution.Projects[0].Namespaces[0];
             Assert.Equal("Project1.Services", namespaceModel.Name);
             Assert.Equal(1, namespaceModel.ClassModels.Count);
 

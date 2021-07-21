@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Logging;
-using HoneydewCore.Models;
 using HoneydewCore.Processors;
 using HoneydewModels;
 using Moq;
@@ -131,19 +130,19 @@ namespace HoneydewCoreTest.Processors
             var processedProjectModel = processable.Value.Solutions[0].Projects[0];
 
             Assert.False(
-                ((DependencyDataMetric) processedProjectModel.Namespaces["Models"].ClassModels[0].Metrics[0].Value)
+                ((DependencyDataMetric) processedProjectModel.Namespaces[0].ClassModels[0].Metrics[0].Value)
                 .Dependencies.TryGetValue("Full.Path.Dependency1", out _));
             Assert.False(
-                ((DependencyDataMetric) processedProjectModel.Namespaces["Services"].ClassModels[0].Metrics[0].Value)
+                ((DependencyDataMetric) processedProjectModel.Namespaces[1].ClassModels[0].Metrics[0].Value)
                 .Dependencies.TryGetValue("Full.Path.Dependency1", out _));
             Assert.False(
-                ((DependencyDataMetric) processedProjectModel.Namespaces["Controllers"].ClassModels[0].Metrics[0]
+                ((DependencyDataMetric) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0]
                     .Value).Dependencies.TryGetValue("Full.Path.Dependency1", out _));
             Assert.False(
-                ((DependencyDataMetric) processedProjectModel.Namespaces["Controllers"].ClassModels[0].Metrics[0]
+                ((DependencyDataMetric) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0]
                     .Value).Dependencies.TryGetValue("Full.Path.Dependency2", out _));
             Assert.False(
-                ((DependencyDataMetric) processedProjectModel.Namespaces["Domain.Data"].ClassModels[0].Metrics[0]
+                ((DependencyDataMetric) processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0]
                     .Value).Dependencies.TryGetValue("Full.Path.Dependency2", out _));
         }
 
@@ -257,29 +256,29 @@ namespace HoneydewCoreTest.Processors
             var processedProjectModel = processable.Value.Solutions[0].Projects[0];
 
             Assert.Empty(
-                ((DependencyDataMetric) processedProjectModel.Namespaces["Models"].ClassModels[0].Metrics[0].Value)
+                ((DependencyDataMetric) processedProjectModel.Namespaces[0].ClassModels[0].Metrics[0].Value)
                 .Dependencies);
 
             Assert.True(
-                ((DependencyDataMetric) processedProjectModel.Namespaces["Services"].ClassModels[0].Metrics[0].Value)
+                ((DependencyDataMetric) processedProjectModel.Namespaces[1].ClassModels[0].Metrics[0].Value)
                 .Dependencies.TryGetValue("Models.Class1", out var depCount1));
             Assert.Equal(2, depCount1);
 
             Assert.True(
-                ((DependencyDataMetric) processedProjectModel.Namespaces["Controllers"].ClassModels[0].Metrics[0]
+                ((DependencyDataMetric) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0]
                     .Value).Dependencies.TryGetValue("Models.Class1", out var depCount2));
             Assert.Equal(6, depCount2);
             Assert.True(
-                ((DependencyDataMetric) processedProjectModel.Namespaces["Controllers"].ClassModels[0].Metrics[0]
+                ((DependencyDataMetric) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0]
                     .Value).Dependencies.TryGetValue("Services.Class2", out var depCount3));
             Assert.Equal(2, depCount3);
 
             Assert.True(
-                ((DependencyDataMetric) processedProjectModel.Namespaces["Domain.Data"].ClassModels[0].Metrics[0]
+                ((DependencyDataMetric) processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0]
                     .Value).Dependencies.TryGetValue("Controllers.Class3", out var depCount4));
             Assert.Equal(4, depCount4);
             Assert.True(
-                ((DependencyDataMetric) processedProjectModel.Namespaces["Domain.Data"].ClassModels[0].Metrics[0]
+                ((DependencyDataMetric) processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0]
                     .Value).Dependencies.TryGetValue("Controllers.Class5", out var depCount5));
             Assert.Equal(1, depCount5);
         }

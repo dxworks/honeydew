@@ -12,7 +12,7 @@ namespace HoneydewModels
             {
                 foreach (var projectModel in solutionModel.Projects)
                 {
-                    foreach (var (_, namespaceModel) in projectModel.Namespaces)
+                    foreach (var namespaceModel in projectModel.Namespaces)
                     {
                         foreach (var classModel in namespaceModel.ClassModels)
                         {

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using HoneydewCore.Models;
 using HoneydewCore.Models.Representations.ReferenceModel;
 using HoneydewModels;
 
@@ -44,11 +43,11 @@ namespace HoneydewCore.Processors
                     SolutionReference = referenceSolutionModel
                 };
 
-                foreach (var (namespaceName, namespaceModel) in projectModel.Namespaces)
+                foreach (var namespaceModel in projectModel.Namespaces)
                 {
                     var referenceNamespaceModel = new ReferenceNamespaceModel
                     {
-                        Name = namespaceName,
+                        Name = namespaceModel.Name,
                         ProjectReference = referenceProjectModel
                     };
 

@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using HoneydewCore.Extractors;
-using HoneydewCore.Models;
 using HoneydewCore.Processors;
 using HoneydewModels;
 using Xunit;
@@ -76,12 +75,10 @@ namespace HoneydewCoreTest.Processors
                         Name = "Project1",
                         Namespaces =
                         {
+                            new NamespaceModel
                             {
-                                "Project1.Services", new NamespaceModel
-                                {
-                                    Name = "Project1.Services",
-                                    ClassModels = classModels,
-                                }
+                                Name = "Project1.Services",
+                                ClassModels = classModels,
                             }
                         }
                     }
@@ -271,12 +268,10 @@ namespace HoneydewCoreTest.Processors
                         Name = "Project1",
                         Namespaces =
                         {
+                            new NamespaceModel
                             {
-                                "Project1.Services", new NamespaceModel
-                                {
-                                    Name = "Project1.Services",
-                                    ClassModels = classModels,
-                                }
+                                Name = "Project1.Services",
+                                ClassModels = classModels,
                             }
                         }
                     }
@@ -429,12 +424,10 @@ namespace HoneydewCoreTest.Processors
                         Name = "Project1",
                         Namespaces =
                         {
+                            new NamespaceModel
                             {
-                                "Project1.Services", new NamespaceModel
-                                {
-                                    Name = "Project1.Services",
-                                    ClassModels = classModels,
-                                }
+                                Name = "Project1.Services",
+                                ClassModels = classModels,
                             }
                         }
                     }
@@ -603,12 +596,10 @@ namespace HoneydewCoreTest.Processors
                         Name = "Project1",
                         Namespaces =
                         {
+                            new NamespaceModel
                             {
-                                "Project1.MyNamespace", new NamespaceModel
-                                {
-                                    Name = "Project1.MyNamespace",
-                                    ClassModels = classModels,
-                                }
+                                Name = "Project1.MyNamespace",
+                                ClassModels = classModels,
                             }
                         }
                     }

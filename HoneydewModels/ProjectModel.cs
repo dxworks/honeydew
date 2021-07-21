@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace HoneydewModels
 {
@@ -10,8 +11,7 @@ namespace HoneydewModels
 
         public IList<string> ProjectReferences { get; set; } = new List<string>();
 
-        public IDictionary<string, NamespaceModel> Namespaces { get; set; } =
-            new Dictionary<string, NamespaceModel>();
+        public IList<NamespaceModel> Namespaces { get; set; } = new List<NamespaceModel>();
 
         public ProjectModel()
         {
@@ -22,18 +22,19 @@ namespace HoneydewModels
             Name = name;
         }
 
-
         public void Add(ClassModel classModel)
         {
-            if (Namespaces.TryGetValue(classModel.Namespace, out var projectNamespace))
+            var namespaceModel = Namespaces.FirstOrDefault(model => model.Name == classModel.Namespace);
+
+            if (namespaceModel == null)
             {
-                projectNamespace.Add(classModel);
+                var model = new NamespaceModel();
+                model.Add(classModel);
+                Namespaces.Add(model);
             }
             else
             {
-                var p = new NamespaceModel();
-                p.Add(classModel);
-                Namespaces.Add(classModel.Namespace, p);
+                namespaceModel.Add(classModel);
             }
         }
     }

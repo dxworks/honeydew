@@ -61,7 +61,7 @@ namespace HoneydewCoreTest.IO.Readers
 
             _fileReaderMock.Setup(reader => reader.ReadFile(pathToModel))
                 .Returns(
-                    @"{""Projects"":[{""Name"":""ProjectName"",""Namespaces"":{""SomeNamespace"":{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""BaseClassFullName"":""object"",""Fields"":[],""Metrics"":[{""ExtractorName"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"",""ValueType"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}]}]}}}]}");
+                    @"{""Projects"":[{""Name"":""ProjectName"",""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""BaseClassFullName"":""object"",""Fields"":[],""Metrics"":[{""ExtractorName"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"",""ValueType"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}]}]}]}]}");
 
             var loadModelFromFile = await _sut.LoadSolution(pathToModel);
 
@@ -70,7 +70,7 @@ namespace HoneydewCoreTest.IO.Readers
             Assert.Equal("ProjectName", loadModelFromFile.Projects[0].Name);
 
             Assert.Equal(1, loadModelFromFile.Projects[0].Namespaces.Count);
-            var projectNamespace = loadModelFromFile.Projects[0].Namespaces["SomeNamespace"];
+            var projectNamespace = loadModelFromFile.Projects[0].Namespaces[0];
 
             Assert.Equal("SomeNamespace", projectNamespace.Name);
             Assert.Equal(1, projectNamespace.ClassModels.Count);

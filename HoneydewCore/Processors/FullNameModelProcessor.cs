@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Logging;
-using HoneydewCore.Models;
 using HoneydewModels;
 
 namespace HoneydewCore.Processors
@@ -78,7 +77,7 @@ namespace HoneydewCore.Processors
             {
                 foreach (var projectModel in solutionModel.Projects)
                 {
-                    foreach (var (_, namespaceModel) in projectModel.Namespaces)
+                    foreach (var namespaceModel in projectModel.Namespaces)
                     {
                         foreach (var classModel in namespaceModel.ClassModels)
                         {
@@ -99,7 +98,7 @@ namespace HoneydewCore.Processors
             {
                 foreach (var projectModel in solutionModel.Projects)
                 {
-                    foreach (var (_, namespaceModel) in projectModel.Namespaces)
+                    foreach (var namespaceModel in projectModel.Namespaces)
                     {
                         foreach (var classModel in namespaceModel.ClassModels)
                         {
@@ -273,7 +272,9 @@ namespace HoneydewCore.Processors
                 fullNamePossibilities = new List<string>();
                 foreach (var usingName in usings)
                 {
-                    if (!projectModelToStartSearchFrom.Namespaces.TryGetValue(usingName, out var usingNamespace))
+                    var usingNamespace =
+                        projectModelToStartSearchFrom.Namespaces.FirstOrDefault(model => model.Name == usingName);
+                    if (usingNamespace == null)
                     {
                         continue;
                     }
@@ -360,7 +361,7 @@ namespace HoneydewCore.Processors
             var fullNamePossibilities = new List<string>();
             outFullName = className;
 
-            foreach (var (_, namespaceModel) in projectModel.Namespaces)
+            foreach (var namespaceModel in projectModel.Namespaces)
             {
                 if (TryToGetClassNameFromNamespace(className, namespaceModel, out var fullName))
                 {
@@ -445,7 +446,9 @@ namespace HoneydewCore.Processors
             {
                 namespaceName.Append(classNameParts[namespaceIndex]);
 
-                if (projectModel.Namespaces.TryGetValue(namespaceName.ToString(), out var namespaceModel))
+                var namespaceModel =
+                    projectModel.Namespaces.FirstOrDefault(model => model.Name == namespaceName.ToString());
+                if (namespaceModel != null)
                 {
                     var className = new StringBuilder();
                     var classIndex = namespaceIndex + 1;

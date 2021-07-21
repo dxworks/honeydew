@@ -36,7 +36,7 @@ namespace HoneydewCore.IO.Readers
                 {
                     foreach (var projectModel in solutionModel.Projects)
                     {
-                        foreach (var (_, projectNamespace) in projectModel.Namespaces)
+                        foreach (var projectNamespace in projectModel.Namespaces)
                         {
                             foreach (var classModel in projectNamespace.ClassModels)
                             {
