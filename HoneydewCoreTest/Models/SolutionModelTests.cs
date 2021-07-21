@@ -1,7 +1,4 @@
-﻿using HoneydewCore.IO.Writers.Exporters;
-using HoneydewCore.Models;
-using HoneydewModels;
-using Moq;
+﻿using HoneydewModels;
 using Xunit;
 
 namespace HoneydewCoreTest.Models
@@ -35,13 +32,5 @@ namespace HoneydewCoreTest.Models
             Assert.Equal("Project2", _sut.Projects[1].Name);
             Assert.Equal("Project3", _sut.Projects[2].Name);
         }
-
-        // [Fact]
-        // public void Export_ShouldReturnEmptyString_WhenExporterIsNotASolutionModelExporter()
-        // {
-        //     var exporterMock = new Mock<IExporter>();
-        //
-        //     Assert.Equal("", _sut.Export(exporterMock.Object));
-        // }
     }
 }
