@@ -1,22 +1,11 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.IO.Writers.Exporters;
 
-namespace HoneydewCore.Models
+namespace HoneydewModels
 {
-    public record SolutionModel : IExportable
+    public record SolutionModel
     {
         public string FilePath { get; set; }
         public IList<ProjectModel> Projects { get; set; } = new List<ProjectModel>();
-
-        public string Export(IExporter exporter)
-        {
-            if (exporter is ISolutionModelExporter modelExporter)
-            {
-                return modelExporter.Export(this);
-            }
-
-            return string.Empty;
-        }
 
         public IEnumerable<ClassModel> GetEnumerable()
         {

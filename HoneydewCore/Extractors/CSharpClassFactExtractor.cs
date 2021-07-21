@@ -6,6 +6,7 @@ using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Models;
 using HoneydewCore.Utils;
+using HoneydewModels;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

@@ -1,22 +1,21 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using HoneydewCore.Extractors;
+﻿using System.Threading.Tasks;
 using HoneydewCore.IO.Readers.Strategies;
-using HoneydewCore.Models;
+using HoneydewExtractors;
+using HoneydewModels;
 
 namespace HoneydewCore.IO.Readers.ProjectRead
 {
     public class ProjectLoader : IProjectLoader
     {
-        private readonly IList<IFactExtractor> _extractors;
+        private readonly IFactExtractor _extractor;
 
         private readonly IProjectProvider _projectProvider;
         private readonly IProjectLoadingStrategy _projectLoadingStrategy;
 
-        public ProjectLoader(IList<IFactExtractor> extractors, IProjectProvider projectProvider,
+        public ProjectLoader(IFactExtractor extractor, IProjectProvider projectProvider,
             IProjectLoadingStrategy projectLoadingStrategy)
         {
-            _extractors = extractors;
+            _extractor = extractor;
             _projectProvider = projectProvider;
             _projectLoadingStrategy = projectLoadingStrategy;
         }
@@ -25,7 +24,7 @@ namespace HoneydewCore.IO.Readers.ProjectRead
         {
             var solution = await _projectProvider.GetProject(path);
 
-            var projectModel = await _projectLoadingStrategy.Load(solution, _extractors);
+            var projectModel = await _projectLoadingStrategy.Load(solution, _extractor);
 
             return projectModel;
         }

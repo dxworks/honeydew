@@ -5,6 +5,7 @@ using System.Text;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Logging;
 using HoneydewCore.Models;
+using HoneydewModels;
 
 namespace HoneydewCore.Processors
 {

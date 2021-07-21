@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Models;
+using HoneydewModels;
 
 namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 {

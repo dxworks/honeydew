@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace HoneydewCore.Models
+namespace HoneydewModels
 {
     public record MethodModel
     {

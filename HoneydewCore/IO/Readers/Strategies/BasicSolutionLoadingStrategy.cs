@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using HoneydewCore.Extractors;
 using HoneydewCore.Logging;
-using HoneydewCore.Models;
+using HoneydewExtractors;
+using HoneydewModels;
 using Microsoft.CodeAnalysis;
 
 namespace HoneydewCore.IO.Readers.Strategies
@@ -20,7 +19,7 @@ namespace HoneydewCore.IO.Readers.Strategies
             _projectLoadingStrategy = projectLoadingStrategy;
         }
 
-        public async Task<SolutionModel> Load(Solution solution, IList<IFactExtractor> extractors)
+        public async Task<SolutionModel> Load(Solution solution, IFactExtractor extractor)
         {
             SolutionModel solutionModel = new()
             {
@@ -33,7 +32,7 @@ namespace HoneydewCore.IO.Readers.Strategies
             {
                 _progressLogger.LogLine();
                 _progressLogger.LogLine($"Loading C# Project from {project.FilePath} ({i}/{projectCount})");
-                var projectModel = await _projectLoadingStrategy.Load(project, extractors);
+                var projectModel = await _projectLoadingStrategy.Load(project, extractor);
 
                 solutionModel.Projects.Add(projectModel);
                 i++;

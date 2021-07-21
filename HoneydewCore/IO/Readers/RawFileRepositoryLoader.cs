@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Threading.Tasks;
 using HoneydewCore.Logging;
-using HoneydewCore.Models;
+using HoneydewModels;
 
 namespace HoneydewCore.IO.Readers
 {

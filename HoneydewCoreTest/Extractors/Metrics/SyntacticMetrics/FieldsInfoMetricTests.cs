@@ -5,6 +5,7 @@ using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.Models;
+using HoneydewModels;
 using Xunit;
 
 namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics

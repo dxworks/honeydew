@@ -2,6 +2,7 @@
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Models;
 using HoneydewCore.Processors;
+using HoneydewModels;
 using Xunit;
 
 namespace HoneydewCoreTest.Processors

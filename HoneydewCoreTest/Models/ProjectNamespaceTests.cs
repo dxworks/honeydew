@@ -1,6 +1,7 @@
 ﻿using HoneydewCore.Extractors.Metrics.CompilationUnitMetrics;
 using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Models;
+using HoneydewModels;
 using Xunit;
 
 namespace HoneydewCoreTest.Models

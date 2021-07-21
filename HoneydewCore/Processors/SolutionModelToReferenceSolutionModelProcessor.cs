@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.Models;
 using HoneydewCore.Models.Representations.ReferenceModel;
+using HoneydewModels;
 
 namespace HoneydewCore.Processors
 {

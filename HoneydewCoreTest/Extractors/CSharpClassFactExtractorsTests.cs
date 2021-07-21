@@ -1,5 +1,6 @@
 ﻿using HoneydewCore.Extractors;
 using HoneydewCore.Models;
+using HoneydewModels;
 using Xunit;
 
 namespace HoneydewCoreTest.Extractors

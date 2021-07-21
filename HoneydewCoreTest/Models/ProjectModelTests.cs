@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Models;
+using HoneydewModels;
 using Xunit;
 
 namespace HoneydewCoreTest.Models

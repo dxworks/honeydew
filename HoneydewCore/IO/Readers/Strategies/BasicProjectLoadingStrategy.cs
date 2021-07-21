@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using HoneydewCore.Extractors;
 using HoneydewCore.Logging;
-using HoneydewCore.Models;
+using HoneydewExtractors;
+using HoneydewModels;
 using Microsoft.CodeAnalysis;
 
 namespace HoneydewCore.IO.Readers.Strategies
@@ -18,7 +17,7 @@ namespace HoneydewCore.IO.Readers.Strategies
             _progressLogger = progressLogger;
         }
 
-        public async Task<ProjectModel> Load(Project project, IList<IFactExtractor> extractors)
+        public async Task<ProjectModel> Load(Project project, IFactExtractor extractors)
         {
             var projectModel = new ProjectModel(project.Name)
             {
@@ -31,20 +30,22 @@ namespace HoneydewCore.IO.Readers.Strategies
             var documentCount = project.Documents.Count();
             foreach (var document in project.Documents)
             {
-                var syntaxTree = await document.GetSyntaxTreeAsync();
+                // var syntaxTree = await document.GetSyntaxTreeAsync();
 
                 try
                 {
                     _progressLogger.Log($"Extracting facts from {document.FilePath} ({i}/{documentCount})...");
 
-                    var classModels = extractors.SelectMany(extractor => extractor.Extract(syntaxTree)).ToList();
+                    var fileContent = await document.GetTextAsync();
+                    var classModels = extractors.Extract(fileContent.ToString());
+                    
 
                     _progressLogger.LogLine("done");
 
                     foreach (var classModel in classModels)
                     {
-                        classModel.FilePath = document.FilePath;
-                        projectModel.Add(classModel);
+                        // classModel.FilePath = document.FilePath;
+                        projectModel.Add((ClassModel) classModel);
                     }
                 }
                 catch (Exception e)

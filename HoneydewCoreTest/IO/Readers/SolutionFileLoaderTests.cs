@@ -5,10 +5,12 @@ using HoneydewCore.IO.Readers.ProjectRead;
 using HoneydewCore.IO.Readers.SolutionRead;
 using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.Logging;
-using HoneydewCore.Models;
+using HoneydewExtractors;
+using HoneydewModels;
 using Microsoft.CodeAnalysis;
 using Moq;
 using Xunit;
+using IFactExtractor = HoneydewExtractors.IFactExtractor;
 
 namespace HoneydewCoreTest.IO.Readers
 {
@@ -19,10 +21,11 @@ namespace HoneydewCoreTest.IO.Readers
         private readonly Mock<ISolutionProvider> _solutionProviderMock = new();
         private readonly Mock<ISolutionLoadingStrategy> _solutionLoadingStrategyMock = new();
         private readonly Mock<IProgressLogger> _progressLoggerMock = new();
+        private readonly Mock<IFactExtractor> _factExtractorMock = new();
 
         public SolutionFileLoaderTests()
         {
-            _sut = new SolutionFileLoader(_progressLoggerMock.Object, new List<IFactExtractor>(),
+            _sut = new SolutionFileLoader(_progressLoggerMock.Object, _factExtractorMock.Object,
                 _solutionProviderMock.Object,
                 _solutionLoadingStrategyMock.Object);
         }
@@ -58,7 +61,7 @@ namespace HoneydewCoreTest.IO.Readers
             _solutionProviderMock.Setup(provider => provider.GetSolution(pathToSolution))
                 .Returns(It.IsAny<Task<Solution>>());
             _solutionLoadingStrategyMock
-                .Setup(strategy => strategy.Load(It.IsAny<Solution>(), new List<IFactExtractor>()))
+                .Setup(strategy => strategy.Load(It.IsAny<Solution>(), _factExtractorMock.Object))
                 .ReturnsAsync(solutionModelMock.Object);
 
             var loadSolution = _sut.LoadSolution(pathToSolution);
@@ -153,7 +156,7 @@ namespace HoneydewCoreTest.IO.Readers
             _solutionProviderMock.Setup(provider => provider.GetSolution(pathToSolution))
                 .ReturnsAsync(It.IsAny<Solution>());
             _solutionLoadingStrategyMock
-                .Setup(strategy => strategy.Load(It.IsAny<Solution>(), new List<IFactExtractor>()))
+                .Setup(strategy => strategy.Load(It.IsAny<Solution>(), _factExtractorMock.Object))
                 .ReturnsAsync(solutionModelMock);
 
             var loadSolution = await _sut.LoadSolution(pathToSolution);

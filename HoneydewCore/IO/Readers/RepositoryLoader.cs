@@ -1,28 +1,26 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using HoneydewCore.Extractors;
 using HoneydewCore.IO.Readers.ProjectRead;
 using HoneydewCore.IO.Readers.SolutionRead;
 using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.Logging;
-using HoneydewCore.Models;
-using HoneydewCore.Processors;
+using HoneydewExtractors;
+using HoneydewModels;
 
 namespace HoneydewCore.IO.Readers
 {
     public class RepositoryLoader : IRepositoryLoader
     {
         private readonly IProgressLogger _progressLogger;
-        private readonly IList<IFactExtractor> _extractors;
+        private readonly IFactExtractor _extractor;
         private const string CsprojExtension = ".csproj";
         private const string SlnExtension = ".sln";
 
-        public RepositoryLoader(IProgressLogger progressLogger, IList<IFactExtractor> extractors)
+        public RepositoryLoader(IProgressLogger progressLogger, IFactExtractor extractor)
         {
             _progressLogger = progressLogger;
-            _extractors = extractors;
+            _extractor = extractor;
         }
 
         public async Task<RepositoryModel> Load(string path)
@@ -35,7 +33,7 @@ namespace HoneydewCore.IO.Readers
                 {
                     _progressLogger.LogLine($"Solution file found at {path}");
 
-                    var solutionLoader = new SolutionFileLoader(_progressLogger, _extractors,
+                    var solutionLoader = new SolutionFileLoader(_progressLogger, _extractor,
                         new MsBuildSolutionProvider(),
                         new BasicSolutionLoadingStrategy(_progressLogger,
                             new BasicProjectLoadingStrategy(_progressLogger)));
@@ -46,7 +44,7 @@ namespace HoneydewCore.IO.Readers
                 {
                     _progressLogger.LogLine($"C# Project file found at {path}");
 
-                    var projectLoader = new ProjectLoader(_extractors, new MsBuildProjectProvider(),
+                    var projectLoader = new ProjectLoader(_extractor, new MsBuildProjectProvider(),
                         new BasicProjectLoadingStrategy(_progressLogger));
                     var projectModel = await projectLoader.Load(path);
 
@@ -73,7 +71,7 @@ namespace HoneydewCore.IO.Readers
                 foreach (var solutionPath in solutionPaths)
                 {
                     var solutionLoader =
-                        new SolutionFileLoader(_progressLogger, _extractors, new MsBuildSolutionProvider(),
+                        new SolutionFileLoader(_progressLogger, _extractor, new MsBuildSolutionProvider(),
                             new BasicSolutionLoadingStrategy(_progressLogger,
                                 new BasicProjectLoadingStrategy(_progressLogger)));
                     var solutionModel = await solutionLoader.LoadSolution(solutionPath);
@@ -97,7 +95,7 @@ namespace HoneydewCore.IO.Readers
 
                     _progressLogger.LogLine($"C# Project file found at {projectPath}");
 
-                    var projectLoader = new ProjectLoader(_extractors, new MsBuildProjectProvider(),
+                    var projectLoader = new ProjectLoader(_extractor, new MsBuildProjectProvider(),
                         new BasicProjectLoadingStrategy(_progressLogger));
                     var projectModel = await projectLoader.Load(projectPath);
                     defaultSolutionModel.Projects.Add(projectModel);
@@ -107,7 +105,7 @@ namespace HoneydewCore.IO.Readers
                 {
                     _progressLogger.LogLine(
                         $"{defaultSolutionModel.Projects.Count} C# Projects were found that didn't belong to any solution file");
-                    
+
                     repositoryModel.Solutions.Add(defaultSolutionModel);
                 }
             }

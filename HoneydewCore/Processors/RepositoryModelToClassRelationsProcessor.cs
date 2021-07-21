@@ -2,6 +2,7 @@
 using HoneydewCore.Extractors.Metrics;
 using HoneydewCore.Models;
 using HoneydewCore.Models.Representations;
+using HoneydewModels;
 
 namespace HoneydewCore.Processors
 {

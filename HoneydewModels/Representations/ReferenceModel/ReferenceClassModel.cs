@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using HoneydewModels;
 
-namespace HoneydewCore.Models.Representations.ReferenceModel
+namespace HoneydewModels.Representations.ReferenceModel
 {
     public record ReferenceClassModel : ReferenceEntity
     {

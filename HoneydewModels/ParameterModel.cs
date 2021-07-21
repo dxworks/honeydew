@@ -1,4 +1,4 @@
-﻿namespace HoneydewCore.Models
+﻿namespace HoneydewModels
 {
     public record ParameterModel
     {

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Models;
+using HoneydewModels;
 using Microsoft.CodeAnalysis;
 
 namespace HoneydewCore.Extractors
