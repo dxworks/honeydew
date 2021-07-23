@@ -5,8 +5,9 @@ using System.Text;
 using HoneydewCore.Logging;
 using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
 using HoneydewModels;
+using HoneydewModels.Processors;
 
-namespace HoneydewCore.Processors
+namespace HoneydewExtractors.Processors
 {
     public class FullNameModelProcessor : IProcessorFunction<RepositoryModel, RepositoryModel>
     {
@@ -158,6 +159,15 @@ namespace HoneydewCore.Processors
                         namespaceModel, projectModel, solutionModel, repositoryModel);
                 });
 
+                foreach (var parameterModel in methodModel.ParameterTypes)
+                {
+                    AddAmbiguousNames(() =>
+                    {
+                        parameterModel.Type = FindClassFullName(parameterModel.Type, namespaceModel,
+                            projectModel, solutionModel, repositoryModel);
+                    });
+                }
+                
                 foreach (var methodModelCalledMethod in methodModel.CalledMethods)
                 {
                     AddAmbiguousNames(() =>

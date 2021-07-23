@@ -1,4 +1,4 @@
-﻿namespace HoneydewCore.Processors
+﻿namespace HoneydewModels.Processors
 {
     public interface IProcessorFunction<in T, out TR>
     {

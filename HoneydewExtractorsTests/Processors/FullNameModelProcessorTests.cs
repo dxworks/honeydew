@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
-using HoneydewCore.Processors;
 using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
+using HoneydewExtractors.Processors;
 using HoneydewModels;
 using Moq;
 using Xunit;
 
-namespace HoneydewCoreTest.Processors
+namespace HoneydewExtractorsTests.Processors
 {
     public class FullNameModelProcessorTests
     {
@@ -136,6 +136,70 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("Project1.Models.Class1", namespaceModel.ClassModels[0].FullName);
             Assert.Equal("Project1.Models.Class1.InnerClass1", namespaceModel.ClassModels[1].FullName);
             Assert.Equal("Project1.Models.Class1.InnerClass1.InnerClass2", namespaceModel.ClassModels[2].FullName);
+        }
+
+        [Fact]
+        public void GetFunction_ShouldReturnTheFullClassName_WhenGivenClassMethodsWithParameters()
+        {
+            var repositoryModel = new RepositoryModel();
+            var solutionModel = new SolutionModel();
+            var projectModel1 = new ProjectModel();
+
+            projectModel1.Namespaces.Add(new NamespaceModel
+            {
+                Name = "Project1.Models",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "Class1"
+                    },
+                    new ClassModel
+                    {
+                        FullName = "Class2",
+                        Constructors =
+                        {
+                            new MethodModel
+                            {
+                                ParameterTypes =
+                                {
+                                    new ParameterModel
+                                    {
+                                        Type = "Class1",
+                                        Modifier = "",
+                                        DefaultValue = ""
+                                    }
+                                }
+                            }
+                        },
+                        Methods =
+                        {
+                            new MethodModel
+                            {
+                                ParameterTypes =
+                                {
+                                    new ParameterModel
+                                    {
+                                        Type = "Class1",
+                                        Modifier = "",
+                                        DefaultValue = ""
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            solutionModel.Projects.Add(projectModel1);
+
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var actualSolutionModel = _sut.Process(repositoryModel);
+
+            var namespaceModel = actualSolutionModel.Solutions[0].Projects[0].Namespaces[0];
+            Assert.Equal("Project1.Models.Class1", namespaceModel.ClassModels[1].Constructors[0].ParameterTypes[0].Type);
+            Assert.Equal("Project1.Models.Class1", namespaceModel.ClassModels[1].Methods[0].ParameterTypes[0].Type);
         }
 
         [Fact]
@@ -940,7 +1004,7 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("OutOfRepositoryClass",
                 actualSolutionModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
 
-            _progressLoggerMock.Verify(logger => logger.LogLine($"Multiple full names found for MyService: "),
+            _progressLoggerMock.Verify(logger => logger.LogLine("Multiple full names found for MyService: "),
                 Times.Never);
         }
     }

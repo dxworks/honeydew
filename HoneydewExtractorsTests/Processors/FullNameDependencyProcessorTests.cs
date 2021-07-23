@@ -2,6 +2,7 @@
 using HoneydewCore.Logging;
 using HoneydewCore.Processors;
 using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
+using HoneydewExtractors.Processors;
 using HoneydewModels;
 using Moq;
 using Xunit;

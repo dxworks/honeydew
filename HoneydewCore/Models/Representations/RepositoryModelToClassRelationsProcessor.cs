@@ -1,9 +1,9 @@
 ﻿using System;
-using HoneydewCore.Extractors.Metrics;
-using HoneydewCore.Models.Representations;
+using HoneydewExtractors.Metrics;
 using HoneydewModels;
+using HoneydewModels.Processors;
 
-namespace HoneydewCore.Processors
+namespace HoneydewCore.Models.Representations
 {
     public class
         RepositoryModelToClassRelationsProcessor : IProcessorFunction<RepositoryModel, ClassRelationsRepresentation>

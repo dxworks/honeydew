@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using HoneydewModels;
+using HoneydewModels.Processors;
 using HoneydewModels.Representations.ReferenceModel;
 
 namespace HoneydewCore.Processors
@@ -73,11 +74,10 @@ namespace HoneydewCore.Processors
         {
             foreach (var classModel in solutionModel.GetEnumerable())
             {
-                var referenceEntity = referenceSolutionModel.FindFirst(entity =>
-                    entity is ReferenceClassModel && entity.Name == classModel.FullName);
+                var referenceClassModel =
+                    referenceSolutionModel.FindFirstClass(entity => entity.Name == classModel.FullName);
 
-                if (referenceEntity == null) continue;
-                var referenceClassModel = (ReferenceClassModel) referenceEntity;
+                if (referenceClassModel == null) continue;
 
                 referenceClassModel.BaseClass =
                     GetClassReferenceByName(referenceSolutionModel, classModel.BaseClassFullName);
@@ -95,11 +95,8 @@ namespace HoneydewCore.Processors
         {
             foreach (var classModel in solutionModel.GetEnumerable())
             {
-                var referenceEntity = referenceSolutionModel.FindFirst(entity =>
-                    entity is ReferenceClassModel && entity.Name == classModel.FullName);
-
-                if (referenceEntity == null) continue;
-                var referenceClassModel = (ReferenceClassModel) referenceEntity;
+                var referenceClassModel =
+                    referenceSolutionModel.FindFirstClass(entity => entity.Name == classModel.FullName);
 
                 PopulateWithMethodModels(classModel.Methods, referenceClassModel, referenceClassModel.Methods);
 
@@ -150,11 +147,8 @@ namespace HoneydewCore.Processors
         {
             foreach (var classModel in solutionModel.GetEnumerable())
             {
-                var referenceEntity = referenceSolutionModel.FindFirst(entity =>
-                    entity is ReferenceClassModel && entity.Name == classModel.FullName);
-
-                if (referenceEntity == null) continue;
-                var referenceClassModel = (ReferenceClassModel) referenceEntity;
+                var referenceClassModel =
+                    referenceSolutionModel.FindFirstClass(entity => entity.Name == classModel.FullName);
 
                 foreach (var methodModel in classModel.Methods)
                 {
@@ -233,14 +227,10 @@ namespace HoneydewCore.Processors
         private ReferenceClassModel GetClassReferenceByName(ReferenceSolutionModel referenceSolutionModel,
             string className)
         {
-            var referenceEntity = referenceSolutionModel.FindFirst(entity =>
-                entity is ReferenceClassModel && entity.Name == className);
-            if (referenceEntity != null)
-            {
-                return (ReferenceClassModel) referenceEntity;
-            }
-
-            return referenceSolutionModel.FindOrCreateClassModel(className);
+            var referenceClassModel = referenceSolutionModel.FindFirstClass(entity => entity.Name == className);
+            return referenceClassModel != null
+                ? referenceClassModel
+                : referenceSolutionModel.FindOrCreateClassModel(className);
         }
     }
 }

@@ -8,8 +8,4 @@
       <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.11.0-1.final" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Processors" />
-    </ItemGroup>
-
 </Project>
