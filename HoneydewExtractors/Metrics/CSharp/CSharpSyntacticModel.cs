@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp
+namespace HoneydewExtractors.Metrics.CSharp
 {
     public class CSharpSyntacticModel : ISyntacticModel
     {

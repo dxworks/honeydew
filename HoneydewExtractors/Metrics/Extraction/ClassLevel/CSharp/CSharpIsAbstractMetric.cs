@@ -1,15 +1,25 @@
-﻿using HoneydewCore.Utils;
+﻿using HoneydewExtractors.Metrics.CSharp;
+using HoneydewExtractors.Utils;
+using HoneydewModels;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewCore.Extractors.Metrics.SyntacticMetrics
+namespace HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp
 {
-    public class IsAbstractMetric : CSharpMetricExtractor, ISyntacticMetric
+    public class CSharpIsAbstractMetric : HoneydewCSharpSyntaxWalker,
+        IExtractionMetric<CSharpSyntacticModel, CSharpSemanticModel, CSharpSyntaxNode>, IIsAbstractMetric
     {
+        public CSharpSyntacticModel HoneydewSyntacticModel { get; set; }
+        public CSharpSemanticModel HoneydewSemanticModel { get; set; }
         public bool IsAbstract { get; private set; }
 
-        public override IMetric GetMetric()
+        public ExtractionMetricType GetMetricType()
         {
-            return new Metric<bool>(IsAbstract);
+            return ExtractionMetricType.ClassLevel;
+        }
+
+        public override IMetricValue GetMetric()
+        {
+            return new MetricValue<bool>(IsAbstract);
         }
 
         public override string PrettyPrint()

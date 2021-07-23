@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.Models;
 using HoneydewModels;
 
-namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
+namespace HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp
 {
-    public class MethodInfoDataMetric
+    public class CSharpMethodInfoDataMetric
     {
         public IList<MethodModel> MethodInfos { get; } = new List<MethodModel>();
         public IList<MethodModel> ConstructorInfos { get; } = new List<MethodModel>();

@@ -1,19 +1,28 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.Models;
-using HoneydewCore.Utils;
+using HoneydewExtractors.Metrics.CSharp;
+using HoneydewExtractors.Utils;
 using HoneydewModels;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
+namespace HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp
 {
-    public class FieldsInfoMetric : CSharpMetricExtractor, ISemanticMetric
+    public class CSharpFieldsInfoMetric : HoneydewCSharpSyntaxWalker,
+        IExtractionMetric<CSharpSyntacticModel, CSharpSemanticModel, CSharpSyntaxNode>, IFieldsInfoMetric
     {
+        public CSharpSyntacticModel HoneydewSyntacticModel { get; set; }
+        public CSharpSemanticModel HoneydewSemanticModel { get; set; }
+
+
         public IList<FieldModel> FieldInfos { get; } = new List<FieldModel>();
 
-        public override IMetric GetMetric()
+        public ExtractionMetricType GetMetricType()
         {
-            return new Metric<IList<FieldModel>>(FieldInfos);
+            return ExtractionMetricType.ClassLevel;
+        }
+
+        public override IMetricValue GetMetric()
+        {
+            return new MetricValue<IList<FieldModel>>(FieldInfos);
         }
 
         public override string PrettyPrint()
@@ -39,13 +48,8 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
             
             CSharpConstants.SetModifiers(allModifiers, ref accessModifier, ref modifier);
 
-            var typeName = node.Declaration.Type.ToString();
-            var nodeSymbol = ExtractorSemanticModel.GetSymbolInfo(node.Declaration.Type).Symbol;
-            if (nodeSymbol != null)
-            {
-                typeName = nodeSymbol.ToString();
-            }
-            
+            var typeName = HoneydewSemanticModel.GetFullName(node.Declaration);
+
             foreach (var variable in node.Declaration.Variables)
             {
                 FieldInfos.Add(new FieldModel

@@ -48,8 +48,14 @@ namespace HoneydewModels
 
         private string _namespace = "";
 
-        public void AddMetricValue(MetricValue metricValue)
+        public void AddMetricValue(string extractorName, IMetricValue metricValue)
         {
+            Metrics.Add(new ClassMetric
+            {
+                ExtractorName = extractorName,
+                ValueType = metricValue.GetValueType(),
+                Value = metricValue.GetValue()
+            });
         }
 
         public Optional<object> GetMetricValue<T>()

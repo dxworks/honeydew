@@ -1,24 +1,33 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using HoneydewCore.Utils;
+using HoneydewExtractors.Metrics.CSharp;
+using HoneydewExtractors.Utils;
 using HoneydewModels;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
+namespace HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp
 {
-    public class MethodInfoMetric : CSharpMetricExtractor, ISemanticMetric
+    public class CSharpMethodInfoMetric : HoneydewCSharpSyntaxWalker,
+        IExtractionMetric<CSharpSyntacticModel, CSharpSemanticModel, CSharpSyntaxNode>, IMethodInfoMetric
     {
-        public MethodInfoDataMetric DataMetric { get; set; } = new();
+        public CSharpSyntacticModel HoneydewSyntacticModel { get; set; }
+        public CSharpSemanticModel HoneydewSemanticModel { get; set; }
+
+        public CSharpMethodInfoDataMetric DataMetric { get; set; } = new();
 
         private string _containingClassName = "";
         private string _baseTypeName = CSharpConstants.ObjectIdentifier;
         private bool _isInterface;
 
-        public override IMetric GetMetric()
+        public ExtractionMetricType GetMetricType()
         {
-            return new Metric<MethodInfoDataMetric>(DataMetric);
+            return ExtractionMetricType.ClassLevel;
+        }
+
+        public override IMetricValue GetMetric()
+        {
+            return new MetricValue<CSharpMethodInfoDataMetric>(DataMetric);
         }
 
         public override string PrettyPrint()
@@ -49,8 +58,8 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 
         private void AddInfoForNode(TypeDeclarationSyntax node)
         {
-            _containingClassName = ExtractorSemanticModel.GetDeclaredSymbol(node)?.ToDisplayString();
-            _baseTypeName = ExtractorSemanticModel.GetDeclaredSymbol(node)?.BaseType?.ToDisplayString();
+            _containingClassName = HoneydewSemanticModel.GetFullName(node);
+            _baseTypeName = HoneydewSemanticModel.GetBaseClassName(node);
 
             foreach (var memberDeclarationSyntax in node.Members)
             {
@@ -93,13 +102,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
         {
             GetModifiersForNode(syntax, out var accessModifier, out var modifier);
 
-            var returnType = syntax.ReturnType.ToString();
-
-            var returnValueSymbol = ExtractorSemanticModel.GetDeclaredSymbol(syntax.ReturnType);
-            if (returnValueSymbol != null)
-            {
-                returnType = returnValueSymbol.ToString();
-            }
+            var returnType = HoneydewSemanticModel.GetFullName(syntax.ReturnType);
 
             var methodModel = new MethodModel
             {
@@ -121,12 +124,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
         {
             foreach (var parameter in syntax.ParameterList.Parameters)
             {
-                var parameterSymbol = ExtractorSemanticModel.GetDeclaredSymbol(parameter);
-                var parameterType = parameter.Type?.ToString();
-                if (parameterSymbol != null)
-                {
-                    parameterType = parameterSymbol.Type.ToDisplayString();
-                }
+                var parameterType = HoneydewSemanticModel.GetFullName(parameter.Type);
 
                 methodModel.ParameterTypes.Add(new ParameterModel
                 {
@@ -159,7 +157,7 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
                         break;
                     case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
                     {
-                        var className = _containingClassName;
+                        string className;
 
                         if (memberAccessExpressionSyntax.Expression.ToFullString() ==
                             CSharpConstants.BaseClassIdentifier)
@@ -168,16 +166,8 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
                         }
                         else
                         {
-                            var symbolInfo =
-                                ExtractorSemanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression);
-                            if (symbolInfo.Symbol is ILocalSymbol localSymbol)
-                            {
-                                className = localSymbol.Type.ToDisplayString();
-                            }
-                            else if (symbolInfo.Symbol != null)
-                            {
-                                className = symbolInfo.Symbol.ToString();
-                            }
+                            className = HoneydewSemanticModel.GetFullName(memberAccessExpressionSyntax.Expression) ??
+                                        _containingClassName;
                         }
 
                         methodModel.CalledMethods.Add(new MethodCallModel
@@ -210,9 +200,9 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 
             IList<ParameterModel> parameterModels = new List<ParameterModel>();
 
+            var methodSymbol = HoneydewSemanticModel.GetMethodSymbol(syntax.Initializer);
 
-            var symbol = ExtractorSemanticModel.GetSymbolInfo(syntax.Initializer).Symbol;
-            if (symbol is IMethodSymbol methodSymbol)
+            if (methodSymbol != null)
             {
                 parameterModels = GetParameterTypes(methodSymbol);
                 methodName = methodSymbol.ContainingType.Name;
@@ -228,10 +218,8 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
 
         private IList<ParameterModel> GetParameterTypes(ExpressionSyntax invocationExpressionSyntax)
         {
-            var symbolInfo = ExtractorSemanticModel.GetSymbolInfo(invocationExpressionSyntax);
-            return symbolInfo.Symbol is not IMethodSymbol methodSymbol
-                ? new List<ParameterModel>()
-                : GetParameterTypes(methodSymbol);
+            var methodSymbol = HoneydewSemanticModel.GetMethodSymbol(invocationExpressionSyntax);
+            return methodSymbol == null ? new List<ParameterModel>() : GetParameterTypes(methodSymbol);
         }
 
         private static IList<ParameterModel> GetParameterTypes(IMethodSymbol methodSymbol)

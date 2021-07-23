@@ -2,6 +2,6 @@
 {
     public interface IClassModel
     {
-        void AddMetricValue(MetricValue metricValue);
+        void AddMetricValue(string extractorName, IMetricValue metricValue);
     }
 }

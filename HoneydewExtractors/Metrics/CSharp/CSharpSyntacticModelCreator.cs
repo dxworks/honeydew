@@ -4,11 +4,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp
+namespace HoneydewExtractors.Metrics.CSharp
 {
-    public class CSharpSyntacticModelCreator : ISyntacticModelCreator
+    public class CSharpSyntacticModelCreator : ISyntacticModelCreator<CSharpSyntacticModel>
     {
-        public ISyntacticModel Create(string fileContent)
+        public CSharpSyntacticModel Create(string fileContent)
         {
             if (string.IsNullOrWhiteSpace(fileContent))
             {

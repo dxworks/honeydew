@@ -1,11 +1,11 @@
 ﻿using System.Linq;
-using HoneydewCore.Utils;
+using HoneydewExtractors.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
+namespace HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp
 {
-    public class LocalVariablesDependencyMetric : DependencyMetric
+    public class CSharpLocalVariablesDependencyMetric : CSharpDependencyMetric, ILocalVariablesDependencyMetric
     {
         public override string PrettyPrint()
         {
@@ -31,10 +31,20 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
             foreach (var variableDeclarationSyntax in body.DescendantNodes()
                 .OfType<VariableDeclarationSyntax>())
             {
-                var dependencySymbolInfo = ExtractorSemanticModel.GetSymbolInfo(variableDeclarationSyntax.Type);
-                if (dependencySymbolInfo.Symbol == null)
+                var fullName = HoneydewSemanticModel.GetFullName(variableDeclarationSyntax.Type);
+
+                if (fullName != CSharpConstants.VarIdentifier)
                 {
-                    if (variableDeclarationSyntax.Type.ToString() == CSharpConstants.VarIdentifier)
+                    AddDependency(fullName);
+                }
+                else
+                {
+                    fullName = HoneydewSemanticModel.GetFullName(variableDeclarationSyntax);
+                    if (fullName != CSharpConstants.VarIdentifier)
+                    {
+                        AddDependency(fullName);
+                    }
+                    else
                     {
                         foreach (var declarationVariable in variableDeclarationSyntax.Variables)
                         {
@@ -44,18 +54,10 @@ namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
                                 objectCreationExpressionSyntax
                             })
                             {
-                                AddDependency(objectCreationExpressionSyntax.Type.ToString());
+                                AddDependency(HoneydewSemanticModel.GetFullName(objectCreationExpressionSyntax.Type));
                             }
                         }
                     }
-                    else
-                    {
-                        AddDependency(variableDeclarationSyntax.Type.ToString());
-                    }
-                }
-                else
-                {
-                    AddDependency(dependencySymbolInfo.Symbol.ToString());
                 }
             }
         }

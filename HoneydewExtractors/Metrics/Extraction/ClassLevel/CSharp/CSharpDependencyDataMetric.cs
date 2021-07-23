@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace HoneydewCore.Extractors.Metrics.SemanticMetrics
+namespace HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp
 {
-    public class DependencyDataMetric
+    public class CSharpDependencyDataMetric
     {
         public IList<string> Usings { get; set; } = new List<string>();
         public IDictionary<string, int> Dependencies { get; set; } = new Dictionary<string, int>();
