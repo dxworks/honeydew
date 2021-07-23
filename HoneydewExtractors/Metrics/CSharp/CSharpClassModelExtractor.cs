@@ -75,13 +75,12 @@ namespace HoneydewExtractors.Metrics.CSharp
         private static IList<FieldModel> ExtractFieldsInfo(SyntaxNode declarationSyntax,
             CSharpSemanticModel semanticModel)
         {
-            // var fieldsInfoMetric = new FieldsInfoMetric
-            // {
-            //     ExtractorSemanticModel = semanticModel
-            // };
-            // fieldsInfoMetric.Visit(declarationSyntax);
-            // return fieldsInfoMetric.FieldInfos;
-            return new List<FieldModel>();
+            var fieldsInfoMetric = new CSharpFieldsInfoMetric
+            {
+                HoneydewSemanticModel = semanticModel
+            };
+            fieldsInfoMetric.Visit(declarationSyntax);
+            return fieldsInfoMetric.FieldInfos;
         }
 
         private static CSharpMethodInfoDataMetric ExtractMethodInfo(SyntaxNode declarationSyntax,

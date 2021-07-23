@@ -13,57 +13,6 @@ namespace HoneydewCoreTest.Models.Representations.ReferenceModel
         }
 
         [Theory]
-        [InlineData("Project0")]
-        [InlineData("Project1")]
-        [InlineData("Project0.Namespace0")]
-        [InlineData("Project0.Namespace2")]
-        [InlineData("Project1.Namespace0")]
-        [InlineData("Project0.Namespace0.CountClass")]
-        [InlineData("Project1.Namespace0.SomeClass")]
-        [InlineData("Calculate")]
-        [InlineData("Recalculate")]
-        [InlineData("Value")]
-        [InlineData("MyMethod")]
-        public void FindFirst_ShouldReturnEntityByName_WhenSolutionHasMultipleEntities(
-            string entityName)
-        {
-            AddDataToModel();
-
-            var referenceEntity = _sut.FindFirst(entity => entity.Name == entityName);
-
-            Assert.Equal(entityName, referenceEntity.Name);
-        }
-
-        [Theory]
-        [InlineData("Project0")]
-        [InlineData("Project1")]
-        public void FindFirst_ShouldReturnProjectByName_WhenSolutionHasMultipleProject(
-            string name)
-        {
-            AddDataToModel();
-
-            var referenceEntity = _sut.FindFirstProject(projectModel => projectModel.Name == name);
-
-            Assert.Equal(name, referenceEntity.Name);
-        }
-
-        [Theory]
-        [InlineData("Project0.Namespace0")]
-        [InlineData("Project0.Namespace1")]
-        [InlineData("Project0.Namespace2")]
-        [InlineData("Project1.Namespace0")]
-        [InlineData("Project1.Namespace1")]
-        public void FindFirst_ShouldReturnNamespaceByName_WhenSolutionHasMultipleNamespaces(
-            string name)
-        {
-            AddDataToModel();
-
-            var referenceEntity = _sut.FindFirstNamespace(namespaceModel => namespaceModel.Name == name);
-
-            Assert.Equal(name, referenceEntity.Name);
-        }
-
-        [Theory]
         [InlineData("Project0.Namespace0.CountClass")]
         [InlineData("Project1.Namespace0.SomeClass")]
         [InlineData("Project1.Namespace0.OtherClass")]
@@ -73,34 +22,6 @@ namespace HoneydewCoreTest.Models.Representations.ReferenceModel
             AddDataToModel();
 
             var referenceEntity = _sut.FindFirstClass(classModel => classModel.Name == name);
-
-            Assert.Equal(name, referenceEntity.Name);
-        }
-
-        [Theory]
-        [InlineData("Calculate")]
-        [InlineData("Recalculate")]
-        [InlineData("MyMethod")]
-        public void FindFirst_ShouldReturnMethodByName_WhenSolutionHasMultipleMethodsInDifferentClasses(
-            string name)
-        {
-            AddDataToModel();
-
-            var referenceEntity = _sut.FindFirstMethod(methodModel => methodModel.Name == name);
-
-            Assert.Equal(name, referenceEntity.Name);
-        }
-
-        [Theory]
-        [InlineData("Count")]
-        [InlineData("Value")]
-        [InlineData("OtherValue")]
-        public void FindFirst_ShouldReturnFieldByName_WhenSolutionHasMultipleFieldsInDifferentClasses(
-            string name)
-        {
-            AddDataToModel();
-
-            var referenceEntity = _sut.FindFirstField(fieldModel => fieldModel.Name == name);
 
             Assert.Equal(name, referenceEntity.Name);
         }

@@ -32,11 +32,16 @@ namespace HoneydewExtractors.Metrics.CSharp
             return typeName;
         }
 
+        public string GetFullName(ITypeSymbol typeSyntax)
+        {
+            return typeSyntax.ToString();
+        }
+
         public string GetFullName(TypeSyntax typeSyntax)
         {
-            var returnValueSymbol = Model.GetDeclaredSymbol(typeSyntax);
-            return returnValueSymbol != null
-                ? returnValueSymbol.ToString()
+            var returnValueSymbol = Model.GetSymbolInfo(typeSyntax);
+            return returnValueSymbol.Symbol != null
+                ? returnValueSymbol.Symbol.ToString()
                 : typeSyntax.ToString();
         }
 

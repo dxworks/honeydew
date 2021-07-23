@@ -1,6 +1,7 @@
 ﻿using System;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Models.Representations;
+using HoneydewModels.Representations;
 using Xunit;
 
 namespace HoneydewCoreTest.IO.Writers.Exporters

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.IO.Writers.Exporters;
+using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
 using HoneydewModels;
 using Xunit;
 
@@ -77,9 +77,9 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
 
             classModel.Metrics.Add(new ClassMetric()
             {
-                ExtractorName = typeof(BaseClassMetric).FullName,
-                ValueType = typeof(InheritanceMetric).FullName,
-                Value = new InheritanceMetric {Interfaces = {"Interface1"}, BaseClassName = "SomeParent"}
+                ExtractorName = typeof(CSharpBaseClassMetric).FullName,
+                ValueType = typeof(CSharpInheritanceMetric).FullName,
+                Value = new CSharpInheritanceMetric {Interfaces = {"Interface1"}, BaseClassName = "SomeParent"}
             });
 
             var classModels = new List<ClassModel>
@@ -88,7 +88,7 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""ProjectName"",""FilePath"":""some_path"",""ProjectReferences"":[""HoneydewCore""],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""FilePath"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""AccessModifier"":""private"",""Modifier"":""static"",""BaseClassFullName"":""object"",""BaseInterfaces"":[],""Fields"":[],""Constructors"":[],""Methods"":[],""Metrics"":[{""ExtractorName"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric"",""ValueType"":""HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}],""Namespace"":""SomeNamespace""}]}]}]}";
+                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""ProjectName"",""FilePath"":""some_path"",""ProjectReferences"":[""HoneydewCore""],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""FilePath"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""AccessModifier"":""private"",""Modifier"":""static"",""BaseClassFullName"":""object"",""BaseInterfaces"":[],""Fields"":[],""Constructors"":[],""Methods"":[],""Metrics"":[{""ExtractorName"":""HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpBaseClassMetric"",""ValueType"":""HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpInheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}],""Namespace"":""SomeNamespace""}]}]}]}";
 
             var projectModel = new ProjectModel("ProjectName")
             {

@@ -3,6 +3,7 @@ using System.Linq;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Models.Representations;
 using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
+using HoneydewModels.Representations;
 using Moq;
 using Xunit;
 

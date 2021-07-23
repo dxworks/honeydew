@@ -222,7 +222,7 @@ namespace HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp
             return methodSymbol == null ? new List<ParameterModel>() : GetParameterTypes(methodSymbol);
         }
 
-        private static IList<ParameterModel> GetParameterTypes(IMethodSymbol methodSymbol)
+        private IList<ParameterModel> GetParameterTypes(IMethodSymbol methodSymbol)
         {
             IList<ParameterModel> parameterTypes = new List<ParameterModel>();
             foreach (var parameter in methodSymbol.Parameters)
@@ -253,7 +253,7 @@ namespace HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp
 
                 parameterTypes.Add(new ParameterModel
                 {
-                    Type = parameter.Type.ToString(),
+                    Type = HoneydewSemanticModel.GetFullName(parameter.Type),
                     Modifier = modifier,
                     DefaultValue = defaultValue
                 });

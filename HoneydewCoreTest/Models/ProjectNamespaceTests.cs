@@ -1,5 +1,5 @@
-﻿using HoneydewCore.Extractors.Metrics.CompilationUnitMetrics;
-using HoneydewCore.Extractors.Metrics.SemanticMetrics;
+﻿using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
+using HoneydewExtractors.Metrics.Extraction.CompilationUnitLevel.CSharp;
 using HoneydewModels;
 using Xunit;
 
@@ -82,7 +82,7 @@ namespace HoneydewCoreTest.Models
             classModel.Metrics.Add(new ClassMetric
             {
                 Value = 0,
-                ExtractorName = typeof(UsingsCountMetric).FullName,
+                ExtractorName = typeof(CSharpUsingsCountMetric).FullName,
                 ValueType = typeof(int).FullName
             });
 
@@ -95,7 +95,7 @@ namespace HoneydewCoreTest.Models
 
             Assert.Equal(1, sutClassModel.Metrics.Count);
 
-            Assert.Equal("HoneydewCore.Extractors.Metrics.CompilationUnitMetrics.UsingsCountMetric",
+            Assert.Equal("HoneydewExtractors.Metrics.Extraction.CompilationUnitLevel.CSharp.CSharpUsingsCountMetric",
                 sutClassModel.Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", sutClassModel.Metrics[0].ValueType);
             Assert.Equal(0, (int) sutClassModel.Metrics[0].Value);
@@ -111,7 +111,7 @@ namespace HoneydewCoreTest.Models
             classModel1.Metrics.Add(new ClassMetric
             {
                 Value = 0,
-                ExtractorName = typeof(UsingsCountMetric).FullName,
+                ExtractorName = typeof(CSharpUsingsCountMetric).FullName,
                 ValueType = typeof(int).FullName
             });
 
@@ -123,12 +123,12 @@ namespace HoneydewCoreTest.Models
             };
             classModel2.Metrics.Add(new ClassMetric
             {
-                Value = new InheritanceMetric
+                Value = new CSharpInheritanceMetric
                 {
                     BaseClassName = "Object"
                 },
-                ExtractorName = typeof(BaseClassMetric).FullName,
-                ValueType = typeof(InheritanceMetric).FullName
+                ExtractorName = typeof(CSharpBaseClassMetric).FullName,
+                ValueType = typeof(CSharpInheritanceMetric).FullName
             });
 
             _sut.Add(classModel2);
@@ -140,18 +140,18 @@ namespace HoneydewCoreTest.Models
             classModel3.Metrics.Add(new ClassMetric
             {
                 Value = 0,
-                ExtractorName = typeof(UsingsCountMetric).FullName,
+                ExtractorName = typeof(CSharpUsingsCountMetric).FullName,
                 ValueType = typeof(int).FullName
             });
             classModel3.Metrics.Add(new ClassMetric
             {
-                Value = new InheritanceMetric
+                Value = new CSharpInheritanceMetric
                 {
                     BaseClassName = "BaseService",
                     Interfaces = {"IService"}
                 },
-                ExtractorName = typeof(BaseClassMetric).FullName,
-                ValueType = typeof(InheritanceMetric).FullName
+                ExtractorName = typeof(CSharpBaseClassMetric).FullName,
+                ValueType = typeof(CSharpInheritanceMetric).FullName
             });
 
 
@@ -161,37 +161,37 @@ namespace HoneydewCoreTest.Models
 
             Assert.Equal("Items.Pencil", _sut.ClassModels[0].FullName);
             Assert.Equal(1, _sut.ClassModels[0].Metrics.Count);
-            Assert.Equal("HoneydewCore.Extractors.Metrics.CompilationUnitMetrics.UsingsCountMetric",
+            Assert.Equal("HoneydewExtractors.Metrics.Extraction.CompilationUnitLevel.CSharp.CSharpUsingsCountMetric",
                 _sut.ClassModels[0].Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", _sut.ClassModels[0].Metrics[0].ValueType);
             Assert.Equal(0, (int) _sut.ClassModels[0].Metrics[0].Value);
 
             Assert.Equal("Items.Notebook", _sut.ClassModels[1].FullName);
             Assert.Equal(1, _sut.ClassModels[1].Metrics.Count);
-            Assert.Equal("HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric",
+            Assert.Equal("HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpBaseClassMetric",
                 _sut.ClassModels[1].Metrics[0].ExtractorName);
-            Assert.Equal("HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric",
+            Assert.Equal("HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpInheritanceMetric",
                 _sut.ClassModels[1].Metrics[0].ValueType);
-            Assert.Equal(typeof(InheritanceMetric), _sut.ClassModels[1].Metrics[0].Value.GetType());
-            var inheritanceMetric1 = (InheritanceMetric) _sut.ClassModels[1].Metrics[0].Value;
+            Assert.Equal(typeof(CSharpInheritanceMetric), _sut.ClassModels[1].Metrics[0].Value.GetType());
+            var inheritanceMetric1 = (CSharpInheritanceMetric) _sut.ClassModels[1].Metrics[0].Value;
             Assert.Equal(0, inheritanceMetric1.Interfaces.Count);
             Assert.Equal("Object", inheritanceMetric1.BaseClassName);
 
 
             Assert.Equal("Items.IItemService", _sut.ClassModels[2].FullName);
             Assert.Equal(2, _sut.ClassModels[2].Metrics.Count);
-            Assert.Equal("HoneydewCore.Extractors.Metrics.CompilationUnitMetrics.UsingsCountMetric",
+            Assert.Equal("HoneydewExtractors.Metrics.Extraction.CompilationUnitLevel.CSharp.CSharpUsingsCountMetric",
                 _sut.ClassModels[2].Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", _sut.ClassModels[2].Metrics[0].ValueType);
             Assert.Equal(0, (int) _sut.ClassModels[2].Metrics[0].Value);
 
 
-            Assert.Equal("HoneydewCore.Extractors.Metrics.SemanticMetrics.BaseClassMetric",
+            Assert.Equal("HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpBaseClassMetric",
                 _sut.ClassModels[2].Metrics[1].ExtractorName);
-            Assert.Equal("HoneydewCore.Extractors.Metrics.SemanticMetrics.InheritanceMetric",
+            Assert.Equal("HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpInheritanceMetric",
                 _sut.ClassModels[2].Metrics[1].ValueType);
-            Assert.Equal(typeof(InheritanceMetric), _sut.ClassModels[2].Metrics[1].Value.GetType());
-            var inheritanceMetric2 = (InheritanceMetric) _sut.ClassModels[2].Metrics[1].Value;
+            Assert.Equal(typeof(CSharpInheritanceMetric), _sut.ClassModels[2].Metrics[1].Value.GetType());
+            var inheritanceMetric2 = (CSharpInheritanceMetric) _sut.ClassModels[2].Metrics[1].Value;
             Assert.Equal("BaseService", inheritanceMetric2.BaseClassName);
 
             Assert.Equal(1, inheritanceMetric2.Interfaces.Count);

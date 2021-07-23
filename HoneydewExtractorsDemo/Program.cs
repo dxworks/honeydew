@@ -8,10 +8,11 @@ using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Writers;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Logging;
-using HoneydewCore.Processors;
+using HoneydewCore.Models.Representations;
 using HoneydewExtractors.Metrics.CSharp;
 using HoneydewExtractors.Metrics.Extraction.ClassLevel;
 using HoneydewExtractors.Metrics.Extraction.CompilationUnitLevel;
+using HoneydewExtractors.Processors;
 using HoneydewModels;
 
 namespace HoneydewExtractorsDemo

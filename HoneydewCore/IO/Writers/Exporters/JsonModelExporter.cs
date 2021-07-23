@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using HoneydewCore.Models.Representations;
 using HoneydewModels;
+using HoneydewModels.Representations;
 
 namespace HoneydewCore.IO.Writers.Exporters
 {
