@@ -10,9 +10,8 @@ using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Logging;
 using HoneydewCore.Models.Representations;
 using HoneydewCore.Processors;
-using HoneydewExtractors;
-using HoneydewExtractors.CSharp;
-using HoneydewExtractors.Metrics;
+using HoneydewExtractors.Metrics.CSharp;
+using HoneydewExtractors.Metrics.Extraction.ClassLevel;
 using HoneydewModels;
 
 namespace HoneydewExtractorsDemo
@@ -68,7 +67,7 @@ namespace HoneydewExtractorsDemo
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
-        private static IFactExtractor LoadExtractors()
+        private static CSharpFactExtractor LoadExtractors()
         {
             // var cSharpClassFactExtractor = new CSharpClassFactExtractor();
             // cSharpClassFactExtractor.AddMetric<BaseClassMetric>();
@@ -84,9 +83,11 @@ namespace HoneydewExtractorsDemo
             // };
 
             // return extractors;
-
-            return new FactExtractor(new MetricLoader<IExtractionMetric>(), new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(), new CSharpClassModelExtractor());
+            
+            var cSharpFactExtractor = new CSharpFactExtractor();
+            cSharpFactExtractor.AddMetric<IBaseClassMetric>();
+            
+            return cSharpFactExtractor;
         }
 
         // private static async Task<RepositoryModel> LoadModel(IProgressLogger progressLogger, string inputPath)
@@ -98,10 +99,10 @@ namespace HoneydewExtractorsDemo
         // }
 
         private static async Task<RepositoryModel> ExtractModel(IProgressLogger progressLogger, string inputPath,
-            IFactExtractor extractor)
+            CSharpFactExtractor extractor)
         {
             // Create repository model from path
-            var repositoryLoader = new RepositoryLoader(progressLogger, extractor);
+            var repositoryLoader = new CSharpRepositoryLoader(progressLogger, extractor);
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;
