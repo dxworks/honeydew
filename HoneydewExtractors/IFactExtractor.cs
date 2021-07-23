@@ -3,8 +3,9 @@ using HoneydewModels;
 
 namespace HoneydewExtractors
 {
-    public interface IFactExtractor
+    public interface IFactExtractor<TClassModel>
+        where TClassModel : IClassModel
     {
-        public IList<IClassModel> Extract(string fileContent);
+        public IList<TClassModel> Extract(string fileContent);
     }
 }

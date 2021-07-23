@@ -1,7 +1,8 @@
 ﻿namespace HoneydewExtractors
 {
-    public interface ISyntacticModelCreator
+    public interface ISyntacticModelCreator<out TSyntacticModel>
+        where TSyntacticModel : ISyntacticModel
     {
-        ISyntacticModel Create(string fileContent);
+        TSyntacticModel Create(string fileContent);
     }
 }

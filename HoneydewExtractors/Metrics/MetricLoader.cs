@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace HoneydewExtractors.Metrics
 {
-    public class MetricLoader<TM> : IMetricLoader<TM>
+    public class MetricLoader<TM>
     {
         private readonly ISet<Type> _metricsTypes = new HashSet<Type>();
 
@@ -13,7 +13,17 @@ namespace HoneydewExtractors.Metrics
             _metricsTypes.Add(typeof(T));
         }
 
-        public IList<TM> GetMetrics()
+        public void LoadMetric(Type type)
+        {
+            if (!typeof(TM).IsAssignableFrom(type))
+            {
+                return;
+            }
+
+            _metricsTypes.Add(type);
+        }
+
+        public IList<TM> InstantiateMetrics()
         {
             return _metricsTypes
                 .Select(metricsType => (TM) Activator.CreateInstance(metricsType))

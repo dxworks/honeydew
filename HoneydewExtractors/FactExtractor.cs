@@ -1,43 +1,68 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using HoneydewExtractors.Metrics;
+using HoneydewExtractors.Metrics.Extraction;
 using HoneydewModels;
 
 namespace HoneydewExtractors
 {
-    public class FactExtractor : IFactExtractor
+    public abstract class
+        FactExtractor<TClassModel, TSyntacticModel, TSemanticModel, TSyntaxNode> : IFactExtractor<TClassModel>
+        where TClassModel : IClassModel
+        where TSyntacticModel : ISyntacticModel
+        where TSemanticModel : ISemanticModel
+        where TSyntaxNode : ISyntaxNode
     {
-        private readonly IMetricLoader<IExtractionMetric> _metricLoader;
-        private readonly ISyntacticModelCreator _syntacticModelCreator;
-        private readonly ISemanticModelCreator _semanticModelCreator;
-        private readonly IClassModelExtractor _classModelExtractor;
+        private readonly ISet<Type> _abstractMetrics = new HashSet<Type>();
 
-        public FactExtractor(IMetricLoader<IExtractionMetric> metricLoader,
-            ISyntacticModelCreator syntacticModelCreator, ISemanticModelCreator semanticModelCreator,
-            IClassModelExtractor classModelExtractor)
+        private readonly MetricLoader<IExtractionMetric<TSyntacticModel, TSemanticModel, TSyntaxNode>> _metricLoader =
+            new();
+
+        private readonly ISyntacticModelCreator<TSyntacticModel> _syntacticModelCreator;
+        private readonly ISemanticModelCreator<TSyntacticModel, TSemanticModel> _semanticModelCreator;
+
+        private readonly IClassModelExtractor<TClassModel, TSyntacticModel, TSemanticModel, TSyntaxNode>
+            _classModelExtractor;
+        
+        private bool _hasLoadedMetrics;
+
+        protected abstract IDictionary<Type, Type> PopulateWithConcreteTypes();
+
+        protected FactExtractor(ISyntacticModelCreator<TSyntacticModel> syntacticModelCreator,
+            ISemanticModelCreator<TSyntacticModel, TSemanticModel> semanticModelCreator,
+            IClassModelExtractor<TClassModel, TSyntacticModel, TSemanticModel, TSyntaxNode>
+                classModelExtractor)
         {
-            _metricLoader = metricLoader;
             _syntacticModelCreator = syntacticModelCreator;
             _semanticModelCreator = semanticModelCreator;
             _classModelExtractor = classModelExtractor;
+            }
+
+        public void AddMetric<T>() where T : IMetric
+        {
+            _abstractMetrics.Add(typeof(T));
         }
 
-        public IList<IClassModel> Extract(string fileContent)
+        public IList<TClassModel> Extract(string fileContent)
         {
-            var syntacticModel = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntacticModel);
-
-            var classModels = _classModelExtractor.Extract(syntacticModel, semanticModel);
-
-            var extractionMetrics = _metricLoader.GetMetrics();
-            foreach (var classModel in classModels)
+            if (!_hasLoadedMetrics)
             {
-                foreach (var extractionMetric in extractionMetrics)
+                _hasLoadedMetrics = true;
+                
+                var concreteMetrics = PopulateWithConcreteTypes();
+                foreach (var abstractMetric in _abstractMetrics)
                 {
-                    classModel.AddMetricValue(extractionMetric.Calculate(syntacticModel, semanticModel));
+                    if (concreteMetrics.TryGetValue(abstractMetric, out var concreteMetricType))
+                    {
+                        _metricLoader.LoadMetric(concreteMetricType);
+                    }
                 }
             }
 
-            return classModels;
+            var syntacticModel = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntacticModel);
+
+            return _classModelExtractor.Extract(syntacticModel, semanticModel, _metricLoader);
         }
     }
 }

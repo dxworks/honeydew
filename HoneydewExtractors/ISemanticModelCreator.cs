@@ -1,7 +1,9 @@
 ﻿namespace HoneydewExtractors
 {
-    public interface ISemanticModelCreator
+    public interface ISemanticModelCreator<in TSyntacticModel, out TSemanticModel>
+        where TSyntacticModel : ISyntacticModel
+        where TSemanticModel : ISemanticModel
     {
-        ISemanticModel Create(ISyntacticModel syntacticModel);
+        TSemanticModel Create(TSyntacticModel syntacticModel);
     }
 }
