@@ -1,56 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using HoneydewCore.Extractors;
-using HoneydewCore.Extractors.Metrics;
-using HoneydewCore.Extractors.Metrics.SemanticMetrics;
-using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
-using HoneydewCore.Models;
+﻿using System.Collections.Generic;
+using HoneydewExtractors.Metrics;
+using HoneydewExtractors.Metrics.CSharp;
+using HoneydewExtractors.Metrics.Extraction.ClassLevel;
+using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
 using HoneydewModels;
 using Xunit;
 
-namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
+namespace HoneydewExtractorsTests.Metrics.Extraction.CSharp.ClassLevel
 {
-    public class FieldsInfoMetricTests
+    public class CSharpFieldsInfoMetricTests
     {
-        private readonly CSharpMetricExtractor _sut;
-        private readonly IFactExtractor _factExtractor;
+        private readonly CSharpFactExtractor _factExtractor;
 
-        public FieldsInfoMetricTests()
+        public CSharpFieldsInfoMetricTests()
         {
-            _sut = new FieldsInfoMetric();
-
-            var metrics = new List<Type>
-            {
-                _sut.GetType()
-            };
-
-            _factExtractor = new CSharpClassFactExtractor(metrics);
+            _factExtractor = new CSharpFactExtractor();
+            _factExtractor.AddMetric<IFieldsInfoMetric>();
         }
 
         [Fact]
-        public void GetMetricType_ShouldReturnSemantic()
+        public void GetMetricType_ShouldReturnClassLevel()
         {
-            Assert.True(_sut is ISemanticMetric);
+            Assert.Equal(ExtractionMetricType.ClassLevel, new CSharpFieldsInfoMetric().GetMetricType());
         }
 
         [Fact]
         public void PrettyPrint_ShouldReturnFieldsInfo()
         {
-            Assert.Equal("Fields Info", _sut.PrettyPrint());
+            Assert.Equal("Fields Info", new CSharpFieldsInfoMetric().PrettyPrint());
         }
-
 
         [Fact]
         public void Extract_ShouldHaveNoFields_WhenGivenAnInterface()
         {
             const string fileContent = @"using System;
-    
-                                     namespace TopLevel
-                                     {
-                                         public interface Foo { public void f(); string g(int a); }
+     
+                                      namespace TopLevel
+                                      {
+                                          public interface Foo { public void f(); string g(int a); }
 
-                                         public interface Bar { public void f(int a); string g(int a, float b); }                                        
-                                     }";
+                                          public interface Bar { public void f(int a); string g(int a, float b); }                                        
+                                      }";
 
 
             var classModels = _factExtractor.Extract(fileContent);
@@ -59,7 +49,7 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
 
             foreach (var classModel in classModels)
             {
-                var optional = classModel.GetMetricValue<FieldsInfoMetric>();
+                var optional = classModel.GetMetricValue<CSharpFieldsInfoMetric>();
                 Assert.True(optional.HasValue);
 
                 var fieldInfos = (IList<FieldModel>) optional.Value;
@@ -72,21 +62,21 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
         public void Extract_ShouldHavePrivateFieldsWithModifiers_WhenGivenClassWithFieldsAndModifiersWithDefaultAccess()
         {
             const string fileContent = @"using System;
-                                     using HoneydewCore.Extractors;
-                                     namespace TopLevel
-                                     {
-                                         public class Foo { readonly int A = 12; volatile float X; static string Y = """";
-                                                          void f() {}
-                                                          public string g(int a) {return ""Value"";}                                            
-                                                          }                                        
-                                     }";
+                                      using HoneydewCore.Extractors;
+                                      namespace TopLevel
+                                      {
+                                          public class Foo { readonly int A = 12; volatile float X; static string Y = """";
+                                                           void f() {}
+                                                           public string g(int a) {return ""Value"";}                                            
+                                                           }                                        
+                                      }";
 
 
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, classModels.Count);
 
-            var optional = classModels[0].GetMetricValue<FieldsInfoMetric>();
+            var optional = classModels[0].GetMetricValue<CSharpFieldsInfoMetric>();
             Assert.True(optional.HasValue);
 
             var fieldInfos = (IList<FieldModel>) optional.Value;
@@ -123,18 +113,18 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             string modifier)
         {
             var fileContent = $@"using System;
-                                     using HoneydewCore.Extractors;
-                                     namespace TopLevel
-                                     {{
-                                         public class Foo {{ {modifier} int AnimalNest; {modifier} float X,Yaz_fafa; {modifier} string _zxy; {modifier} CSharpMetricExtractor extractor;}}                                        
-                                     }}";
+                                      using HoneydewCore.Extractors;
+                                      namespace TopLevel
+                                      {{
+                                          public class Foo {{ {modifier} int AnimalNest; {modifier} float X,Yaz_fafa; {modifier} string _zxy; {modifier} CSharpMetricExtractor extractor;}}                                        
+                                      }}";
 
 
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, classModels.Count);
 
-            var optional = classModels[0].GetMetricValue<FieldsInfoMetric>();
+            var optional = classModels[0].GetMetricValue<CSharpFieldsInfoMetric>();
             Assert.True(optional.HasValue);
 
             var fieldInfos = (IList<FieldModel>) optional.Value;
@@ -183,18 +173,18 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             string visibility)
         {
             var fileContent = $@"using System;
-                                     using HoneydewCore.Extractors;
-                                     namespace SomeNamespace
-                                     {{
-                                         public class Foo {{ {visibility} event CSharpMetricExtractor extractor; {visibility} event int _some_event; {visibility} event Action MyAction1,MyAction2;}}                                        
-                                     }}";
+                                      using HoneydewCore.Extractors;
+                                      namespace SomeNamespace
+                                      {{
+                                          public class Foo {{ {visibility} event CSharpMetricExtractor extractor; {visibility} event int _some_event; {visibility} event Action MyAction1,MyAction2;}}                                        
+                                      }}";
 
 
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, classModels.Count);
 
-            var optional = classModels[0].GetMetricValue<FieldsInfoMetric>();
+            var optional = classModels[0].GetMetricValue<CSharpFieldsInfoMetric>();
             Assert.True(optional.HasValue);
 
             var fieldInfos = (IList<FieldModel>) optional.Value;
@@ -234,20 +224,20 @@ namespace HoneydewCoreTest.Extractors.Metrics.SyntacticMetrics
             string modifier)
         {
             var fileContent = $@"using System;
-                                     using HoneydewCore.Extractors;
-                                     namespace TopLevel
-                                     {{
-                                         public class Foo {{ {modifier} public int AnimalNest; protected {modifier} float X,Yaz_fafa; {modifier} string _zxy; {modifier} CSharpMetricExtractor extractor;
-                                             void f() {{ AnimalNest=0;}}
-                                             }}                                        
-                                     }}";
+                                      using HoneydewCore.Extractors;
+                                      namespace TopLevel
+                                      {{
+                                          public class Foo {{ {modifier} public int AnimalNest; protected {modifier} float X,Yaz_fafa; {modifier} string _zxy; {modifier} CSharpMetricExtractor extractor;
+                                              void f() {{ AnimalNest=0;}}
+                                              }}                                        
+                                      }}";
 
 
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, classModels.Count);
 
-            var optional = classModels[0].GetMetricValue<FieldsInfoMetric>();
+            var optional = classModels[0].GetMetricValue<CSharpFieldsInfoMetric>();
             Assert.True(optional.HasValue);
 
             var fieldInfos = (IList<FieldModel>) optional.Value;
