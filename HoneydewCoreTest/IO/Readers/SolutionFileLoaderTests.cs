@@ -4,7 +4,7 @@ using HoneydewCore.IO.Readers.ProjectRead;
 using HoneydewCore.IO.Readers.SolutionRead;
 using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.Logging;
-using HoneydewExtractors;
+using HoneydewExtractors.Metrics.CSharp;
 using HoneydewModels;
 using Microsoft.CodeAnalysis;
 using Moq;
@@ -19,7 +19,7 @@ namespace HoneydewCoreTest.IO.Readers
         private readonly Mock<ISolutionProvider> _solutionProviderMock = new();
         private readonly Mock<ISolutionLoadingStrategy> _solutionLoadingStrategyMock = new();
         private readonly Mock<IProgressLogger> _progressLoggerMock = new();
-        private readonly Mock<IFactExtractor> _factExtractorMock = new();
+        private readonly Mock<CSharpFactExtractor> _factExtractorMock = new();
 
         public SolutionFileLoaderTests()
         {

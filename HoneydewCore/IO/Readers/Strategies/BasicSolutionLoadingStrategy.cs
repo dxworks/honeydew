@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using HoneydewCore.Logging;
 using HoneydewExtractors;
+using HoneydewExtractors.Metrics.CSharp;
 using HoneydewModels;
 using Microsoft.CodeAnalysis;
 
@@ -19,7 +20,7 @@ namespace HoneydewCore.IO.Readers.Strategies
             _projectLoadingStrategy = projectLoadingStrategy;
         }
 
-        public async Task<SolutionModel> Load(Solution solution, IFactExtractor extractor)
+        public async Task<SolutionModel> Load(Solution solution, CSharpFactExtractor extractor)
         {
             SolutionModel solutionModel = new()
             {

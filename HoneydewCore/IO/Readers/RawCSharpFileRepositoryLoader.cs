@@ -2,16 +2,17 @@
 using System.Text.Json;
 using System.Threading.Tasks;
 using HoneydewCore.Logging;
+using HoneydewExtractors;
 using HoneydewModels;
 
 namespace HoneydewCore.IO.Readers
 {
-    public class RawFileRepositoryLoader : IRepositoryLoader
+    public class RawCSharpFileRepositoryLoader : IRepositoryLoader<RepositoryModel>
     {
         private readonly IProgressLogger _progressLogger;
         private readonly IFileReader _fileReader;
 
-        public RawFileRepositoryLoader(IProgressLogger progressLogger, IFileReader fileReader)
+        public RawCSharpFileRepositoryLoader(IProgressLogger progressLogger, IFileReader fileReader)
         {
             _progressLogger = progressLogger;
             _fileReader = fileReader;

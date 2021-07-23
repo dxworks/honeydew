@@ -1,18 +1,18 @@
 ﻿using System.Threading.Tasks;
 using HoneydewCore.IO.Readers.Strategies;
-using HoneydewExtractors;
+using HoneydewExtractors.Metrics.CSharp;
 using HoneydewModels;
 
 namespace HoneydewCore.IO.Readers.ProjectRead
 {
     public class ProjectLoader : IProjectLoader
     {
-        private readonly IFactExtractor _extractor;
+        private readonly CSharpFactExtractor _extractor;
 
         private readonly IProjectProvider _projectProvider;
         private readonly IProjectLoadingStrategy _projectLoadingStrategy;
 
-        public ProjectLoader(IFactExtractor extractor, IProjectProvider projectProvider,
+        public ProjectLoader(CSharpFactExtractor extractor, IProjectProvider projectProvider,
             IProjectLoadingStrategy projectLoadingStrategy)
         {
             _extractor = extractor;

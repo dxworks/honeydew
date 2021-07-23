@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using HoneydewCore.Logging;
-using HoneydewExtractors;
+using HoneydewExtractors.Metrics.CSharp;
 using HoneydewModels;
 using Microsoft.CodeAnalysis;
 
@@ -17,7 +17,7 @@ namespace HoneydewCore.IO.Readers.Strategies
             _progressLogger = progressLogger;
         }
 
-        public async Task<ProjectModel> Load(Project project, IFactExtractor extractors)
+        public async Task<ProjectModel> Load(Project project, CSharpFactExtractor extractors)
         {
             var projectModel = new ProjectModel(project.Name)
             {
@@ -38,14 +38,13 @@ namespace HoneydewCore.IO.Readers.Strategies
 
                     var fileContent = await document.GetTextAsync();
                     var classModels = extractors.Extract(fileContent.ToString());
-                    
 
                     _progressLogger.LogLine("done");
 
                     foreach (var classModel in classModels)
                     {
-                        // classModel.FilePath = document.FilePath;
-                        projectModel.Add((ClassModel) classModel);
+                        classModel.FilePath = document.FilePath;
+                        projectModel.Add(classModel);
                     }
                 }
                 catch (Exception e)

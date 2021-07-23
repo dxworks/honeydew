@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using HoneydewCore.IO.Readers.Strategies;
 using HoneydewCore.Logging;
 using HoneydewExtractors;
+using HoneydewExtractors.Metrics.CSharp;
 using HoneydewModels;
 
 namespace HoneydewCore.IO.Readers.SolutionRead
@@ -10,12 +11,12 @@ namespace HoneydewCore.IO.Readers.SolutionRead
     public class SolutionFileLoader : ISolutionLoader
     {
         private readonly IProgressLogger _progressLogger;
-        private readonly IFactExtractor _extractor;
+        private readonly CSharpFactExtractor _extractor;
 
         private readonly ISolutionProvider _solutionProvider;
         private readonly ISolutionLoadingStrategy _solutionLoadingStrategy;
 
-        public SolutionFileLoader(IProgressLogger progressLogger, IFactExtractor extractor,
+        public SolutionFileLoader(IProgressLogger progressLogger, CSharpFactExtractor extractor,
             ISolutionProvider solutionProvider,
             ISolutionLoadingStrategy solutionLoadingStrategy)
         {
