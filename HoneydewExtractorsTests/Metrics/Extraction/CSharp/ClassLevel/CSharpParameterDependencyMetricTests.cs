@@ -8,10 +8,12 @@ namespace HoneydewExtractorsTests.Metrics.Extraction.CSharp.ClassLevel
 {
      public class CSharpParameterDependencyMetricTests
      {
+         private readonly CSharpParameterDependencyMetric _sut;
          private readonly CSharpFactExtractor _factExtractor;
 
          public CSharpParameterDependencyMetricTests()
          {
+             _sut = new CSharpParameterDependencyMetric();
              _factExtractor = new CSharpFactExtractor();
              _factExtractor.AddMetric<IParameterDependencyMetric>();
          }
@@ -19,13 +21,13 @@ namespace HoneydewExtractorsTests.Metrics.Extraction.CSharp.ClassLevel
          [Fact]
          public void GetMetricType_ShouldReturnClassLevel()
          {
-             Assert.Equal(ExtractionMetricType.CompilationUnitLevel, new CSharpParameterDependencyMetric().GetMetricType());
+             Assert.Equal(ExtractionMetricType.CompilationUnitLevel, _sut.GetMetricType());
          }
 
          [Fact]
          public void PrettyPrint_ShouldReturnParameterDependency()
          {
-             Assert.Equal("Parameter Dependency", new CSharpParameterDependencyMetric().PrettyPrint());
+             Assert.Equal("Parameter Dependency", _sut.PrettyPrint());
          }
 
          [Fact]
@@ -252,63 +254,62 @@ namespace HoneydewExtractorsTests.Metrics.Extraction.CSharp.ClassLevel
              Assert.Equal(2, dependencies.Dependencies["int"]);
              Assert.Equal(1, dependencies.Dependencies["string"]);
          }
-
-         // todo
-         // [Fact]
-         // public void GetRelations_ShouldHaveNoRelations_WhenClassHasMethodsWithNoParameters()
-         // {
-         //     var fileRelations = _sut.GetRelations(new CSharpDependencyDataMetric());
-         //
-         //     Assert.Empty(fileRelations);
-         // }
-         //
-         // [Fact]
-         // public void GetRelations_ShouldHaveNoRelations_WhenDependenciesAreOnlyPrimitiveTypes()
-         // {
-         //     var fileRelations = _sut.GetRelations(new CSharpDependencyDataMetric
-         //     {
-         //         Usings = {"System"},
-         //         Dependencies =
-         //         {
-         //             {"int", 3},
-         //             {"float", 2},
-         //             {"string", 1}
-         //         }
-         //     });
-         //
-         //     Assert.Empty(fileRelations);
-         // }
-         //
-         // [Fact]
-         // public void GetRelations_Extract_ShouldHaveRelations_WhenThereAreNonPrimitiveDependencies()
-         // {
-         //     var fileRelations = _sut.GetRelations(new CSharpDependencyDataMetric
-         //     {
-         //         Usings =
-         //         {
-         //             "System", "HoneydewCore.Extractors", "HoneydewCore.Extractors.Metrics",
-         //             "HoneydewCore.Extractors.Metrics.SemanticMetrics"
-         //         },
-         //         Dependencies =
-         //         {
-         //             {"int", 3},
-         //             {"IFactExtractor", 2},
-         //             {"CSharpMetricExtractor", 1}
-         //         }
-         //     });
-         //
-         //     Assert.NotEmpty(fileRelations);
-         //     Assert.Equal(2, fileRelations.Count);
-         //
-         //     var fileRelation1 = fileRelations[0];
-         //     Assert.Equal("IFactExtractor", fileRelation1.FileTarget);
-         //     Assert.Equal(typeof(CSharpParameterDependencyMetric).FullName, fileRelation1.RelationType);
-         //     Assert.Equal(2, fileRelation1.RelationCount);
-         //
-         //     var fileRelation2 = fileRelations[1];
-         //     Assert.Equal("CSharpMetricExtractor", fileRelation2.FileTarget);
-         //     Assert.Equal(typeof(CSharpParameterDependencyMetric).FullName, fileRelation2.RelationType);
-         //     Assert.Equal(1, fileRelation2.RelationCount);
-         // }
+         
+         [Fact]
+         public void GetRelations_ShouldHaveNoRelations_WhenClassHasMethodsWithNoParameters()
+         {
+             var fileRelations = _sut.GetRelations(new CSharpDependencyDataMetric());
+         
+             Assert.Empty(fileRelations);
+         }
+         
+         [Fact]
+         public void GetRelations_ShouldHaveNoRelations_WhenDependenciesAreOnlyPrimitiveTypes()
+         {
+             var fileRelations = _sut.GetRelations(new CSharpDependencyDataMetric
+             {
+                 Usings = {"System"},
+                 Dependencies =
+                 {
+                     {"int", 3},
+                     {"float", 2},
+                     {"string", 1}
+                 }
+             });
+         
+             Assert.Empty(fileRelations);
+         }
+         
+         [Fact]
+         public void GetRelations_Extract_ShouldHaveRelations_WhenThereAreNonPrimitiveDependencies()
+         {
+             var fileRelations = _sut.GetRelations(new CSharpDependencyDataMetric
+             {
+                 Usings =
+                 {
+                     "System", "HoneydewCore.Extractors", "HoneydewCore.Extractors.Metrics",
+                     "HoneydewCore.Extractors.Metrics.SemanticMetrics"
+                 },
+                 Dependencies =
+                 {
+                     {"int", 3},
+                     {"IFactExtractor", 2},
+                     {"CSharpMetricExtractor", 1}
+                 }
+             });
+         
+             Assert.NotEmpty(fileRelations);
+             Assert.Equal(2, fileRelations.Count);
+         
+             var fileRelation1 = fileRelations[0];
+             Assert.Equal("IFactExtractor", fileRelation1.FileTarget);
+             Assert.Equal(typeof(CSharpParameterDependencyMetric).FullName, fileRelation1.RelationType);
+             Assert.Equal(2, fileRelation1.RelationCount);
+         
+             var fileRelation2 = fileRelations[1];
+             Assert.Equal("CSharpMetricExtractor", fileRelation2.FileTarget);
+             Assert.Equal(typeof(CSharpParameterDependencyMetric).FullName, fileRelation2.RelationType);
+             Assert.Equal(1, fileRelation2.RelationCount);
+         }
      }
 }

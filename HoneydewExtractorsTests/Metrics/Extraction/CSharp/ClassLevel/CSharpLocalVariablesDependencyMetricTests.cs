@@ -6,32 +6,34 @@ using Xunit;
 
 namespace HoneydewExtractorsTests.Metrics.Extraction.CSharp.ClassLevel
 {
-     public class CSharpLocalVariablesDependencyMetricTests
-     {
-         private readonly CSharpFactExtractor _factExtractor;
+    public class CSharpLocalVariablesDependencyMetricTests
+    {
+        private readonly CSharpLocalVariablesDependencyMetric _sut;
+        private readonly CSharpFactExtractor _factExtractor;
 
-         public CSharpLocalVariablesDependencyMetricTests()
-         {
-             _factExtractor = new CSharpFactExtractor();
-             _factExtractor.AddMetric<ILocalVariablesDependencyMetric>();
-         }
-         
-         [Fact]
-         public void GetMetricType_ShouldReturnClassLevel()
-         {
-             Assert.Equal(ExtractionMetricType.CompilationUnitLevel, new CSharpLocalVariablesDependencyMetric().GetMetricType());
-         }
+        public CSharpLocalVariablesDependencyMetricTests()
+        {
+            _sut = new CSharpLocalVariablesDependencyMetric();
+            _factExtractor = new CSharpFactExtractor();
+            _factExtractor.AddMetric<ILocalVariablesDependencyMetric>();
+        }
 
-         [Fact]
-         public void PrettyPrint_ShouldReturnLocalVariablesDependency()
-         {
-             Assert.Equal("Local Variables Dependency", new CSharpLocalVariablesDependencyMetric().PrettyPrint());
-         }
+        [Fact]
+        public void GetMetricType_ShouldReturnClassLevel()
+        {
+            Assert.Equal(ExtractionMetricType.CompilationUnitLevel, _sut.GetMetricType());
+        }
 
-         [Fact]
-         public void Extract_ShouldHaveNoLocalVariables_WhenClassHasMethodsThatDontUseLocalVariables()
-         {
-             const string fileContent = @"
+        [Fact]
+        public void PrettyPrint_ShouldReturnLocalVariablesDependency()
+        {
+            Assert.Equal("Local Variables Dependency", _sut.PrettyPrint());
+        }
+
+        [Fact]
+        public void Extract_ShouldHaveNoLocalVariables_WhenClassHasMethodsThatDontUseLocalVariables()
+        {
+            const string fileContent = @"
                                      namespace App
                                      {                                       
 
@@ -43,21 +45,21 @@ namespace HoneydewExtractorsTests.Metrics.Extraction.CSharp.ClassLevel
                                          }
                                      }";
 
-             var classModels = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-             var optional = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
-             Assert.True(optional.HasValue);
+            var optional = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
+            Assert.True(optional.HasValue);
 
-             var dataMetric = (CSharpDependencyDataMetric) optional.Value;
+            var dataMetric = (CSharpDependencyDataMetric) optional.Value;
 
-             Assert.Empty(dataMetric.Usings);
-             Assert.Empty(dataMetric.Dependencies);
-         }
+            Assert.Empty(dataMetric.Usings);
+            Assert.Empty(dataMetric.Dependencies);
+        }
 
-         [Fact]
-         public void Extract_ShouldHavePrimitiveLocalValues_WhenClassHasMethodsThatHaveLocalVariables()
-         {
-             const string fileContent = @"using System;
+        [Fact]
+        public void Extract_ShouldHavePrimitiveLocalValues_WhenClassHasMethodsThatHaveLocalVariables()
+        {
+            const string fileContent = @"using System;
 
                                      namespace App
                                      {                                       
@@ -73,26 +75,26 @@ namespace HoneydewExtractorsTests.Metrics.Extraction.CSharp.ClassLevel
                                          }
                                      }";
 
-             var classModels = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-             var optional = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
-             Assert.True(optional.HasValue);
+            var optional = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
+            Assert.True(optional.HasValue);
 
-             var dataMetric = (CSharpDependencyDataMetric) optional.Value;
+            var dataMetric = (CSharpDependencyDataMetric) optional.Value;
 
-             Assert.Equal(1, dataMetric.Usings.Count);
-             Assert.Equal("System", dataMetric.Usings[0]);
+            Assert.Equal(1, dataMetric.Usings.Count);
+            Assert.Equal("System", dataMetric.Usings[0]);
 
-             Assert.Equal(3, dataMetric.Dependencies.Count);
-             Assert.Equal(3, dataMetric.Dependencies["int"]);
-             Assert.Equal(1, dataMetric.Dependencies["float"]);
-             Assert.Equal(1, dataMetric.Dependencies["string"]);
-         }
+            Assert.Equal(3, dataMetric.Dependencies.Count);
+            Assert.Equal(3, dataMetric.Dependencies["int"]);
+            Assert.Equal(1, dataMetric.Dependencies["float"]);
+            Assert.Equal(1, dataMetric.Dependencies["string"]);
+        }
 
-         [Fact]
-         public void Extract_ShouldHaveNoPrimitiveLocalVariables_WhenGivenAnInterface()
-         {
-             const string fileContent = @"using System;
+        [Fact]
+        public void Extract_ShouldHaveNoPrimitiveLocalVariables_WhenGivenAnInterface()
+        {
+            const string fileContent = @"using System;
 
                                      namespace App
                                      {                                       
@@ -108,23 +110,23 @@ namespace HoneydewExtractorsTests.Metrics.Extraction.CSharp.ClassLevel
                                          }
                                      }";
 
-             var classModels = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-             var optional = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
-             Assert.True(optional.HasValue);
+            var optional = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
+            Assert.True(optional.HasValue);
 
-             var dataMetric = (CSharpDependencyDataMetric) optional.Value;
+            var dataMetric = (CSharpDependencyDataMetric) optional.Value;
 
-             Assert.Equal(1, dataMetric.Usings.Count);
-             Assert.Equal("System", dataMetric.Usings[0]);
+            Assert.Equal(1, dataMetric.Usings.Count);
+            Assert.Equal("System", dataMetric.Usings[0]);
 
-             Assert.Empty(dataMetric.Dependencies);
-         }
+            Assert.Empty(dataMetric.Dependencies);
+        }
 
-         [Fact]
-         public void Extract_ShouldHaveNoDependencies_WhenGivenAnInterface()
-         {
-             const string fileContent = @"using System;
+        [Fact]
+        public void Extract_ShouldHaveNoDependencies_WhenGivenAnInterface()
+        {
+            const string fileContent = @"using System;
                                      using HoneydewCore.Extractors;
                                      using HoneydewCore.Extractors.Metrics;
                                      using HoneydewCore.Extractors.Metrics.SemanticMetrics;
@@ -140,26 +142,26 @@ namespace HoneydewExtractorsTests.Metrics.Extraction.CSharp.ClassLevel
                                          }
                                      }";
 
-             var classModels = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-             var optional = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
-             Assert.True(optional.HasValue);
+            var optional = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
+            Assert.True(optional.HasValue);
 
-             var dataMetric = (CSharpDependencyDataMetric) optional.Value;
+            var dataMetric = (CSharpDependencyDataMetric) optional.Value;
 
-             Assert.Equal(4, dataMetric.Usings.Count);
-             Assert.Equal("System", dataMetric.Usings[0]);
-             Assert.Equal("HoneydewCore.Extractors", dataMetric.Usings[1]);
-             Assert.Equal("HoneydewCore.Extractors.Metrics", dataMetric.Usings[2]);
-             Assert.Equal("HoneydewCore.Extractors.Metrics.SemanticMetrics", dataMetric.Usings[3]);
+            Assert.Equal(4, dataMetric.Usings.Count);
+            Assert.Equal("System", dataMetric.Usings[0]);
+            Assert.Equal("HoneydewCore.Extractors", dataMetric.Usings[1]);
+            Assert.Equal("HoneydewCore.Extractors.Metrics", dataMetric.Usings[2]);
+            Assert.Equal("HoneydewCore.Extractors.Metrics.SemanticMetrics", dataMetric.Usings[3]);
 
-             Assert.Empty(dataMetric.Dependencies);
-         }
+            Assert.Empty(dataMetric.Dependencies);
+        }
 
-         [Fact]
-         public void Extract_ShouldHaveLocalVariablesDependencies_WhenClassHasMethodsWithNonPrimitiveLocalVariables()
-         {
-             const string fileContent = @"using System;
+        [Fact]
+        public void Extract_ShouldHaveLocalVariablesDependencies_WhenClassHasMethodsWithNonPrimitiveLocalVariables()
+        {
+            const string fileContent = @"using System;
                                      using HoneydewCore.Extractors;
                                      using HoneydewCore.Extractors.Metrics;
                                      namespace App
@@ -174,27 +176,27 @@ namespace HoneydewExtractorsTests.Metrics.Extraction.CSharp.ClassLevel
                                          }
                                      }";
 
-             var classModels = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-             var optional = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
-             Assert.True(optional.HasValue);
+            var optional = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
+            Assert.True(optional.HasValue);
 
-             var dataMetric = (CSharpDependencyDataMetric) optional.Value;
+            var dataMetric = (CSharpDependencyDataMetric) optional.Value;
 
-             Assert.Equal(3, dataMetric.Usings.Count);
-             Assert.Equal("System", dataMetric.Usings[0]);
-             Assert.Equal("HoneydewCore.Extractors", dataMetric.Usings[1]);
-             Assert.Equal("HoneydewCore.Extractors.Metrics", dataMetric.Usings[2]);
+            Assert.Equal(3, dataMetric.Usings.Count);
+            Assert.Equal("System", dataMetric.Usings[0]);
+            Assert.Equal("HoneydewCore.Extractors", dataMetric.Usings[1]);
+            Assert.Equal("HoneydewCore.Extractors.Metrics", dataMetric.Usings[2]);
 
-             Assert.Equal(2, dataMetric.Dependencies.Count);
-             Assert.Equal(2, dataMetric.Dependencies["CSharpMetricExtractor"]);
-             Assert.Equal(3, dataMetric.Dependencies["IFactExtractor"]);
-         }
+            Assert.Equal(2, dataMetric.Dependencies.Count);
+            Assert.Equal(2, dataMetric.Dependencies["CSharpMetricExtractor"]);
+            Assert.Equal(3, dataMetric.Dependencies["IFactExtractor"]);
+        }
 
-         [Fact]
-         public void Extract_ShouldHaveLocalVariablesDependencies_WhenClassHasConstructorLocalVariables()
-         {
-             const string fileContent = @"using System;
+        [Fact]
+        public void Extract_ShouldHaveLocalVariablesDependencies_WhenClassHasConstructorLocalVariables()
+        {
+            const string fileContent = @"using System;
                                      using HoneydewCore.Extractors;
                                      using HoneydewCore.Extractors.Metrics;
                                      namespace App
@@ -210,29 +212,29 @@ namespace HoneydewExtractorsTests.Metrics.Extraction.CSharp.ClassLevel
                                          }
                                      }";
 
-             var classModels = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-             var optional = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
-             Assert.True(optional.HasValue);
+            var optional = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
+            Assert.True(optional.HasValue);
 
-             var dataMetric = (CSharpDependencyDataMetric) optional.Value;
+            var dataMetric = (CSharpDependencyDataMetric) optional.Value;
 
-             Assert.Equal(3, dataMetric.Usings.Count);
-             Assert.Equal("System", dataMetric.Usings[0]);
-             Assert.Equal("HoneydewCore.Extractors", dataMetric.Usings[1]);
-             Assert.Equal("HoneydewCore.Extractors.Metrics", dataMetric.Usings[2]);
+            Assert.Equal(3, dataMetric.Usings.Count);
+            Assert.Equal("System", dataMetric.Usings[0]);
+            Assert.Equal("HoneydewCore.Extractors", dataMetric.Usings[1]);
+            Assert.Equal("HoneydewCore.Extractors.Metrics", dataMetric.Usings[2]);
 
-             Assert.Equal(3, dataMetric.Dependencies.Count);
-             Assert.Equal(1, dataMetric.Dependencies["CSharpMetricExtractor"]);
-             Assert.Equal(5, dataMetric.Dependencies["int"]);
-             Assert.Equal(1, dataMetric.Dependencies["double"]);
-         }
+            Assert.Equal(3, dataMetric.Dependencies.Count);
+            Assert.Equal(1, dataMetric.Dependencies["CSharpMetricExtractor"]);
+            Assert.Equal(5, dataMetric.Dependencies["int"]);
+            Assert.Equal(1, dataMetric.Dependencies["double"]);
+        }
 
-         [Fact]
-         public void
-             Extract_ShouldHaveLocalVariablesDependencies_WhenClassHasMethodsWithNonPrimitiveLocalVariablesInAForLoop()
-         {
-             const string fileContent = @"using System;
+        [Fact]
+        public void
+            Extract_ShouldHaveLocalVariablesDependencies_WhenClassHasMethodsWithNonPrimitiveLocalVariablesInAForLoop()
+        {
+            const string fileContent = @"using System;
                                      using HoneydewCore.Extractors;
                                      namespace App
                                      {                                       
@@ -248,28 +250,28 @@ namespace HoneydewExtractorsTests.Metrics.Extraction.CSharp.ClassLevel
                                          }
                                      }";
 
-             var classModels = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-             var optional = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
-             Assert.True(optional.HasValue);
+            var optional = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
+            Assert.True(optional.HasValue);
 
-             var dependencies = (CSharpDependencyDataMetric) optional.Value;
+            var dependencies = (CSharpDependencyDataMetric) optional.Value;
 
-             Assert.Equal(2, dependencies.Usings.Count);
-             Assert.Equal("System", dependencies.Usings[0]);
-             Assert.Equal("HoneydewCore.Extractors", dependencies.Usings[1]);
+            Assert.Equal(2, dependencies.Usings.Count);
+            Assert.Equal("System", dependencies.Usings[0]);
+            Assert.Equal("HoneydewCore.Extractors", dependencies.Usings[1]);
 
-             Assert.Equal(2, dependencies.Dependencies.Count);
-             Assert.Equal(1, dependencies.Dependencies["CSharpMetricExtractor"]);
-             Assert.Equal(1, dependencies.Dependencies["int"]);
-         }
-         
-         
-         [Fact(Skip = "Return later when csharp model is has usings")]
-         public void
-             Extract_ShouldHaveLocalVariablesDependencies_WhenNamespaceHasMultipleClasses()
-         {
-             const string fileContent = @"using System;
+            Assert.Equal(2, dependencies.Dependencies.Count);
+            Assert.Equal(1, dependencies.Dependencies["CSharpMetricExtractor"]);
+            Assert.Equal(1, dependencies.Dependencies["int"]);
+        }
+
+
+        [Fact(Skip = "Return later when csharp model is has usings")]
+        public void
+            Extract_ShouldHaveLocalVariablesDependencies_WhenNamespaceHasMultipleClasses()
+        {
+            const string fileContent = @"using System;
                                      using HoneydewCore.Extractors;
                                      namespace App
                                      {                                       
@@ -295,96 +297,95 @@ namespace HoneydewExtractorsTests.Metrics.Extraction.CSharp.ClassLevel
                                          }
                                      }";
 
-             var classModels = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-             Assert.Equal(2, classModels.Count);
-             
-             var optional1 = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
-             Assert.True(optional1.HasValue);
+            Assert.Equal(2, classModels.Count);
 
-             var dependencies = (CSharpDependencyDataMetric) optional1.Value;
+            var optional1 = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
+            Assert.True(optional1.HasValue);
 
-             Assert.Equal(2, dependencies.Usings.Count);
-             Assert.Equal("System", dependencies.Usings[0]);
-             Assert.Equal("HoneydewCore.Extractors", dependencies.Usings[1]);
+            var dependencies = (CSharpDependencyDataMetric) optional1.Value;
 
-             Assert.Equal(2, dependencies.Dependencies.Count);
-             Assert.Equal(1, dependencies.Dependencies["CSharpMetricExtractor"]);
-             Assert.Equal(1, dependencies.Dependencies["int"]);
-             
-             
-             var optional2 = classModels[1].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
-             Assert.True(optional2.HasValue);
+            Assert.Equal(2, dependencies.Usings.Count);
+            Assert.Equal("System", dependencies.Usings[0]);
+            Assert.Equal("HoneydewCore.Extractors", dependencies.Usings[1]);
 
-             var dataMetric = (CSharpDependencyDataMetric) optional2.Value;
+            Assert.Equal(2, dependencies.Dependencies.Count);
+            Assert.Equal(1, dependencies.Dependencies["CSharpMetricExtractor"]);
+            Assert.Equal(1, dependencies.Dependencies["int"]);
 
-             Assert.Equal(3, dataMetric.Usings.Count);
-             Assert.Equal("System", dataMetric.Usings[0]);
-             Assert.Equal("HoneydewCore.Extractors", dataMetric.Usings[1]);
-             Assert.Equal("HoneydewCore.Extractors.Metrics", dataMetric.Usings[2]);
 
-             Assert.Equal(3, dataMetric.Dependencies.Count);
-             Assert.Equal(1, dataMetric.Dependencies["CSharpMetricExtractor"]);
-             Assert.Equal(5, dataMetric.Dependencies["int"]);
-             Assert.Equal(1, dataMetric.Dependencies["double"]);
-         }
+            var optional2 = classModels[1].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
+            Assert.True(optional2.HasValue);
 
-         // todo
-         // [Fact]
-         // public void GetRelations_ShouldHaveNoRelations_WhenClassHasMethodsWithNoReturnValues()
-         // {
-         //     var fileRelations = _sut.GetRelations(new CSharpDependencyDataMetric());
-         //
-         //     Assert.Empty(fileRelations);
-         // }
-         //
-         // [Fact]
-         // public void GetRelations_ShouldHaveNoRelations_WhenDependenciesAreOnlyPrimitiveTypes()
-         // {
-         //     var fileRelations = _sut.GetRelations(new CSharpDependencyDataMetric
-         //     {
-         //         Usings = {"System"},
-         //         Dependencies =
-         //         {
-         //             {"int", 3},
-         //             {"float", 2},
-         //             {"string", 1}
-         //         }
-         //     });
-         //
-         //     Assert.Empty(fileRelations);
-         // }
-         //
-         // [Fact]
-         // public void GetRelations_Extract_ShouldHaveRelations_WhenThereAreNonPrimitiveDependencies()
-         // {
-         //     var fileRelations = _sut.GetRelations(new CSharpDependencyDataMetric
-         //     {
-         //         Usings =
-         //         {
-         //             "System", "HoneydewCore.Extractors", "HoneydewCore.Extractors.Metrics",
-         //             "HoneydewCore.Extractors.Metrics.SemanticMetrics"
-         //         },
-         //         Dependencies =
-         //         {
-         //             {"int", 3},
-         //             {"IFactExtractor", 2},
-         //             {"CSharpMetricExtractor", 1}
-         //         }
-         //     });
-         //
-         //     Assert.NotEmpty(fileRelations);
-         //     Assert.Equal(2, fileRelations.Count);
-         //
-         //     var fileRelation1 = fileRelations[0];
-         //     Assert.Equal("IFactExtractor", fileRelation1.FileTarget);
-         //     Assert.Equal(typeof(CSharpLocalVariablesDependencyMetric).FullName, fileRelation1.RelationType);
-         //     Assert.Equal(2, fileRelation1.RelationCount);
-         //
-         //     var fileRelation2 = fileRelations[1];
-         //     Assert.Equal("CSharpMetricExtractor", fileRelation2.FileTarget);
-         //     Assert.Equal(typeof(CSharpLocalVariablesDependencyMetric).FullName, fileRelation2.RelationType);
-         //     Assert.Equal(1, fileRelation2.RelationCount);
-         // }
-     }
+            var dataMetric = (CSharpDependencyDataMetric) optional2.Value;
+
+            Assert.Equal(3, dataMetric.Usings.Count);
+            Assert.Equal("System", dataMetric.Usings[0]);
+            Assert.Equal("HoneydewCore.Extractors", dataMetric.Usings[1]);
+            Assert.Equal("HoneydewCore.Extractors.Metrics", dataMetric.Usings[2]);
+
+            Assert.Equal(3, dataMetric.Dependencies.Count);
+            Assert.Equal(1, dataMetric.Dependencies["CSharpMetricExtractor"]);
+            Assert.Equal(5, dataMetric.Dependencies["int"]);
+            Assert.Equal(1, dataMetric.Dependencies["double"]);
+        }
+
+        [Fact]
+        public void GetRelations_ShouldHaveNoRelations_WhenClassHasMethodsWithNoReturnValues()
+        {
+            var fileRelations = _sut.GetRelations(new CSharpDependencyDataMetric());
+
+            Assert.Empty(fileRelations);
+        }
+
+        [Fact]
+        public void GetRelations_ShouldHaveNoRelations_WhenDependenciesAreOnlyPrimitiveTypes()
+        {
+            var fileRelations = _sut.GetRelations(new CSharpDependencyDataMetric
+            {
+                Usings = {"System"},
+                Dependencies =
+                {
+                    {"int", 3},
+                    {"float", 2},
+                    {"string", 1}
+                }
+            });
+
+            Assert.Empty(fileRelations);
+        }
+
+        [Fact]
+        public void GetRelations_Extract_ShouldHaveRelations_WhenThereAreNonPrimitiveDependencies()
+        {
+            var fileRelations = _sut.GetRelations(new CSharpDependencyDataMetric
+            {
+                Usings =
+                {
+                    "System", "HoneydewCore.Extractors", "HoneydewCore.Extractors.Metrics",
+                    "HoneydewCore.Extractors.Metrics.SemanticMetrics"
+                },
+                Dependencies =
+                {
+                    {"int", 3},
+                    {"IFactExtractor", 2},
+                    {"CSharpMetricExtractor", 1}
+                }
+            });
+
+            Assert.NotEmpty(fileRelations);
+            Assert.Equal(2, fileRelations.Count);
+
+            var fileRelation1 = fileRelations[0];
+            Assert.Equal("IFactExtractor", fileRelation1.FileTarget);
+            Assert.Equal(typeof(CSharpLocalVariablesDependencyMetric).FullName, fileRelation1.RelationType);
+            Assert.Equal(2, fileRelation1.RelationCount);
+
+            var fileRelation2 = fileRelations[1];
+            Assert.Equal("CSharpMetricExtractor", fileRelation2.FileTarget);
+            Assert.Equal(typeof(CSharpLocalVariablesDependencyMetric).FullName, fileRelation2.RelationType);
+            Assert.Equal(1, fileRelation2.RelationCount);
+        }
+    }
 }

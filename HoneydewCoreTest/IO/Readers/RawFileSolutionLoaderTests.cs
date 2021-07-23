@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Text.Json;
+using System.Threading.Tasks;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Readers.SolutionRead;
-using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
 using Moq;
 using Xunit;
 
@@ -86,12 +86,19 @@ namespace HoneydewCoreTest.IO.Readers
                 classModel.Metrics[0].ExtractorName);
             Assert.Equal("HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpInheritanceMetric",
                 classModel.Metrics[0].ValueType);
-            // todo
-            // Assert.Equal(typeof(CSharpInheritanceMetric), classModel.Metrics[0].Value.GetType());
-            // var value = (CSharpInheritanceMetric) classModel.Metrics[0].Value;
-            // Assert.Equal(1, value.Interfaces.Count);
-            // Assert.Equal("Interface1", value.Interfaces[0]);
-            // Assert.Equal("SomeParent", value.BaseClassName);
+            
+            Assert.Equal(typeof(JsonElement), classModel.Metrics[0].Value.GetType());
+            var value = (JsonElement) classModel.Metrics[0].Value;
+
+            var baseClassName = value.GetProperty("BaseClassName");
+            Assert.Equal("SomeParent",baseClassName.GetString());
+            
+            var interfacesJsonElement = value.GetProperty("Interfaces");
+            Assert.Equal(1, interfacesJsonElement.GetArrayLength());
+            foreach (var element in interfacesJsonElement.EnumerateArray())
+            {
+                Assert.Equal("Interface1", element.GetString());
+            }
         }
     }
 }

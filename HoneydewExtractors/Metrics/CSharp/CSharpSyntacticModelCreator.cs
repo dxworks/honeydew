@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,7 +11,7 @@ namespace HoneydewExtractors.Metrics.CSharp
         {
             if (string.IsNullOrWhiteSpace(fileContent))
             {
-                throw new NullReferenceException("Empty Content");
+                throw new ExtractionException("Empty Content");
             }
 
             var tree = CSharpSyntaxTree.ParseText(fileContent);

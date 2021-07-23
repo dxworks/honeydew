@@ -8,11 +8,6 @@ namespace HoneydewExtractors.Metrics
     {
         private readonly ISet<Type> _metricsTypes = new HashSet<Type>();
 
-        public void LoadMetric<T>() where T : TM
-        {
-            _metricsTypes.Add(typeof(T));
-        }
-
         public void LoadMetric(Type type)
         {
             if (!typeof(TM).IsAssignableFrom(type))

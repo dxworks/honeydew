@@ -30,8 +30,6 @@ namespace HoneydewCore.IO.Readers.Strategies
             var documentCount = project.Documents.Count();
             foreach (var document in project.Documents)
             {
-                // var syntaxTree = await document.GetSyntaxTreeAsync();
-
                 try
                 {
                     _progressLogger.Log($"Extracting facts from {document.FilePath} ({i}/{documentCount})...");
