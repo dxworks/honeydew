@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Logging;
 using HoneydewCore.Processors;
+using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
 using HoneydewModels;
 using Moq;
 using Xunit;
@@ -85,11 +85,7 @@ namespace HoneydewCoreTest.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                .Process(_sut)
-                .Finish<RepositoryModel>();
-
-            var actualSolutionModel = processable.Value;
+            var actualSolutionModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.Class1",
                 actualSolutionModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FullName);
@@ -134,11 +130,7 @@ namespace HoneydewCoreTest.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                .Process(_sut)
-                .Finish<RepositoryModel>();
-
-            var actualSolutionModel = processable.Value;
+            var actualSolutionModel = _sut.Process(repositoryModel);
 
             var namespaceModel = actualSolutionModel.Solutions[0].Projects[0].Namespaces[0];
             Assert.Equal("Project1.Models.Class1", namespaceModel.ClassModels[0].FullName);
@@ -229,11 +221,7 @@ namespace HoneydewCoreTest.Processors
             solutionModel.Projects.Add(projectModel2);
             repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                .Process(_sut)
-                .Finish<RepositoryModel>();
-
-            var actualSolutionModel = processable.Value;
+            var actualSolutionModel = _sut.Process(repositoryModel);
 
             var modelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces[0];
             Assert.Equal("object", modelsNamespace.ClassModels[0].BaseClassFullName);
@@ -330,11 +318,7 @@ namespace HoneydewCoreTest.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                .Process(_sut)
-                .Finish<RepositoryModel>();
-
-            var actualSolutionModel = processable.Value;
+            var actualSolutionModel = _sut.Process(repositoryModel);
 
             var modelInterfacesNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces[0];
             Assert.Empty(modelInterfacesNamespace.ClassModels[0].BaseInterfaces);
@@ -422,11 +406,7 @@ namespace HoneydewCoreTest.Processors
             solutionModel.Projects.Add(projectModel1);
             repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                .Process(_sut)
-                .Finish<RepositoryModel>();
-
-            var actualSolutionModel = processable.Value;
+            var actualSolutionModel = _sut.Process(repositoryModel);
 
             var modelInterfacesNamespace =
                 actualSolutionModel.Solutions[0].Projects[0].Namespaces[0];
@@ -499,11 +479,7 @@ namespace HoneydewCoreTest.Processors
             solutionModel.Projects.Add(projectModel2);
             repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                .Process(_sut)
-                .Finish<RepositoryModel>();
-
-            var actualSolutionModel = processable.Value;
+            var actualSolutionModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.SomeModel",
                 actualSolutionModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].Fields[0].Type);
@@ -580,11 +556,7 @@ namespace HoneydewCoreTest.Processors
             repositoryModel.Solutions.Add(solutionModel1);
             repositoryModel.Solutions.Add(solutionModel2);
 
-            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                .Process(_sut)
-                .Finish<RepositoryModel>();
-
-            var actualSolutionModel = processable.Value;
+            var actualSolutionModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.SomeModel",
                 actualSolutionModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0]
@@ -702,9 +674,9 @@ namespace HoneydewCoreTest.Processors
                         {
                             new ClassMetric
                             {
-                                ExtractorName = typeof(ParameterDependencyMetric).FullName,
-                                ValueType = typeof(DependencyDataMetric).FullName,
-                                Value = new DependencyDataMetric
+                                ExtractorName = typeof(CSharpParameterDependencyMetric).FullName,
+                                ValueType = typeof(CSharpDependencyDataMetric).FullName,
+                                Value = new CSharpDependencyDataMetric
                                 {
                                     Dependencies = new Dictionary<string, int>()
                                     {
@@ -721,11 +693,7 @@ namespace HoneydewCoreTest.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                .Process(_sut)
-                .Finish<RepositoryModel>();
-
-            var actualSolutionModel = processable.Value;
+            var actualSolutionModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.AmbiguousClass",
                 actualSolutionModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FullName);
@@ -746,7 +714,7 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].ContainingClassName);
             Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].ParameterTypes[0].Type);
             Assert.Equal("AmbiguousClass", someClassModel.Fields[0].Type);
-            var metricDependencies = ((DependencyDataMetric) someClassModel.Metrics[0].Value).Dependencies;
+            var metricDependencies = ((CSharpDependencyDataMetric) someClassModel.Metrics[0].Value).Dependencies;
             Assert.Equal(1, metricDependencies.Count);
             Assert.True(metricDependencies.ContainsKey("AmbiguousClass"));
 
@@ -816,11 +784,7 @@ namespace HoneydewCoreTest.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                .Process(_sut)
-                .Finish<RepositoryModel>();
-
-            var actualSolutionModel = processable.Value;
+            var actualSolutionModel = _sut.Process(repositoryModel);
 
             Assert.Equal("MyService",
                 actualSolutionModel.Solutions[0].Projects[2].Namespaces[0].ClassModels[0].Fields[0].Type);
@@ -898,11 +862,7 @@ namespace HoneydewCoreTest.Processors
             repositoryModel.Solutions.Add(solutionModel3);
 
 
-            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                .Process(_sut)
-                .Finish<RepositoryModel>();
-
-            var actualSolutionModel = processable.Value;
+            var actualSolutionModel = _sut.Process(repositoryModel);
 
             Assert.Equal("MyService",
                 actualSolutionModel.Solutions[2].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
@@ -975,11 +935,7 @@ namespace HoneydewCoreTest.Processors
             repositoryModel.Solutions.Add(solutionModel1);
             repositoryModel.Solutions.Add(solutionModel2);
 
-            var processable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                .Process(_sut)
-                .Finish<RepositoryModel>();
-
-            var actualSolutionModel = processable.Value;
+            var actualSolutionModel = _sut.Process(repositoryModel);
 
             Assert.Equal("OutOfRepositoryClass",
                 actualSolutionModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);

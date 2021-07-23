@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.Extractors.Metrics.SemanticMetrics;
-using HoneydewCore.Models;
 using HoneydewCore.Processors;
+using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
 using HoneydewModels;
 using Xunit;
 
@@ -19,15 +18,15 @@ namespace HoneydewCoreTest.Processors
         [Fact]
         public void GetFunction_ShouldReturnEmptyRepresentation_WhenSolutionModelIsNull()
         {
-            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(null));
-            Assert.Empty(processable.Value.ClassRelations);
+            var classRelationsRepresentation = _sut.Process(null);
+            Assert.Empty(classRelationsRepresentation.ClassRelations);
         }
 
         [Fact]
         public void GetFunction_ShouldReturnEmptyRepresentation_WhenSolutionModelIsEmpty()
         {
-            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(new RepositoryModel()));
-            Assert.Empty(processable.Value.ClassRelations);
+            var classRelationsRepresentation = _sut.Process(new RepositoryModel());
+            Assert.Empty(classRelationsRepresentation.ClassRelations);
         }
 
         [Fact]
@@ -38,11 +37,11 @@ namespace HoneydewCoreTest.Processors
             solutionModel.Projects.Add(new ProjectModel());
             solutionModel.Projects.Add(new ProjectModel());
             solutionModel.Projects.Add(new ProjectModel());
-            
+
             repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(repositoryModel));
-            Assert.Empty(processable.Value.ClassRelations);
+            var classRelationsRepresentation = _sut.Process(repositoryModel);
+            Assert.Empty(classRelationsRepresentation.ClassRelations);
         }
 
         [Fact]
@@ -56,13 +55,13 @@ namespace HoneydewCoreTest.Processors
             {
                 FullName = "Models.Class", FilePath = "path/Model/Class.cs"
             });
-            
+
             solutionModel.Projects.Add(projectModel);
             repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(repositoryModel));
+            var classRelationsRepresentation = _sut.Process(repositoryModel);
 
-            Assert.Equal(0, processable.Value.TotalRelationsCount("InvalidClass", "InvalidTarget"));
+            Assert.Equal(0, classRelationsRepresentation.TotalRelationsCount("InvalidClass", "InvalidTarget"));
         }
 
         [Fact]
@@ -81,10 +80,11 @@ namespace HoneydewCoreTest.Processors
             solutionModel.Projects.Add(projectModel);
             repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(repositoryModel));
-            Assert.Equal(1, processable.Value.ClassRelations.Count);
+            var classRelationsRepresentation = _sut.Process(repositoryModel);
+            Assert.Equal(1, classRelationsRepresentation.ClassRelations.Count);
 
-            Assert.True(processable.Value.ClassRelations.TryGetValue("Models.Class", out var targetDictionary));
+            Assert.True(
+                classRelationsRepresentation.ClassRelations.TryGetValue("Models.Class", out var targetDictionary));
             Assert.Empty(targetDictionary);
         }
 
@@ -109,17 +109,19 @@ namespace HoneydewCoreTest.Processors
             solutionModel.Projects.Add(projectModel);
             repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(repositoryModel));
-            Assert.Equal(classCount, processable.Value.ClassRelations.Count);
+            var classRelationsRepresentation = _sut.Process(repositoryModel);
+            Assert.Equal(classCount, classRelationsRepresentation.ClassRelations.Count);
             for (var i = 0; i < classCount; i++)
             {
-                Assert.True(processable.Value.ClassRelations.TryGetValue("Items.Item" + i, out var targetDictionary));
+                Assert.True(
+                    classRelationsRepresentation.ClassRelations.TryGetValue("Items.Item" + i,
+                        out var targetDictionary));
                 Assert.Empty(targetDictionary);
             }
 
-            foreach (var (key, _) in processable.Value.ClassRelations)
+            foreach (var (key, _) in classRelationsRepresentation.ClassRelations)
             {
-                Assert.Equal(0, processable.Value.TotalRelationsCount(key, "invalidDependency"));
+                Assert.Equal(0, classRelationsRepresentation.TotalRelationsCount(key, "invalidDependency"));
             }
         }
 
@@ -136,7 +138,7 @@ namespace HoneydewCoreTest.Processors
                 FullName = "Models.Class1", FilePath = "path/Model/Class1.cs"
             });
 
-            var extractorName = typeof(ParameterDependencyMetric).FullName;
+            var extractorName = typeof(CSharpParameterDependencyMetric).FullName;
             projectModel.Add(new ClassModel
             {
                 FullName = "Models.Class2", FilePath = "path/Model/Class2.cs",
@@ -145,8 +147,8 @@ namespace HoneydewCoreTest.Processors
                     new ClassMetric
                     {
                         ExtractorName = extractorName,
-                        ValueType = typeof(DependencyDataMetric).FullName,
-                        Value = new DependencyDataMetric
+                        ValueType = typeof(CSharpDependencyDataMetric).FullName,
+                        Value = new CSharpDependencyDataMetric
                         {
                             Dependencies = new Dictionary<string, int>()
                             {
@@ -160,14 +162,16 @@ namespace HoneydewCoreTest.Processors
             solutionModel.Projects.Add(projectModel);
             repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(repositoryModel));
+            var classRelationsRepresentation = _sut.Process(repositoryModel);
 
-            Assert.Equal(2, processable.Value.ClassRelations.Count);
+            Assert.Equal(2, classRelationsRepresentation.ClassRelations.Count);
 
-            Assert.True(processable.Value.ClassRelations.TryGetValue("Models.Class1", out var targetDictionary1));
+            Assert.True(
+                classRelationsRepresentation.ClassRelations.TryGetValue("Models.Class1", out var targetDictionary1));
             Assert.Empty(targetDictionary1);
 
-            Assert.True(processable.Value.ClassRelations.TryGetValue("Models.Class2", out var targetDictionary2));
+            Assert.True(
+                classRelationsRepresentation.ClassRelations.TryGetValue("Models.Class2", out var targetDictionary2));
             Assert.NotEmpty(targetDictionary2);
             Assert.Equal(1, targetDictionary2.Count);
 
@@ -176,10 +180,10 @@ namespace HoneydewCoreTest.Processors
             Assert.True(dependencyDictionary.TryGetValue(extractorName!, out var count));
             Assert.Equal(2, count);
 
-            Assert.Equal(2, processable.Value.TotalRelationsCount("Models.Class2", "Models.Class1"));
+            Assert.Equal(2, classRelationsRepresentation.TotalRelationsCount("Models.Class2", "Models.Class1"));
         }
-        
-         [Fact]
+
+        [Fact]
         public void
             GetFunction_ShouldReturnRepresentationsWithNoRelations_WhenSolutionModelHasProjectWithInvalidRelationMetric()
         {
@@ -205,10 +209,10 @@ namespace HoneydewCoreTest.Processors
             solutionModel.Projects.Add(projectModel);
             repositoryModel.Solutions.Add(solutionModel);
 
-            var processable = _sut.GetFunction().Invoke(new Processable<RepositoryModel>(repositoryModel));
+            var classRelationsRepresentation = _sut.Process(repositoryModel);
 
-            Assert.Equal(0, processable.Value.ClassRelations.Count);
-            Assert.Equal(0, processable.Value.TotalRelationsCount("Models.Class2", "Models.Class1"));
+            Assert.Equal(0, classRelationsRepresentation.ClassRelations.Count);
+            Assert.Equal(0, classRelationsRepresentation.TotalRelationsCount("Models.Class2", "Models.Class1"));
         }
     }
 }

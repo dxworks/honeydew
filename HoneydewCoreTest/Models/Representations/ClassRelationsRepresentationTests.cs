@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Models.Representations;
+using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
 using Moq;
 using Xunit;
 
@@ -201,18 +201,18 @@ namespace HoneydewCoreTest.Models.Representations
         [Fact]
         public void GetDependenciesTypePretty_ShouldReturnTheDependencies_WhenUsePrettyIsFalse()
         {
-            _sut.Add("source", "target", typeof(ParameterDependencyMetric).FullName, 4);
+            _sut.Add("source", "target", typeof(CSharpParameterDependencyMetric).FullName, 4);
 
             var dependenciesTypePretty = _sut.GetDependenciesTypePretty();
 
             Assert.Single(dependenciesTypePretty);
-            Assert.Equal(typeof(ParameterDependencyMetric).FullName, dependenciesTypePretty.First());
+            Assert.Equal(typeof(CSharpParameterDependencyMetric).FullName, dependenciesTypePretty.First());
         }
         
         [Fact]
         public void GetDependenciesTypePretty_ShouldReturnTheDependenciesPrettyPrint_WhenUsePrettyIsTrue()
         {
-            _sut.Add("source", "target", typeof(ParameterDependencyMetric).FullName, 4);
+            _sut.Add("source", "target", typeof(CSharpParameterDependencyMetric).FullName, 4);
             _sut.UsePrettyPrint = true;
 
             var dependenciesTypePretty = _sut.GetDependenciesTypePretty();

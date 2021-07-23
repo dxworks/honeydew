@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using HoneydewCore.Extractors.Metrics.SemanticMetrics;
 using HoneydewCore.Logging;
+using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
 using HoneydewModels;
 
 namespace HoneydewCore.Processors
@@ -32,28 +32,23 @@ namespace HoneydewCore.Processors
             _progressLogger = progressLogger;
         }
 
-        public Func<Processable<RepositoryModel>, Processable<RepositoryModel>> GetFunction()
+        public RepositoryModel Process(RepositoryModel repositoryModel)
         {
-            return solutionModelProcessable =>
+            SetFullNameForClassModels(repositoryModel);
+
+            SetFullNameForClassModelComponents(repositoryModel);
+
+            foreach (var (ambiguousName, possibilities) in _ambiguousNames)
             {
-                var repositoryModel = solutionModelProcessable.Value;
-
-                SetFullNameForClassModels(repositoryModel);
-
-                SetFullNameForClassModelComponents(repositoryModel);
-
-                foreach (var (ambiguousName, possibilities) in _ambiguousNames)
+                _progressLogger.LogLine();
+                _progressLogger.LogLine($"Multiple full names found for {ambiguousName}: ");
+                foreach (var possibleName in possibilities)
                 {
-                    _progressLogger.LogLine();
-                    _progressLogger.LogLine($"Multiple full names found for {ambiguousName}: ");
-                    foreach (var possibleName in possibilities)
-                    {
-                        _progressLogger.LogLine(possibleName);
-                    }
+                    _progressLogger.LogLine(possibleName);
                 }
+            }
 
-                return solutionModelProcessable;
-            };
+            return repositoryModel;
         }
 
         private void AddAmbiguousNames(Action action)
@@ -188,11 +183,11 @@ namespace HoneydewCore.Processors
             NamespaceModel namespaceModel, ProjectModel projectModel, SolutionModel solutionModel)
         {
             var parameterDependenciesMetrics = classModel.Metrics.Where(metric =>
-                typeof(DependencyMetric).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
+                typeof(CSharpDependencyMetric).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
 
             foreach (var metric in parameterDependenciesMetrics)
             {
-                var dependencyDataMetric = metric.Value as DependencyDataMetric;
+                var dependencyDataMetric = metric.Value as CSharpDependencyDataMetric;
                 if (dependencyDataMetric == null)
                 {
                     continue;

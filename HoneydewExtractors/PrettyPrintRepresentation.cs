@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using HoneydewCore.Extractors.Metrics;
+using HoneydewExtractors.Metrics;
 
-namespace HoneydewCore.Models.Representations
+namespace HoneydewExtractors
 {
     public abstract class PrettyPrintRepresentation
     {
@@ -23,12 +23,12 @@ namespace HoneydewCore.Models.Representations
             return stringsToPretty.Select(dependency =>
             {
                 var type = Type.GetType(dependency);
-                if (type == null || !typeof(IMetricExtractor).IsAssignableFrom(type))
+                if (type == null || !typeof(IMetric).IsAssignableFrom(type))
                 {
                     return dependency;
                 }
 
-                var metricExtractor = (IMetricExtractor) Activator.CreateInstance(type);
+                var metricExtractor = (IMetric) Activator.CreateInstance(type);
 
                 return metricExtractor == null ? dependency : metricExtractor.PrettyPrint();
             }).ToList();

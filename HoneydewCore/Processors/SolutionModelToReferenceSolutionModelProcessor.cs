@@ -1,35 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using HoneydewCore.Models.Representations.ReferenceModel;
 using HoneydewModels;
+using HoneydewModels.Representations.ReferenceModel;
 
 namespace HoneydewCore.Processors
 {
     public class
         SolutionModelToReferenceSolutionModelProcessor : IProcessorFunction<SolutionModel, ReferenceSolutionModel>
     {
-        public Func<Processable<SolutionModel>, Processable<ReferenceSolutionModel>> GetFunction()
+        public ReferenceSolutionModel Process(SolutionModel solutionModel)
         {
-            return processable =>
-            {
-                var solutionModel = processable.Value;
+            var referenceSolutionModel = new ReferenceSolutionModel();
 
-                var referenceSolutionModel = new ReferenceSolutionModel();
+            if (solutionModel == null)
+                return referenceSolutionModel;
 
-                if (solutionModel == null)
-                    return new Processable<ReferenceSolutionModel>(referenceSolutionModel);
+            PopulateModelWithProjectNamespacesAndClasses(solutionModel, referenceSolutionModel);
 
-                PopulateModelWithProjectNamespacesAndClasses(solutionModel, referenceSolutionModel);
+            PopulateModelWithBaseClassesAndInterfaces(solutionModel, referenceSolutionModel);
 
-                PopulateModelWithBaseClassesAndInterfaces(solutionModel, referenceSolutionModel);
+            PopulateModelWithMethodsAndFields(solutionModel, referenceSolutionModel);
 
-                PopulateModelWithMethodsAndFields(solutionModel, referenceSolutionModel);
+            PopulateModelWithMethodReferences(solutionModel, referenceSolutionModel);
 
-                PopulateModelWithMethodReferences(solutionModel, referenceSolutionModel);
-
-                return new Processable<ReferenceSolutionModel>(referenceSolutionModel);
-            };
+            return referenceSolutionModel;
         }
 
         private static void PopulateModelWithProjectNamespacesAndClasses(SolutionModel solutionModel,

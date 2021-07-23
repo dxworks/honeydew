@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace HoneydewCore.Processors
+﻿namespace HoneydewCore.Processors
 {
-    public interface IProcessorFunction<T, TR>
+    public interface IProcessorFunction<in T, out TR>
     {
-        Func<Processable<T>, Processable<TR>> GetFunction();
+        TR Process(T input);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.Extractors;
 using HoneydewCore.Processors;
+using HoneydewExtractors.Metrics.CSharp;
 using HoneydewModels;
 using Xunit;
 
@@ -18,15 +18,15 @@ namespace HoneydewCoreTest.Processors
         [Fact]
         public void GetFunction_ShouldReturnEmptyProjects_WhenSolutionModelIsNull()
         {
-            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(null));
-            Assert.Empty(processable.Value.Projects);
+            var referenceSolutionModel = _sut.Process(null);
+            Assert.Empty(referenceSolutionModel.Projects);
         }
 
         [Fact]
         public void GetFunction_ShouldReturnEmptyProjects_WhenSolutionModelIsEmpty()
         {
-            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(new SolutionModel()));
-            Assert.Empty(processable.Value.Projects);
+            var referenceSolutionModel = _sut.Process(new SolutionModel());
+            Assert.Empty(referenceSolutionModel.Projects);
         }
 
         [Fact]
@@ -65,10 +65,8 @@ namespace HoneydewCoreTest.Processors
                     }
                 }
             };
-
-            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
-
-            var referenceSolutionModel = processable.Value;
+            
+            var referenceSolutionModel = _sut.Process(solutionModel);
 
             Assert.Equal(2, referenceSolutionModel.Projects.Count);
 
@@ -145,9 +143,7 @@ namespace HoneydewCoreTest.Processors
             };
 
 
-            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
-
-            var referenceSolutionModel = processable.Value;
+            var referenceSolutionModel = _sut.Process(solutionModel);
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
 
@@ -340,9 +336,7 @@ namespace HoneydewCoreTest.Processors
             };
 
 
-            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
-
-            var referenceSolutionModel = processable.Value;
+            var referenceSolutionModel = _sut.Process(solutionModel);
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
 
@@ -486,7 +480,7 @@ namespace Project1.Services
         }
     }
 }";
-            var extractor = new CSharpClassFactExtractor();
+            var extractor = new CSharpFactExtractor();
             var classModels = extractor.Extract(fileContent);
 
             var solutionModel = new SolutionModel
@@ -509,9 +503,7 @@ namespace Project1.Services
             };
 
 
-            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
-
-            var referenceSolutionModel = processable.Value;
+            var referenceSolutionModel = _sut.Process(solutionModel);
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
             var allCreatedReferences = referenceSolutionModel.GetAllCreatedReferences();
@@ -701,9 +693,7 @@ namespace Project1.Services
                 }
             };
 
-            var processable = _sut.GetFunction().Invoke(new Processable<SolutionModel>(solutionModel));
-
-            var referenceSolutionModel = processable.Value;
+            var referenceSolutionModel = _sut.Process(solutionModel);
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
             var allCreatedReferences = referenceSolutionModel.GetAllCreatedReferences();

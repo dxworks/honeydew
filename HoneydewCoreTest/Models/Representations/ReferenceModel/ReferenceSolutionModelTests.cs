@@ -1,4 +1,4 @@
-﻿using HoneydewCore.Models.Representations.ReferenceModel;
+﻿using HoneydewModels.Representations.ReferenceModel;
 using Xunit;
 
 namespace HoneydewCoreTest.Models.Representations.ReferenceModel

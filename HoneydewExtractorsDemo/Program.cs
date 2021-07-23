@@ -8,10 +8,10 @@ using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Writers;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Logging;
-using HoneydewCore.Models.Representations;
 using HoneydewCore.Processors;
 using HoneydewExtractors.Metrics.CSharp;
 using HoneydewExtractors.Metrics.Extraction.ClassLevel;
+using HoneydewExtractors.Metrics.Extraction.CompilationUnitLevel;
 using HoneydewModels;
 
 namespace HoneydewExtractorsDemo
@@ -55,10 +55,8 @@ namespace HoneydewExtractorsDemo
                 progressLogger.LogLine("Resolving Full Name Dependencies");
 
                 ConsoleLoggerWithHistory consoleLoggerWithHistory = new(new ConsoleProgressLogger());
-                // Set fully qualified names to classes
-                // repositoryModel = new ProcessorChain(IProcessable.Of(repositoryModel))
-                //     .Process(new FullNameModelProcessor(consoleLoggerWithHistory))
-                //     .Finish<RepositoryModel>().Value;
+
+                repositoryModel = new FullNameModelProcessor(consoleLoggerWithHistory).Process(repositoryModel);
 
                 WriteAllRepresentations(repositoryModel, consoleLoggerWithHistory, DefaultPathForAllRepresentations);
 
@@ -69,24 +67,14 @@ namespace HoneydewExtractorsDemo
 
         private static CSharpFactExtractor LoadExtractors()
         {
-            // var cSharpClassFactExtractor = new CSharpClassFactExtractor();
-            // cSharpClassFactExtractor.AddMetric<BaseClassMetric>();
-            // cSharpClassFactExtractor.AddMetric<UsingsCountMetric>();
-            // cSharpClassFactExtractor.AddMetric<IsAbstractMetric>();
-            // cSharpClassFactExtractor.AddMetric<ParameterDependencyMetric>();
-            // cSharpClassFactExtractor.AddMetric<ReturnValueDependencyMetric>();
-            // cSharpClassFactExtractor.AddMetric<LocalVariablesDependencyMetric>();
-            //
-            // var extractors = new List<IFactExtractor>
-            // {
-            //     cSharpClassFactExtractor
-            // };
-
-            // return extractors;
-            
             var cSharpFactExtractor = new CSharpFactExtractor();
             cSharpFactExtractor.AddMetric<IBaseClassMetric>();
-            
+            cSharpFactExtractor.AddMetric<IUsingsCountMetric>();
+            cSharpFactExtractor.AddMetric<IIsAbstractMetric>();
+            cSharpFactExtractor.AddMetric<IParameterDependencyMetric>();
+            cSharpFactExtractor.AddMetric<IReturnValueDependencyMetric>();
+            cSharpFactExtractor.AddMetric<ILocalVariablesDependencyMetric>();
+
             return cSharpFactExtractor;
         }
 
@@ -136,13 +124,10 @@ namespace HoneydewExtractorsDemo
 
         private static IExportable GetClassRelationsRepresentation(RepositoryModel repositoryModel)
         {
-            var classRelationsProcessable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                .Process(new RepositoryModelToClassRelationsProcessor())
-                .Peek<ClassRelationsRepresentation>(relationsRepresentation =>
-                    relationsRepresentation.UsePrettyPrint = true)
-                .Finish<ClassRelationsRepresentation>();
-            IExportable exportable = classRelationsProcessable.Value;
-            return exportable;
+            var classRelationsRepresentation = new RepositoryModelToClassRelationsProcessor().Process(repositoryModel);
+            classRelationsRepresentation.UsePrettyPrint = true;
+            
+            return classRelationsRepresentation;
         }
     }
 }

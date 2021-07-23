@@ -1,4 +1,4 @@
-﻿namespace HoneydewCore.Models.Representations
+﻿namespace HoneydewModels.Representations
 {
     public record FileRelation
     {
