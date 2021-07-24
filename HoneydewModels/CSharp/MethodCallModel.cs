@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace HoneydewModels
+namespace HoneydewModels.CSharp
 {
     public record MethodCallModel
     {

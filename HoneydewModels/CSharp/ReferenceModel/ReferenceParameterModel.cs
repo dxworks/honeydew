@@ -1,4 +1,4 @@
-﻿namespace HoneydewModels.Representations.ReferenceModel
+﻿namespace HoneydewModels.CSharp.ReferenceModel
 {
     public record ReferenceParameterModel
     {

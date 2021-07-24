@@ -1,4 +1,4 @@
-﻿namespace HoneydewModels
+﻿namespace HoneydewModels.CSharp
 {
     public record FieldModel
     {

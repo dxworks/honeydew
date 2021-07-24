@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using HoneydewModels;
 
-namespace HoneydewModels
+namespace HoneydewModels.CSharp
 {
     public record NamespaceModel
     {

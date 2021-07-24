@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace HoneydewModels.Representations.ReferenceModel
+namespace HoneydewModels.CSharp.ReferenceModel
 {
     public record ReferenceNamespaceModel  : ReferenceEntity
     {
