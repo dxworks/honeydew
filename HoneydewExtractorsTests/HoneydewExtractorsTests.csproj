@@ -21,11 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\HoneydewCore\HoneydewCore.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Metrics\Extraction\CSharp" />
+      <ProjectReference Include="..\HoneydewExtractors\HoneydewExtractors.csproj" />
     </ItemGroup>
 
 </Project>
