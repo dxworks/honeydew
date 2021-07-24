@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Processors;
-using HoneydewExtractors.Metrics.CSharp;
+using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels;
+using HoneydewModels.CSharp;
 using Xunit;
 
-namespace HoneydewCoreTest.Processors
+namespace HoneydewCoreIntegrationTests.Processors
 {
     public class SolutionModelToReferenceSolutionModelProcessorTests
     {

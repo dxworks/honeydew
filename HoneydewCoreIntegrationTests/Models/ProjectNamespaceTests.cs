@@ -1,9 +1,10 @@
-﻿using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
-using HoneydewExtractors.Metrics.Extraction.CompilationUnitLevel.CSharp;
+﻿using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
+using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
 using HoneydewModels;
+using HoneydewModels.CSharp;
 using Xunit;
 
-namespace HoneydewCoreTest.Models
+namespace HoneydewCoreIntegrationTests.Models
 {
     public class ProjectNamespaceTests
     {
@@ -95,7 +96,7 @@ namespace HoneydewCoreTest.Models
 
             Assert.Equal(1, sutClassModel.Metrics.Count);
 
-            Assert.Equal("HoneydewExtractors.Metrics.Extraction.CompilationUnitLevel.CSharp.CSharpUsingsCountMetric",
+            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel.CSharpUsingsCountMetric",
                 sutClassModel.Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", sutClassModel.Metrics[0].ValueType);
             Assert.Equal(0, (int) sutClassModel.Metrics[0].Value);
@@ -161,16 +162,16 @@ namespace HoneydewCoreTest.Models
 
             Assert.Equal("Items.Pencil", _sut.ClassModels[0].FullName);
             Assert.Equal(1, _sut.ClassModels[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Metrics.Extraction.CompilationUnitLevel.CSharp.CSharpUsingsCountMetric",
+            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel.CSharpUsingsCountMetric",
                 _sut.ClassModels[0].Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", _sut.ClassModels[0].Metrics[0].ValueType);
             Assert.Equal(0, (int) _sut.ClassModels[0].Metrics[0].Value);
 
             Assert.Equal("Items.Notebook", _sut.ClassModels[1].FullName);
             Assert.Equal(1, _sut.ClassModels[1].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpBaseClassMetric",
+            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpBaseClassMetric",
                 _sut.ClassModels[1].Metrics[0].ExtractorName);
-            Assert.Equal("HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpInheritanceMetric",
+            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpInheritanceMetric",
                 _sut.ClassModels[1].Metrics[0].ValueType);
             Assert.Equal(typeof(CSharpInheritanceMetric), _sut.ClassModels[1].Metrics[0].Value.GetType());
             var inheritanceMetric1 = (CSharpInheritanceMetric) _sut.ClassModels[1].Metrics[0].Value;
@@ -180,15 +181,15 @@ namespace HoneydewCoreTest.Models
 
             Assert.Equal("Items.IItemService", _sut.ClassModels[2].FullName);
             Assert.Equal(2, _sut.ClassModels[2].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Metrics.Extraction.CompilationUnitLevel.CSharp.CSharpUsingsCountMetric",
+            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel.CSharpUsingsCountMetric",
                 _sut.ClassModels[2].Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", _sut.ClassModels[2].Metrics[0].ValueType);
             Assert.Equal(0, (int) _sut.ClassModels[2].Metrics[0].Value);
 
 
-            Assert.Equal("HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpBaseClassMetric",
+            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpBaseClassMetric",
                 _sut.ClassModels[2].Metrics[1].ExtractorName);
-            Assert.Equal("HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpInheritanceMetric",
+            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpInheritanceMetric",
                 _sut.ClassModels[2].Metrics[1].ValueType);
             Assert.Equal(typeof(CSharpInheritanceMetric), _sut.ClassModels[2].Metrics[1].Value.GetType());
             var inheritanceMetric2 = (CSharpInheritanceMetric) _sut.ClassModels[2].Metrics[1].Value;

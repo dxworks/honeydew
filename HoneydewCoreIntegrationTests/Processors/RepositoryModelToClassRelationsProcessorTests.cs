@@ -1,18 +1,25 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.Models.Representations;
-using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
-using HoneydewModels;
+using HoneydewCore.ModelRepresentations;
+using HoneydewCore.Processors;
+using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
+using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
-namespace HoneydewCoreTest.Processors
+namespace HoneydewCoreIntegrationTests.Processors
 {
     public class RepositoryModelToClassRelationsProcessorTests
     {
         private readonly RepositoryModelToClassRelationsProcessor _sut;
 
+        private readonly Mock<IMetricRelationsProvider> _metricRelationsProviderMock = new();
+        private readonly Mock<IMetricPrettier> _metricPrettierMock = new();
+
         public RepositoryModelToClassRelationsProcessorTests()
         {
-            _sut = new RepositoryModelToClassRelationsProcessor();
+            _sut = new RepositoryModelToClassRelationsProcessor(_metricRelationsProviderMock.Object,
+                _metricPrettierMock.Object,
+                false);
         }
 
         [Fact]
@@ -125,7 +132,7 @@ namespace HoneydewCoreTest.Processors
             }
         }
 
-        [Fact(Skip = "Return later when refactoring is done")]
+        [Fact]
         public void
             GetFunction_ShouldReturnRepresentationsWithRelations_WhenSolutionModelHasProjectWithTwoClassesAndRelationsBetweenThem()
         {
@@ -139,28 +146,42 @@ namespace HoneydewCoreTest.Processors
             });
 
             var extractorName = typeof(CSharpParameterDependencyMetric).FullName;
+            var classMetric = new ClassMetric
+            {
+                ExtractorName = extractorName,
+                ValueType = typeof(CSharpDependencyDataMetric).FullName,
+                Value = new CSharpDependencyDataMetric
+                {
+                    Dependencies = new Dictionary<string, int>
+                    {
+                        {"Models.Class1", 2}
+                    }
+                }
+            };
             projectModel.Add(new ClassModel
             {
                 FullName = "Models.Class2", FilePath = "path/Model/Class2.cs",
                 Metrics =
                 {
-                    new ClassMetric
-                    {
-                        ExtractorName = extractorName,
-                        ValueType = typeof(CSharpDependencyDataMetric).FullName,
-                        Value = new CSharpDependencyDataMetric
-                        {
-                            Dependencies = new Dictionary<string, int>()
-                            {
-                                {"Models.Class1", 2}
-                            }
-                        }
-                    }
+                    classMetric
                 }
             });
 
+
             solutionModel.Projects.Add(projectModel);
             repositoryModel.Solutions.Add(solutionModel);
+
+            _metricRelationsProviderMock.Setup(provider => provider.GetFileRelations(classMetric)).Returns(
+                new List<FileRelation>
+                {
+                    new()
+                    {
+                        FileTarget = "Models.Class1",
+                        RelationCount = 2,
+                        RelationType = extractorName
+                    }
+                });
+
 
             var classRelationsRepresentation = _sut.Process(repositoryModel);
 
@@ -192,19 +213,23 @@ namespace HoneydewCoreTest.Processors
             var projectModel = new ProjectModel();
 
             const string extractorName = "some_string";
+            var classMetric = new ClassMetric
+            {
+                ExtractorName = extractorName,
+                ValueType = typeof(string).FullName,
+                Value = ""
+            };
             projectModel.Add(new ClassModel
             {
                 FullName = "Models.Class2", FilePath = "path/Model/Class2.cs",
                 Metrics =
                 {
-                    new ClassMetric
-                    {
-                        ExtractorName = extractorName,
-                        ValueType = typeof(string).FullName,
-                        Value = ""
-                    }
+                    classMetric
                 }
             });
+
+            _metricRelationsProviderMock.Setup(provider => provider.GetFileRelations(classMetric)).Returns(
+                new List<FileRelation>());
 
             solutionModel.Projects.Add(projectModel);
             repositoryModel.Solutions.Add(solutionModel);

@@ -13,9 +13,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoneydewModels", "HoneydewM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoneydewExtractors", "HoneydewExtractors\HoneydewExtractors.csproj", "{23BABD99-C5B6-401A-ACB0-44271449BB80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoneydewExtractorsDemo", "HoneydewExtractorsDemo\HoneydewExtractorsDemo.csproj", "{8A7055C7-6184-441A-8815-A3CC9917A2A4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoneydewExtractorsTests", "HoneydewExtractorsTests\HoneydewExtractorsTests.csproj", "{A75D42F1-2EE2-458D-9F8D-A51435BED666}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoneydewCoreIntegrationTests", "HoneydewCoreIntegrationTests\HoneydewCoreIntegrationTests.csproj", "{319F6793-BBF0-4C77-AE17-770AA09856EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,14 +43,14 @@ Global
 		{23BABD99-C5B6-401A-ACB0-44271449BB80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23BABD99-C5B6-401A-ACB0-44271449BB80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23BABD99-C5B6-401A-ACB0-44271449BB80}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8A7055C7-6184-441A-8815-A3CC9917A2A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8A7055C7-6184-441A-8815-A3CC9917A2A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8A7055C7-6184-441A-8815-A3CC9917A2A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8A7055C7-6184-441A-8815-A3CC9917A2A4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A75D42F1-2EE2-458D-9F8D-A51435BED666}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A75D42F1-2EE2-458D-9F8D-A51435BED666}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A75D42F1-2EE2-458D-9F8D-A51435BED666}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A75D42F1-2EE2-458D-9F8D-A51435BED666}.Release|Any CPU.Build.0 = Release|Any CPU
+		{319F6793-BBF0-4C77-AE17-770AA09856EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{319F6793-BBF0-4C77-AE17-770AA09856EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{319F6793-BBF0-4C77-AE17-770AA09856EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{319F6793-BBF0-4C77-AE17-770AA09856EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

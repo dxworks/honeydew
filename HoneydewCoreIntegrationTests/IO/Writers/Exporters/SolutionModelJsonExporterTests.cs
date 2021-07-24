@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.IO.Writers.Exporters;
-using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
+using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewModels;
+using HoneydewModels.CSharp;
 using Xunit;
 
-namespace HoneydewCoreTest.IO.Writers.Exporters
+namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
 {
     public class SolutionModelJsonExporterTests
     {
@@ -88,7 +89,7 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""ProjectName"",""FilePath"":""some_path"",""ProjectReferences"":[""HoneydewCore""],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""FilePath"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""AccessModifier"":""private"",""Modifier"":""static"",""BaseClassFullName"":""object"",""BaseInterfaces"":[],""Fields"":[],""Constructors"":[],""Methods"":[],""Metrics"":[{""ExtractorName"":""HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpBaseClassMetric"",""ValueType"":""HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpInheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}],""Namespace"":""SomeNamespace""}]}]}]}";
+                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""ProjectName"",""FilePath"":""some_path"",""ProjectReferences"":[""HoneydewCore""],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""FilePath"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""AccessModifier"":""private"",""Modifier"":""static"",""BaseClassFullName"":""object"",""BaseInterfaces"":[],""Fields"":[],""Constructors"":[],""Methods"":[],""Metrics"":[{""ExtractorName"":""HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpBaseClassMetric"",""ValueType"":""HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpInheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}],""Namespace"":""SomeNamespace""}]}]}]}";
 
             var projectModel = new ProjectModel("ProjectName")
             {

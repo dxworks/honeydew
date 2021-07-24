@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Linq;
 using HoneydewCore.IO.Writers.Exporters;
-using HoneydewCore.Models.Representations;
-using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
-using HoneydewModels.Representations;
+using HoneydewCore.ModelRepresentations;
+using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using Moq;
 using Xunit;
 
-namespace HoneydewCoreTest.Models.Representations
+namespace HoneydewCoreIntegrationTests.Models.Representations
 {
     public class ClassRelationsRepresentationTests
     {
         private readonly ClassRelationsRepresentation _sut;
+        private readonly Mock<IMetricPrettier> _metricPrettierMock = new();
 
         public ClassRelationsRepresentationTests()
         {
-            _sut = new ClassRelationsRepresentation();
+            _sut = new ClassRelationsRepresentation(_metricPrettierMock.Object);
         }
 
         [Theory]
@@ -204,34 +204,36 @@ namespace HoneydewCoreTest.Models.Representations
         {
             _sut.Add("source", "target", typeof(CSharpParameterDependencyMetric).FullName, 4);
 
-            var dependenciesTypePretty = _sut.GetDependenciesTypePretty();
+            var dependenciesTypePretty = _sut.DependenciesType;
 
             Assert.Single(dependenciesTypePretty);
             Assert.Equal(typeof(CSharpParameterDependencyMetric).FullName, dependenciesTypePretty.First());
         }
-        
+
         [Fact]
         public void GetDependenciesTypePretty_ShouldReturnTheDependenciesPrettyPrint_WhenUsePrettyIsTrue()
         {
-            _sut.Add("source", "target", typeof(CSharpParameterDependencyMetric).FullName, 4);
+            var dependencyType = typeof(CSharpParameterDependencyMetric).FullName;
+
+            _metricPrettierMock.Setup(prettier => prettier.Pretty(dependencyType)).Returns("Parameter Dependency");
+
             _sut.UsePrettyPrint = true;
+            _sut.Add("source", "target", dependencyType, 4);
 
-            var dependenciesTypePretty = _sut.GetDependenciesTypePretty();
-
-            Assert.Single(dependenciesTypePretty);
-            Assert.Equal("Parameter Dependency", dependenciesTypePretty.First());
+            Assert.Single(_sut.DependenciesType);
+            Assert.Equal("Parameter Dependency", _sut.DependenciesType.First());
         }
-        
+
         [Fact]
         public void GetDependenciesTypePretty_ShouldReturnTheDependencies_WhenUsePrettyIsTrueAndTheClassIsNotAMetric()
         {
-            _sut.Add("source", "target", "string", 4);
+            _metricPrettierMock.Setup(prettier => prettier.Pretty("string")).Returns("string");
+
             _sut.UsePrettyPrint = true;
+            _sut.Add("source", "target", "string", 4);
 
-            var dependenciesTypePretty = _sut.GetDependenciesTypePretty();
-
-            Assert.Single(dependenciesTypePretty);
-            Assert.Equal("string", dependenciesTypePretty.First());
+            Assert.Single(_sut.DependenciesType);
+            Assert.Equal("string", _sut.DependenciesType.First());
         }
     }
 }
