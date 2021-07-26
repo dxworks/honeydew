@@ -2,7 +2,7 @@
 
 namespace HoneydewModels.CSharp
 {
-    public class RepositoryModel
+    public class RepositoryModel : IRepositoryModel
     {
         public IList<SolutionModel> Solutions { get; set; } = new List<SolutionModel>();
 
