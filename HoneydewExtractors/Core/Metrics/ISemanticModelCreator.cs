@@ -1,4 +1,4 @@
-﻿namespace HoneydewExtractors
+﻿namespace HoneydewExtractors.Core.Metrics
 {
     public interface ISemanticModelCreator<in TSyntacticModel, out TSemanticModel>
         where TSyntacticModel : ISyntacticModel

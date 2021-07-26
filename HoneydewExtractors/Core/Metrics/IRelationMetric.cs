@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using HoneydewModels.Representations;
+using HoneydewCore.ModelRepresentations;
 
-namespace HoneydewExtractors.Metrics
+namespace HoneydewExtractors.Core.Metrics
 {
     public interface IRelationMetric
     {

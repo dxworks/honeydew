@@ -1,4 +1,4 @@
-﻿using HoneydewExtractors.Core.Metrics.Extraction;
+﻿using HoneydewExtractors.Core.Metrics;
 using Microsoft.CodeAnalysis;
 
 namespace HoneydewExtractors.CSharp.Metrics

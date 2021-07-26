@@ -1,5 +1,4 @@
-﻿using HoneydewExtractors.Core.Metrics;
-using HoneydewExtractors.Core.Metrics.Extraction;
+﻿using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

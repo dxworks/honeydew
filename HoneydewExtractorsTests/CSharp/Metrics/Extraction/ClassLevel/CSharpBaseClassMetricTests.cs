@@ -1,4 +1,4 @@
-﻿using HoneydewExtractors.Core.Metrics;
+﻿using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using Xunit;

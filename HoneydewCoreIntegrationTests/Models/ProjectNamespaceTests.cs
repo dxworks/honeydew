@@ -1,6 +1,5 @@
 ﻿using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
-using HoneydewModels;
 using HoneydewModels.CSharp;
 using Xunit;
 

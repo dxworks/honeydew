@@ -2,7 +2,6 @@
 using System.Linq;
 using HoneydewCore.Utils;
 using HoneydewExtractors.Core;
-using HoneydewExtractors.Core.Metrics;
 using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewExtractors.CSharp.Utils;

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using HoneydewModels;
 using HoneydewModels.CSharp;
 using HoneydewModels.CSharp.ReferenceModel;
 

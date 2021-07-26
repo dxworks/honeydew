@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using HoneydewModels;
 
-namespace HoneydewExtractors
+namespace HoneydewExtractors.Core
 {
     public interface IFactExtractor<TClassModel>
         where TClassModel : IClassModel

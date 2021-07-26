@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using HoneydewCore.Processors;
 using HoneydewExtractors.CSharp.Metrics;
-using HoneydewModels;
 using HoneydewModels.CSharp;
 using Xunit;
 

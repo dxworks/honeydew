@@ -1,8 +1,7 @@
 ﻿using System.Threading.Tasks;
-using HoneydewModels;
 using HoneydewModels.CSharp;
 
-namespace HoneydewExtractors.RepositoryLoading.CSharp.ProjectRead
+namespace HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead
 {
     public interface IProjectLoader
     {

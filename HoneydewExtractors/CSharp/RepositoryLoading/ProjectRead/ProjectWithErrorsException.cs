@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HoneydewExtractors.RepositoryLoading.CSharp.ProjectRead
+namespace HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead
 {
     public class ProjectWithErrorsException : Exception
     {

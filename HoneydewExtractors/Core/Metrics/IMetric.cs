@@ -1,6 +1,6 @@
 ﻿using HoneydewModels;
 
-namespace HoneydewExtractors.Metrics
+namespace HoneydewExtractors.Core.Metrics
 {
     public interface IMetric
     {

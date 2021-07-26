@@ -4,7 +4,7 @@ using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 
-namespace HoneydewExtractors.RepositoryLoading.CSharp.ProjectRead
+namespace HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead
 {
     public class MsBuildProjectProvider : IProjectProvider
     {

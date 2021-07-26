@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 
-namespace HoneydewExtractors.RepositoryLoading.CSharp.ProjectRead
+namespace HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead
 {
     public interface IProjectProvider
     {

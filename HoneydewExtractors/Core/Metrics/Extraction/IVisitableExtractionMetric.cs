@@ -1,6 +1,4 @@
-﻿using HoneydewExtractors.Metrics.Extraction;
-
-namespace HoneydewExtractors.Metrics
+﻿namespace HoneydewExtractors.Core.Metrics.Extraction
 {
     public interface IVisitableExtractionMetric<in TSyntaxNode> : IMetric
         where TSyntaxNode : ISyntaxNode

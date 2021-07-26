@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
-using HoneydewModels;
 using HoneydewModels.CSharp;
 
-namespace HoneydewExtractors.RepositoryLoading.CSharp.ProjectRead
+namespace HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead
 {
     public class ProjectLoader : IProjectLoader
     {

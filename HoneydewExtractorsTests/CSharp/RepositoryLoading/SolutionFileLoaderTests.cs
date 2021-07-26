@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using HoneydewCore.Logging;
 using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead;
 using HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead;
 using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
-using HoneydewExtractors.RepositoryLoading.CSharp.ProjectRead;
 using HoneydewModels.CSharp;
 using Microsoft.CodeAnalysis;
 using Moq;

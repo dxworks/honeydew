@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
-using HoneydewExtractors.Metrics;
-using HoneydewExtractors.Metrics.Extraction;
+using HoneydewCore.Utils;
+using HoneydewExtractors.Core.Metrics;
+using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewModels;
 
-namespace HoneydewExtractors
+namespace HoneydewExtractors.Core
 {
     public interface IClassModelExtractor<TClassModel, TSyntacticModel, TSemanticModel, TSyntaxNode>
         where TClassModel : IClassModel
@@ -12,6 +13,6 @@ namespace HoneydewExtractors
         where TSyntaxNode : ISyntaxNode
     {
         IList<TClassModel> Extract(TSyntacticModel syntacticModel, TSemanticModel semanticModel,
-            MetricLoader<IExtractionMetric<TSyntacticModel, TSemanticModel, TSyntaxNode>> metricLoader);
+            TypeSpawner<IExtractionMetric<TSyntacticModel, TSemanticModel, TSyntaxNode>> metricSpawner);
     }
 }

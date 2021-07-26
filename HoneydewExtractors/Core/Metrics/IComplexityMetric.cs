@@ -1,4 +1,4 @@
-﻿namespace HoneydewExtractors.Metrics
+﻿namespace HoneydewExtractors.Core.Metrics
 {
     public interface IComplexityMetric: IMetric
     {

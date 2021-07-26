@@ -1,7 +1,6 @@
-﻿namespace HoneydewExtractors
+﻿namespace HoneydewExtractors.Core.Metrics
 {
     public interface ISyntacticModel
     {
-        
     }
 }
