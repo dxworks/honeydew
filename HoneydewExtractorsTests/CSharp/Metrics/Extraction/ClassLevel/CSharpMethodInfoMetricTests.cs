@@ -1,4 +1,4 @@
-﻿using HoneydewExtractors.Core.Metrics;
+﻿using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewModels.CSharp;
@@ -935,9 +935,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("null", classModels[0].Methods[0].ParameterTypes[0].DefaultValue);
         }
 
-
         [Fact]
-        public void Extract_ShouldCalledMethods_WhenProvidedClassThatCallsMethodsFromAFieldOfADifferentClass()
+        public void Extract_ShouldJaveCalledMethods_WhenProvidedClassThatCallsMethodsFromAFieldOfADifferentClass()
         {
             const string fileContent = @"using System;
                                       using HoneydewCore.Extractors;
@@ -973,6 +972,389 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("", methodModel.CalledMethods[0].ParameterTypes[0].Modifier);
             Assert.Null(methodModel.CalledMethods[0].ParameterTypes[0].DefaultValue);
             Assert.Equal("int", methodModel.CalledMethods[0].ParameterTypes[0].Type);
+        }
+
+        [Fact]
+        public void Extract_ShouldHaveCalledMethods_WhenProvidedClassThatCallsStaticMethods()
+        {
+            const string fileContent = @"using System;
+
+                                          namespace TopLevel
+                                          {
+                                                public class Foo 
+                                                {
+                                                    public static void Method(int a) 
+                                                    {
+                                                    }
+                                                }
+    
+                                                 public class Bar
+                                                 {
+                                                    private static void OtherMethod(){}
+    
+                                                    void M()
+                                                    {
+                                                        OtherMethod();
+                                                        Foo.Method(2);    
+                                                        int.Parse(""5"");
+                                                    }
+                                                 }                                  
+                                          }";
+
+            var classModels = _factExtractor.Extract(fileContent);
+
+            var methodModelM = classModels[1].Methods[1];
+            Assert.Equal("M", methodModelM.Name);
+            Assert.Equal(3, methodModelM.CalledMethods.Count);
+
+            var calledMethod1 = methodModelM.CalledMethods[0];
+            Assert.Equal("OtherMethod", calledMethod1.MethodName);
+            Assert.Equal("TopLevel.Bar", calledMethod1.ContainingClassName);
+            Assert.Empty(calledMethod1.ParameterTypes);
+
+            var calledMethod2 = methodModelM.CalledMethods[1];
+            Assert.Equal("Method", calledMethod2.MethodName);
+            Assert.Equal("TopLevel.Foo", calledMethod2.ContainingClassName);
+            Assert.Equal(1, calledMethod2.ParameterTypes.Count);
+            Assert.Equal("", calledMethod2.ParameterTypes[0].Modifier);
+            Assert.Null(calledMethod2.ParameterTypes[0].DefaultValue);
+            Assert.Equal("int", calledMethod2.ParameterTypes[0].Type);
+
+            var calledMethod3 = methodModelM.CalledMethods[2];
+            Assert.Equal("Parse", calledMethod3.MethodName);
+            Assert.Equal("int", calledMethod3.ContainingClassName);
+            Assert.Equal(1, calledMethod3.ParameterTypes.Count);
+            Assert.Equal("", calledMethod3.ParameterTypes[0].Modifier);
+            Assert.Null(calledMethod3.ParameterTypes[0].DefaultValue);
+            Assert.Equal("string", calledMethod3.ParameterTypes[0].Type);
+        }
+
+        [Fact]
+        public void Extract_ShouldHaveCalledMethods_WhenProvidedClassThatCallsStaticMethodsFromUnknownClass()
+        {
+            const string fileContent = @"using System;
+                                          
+                                          namespace TopLevel
+                                          {                                                   
+                                                 public class Bar
+                                                 {
+                                                    void M()
+                                                    {
+                                                        Foo.Method(2);    
+                                                    }
+                                                 }                                  
+                                          }";
+
+            var classModels = _factExtractor.Extract(fileContent);
+
+            var methodModelM = classModels[0].Methods[0];
+            Assert.Equal("M", methodModelM.Name);
+            Assert.Equal(1, methodModelM.CalledMethods.Count);
+
+            var calledMethod = methodModelM.CalledMethods[0];
+            Assert.Equal("Method", calledMethod.MethodName);
+            Assert.Equal("Foo", calledMethod.ContainingClassName);
+            Assert.Empty(calledMethod.ParameterTypes);
+        }
+
+        [Fact]
+        public void Extract_ShouldHaveCalledMethods_WhenProvidedClassThatCallsFuncLambdas()
+        {
+            const string fileContent = @"using System;
+
+                                          namespace TopLevel
+                                          {    
+                                                 public class Bar
+                                                 {
+                                                    void Other(Func<int> a)
+                                                    {
+                                                    } 
+                                                    void Method()
+                                                    {
+                                                        Func<int> func = () => 66;
+                                                        Other(func);
+                                                        Other(() => 0);
+                                                        Other(() => { return 6;});
+                                                        Other(A);
+                                                        Other(delegate { return 7;});
+                                                    }
+
+                                                    private int A()
+                                                    {
+                                                        throw new NotImplementedException();
+                                                    }
+                                                 }                                  
+                                          }";
+
+            var classModels = _factExtractor.Extract(fileContent);
+
+            var methodModelM = classModels[0].Methods[1];
+            Assert.Equal("Method", methodModelM.Name);
+            Assert.Equal(5, methodModelM.CalledMethods.Count);
+
+            foreach (var calledMethod in methodModelM.CalledMethods)
+            {
+                Assert.Equal("Other", calledMethod.MethodName);
+                Assert.Equal("TopLevel.Bar", calledMethod.ContainingClassName);
+                Assert.Equal(1, calledMethod.ParameterTypes.Count);
+                Assert.Equal("", calledMethod.ParameterTypes[0].Modifier);
+                Assert.Null(calledMethod.ParameterTypes[0].DefaultValue);
+                Assert.Equal("System.Func<int>", calledMethod.ParameterTypes[0].Type);
+            }
+        }
+
+        [Fact]
+        public void Extract_ShouldHaveCalledMethods_WhenProvidedClassThatCallsActionLambdas()
+        {
+            const string fileContent = @"using System;
+                                          namespace TopLevel
+                                          {    
+                                                 
+                                            public class Bar
+                                            {
+                                                void Other(System.Action<int> a)
+                                                {
+                                                }
+
+                                                void Method()
+                                                {
+                                                    Other(i => { });
+                                                                                            
+                                                    Other(i =>
+                                                    {
+                                                        i++;
+                                                    });
+                                                                                            
+                                                    Other(delegate(int i) {  });
+                                                    Other(A);
+                                                }
+
+                                                private void A(int obj)
+                                                {
+                                                    throw new System.NotImplementedException();
+                                                }
+                                            }                                      
+                                          }";
+            var classModels = _factExtractor.Extract(fileContent);
+
+            var methodModelM = classModels[0].Methods[1];
+            Assert.Equal("Method", methodModelM.Name);
+            Assert.Equal(4, methodModelM.CalledMethods.Count);
+
+            foreach (var calledMethod in methodModelM.CalledMethods)
+            {
+                Assert.Equal("Other", calledMethod.MethodName);
+                Assert.Equal("TopLevel.Bar", calledMethod.ContainingClassName);
+                Assert.Equal(1, calledMethod.ParameterTypes.Count);
+                Assert.Equal("", calledMethod.ParameterTypes[0].Modifier);
+                Assert.Null(calledMethod.ParameterTypes[0].DefaultValue);
+                Assert.Equal("System.Action<int>", calledMethod.ParameterTypes[0].Type);
+            }
+        }
+
+        [Fact]
+        public void Extract_ShouldHaveCalledMethods_WhenProvidedClassThatCallMethodsInsideLambdas()
+        {
+            const string fileContent = @"using System;
+                                          namespace TopLevel
+                                          {           
+                                             public class Bar
+                                            {
+                                                void Other(System.Action<int> a)
+                                                {
+                                                }
+
+                                                void Other(Func<int> a)
+                                                {
+                                                }
+                                                void Method()
+                                                {
+                                                    Other(i => { Calc(i);});
+
+                                                    Other(() => Calc(2));
+                                                }
+
+                                                private int Calc(int a)
+                                                {
+                                                    return a * 2;
+                                                }
+                                            }                                       
+                                          }";
+            var classModels = _factExtractor.Extract(fileContent);
+
+            var methodModelM = classModels[0].Methods[2];
+            Assert.Equal("Method", methodModelM.Name);
+            Assert.Equal(4, methodModelM.CalledMethods.Count);
+
+
+            var calledMethod1 = methodModelM.CalledMethods[0];
+            Assert.Equal("Other", calledMethod1.MethodName);
+            Assert.Equal("TopLevel.Bar", calledMethod1.ContainingClassName);
+            Assert.Equal(1, calledMethod1.ParameterTypes.Count);
+            Assert.Equal("", calledMethod1.ParameterTypes[0].Modifier);
+            Assert.Null(calledMethod1.ParameterTypes[0].DefaultValue);
+            Assert.Equal("System.Action<int>", calledMethod1.ParameterTypes[0].Type);
+
+            var calledMethod2 = methodModelM.CalledMethods[1];
+            Assert.Equal("Calc", calledMethod2.MethodName);
+            Assert.Equal("TopLevel.Bar", calledMethod2.ContainingClassName);
+            Assert.Equal(1, calledMethod2.ParameterTypes.Count);
+            Assert.Equal("", calledMethod2.ParameterTypes[0].Modifier);
+            Assert.Null(calledMethod2.ParameterTypes[0].DefaultValue);
+            Assert.Equal("int", calledMethod2.ParameterTypes[0].Type);
+
+            var calledMethod3 = methodModelM.CalledMethods[2];
+            Assert.Equal("Other", calledMethod3.MethodName);
+            Assert.Equal("TopLevel.Bar", calledMethod3.ContainingClassName);
+            Assert.Equal(1, calledMethod3.ParameterTypes.Count);
+            Assert.Equal("", calledMethod3.ParameterTypes[0].Modifier);
+            Assert.Null(calledMethod3.ParameterTypes[0].DefaultValue);
+            Assert.Equal("System.Func<int>", calledMethod3.ParameterTypes[0].Type);
+
+            var calledMethod4 = methodModelM.CalledMethods[3];
+            Assert.Equal("Calc", calledMethod4.MethodName);
+            Assert.Equal("TopLevel.Bar", calledMethod4.ContainingClassName);
+            Assert.Equal(1, calledMethod4.ParameterTypes.Count);
+            Assert.Equal("", calledMethod4.ParameterTypes[0].Modifier);
+            Assert.Null(calledMethod4.ParameterTypes[0].DefaultValue);
+            Assert.Equal("int", calledMethod4.ParameterTypes[0].Type);
+        }
+
+        [Fact]
+        public void Extract_ShouldHaveCalledMethods_WhenProvidedClassThatCallHasCalledMethodsChained()
+        {
+            const string fileContent = @"using System;
+
+                                          namespace TopLevel
+                                          {           
+                                            class Foo
+                                            {
+                                                public string GetName()
+                                                {
+                                                    return """";
+                                                } 
+                                            }
+                                            
+                                            class Builder
+                                            {
+                                                public Builder Set()
+                                                {
+                                                    return this;
+                                                }
+
+                                                public Foo Build()
+                                                {
+                                                    return new Foo();
+                                                }
+                                            }
+                                            
+                                            public class Bar
+                                            {
+                                                
+                                                void Method()
+                                                {
+                                                    var a = Create()
+                                                        .Set()
+                                                        .Build()
+                                                        .GetName().Trim();
+                                                }
+
+                                                private Builder Create()
+                                                {
+                                                    return new Builder();
+                                                }
+                                            }                                          
+                                          }";
+            var classModels = _factExtractor.Extract(fileContent);
+
+            var methodModelM = classModels[2].Methods[0];
+            Assert.Equal("Method", methodModelM.Name);
+            Assert.Equal(5, methodModelM.CalledMethods.Count);
+
+            var calledMethod0 = methodModelM.CalledMethods[0];
+            Assert.Equal("Trim", calledMethod0.MethodName);
+            Assert.Equal("string", calledMethod0.ContainingClassName);
+            Assert.Empty(calledMethod0.ParameterTypes);
+
+            var calledMethod1 = methodModelM.CalledMethods[1];
+            Assert.Equal("GetName", calledMethod1.MethodName);
+            Assert.Equal("TopLevel.Foo", calledMethod1.ContainingClassName);
+            Assert.Empty(calledMethod1.ParameterTypes);
+
+            var calledMethod2 = methodModelM.CalledMethods[2];
+            Assert.Equal("Build", calledMethod2.MethodName);
+            Assert.Equal("TopLevel.Builder", calledMethod2.ContainingClassName);
+            Assert.Empty(calledMethod2.ParameterTypes);
+
+            var calledMethod3 = methodModelM.CalledMethods[3];
+            Assert.Equal("Set", calledMethod3.MethodName);
+            Assert.Equal("TopLevel.Builder", calledMethod3.ContainingClassName);
+            Assert.Empty(calledMethod3.ParameterTypes);
+
+            var calledMethod4 = methodModelM.CalledMethods[4];
+            Assert.Equal("Create", calledMethod4.MethodName);
+            Assert.Equal("TopLevel.Bar", calledMethod4.ContainingClassName);
+            Assert.Empty(calledMethod4.ParameterTypes);
+        }
+
+        [Fact]
+        public void Extract_ShouldHaveCalledMethods_WhenProvidedClassThatCallsLinqMethods()
+        {
+            const string fileContent = @"
+                                        using System;
+                                        using System.Collections.Generic;
+                                        using System.Linq;
+                                          namespace TopLevel
+                                          {                                                       
+                                            public class Bar
+                                            {
+                                                void Method()
+                                                {
+                                                    var list = new List<string>();
+                                                    var enumerable = list.Where(s => s != null).Skip(6).Select(s=>s.Trim()).ToList();
+                                                }
+                                            }                                          
+                                          }";
+
+            var classModels = _factExtractor.Extract(fileContent);
+
+            var methodModelM = classModels[0].Methods[0];
+            Assert.Equal("Method", methodModelM.Name);
+            Assert.Equal(5, methodModelM.CalledMethods.Count);
+
+            var calledMethod0 = methodModelM.CalledMethods[0];
+            Assert.Equal("ToList", calledMethod0.MethodName);
+            Assert.Equal("System.Collections.Generic.IEnumerable<string>", calledMethod0.ContainingClassName);
+            Assert.Empty(calledMethod0.ParameterTypes);
+
+            var calledMethod1 = methodModelM.CalledMethods[1];
+            Assert.Equal("Select", calledMethod1.MethodName);
+            Assert.Equal("System.Collections.Generic.IEnumerable<string>", calledMethod1.ContainingClassName);
+            Assert.Equal(1, calledMethod1.ParameterTypes.Count);
+            Assert.Equal("", calledMethod1.ParameterTypes[0].Modifier);
+            Assert.Equal("System.Func<string, string>", calledMethod1.ParameterTypes[0].Type);
+            Assert.Null(calledMethod1.ParameterTypes[0].DefaultValue);
+
+            var calledMethod2 = methodModelM.CalledMethods[2];
+            Assert.Equal("Skip", calledMethod2.MethodName);
+            Assert.Equal("System.Collections.Generic.IEnumerable<string>", calledMethod2.ContainingClassName);
+            Assert.Equal(1, calledMethod2.ParameterTypes.Count);
+            Assert.Equal("", calledMethod2.ParameterTypes[0].Modifier);
+            Assert.Equal("int", calledMethod2.ParameterTypes[0].Type);
+            Assert.Null(calledMethod2.ParameterTypes[0].DefaultValue);
+
+            var calledMethod3 = methodModelM.CalledMethods[3];
+            Assert.Equal("Where", calledMethod3.MethodName);
+            Assert.Equal("System.Collections.Generic.List<string>", calledMethod3.ContainingClassName);
+            Assert.Equal(1, calledMethod3.ParameterTypes.Count);
+            Assert.Equal("", calledMethod3.ParameterTypes[0].Modifier);
+            Assert.Equal("System.Func<string, bool>", calledMethod3.ParameterTypes[0].Type);
+            Assert.Null(calledMethod3.ParameterTypes[0].DefaultValue);
+
+            var calledMethod4 = methodModelM.CalledMethods[4];
+            Assert.Equal("Trim", calledMethod4.MethodName);
+            Assert.Equal("string", calledMethod4.ContainingClassName);
+            Assert.Empty(calledMethod4.ParameterTypes);
         }
     }
 }

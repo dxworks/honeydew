@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using HoneydewExtractors.Core.Metrics;
 using HoneydewExtractors.CSharp.Utils;
 using Microsoft.CodeAnalysis;
@@ -49,12 +50,23 @@ namespace HoneydewExtractors.CSharp.Metrics
         public string GetFullName(ExpressionSyntax expressionSyntax)
         {
             var symbolInfo = Model.GetSymbolInfo(expressionSyntax);
-            return symbolInfo.Symbol switch
+            switch (symbolInfo.Symbol)
             {
-                ILocalSymbol localSymbol => localSymbol.Type.ToDisplayString(),
-                IFieldSymbol fieldSymbol => fieldSymbol.Type.ToDisplayString(),
-                _ => symbolInfo.Symbol?.ToString()
-            };
+                case ILocalSymbol localSymbol:
+                    return localSymbol.Type.ToDisplayString();
+                case IFieldSymbol fieldSymbol:
+                    return fieldSymbol.Type.ToDisplayString();
+                case IMethodSymbol methodSymbol:
+                    return methodSymbol.ReturnType.ToDisplayString();
+                default:
+                {
+                    if (symbolInfo.Symbol == null)
+                    {
+                        return expressionSyntax.ToString();
+                    }
+                    return symbolInfo.Symbol.ToString();
+                }
+            }
         }
 
         public IList<string> GetBaseInterfaces(TypeDeclarationSyntax node)
