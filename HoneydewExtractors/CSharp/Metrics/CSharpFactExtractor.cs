@@ -7,7 +7,7 @@ namespace HoneydewExtractors.CSharp.Metrics
         CSharpFactExtractor : FactExtractor<ClassModel, CSharpSyntacticModel, CSharpSemanticModel, CSharpSyntaxNode>
     {
         public CSharpFactExtractor() : base(new CSharpSyntacticModelCreator(),
-            new CSharpSemanticModelCreator(), new CSharpClassModelExtractor())
+            new CSharpSemanticModelCreator(new CSharpCompilationMaker()), new CSharpClassModelExtractor())
         {
         }
     }

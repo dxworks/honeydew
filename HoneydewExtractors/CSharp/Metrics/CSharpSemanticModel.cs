@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using HoneydewExtractors.Core.Metrics;
 using HoneydewExtractors.CSharp.Utils;
 using Microsoft.CodeAnalysis;

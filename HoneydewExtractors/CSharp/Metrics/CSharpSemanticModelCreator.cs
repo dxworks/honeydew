@@ -1,14 +1,18 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using HoneydewExtractors.Core;
 using HoneydewExtractors.Core.Metrics;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace HoneydewExtractors.CSharp.Metrics
 {
     public class CSharpSemanticModelCreator : ISemanticModelCreator<CSharpSyntacticModel, CSharpSemanticModel>
     {
+        private readonly ICompilationMaker _compilationMaker;
+
+        public CSharpSemanticModelCreator(ICompilationMaker compilationMaker)
+        {
+            _compilationMaker = compilationMaker;
+        }
+
         public CSharpSemanticModel Create(CSharpSyntacticModel syntacticModel)
         {
             var semanticModel = CreateSemanticModel(syntacticModel?.Tree);
@@ -18,33 +22,9 @@ namespace HoneydewExtractors.CSharp.Metrics
             };
         }
 
-        private static SemanticModel CreateSemanticModel(SyntaxTree tree)
+        private SemanticModel CreateSemanticModel(SyntaxTree tree)
         {
-            var compilation = CSharpCompilation.Create("Compilation");
-
-            // try to add a reference to the System assembly
-            var systemReference = typeof(object).Assembly.Location;
-
-            // if 'systemReference' is empty means that the build is a single-file app and should look in the dlls to search for the System.dll 
-            if (string.IsNullOrEmpty(systemReference))
-            {
-                var value = (string) AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES");
-                if (value != null)
-                {
-                    var pathToDlls = value.Split(Path.PathSeparator);
-                    var pathToSystem = pathToDlls.FirstOrDefault(path => path.Contains("System.dll"));
-
-                    if (!string.IsNullOrEmpty(pathToSystem))
-                    {
-                        compilation = compilation.AddReferences(MetadataReference.CreateFromFile(pathToSystem));
-                    }
-                }
-            }
-            // if 'systemReference' is empty means that the System.dll Location is accessible with Reflection
-            else
-            {
-                compilation = compilation.AddReferences(MetadataReference.CreateFromFile(systemReference));
-            }
+            var compilation = _compilationMaker.GetCompilation();
 
             compilation = compilation.AddSyntaxTrees(tree);
 
