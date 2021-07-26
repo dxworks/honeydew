@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
 using System.Threading.Tasks;
 using CommandLine;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Writers;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Logging;
+using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
-using HoneydewExtractors;
 using HoneydewExtractors.Core;
 using HoneydewExtractors.Core.Metrics;
 using HoneydewExtractors.CSharp.Metrics;
@@ -18,6 +17,8 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
 using HoneydewExtractors.CSharp.RepositoryLoading;
 using HoneydewExtractors.Processors;
 using HoneydewModels.CSharp;
+using HoneydewModels.Exporters;
+using HoneydewModels.Importers;
 
 namespace Honeydew
 {
@@ -86,7 +87,7 @@ namespace Honeydew
         {
             // Load repository model from path
             IRepositoryLoader<RepositoryModel> repositoryLoader =
-                new RawCSharpFileRepositoryLoader(progressLogger, new FileReader());
+                new RawCSharpFileRepositoryLoader(progressLogger, new FileReader(), new JsonRepositoryModelImporter());
             var repositoryModel = await repositoryLoader.Load(inputPath);
             return repositoryModel;
         }
@@ -104,19 +105,14 @@ namespace Honeydew
             ConsoleLoggerWithHistory consoleLoggerWithHistory, string outputPath)
         {
             var writer = new FileWriter();
-
-            var fileContent = JsonSerializer.Serialize(repositoryModel);
-            writer.WriteFile(Path.Combine(outputPath, "honeydew.json"), fileContent);
+            
+            var repositoryExporter = GetRepositoryModelExporter();
+            writer.WriteFile(Path.Combine(outputPath, "honeydew.json"), repositoryExporter.Export(repositoryModel));
 
             var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
+            var csvModelExporter = GetClassRelationsRepresentationExporter();
             writer.WriteFile(Path.Combine(outputPath, "honeydew.csv"),
-                classRelationsRepresentation.Export(new CsvModelExporter
-                {
-                    ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
-                    {
-                        new("Total Count", ExportUtils.CsvSumPerLine)
-                    }
-                }));
+                csvModelExporter.Export(classRelationsRepresentation));
 
 
             var ambiguousHistory = consoleLoggerWithHistory.GetHistory();
@@ -126,7 +122,25 @@ namespace Honeydew
             }
         }
 
-        private static IExportable GetClassRelationsRepresentation(RepositoryModel repositoryModel)
+        private static IModelExporter<RepositoryModel> GetRepositoryModelExporter()
+        {
+            return new JsonRepositoryModelExporter();
+        }
+
+        private static IModelExporter<ClassRelationsRepresentation> GetClassRelationsRepresentationExporter()
+        {
+            var csvModelExporter = new CsvClassRelationsRepresentationExporter
+            {
+                ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
+                {
+                    new("Total Count", ExportUtils.CsvSumPerLine)
+                }
+            };
+
+            return csvModelExporter;
+        }
+
+        private static ClassRelationsRepresentation GetClassRelationsRepresentation(RepositoryModel repositoryModel)
         {
             var classRelationsRepresentation =
                 new RepositoryModelToClassRelationsProcessor(new MetricRelationsProvider(), new MetricPrettier(), true)

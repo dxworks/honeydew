@@ -1,4 +1,4 @@
-﻿using HoneydewModels;
+﻿using HoneydewModels.CSharp;
 using Xunit;
 
 namespace HoneydewCoreTest.Models

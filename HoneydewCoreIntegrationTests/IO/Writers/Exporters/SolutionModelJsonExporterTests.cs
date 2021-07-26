@@ -1,19 +1,18 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.IO.Writers.Exporters;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
-using HoneydewModels;
 using HoneydewModels.CSharp;
+using HoneydewModels.Exporters;
 using Xunit;
 
 namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
 {
     public class SolutionModelJsonExporterTests
     {
-        private readonly ISolutionModelExporter _sut;
+        private readonly JsonSolutionModelExporter _sut;
 
         public SolutionModelJsonExporterTests()
         {
-            _sut = new JsonModelExporter();
+            _sut = new JsonSolutionModelExporter();
         }
 
         [Fact]

@@ -8,10 +8,10 @@ namespace HoneydewModels.CSharp.ReferenceModel
     {
         public IList<ReferenceProjectModel> Projects { get; } = new List<ReferenceProjectModel>();
 
+        public IList<ReferenceClassModel> CreatedClassModels { get; } = new List<ReferenceClassModel>();
+        
         private readonly IDictionary<string, ReferenceClassModel> _classModels =
-            new Dictionary<string, ReferenceClassModel>();
-
-        private readonly IList<ReferenceClassModel> _createdClassModels = new List<ReferenceClassModel>();
+            new Dictionary<string, ReferenceClassModel>();        
 
         public ReferenceClassModel FindOrCreateClassModel(string type)
         {
@@ -31,14 +31,9 @@ namespace HoneydewModels.CSharp.ReferenceModel
             };
 
             _classModels.Add(type, classModel);
-            _createdClassModels.Add(classModel);
+            CreatedClassModels.Add(classModel);
 
             return classModel;
-        }
-
-        public IList<ReferenceClassModel> GetAllCreatedReferences()
-        {
-            return _createdClassModels;
         }
 
         public ReferenceClassModel FindFirstClass(Func<ReferenceClassModel, bool> predicate)

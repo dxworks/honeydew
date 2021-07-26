@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
-using HoneydewCore.Processors;
-using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
+using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewExtractors.Processors;
-using HoneydewModels;
+using HoneydewModels.CSharp;
 using Moq;
 using Xunit;
 
-namespace HoneydewCoreTest.Processors
+namespace HoneydewExtractorsTests.Processors
 {
     public class FullNameDependencyProcessorTests
     {

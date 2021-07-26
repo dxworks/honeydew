@@ -90,7 +90,7 @@ namespace HoneydewCoreIntegrationTests.Processors
              var referenceSolutionModel = _sut.Process(solutionModel);
 
              Assert.Equal(1, referenceSolutionModel.Projects.Count);
-             var allCreatedReferences = referenceSolutionModel.GetAllCreatedReferences();
+             var allCreatedReferences = referenceSolutionModel.CreatedClassModels;
              Assert.Equal(5, allCreatedReferences.Count);
 
              var objectClassModel =
@@ -280,7 +280,7 @@ namespace HoneydewCoreIntegrationTests.Processors
              var referenceSolutionModel = _sut.Process(solutionModel);
              
              Assert.Equal(1, referenceSolutionModel.Projects.Count);
-             var allCreatedReferences = referenceSolutionModel.GetAllCreatedReferences();
+             var allCreatedReferences = referenceSolutionModel.CreatedClassModels;
              Assert.Equal(6, allCreatedReferences.Count);
 
              var objectClassModel =
@@ -433,7 +433,7 @@ namespace HoneydewCoreIntegrationTests.Processors
              var referenceSolutionModel = _sut.Process(solutionModel);
 
              Assert.Equal(1, referenceSolutionModel.Projects.Count);
-             var allCreatedReferences = referenceSolutionModel.GetAllCreatedReferences();
+             var allCreatedReferences = referenceSolutionModel.CreatedClassModels;
              Assert.Equal(1, allCreatedReferences.Count);
 
              var objectClassModel =
@@ -602,7 +602,7 @@ namespace HoneydewCoreIntegrationTests.Processors
              var referenceSolutionModel = _sut.Process(solutionModel);
 
              Assert.Equal(1, referenceSolutionModel.Projects.Count);
-             var allCreatedReferences = referenceSolutionModel.GetAllCreatedReferences();
+             var allCreatedReferences = referenceSolutionModel.CreatedClassModels;
              Assert.Equal(4, allCreatedReferences.Count);
 
              var objectClassModel =

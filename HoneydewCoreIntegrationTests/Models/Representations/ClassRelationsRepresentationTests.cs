@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using HoneydewCore.IO.Writers.Exporters;
+﻿using System.Linq;
 using HoneydewCore.ModelRepresentations;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using Moq;
@@ -162,41 +160,6 @@ namespace HoneydewCoreIntegrationTests.Models.Representations
             Assert.True(_sut.DependenciesType.Contains("dependency2"));
             Assert.True(_sut.DependenciesType.Contains("dependency3"));
             Assert.True(_sut.DependenciesType.Contains("dependency4"));
-        }
-
-
-        [Fact]
-        public void Export_ShouldReturnEmptyString_WhenGivenEmptyRelations()
-        {
-            var exporterMock = new Mock<IClassRelationsRepresentationExporter>();
-            exporterMock.Setup(exporter => exporter.Export(_sut)).Returns(@"""Source"",""Target""");
-
-            Assert.Equal(@"""Source"",""Target""", _sut.Export(exporterMock.Object));
-        }
-
-        [Fact]
-        public void Export_ShouldReturnCsv_WhenGivenOneRelationRepresentation()
-        {
-            var newLine = Environment.NewLine;
-
-            var exporterMock = new Mock<IClassRelationsRepresentationExporter>();
-            exporterMock.Setup(exporter => exporter.Export(_sut))
-                .Returns($@"""Source"",""Target"",""dependency""{newLine}""source"",""target"",""4""");
-
-
-            _sut.Add("source", "target", "dependency", 4);
-
-            var expectedString = $@"""Source"",""Target"",""dependency""{newLine}""source"",""target"",""4""";
-
-            Assert.Equal(expectedString, _sut.Export(exporterMock.Object));
-        }
-
-        [Fact]
-        public void Export_ShouldReturnEmptyString_WhenGivenAWrongExporter()
-        {
-            var exporterMock = new Mock<IExporter>();
-
-            Assert.Equal("", _sut.Export(exporterMock.Object));
         }
 
         [Fact]

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using HoneydewCore.Logging;
-using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
-using HoneydewModels;
-using HoneydewModels.Processors;
+using HoneydewCore.Processors;
+using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
+using HoneydewModels.CSharp;
 
 namespace HoneydewExtractors.Processors
 {

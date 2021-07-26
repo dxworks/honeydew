@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using HoneydewModels;
-using HoneydewModels.Processors;
-using HoneydewModels.Representations.ReferenceModel;
+using HoneydewModels.CSharp;
+using HoneydewModels.CSharp.ReferenceModel;
 
 namespace HoneydewCore.Processors
 {

@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
-using HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp;
+using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewExtractors.Processors;
 using HoneydewModels;
+using HoneydewModels.CSharp;
 using Moq;
 using Xunit;
 
