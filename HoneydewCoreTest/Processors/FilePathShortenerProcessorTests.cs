@@ -1,4 +1,5 @@
-﻿using HoneydewCore.IO;
+﻿using System.IO;
+using HoneydewCore.IO;
 using HoneydewCore.Processors;
 using HoneydewModels.CSharp;
 using Moq;
@@ -43,9 +44,10 @@ namespace HoneydewCoreTest.Processors
             var processesRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Solution1.sln", processesRepositoryModel.Solutions[0].FilePath);
-            Assert.Equal("SomeFolder\\solution2.sln", processesRepositoryModel.Solutions[1].FilePath);
+            Assert.Equal(Path.Join("SomeFolder", "solution2.sln"), processesRepositoryModel.Solutions[1].FilePath);
             Assert.Equal("solution3.sln", processesRepositoryModel.Solutions[2].FilePath);
-            Assert.Equal("Folder\\Other\\Folder2\\solution4.sln", processesRepositoryModel.Solutions[3].FilePath);
+            Assert.Equal(Path.Join("Folder", "Other", "Folder2", "solution4.sln"),
+                processesRepositoryModel.Solutions[3].FilePath);
         }
 
         [Fact]
@@ -93,12 +95,15 @@ namespace HoneydewCoreTest.Processors
 
             var processesRepositoryModel = _sut.Process(repositoryModel);
 
-            Assert.Equal("Project1\\Project1.csproj", processesRepositoryModel.Solutions[0].Projects[0].FilePath);
-            Assert.Equal("Project2\\Project2.csproj", processesRepositoryModel.Solutions[0].Projects[1].FilePath);
-            Assert.Equal("SomeFolder\\Proj.csproj", processesRepositoryModel.Solutions[1].Projects[0].FilePath);
-            Assert.Equal("Folder\\Folder2\\Folder3\\Project1.csproj",
+            Assert.Equal(Path.Join("Project1", "Project1.csproj"),
+                processesRepositoryModel.Solutions[0].Projects[0].FilePath);
+            Assert.Equal(Path.Join("Project2", "Project2.csproj"),
+                processesRepositoryModel.Solutions[0].Projects[1].FilePath);
+            Assert.Equal(Path.Join("SomeFolder", "Proj.csproj"),
+                processesRepositoryModel.Solutions[1].Projects[0].FilePath);
+            Assert.Equal(Path.Join("Folder", "Folder2", "Folder3", "Project1.csproj"),
                 processesRepositoryModel.Solutions[2].Projects[0].FilePath);
-            Assert.Equal("Folder\\Folder1\\Folder3\\Project2.csproj",
+            Assert.Equal(Path.Join("Folder", "Folder1", "Folder3", "Project2.csproj"),
                 processesRepositoryModel.Solutions[2].Projects[1].FilePath);
         }
 
@@ -188,17 +193,17 @@ namespace HoneydewCoreTest.Processors
 
             var processesRepositoryModel = _sut.Process(repositoryModel);
 
-            Assert.Equal("Project1\\Namespace1\\Class1.cs",
+            Assert.Equal(Path.Join("Project1", "Namespace1", "Class1.cs"),
                 processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FilePath);
-            Assert.Equal("Project1\\Namespace1\\Class2.cs",
+            Assert.Equal(Path.Join("Project1", "Namespace1", "Class2.cs"),
                 processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[1].FilePath);
-            Assert.Equal("Project2\\Models\\Model1.cs",
+            Assert.Equal(Path.Join("Project2", "Models", "Model1.cs"),
                 processesRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].FilePath);
-            Assert.Equal("Project2\\Models\\Model2.cs",
+            Assert.Equal(Path.Join("Project2", "Models", "Model2.cs"),
                 processesRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[1].FilePath);
-            Assert.Equal("Project2\\Controllers\\Controller.cs",
+            Assert.Equal(Path.Join("Project2", "Controllers", "Controller.cs"),
                 processesRepositoryModel.Solutions[0].Projects[1].Namespaces[1].ClassModels[0].FilePath);
-            Assert.Equal("SomeFolder\\Folder1\\Folder2\\Folder3\\_my_class.cs",
+            Assert.Equal(Path.Join("SomeFolder", "Folder1", "Folder2", "Folder3", "_my_class.cs"),
                 processesRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0].FilePath);
         }
 
@@ -360,17 +365,17 @@ namespace HoneydewCoreTest.Processors
                     repositoryModel);
 
             Assert.Equal("Solution.sln", processesRepositoryModel.Solutions[0].FilePath);
-            Assert.Equal("Project1\\Project1.csproj",
+            Assert.Equal(Path.Join("Project1", "Project1.csproj"),
                 processesRepositoryModel.Solutions[0].Projects[0].FilePath);
-            Assert.Equal("Project1\\Models\\Model1.cs",
+            Assert.Equal(Path.Join("Project1", "Models", "Model1.cs"),
                 processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FilePath);
-            Assert.Equal("Project1\\Models\\Model2.cs",
+            Assert.Equal(Path.Join("Project1", "Models", "Model2.cs"),
                 processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[1].FilePath);
-            Assert.Equal("Project2\\Project2.csproj",
+            Assert.Equal(Path.Join("Project2", "Project2.csproj"),
                 processesRepositoryModel.Solutions[0].Projects[1].FilePath);
-            Assert.Equal("Project2\\Controller\\Impl\\Controller.cs",
+            Assert.Equal(Path.Join("Project2", "Controller", "Impl", "Controller.cs"),
                 processesRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].FilePath);
-            Assert.Equal("Project2\\Repository\\IRepository.cs",
+            Assert.Equal(Path.Join("Project2", "Repository", "IRepository.cs"),
                 processesRepositoryModel.Solutions[0].Projects[1].Namespaces[1].ClassModels[0].FilePath);
         }
 
@@ -433,14 +438,15 @@ namespace HoneydewCoreTest.Processors
                 new FilePathShortenerProcessor(_folderPathValidatorMock.Object, "D:/SomePath/Project.csproj").Process(
                     repositoryModel);
 
-            Assert.Equal("Project1\\Project1.csproj", processesRepositoryModel.Solutions[0].Projects[0].FilePath);
-            Assert.Equal("Project1\\Models\\Model1.cs",
+            Assert.Equal(Path.Join("Project1", "Project1.csproj"),
+                processesRepositoryModel.Solutions[0].Projects[0].FilePath);
+            Assert.Equal(Path.Join("Project1", "Models", "Model1.cs"),
                 processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FilePath);
-            Assert.Equal("Project1\\Models\\Model2.cs",
+            Assert.Equal(Path.Join("Project1", "Models", "Model2.cs"),
                 processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[1].FilePath);
-            Assert.Equal("Project1\\Controller\\Impl\\Controller.cs",
+            Assert.Equal(Path.Join("Project1", "Controller", "Impl", "Controller.cs"),
                 processesRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].FilePath);
-            Assert.Equal("Project1\\Repository\\IRepository.cs",
+            Assert.Equal(Path.Join("Project1", "Repository", "IRepository.cs"),
                 processesRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].FilePath);
         }
     }
