@@ -266,69 +266,69 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         }
 
 
-//         [Fact(Skip = "Return later when csharp model is has usings")]
-//         public void
-//             Extract_ShouldHaveLocalVariablesDependencies_WhenNamespaceHasMultipleClasses()
-//         {
-//             const string fileContent = @"using System;
-//                                      using HoneydewCore.Extractors;
-//                                      namespace App
-//                                      {                                       
-//                                          public class Class1
-//                                          {                                           
-//                                              public CSharpMetricExtractor Foo(int a, string name) {
-//                                                  for (var i=0;i<a;i++) { 
-//                                                   if (name == ""AA"") {
-//                                                  var b = new CSharpMetricExtractor(); return b;}
-//                                                  }
-//                                              return null;
-//                                              }
-//                                          }
-//
-//                                         public class Class2
-//                                          {                                       
-//                                               int _a; string b;    
-//                                              public Class2(int a, string name) {_a=a; var c = new CSharpMetricExtractor(); var x = a+2; b=name+x;}
-//
-//                                              public Class2() { var i=0; var c=2; _a=i+c;  var x = _a+2; b=""name""+x;}
-//
-//                                              double f() { int a=2; var c=6.0; return a+c; }
-//                                          }
-//                                      }";
-//
-//             var classModels = _factExtractor.Extract(fileContent);
-//
-//             Assert.Equal(2, classModels.Count);
-//
-//             var optional1 = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
-//             Assert.True(optional1.HasValue);
-//
-//             var dependencies = (CSharpDependencyDataMetric) optional1.Value;
-//
-//             Assert.Equal(2, dependencies.Usings.Count);
-//             Assert.Equal("System", dependencies.Usings[0]);
-//             Assert.Equal("HoneydewCore.Extractors", dependencies.Usings[1]);
-//
-//             Assert.Equal(2, dependencies.Dependencies.Count);
-//             Assert.Equal(1, dependencies.Dependencies["CSharpMetricExtractor"]);
-//             Assert.Equal(1, dependencies.Dependencies["int"]);
-//
-//
-//             var optional2 = classModels[1].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
-//             Assert.True(optional2.HasValue);
-//
-//             var dataMetric = (CSharpDependencyDataMetric) optional2.Value;
-//
-//             Assert.Equal(3, dataMetric.Usings.Count);
-//             Assert.Equal("System", dataMetric.Usings[0]);
-//             Assert.Equal("HoneydewCore.Extractors", dataMetric.Usings[1]);
-//             Assert.Equal("HoneydewCore.Extractors.Metrics", dataMetric.Usings[2]);
-//
-//             Assert.Equal(3, dataMetric.Dependencies.Count);
-//             Assert.Equal(1, dataMetric.Dependencies["CSharpMetricExtractor"]);
-//             Assert.Equal(5, dataMetric.Dependencies["int"]);
-//             Assert.Equal(1, dataMetric.Dependencies["double"]);
-//         }
+        [Fact(Skip = "Return later when csharp model is has usings")]
+        public void
+            Extract_ShouldHaveLocalVariablesDependencies_WhenNamespaceHasMultipleClasses()
+        {
+            const string fileContent = @"using System;
+                                     using HoneydewCore.Extractors;
+                                     namespace App
+                                     {                                       
+                                         public class Class1
+                                         {                                           
+                                             public CSharpMetricExtractor Foo(int a, string name) {
+                                                 for (var i=0;i<a;i++) { 
+                                                  if (name == ""AA"") {
+                                                 var b = new CSharpMetricExtractor(); return b;}
+                                                 }
+                                             return null;
+                                             }
+                                         }
+
+                                        public class Class2
+                                         {                                       
+                                              int _a; string b;    
+                                             public Class2(int a, string name) {_a=a; var c = new CSharpMetricExtractor(); var x = a+2; b=name+x;}
+
+                                             public Class2() { var i=0; var c=2; _a=i+c;  var x = _a+2; b=""name""+x;}
+
+                                             double f() { int a=2; var c=6.0; return a+c; }
+                                         }
+                                     }";
+
+            var classModels = _factExtractor.Extract(fileContent);
+
+            Assert.Equal(2, classModels.Count);
+
+            var optional1 = classModels[0].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
+            Assert.True(optional1.HasValue);
+
+            var dependencies = (CSharpDependencyDataMetric) optional1.Value;
+
+            Assert.Equal(2, dependencies.Usings.Count);
+            Assert.Equal("System", dependencies.Usings[0]);
+            Assert.Equal("HoneydewCore.Extractors", dependencies.Usings[1]);
+
+            Assert.Equal(2, dependencies.Dependencies.Count);
+            Assert.Equal(1, dependencies.Dependencies["CSharpMetricExtractor"]);
+            Assert.Equal(1, dependencies.Dependencies["int"]);
+
+
+            var optional2 = classModels[1].GetMetricValue<CSharpLocalVariablesDependencyMetric>();
+            Assert.True(optional2.HasValue);
+
+            var dataMetric = (CSharpDependencyDataMetric) optional2.Value;
+
+            Assert.Equal(3, dataMetric.Usings.Count);
+            Assert.Equal("System", dataMetric.Usings[0]);
+            Assert.Equal("HoneydewCore.Extractors", dataMetric.Usings[1]);
+            Assert.Equal("HoneydewCore.Extractors.Metrics", dataMetric.Usings[2]);
+
+            Assert.Equal(3, dataMetric.Dependencies.Count);
+            Assert.Equal(1, dataMetric.Dependencies["CSharpMetricExtractor"]);
+            Assert.Equal(5, dataMetric.Dependencies["int"]);
+            Assert.Equal(1, dataMetric.Dependencies["double"]);
+        }
 
         [Fact]
         public void GetRelations_ShouldHaveNoRelations_WhenClassHasMethodsWithNoReturnValues()
