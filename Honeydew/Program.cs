@@ -61,7 +61,11 @@ namespace Honeydew
 
                 ConsoleLoggerWithHistory consoleLoggerWithHistory = new(new ConsoleProgressLogger());
 
+                // Post Extraction Repository model processing
                 repositoryModel = new FullNameModelProcessor(consoleLoggerWithHistory).Process(repositoryModel);
+
+                repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
+
 
                 WriteAllRepresentations(repositoryModel, consoleLoggerWithHistory, DefaultPathForAllRepresentations);
 
@@ -105,7 +109,7 @@ namespace Honeydew
             ConsoleLoggerWithHistory consoleLoggerWithHistory, string outputPath)
         {
             var writer = new FileWriter();
-            
+
             var repositoryExporter = GetRepositoryModelExporter();
             writer.WriteFile(Path.Combine(outputPath, "honeydew.json"), repositoryExporter.Export(repositoryModel));
 
