@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using HoneydewExtractors.Core.Metrics;
 using HoneydewExtractors.CSharp.Utils;
+using HoneydewModels.CSharp;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -63,6 +64,7 @@ namespace HoneydewExtractors.CSharp.Metrics
                     {
                         return expressionSyntax.ToString();
                     }
+
                     return symbolInfo.Symbol.ToString();
                 }
             }
@@ -114,6 +116,92 @@ namespace HoneydewExtractors.CSharp.Metrics
             }
 
             return null;
+        }
+
+        public MethodCallModel GetMethodCallModel(InvocationExpressionSyntax invocationExpressionSyntax,
+            string containingClassName, string baseTypeName = "object")
+        {
+            switch (invocationExpressionSyntax.Expression)
+            {
+                case IdentifierNameSyntax:
+                    return new MethodCallModel
+                    {
+                        MethodName = invocationExpressionSyntax.Expression.ToString(),
+                        ContainingClassName = containingClassName,
+                        ParameterTypes = GetParameterTypes(invocationExpressionSyntax)
+                    };
+
+                case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
+                {
+                    string className;
+
+                    if (memberAccessExpressionSyntax.Expression.ToFullString() ==
+                        CSharpConstants.BaseClassIdentifier)
+                    {
+                        className = baseTypeName;
+                    }
+                    else
+                    {
+                        className = GetFullName(memberAccessExpressionSyntax.Expression) ??
+                                    containingClassName;
+                    }
+
+                    return new MethodCallModel
+                    {
+                        MethodName = memberAccessExpressionSyntax.Name.ToString(),
+                        ContainingClassName = className,
+                        ParameterTypes = GetParameterTypes(invocationExpressionSyntax)
+                    };
+                }
+            }
+
+            return null;
+        }
+
+        public IList<ParameterModel> GetParameterTypes(IMethodSymbol methodSymbol)
+        {
+            IList<ParameterModel> parameterTypes = new List<ParameterModel>();
+            foreach (var parameter in methodSymbol.Parameters)
+            {
+                var modifier = parameter.RefKind switch
+                {
+                    RefKind.In => "in",
+                    RefKind.Out => "out",
+                    RefKind.Ref => "ref",
+                    _ => ""
+                };
+
+                if (parameter.IsParams)
+                {
+                    modifier = "params";
+                }
+
+                if (parameter.IsThis)
+                {
+                    modifier = "this";
+                }
+
+                string defaultValue = null;
+                if (parameter.HasExplicitDefaultValue)
+                {
+                    defaultValue = parameter.ExplicitDefaultValue?.ToString();
+                }
+
+                parameterTypes.Add(new ParameterModel
+                {
+                    Type = GetFullName(parameter.Type),
+                    Modifier = modifier,
+                    DefaultValue = defaultValue
+                });
+            }
+
+            return parameterTypes;
+        }
+        
+        private IList<ParameterModel> GetParameterTypes(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode syntaxNode)
+        {
+            var methodSymbol = GetMethodSymbol(syntaxNode);
+            return methodSymbol == null ? new List<ParameterModel>() : GetParameterTypes(methodSymbol);
         }
     }
 }

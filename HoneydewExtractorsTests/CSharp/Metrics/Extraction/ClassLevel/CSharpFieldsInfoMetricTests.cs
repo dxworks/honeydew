@@ -86,18 +86,21 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("int", fieldInfos[0].Type);
             Assert.Equal("readonly", fieldInfos[0].Modifier);
             Assert.Equal("private", fieldInfos[0].AccessModifier);
+            Assert.Equal("TopLevel.Foo", fieldInfos[0].ContainingClassName);
             Assert.False(fieldInfos[0].IsEvent);
 
             Assert.Equal("X", fieldInfos[1].Name);
             Assert.Equal("float", fieldInfos[1].Type);
             Assert.Equal("volatile", fieldInfos[1].Modifier);
             Assert.Equal("private", fieldInfos[1].AccessModifier);
+            Assert.Equal("TopLevel.Foo", fieldInfos[1].ContainingClassName);
             Assert.False(fieldInfos[1].IsEvent);
 
             Assert.Equal("Y", fieldInfos[2].Name);
             Assert.Equal("string", fieldInfos[2].Type);
             Assert.Equal("static", fieldInfos[2].Modifier);
             Assert.Equal("private", fieldInfos[2].AccessModifier);
+            Assert.Equal("TopLevel.Foo", fieldInfos[2].ContainingClassName);
             Assert.False(fieldInfos[2].IsEvent);
         }
 

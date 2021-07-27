@@ -12,8 +12,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
     {
         public CSharpSyntacticModel HoneydewSyntacticModel { get; set; }
         public CSharpSemanticModel HoneydewSemanticModel { get; set; }
-
-
+        
         public IList<FieldModel> FieldInfos { get; } = new List<FieldModel>();
 
         public ExtractionMetricType GetMetricType()
@@ -42,10 +41,16 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
         }
 
         private void AddFieldInfo(BaseFieldDeclarationSyntax node, bool isEvent)
-        {
+        {            
             var allModifiers = node.Modifiers.ToString();
             var accessModifier = CSharpConstants.DefaultFieldAccessModifier;
             var modifier = allModifiers;
+
+            var containingClass = "";
+            if (node.Parent is BaseTypeDeclarationSyntax classDeclarationSyntax)
+            {
+                containingClass = HoneydewSemanticModel.GetFullName(classDeclarationSyntax);
+            }
             
             CSharpConstants.SetModifiers(allModifiers, ref accessModifier, ref modifier);
 
@@ -60,6 +65,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                     IsEvent = isEvent,
                     Type = typeName,
                     Name = variable.Identifier.ToString(),
+                    ContainingClassName = containingClass
                 });
             }
         }

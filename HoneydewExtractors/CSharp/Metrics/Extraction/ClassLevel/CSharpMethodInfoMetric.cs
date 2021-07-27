@@ -4,7 +4,6 @@ using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels;
 using HoneydewModels.CSharp;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
@@ -146,39 +145,11 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
             foreach (var invocationExpressionSyntax in syntax.Body.DescendantNodes()
                 .OfType<InvocationExpressionSyntax>())
             {
-                switch (invocationExpressionSyntax.Expression)
+                var methodCallModel = HoneydewSemanticModel.GetMethodCallModel(invocationExpressionSyntax,
+                    _containingClassName, _baseTypeName);
+                if (methodCallModel != null)
                 {
-                    case IdentifierNameSyntax:
-                        methodModel.CalledMethods.Add(new MethodCallModel
-                        {
-                            MethodName = invocationExpressionSyntax.Expression.ToString(),
-                            ContainingClassName = _containingClassName,
-                            ParameterTypes = GetParameterTypes(invocationExpressionSyntax)
-                        });
-                        break;
-                    case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
-                    {
-                        string className;
-
-                        if (memberAccessExpressionSyntax.Expression.ToFullString() ==
-                            CSharpConstants.BaseClassIdentifier)
-                        {
-                            className = _baseTypeName;
-                        }
-                        else
-                        {
-                            className = HoneydewSemanticModel.GetFullName(memberAccessExpressionSyntax.Expression) ??
-                                        _containingClassName;
-                        }
-
-                        methodModel.CalledMethods.Add(new MethodCallModel
-                        {
-                            MethodName = memberAccessExpressionSyntax.Name.ToString(),
-                            ContainingClassName = className,
-                            ParameterTypes = GetParameterTypes(invocationExpressionSyntax)
-                        });
-                        break;
-                    }
+                    methodModel.CalledMethods.Add(methodCallModel);
                 }
             }
         }
@@ -205,7 +176,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
 
             if (methodSymbol != null)
             {
-                parameterModels = GetParameterTypes(methodSymbol);
+                parameterModels = HoneydewSemanticModel.GetParameterTypes(methodSymbol);
                 methodName = methodSymbol.ContainingType.Name;
             }
 
@@ -215,52 +186,6 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 ContainingClassName = containingClassName,
                 ParameterTypes = parameterModels
             });
-        }
-
-        private IList<ParameterModel> GetParameterTypes(ExpressionSyntax invocationExpressionSyntax)
-        {
-            var methodSymbol = HoneydewSemanticModel.GetMethodSymbol(invocationExpressionSyntax);
-            return methodSymbol == null ? new List<ParameterModel>() : GetParameterTypes(methodSymbol);
-        }
-
-        private IList<ParameterModel> GetParameterTypes(IMethodSymbol methodSymbol)
-        {
-            IList<ParameterModel> parameterTypes = new List<ParameterModel>();
-            foreach (var parameter in methodSymbol.Parameters)
-            {
-                var modifier = parameter.RefKind switch
-                {
-                    RefKind.In => "in",
-                    RefKind.Out => "out",
-                    RefKind.Ref => "ref",
-                    _ => ""
-                };
-
-                if (parameter.IsParams)
-                {
-                    modifier = "params";
-                }
-
-                if (parameter.IsThis)
-                {
-                    modifier = "this";
-                }
-
-                string defaultValue = null;
-                if (parameter.HasExplicitDefaultValue)
-                {
-                    defaultValue = parameter.ExplicitDefaultValue?.ToString();
-                }
-
-                parameterTypes.Add(new ParameterModel
-                {
-                    Type = HoneydewSemanticModel.GetFullName(parameter.Type),
-                    Modifier = modifier,
-                    DefaultValue = defaultValue
-                });
-            }
-
-            return parameterTypes;
         }
 
         private void GetModifiersForNode(MemberDeclarationSyntax node, out string accessModifier, out string modifier)

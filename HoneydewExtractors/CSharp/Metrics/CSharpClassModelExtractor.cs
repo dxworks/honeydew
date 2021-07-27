@@ -43,6 +43,7 @@ namespace HoneydewExtractors.CSharp.Metrics
                     Modifier = modifier,
                     FullName = fullName,
                     Fields = ExtractFieldsInfo(declarationSyntax, semanticModel),
+                    Properties = ExtractPropertiesInfo(declarationSyntax, semanticModel),
                     Methods = methodInfoDataMetric.MethodInfos,
                     Constructors = methodInfoDataMetric.ConstructorInfos,
                     BaseClassFullName = baseClassName,
@@ -75,6 +76,17 @@ namespace HoneydewExtractors.CSharp.Metrics
             return classModels;
         }
 
+        private static IList<PropertyModel> ExtractPropertiesInfo(SyntaxNode declarationSyntax,
+            CSharpSemanticModel semanticModel)
+        {
+            var fieldsInfoMetric = new CSharpPropertiesInfoMetric
+            {
+                HoneydewSemanticModel = semanticModel
+            };
+            fieldsInfoMetric.Visit(declarationSyntax);
+            return fieldsInfoMetric.PropertyInfos;
+        }
+
         private static IList<FieldModel> ExtractFieldsInfo(SyntaxNode declarationSyntax,
             CSharpSemanticModel semanticModel)
         {
@@ -97,7 +109,7 @@ namespace HoneydewExtractors.CSharp.Metrics
             return fieldsInfoMetric.DataMetric;
         }
 
-        private void ExtractBaseClassAndBaseInterfaces(SyntaxNode declarationSyntax,
+        private static void ExtractBaseClassAndBaseInterfaces(SyntaxNode declarationSyntax,
             CSharpSemanticModel semanticModel, out string baseClass, out IList<string> baseInterfaces)
         {
             var fieldsInfoMetric = new CSharpBaseClassMetric
