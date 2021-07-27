@@ -14,8 +14,6 @@ namespace HoneydewCore.Processors
 
         public FilePathShortenerProcessor(IFolderPathValidator folderPathValidator, string inputFilePath)
         {
-            inputFilePath = inputFilePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-
             _inputFilePath = inputFilePath;
 
             if (!folderPathValidator.IsFolder(inputFilePath))
@@ -26,6 +24,8 @@ namespace HoneydewCore.Processors
                     _inputFilePath = directoryInfo.ToString();
                 }
             }
+
+            _inputFilePath = _inputFilePath.Replace('\\', '/');
         }
 
         public RepositoryModel Process(RepositoryModel repositoryModel)
@@ -62,14 +62,14 @@ namespace HoneydewCore.Processors
 
         private string TrimPath(string path)
         {
-            path = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-
             if (!AreSubDirectories(_inputFilePath, path))
             {
-                return path;
+                return path.Replace('\\', '/');
             }
 
-            return Path.GetRelativePath(_inputFilePath, path);
+            var relativePath = Path.GetRelativePath(_inputFilePath, path);
+
+            return relativePath.Replace('\\', '/');
         }
 
         private static bool AreSubDirectories(string path1, string path2)
