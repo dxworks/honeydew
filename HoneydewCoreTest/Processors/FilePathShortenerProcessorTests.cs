@@ -9,15 +9,6 @@ namespace HoneydewCoreTest.Processors
 {
     public class FilePathShortenerProcessorTests
     {
-        private readonly FilePathShortenerProcessor _sut;
-        private readonly Mock<IFolderPathValidator> _folderPathValidatorMock;
-
-        public FilePathShortenerProcessorTests()
-        {
-            _folderPathValidatorMock = new Mock<IFolderPathValidator>();
-            _folderPathValidatorMock.Setup(validator => validator.IsFolder("C:\\SomePath\\InputFolder")).Returns(true);
-            _sut = new FilePathShortenerProcessor(_folderPathValidatorMock.Object, "C:\\SomePath\\InputFolder");
-        }
 
         [Fact]
         public void Process_ShouldHaveSolutionsWithShortenedPath_WhenProvidedWithInputPathToAFolder()
@@ -41,7 +32,11 @@ namespace HoneydewCoreTest.Processors
                 FilePath = "C:/SomePath/InputFolder/Folder/Other/Folder2/solution4.sln"
             });
 
-            var processesRepositoryModel = _sut.Process(repositoryModel);
+            var folderPathValidatorMock = new Mock<IFolderPathValidator>();
+            folderPathValidatorMock.Setup(validator => validator.IsFolder("C:\\SomePath\\InputFolder")).Returns(true);
+            var sut = new FilePathShortenerProcessor(folderPathValidatorMock.Object, "C:\\SomePath\\InputFolder");
+            
+            var processesRepositoryModel = sut.Process(repositoryModel);
 
             Assert.Equal("Solution1.sln", processesRepositoryModel.Solutions[0].FilePath);
             Assert.Equal(Path.Join("SomeFolder", "solution2.sln"), processesRepositoryModel.Solutions[1].FilePath);
@@ -92,8 +87,12 @@ namespace HoneydewCoreTest.Processors
                     }
                 }
             });
+            
+            var folderPathValidatorMock = new Mock<IFolderPathValidator>();
+            folderPathValidatorMock.Setup(validator => validator.IsFolder("C:\\SomePath\\InputFolder")).Returns(true);
+            var sut = new FilePathShortenerProcessor(folderPathValidatorMock.Object, "C:\\SomePath\\InputFolder");
 
-            var processesRepositoryModel = _sut.Process(repositoryModel);
+            var processesRepositoryModel = sut.Process(repositoryModel);
 
             Assert.Equal(Path.Join("Project1", "Project1.csproj"),
                 processesRepositoryModel.Solutions[0].Projects[0].FilePath);
@@ -190,8 +189,12 @@ namespace HoneydewCoreTest.Processors
                     }
                 }
             });
+            
+            var folderPathValidatorMock = new Mock<IFolderPathValidator>();
+            folderPathValidatorMock.Setup(validator => validator.IsFolder("C:\\SomePath\\InputFolder")).Returns(true);
+            var sut = new FilePathShortenerProcessor(folderPathValidatorMock.Object, "C:\\SomePath\\InputFolder");
 
-            var processesRepositoryModel = _sut.Process(repositoryModel);
+            var processesRepositoryModel = sut.Process(repositoryModel);
 
             Assert.Equal(Path.Join("Project1", "Namespace1", "Class1.cs"),
                 processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FilePath);
@@ -277,8 +280,12 @@ namespace HoneydewCoreTest.Processors
                     }
                 }
             });
+            
+            var folderPathValidatorMock = new Mock<IFolderPathValidator>();
+            folderPathValidatorMock.Setup(validator => validator.IsFolder("C:\\SomePath\\InputFolder")).Returns(true);
+            var sut = new FilePathShortenerProcessor(folderPathValidatorMock.Object, "C:\\SomePath\\InputFolder");
 
-            var processesRepositoryModel = _sut.Process(repositoryModel);
+            var processesRepositoryModel = sut.Process(repositoryModel);
 
             Assert.Equal("RandomPathToSolution1", processesRepositoryModel.Solutions[0].FilePath);
             Assert.Equal("Path1/Path2/Project.csproj", processesRepositoryModel.Solutions[0].Projects[0].FilePath);
@@ -357,11 +364,12 @@ namespace HoneydewCoreTest.Processors
                     }
                 }
             });
-
-            _folderPathValidatorMock.Setup(validator => validator.IsFolder("D:/SomePath/Solution.sln")).Returns(false);
+            
+            var folderPathValidatorMock = new Mock<IFolderPathValidator>();
+            folderPathValidatorMock.Setup(validator => validator.IsFolder("D:/SomePath/Solution.sln")).Returns(false);
 
             var processesRepositoryModel =
-                new FilePathShortenerProcessor(_folderPathValidatorMock.Object, "D:/SomePath/Solution.sln").Process(
+                new FilePathShortenerProcessor(folderPathValidatorMock.Object, "D:/SomePath/Solution.sln").Process(
                     repositoryModel);
 
             Assert.Equal("Solution.sln", processesRepositoryModel.Solutions[0].FilePath);
@@ -430,12 +438,13 @@ namespace HoneydewCoreTest.Processors
                     }
                 }
             });
-
-            _folderPathValidatorMock.Setup(validator => validator.IsFolder("D:/SomePath/Project.csproj"))
+            
+            var folderPathValidatorMock = new Mock<IFolderPathValidator>();
+            folderPathValidatorMock.Setup(validator => validator.IsFolder("D:/SomePath/Project.csproj"))
                 .Returns(false);
 
             var processesRepositoryModel =
-                new FilePathShortenerProcessor(_folderPathValidatorMock.Object, "D:/SomePath/Project.csproj").Process(
+                new FilePathShortenerProcessor(folderPathValidatorMock.Object, "D:/SomePath/Project.csproj").Process(
                     repositoryModel);
 
             Assert.Equal(Path.Join("Project1", "Project1.csproj"),
