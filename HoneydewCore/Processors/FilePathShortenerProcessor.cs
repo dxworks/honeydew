@@ -14,6 +14,8 @@ namespace HoneydewCore.Processors
 
         public FilePathShortenerProcessor(IFolderPathValidator folderPathValidator, string inputFilePath)
         {
+            inputFilePath = inputFilePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+
             _inputFilePath = inputFilePath;
 
             if (!folderPathValidator.IsFolder(inputFilePath))
