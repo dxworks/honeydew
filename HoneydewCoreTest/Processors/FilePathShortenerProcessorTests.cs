@@ -288,20 +288,20 @@ namespace HoneydewCoreTest.Processors
             var processesRepositoryModel = sut.Process(repositoryModel);
 
             Assert.Equal("RandomPathToSolution1", processesRepositoryModel.Solutions[0].FilePath);
-            Assert.Equal("Path1/Path2/Project.csproj", processesRepositoryModel.Solutions[0].Projects[0].FilePath);
+            Assert.Equal(Path.Join("Path1","Path2","Project.csproj"), processesRepositoryModel.Solutions[0].Projects[0].FilePath);
             Assert.Equal("Class1.cs",
                 processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FilePath);
-            Assert.Equal("Path1/Path2/Namespace1/Class2.cs",
+            Assert.Equal(Path.Join("Path1","Path2","Namespace1","Class2.cs"),
                 processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[1].FilePath);
 
-            Assert.Equal("Folder1\\Folder\\Solution1.sln", processesRepositoryModel.Solutions[1].FilePath);
-            Assert.Equal("Folder1\\Folder\\Project2\\Project2.csproj",
+            Assert.Equal(Path.Join("Folder1","Folder","Solution1.sln"), processesRepositoryModel.Solutions[1].FilePath);
+            Assert.Equal(Path.Join("Folder1","Folder","Project2","Project2.csproj"),
                 processesRepositoryModel.Solutions[1].Projects[0].FilePath);
-            Assert.Equal("Models\\Model1.cs",
+            Assert.Equal(Path.Join("Models","Model1.cs"),
                 processesRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0].FilePath);
-            Assert.Equal("Folder1\\Folder\\Models\\Model2.cs",
+            Assert.Equal(Path.Join("Folder1","Folder","Models","Model2.cs"),
                 processesRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[1].FilePath);
-            Assert.Equal("Controllers\\Controller.cs",
+            Assert.Equal(Path.Join("Controllers","Controller.cs"),
                 processesRepositoryModel.Solutions[1].Projects[0].Namespaces[1].ClassModels[0].FilePath);
         }
 

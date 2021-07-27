@@ -60,6 +60,8 @@ namespace HoneydewCore.Processors
 
         private string TrimPath(string path)
         {
+            path = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+
             if (!AreSubDirectories(_inputFilePath, path))
             {
                 return path;
