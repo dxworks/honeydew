@@ -11,15 +11,20 @@ namespace HoneydewExtractors.CSharp.Metrics
     {
         public SemanticModel Model { private get; init; }
 
-        public string GetFullName(BaseTypeDeclarationSyntax declarationSyntax)
+        public string GetFullName(MemberDeclarationSyntax declarationSyntax)
         {
             var declaredSymbol = Model.GetDeclaredSymbol(declarationSyntax);
-            if (declaredSymbol == null)
+            if (declaredSymbol != null)
             {
-                return declarationSyntax.Identifier.ToString();
+                return declaredSymbol.ToDisplayString();
             }
 
-            return declaredSymbol.ToDisplayString();
+            return declarationSyntax switch
+            {
+                DelegateDeclarationSyntax delegateDeclaration => delegateDeclaration.Identifier.ToString(),
+                BaseTypeDeclarationSyntax baseTypeDeclarationSyntax => baseTypeDeclarationSyntax.Identifier.ToString(),
+                _ => declarationSyntax.ToString()
+            };
         }
 
         public string GetFullName(VariableDeclarationSyntax declarationSyntax)
@@ -34,40 +39,12 @@ namespace HoneydewExtractors.CSharp.Metrics
             return typeName;
         }
 
-        public string GetFullName(ITypeSymbol typeSyntax)
-        {
-            return typeSyntax.ToString();
-        }
-
         public string GetFullName(TypeSyntax typeSyntax)
         {
             var returnValueSymbol = Model.GetSymbolInfo(typeSyntax);
             return returnValueSymbol.Symbol != null
                 ? returnValueSymbol.Symbol.ToString()
                 : typeSyntax.ToString();
-        }
-
-        public string GetFullName(ExpressionSyntax expressionSyntax)
-        {
-            var symbolInfo = Model.GetSymbolInfo(expressionSyntax);
-            switch (symbolInfo.Symbol)
-            {
-                case ILocalSymbol localSymbol:
-                    return localSymbol.Type.ToDisplayString();
-                case IFieldSymbol fieldSymbol:
-                    return fieldSymbol.Type.ToDisplayString();
-                case IMethodSymbol methodSymbol:
-                    return methodSymbol.ReturnType.ToDisplayString();
-                default:
-                {
-                    if (symbolInfo.Symbol == null)
-                    {
-                        return expressionSyntax.ToString();
-                    }
-
-                    return symbolInfo.Symbol.ToString();
-                }
-            }
         }
 
         public IList<string> GetBaseInterfaces(TypeDeclarationSyntax node)
@@ -189,7 +166,7 @@ namespace HoneydewExtractors.CSharp.Metrics
 
                 parameterTypes.Add(new ParameterModel
                 {
-                    Type = GetFullName(parameter.Type),
+                    Type = parameter.Type.ToString(),
                     Modifier = modifier,
                     DefaultValue = defaultValue
                 });
@@ -197,11 +174,34 @@ namespace HoneydewExtractors.CSharp.Metrics
 
             return parameterTypes;
         }
-        
+
         private IList<ParameterModel> GetParameterTypes(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode syntaxNode)
         {
             var methodSymbol = GetMethodSymbol(syntaxNode);
             return methodSymbol == null ? new List<ParameterModel>() : GetParameterTypes(methodSymbol);
+        }
+
+        private string GetFullName(ExpressionSyntax expressionSyntax)
+        {
+            var symbolInfo = Model.GetSymbolInfo(expressionSyntax);
+            switch (symbolInfo.Symbol)
+            {
+                case ILocalSymbol localSymbol:
+                    return localSymbol.Type.ToDisplayString();
+                case IFieldSymbol fieldSymbol:
+                    return fieldSymbol.Type.ToDisplayString();
+                case IMethodSymbol methodSymbol:
+                    return methodSymbol.ReturnType.ToDisplayString();
+                default:
+                {
+                    if (symbolInfo.Symbol == null)
+                    {
+                        return expressionSyntax.ToString();
+                    }
+
+                    return symbolInfo.Symbol.ToString();
+                }
+            }
         }
     }
 }

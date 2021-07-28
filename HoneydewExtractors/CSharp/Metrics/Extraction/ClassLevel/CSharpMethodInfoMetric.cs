@@ -35,6 +35,26 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
             return "Methods Info";
         }
 
+        public override void VisitDelegateDeclaration(DelegateDeclarationSyntax syntax)
+        {
+            _containingClassName = HoneydewSemanticModel.GetFullName(syntax);
+
+            var returnType = HoneydewSemanticModel.GetFullName(syntax.ReturnType);
+
+            var methodModel = new MethodModel
+            {
+                Name = _containingClassName,
+                ReturnType = returnType,
+                ContainingClassName = _containingClassName,
+                Modifier = "",
+                AccessModifier = "",
+            };
+
+            ExtractInfoAboutParameters(syntax.ParameterList, methodModel);
+
+            DataMetric.MethodInfos.Add(methodModel);
+        }
+
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             AddInfoForNode(node);
@@ -89,7 +109,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 IsConstructor = true
             };
 
-            ExtractInfoAboutParameters(syntax, methodModel);
+            ExtractInfoAboutParameters(syntax.ParameterList, methodModel);
 
             ExtractInfoAboutConstructorCalls(syntax, methodModel);
 
@@ -113,16 +133,16 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 AccessModifier = accessModifier,
             };
 
-            ExtractInfoAboutParameters(syntax, methodModel);
+            ExtractInfoAboutParameters(syntax.ParameterList, methodModel);
 
             ExtractInfoAboutCalledMethods(syntax, methodModel);
 
             DataMetric.MethodInfos.Add(methodModel);
         }
 
-        private void ExtractInfoAboutParameters(BaseMethodDeclarationSyntax syntax, MethodModel methodModel)
+        private void ExtractInfoAboutParameters(BaseParameterListSyntax parameterList, MethodModel methodModel)
         {
-            foreach (var parameter in syntax.ParameterList.Parameters)
+            foreach (var parameter in parameterList.Parameters)
             {
                 var parameterType = HoneydewSemanticModel.GetFullName(parameter.Type);
 

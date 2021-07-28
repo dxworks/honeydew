@@ -20,7 +20,10 @@ namespace HoneydewExtractors.CSharp.Metrics
             IList<ClassModel> classModels = new List<ClassModel>();
 
             var root = syntacticModel.CompilationUnitSyntax;
-            var syntaxes = root.DescendantNodes().OfType<BaseTypeDeclarationSyntax>().ToList();
+            var syntaxes = new List<MemberDeclarationSyntax>();
+
+            syntaxes.AddRange(root.DescendantNodes().OfType<BaseTypeDeclarationSyntax>().ToList());
+            syntaxes.AddRange(root.DescendantNodes().OfType<DelegateDeclarationSyntax>());
 
             foreach (var declarationSyntax in syntaxes)
             {
@@ -36,7 +39,7 @@ namespace HoneydewExtractors.CSharp.Metrics
                 CSharpConstants.SetModifiers(declarationSyntax.Modifiers.ToString(), ref accessModifier, ref modifier);
 
                 var methodInfoDataMetric = ExtractMethodInfo(declarationSyntax, semanticModel);
-                var projectClass = new ClassModel
+                var classModel = new ClassModel
                 {
                     ClassType = classType,
                     AccessModifier = accessModifier,
@@ -66,11 +69,11 @@ namespace HoneydewExtractors.CSharp.Metrics
                         extractionMetric.Visit(new CSharpSyntaxNode(declarationSyntax));
                     }
 
-                    projectClass.AddMetricValue(extractionMetric.GetType().FullName, extractionMetric.GetMetric());
+                    classModel.AddMetricValue(extractionMetric.GetType().FullName, extractionMetric.GetMetric());
                 }
 
 
-                classModels.Add(projectClass);
+                classModels.Add(classModel);
             }
 
             return classModels;

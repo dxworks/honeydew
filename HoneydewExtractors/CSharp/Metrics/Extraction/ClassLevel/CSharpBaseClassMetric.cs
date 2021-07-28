@@ -30,6 +30,11 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
             return "Inherits Class";
         }
 
+        public override void VisitDelegateDeclaration(DelegateDeclarationSyntax node)
+        {
+            InheritanceMetric.BaseClassName = "System.Delegate";
+        }
+
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
         {
             InheritanceMetric.BaseClassName = null;
