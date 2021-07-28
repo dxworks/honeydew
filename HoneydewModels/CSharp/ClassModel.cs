@@ -21,8 +21,10 @@ namespace HoneydewModels.CSharp
 
         public IList<string> BaseInterfaces { get; init; } = new List<string>();
 
+        public IList<string> Usings { get; set; } = new List<string>();
+
         public IList<FieldModel> Fields { get; init; } = new List<FieldModel>();
-        
+
         public IList<PropertyModel> Properties { get; init; } = new List<PropertyModel>();
 
         public IList<MethodModel> Constructors { get; init; } = new List<MethodModel>();

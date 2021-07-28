@@ -4,6 +4,7 @@ using HoneydewCore.Utils;
 using HoneydewExtractors.Core;
 using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
+using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 using Microsoft.CodeAnalysis;
@@ -71,9 +72,20 @@ namespace HoneydewExtractors.CSharp.Metrics
 
                     classModel.AddMetricValue(extractionMetric.GetType().FullName, extractionMetric.GetMetric());
                 }
-
-
                 classModels.Add(classModel);
+            }
+
+            var usingsMetric = new CSharpUsingsMetric
+            {
+                HoneydewSemanticModel = semanticModel
+            };
+            usingsMetric.Visit(root);
+            foreach (var classModel in classModels)
+            {
+                if (usingsMetric.Usings.TryGetValue(classModel.FullName, out var usings))
+                {
+                    classModel.Usings = usings.ToList();
+                }
             }
 
             return classModels;
