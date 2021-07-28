@@ -15,6 +15,7 @@ using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
 using HoneydewExtractors.CSharp.RepositoryLoading;
+using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
 using HoneydewExtractors.Processors;
 using HoneydewModels.CSharp;
 using HoneydewModels.Exporters;
@@ -99,7 +100,11 @@ namespace Honeydew
         private static async Task<RepositoryModel> ExtractModel(IProgressLogger progressLogger, string inputPath)
         {
             // Create repository model from path
-            var repositoryLoader = new CSharpRepositoryLoader(progressLogger, LoadExtractor());
+            var projectLoadingStrategy = new BasicProjectLoadingStrategy(progressLogger);
+            var solutionLoadingStrategy = new BasicSolutionLoadingStrategy(progressLogger, projectLoadingStrategy);
+            
+            var repositoryLoader = new CSharpRepositoryLoader(projectLoadingStrategy, solutionLoadingStrategy,
+                progressLogger, LoadExtractor());
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;

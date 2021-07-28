@@ -13,13 +13,19 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
 {
     public class CSharpRepositoryLoader : IRepositoryLoader<RepositoryModel>
     {
+        private readonly IProjectLoadingStrategy _projectLoadingStrategy;
+        private readonly ISolutionLoadingStrategy _solutionLoadingStrategy;
         private readonly IProgressLogger _progressLogger;
         private readonly CSharpFactExtractor _extractor;
         private const string CsprojExtension = ".csproj";
         private const string SlnExtension = ".sln";
 
-        public CSharpRepositoryLoader(IProgressLogger progressLogger, CSharpFactExtractor extractor)
+        public CSharpRepositoryLoader(IProjectLoadingStrategy projectLoadingStrategy,
+            ISolutionLoadingStrategy solutionLoadingStrategy, IProgressLogger progressLogger,
+            CSharpFactExtractor extractor)
         {
+            _projectLoadingStrategy = projectLoadingStrategy;
+            _solutionLoadingStrategy = solutionLoadingStrategy;
             _progressLogger = progressLogger;
             _extractor = extractor;
         }
@@ -36,8 +42,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
 
                     var solutionLoader = new SolutionFileLoader(_progressLogger, _extractor,
                         new MsBuildSolutionProvider(),
-                        new BasicSolutionLoadingStrategy(_progressLogger,
-                            new BasicProjectLoadingStrategy(_progressLogger)));
+                        _solutionLoadingStrategy);
                     var solutionModel = await solutionLoader.LoadSolution(path);
                     repositoryModel.Solutions.Add(solutionModel);
                 }
@@ -46,7 +51,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                     _progressLogger.LogLine($"C# Project file found at {path}");
 
                     var projectLoader = new ProjectLoader(_extractor, new MsBuildProjectProvider(),
-                        new BasicProjectLoadingStrategy(_progressLogger));
+                        _projectLoadingStrategy);
                     var projectModel = await projectLoader.Load(path);
 
                     repositoryModel.Solutions.Add(new SolutionModel
@@ -73,8 +78,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                 {
                     var solutionLoader =
                         new SolutionFileLoader(_progressLogger, _extractor, new MsBuildSolutionProvider(),
-                            new BasicSolutionLoadingStrategy(_progressLogger,
-                                new BasicProjectLoadingStrategy(_progressLogger)));
+                            _solutionLoadingStrategy);
                     var solutionModel = await solutionLoader.LoadSolution(solutionPath);
                     repositoryModel.Solutions.Add(solutionModel);
                 }
@@ -97,7 +101,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                     _progressLogger.LogLine($"C# Project file found at {projectPath}");
 
                     var projectLoader = new ProjectLoader(_extractor, new MsBuildProjectProvider(),
-                        new BasicProjectLoadingStrategy(_progressLogger));
+                        _projectLoadingStrategy);
                     var projectModel = await projectLoader.Load(projectPath);
                     defaultSolutionModel.Projects.Add(projectModel);
                 }
