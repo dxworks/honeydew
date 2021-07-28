@@ -186,6 +186,8 @@ namespace HoneydewExtractors.CSharp.Metrics
             var symbolInfo = Model.GetSymbolInfo(expressionSyntax);
             switch (symbolInfo.Symbol)
             {
+                case IPropertySymbol propertySymbol:
+                    return propertySymbol.Type.ToDisplayString();
                 case ILocalSymbol localSymbol:
                     return localSymbol.Type.ToDisplayString();
                 case IFieldSymbol fieldSymbol:

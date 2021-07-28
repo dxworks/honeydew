@@ -842,5 +842,51 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("string", calledMethod0.ParameterTypes[1].Type);
             Assert.Null(calledMethod0.ParameterTypes[1].DefaultValue);
         }
+        
+        [Fact]
+        public void Extract_ShouldHaveCalledMethods_WhenProvidedClassThatCallsMethodsFromAnotherClassAsProperty()
+        {
+            const string fileContent = @"
+                                        using System;
+                                        using System.Collections.Generic;                                        
+                                          namespace TopLevel
+                                          {                                                       
+                                            class Foo
+                                            {
+                                                public Dictionary<string, string> MyDictionary = new();
+                                            }
+                                            
+                                            public class Bar
+                                            {
+                                                Foo foo {get;set;}
+                                                void Method()
+                                                {                                                   
+                                                    if (foo.MyDictionary.TryGetValue(""value"", out var value))
+                                                    {                                                        
+                                                    }
+                                                }
+                                            }                                              
+                                          }";
+            
+            var classModels = _factExtractor.Extract(fileContent);
+
+            var methodModelM = classModels[1].Methods[0];
+            Assert.Equal("Method", methodModelM.Name);
+            Assert.Equal(1, methodModelM.CalledMethods.Count);
+
+            var calledMethod0 = methodModelM.CalledMethods[0];
+            Assert.Equal("TryGetValue", calledMethod0.MethodName);
+            Assert.Equal("System.Collections.Generic.Dictionary<string, string>", calledMethod0.ContainingClassName);
+            
+            Assert.Equal(2, calledMethod0.ParameterTypes.Count);
+            
+            Assert.Equal("", calledMethod0.ParameterTypes[0].Modifier);
+            Assert.Equal("string", calledMethod0.ParameterTypes[0].Type);
+            Assert.Null(calledMethod0.ParameterTypes[0].DefaultValue);
+            
+            Assert.Equal("out", calledMethod0.ParameterTypes[1].Modifier);
+            Assert.Equal("string", calledMethod0.ParameterTypes[1].Type);
+            Assert.Null(calledMethod0.ParameterTypes[1].DefaultValue);
+        }
     }
 }

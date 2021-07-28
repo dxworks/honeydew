@@ -730,5 +730,75 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("ExternClass", propertyModels[0].CalledMethods[1].ContainingClassName);
             Assert.Empty(propertyModels[0].CalledMethods[1].ParameterTypes);
         }
+        
+        [Fact]
+        public void
+            Extract_ShouldHaveEventProperties_WhenGivenClassWithComputedPropertyThatCallsMethodsFromOtherClassFromTheSameNamespaceAsProperty()
+        {
+            const string fileContent =
+                @"using System;                                                                         
+                                    namespace TopLevel
+                                    {
+                                        public class Bar
+                                        {
+                                            public string Convert(int a)
+                                            {
+                                                return a.ToString();
+                                            }
+
+                                            public static string Cut(string s)
+                                            {
+                                                return s.Trim();
+                                            }
+                                        }
+
+                                        public class Foo
+                                        {
+                                            private Bar _bar {get;set;}
+                                            private string _value;
+
+                                            public event Func<string> Value
+                                            {
+                                                add
+                                                {
+                                                    var temp = _value;
+                                                    _bar.Convert(temp.Length);
+                                                }
+                                                remove => _value = Bar.Cut(value);
+                                            }
+                                        }
+                                    }";
+
+            var classModels = _factExtractor.Extract(fileContent);
+
+            Assert.Equal(2, classModels.Count);
+
+            var optional = classModels[1].GetMetricValue<CSharpPropertiesInfoMetric>();
+            Assert.True(optional.HasValue);
+
+            var propertyModels = (IList<PropertyModel>) optional.Value;
+
+            Assert.Equal(2, propertyModels.Count);
+
+            var propertyModel = propertyModels[1];
+            Assert.Equal("Value", propertyModel.Name);
+            Assert.Equal("System.Func<string>", propertyModel.Type);
+            Assert.Equal("", propertyModel.Modifier);
+            Assert.Equal("public", propertyModel.AccessModifier);
+            Assert.True(propertyModel.IsEvent);
+            Assert.Equal("TopLevel.Foo", propertyModel.ContainingClassName);
+            Assert.Equal(2, propertyModel.CalledMethods.Count);
+
+            Assert.Equal("Convert", propertyModel.CalledMethods[0].MethodName);
+            Assert.Equal("TopLevel.Bar", propertyModel.CalledMethods[0].ContainingClassName);
+            Assert.Equal(1, propertyModel.CalledMethods[0].ParameterTypes.Count);
+            Assert.Equal("", propertyModel.CalledMethods[0].ParameterTypes[0].Modifier);
+            Assert.Equal("int", propertyModel.CalledMethods[0].ParameterTypes[0].Type);
+            Assert.Null(propertyModel.CalledMethods[0].ParameterTypes[0].DefaultValue);
+
+            Assert.Equal("Cut", propertyModel.CalledMethods[1].MethodName);
+            Assert.Equal("TopLevel.Bar", propertyModel.CalledMethods[1].ContainingClassName);
+            Assert.Empty(propertyModel.CalledMethods[1].ParameterTypes);
+        }
     }
 }
