@@ -149,13 +149,10 @@ namespace HoneydewCoreIntegrationTests.Processors
             var classMetric = new ClassMetric
             {
                 ExtractorName = extractorName,
-                ValueType = typeof(CSharpDependencyDataMetric).FullName,
-                Value = new CSharpDependencyDataMetric
+                ValueType = typeof(IDictionary<string, int>).FullName,
+                Value = new Dictionary<string, int>
                 {
-                    Dependencies = new Dictionary<string, int>
-                    {
-                        {"Models.Class1", 2}
-                    }
+                    {"Models.Class1", 2}
                 }
             };
             projectModel.Add(new ClassModel

@@ -5,7 +5,6 @@ using HoneydewExtractors.Core.Metrics;
 using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
 {
@@ -15,40 +14,36 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
     {
         public CSharpSyntacticModel HoneydewSyntacticModel { get; set; }
         public CSharpSemanticModel HoneydewSemanticModel { get; set; }
-        public CSharpDependencyDataMetric DataMetric { get; set; } = new();
 
-        // todo change to class level
+        public IDictionary<string, int> Dependencies { get; set; } = new Dictionary<string, int>();
+
+
         public ExtractionMetricType GetMetricType()
         {
-            return ExtractionMetricType.CompilationUnitLevel;
+            return ExtractionMetricType.ClassLevel;
         }
 
         public override IMetricValue GetMetric()
         {
-            return new MetricValue<CSharpDependencyDataMetric>(DataMetric);
-        }
-
-        public override void VisitUsingDirective(UsingDirectiveSyntax node)
-        {
-            DataMetric.Usings.Add(node.Name.ToString());
+            return new MetricValue<IDictionary<string, int>>(Dependencies);
         }
 
         public IList<FileRelation> GetRelations(object metricValue)
         {
             try
             {
-                var dataMetric = (CSharpDependencyDataMetric) metricValue;
-        
+                var dependencies = (IDictionary<string, int>) metricValue;
+
                 IList<FileRelation> fileRelations = new List<FileRelation>();
-        
-                foreach (var (dependency, count) in dataMetric.Dependencies)
+
+                foreach (var (dependency, count) in dependencies)
                 {
                     var type = Type.GetType(dependency);
                     if (type is {IsPrimitive: true} || CSharpConstants.IsPrimitive(dependency))
                     {
                         continue;
                     }
-        
+
                     var relationType = GetType().FullName;
                     var fileRelation = new FileRelation
                     {
@@ -58,7 +53,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                     };
                     fileRelations.Add(fileRelation);
                 }
-        
+
                 return fileRelations;
             }
             catch (Exception)
@@ -69,13 +64,13 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
 
         protected void AddDependency(string dependencyName)
         {
-            if (DataMetric.Dependencies.ContainsKey(dependencyName))
+            if (Dependencies.ContainsKey(dependencyName))
             {
-                DataMetric.Dependencies[dependencyName]++;
+                Dependencies[dependencyName]++;
             }
             else
             {
-                DataMetric.Dependencies.Add(dependencyName, 1);
+                Dependencies.Add(dependencyName, 1);
             }
         }
     }

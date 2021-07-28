@@ -1,38 +1,39 @@
-﻿using HoneydewExtractors.Core.Metrics.Extraction;
+﻿using System.Collections.Generic;
+using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 {
-     public class CSharpReturnValueDependencyMetricTests
-     {
-         private readonly CSharpReturnValueDependencyMetric _sut;
-         private readonly CSharpFactExtractor _factExtractor;
+    public class CSharpReturnValueDependencyMetricTests
+    {
+        private readonly CSharpReturnValueDependencyMetric _sut;
+        private readonly CSharpFactExtractor _factExtractor;
 
-         public CSharpReturnValueDependencyMetricTests()
-         {
-             _sut = new CSharpReturnValueDependencyMetric();
-             _factExtractor = new CSharpFactExtractor();
-             _factExtractor.AddMetric<CSharpReturnValueDependencyMetric>();
-         }
+        public CSharpReturnValueDependencyMetricTests()
+        {
+            _sut = new CSharpReturnValueDependencyMetric();
+            _factExtractor = new CSharpFactExtractor();
+            _factExtractor.AddMetric<CSharpReturnValueDependencyMetric>();
+        }
 
-         [Fact]
-         public void GetMetricType_ShouldReturnClassLevel()
-         {
-             Assert.Equal(ExtractionMetricType.CompilationUnitLevel, _sut.GetMetricType());
-         }
+        [Fact]
+        public void GetMetricType_ShouldReturnClassLevel()
+        {
+            Assert.Equal(ExtractionMetricType.ClassLevel, _sut.GetMetricType());
+        }
 
-         [Fact]
-         public void PrettyPrint_ShouldReturnReturnValueDependency()
-         {
-             Assert.Equal("Return Value Dependency", _sut.PrettyPrint());
-         }
+        [Fact]
+        public void PrettyPrint_ShouldReturnReturnValueDependency()
+        {
+            Assert.Equal("Return Value Dependency", _sut.PrettyPrint());
+        }
 
-         [Fact]
-         public void Extract_ShouldHaveVoidReturnValues_WhenClassHasMethodsThatReturnVoid()
-         {
-             const string fileContent = @"
+        [Fact]
+        public void Extract_ShouldHaveVoidReturnValues_WhenClassHasMethodsThatReturnVoid()
+        {
+            const string fileContent = @"
                                      namespace App
                                      {                                       
 
@@ -44,23 +45,21 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                          }
                                      }";
 
-             var classModels = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-             var optional = classModels[0].GetMetricValue<CSharpReturnValueDependencyMetric>();
-             Assert.True(optional.HasValue);
+            var optional = classModels[0].GetMetricValue<CSharpReturnValueDependencyMetric>();
+            Assert.True(optional.HasValue);
 
-             var dependencies = (CSharpDependencyDataMetric) optional.Value;
+            var dependencies = (IDictionary<string, int>) optional.Value;
 
-             Assert.Empty(dependencies.Usings);
+            Assert.Equal(1, dependencies.Count);
+            Assert.Equal(2, dependencies["void"]);
+        }
 
-             Assert.Equal(1, dependencies.Dependencies.Count);
-             Assert.Equal(2, dependencies.Dependencies["void"]);
-         }
-
-         [Fact]
-         public void Extract_ShouldHavePrimitiveReturnValues_WhenClassHasMethodsThatReturnPrimitiveValues()
-         {
-             const string fileContent = @"using System;
+        [Fact]
+        public void Extract_ShouldHavePrimitiveReturnValues_WhenClassHasMethodsThatReturnPrimitiveValues()
+        {
+            const string fileContent = @"using System;
 
                                      namespace App
                                      {                                       
@@ -76,26 +75,23 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                          }
                                      }";
 
-             var classModels = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-             var optional = classModels[0].GetMetricValue<CSharpReturnValueDependencyMetric>();
-             Assert.True(optional.HasValue);
+            var optional = classModels[0].GetMetricValue<CSharpReturnValueDependencyMetric>();
+            Assert.True(optional.HasValue);
 
-             var dependencies = (CSharpDependencyDataMetric) optional.Value;
+            var dependencies = (IDictionary<string, int>) optional.Value;
 
-             Assert.Equal(1, dependencies.Usings.Count);
-             Assert.Equal("System", dependencies.Usings[0]);
+            Assert.Equal(3, dependencies.Count);
+            Assert.Equal(2, dependencies["int"]);
+            Assert.Equal(1, dependencies["float"]);
+            Assert.Equal(1, dependencies["string"]);
+        }
 
-             Assert.Equal(3, dependencies.Dependencies.Count);
-             Assert.Equal(2, dependencies.Dependencies["int"]);
-             Assert.Equal(1, dependencies.Dependencies["float"]);
-             Assert.Equal(1, dependencies.Dependencies["string"]);
-         }
-
-         [Fact]
-         public void Extract_ShouldHavePrimitiveReturnValues_WhenInterfaceHasMethodsWithPrimitiveReturnValues()
-         {
-             const string fileContent = @"using System;
+        [Fact]
+        public void Extract_ShouldHavePrimitiveReturnValues_WhenInterfaceHasMethodsWithPrimitiveReturnValues()
+        {
+            const string fileContent = @"using System;
 
                                      namespace App
                                      {                                       
@@ -111,27 +107,24 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                          }
                                      }";
 
-             var classModels = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-             var optional = classModels[0].GetMetricValue<CSharpReturnValueDependencyMetric>();
-             Assert.True(optional.HasValue);
+            var optional = classModels[0].GetMetricValue<CSharpReturnValueDependencyMetric>();
+            Assert.True(optional.HasValue);
 
-             var dependencies = (CSharpDependencyDataMetric) optional.Value;
+            var dependencies = (IDictionary<string, int>) optional.Value;
 
-             Assert.Equal(1, dependencies.Usings.Count);
-             Assert.Equal("System", dependencies.Usings[0]);
+            Assert.Equal(4, dependencies.Count);
+            Assert.Equal(1, dependencies["int"]);
+            Assert.Equal(1, dependencies["float"]);
+            Assert.Equal(1, dependencies["string"]);
+            Assert.Equal(1, dependencies["void"]);
+        }
 
-             Assert.Equal(4, dependencies.Dependencies.Count);
-             Assert.Equal(1, dependencies.Dependencies["int"]);
-             Assert.Equal(1, dependencies.Dependencies["float"]);
-             Assert.Equal(1, dependencies.Dependencies["string"]);
-             Assert.Equal(1, dependencies.Dependencies["void"]);
-         }
-
-         [Fact]
-         public void Extract_ShouldHaveDependenciesReturnValues_WhenInterfaceHasMethodsWithDependenciesReturnValues()
-         {
-             const string fileContent = @"using System;
+        [Fact]
+        public void Extract_ShouldHaveDependenciesReturnValues_WhenInterfaceHasMethodsWithDependenciesReturnValues()
+        {
+            const string fileContent = @"using System;
                                      using HoneydewCore.Extractors;
                                      using HoneydewCore.Extractors.Metrics;
                                      using HoneydewCore.Extractors.Metrics.SemanticMetrics;
@@ -147,28 +140,22 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                          }
                                      }";
 
-             var classModels = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-             var optional = classModels[0].GetMetricValue<CSharpReturnValueDependencyMetric>();
-             Assert.True(optional.HasValue);
+            var optional = classModels[0].GetMetricValue<CSharpReturnValueDependencyMetric>();
+            Assert.True(optional.HasValue);
 
-             var dependencies = (CSharpDependencyDataMetric) optional.Value;
+            var dependencies = (IDictionary<string, int>) optional.Value;
 
-             Assert.Equal(4, dependencies.Usings.Count);
-             Assert.Equal("System", dependencies.Usings[0]);
-             Assert.Equal("HoneydewCore.Extractors", dependencies.Usings[1]);
-             Assert.Equal("HoneydewCore.Extractors.Metrics", dependencies.Usings[2]);
-             Assert.Equal("HoneydewCore.Extractors.Metrics.SemanticMetrics", dependencies.Usings[3]);
+            Assert.Equal(2, dependencies.Count);
+            Assert.Equal(2, dependencies["CSharpMetricExtractor"]);
+            Assert.Equal(1, dependencies["IFactExtractor"]);
+        }
 
-             Assert.Equal(2, dependencies.Dependencies.Count);
-             Assert.Equal(2, dependencies.Dependencies["CSharpMetricExtractor"]);
-             Assert.Equal(1, dependencies.Dependencies["IFactExtractor"]);
-         }
-
-         [Fact]
-         public void Extract_ShouldHaveDependenciesReturnValues_WhenClassHasMethodsWithDependenciesReturnValues()
-         {
-             const string fileContent = @"using System;
+        [Fact]
+        public void Extract_ShouldHaveDependenciesReturnValues_WhenClassHasMethodsWithDependenciesReturnValues()
+        {
+            const string fileContent = @"using System;
                                      using HoneydewCore.Extractors;
                                      using HoneydewCore.Extractors.Metrics;
                                      namespace App
@@ -183,78 +170,61 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                          }
                                      }";
 
-             var classModels = _factExtractor.Extract(fileContent);
+            var classModels = _factExtractor.Extract(fileContent);
 
-             var optional = classModels[0].GetMetricValue<CSharpReturnValueDependencyMetric>();
-             Assert.True(optional.HasValue);
+            var optional = classModels[0].GetMetricValue<CSharpReturnValueDependencyMetric>();
+            Assert.True(optional.HasValue);
 
-             var dependencies = (CSharpDependencyDataMetric) optional.Value;
+            var dependencies = (IDictionary<string, int>) optional.Value;
 
-             Assert.Equal(3, dependencies.Usings.Count);
-             Assert.Equal("System", dependencies.Usings[0]);
-             Assert.Equal("HoneydewCore.Extractors", dependencies.Usings[1]);
-             Assert.Equal("HoneydewCore.Extractors.Metrics", dependencies.Usings[2]);
+            Assert.Equal(2, dependencies.Count);
+            Assert.Equal(1, dependencies["CSharpMetricExtractor"]);
+            Assert.Equal(2, dependencies["IFactExtractor"]);
+        }
 
-             Assert.Equal(2, dependencies.Dependencies.Count);
-             Assert.Equal(1, dependencies.Dependencies["CSharpMetricExtractor"]);
-             Assert.Equal(2, dependencies.Dependencies["IFactExtractor"]);
-         }
+        [Fact]
+        public void GetRelations_ShouldHaveNoRelations_WhenClassHasMethodsWithNoReturnValues()
+        {
+            var fileRelations = _sut.GetRelations(new Dictionary<string, int>());
 
-         [Fact]
-         public void GetRelations_ShouldHaveNoRelations_WhenClassHasMethodsWithNoReturnValues()
-         {
-             var fileRelations = _sut.GetRelations(new CSharpDependencyDataMetric());
-         
-             Assert.Empty(fileRelations);
-         }
-         
-         [Fact]
-         public void GetRelations_ShouldHaveNoRelations_WhenDependenciesAreOnlyPrimitiveTypes()
-         {
-             var fileRelations = _sut.GetRelations(new CSharpDependencyDataMetric
-             {
-                 Usings = {"System"},
-                 Dependencies =
-                 {
-                     {"int", 3},
-                     {"float", 2},
-                     {"string", 1}
-                 }
-             });
-         
-             Assert.Empty(fileRelations);
-         }
-         
-         [Fact]
-         public void GetRelations_Extract_ShouldHaveRelations_WhenThereAreNonPrimitiveDependencies()
-         {
-             var fileRelations = _sut.GetRelations(new CSharpDependencyDataMetric
-             {
-                 Usings =
-                 {
-                     "System", "HoneydewCore.Extractors", "HoneydewCore.Extractors.Metrics",
-                     "HoneydewCore.Extractors.Metrics.SemanticMetrics"
-                 },
-                 Dependencies =
-                 {
-                     {"int", 3},
-                     {"IFactExtractor", 2},
-                     {"CSharpMetricExtractor", 1}
-                 }
-             });
-         
-             Assert.NotEmpty(fileRelations);
-             Assert.Equal(2, fileRelations.Count);
-         
-             var fileRelation1 = fileRelations[0];
-             Assert.Equal("IFactExtractor", fileRelation1.FileTarget);
-             Assert.Equal(typeof(CSharpReturnValueDependencyMetric).FullName, fileRelation1.RelationType);
-             Assert.Equal(2, fileRelation1.RelationCount);
-         
-             var fileRelation2 = fileRelations[1];
-             Assert.Equal("CSharpMetricExtractor", fileRelation2.FileTarget);
-             Assert.Equal(typeof(CSharpReturnValueDependencyMetric).FullName, fileRelation2.RelationType);
-             Assert.Equal(1, fileRelation2.RelationCount);
-         }
-     }
+            Assert.Empty(fileRelations);
+        }
+
+        [Fact]
+        public void GetRelations_ShouldHaveNoRelations_WhenDependenciesAreOnlyPrimitiveTypes()
+        {
+            var fileRelations = _sut.GetRelations(new Dictionary<string, int>
+            {
+                {"int", 3},
+                {"float", 2},
+                {"string", 1}
+            });
+
+            Assert.Empty(fileRelations);
+        }
+
+        [Fact]
+        public void GetRelations_Extract_ShouldHaveRelations_WhenThereAreNonPrimitiveDependencies()
+        {
+            var fileRelations = _sut.GetRelations(new Dictionary<string, int>
+            {
+                {"int", 3},
+                {"IFactExtractor", 2},
+                {"CSharpMetricExtractor", 1}
+            });
+
+            Assert.NotEmpty(fileRelations);
+            Assert.Equal(2, fileRelations.Count);
+
+            var fileRelation1 = fileRelations[0];
+            Assert.Equal("IFactExtractor", fileRelation1.FileTarget);
+            Assert.Equal(typeof(CSharpReturnValueDependencyMetric).FullName, fileRelation1.RelationType);
+            Assert.Equal(2, fileRelation1.RelationCount);
+
+            var fileRelation2 = fileRelations[1];
+            Assert.Equal("CSharpMetricExtractor", fileRelation2.FileTarget);
+            Assert.Equal(typeof(CSharpReturnValueDependencyMetric).FullName, fileRelation2.RelationType);
+            Assert.Equal(1, fileRelation2.RelationCount);
+        }
+    }
 }

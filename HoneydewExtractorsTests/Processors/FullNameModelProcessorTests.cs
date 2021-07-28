@@ -198,7 +198,8 @@ namespace HoneydewExtractorsTests.Processors
             var actualSolutionModel = _sut.Process(repositoryModel);
 
             var namespaceModel = actualSolutionModel.Solutions[0].Projects[0].Namespaces[0];
-            Assert.Equal("Project1.Models.Class1", namespaceModel.ClassModels[1].Constructors[0].ParameterTypes[0].Type);
+            Assert.Equal("Project1.Models.Class1",
+                namespaceModel.ClassModels[1].Constructors[0].ParameterTypes[0].Type);
             Assert.Equal("Project1.Models.Class1", namespaceModel.ClassModels[1].Methods[0].ParameterTypes[0].Type);
         }
 
@@ -739,14 +740,11 @@ namespace HoneydewExtractorsTests.Processors
                             new ClassMetric
                             {
                                 ExtractorName = typeof(CSharpParameterDependencyMetric).FullName,
-                                ValueType = typeof(CSharpDependencyDataMetric).FullName,
-                                Value = new CSharpDependencyDataMetric
+                                ValueType = typeof(Dictionary<string, int>).FullName,
+                                Value = new Dictionary<string, int>()
                                 {
-                                    Dependencies = new Dictionary<string, int>()
-                                    {
-                                        {"AmbiguousClass", 2}
-                                    },
-                                }
+                                    {"AmbiguousClass", 2}
+                                },
                             }
                         }
                     }
@@ -778,8 +776,8 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].ContainingClassName);
             Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].ParameterTypes[0].Type);
             Assert.Equal("AmbiguousClass", someClassModel.Fields[0].Type);
-            var metricDependencies = ((CSharpDependencyDataMetric) someClassModel.Metrics[0].Value).Dependencies;
-            Assert.Equal(1, metricDependencies.Count);
+            var metricDependencies = ((Dictionary<string, int>) someClassModel.Metrics[0].Value);
+            Assert.Single(metricDependencies);
             Assert.True(metricDependencies.ContainsKey("AmbiguousClass"));
 
             _progressLoggerMock.Verify(logger => logger.LogLine($"Multiple full names found for AmbiguousClass: "),
@@ -1007,8 +1005,8 @@ namespace HoneydewExtractorsTests.Processors
             _progressLoggerMock.Verify(logger => logger.LogLine("Multiple full names found for MyService: "),
                 Times.Never);
         }
-        
-          [Fact]
+
+        [Fact]
         public void GetFunction_ShouldReturnTheFullClassNames_WhenGivenClassModelsWithProperties()
         {
             var repositoryModel = new RepositoryModel();
@@ -1028,7 +1026,7 @@ namespace HoneydewExtractorsTests.Processors
                             new PropertyModel
                             {
                                 Type = "int"
-                            } 
+                            }
                         }
                     }
                 }
@@ -1046,7 +1044,7 @@ namespace HoneydewExtractorsTests.Processors
                         {
                             new PropertyModel
                             {
-                                Type="Class1"
+                                Type = "Class1"
                             }
                         }
                     }
@@ -1097,6 +1095,5 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Equal("Namespace.RandomClassClass",
                 actualSolutionModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Properties[2].Type);
         }
-
     }
 }

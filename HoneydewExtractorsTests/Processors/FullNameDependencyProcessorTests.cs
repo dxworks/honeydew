@@ -30,14 +30,10 @@ namespace HoneydewExtractorsTests.Processors
             classModel1.Metrics.Add(new ClassMetric
             {
                 ExtractorName = typeof(CSharpParameterDependencyMetric).FullName,
-                ValueType = typeof(CSharpDependencyDataMetric).FullName,
-                Value = new CSharpDependencyDataMetric
+                ValueType = typeof(Dictionary<string, int>).FullName,
+                Value = new Dictionary<string, int>
                 {
-                    Dependencies = new Dictionary<string, int>()
-                    {
-                        {"Dependency1", 1}
-                    },
-                    Usings = {"System"}
+                    {"Dependency1", 1}
                 }
             });
 
@@ -48,14 +44,10 @@ namespace HoneydewExtractorsTests.Processors
             classModel2.Metrics.Add(new ClassMetric
             {
                 ExtractorName = typeof(CSharpParameterDependencyMetric).FullName,
-                ValueType = typeof(CSharpDependencyDataMetric).FullName,
-                Value = new CSharpDependencyDataMetric
+                ValueType = typeof(Dictionary<string, int>).FullName,
+                Value = new Dictionary<string, int>
                 {
-                    Dependencies = new Dictionary<string, int>()
-                    {
-                        {"Dependency1", 2}
-                    },
-                    Usings = {"System", "Xunit"}
+                    {"Dependency1", 2}
                 }
             });
 
@@ -66,15 +58,11 @@ namespace HoneydewExtractorsTests.Processors
             classModel3.Metrics.Add(new ClassMetric
             {
                 ExtractorName = typeof(CSharpParameterDependencyMetric).FullName,
-                ValueType = typeof(CSharpDependencyDataMetric).FullName,
-                Value = new CSharpDependencyDataMetric
+                ValueType = typeof(Dictionary<string, int>).FullName,
+                Value = new Dictionary<string, int>
                 {
-                    Dependencies = new Dictionary<string, int>()
-                    {
-                        {"Dependency1", 6},
-                        {"Dependency2", 2}
-                    },
-                    Usings = {"Xunit"}
+                    {"Dependency1", 6},
+                    {"Dependency2", 2}
                 }
             });
 
@@ -85,14 +73,10 @@ namespace HoneydewExtractorsTests.Processors
             classModel4.Metrics.Add(new ClassMetric
             {
                 ExtractorName = typeof(CSharpParameterDependencyMetric).FullName,
-                ValueType = typeof(CSharpDependencyDataMetric).FullName,
-                Value = new CSharpDependencyDataMetric
+                ValueType = typeof(Dictionary<string, int>).FullName,
+                Value = new Dictionary<string, int>
                 {
-                    Dependencies = new Dictionary<string, int>()
-                    {
-                        {"Dependency2", 2}
-                    },
-                    Usings = {"System", "Xunit"}
+                    {"Dependency2", 2}
                 }
             });
 
@@ -103,11 +87,8 @@ namespace HoneydewExtractorsTests.Processors
             classModel5.Metrics.Add(new ClassMetric
             {
                 ExtractorName = typeof(CSharpParameterDependencyMetric).FullName,
-                ValueType = typeof(CSharpDependencyDataMetric).FullName,
-                Value = new CSharpDependencyDataMetric
-                {
-                    Dependencies = new Dictionary<string, int>()
-                }
+                ValueType = typeof(Dictionary<string, int>).FullName,
+                Value = new Dictionary<string, int>()
             });
 
             var projectModel = new ProjectModel();
@@ -128,20 +109,20 @@ namespace HoneydewExtractorsTests.Processors
             var processedProjectModel = processedRepositoryModel.Solutions[0].Projects[0];
 
             Assert.False(
-                ((CSharpDependencyDataMetric) processedProjectModel.Namespaces[0].ClassModels[0].Metrics[0].Value)
-                .Dependencies.TryGetValue("Full.Path.Dependency1", out _));
+                ((Dictionary<string, int>) processedProjectModel.Namespaces[0].ClassModels[0].Metrics[0].Value)
+                .TryGetValue("Full.Path.Dependency1", out _));
             Assert.False(
-                ((CSharpDependencyDataMetric) processedProjectModel.Namespaces[1].ClassModels[0].Metrics[0].Value)
-                .Dependencies.TryGetValue("Full.Path.Dependency1", out _));
+                ((Dictionary<string, int>) processedProjectModel.Namespaces[1].ClassModels[0].Metrics[0].Value)
+                .TryGetValue("Full.Path.Dependency1", out _));
             Assert.False(
-                ((CSharpDependencyDataMetric) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0]
-                    .Value).Dependencies.TryGetValue("Full.Path.Dependency1", out _));
+                ((Dictionary<string, int>) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
+                .TryGetValue("Full.Path.Dependency1", out _));
             Assert.False(
-                ((CSharpDependencyDataMetric) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0]
-                    .Value).Dependencies.TryGetValue("Full.Path.Dependency2", out _));
+                ((Dictionary<string, int>) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
+                .TryGetValue("Full.Path.Dependency2", out _));
             Assert.False(
-                ((CSharpDependencyDataMetric) processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0]
-                    .Value).Dependencies.TryGetValue("Full.Path.Dependency2", out _));
+                ((Dictionary<string, int>) processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0].Value)
+                .TryGetValue("Full.Path.Dependency2", out _));
         }
 
         [Fact]
@@ -156,12 +137,8 @@ namespace HoneydewExtractorsTests.Processors
             classModel1.Metrics.Add(new ClassMetric
             {
                 ExtractorName = typeof(CSharpParameterDependencyMetric).FullName,
-                ValueType = typeof(CSharpDependencyDataMetric).FullName,
-                Value = new CSharpDependencyDataMetric
-                {
-                    Dependencies = new Dictionary<string, int>(),
-                    Usings = {"System"}
-                }
+                ValueType = typeof(Dictionary<string, int>).FullName,
+                Value = new Dictionary<string, int>()
             });
 
             ClassModel classModel2 = new()
@@ -171,14 +148,10 @@ namespace HoneydewExtractorsTests.Processors
             classModel2.Metrics.Add(new ClassMetric
             {
                 ExtractorName = typeof(CSharpParameterDependencyMetric).FullName,
-                ValueType = typeof(CSharpDependencyDataMetric).FullName,
-                Value = new CSharpDependencyDataMetric
+                ValueType = typeof(Dictionary<string, int>).FullName,
+                Value = new Dictionary<string, int>
                 {
-                    Dependencies = new Dictionary<string, int>()
-                    {
-                        {"Class1", 2}
-                    },
-                    Usings = {"System", "Models"}
+                    {"Class1", 2}
                 }
             });
 
@@ -189,15 +162,11 @@ namespace HoneydewExtractorsTests.Processors
             classModel3.Metrics.Add(new ClassMetric
             {
                 ExtractorName = typeof(CSharpParameterDependencyMetric).FullName,
-                ValueType = typeof(CSharpDependencyDataMetric).FullName,
-                Value = new CSharpDependencyDataMetric
+                ValueType = typeof(Dictionary<string, int>).FullName,
+                Value = new Dictionary<string, int>
                 {
-                    Dependencies = new Dictionary<string, int>()
-                    {
-                        {"Class1", 6},
-                        {"Class2", 2}
-                    },
-                    Usings = {"Models", "Services"}
+                    {"Class1", 6},
+                    {"Class2", 2}
                 }
             });
 
@@ -208,15 +177,11 @@ namespace HoneydewExtractorsTests.Processors
             classModel4.Metrics.Add(new ClassMetric
             {
                 ExtractorName = typeof(CSharpParameterDependencyMetric).FullName,
-                ValueType = typeof(CSharpDependencyDataMetric).FullName,
-                Value = new CSharpDependencyDataMetric
+                ValueType = typeof(Dictionary<string, int>).FullName,
+                Value = new Dictionary<string, int>
                 {
-                    Dependencies = new Dictionary<string, int>()
-                    {
-                        {"Class3", 4},
-                        {"Class5", 1},
-                    },
-                    Usings = {"Controllers"}
+                    {"Class3", 4},
+                    {"Class5", 1},
                 }
             });
 
@@ -227,11 +192,8 @@ namespace HoneydewExtractorsTests.Processors
             classModel5.Metrics.Add(new ClassMetric
             {
                 ExtractorName = typeof(CSharpParameterDependencyMetric).FullName,
-                ValueType = typeof(CSharpDependencyDataMetric).FullName,
-                Value = new CSharpDependencyDataMetric
-                {
-                    Dependencies = new Dictionary<string, int>()
-                }
+                ValueType = typeof(Dictionary<string, int>).FullName,
+                Value = new Dictionary<string, int>()
             });
 
             var projectModel = new ProjectModel();
@@ -246,37 +208,36 @@ namespace HoneydewExtractorsTests.Processors
 
             var repositoryModel = new RepositoryModel();
             repositoryModel.Solutions.Add(solutionModel);
-            
-            
+
+
             var processedRepositoryModel = _sut.Process(repositoryModel);
 
             var processedProjectModel = processedRepositoryModel.Solutions[0].Projects[0];
 
             Assert.Empty(
-                ((CSharpDependencyDataMetric) processedProjectModel.Namespaces[0].ClassModels[0].Metrics[0].Value)
-                .Dependencies);
+                (Dictionary<string, int>) processedProjectModel.Namespaces[0].ClassModels[0].Metrics[0].Value);
 
             Assert.True(
-                ((CSharpDependencyDataMetric) processedProjectModel.Namespaces[1].ClassModels[0].Metrics[0].Value)
-                .Dependencies.TryGetValue("Models.Class1", out var depCount1));
+                ((Dictionary<string, int>) processedProjectModel.Namespaces[1].ClassModels[0].Metrics[0].Value)
+                .TryGetValue("Models.Class1", out var depCount1));
             Assert.Equal(2, depCount1);
 
             Assert.True(
-                ((CSharpDependencyDataMetric) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0]
-                    .Value).Dependencies.TryGetValue("Models.Class1", out var depCount2));
+                ((Dictionary<string, int>) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
+                .TryGetValue("Models.Class1", out var depCount2));
             Assert.Equal(6, depCount2);
             Assert.True(
-                ((CSharpDependencyDataMetric) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0]
-                    .Value).Dependencies.TryGetValue("Services.Class2", out var depCount3));
+                ((Dictionary<string, int>) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
+                .TryGetValue("Services.Class2", out var depCount3));
             Assert.Equal(2, depCount3);
 
             Assert.True(
-                ((CSharpDependencyDataMetric) processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0]
-                    .Value).Dependencies.TryGetValue("Controllers.Class3", out var depCount4));
+                ((Dictionary<string, int>) processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0].Value)
+                .TryGetValue("Controllers.Class3", out var depCount4));
             Assert.Equal(4, depCount4);
             Assert.True(
-                ((CSharpDependencyDataMetric) processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0]
-                    .Value).Dependencies.TryGetValue("Controllers.Class5", out var depCount5));
+                ((Dictionary<string, int>) processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0].Value)
+                .TryGetValue("Controllers.Class5", out var depCount5));
             Assert.Equal(1, depCount5);
         }
     }
