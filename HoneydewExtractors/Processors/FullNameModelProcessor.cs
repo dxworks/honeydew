@@ -125,6 +125,15 @@ namespace HoneydewExtractors.Processors
                                 });
                             }
 
+                            foreach (var propertyModel in classModel.Properties)
+                            {
+                                AddAmbiguousNames(() =>
+                                {
+                                    propertyModel.Type = FindClassFullName(propertyModel.Type,
+                                        namespaceModel, projectModel, solutionModel, repositoryModel);
+                                });
+                            }
+                            
                             foreach (var methodModel in classModel.Methods)
                             {
                                 AddAmbiguousNames(() =>

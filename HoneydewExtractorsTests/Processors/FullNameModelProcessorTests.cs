@@ -1007,5 +1007,96 @@ namespace HoneydewExtractorsTests.Processors
             _progressLoggerMock.Verify(logger => logger.LogLine("Multiple full names found for MyService: "),
                 Times.Never);
         }
+        
+          [Fact]
+        public void GetFunction_ShouldReturnTheFullClassNames_WhenGivenClassModelsWithProperties()
+        {
+            var repositoryModel = new RepositoryModel();
+            var solutionModel = new SolutionModel();
+            var projectModel1 = new ProjectModel();
+
+            projectModel1.Namespaces.Add(new NamespaceModel
+            {
+                Name = "Models",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "Class1",
+                        Properties =
+                        {
+                            new PropertyModel
+                            {
+                                Type = "int"
+                            } 
+                        }
+                    }
+                }
+            });
+
+            projectModel1.Namespaces.Add(new NamespaceModel
+            {
+                Name = "Services",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "Class2",
+                        Properties =
+                        {
+                            new PropertyModel
+                            {
+                                Type="Class1"
+                            }
+                        }
+                    }
+                }
+            });
+
+            projectModel1.Namespaces.Add(new NamespaceModel
+            {
+                Name = "Controllers",
+                ClassModels =
+                {
+                    new ClassModel
+                    {
+                        FullName = "Class4",
+                        Properties =
+                        {
+                            new PropertyModel
+                            {
+                                Type = "Class2"
+                            },
+                            new PropertyModel
+                            {
+                                Type = "string"
+                            },
+                            new PropertyModel
+                            {
+                                Type = "Namespace.RandomClassClass"
+                            }
+                        }
+                    }
+                }
+            });
+
+            solutionModel.Projects.Add(projectModel1);
+
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var actualSolutionModel = _sut.Process(repositoryModel);
+
+            Assert.Equal("int",
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].Properties[0].Type);
+            Assert.Equal("Models.Class1",
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].Properties[0].Type);
+            Assert.Equal("Services.Class2",
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Properties[0].Type);
+            Assert.Equal("string",
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Properties[1].Type);
+            Assert.Equal("Namespace.RandomClassClass",
+                actualSolutionModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Properties[2].Type);
+        }
+
     }
 }
