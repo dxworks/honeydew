@@ -42,11 +42,20 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel
         {
             var usingName = node.Name.ToString();
             var isStatic = node.StaticKeyword.Value != null;
+            var alias = node.Alias == null ? "" : node.Alias.Name.ToString();
+            var aliasType = EAliasType.None;
+
+            if (!string.IsNullOrEmpty(alias))
+            {
+                aliasType = HoneydewSemanticModel.IsNamespace(node.Name) ? EAliasType.Namespace : EAliasType.Class;
+            }
 
             var cSharpUsing = new UsingModel()
             {
                 Name = usingName,
-                IsStatic = isStatic
+                IsStatic = isStatic,
+                Alias = alias,
+                AliasType = aliasType
             };
 
             if (node.Parent != null && node.Parent.Kind() == SyntaxKind.NamespaceDeclaration)

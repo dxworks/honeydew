@@ -6,8 +6,6 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
 using HoneydewModels.CSharp;
 using Xunit;
 
-// todo equal - aliasing
-
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
 {
     public class CSharpUsingsMetricTests
@@ -633,11 +631,13 @@ class Class2
                     model.Name == "System.Collections.Generic" && !model.IsStatic));
                 Assert.NotNull(
                     classModel.Usings.SingleOrDefault(model => model.Name == "System.Linq" && !model.IsStatic));
-                Assert.NotNull(classModel.Usings.SingleOrDefault(model => model.Name == "System.Text" && !model.IsStatic));
+                Assert.NotNull(
+                    classModel.Usings.SingleOrDefault(model => model.Name == "System.Text" && !model.IsStatic));
                 Assert.NotNull(classModel.Usings.SingleOrDefault(model =>
                     model.Name == "Microsoft.CodeAnalysis" && !model.IsStatic));
-                
-                Assert.NotNull(classModel.Usings.SingleOrDefault(model => model.Name == "System.Math" && model.IsStatic));
+
+                Assert.NotNull(
+                    classModel.Usings.SingleOrDefault(model => model.Name == "System.Math" && model.IsStatic));
             }
 
             Assert.Equal(6, classModels[0].Usings.Count);
@@ -658,6 +658,120 @@ class Class2
             var delegateUsings = classModels[4].Usings;
             Assert.Equal(7, delegateUsings.Count);
             Assert.Contains(delegateUsings, model => model.Name == "Microsoft.CodeAnalysis.CSharp" && model.IsStatic);
+        }
+
+        [Fact]
+        public void Extract_ShouldHaveUsingsInClassModels_WhenGivenAliasedNamespace()
+        {
+            const string fileContent = @"
+using System;
+namespace PC
+{
+    using Project = PC.MyCompany.Project;
+    class A
+    {
+        void M()
+        {
+            var mc = new Project.MyClass();
+        }
+    }
+    namespace MyCompany
+    {
+        namespace Project
+        {
+            using Company = MyCompany;
+            public class MyClass { }
+        }
+    }
+}";
+
+            var classModels = _factExtractor.Extract(fileContent);
+
+            Assert.Equal(2, classModels.Count);
+
+            foreach (var classModel in classModels)
+            {
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model =>
+                    model.Name == "System" && model.AliasType == EAliasType.None && model.Alias == ""));
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model =>
+                    model.Name == "PC.MyCompany.Project" && model.AliasType == EAliasType.Namespace &&
+                    model.Alias == "Project"));
+            }
+
+            Assert.Equal(2, classModels[0].Usings.Count);
+
+
+            var myClassUsings = classModels[1].Usings;
+            Assert.Equal(3, myClassUsings.Count);
+            Assert.Contains(myClassUsings,
+                model => model.Name == "MyCompany" && model.AliasType == EAliasType.Namespace &&
+                         model.Alias == "Company");
+        }
+
+        [Fact]
+        public void Extract_ShouldHaveUsingsInClassModels_WhenGivenAliasedClass()
+        {
+            const string fileContent = @"
+using System;
+
+using AliasToMyClass = NameSpace1.MyClass;
+
+using UsingAlias = NameSpace2.MyClass<int>;
+
+namespace NameSpace1
+{
+    public class MyClass
+    {
+        public override string ToString()
+        {
+            return ""You are in NameSpace1.MyClass."";
+        }
+    }
+}
+
+namespace NameSpace2
+{
+    class MyClass<T>
+    {
+        public override string ToString()
+        {
+            return ""You are in NameSpace2.MyClass."";
+        }
+    }
+}
+
+namespace NameSpace3
+{
+    class MainClass
+    {
+        static void Main()
+        {
+            var instance1 = new AliasToMyClass();
+            Console.WriteLine(instance1);
+
+            var instance2 = new UsingAlias();
+            Console.WriteLine(instance2);
+        }
+    }
+}";
+
+            var classModels = _factExtractor.Extract(fileContent);
+
+            Assert.Equal(3, classModels.Count);
+
+            foreach (var classModel in classModels)
+            {
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model =>
+                    model.Name == "System" && model.AliasType == EAliasType.None && model.Alias == ""));
+                
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model =>
+                    model.Name == "NameSpace1.MyClass" && model.AliasType == EAliasType.Class &&
+                    model.Alias == "AliasToMyClass"));
+                
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model =>
+                    model.Name == "NameSpace2.MyClass<int>" && model.AliasType == EAliasType.Class &&
+                    model.Alias == "UsingAlias"));
+            }
         }
     }
 }

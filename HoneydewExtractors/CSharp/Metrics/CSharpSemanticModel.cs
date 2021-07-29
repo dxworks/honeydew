@@ -205,5 +205,18 @@ namespace HoneydewExtractors.CSharp.Metrics
                 }
             }
         }
+
+        public bool IsNamespace(NameSyntax nodeName)
+        {
+            var symbolInfo = Model.GetSymbolInfo(nodeName);
+            switch (symbolInfo.Symbol)
+            {
+                case null:
+                case INamespaceSymbol:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 }
