@@ -164,7 +164,7 @@ namespace HoneydewExtractors.Processors
             }
 
             void SetContainingClassAndCalledMethodsFullName(MethodModel methodModel, NamespaceModel namespaceModel,
-                ProjectModel projectModel, SolutionModel solutionModel, IList<string> usings)
+                ProjectModel projectModel, SolutionModel solutionModel, IList<UsingModel> usings)
             {
                 AddAmbiguousNames(() =>
                 {
@@ -264,7 +264,7 @@ namespace HoneydewExtractors.Processors
 
         private static string FindClassFullName(string className, NamespaceModel namespaceModelToStartSearchFrom,
             ProjectModel projectModelToStartSearchFrom, SolutionModel solutionModelToStartSearchFrom,
-            RepositoryModel repositoryModel, IList<string> usings)
+            RepositoryModel repositoryModel, IList<UsingModel> usings)
         {
             if (string.IsNullOrEmpty(className))
             {
@@ -288,10 +288,10 @@ namespace HoneydewExtractors.Processors
             if (usings != null)
             {
                 fullNamePossibilities = new List<string>();
-                foreach (var usingName in usings)
+                foreach (var usingModel in usings)
                 {
                     var usingNamespace =
-                        projectModelToStartSearchFrom.Namespaces.FirstOrDefault(model => model.Name == usingName);
+                        projectModelToStartSearchFrom.Namespaces.FirstOrDefault(model => model.Name == usingModel.Name);
                     if (usingNamespace == null)
                     {
                         continue;

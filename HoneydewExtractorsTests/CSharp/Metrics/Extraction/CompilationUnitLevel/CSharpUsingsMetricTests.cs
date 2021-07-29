@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
+using HoneydewModels.CSharp;
 using Xunit;
 
 // todo equal - aliasing
-// todo static
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
 {
@@ -57,18 +58,19 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
 
             var optional = classModels[0].GetMetricValue<CSharpUsingsMetric>();
             Assert.True(optional.HasValue);
-            var usings = (IDictionary<string, ISet<string>>) optional.Value;
+            var usings = (IDictionary<string, ISet<UsingModel>>) optional.Value;
 
             Assert.Equal(1, usings.Count);
             var usingsList = usings["TopLevel.Foo"];
 
             Assert.Equal(6, usingsList.Count);
-            Assert.True(usingsList.Contains("System"));
-            Assert.True(usingsList.Contains("System.Collections.Generic"));
-            Assert.True(usingsList.Contains("System.Linq"));
-            Assert.True(usingsList.Contains("System.Text"));
-            Assert.True(usingsList.Contains("Microsoft.CodeAnalysis"));
-            Assert.True(usingsList.Contains("Microsoft.CodeAnalysis.CSharp"));
+
+            Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System"));
+            Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Collections.Generic"));
+            Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Linq"));
+            Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Text"));
+            Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "Microsoft.CodeAnalysis"));
+            Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "Microsoft.CodeAnalysis.CSharp"));
         }
 
         [Fact]
@@ -92,19 +94,19 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
 
             var optional = classModels[0].GetMetricValue<CSharpUsingsMetric>();
             Assert.True(optional.HasValue);
-            var usings = (IDictionary<string, ISet<string>>) optional.Value;
+            var usings = (IDictionary<string, ISet<UsingModel>>) optional.Value;
 
             Assert.Equal(1, usings.Count);
             var usingsList = usings["TopLevel.Foo"];
 
             Assert.Equal(6, usingsList.Count);
 
-            Assert.True(usingsList.Contains("System"));
-            Assert.True(usingsList.Contains("System.Collections.Generic"));
-            Assert.True(usingsList.Contains("System.Linq"));
-            Assert.True(usingsList.Contains("System.Text"));
-            Assert.True(usingsList.Contains("Microsoft.CodeAnalysis"));
-            Assert.True(usingsList.Contains("Microsoft.CodeAnalysis.CSharp"));
+            Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System"));
+            Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Collections.Generic"));
+            Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Linq"));
+            Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Text"));
+            Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "Microsoft.CodeAnalysis"));
+            Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "Microsoft.CodeAnalysis.CSharp"));
         }
 
         [Fact]
@@ -132,7 +134,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
 
             var optional = classModels[0].GetMetricValue<CSharpUsingsMetric>();
             Assert.True(optional.HasValue);
-            var usings = (IDictionary<string, ISet<string>>) optional.Value;
+            var usings = (IDictionary<string, ISet<UsingModel>>) optional.Value;
 
             Assert.Equal(5, usings.Count);
             Assert.True(usings.ContainsKey("TopLevel.Class1"));
@@ -145,12 +147,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
             {
                 Assert.Equal(6, usingsList.Count);
 
-                Assert.True(usingsList.Contains("System"));
-                Assert.True(usingsList.Contains("System.Collections.Generic"));
-                Assert.True(usingsList.Contains("System.Linq"));
-                Assert.True(usingsList.Contains("System.Text"));
-                Assert.True(usingsList.Contains("Microsoft.CodeAnalysis"));
-                Assert.True(usingsList.Contains("Microsoft.CodeAnalysis.CSharp"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Collections.Generic"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Linq"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Text"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "Microsoft.CodeAnalysis"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "Microsoft.CodeAnalysis.CSharp"));
             }
         }
 
@@ -181,7 +184,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
 
             var optional = classModels[0].GetMetricValue<CSharpUsingsMetric>();
             Assert.True(optional.HasValue);
-            var usings = (IDictionary<string, ISet<string>>) optional.Value;
+            var usings = (IDictionary<string, ISet<UsingModel>>) optional.Value;
 
             Assert.Equal(5, usings.Count);
             Assert.True(usings.ContainsKey("TopLevel.Class1"));
@@ -194,12 +197,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
             {
                 Assert.Equal(6, usingsList.Count);
 
-                Assert.True(usingsList.Contains("System"));
-                Assert.True(usingsList.Contains("System.Collections.Generic"));
-                Assert.True(usingsList.Contains("System.Linq"));
-                Assert.True(usingsList.Contains("System.Text"));
-                Assert.True(usingsList.Contains("Microsoft.CodeAnalysis"));
-                Assert.True(usingsList.Contains("Microsoft.CodeAnalysis.CSharp"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Collections.Generic"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Linq"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Text"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "Microsoft.CodeAnalysis"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "Microsoft.CodeAnalysis.CSharp"));
             }
         }
 
@@ -240,7 +243,7 @@ namespace Analyzers
 
             var optional = classModels[0].GetMetricValue<CSharpUsingsMetric>();
             Assert.True(optional.HasValue);
-            var usings = (IDictionary<string, ISet<string>>) optional.Value;
+            var usings = (IDictionary<string, ISet<UsingModel>>) optional.Value;
 
             Assert.Equal(5, usings.Count);
             Assert.True(usings.ContainsKey("TopLevel.Class1"));
@@ -251,36 +254,36 @@ namespace Analyzers
 
             foreach (var (_, usingsList) in usings)
             {
-                Assert.True(usingsList.Contains("System"));
-                Assert.True(usingsList.Contains("System.Collections.Generic"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Collections.Generic"));
             }
 
             var class1Usings = usings["TopLevel.Class1"];
             Assert.Equal(4, class1Usings.Count);
-            Assert.True(class1Usings.Contains("System.Linq"));
-            Assert.True(class1Usings.Contains("System.Text"));
+            Assert.Contains(class1Usings, model => model.Name == "System.Linq");
+            Assert.Contains(class1Usings, model => model.Name == "System.Text");
 
             var recordUsings = usings["TopLevel.Record1"];
             Assert.Equal(4, recordUsings.Count);
-            Assert.True(recordUsings.Contains("System.Linq"));
-            Assert.True(recordUsings.Contains("System.Text"));
+            Assert.Contains(recordUsings, model => model.Name == "System.Linq");
+            Assert.Contains(recordUsings, model => model.Name == "System.Text");
 
             var structUsings = usings["TopLevel.Struct1"];
             Assert.Equal(4, structUsings.Count);
-            Assert.True(structUsings.Contains("System.Linq"));
-            Assert.True(structUsings.Contains("System.Text"));
+            Assert.Contains(structUsings, model => model.Name == "System.Linq");
+            Assert.Contains(structUsings, model => model.Name == "System.Text");
 
             var interfaceUsings = usings["Analyzers.Interface1"];
             Assert.Equal(5, interfaceUsings.Count);
-            Assert.True(interfaceUsings.Contains("System.Linq"));
-            Assert.True(interfaceUsings.Contains("Microsoft.CodeAnalysis"));
-            Assert.True(interfaceUsings.Contains("Microsoft.CodeAnalysis.CSharp"));
+            Assert.Contains(interfaceUsings, model => model.Name == "System.Linq");
+            Assert.Contains(interfaceUsings, model => model.Name == "Microsoft.CodeAnalysis");
+            Assert.Contains(interfaceUsings, model => model.Name == "Microsoft.CodeAnalysis.CSharp");
 
             var delegateUsings = usings["Analyzers.Foo"];
             Assert.Equal(5, delegateUsings.Count);
-            Assert.True(delegateUsings.Contains("System.Linq"));
-            Assert.True(delegateUsings.Contains("Microsoft.CodeAnalysis"));
-            Assert.True(delegateUsings.Contains("Microsoft.CodeAnalysis.CSharp"));
+            Assert.Contains(delegateUsings, model => model.Name == "System.Linq");
+            Assert.Contains(delegateUsings, model => model.Name == "Microsoft.CodeAnalysis");
+            Assert.Contains(delegateUsings, model => model.Name == "Microsoft.CodeAnalysis.CSharp");
         }
 
         [Fact]
@@ -332,7 +335,7 @@ namespace Analyzers
 
             var optional = classModels[0].GetMetricValue<CSharpUsingsMetric>();
             Assert.True(optional.HasValue);
-            var usings = (IDictionary<string, ISet<string>>) optional.Value;
+            var usings = (IDictionary<string, ISet<UsingModel>>) optional.Value;
 
             Assert.Equal(4, usings.Count);
             Assert.True(usings.ContainsKey("TopLevel.Analyzers.Interface1"));
@@ -342,11 +345,11 @@ namespace Analyzers
 
             foreach (var (_, usingsList) in usings)
             {
-                Assert.True(usingsList.Contains("System"));
-                Assert.True(usingsList.Contains("System.Collections.Generic"));
-                Assert.True(usingsList.Contains("System.Linq"));
-                Assert.True(usingsList.Contains("System.Text"));
-                Assert.True(usingsList.Contains("Microsoft.CodeAnalysis"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Collections.Generic"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Linq"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Text"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "Microsoft.CodeAnalysis"));
             }
 
             var interfaceUsings = usings["TopLevel.Analyzers.Interface1"];
@@ -354,16 +357,16 @@ namespace Analyzers
 
             var delegateUsings = usings["TopLevel.Analyzers.MyDelegates.Foo"];
             Assert.Equal(6, delegateUsings.Count);
-            Assert.True(delegateUsings.Contains("Microsoft.CodeAnalysis.CSharp"));
+            Assert.Contains(delegateUsings, model => model.Name == "Microsoft.CodeAnalysis.CSharp");
 
             var structUsings = usings["TopLevel.Analyzers.MyDelegates.Structs.Struct1"];
             Assert.Equal(7, structUsings.Count);
-            Assert.True(structUsings.Contains("Microsoft.CodeAnalysis.CSharp"));
-            Assert.True(structUsings.Contains("MyLib"));
+            Assert.Contains(structUsings, model => model.Name == "Microsoft.CodeAnalysis.CSharp");
+            Assert.Contains(structUsings, model => model.Name == "MyLib");
 
             var recordUsings = usings["TopLevel.Analyzers.My.Records.Record1"];
             Assert.Equal(6, recordUsings.Count);
-            Assert.True(recordUsings.Contains("MyLib.Records"));
+            Assert.Contains(recordUsings, model => model.Name == "MyLib.Records");
         }
 
         [Fact]
@@ -411,7 +414,7 @@ namespace TopLevel
 
             var optional = classModels[0].GetMetricValue<CSharpUsingsMetric>();
             Assert.True(optional.HasValue);
-            var usings = (IDictionary<string, ISet<string>>) optional.Value;
+            var usings = (IDictionary<string, ISet<UsingModel>>) optional.Value;
 
             Assert.Equal(7, usings.Count);
             Assert.True(usings.ContainsKey("TopLevel.Class1"));
@@ -424,11 +427,11 @@ namespace TopLevel
 
             foreach (var (_, usingsList) in usings)
             {
-                Assert.True(usingsList.Contains("System"));
-                Assert.True(usingsList.Contains("System.Collections.Generic"));
-                Assert.True(usingsList.Contains("System.Linq"));
-                Assert.True(usingsList.Contains("System.Text"));
-                Assert.False(usingsList.Contains("MyLib"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Collections.Generic"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Linq"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Text"));
+                Assert.Null(usingsList.SingleOrDefault(model => model.Name == "MyLib"));
             }
 
             Assert.Equal(4, usings["TopLevel.Class1"].Count);
@@ -436,23 +439,23 @@ namespace TopLevel
 
             var class2Usings = usings["TopLevel.Analyzers.Class2"];
             Assert.Equal(5, class2Usings.Count);
-            Assert.True(class2Usings.Contains("Microsoft.CodeAnalysis.CSharp"));
+            Assert.Contains(class2Usings, model => model.Name == "Microsoft.CodeAnalysis.CSharp");
 
             var innerClass1Usings = usings["TopLevel.Analyzers.Class2.InnerClass1"];
             Assert.Equal(5, innerClass1Usings.Count);
-            Assert.True(innerClass1Usings.Contains("Microsoft.CodeAnalysis.CSharp"));
+            Assert.Contains(innerClass1Usings, model => model.Name == "Microsoft.CodeAnalysis.CSharp");
 
             var innerClass2Usings = usings["TopLevel.Analyzers.Class2.InnerClass1.InnerClass2"];
             Assert.Equal(5, innerClass2Usings.Count);
-            Assert.True(innerClass2Usings.Contains("Microsoft.CodeAnalysis.CSharp"));
+            Assert.Contains(innerClass2Usings, model => model.Name == "Microsoft.CodeAnalysis.CSharp");
 
             var interface1Usings = usings["TopLevel.Analyzers.Interface1"];
             Assert.Equal(5, interface1Usings.Count);
-            Assert.True(interface1Usings.Contains("Microsoft.CodeAnalysis.CSharp"));
+            Assert.Contains(interface1Usings, model => model.Name == "Microsoft.CodeAnalysis.CSharp");
 
             var innerInterfaceUsings = usings["TopLevel.Analyzers.Interface1.IInnerInterface"];
             Assert.Equal(5, innerInterfaceUsings.Count);
-            Assert.True(innerInterfaceUsings.Contains("Microsoft.CodeAnalysis.CSharp"));
+            Assert.Contains(innerInterfaceUsings, model => model.Name == "Microsoft.CodeAnalysis.CSharp");
         }
 
         [Fact]
@@ -478,7 +481,7 @@ class Class2
 
             var optional = classModels[0].GetMetricValue<CSharpUsingsMetric>();
             Assert.True(optional.HasValue);
-            var usings = (IDictionary<string, ISet<string>>) optional.Value;
+            var usings = (IDictionary<string, ISet<UsingModel>>) optional.Value;
 
             Assert.Equal(3, usings.Count);
             Assert.True(usings.ContainsKey("Class2"));
@@ -488,10 +491,10 @@ class Class2
             foreach (var (_, usingsList) in usings)
             {
                 Assert.Equal(4, usingsList.Count);
-                Assert.True(usingsList.Contains("System"));
-                Assert.True(usingsList.Contains("System.Collections.Generic"));
-                Assert.True(usingsList.Contains("System.Linq"));
-                Assert.True(usingsList.Contains("MyLib"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Collections.Generic"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "System.Linq"));
+                Assert.NotNull(usingsList.SingleOrDefault(model => model.Name == "MyLib"));
             }
         }
 
@@ -543,34 +546,118 @@ class Class2
             var classModels = _factExtractor.Extract(fileContent);
 
             Assert.Equal(5, classModels.Count);
-            
+
             foreach (var classModel in classModels)
             {
-                Assert.True(classModel.Usings.Contains("System"));
-                Assert.True(classModel.Usings.Contains("System.Collections.Generic"));
-                Assert.True(classModel.Usings.Contains("System.Linq"));
-                Assert.True(classModel.Usings.Contains("System.Text"));
-                Assert.True(classModel.Usings.Contains("Microsoft.CodeAnalysis"));
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model => model.Name == "System"));
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model => model.Name == "System"));
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model => model.Name == "System.Collections.Generic"));
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model => model.Name == "System.Linq"));
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model => model.Name == "System.Text"));
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model => model.Name == "Microsoft.CodeAnalysis"));
             }
-            
+
             Assert.Equal(5, classModels[0].Usings.Count);
 
             var structUsings = classModels[1].Usings;
             Assert.Equal(7, structUsings.Count);
-            Assert.True(structUsings.Contains("Microsoft.CodeAnalysis.CSharp"));
-            Assert.True(structUsings.Contains("MyLib"));
+            Assert.Contains(structUsings, model => model.Name == "Microsoft.CodeAnalysis.CSharp");
+            Assert.Contains(structUsings, model => model.Name == "MyLib");
 
             var recordUsings = classModels[2].Usings;
             Assert.Equal(6, recordUsings.Count);
-            Assert.True(recordUsings.Contains("MyLib.Records"));
+            Assert.Contains(recordUsings, model => model.Name == "MyLib.Records");
 
             var classUsings = classModels[3].Usings;
             Assert.Equal(6, classUsings.Count);
-            Assert.True(classUsings.Contains("MyLib.Records"));
-            
+            Assert.Contains(classUsings, model => model.Name == "MyLib.Records");
+
             var delegateUsings = classModels[4].Usings;
             Assert.Equal(6, delegateUsings.Count);
-            Assert.True(delegateUsings.Contains("Microsoft.CodeAnalysis.CSharp"));
+            Assert.Contains(delegateUsings, model => model.Name == "Microsoft.CodeAnalysis.CSharp");
+        }
+
+        [Fact]
+        public void Extract_ShouldHaveUsingsInClassModels_WhenGivenStaticUsings()
+        {
+            const string fileContent = @"
+    using System;
+    using System.Collections.Generic;
+    using static System.Math;
+
+    namespace TopLevel
+    {
+        using System.Collections.Generic;
+        using System.Linq;
+        using System.Text;
+    
+        namespace Analyzers
+        {
+            using System.Linq;
+            using Microsoft.CodeAnalysis;
+
+            public interface Interface1 {}
+
+            namespace MyDelegates
+            {
+                using static Microsoft.CodeAnalysis.CSharp;
+            
+                public delegate void Foo();
+            
+                namespace Structs
+                {
+                    using System.Text;
+                    using static MyLib;
+
+                    public struct Struct1{}   
+                }
+            }
+
+            namespace My.Records
+            {
+                using static MyLib.Records;
+                public class Class1 {
+                public record Record1{}}
+            }
+        }
+    }";
+
+            var classModels = _factExtractor.Extract(fileContent);
+
+            Assert.Equal(5, classModels.Count);
+
+            foreach (var classModel in classModels)
+            {
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model => model.Name == "System" && !model.IsStatic));
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model =>
+                    model.Name == "System.Collections.Generic" && !model.IsStatic));
+                Assert.NotNull(
+                    classModel.Usings.SingleOrDefault(model => model.Name == "System.Linq" && !model.IsStatic));
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model => model.Name == "System.Text" && !model.IsStatic));
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model =>
+                    model.Name == "Microsoft.CodeAnalysis" && !model.IsStatic));
+                
+                Assert.NotNull(classModel.Usings.SingleOrDefault(model => model.Name == "System.Math" && model.IsStatic));
+            }
+
+            Assert.Equal(6, classModels[0].Usings.Count);
+
+            var structUsings = classModels[1].Usings;
+            Assert.Equal(8, structUsings.Count);
+            Assert.Contains(structUsings, model => model.Name == "Microsoft.CodeAnalysis.CSharp" && model.IsStatic);
+            Assert.Contains(structUsings, model => model.Name == "MyLib" && model.IsStatic);
+
+            var recordUsings = classModels[2].Usings;
+            Assert.Equal(7, recordUsings.Count);
+            Assert.Contains(recordUsings, model => model.Name == "MyLib.Records" && model.IsStatic);
+
+            var classUsings = classModels[3].Usings;
+            Assert.Equal(7, classUsings.Count);
+            Assert.Contains(classUsings, model => model.Name == "MyLib.Records" && model.IsStatic);
+
+            var delegateUsings = classModels[4].Usings;
+            Assert.Equal(7, delegateUsings.Count);
+            Assert.Contains(delegateUsings, model => model.Name == "Microsoft.CodeAnalysis.CSharp" && model.IsStatic);
         }
     }
 }

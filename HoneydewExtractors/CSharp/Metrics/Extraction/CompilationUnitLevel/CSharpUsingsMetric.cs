@@ -2,6 +2,7 @@
 using System.Linq;
 using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewModels;
+using HoneydewModels.CSharp;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,12 +15,13 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel
         public CSharpSyntacticModel HoneydewSyntacticModel { get; set; }
         public CSharpSemanticModel HoneydewSemanticModel { get; set; }
 
-        public IDictionary<string, ISet<string>> Usings { get; private set; } =
-            new Dictionary<string, ISet<string>>();
+        public IDictionary<string, ISet<UsingModel>> Usings { get; private set; } =
+            new Dictionary<string, ISet<UsingModel>>();
 
-        private readonly ISet<string> _commonUsings = new HashSet<string>();
+        private readonly ISet<UsingModel> _commonUsings = new HashSet<UsingModel>();
 
-        private readonly IDictionary<string, ISet<string>> _namespaceUsings = new Dictionary<string, ISet<string>>();
+        private readonly IDictionary<string, ISet<UsingModel>> _namespaceUsings =
+            new Dictionary<string, ISet<UsingModel>>();
 
         public ExtractionMetricType GetMetricType()
         {
@@ -28,7 +30,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel
 
         public override IMetricValue GetMetric()
         {
-            return new MetricValue<IDictionary<string, ISet<string>>>(Usings);
+            return new MetricValue<IDictionary<string, ISet<UsingModel>>>(Usings);
         }
 
         public override string PrettyPrint()
@@ -39,6 +41,13 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel
         public override void VisitUsingDirective(UsingDirectiveSyntax node)
         {
             var usingName = node.Name.ToString();
+            var isStatic = node.StaticKeyword.Value != null;
+
+            var cSharpUsing = new UsingModel()
+            {
+                Name = usingName,
+                IsStatic = isStatic
+            };
 
             if (node.Parent != null && node.Parent.Kind() == SyntaxKind.NamespaceDeclaration)
             {
@@ -47,16 +56,19 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel
 
                 if (_namespaceUsings.TryGetValue(namespaceName, out var usingsSet))
                 {
-                    usingsSet.Add(usingName);
+                    usingsSet.Add(cSharpUsing);
                 }
                 else
                 {
-                    _namespaceUsings.Add(namespaceName, new HashSet<string> {usingName});
+                    _namespaceUsings.Add(namespaceName, new HashSet<UsingModel>
+                    {
+                        cSharpUsing
+                    });
                 }
             }
             else
             {
-                _commonUsings.Add(usingName);
+                _commonUsings.Add(cSharpUsing);
             }
         }
 
@@ -123,7 +135,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel
             };
         }
 
-        private void AddToUsings(string name, ISet<string> usingsSet)
+        private void AddToUsings(string name, ISet<UsingModel> usingsSet)
         {
             if (Usings.ContainsKey(name))
             {
@@ -133,9 +145,9 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel
             Usings.Add(name, usingsSet);
         }
 
-        private ISet<string> AddUsingsFromParent(NamespaceDeclarationSyntax node)
+        private ISet<UsingModel> AddUsingsFromParent(NamespaceDeclarationSyntax node)
         {
-            var usings = new HashSet<string>();
+            var usings = new HashSet<UsingModel>();
 
             if (node == null)
             {
