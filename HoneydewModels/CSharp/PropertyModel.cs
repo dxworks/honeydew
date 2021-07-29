@@ -14,7 +14,7 @@ namespace HoneydewModels.CSharp
 
         public bool IsEvent { get; init; }
 
-        public string ContainingClassName { get; init; }
+        public string ContainingClassName { get; set; }
         
         public IList<string> Accessors { get; set; } = new List<string>();
         

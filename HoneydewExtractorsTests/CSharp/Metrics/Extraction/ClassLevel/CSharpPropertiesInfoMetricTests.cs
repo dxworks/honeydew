@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
@@ -538,11 +539,19 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             Assert.Equal("Triple", propertyModels[0].CalledMethods[0].MethodName);
             Assert.Equal("ExternClass", propertyModels[0].CalledMethods[0].ContainingClassName);
-            Assert.Empty(propertyModels[0].CalledMethods[0].ParameterTypes);
+            
+            Assert.Equal(1,propertyModels[0].CalledMethods[0].ParameterTypes.Count);
+            Assert.Equal("",propertyModels[0].CalledMethods[0].ParameterTypes[0].Modifier);
+            Assert.Equal("int",propertyModels[0].CalledMethods[0].ParameterTypes[0].Type);
+            Assert.Null(propertyModels[0].CalledMethods[0].ParameterTypes[0].DefaultValue);
 
             Assert.Equal("Double", propertyModels[0].CalledMethods[1].MethodName);
             Assert.Equal("ExternClass", propertyModels[0].CalledMethods[1].ContainingClassName);
-            Assert.Empty(propertyModels[0].CalledMethods[1].ParameterTypes);
+            
+            Assert.Equal(1,propertyModels[0].CalledMethods[1].ParameterTypes.Count);
+            Assert.Equal("",propertyModels[0].CalledMethods[1].ParameterTypes[0].Modifier);
+            Assert.Equal("int",propertyModels[0].CalledMethods[1].ParameterTypes[0].Type);
+            Assert.Null(propertyModels[0].CalledMethods[1].ParameterTypes[0].DefaultValue);
         }
 
         [Fact]
@@ -609,7 +618,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("double", propertyModels[0].CalledMethods[1].ParameterTypes[0].Type);
             Assert.Null(propertyModels[0].CalledMethods[1].ParameterTypes[0].DefaultValue);
         }
-
+       
         [Fact]
         public void
             Extract_ShouldHaveEventProperties_WhenGivenClassWithComputedPropertyThatCallsMethodsFromOtherClassFromTheSameNamespace()
@@ -618,16 +627,16 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                 @"using System;                                                                         
                                     namespace TopLevel
                                     {
-                                        public class Bar
+                                         public class Bar
                                         {
                                             public string Convert(int a)
                                             {
                                                 return a.ToString();
                                             }
 
-                                            public static string Cut(string s)
+                                            public static string Cut(Func<string> s)
                                             {
-                                                return s.Trim();
+                                                return s.ToString();
                                             }
                                         }
 
@@ -676,7 +685,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             Assert.Equal("Cut", propertyModels[0].CalledMethods[1].MethodName);
             Assert.Equal("TopLevel.Bar", propertyModels[0].CalledMethods[1].ContainingClassName);
-            Assert.Empty(propertyModels[0].CalledMethods[1].ParameterTypes);
+            Assert.Equal(1,propertyModels[0].CalledMethods[1].ParameterTypes.Count);
+            Assert.Equal("",propertyModels[0].CalledMethods[1].ParameterTypes[0].Modifier);
+            Assert.Equal("System.Func<string>",propertyModels[0].CalledMethods[1].ParameterTypes[0].Type);
+            Assert.Null(propertyModels[0].CalledMethods[1].ParameterTypes[0].DefaultValue);
         }
 
         [Fact]
@@ -724,11 +736,17 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             Assert.Equal("Triple", propertyModels[0].CalledMethods[0].MethodName);
             Assert.Equal("ExternClass", propertyModels[0].CalledMethods[0].ContainingClassName);
-            Assert.Empty(propertyModels[0].CalledMethods[0].ParameterTypes);
+            Assert.Equal(1,propertyModels[0].CalledMethods[0].ParameterTypes.Count);
+            Assert.Equal("",propertyModels[0].CalledMethods[0].ParameterTypes[0].Modifier);
+            Assert.Equal("int",propertyModels[0].CalledMethods[0].ParameterTypes[0].Type);
+            Assert.Null(propertyModels[0].CalledMethods[0].ParameterTypes[0].DefaultValue);
 
             Assert.Equal("Double", propertyModels[0].CalledMethods[1].MethodName);
             Assert.Equal("ExternClass", propertyModels[0].CalledMethods[1].ContainingClassName);
-            Assert.Empty(propertyModels[0].CalledMethods[1].ParameterTypes);
+            Assert.Equal(1,propertyModels[0].CalledMethods[1].ParameterTypes.Count);
+            Assert.Equal("",propertyModels[0].CalledMethods[1].ParameterTypes[0].Modifier);
+            Assert.Equal("System.Func<int>",propertyModels[0].CalledMethods[1].ParameterTypes[0].Type);
+            Assert.Null(propertyModels[0].CalledMethods[1].ParameterTypes[0].DefaultValue);
         }
         
         [Fact]
@@ -798,7 +816,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             Assert.Equal("Cut", propertyModel.CalledMethods[1].MethodName);
             Assert.Equal("TopLevel.Bar", propertyModel.CalledMethods[1].ContainingClassName);
-            Assert.Empty(propertyModel.CalledMethods[1].ParameterTypes);
+
+            Assert.Equal(1,propertyModel.CalledMethods[1].ParameterTypes.Count);
+            Assert.Equal("",propertyModel.CalledMethods[1].ParameterTypes[0].Modifier);
+            Assert.Equal("System.Func<string>",propertyModel.CalledMethods[1].ParameterTypes[0].Type);
+            Assert.Null(propertyModel.CalledMethods[1].ParameterTypes[0].DefaultValue);
         }
     }
 }

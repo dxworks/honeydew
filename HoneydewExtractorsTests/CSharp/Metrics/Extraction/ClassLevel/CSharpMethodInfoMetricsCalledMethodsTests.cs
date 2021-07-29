@@ -15,7 +15,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             _factExtractor.AddMetric<CSharpMethodInfoMetric>();
         }
 
-               [Fact]
+        [Fact]
         public void Extract_ShouldHaveConstructors_WhenGivenClassWithConstructorThatCallsOtherMethods()
         {
             const string fileContent = @"using System;
@@ -374,7 +374,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                 Assert.Equal("", constructorModel.Modifier);
             }
         }
-        
+
         [Fact]
         public void Extract_ShouldHaveCalledMethods_WhenProvidedClassThatCallsMethodsFromAFieldOfADifferentClass()
         {
@@ -494,7 +494,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var calledMethod = methodModelM.CalledMethods[0];
             Assert.Equal("Method", calledMethod.MethodName);
             Assert.Equal("Foo", calledMethod.ContainingClassName);
-            Assert.Empty(calledMethod.ParameterTypes);
+            Assert.Equal(1, calledMethod.ParameterTypes.Count);
+            Assert.Equal("", calledMethod.ParameterTypes[0].Modifier);
+            Assert.Equal("System.Int32", calledMethod.ParameterTypes[0].Type);
+            Assert.Null(calledMethod.ParameterTypes[0].DefaultValue);
         }
 
         [Fact]
@@ -821,7 +824,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                                 }
                                             }                                              
                                           }";
-            
+
             var classModels = _factExtractor.Extract(fileContent);
 
             var methodModelM = classModels[1].Methods[0];
@@ -831,18 +834,18 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var calledMethod0 = methodModelM.CalledMethods[0];
             Assert.Equal("TryGetValue", calledMethod0.MethodName);
             Assert.Equal("System.Collections.Generic.Dictionary<string, string>", calledMethod0.ContainingClassName);
-            
+
             Assert.Equal(2, calledMethod0.ParameterTypes.Count);
-            
+
             Assert.Equal("", calledMethod0.ParameterTypes[0].Modifier);
             Assert.Equal("string", calledMethod0.ParameterTypes[0].Type);
             Assert.Null(calledMethod0.ParameterTypes[0].DefaultValue);
-            
+
             Assert.Equal("out", calledMethod0.ParameterTypes[1].Modifier);
             Assert.Equal("string", calledMethod0.ParameterTypes[1].Type);
             Assert.Null(calledMethod0.ParameterTypes[1].DefaultValue);
         }
-        
+
         [Fact]
         public void Extract_ShouldHaveCalledMethods_WhenProvidedClassThatCallsMethodsFromAnotherClassAsProperty()
         {
@@ -867,7 +870,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                                 }
                                             }                                              
                                           }";
-            
+
             var classModels = _factExtractor.Extract(fileContent);
 
             var methodModelM = classModels[1].Methods[0];
@@ -877,13 +880,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var calledMethod0 = methodModelM.CalledMethods[0];
             Assert.Equal("TryGetValue", calledMethod0.MethodName);
             Assert.Equal("System.Collections.Generic.Dictionary<string, string>", calledMethod0.ContainingClassName);
-            
+
             Assert.Equal(2, calledMethod0.ParameterTypes.Count);
-            
+
             Assert.Equal("", calledMethod0.ParameterTypes[0].Modifier);
             Assert.Equal("string", calledMethod0.ParameterTypes[0].Type);
             Assert.Null(calledMethod0.ParameterTypes[0].DefaultValue);
-            
+
             Assert.Equal("out", calledMethod0.ParameterTypes[1].Modifier);
             Assert.Equal("string", calledMethod0.ParameterTypes[1].Type);
             Assert.Null(calledMethod0.ParameterTypes[1].DefaultValue);

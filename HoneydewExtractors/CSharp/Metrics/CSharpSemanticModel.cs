@@ -96,8 +96,16 @@ namespace HoneydewExtractors.CSharp.Metrics
         }
 
         public MethodCallModel GetMethodCallModel(InvocationExpressionSyntax invocationExpressionSyntax,
-            string containingClassName, string baseTypeName = "object")
+            string baseTypeName = "object")
         {
+            string containingClassName = null;
+
+            var symbolInfo = Model.GetSymbolInfo(invocationExpressionSyntax);
+            if (symbolInfo.Symbol != null)
+            {
+                containingClassName = symbolInfo.Symbol.ContainingType.ToString();
+            }
+
             switch (invocationExpressionSyntax.Expression)
             {
                 case IdentifierNameSyntax:
@@ -175,10 +183,50 @@ namespace HoneydewExtractors.CSharp.Metrics
             return parameterTypes;
         }
 
-        private IList<ParameterModel> GetParameterTypes(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode syntaxNode)
+        private IList<ParameterModel> GetParameterTypes(InvocationExpressionSyntax invocationSyntax)
         {
-            var methodSymbol = GetMethodSymbol(syntaxNode);
-            return methodSymbol == null ? new List<ParameterModel>() : GetParameterTypes(methodSymbol);
+            var methodSymbol = GetMethodSymbol(invocationSyntax);
+            if (methodSymbol == null)
+            {
+                // try to reconstruct the parameters from the method call
+                var parameterList = new List<ParameterModel>();
+                var success = true;
+
+                foreach (var argumentSyntax in invocationSyntax.ArgumentList.Arguments)
+                {
+                    
+                    var parameterSymbolInfo = Model.GetSymbolInfo(argumentSyntax.Expression);
+                    if (parameterSymbolInfo.Symbol != null)
+                    {
+                        parameterList.Add(new ParameterModel
+                        {
+                            Type = GetFullName(argumentSyntax.Expression) 
+                        });
+                        continue;
+                    }
+                    
+                    if (argumentSyntax.Expression is not LiteralExpressionSyntax literalExpressionSyntax)
+                    {
+                        success = false;
+                        break;
+                    }
+
+                    if (literalExpressionSyntax.Token.Value == null)
+                    {
+                        success = false;
+                        break;
+                    }
+
+                    parameterList.Add(new ParameterModel
+                    {
+                        Type = literalExpressionSyntax.Token.Value.GetType().FullName 
+                    });
+                }
+
+                return success ? parameterList : new List<ParameterModel>();
+            }
+
+            return GetParameterTypes(methodSymbol);
         }
 
         private string GetFullName(ExpressionSyntax expressionSyntax)

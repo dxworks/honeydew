@@ -165,8 +165,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
             foreach (var invocationExpressionSyntax in syntax.Body.DescendantNodes()
                 .OfType<InvocationExpressionSyntax>())
             {
-                var methodCallModel = HoneydewSemanticModel.GetMethodCallModel(invocationExpressionSyntax,
-                    _containingClassName, _baseTypeName);
+                var methodCallModel = HoneydewSemanticModel.GetMethodCallModel(invocationExpressionSyntax, _baseTypeName);
                 if (methodCallModel != null)
                 {
                     methodModel.CalledMethods.Add(methodCallModel);

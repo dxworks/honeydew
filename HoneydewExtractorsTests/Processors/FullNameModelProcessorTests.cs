@@ -19,7 +19,7 @@ namespace HoneydewExtractorsTests.Processors
         }
 
         [Fact]
-        public void GetFunction_ShouldReturnTheFullClassNames_WhenGivenClassModels()
+        public void Process_ShouldReturnTheFullClassNames_WhenGivenClassModels()
         {
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -85,22 +85,22 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
-            var actualSolutionModel = _sut.Process(repositoryModel);
+            var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.Class1",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FullName);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FullName);
             Assert.Equal("Services.Class2",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].FullName);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].FullName);
             Assert.Equal("Controllers.Class3",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].FullName);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].FullName);
             Assert.Equal("Controllers.Class4",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[1].FullName);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[1].FullName);
             Assert.Equal("Domain.Data.Class5",
-                actualSolutionModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].FullName);
+                actualRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].FullName);
         }
 
         [Fact]
-        public void GetFunction_ShouldReturnTheFullClassName_WhenGivenClassWithInnerClass()
+        public void Process_ShouldReturnTheFullClassName_WhenGivenClassWithInnerClass()
         {
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -130,16 +130,16 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
-            var actualSolutionModel = _sut.Process(repositoryModel);
+            var actualRepositoryModel = _sut.Process(repositoryModel);
 
-            var namespaceModel = actualSolutionModel.Solutions[0].Projects[0].Namespaces[0];
+            var namespaceModel = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
             Assert.Equal("Project1.Models.Class1", namespaceModel.ClassModels[0].FullName);
             Assert.Equal("Project1.Models.Class1.InnerClass1", namespaceModel.ClassModels[1].FullName);
             Assert.Equal("Project1.Models.Class1.InnerClass1.InnerClass2", namespaceModel.ClassModels[2].FullName);
         }
 
         [Fact]
-        public void GetFunction_ShouldReturnTheFullClassName_WhenGivenClassMethodsWithParameters()
+        public void Process_ShouldReturnTheFullClassName_WhenGivenClassMethodsWithParameters()
         {
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -195,16 +195,16 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
-            var actualSolutionModel = _sut.Process(repositoryModel);
+            var actualRepositoryModel = _sut.Process(repositoryModel);
 
-            var namespaceModel = actualSolutionModel.Solutions[0].Projects[0].Namespaces[0];
+            var namespaceModel = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
             Assert.Equal("Project1.Models.Class1",
                 namespaceModel.ClassModels[1].Constructors[0].ParameterTypes[0].Type);
             Assert.Equal("Project1.Models.Class1", namespaceModel.ClassModels[1].Methods[0].ParameterTypes[0].Type);
         }
 
         [Fact]
-        public void GetFunction_ShouldReturnTheFullBaseClassNames_WhenGivenClassModels()
+        public void Process_ShouldReturnTheFullBaseClassNames_WhenGivenClassModels()
         {
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -286,27 +286,27 @@ namespace HoneydewExtractorsTests.Processors
             solutionModel.Projects.Add(projectModel2);
             repositoryModel.Solutions.Add(solutionModel);
 
-            var actualSolutionModel = _sut.Process(repositoryModel);
+            var actualRepositoryModel = _sut.Process(repositoryModel);
 
-            var modelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces[0];
-            Assert.Equal("object", modelsNamespace.ClassModels[0].BaseClassFullName);
+            var modelsNamespace = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
+            Assert.Equal("System.Object", modelsNamespace.ClassModels[0].BaseClassFullName);
             Assert.Equal("Models.Class1", modelsNamespace.ClassModels[1].BaseClassFullName);
             Assert.Equal("Models.Class1", modelsNamespace.ClassModels[2].BaseClassFullName);
             Assert.Equal("Models.Class3", modelsNamespace.ClassModels[3].BaseClassFullName);
 
-            var otherModelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces[1];
+            var otherModelsNamespace = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1];
             Assert.Equal("Models.Other.Class2", otherModelsNamespace.ClassModels[0].BaseClassFullName);
             Assert.Equal("Models.Class1", otherModelsNamespace.ClassModels[1].BaseClassFullName);
             Assert.Equal("Models.TheClass", otherModelsNamespace.ClassModels[2].BaseClassFullName);
             Assert.Equal("Models.Other.Class3", otherModelsNamespace.ClassModels[3].BaseClassFullName);
 
             Assert.Equal("Models.Other.SuperClass",
-                actualSolutionModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0]
+                actualRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0]
                     .BaseClassFullName);
         }
 
         [Fact]
-        public void GetFunction_ShouldReturnTheFullBaseInterfacesNames_WhenGivenClassModels()
+        public void Process_ShouldReturnTheFullBaseInterfacesNames_WhenGivenClassModels()
         {
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -383,15 +383,15 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
-            var actualSolutionModel = _sut.Process(repositoryModel);
+            var actualRepositoryModel = _sut.Process(repositoryModel);
 
-            var modelInterfacesNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces[0];
+            var modelInterfacesNamespace = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
             Assert.Empty(modelInterfacesNamespace.ClassModels[0].BaseInterfaces);
             Assert.Equal("Models.Interfaces.IInterface1", modelInterfacesNamespace.ClassModels[1].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface1", modelInterfacesNamespace.ClassModels[2].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface2", modelInterfacesNamespace.ClassModels[2].BaseInterfaces[1]);
 
-            var modelsNamespace = actualSolutionModel.Solutions[0].Projects[0].Namespaces[1];
+            var modelsNamespace = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1];
             Assert.Equal("Models.Interfaces.IInterface3", modelsNamespace.ClassModels[0].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[1].BaseInterfaces[0]);
             Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[2].BaseInterfaces[0]);
@@ -400,12 +400,12 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[3].BaseInterfaces[0]);
             Assert.Equal("MyNamespace.AInterface", modelsNamespace.ClassModels[3].BaseInterfaces[1]);
 
-            Assert.Empty(actualSolutionModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0]
+            Assert.Empty(actualRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0]
                 .BaseInterfaces);
         }
 
         [Fact]
-        public void GetFunction_ShouldReturnTheFullNamesOfContainingClassNameOfMethods_WhenGivenClassModelsWithMethods()
+        public void Process_ShouldReturnTheFullNamesOfContainingClassNameOfMethods_WhenGivenClassModelsWithMethods()
         {
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -471,10 +471,10 @@ namespace HoneydewExtractorsTests.Processors
             solutionModel.Projects.Add(projectModel1);
             repositoryModel.Solutions.Add(solutionModel);
 
-            var actualSolutionModel = _sut.Process(repositoryModel);
+            var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var modelInterfacesNamespace =
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces[0];
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
 
             Assert.Empty(modelInterfacesNamespace.ClassModels[0].Constructors);
             Assert.Equal(2, modelInterfacesNamespace.ClassModels[0].Methods.Count);
@@ -500,7 +500,7 @@ namespace HoneydewExtractorsTests.Processors
 
         [Fact]
         public void
-            GetFunction_ShouldHaveFindClassInOtherProject_WhenGivenAClassThatCouldNotBeenFoundInCurrentProject()
+            Process_ShouldHaveFindClassInOtherProject_WhenGivenAClassThatCouldNotBeenFoundInCurrentProject()
         {
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -544,15 +544,15 @@ namespace HoneydewExtractorsTests.Processors
             solutionModel.Projects.Add(projectModel2);
             repositoryModel.Solutions.Add(solutionModel);
 
-            var actualSolutionModel = _sut.Process(repositoryModel);
+            var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.SomeModel",
-                actualSolutionModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].Fields[0].Type);
+                actualRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].Fields[0].Type);
         }
 
         [Fact]
         public void
-            GetFunction_ShouldHaveFindClassInOtherSolution_WhenGivenAClassThatCouldNotBeenFoundInCurrentSolution()
+            Process_ShouldHaveFindClassInOtherSolution_WhenGivenAClassThatCouldNotBeenFoundInCurrentSolution()
         {
             var repositoryModel = new RepositoryModel();
             var solutionModel1 = new SolutionModel();
@@ -621,19 +621,19 @@ namespace HoneydewExtractorsTests.Processors
             repositoryModel.Solutions.Add(solutionModel1);
             repositoryModel.Solutions.Add(solutionModel2);
 
-            var actualSolutionModel = _sut.Process(repositoryModel);
+            var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.SomeModel",
-                actualSolutionModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0]
+                actualRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0]
                     .Fields[0].Type);
             Assert.Equal("Services.Service",
-                actualSolutionModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0]
+                actualRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0]
                     .Methods[0].ReturnType);
         }
 
         [Fact]
         public void
-            GetFunction_ShouldHavePropertiesWithAmbiguousTypesAndLogThem_WhenGivenClassesWithTheSameNameInTheSameProject()
+            Process_ShouldHavePropertiesWithAmbiguousTypesAndLogThem_WhenGivenClassesWithTheSameNameInTheSameProject()
         {
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -755,17 +755,17 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
-            var actualSolutionModel = _sut.Process(repositoryModel);
+            var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.AmbiguousClass",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FullName);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FullName);
             Assert.Equal("Services.AmbiguousClass",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].FullName);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].FullName);
             Assert.Equal("Controllers.AmbiguousClass",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].FullName);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].FullName);
 
             var someClassModel =
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces[3].ClassModels[0];
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[3].ClassModels[0];
             Assert.Equal("SomeNamespace.SomeClass",
                 someClassModel.FullName);
 
@@ -789,7 +789,7 @@ namespace HoneydewExtractorsTests.Processors
 
         [Fact]
         public void
-            GetFunction_ShouldHavePropertiesWithAmbiguousNamesAndLogThem_WhenGivenClassesWithTheSameNameInTheSameSolution()
+            Process_ShouldHavePropertiesWithAmbiguousNamesAndLogThem_WhenGivenClassesWithTheSameNameInTheSameSolution()
         {
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -846,10 +846,10 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
-            var actualSolutionModel = _sut.Process(repositoryModel);
+            var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("MyService",
-                actualSolutionModel.Solutions[0].Projects[2].Namespaces[0].ClassModels[0].Fields[0].Type);
+                actualRepositoryModel.Solutions[0].Projects[2].Namespaces[0].ClassModels[0].Fields[0].Type);
 
             _progressLoggerMock.Verify(logger => logger.LogLine($"Multiple full names found for MyService: "),
                 Times.Once);
@@ -859,7 +859,7 @@ namespace HoneydewExtractorsTests.Processors
 
         [Fact]
         public void
-            GetFunction_ShouldHavePropertiesWithAmbiguousNamesAndLogThem_WhenGivenClassesWithTheSameNameInTheSameRepository()
+            Process_ShouldHavePropertiesWithAmbiguousNamesAndLogThem_WhenGivenClassesWithTheSameNameInTheSameRepository()
         {
             var repositoryModel = new RepositoryModel();
 
@@ -924,10 +924,10 @@ namespace HoneydewExtractorsTests.Processors
             repositoryModel.Solutions.Add(solutionModel3);
 
 
-            var actualSolutionModel = _sut.Process(repositoryModel);
+            var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("MyService",
-                actualSolutionModel.Solutions[2].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
+                actualRepositoryModel.Solutions[2].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
 
             _progressLoggerMock.Verify(logger => logger.LogLine($"Multiple full names found for MyService: "),
                 Times.Once);
@@ -937,7 +937,7 @@ namespace HoneydewExtractorsTests.Processors
 
         [Fact]
         public void
-            GetFunction_ShouldHaveClassNameTheSame_WhenClassNameDoesNotExistInRepository()
+            Process_ShouldHaveClassNameTheSame_WhenClassNameDoesNotExistInRepository()
         {
             var repositoryModel = new RepositoryModel();
             var solutionModel1 = new SolutionModel();
@@ -997,17 +997,17 @@ namespace HoneydewExtractorsTests.Processors
             repositoryModel.Solutions.Add(solutionModel1);
             repositoryModel.Solutions.Add(solutionModel2);
 
-            var actualSolutionModel = _sut.Process(repositoryModel);
+            var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("OutOfRepositoryClass",
-                actualSolutionModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
+                actualRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
 
             _progressLoggerMock.Verify(logger => logger.LogLine("Multiple full names found for MyService: "),
                 Times.Never);
         }
 
         [Fact]
-        public void GetFunction_ShouldReturnTheFullClassNames_WhenGivenClassModelsWithProperties()
+        public void Process_ShouldReturnTheFullClassNames_WhenGivenClassModelsWithProperties()
         {
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -1082,18 +1082,18 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
-            var actualSolutionModel = _sut.Process(repositoryModel);
+            var actualRepositoryModel = _sut.Process(repositoryModel);
 
-            Assert.Equal("int",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].Properties[0].Type);
+            Assert.Equal("System.Int32",
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].Properties[0].Type);
             Assert.Equal("Models.Class1",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].Properties[0].Type);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].Properties[0].Type);
             Assert.Equal("Services.Class2",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Properties[0].Type);
-            Assert.Equal("string",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Properties[1].Type);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Properties[0].Type);
+            Assert.Equal("System.String",
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Properties[1].Type);
             Assert.Equal("Namespace.RandomClassClass",
-                actualSolutionModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Properties[2].Type);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Properties[2].Type);
         }
     }
 }

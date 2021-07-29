@@ -221,7 +221,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("override", classModels[1].Methods[1].Modifier);
             Assert.Equal(3, classModels[1].Methods[1].CalledMethods.Count);
             Assert.Equal("G", classModels[1].Methods[1].CalledMethods[0].MethodName);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].CalledMethods[0].ContainingClassName);
+            Assert.Equal("TopLevel.Foo", classModels[1].Methods[1].CalledMethods[0].ContainingClassName);
             Assert.Equal(1, classModels[1].Methods[1].CalledMethods[0].ParameterTypes.Count);
             Assert.Equal("float", classModels[1].Methods[1].CalledMethods[0].ParameterTypes[0].Type);
             Assert.Equal("", classModels[1].Methods[1].CalledMethods[0].ParameterTypes[0].Modifier);
