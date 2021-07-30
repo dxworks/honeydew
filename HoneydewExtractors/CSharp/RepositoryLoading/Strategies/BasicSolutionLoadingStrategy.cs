@@ -30,8 +30,8 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
             var projectCount = solution.Projects.Count();
             foreach (var project in solution.Projects)
             {
-                _progressLogger.LogLine();
-                _progressLogger.LogLine($"Loading C# Project from {project.FilePath} ({i}/{projectCount})");
+                _progressLogger.Log();
+                _progressLogger.Log($"Loading C# Project from {project.FilePath} ({i}/{projectCount})");
                 var projectModel = await _projectLoadingStrategy.Load(project, extractor);
 
                 solutionModel.Projects.Add(projectModel);

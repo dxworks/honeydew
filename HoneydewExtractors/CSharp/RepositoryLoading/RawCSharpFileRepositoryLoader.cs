@@ -23,7 +23,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
 
         public Task<RepositoryModel> Load(string path)
         {
-            _progressLogger.LogLine($"Opening File at {path}");
+            _progressLogger.Log($"Opening File at {path}");
 
             var fileContent = _fileReader.ReadFile(path);
 
@@ -36,7 +36,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                     return null;
                 }
 
-                _progressLogger.LogLine("Model Loaded");
+                _progressLogger.Log("Model Loaded");
 
                 return Task.FromResult(repositoryModel);
             }

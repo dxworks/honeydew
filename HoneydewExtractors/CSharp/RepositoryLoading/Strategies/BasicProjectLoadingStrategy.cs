@@ -37,7 +37,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     var fileContent = await document.GetTextAsync();
                     var classModels = extractors.Extract(fileContent.ToString());
 
-                    _progressLogger.LogLine("done");
+                    _progressLogger.Log($"Done extracting from {document.FilePath} ({i}/{documentCount})");
 
                     foreach (var classModel in classModels)
                     {
@@ -47,7 +47,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                 }
                 catch (Exception e)
                 {
-                    await Console.Error.WriteLineAsync($"Could not extract from {document.FilePath} because {e}");
+                    _progressLogger.Log($"Could not extract from {document.FilePath} ({i}/{documentCount}) because {e}", LogLevels.Warning);
                 }
 
                 i++;

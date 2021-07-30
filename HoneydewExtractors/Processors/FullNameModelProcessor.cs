@@ -11,21 +11,10 @@ namespace HoneydewExtractors.Processors
 {
     public class FullNameModelProcessor : IProcessorFunction<RepositoryModel, RepositoryModel>
     {
-        private class AmbiguousFullNameException : Exception
-        {
-            public string AmbiguousName { get; }
-            public IList<string> PossibleNames { get; }
-
-            public AmbiguousFullNameException(string ambiguousName, IList<string> possibleNames)
-            {
-                AmbiguousName = ambiguousName;
-                PossibleNames = possibleNames;
-            }
-        }
-
         private readonly IProgressLogger _progressLogger;
 
-        private readonly IDictionary<string, IList<string>> _ambiguousNames = new Dictionary<string, IList<string>>();
+        private readonly IDictionary<AmbiguousName, IList<string>> _ambiguousNames =
+            new Dictionary<AmbiguousName, IList<string>>();
 
         public FullNameModelProcessor(IProgressLogger progressLogger)
         {
@@ -34,19 +23,23 @@ namespace HoneydewExtractors.Processors
 
         public RepositoryModel Process(RepositoryModel repositoryModel)
         {
+            _progressLogger.Log("Resolving Class Names");
             SetFullNameForClassModels(repositoryModel);
 
+            _progressLogger.Log("Resolving Using Statements for each class");
             SetFullNameForUsings(repositoryModel);
 
+            _progressLogger.Log("Resolving class elements");
             SetFullNameForClassModelComponents(repositoryModel);
 
             foreach (var (ambiguousName, possibilities) in _ambiguousNames)
             {
-                _progressLogger.LogLine();
-                _progressLogger.LogLine($"Multiple full names found for {ambiguousName}: ");
+                _progressLogger.Log();
+                _progressLogger.Log($"Multiple full names found for {ambiguousName.Name} in {ambiguousName.Location} :",
+                    LogLevels.Warning);
                 foreach (var possibleName in possibilities)
                 {
-                    _progressLogger.LogLine(possibleName);
+                    _progressLogger.Log(possibleName);
                 }
             }
 
@@ -80,7 +73,8 @@ namespace HoneydewExtractors.Processors
                         {
                             AddAmbiguousNames(() =>
                             {
-                                classModel.FullName = FindClassFullName(classModel.FullName, namespaceModel,
+                                classModel.FullName = FindClassFullName(classModel.FullName, classModel.FilePath,
+                                    namespaceModel,
                                     projectModel, solutionModel, repositoryModel, classModel.Usings);
                             });
                         }
@@ -113,7 +107,8 @@ namespace HoneydewExtractors.Processors
 
                                 AddAmbiguousNames(() =>
                                 {
-                                    usingModel.Name = FindClassFullName(usingModel.Name, namespaceModel,
+                                    usingModel.Name = FindClassFullName(usingModel.Name, classModel.FilePath,
+                                        namespaceModel,
                                         projectModel, solutionModel, repositoryModel, classModel.Usings);
                                 });
                             }
@@ -161,7 +156,8 @@ namespace HoneydewExtractors.Processors
             {
                 foreach (var methodModel in methodModels)
                 {
-                    if (!string.IsNullOrEmpty(methodModel.ReturnType) && methodModel.ReturnType.StartsWith(namespaceAccess))
+                    if (!string.IsNullOrEmpty(methodModel.ReturnType) &&
+                        methodModel.ReturnType.StartsWith(namespaceAccess))
                     {
                         return true;
                     }
@@ -185,7 +181,8 @@ namespace HoneydewExtractors.Processors
             {
                 foreach (var calledMethod in calledMethods)
                 {
-                    if (!string.IsNullOrEmpty(calledMethod.ContainingClassName) && calledMethod.ContainingClassName.StartsWith(namespaceAccess))
+                    if (!string.IsNullOrEmpty(calledMethod.ContainingClassName) &&
+                        calledMethod.ContainingClassName.StartsWith(namespaceAccess))
                     {
                         return true;
                     }
@@ -214,7 +211,8 @@ namespace HoneydewExtractors.Processors
                             AddAmbiguousNames(() =>
                             {
                                 classModel.BaseClassFullName = FindClassFullName(
-                                    classModel.BaseClassFullName, namespaceModel, projectModel, solutionModel,
+                                    classModel.BaseClassFullName, classModel.FilePath, namespaceModel, projectModel,
+                                    solutionModel,
                                     repositoryModel, classModel.Usings);
                             });
 
@@ -224,7 +222,7 @@ namespace HoneydewExtractors.Processors
                                 AddAmbiguousNames(() =>
                                 {
                                     classModel.BaseInterfaces[iCopy] = FindClassFullName(
-                                        classModel.BaseInterfaces[iCopy],
+                                        classModel.BaseInterfaces[iCopy], classModel.FilePath,
                                         namespaceModel, projectModel, solutionModel, repositoryModel,
                                         classModel.Usings);
                                 });
@@ -234,7 +232,7 @@ namespace HoneydewExtractors.Processors
                             {
                                 AddAmbiguousNames(() =>
                                 {
-                                    fieldModel.Type = FindClassFullName(fieldModel.Type,
+                                    fieldModel.Type = FindClassFullName(fieldModel.Type, classModel.FilePath,
                                         namespaceModel, projectModel, solutionModel, repositoryModel,
                                         classModel.Usings);
                                 });
@@ -244,12 +242,13 @@ namespace HoneydewExtractors.Processors
                             {
                                 AddAmbiguousNames(() =>
                                 {
-                                    propertyModel.Type = FindClassFullName(propertyModel.Type,
+                                    propertyModel.Type = FindClassFullName(propertyModel.Type, classModel.FilePath,
                                         namespaceModel, projectModel, solutionModel, repositoryModel,
                                         classModel.Usings);
                                 });
 
-                                SetContainingClassAndCalledMethodsFullNameProperty(propertyModel, namespaceModel,
+                                SetContainingClassAndCalledMethodsFullNameProperty(classModel.FilePath, propertyModel,
+                                    namespaceModel,
                                     projectModel, solutionModel, classModel.Usings);
                             }
 
@@ -258,17 +257,20 @@ namespace HoneydewExtractors.Processors
                                 AddAmbiguousNames(() =>
                                 {
                                     methodModel.ReturnType = FindClassFullName(methodModel.ReturnType,
+                                        classModel.FilePath,
                                         namespaceModel, projectModel, solutionModel, repositoryModel,
                                         classModel.Usings);
                                 });
 
-                                SetContainingClassAndCalledMethodsFullName(methodModel, namespaceModel,
+                                SetContainingClassAndCalledMethodsFullName(classModel.FilePath, methodModel,
+                                    namespaceModel,
                                     projectModel, solutionModel, classModel.Usings);
                             }
 
                             foreach (var methodModel in classModel.Constructors)
                             {
-                                SetContainingClassAndCalledMethodsFullName(methodModel, namespaceModel,
+                                SetContainingClassAndCalledMethodsFullName(classModel.FilePath, methodModel,
+                                    namespaceModel,
                                     projectModel, solutionModel, classModel.Usings);
                             }
 
@@ -279,26 +281,28 @@ namespace HoneydewExtractors.Processors
                 }
             }
 
-            void SetContainingClassAndCalledMethodsFullNameProperty(PropertyModel propertyModel,
+            void SetContainingClassAndCalledMethodsFullNameProperty(string classFilePath, PropertyModel propertyModel,
                 NamespaceModel namespaceModel,
                 ProjectModel projectModel, SolutionModel solutionModel, IList<UsingModel> usings)
             {
                 AddAmbiguousNames(() =>
                 {
                     propertyModel.ContainingClassName = FindClassFullName(propertyModel.ContainingClassName,
+                        classFilePath,
                         namespaceModel, projectModel, solutionModel, repositoryModel, usings);
                 });
 
-                SetFullNameForCalledMethods(propertyModel.CalledMethods, namespaceModel,
+                SetFullNameForCalledMethods(classFilePath, propertyModel.CalledMethods, namespaceModel,
                     projectModel, solutionModel, repositoryModel, usings);
             }
 
-            void SetContainingClassAndCalledMethodsFullName(MethodModel methodModel, NamespaceModel namespaceModel,
+            void SetContainingClassAndCalledMethodsFullName(string classFilePath, MethodModel methodModel,
+                NamespaceModel namespaceModel,
                 ProjectModel projectModel, SolutionModel solutionModel, IList<UsingModel> usings)
             {
                 AddAmbiguousNames(() =>
                 {
-                    methodModel.ContainingClassName = FindClassFullName(methodModel.ContainingClassName,
+                    methodModel.ContainingClassName = FindClassFullName(methodModel.ContainingClassName, classFilePath,
                         namespaceModel, projectModel, solutionModel, repositoryModel, usings);
                 });
 
@@ -306,17 +310,18 @@ namespace HoneydewExtractors.Processors
                 {
                     AddAmbiguousNames(() =>
                     {
-                        parameterModel.Type = FindClassFullName(parameterModel.Type, namespaceModel,
+                        parameterModel.Type = FindClassFullName(parameterModel.Type, classFilePath, namespaceModel,
                             projectModel, solutionModel, repositoryModel, usings);
                     });
                 }
 
-                SetFullNameForCalledMethods(methodModel.CalledMethods, namespaceModel,
+                SetFullNameForCalledMethods(classFilePath, methodModel.CalledMethods, namespaceModel,
                     projectModel, solutionModel, repositoryModel, usings);
             }
         }
 
-        private void SetFullNameForCalledMethods(IEnumerable<MethodCallModel> methodModelCalledMethods,
+        private void SetFullNameForCalledMethods(string classFilePath,
+            IEnumerable<MethodCallModel> methodModelCalledMethods,
             NamespaceModel namespaceModel, ProjectModel projectModel, SolutionModel solutionModel,
             RepositoryModel repositoryModel, IList<UsingModel> usings)
         {
@@ -326,16 +331,15 @@ namespace HoneydewExtractors.Processors
                 {
                     AddAmbiguousNames(() =>
                     {
-                        parameterModel.Type = FindClassFullName(parameterModel.Type, namespaceModel,
+                        parameterModel.Type = FindClassFullName(parameterModel.Type, classFilePath, namespaceModel,
                             projectModel, solutionModel, repositoryModel, usings);
                     });
                 }
 
                 AddAmbiguousNames(() =>
                 {
-                    calledMethod.ContainingClassName = FindClassFullName(
-                        calledMethod.ContainingClassName, namespaceModel, projectModel, solutionModel,
-                        repositoryModel, usings);
+                    calledMethod.ContainingClassName = FindClassFullName(calledMethod.ContainingClassName,
+                        classFilePath, namespaceModel, projectModel, solutionModel, repositoryModel, usings);
 
                     var classModel = GetClassModelFullyQualified(calledMethod.ContainingClassName, projectModel,
                         solutionModel,
@@ -519,7 +523,8 @@ namespace HoneydewExtractors.Processors
 
                     try
                     {
-                        var fullClassName = FindClassFullName(dependencyName, namespaceModel, projectModel,
+                        var fullClassName = FindClassFullName(dependencyName, classModel.FilePath, namespaceModel,
+                            projectModel,
                             solutionModel, repositoryModel, classModel.Usings);
 
                         if (fullNameDependencies.ContainsKey(fullClassName))
@@ -557,7 +562,8 @@ namespace HoneydewExtractors.Processors
             }
         }
 
-        private static string FindClassFullName(string className, NamespaceModel namespaceModelToStartSearchFrom,
+        private static string FindClassFullName(string className, string classFilePath,
+            NamespaceModel namespaceModelToStartSearchFrom,
             ProjectModel projectModelToStartSearchFrom, SolutionModel solutionModelToStartSearchFrom,
             RepositoryModel repositoryModel, IList<UsingModel> usings)
         {
@@ -591,7 +597,7 @@ namespace HoneydewExtractors.Processors
                     {
                         return usingModel.Name;
                     }
-                    
+
                     if (usingModel.AliasType != EAliasType.Namespace)
                     {
                         continue;
@@ -630,17 +636,23 @@ namespace HoneydewExtractors.Processors
                     case 1:
                         return ConvertToSystemName(fullNamePossibilities.First());
                     case > 1:
-                        throw new AmbiguousFullNameException(className, fullNamePossibilities);
+                        throw new AmbiguousFullNameException(new AmbiguousName
+                        {
+                            Name = className,
+                            Location = classFilePath
+                        }, fullNamePossibilities);
                 }
             }
 
-            if (TryToGetClassNameFromProject(className, projectModelToStartSearchFrom, out var fullNameFromProject))
+            if (TryToGetClassNameFromProject(className, classFilePath, projectModelToStartSearchFrom,
+                out var fullNameFromProject))
             {
                 return ConvertToSystemName(fullNameFromProject);
             }
 
             // search in all projects of solutionModel
-            if (TryToGetClassNameFromSolution(className, solutionModelToStartSearchFrom, out var fullNameFromSolution))
+            if (TryToGetClassNameFromSolution(className, classFilePath, solutionModelToStartSearchFrom,
+                out var fullNameFromSolution))
             {
                 return ConvertToSystemName(fullNameFromSolution);
             }
@@ -653,7 +665,7 @@ namespace HoneydewExtractors.Processors
                     continue;
                 }
 
-                if (TryToGetClassNameFromSolution(className, solution, out var fullName))
+                if (TryToGetClassNameFromSolution(className, classFilePath, solution, out var fullName))
                 {
                     fullNamePossibilities.Add(fullName);
                 }
@@ -662,12 +674,17 @@ namespace HoneydewExtractors.Processors
             return fullNamePossibilities.Count switch
             {
                 1 => ConvertToSystemName(fullNamePossibilities.First()),
-                > 1 => throw new AmbiguousFullNameException(className, fullNamePossibilities),
+                > 1 => throw new AmbiguousFullNameException(new AmbiguousName
+                {
+                    Name = className,
+                    Location = classFilePath
+                }, fullNamePossibilities),
                 _ => ConvertToSystemName(className)
             };
         }
 
-        private static bool TryToGetClassNameFromSolution(string className, SolutionModel solutionModel,
+        private static bool TryToGetClassNameFromSolution(string className, string classFilePath,
+            SolutionModel solutionModel,
             out string outFullName)
         {
             var fullNamePossibilities = new List<string>();
@@ -675,7 +692,7 @@ namespace HoneydewExtractors.Processors
 
             foreach (var projectModel in solutionModel.Projects)
             {
-                if (TryToGetClassNameFromProject(className, projectModel, out var fullName))
+                if (TryToGetClassNameFromProject(className, classFilePath, projectModel, out var fullName))
                 {
                     fullNamePossibilities.Add(fullName);
                 }
@@ -689,13 +706,18 @@ namespace HoneydewExtractors.Processors
                     return true;
                 }
                 case > 1:
-                    throw new AmbiguousFullNameException(className, fullNamePossibilities);
+                    throw new AmbiguousFullNameException(new AmbiguousName
+                    {
+                        Name = className,
+                        Location = classFilePath
+                    }, fullNamePossibilities);
             }
 
             return false;
         }
 
-        private static bool TryToGetClassNameFromProject(string className, ProjectModel projectModel,
+        private static bool TryToGetClassNameFromProject(string className, string classFilePath,
+            ProjectModel projectModel,
             out string outFullName)
         {
             var fullNamePossibilities = new List<string>();
@@ -717,7 +739,11 @@ namespace HoneydewExtractors.Processors
                     return true;
                 }
                 case > 1:
-                    throw new AmbiguousFullNameException(className, fullNamePossibilities);
+                    throw new AmbiguousFullNameException(new AmbiguousName
+                    {
+                        Name = className,
+                        Location = classFilePath
+                    }, fullNamePossibilities);
             }
 
             return false;
@@ -832,6 +858,24 @@ namespace HoneydewExtractors.Processors
             }
 
             return null;
+        }
+
+        private class AmbiguousFullNameException : Exception
+        {
+            public AmbiguousName AmbiguousName { get; }
+            public IList<string> PossibleNames { get; }
+
+            public AmbiguousFullNameException(AmbiguousName ambiguousName, IList<string> possibleNames)
+            {
+                AmbiguousName = ambiguousName;
+                PossibleNames = possibleNames;
+            }
+        }
+
+        private record AmbiguousName
+        {
+            public string Name { get; set; }
+            public string Location { get; set; }
         }
     }
 }

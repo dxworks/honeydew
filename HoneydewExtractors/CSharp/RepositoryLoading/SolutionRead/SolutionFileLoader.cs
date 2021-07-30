@@ -28,15 +28,15 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead
 
         public async Task<SolutionModel> LoadSolution(string pathToFile)
         {
-            _progressLogger.LogLine();
-            _progressLogger.LogLine();
-            _progressLogger.LogLine($"Opening the solution from {pathToFile}");
+            _progressLogger.Log();
+            _progressLogger.Log();
+            _progressLogger.Log($"Opening the solution from {pathToFile}");
 
             try
             {
                 var solution = await _solutionProvider.GetSolution(pathToFile);
 
-                _progressLogger.LogLine($"Found {solution?.Projects.Count()} C# Projects in solution {pathToFile}");
+                _progressLogger.Log($"Found {solution?.Projects.Count()} C# Projects in solution {pathToFile}");
 
                 var solutionModel = await _solutionLoadingStrategy.Load(solution, _extractor);
 
@@ -44,7 +44,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead
             }
             catch (Exception e)
             {
-                await Console.Error.WriteLineAsync($"Could not open solution from {pathToFile} because {e}");
+                _progressLogger.Log($"Could not open solution from {pathToFile} because {e}", LogLevels.Error);
             }
 
             return null;

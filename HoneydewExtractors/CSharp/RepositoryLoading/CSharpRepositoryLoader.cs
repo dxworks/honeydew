@@ -38,7 +38,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
             {
                 if (path.EndsWith(SlnExtension))
                 {
-                    _progressLogger.LogLine($"Solution file found at {path}");
+                    _progressLogger.Log($"Solution file found at {path}");
 
                     var solutionLoader = new SolutionFileLoader(_progressLogger, _extractor,
                         new MsBuildSolutionProvider(),
@@ -51,10 +51,10 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                 }
                 else if (path.EndsWith(CsprojExtension))
                 {
-                    _progressLogger.LogLine($"C# Project file found at {path}");
+                    _progressLogger.Log($"C# Project file found at {path}");
 
                     var projectLoader = new ProjectLoader(_extractor, new MsBuildProjectProvider(),
-                        _projectLoadingStrategy);
+                        _projectLoadingStrategy, _progressLogger);
                     var projectModel = await projectLoader.Load(path);
 
                     if (projectModel != null)
@@ -67,18 +67,18 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                 }
                 else
                 {
-                    _progressLogger.LogLine($"No Solution file or C# Project file found at {path}");
+                    _progressLogger.Log($"No Solution file or C# Project file found at {path}");
 
                     throw new SolutionNotFoundException();
                 }
             }
             else if (Directory.Exists(path))
             {
-                _progressLogger.LogLine($"Searching for solution files at {path}");
+                _progressLogger.Log($"Searching for solution files at {path}");
 
                 var solutionPaths = Directory.GetFiles(path, $"*{SlnExtension}", SearchOption.AllDirectories);
 
-                _progressLogger.LogLine($"Found {solutionPaths.Length} Solutions");
+                _progressLogger.Log($"Found {solutionPaths.Length} Solutions");
 
                 foreach (var solutionPath in solutionPaths)
                 {
@@ -92,7 +92,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                     }
                 }
 
-                _progressLogger.LogLine(
+                _progressLogger.Log(
                     $"Searching for C# Project files that are not in any of the found solutions at {path}");
 
                 var defaultSolutionModel = new SolutionModel();
@@ -107,10 +107,10 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
 
                     if (isUsedInASolution) continue;
 
-                    _progressLogger.LogLine($"C# Project file found at {projectPath}");
+                    _progressLogger.Log($"C# Project file found at {projectPath}");
 
                     var projectLoader = new ProjectLoader(_extractor, new MsBuildProjectProvider(),
-                        _projectLoadingStrategy);
+                        _projectLoadingStrategy, _progressLogger);
                     var projectModel = await projectLoader.Load(projectPath);
                     if (projectModel != null)
                     {
@@ -120,7 +120,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
 
                 if (defaultSolutionModel.Projects.Count > 0)
                 {
-                    _progressLogger.LogLine(
+                    _progressLogger.Log(
                         $"{defaultSolutionModel.Projects.Count} C# Projects were found that didn't belong to any solution file");
 
                     repositoryModel.Solutions.Add(defaultSolutionModel);
