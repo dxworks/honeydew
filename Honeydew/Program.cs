@@ -34,7 +34,7 @@ namespace Honeydew
             await result.MapResult(async options =>
             {
                 var inputPath = options.InputFilePath;
-                var progressLogger = new ConsoleProgressLogger();
+                SerilogLogger progressLogger = new SerilogLogger($"{DefaultPathForAllRepresentations}/logs.txt");
 
                 RepositoryModel repositoryModel;
                 switch (options.Command)
@@ -58,9 +58,10 @@ namespace Honeydew
                     }
                 }
 
-                progressLogger.LogLine("Resolving Full Name Dependencies");
+                progressLogger.Log();
+                progressLogger.Log("Resolving Full Name Dependencies");
 
-                ConsoleLoggerWithHistory consoleLoggerWithHistory = new(new ConsoleProgressLogger());
+                ConsoleLoggerWithHistory consoleLoggerWithHistory = new(progressLogger);
 
                 // Post Extraction Repository model processing
                 repositoryModel = new FullNameModelProcessor(consoleLoggerWithHistory).Process(repositoryModel);
@@ -70,8 +71,10 @@ namespace Honeydew
 
                 WriteAllRepresentations(repositoryModel, consoleLoggerWithHistory, DefaultPathForAllRepresentations);
 
-                progressLogger.LogLine("Extraction Complete!");
-                progressLogger.LogLine($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
+                progressLogger.Log("Extraction Complete!");
+                progressLogger.Log($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
+                
+                progressLogger.CloseAndFlush();    
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
@@ -102,7 +105,7 @@ namespace Honeydew
             // Create repository model from path
             var projectLoadingStrategy = new BasicProjectLoadingStrategy(progressLogger);
             var solutionLoadingStrategy = new BasicSolutionLoadingStrategy(progressLogger, projectLoadingStrategy);
-            
+
             var repositoryLoader = new CSharpRepositoryLoader(projectLoadingStrategy, solutionLoadingStrategy,
                 progressLogger, LoadExtractor());
             var repositoryModel = await repositoryLoader.Load(inputPath);

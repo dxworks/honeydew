@@ -2,8 +2,13 @@
 {
     public interface IProgressLogger
     {
-        public void LogLine(string value = "");
+        public void Log(string value = "", LogLevels logLevel = LogLevels.Information);
+    }
 
-        public void Log(string value);
+    public enum LogLevels
+    {
+        Information,
+        Warning,
+        Error,
     }
 }

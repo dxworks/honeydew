@@ -13,21 +13,15 @@ namespace Honeydew
             _progressLogger = progressLogger;
         }
 
-        public void LogLine(string value = "")
-        {
-            _progressLogger.LogLine(value);
-            _history.AppendLine(value);
-        }
-
-        public void Log(string value)
-        {
-            _progressLogger.Log(value);
-            _history.Append(value);
-        }
-
         public string GetHistory()
         {
             return _history.ToString();
+        }
+
+        public void Log(string value = "", LogLevels logLevel = LogLevels.Information)
+        {
+            _progressLogger.Log(value);
+            _history.AppendLine(value);
         }
     }
 }
