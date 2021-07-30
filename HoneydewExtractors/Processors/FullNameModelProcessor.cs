@@ -13,8 +13,8 @@ namespace HoneydewExtractors.Processors
     {
         private readonly IProgressLogger _progressLogger;
 
-        private readonly IDictionary<AmbiguousName, IList<string>> _ambiguousNames =
-            new Dictionary<AmbiguousName, IList<string>>();
+        private readonly IDictionary<AmbiguousName, ISet<string>> _ambiguousNames =
+            new Dictionary<AmbiguousName, ISet<string>>();
 
         public FullNameModelProcessor(IProgressLogger progressLogger)
         {
@@ -26,10 +26,10 @@ namespace HoneydewExtractors.Processors
             _progressLogger.Log("Resolving Class Names");
             SetFullNameForClassModels(repositoryModel);
 
-            _progressLogger.Log("Resolving Using Statements for each class");
+            _progressLogger.Log("Resolving Using Statements for Each Class");
             SetFullNameForUsings(repositoryModel);
 
-            _progressLogger.Log("Resolving class elements");
+            _progressLogger.Log("Resolving Class Elements (Fields, Methods, Properties,...)");
             SetFullNameForClassModelComponents(repositoryModel);
 
             foreach (var (ambiguousName, possibilities) in _ambiguousNames)
@@ -585,7 +585,7 @@ namespace HoneydewExtractors.Processors
             }
 
             // search in all provided usings
-            List<string> fullNamePossibilities;
+            HashSet<string> fullNamePossibilities;
             if (usings != null)
             {
                 // try searching for the aliases
@@ -615,7 +615,7 @@ namespace HoneydewExtractors.Processors
                     }
                 }
 
-                fullNamePossibilities = new List<string>();
+                fullNamePossibilities = new HashSet<string>();
                 foreach (var usingModel in usings)
                 {
                     var usingNamespace =
@@ -657,7 +657,7 @@ namespace HoneydewExtractors.Processors
                 return ConvertToSystemName(fullNameFromSolution);
             }
 
-            fullNamePossibilities = new List<string>();
+            fullNamePossibilities = new HashSet<string>();
             foreach (var solution in repositoryModel.Solutions)
             {
                 if (solution == solutionModelToStartSearchFrom)
@@ -687,7 +687,7 @@ namespace HoneydewExtractors.Processors
             SolutionModel solutionModel,
             out string outFullName)
         {
-            var fullNamePossibilities = new List<string>();
+            var fullNamePossibilities = new HashSet<string>();
             outFullName = className;
 
             foreach (var projectModel in solutionModel.Projects)
@@ -720,7 +720,7 @@ namespace HoneydewExtractors.Processors
             ProjectModel projectModel,
             out string outFullName)
         {
-            var fullNamePossibilities = new List<string>();
+            var fullNamePossibilities = new HashSet<string>();
             outFullName = className;
 
             foreach (var namespaceModel in projectModel.Namespaces)
@@ -863,9 +863,9 @@ namespace HoneydewExtractors.Processors
         private class AmbiguousFullNameException : Exception
         {
             public AmbiguousName AmbiguousName { get; }
-            public IList<string> PossibleNames { get; }
+            public ISet<string> PossibleNames { get; }
 
-            public AmbiguousFullNameException(AmbiguousName ambiguousName, IList<string> possibleNames)
+            public AmbiguousFullNameException(AmbiguousName ambiguousName, ISet<string> possibleNames)
             {
                 AmbiguousName = ambiguousName;
                 PossibleNames = possibleNames;

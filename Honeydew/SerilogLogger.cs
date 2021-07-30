@@ -1,7 +1,8 @@
-﻿using Serilog;
+﻿using HoneydewCore.Logging;
+using Serilog;
 using Serilog.Core;
 
-namespace HoneydewCore.Logging
+namespace Honeydew
 {
     public class SerilogLogger : IProgressLogger
     {

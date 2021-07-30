@@ -4,7 +4,7 @@ namespace Honeydew
 {
     public class CommandLineOptions
     {
-        private const string CommandThatWillBeExecutedMessage = @"Command that will be executed";
+        private const string CommandThatWillBeExecutedMessage = "Command that will be executed";
 
         [Value(0, Required = true, HelpText = CommandThatWillBeExecutedMessage, Default = "extract")]
         public string Command { get; set; }

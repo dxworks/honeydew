@@ -5,17 +5,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="IO\Writers\" />
+        <Folder Include="IO\Writers\"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\HoneydewModels\HoneydewModels.csproj" />
+        <ProjectReference Include="..\HoneydewModels\HoneydewModels.csproj"/>
     </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Serilog" Version="2.10.1-dev-01343" />
-      <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1-dev-00874" />
-      <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-    </ItemGroup>
-
 </Project>

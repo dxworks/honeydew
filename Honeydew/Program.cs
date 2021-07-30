@@ -33,8 +33,13 @@ namespace Honeydew
 
             await result.MapResult(async options =>
             {
+                var logFilePath = $"{DefaultPathForAllRepresentations}/logs.txt";
+                var progressLogger = new SerilogLogger(logFilePath);
+
+                progressLogger.Log($"Log will be stored at {logFilePath}");
+                progressLogger.Log();
+
                 var inputPath = options.InputFilePath;
-                SerilogLogger progressLogger = new SerilogLogger($"{DefaultPathForAllRepresentations}/logs.txt");
 
                 RepositoryModel repositoryModel;
                 switch (options.Command)
@@ -61,20 +66,20 @@ namespace Honeydew
                 progressLogger.Log();
                 progressLogger.Log("Resolving Full Name Dependencies");
 
-                ConsoleLoggerWithHistory consoleLoggerWithHistory = new(progressLogger);
-
                 // Post Extraction Repository model processing
-                repositoryModel = new FullNameModelProcessor(consoleLoggerWithHistory).Process(repositoryModel);
-
                 repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
 
+                repositoryModel = new FullNameModelProcessor(progressLogger).Process(repositoryModel);
 
-                WriteAllRepresentations(repositoryModel, consoleLoggerWithHistory, DefaultPathForAllRepresentations);
 
+                WriteAllRepresentations(repositoryModel, DefaultPathForAllRepresentations);
+
+                progressLogger.Log();
                 progressLogger.Log("Extraction Complete!");
+                progressLogger.Log();
                 progressLogger.Log($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
-                
-                progressLogger.CloseAndFlush();    
+
+                progressLogger.CloseAndFlush();
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
@@ -113,8 +118,7 @@ namespace Honeydew
             return repositoryModel;
         }
 
-        private static void WriteAllRepresentations(RepositoryModel repositoryModel,
-            ConsoleLoggerWithHistory consoleLoggerWithHistory, string outputPath)
+        private static void WriteAllRepresentations(RepositoryModel repositoryModel, string outputPath)
         {
             var writer = new FileWriter();
 
@@ -125,13 +129,6 @@ namespace Honeydew
             var csvModelExporter = GetClassRelationsRepresentationExporter();
             writer.WriteFile(Path.Combine(outputPath, "honeydew.csv"),
                 csvModelExporter.Export(classRelationsRepresentation));
-
-
-            var ambiguousHistory = consoleLoggerWithHistory.GetHistory();
-            if (!string.IsNullOrEmpty(ambiguousHistory))
-            {
-                writer.WriteFile(Path.Combine(outputPath, "honeydew_ambiguous.txt"), ambiguousHistory);
-            }
         }
 
         private static IModelExporter<RepositoryModel> GetRepositoryModelExporter()
