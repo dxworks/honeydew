@@ -36,6 +36,8 @@ namespace HoneydewExtractors.Processors
         {
             SetFullNameForClassModels(repositoryModel);
 
+            SetFullNameForUsings(repositoryModel);
+
             SetFullNameForClassModelComponents(repositoryModel);
 
             foreach (var (ambiguousName, possibilities) in _ambiguousNames)
@@ -84,6 +86,118 @@ namespace HoneydewExtractors.Processors
                         }
                     }
                 }
+            }
+        }
+
+        private void SetFullNameForUsings(RepositoryModel repositoryModel)
+        {
+            foreach (var solutionModel in repositoryModel.Solutions)
+            {
+                foreach (var projectModel in solutionModel.Projects)
+                {
+                    foreach (var namespaceModel in projectModel.Namespaces)
+                    {
+                        foreach (var classModel in namespaceModel.ClassModels)
+                        {
+                            foreach (var usingModel in classModel.Usings)
+                            {
+                                if (usingModel.AliasType == EAliasType.NotDetermined)
+                                {
+                                    usingModel.AliasType = DetermineUsingType(usingModel, classModel);
+                                }
+
+                                if (usingModel.AliasType != EAliasType.Class)
+                                {
+                                    continue;
+                                }
+
+                                AddAmbiguousNames(() =>
+                                {
+                                    usingModel.Name = FindClassFullName(usingModel.Name, namespaceModel,
+                                        projectModel, solutionModel, repositoryModel, classModel.Usings);
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private static EAliasType DetermineUsingType(UsingModel usingModel, ClassModel classModel)
+        {
+            var namespaceAccess = $"{usingModel.Alias}.";
+
+            if (classModel.Fields.Any(fieldModel => fieldModel.Type.StartsWith(namespaceAccess)))
+            {
+                return EAliasType.Namespace;
+            }
+
+            foreach (var propertyModel in classModel.Properties)
+            {
+                if (propertyModel.Type.StartsWith(namespaceAccess))
+                {
+                    return EAliasType.Namespace;
+                }
+
+                if (IsAliasNamespaceSearchInCalledMethods(propertyModel.CalledMethods))
+                {
+                    return EAliasType.Namespace;
+                }
+            }
+
+            if (IsAliasNamespaceSearchInMethodModels(classModel.Methods))
+            {
+                return EAliasType.Namespace;
+            }
+
+            if (IsAliasNamespaceSearchInMethodModels(classModel.Constructors))
+            {
+                return EAliasType.Namespace;
+            }
+
+            return EAliasType.Class;
+
+            bool IsAliasNamespaceSearchInMethodModels(IEnumerable<MethodModel> methodModels)
+            {
+                foreach (var methodModel in methodModels)
+                {
+                    if (!string.IsNullOrEmpty(methodModel.ReturnType) && methodModel.ReturnType.StartsWith(namespaceAccess))
+                    {
+                        return true;
+                    }
+
+                    if (methodModel.ParameterTypes.Any(parameterModel =>
+                        parameterModel.Type.StartsWith(namespaceAccess)))
+                    {
+                        return true;
+                    }
+
+                    if (IsAliasNamespaceSearchInCalledMethods(methodModel.CalledMethods))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            bool IsAliasNamespaceSearchInCalledMethods(IEnumerable<MethodCallModel> calledMethods)
+            {
+                foreach (var calledMethod in calledMethods)
+                {
+                    if (calledMethod.ContainingClassName.StartsWith(namespaceAccess))
+                    {
+                        return true;
+                    }
+
+                    if (calledMethod.ParameterTypes.Any(parameterModel =>
+                        parameterModel.Type.StartsWith(namespaceAccess)))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
         }
 
@@ -295,10 +409,11 @@ namespace HoneydewExtractors.Processors
                 }
             }
 
-            return "";
+            return containingClassName;
         }
 
-        private bool MethodsHaveTheSameSignature(string firstMethodName, IList<ParameterModel> firstMethodParameters,
+        private static bool MethodsHaveTheSameSignature(string firstMethodName,
+            IList<ParameterModel> firstMethodParameters,
             string secondMethodName, IList<ParameterModel> secondMethodParameters)
         {
             if (firstMethodName != secondMethodName)
@@ -467,6 +582,33 @@ namespace HoneydewExtractors.Processors
             List<string> fullNamePossibilities;
             if (usings != null)
             {
+                // try searching for the aliases
+                // if one class alias is found that matched, return the name
+                // if one namespace alias is found, replace the alias with the real name of the namespace
+                foreach (var usingModel in usings)
+                {
+                    if (usingModel.AliasType == EAliasType.Class && className == usingModel.Alias)
+                    {
+                        return usingModel.Name;
+                    }
+                    
+                    if (usingModel.AliasType != EAliasType.Namespace)
+                    {
+                        continue;
+                    }
+
+                    if (!className.StartsWith(usingModel.Alias))
+                    {
+                        continue;
+                    }
+
+                    if (projectModelToStartSearchFrom.Namespaces.FirstOrDefault(model =>
+                        model.Name == usingModel.Name) != null)
+                    {
+                        return className.Replace(usingModel.Alias, usingModel.Name);
+                    }
+                }
+
                 fullNamePossibilities = new List<string>();
                 foreach (var usingModel in usings)
                 {

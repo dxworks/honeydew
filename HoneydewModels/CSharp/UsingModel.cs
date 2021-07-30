@@ -3,9 +3,9 @@
     public record UsingModel
     {
         public string Name { get; set; }
-        public bool IsStatic { get; set; }
+        public bool IsStatic { get; init; }
 
-        public string Alias { get; set; } = "";
+        public string Alias { get; init; } = "";
 
         public EAliasType AliasType { get; set; }
     }
@@ -14,6 +14,7 @@
     {
         None,
         Namespace,
-        Class
+        Class,
+        NotDetermined
     }
 }

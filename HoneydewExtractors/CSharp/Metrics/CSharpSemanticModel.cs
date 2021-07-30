@@ -194,17 +194,16 @@ namespace HoneydewExtractors.CSharp.Metrics
 
                 foreach (var argumentSyntax in invocationSyntax.ArgumentList.Arguments)
                 {
-                    
                     var parameterSymbolInfo = Model.GetSymbolInfo(argumentSyntax.Expression);
                     if (parameterSymbolInfo.Symbol != null)
                     {
                         parameterList.Add(new ParameterModel
                         {
-                            Type = GetFullName(argumentSyntax.Expression) 
+                            Type = GetFullName(argumentSyntax.Expression)
                         });
                         continue;
                     }
-                    
+
                     if (argumentSyntax.Expression is not LiteralExpressionSyntax literalExpressionSyntax)
                     {
                         success = false;
@@ -219,7 +218,7 @@ namespace HoneydewExtractors.CSharp.Metrics
 
                     parameterList.Add(new ParameterModel
                     {
-                        Type = literalExpressionSyntax.Token.Value.GetType().FullName 
+                        Type = literalExpressionSyntax.Token.Value.GetType().FullName
                     });
                 }
 
@@ -241,6 +240,11 @@ namespace HoneydewExtractors.CSharp.Metrics
                 case IFieldSymbol fieldSymbol:
                     return fieldSymbol.Type.ToDisplayString();
                 case IMethodSymbol methodSymbol:
+                    if (expressionSyntax is ObjectCreationExpressionSyntax && methodSymbol.ReceiverType != null)
+                    {
+                        return methodSymbol.ReceiverType.ToDisplayString();
+                    }
+
                     return methodSymbol.ReturnType.ToDisplayString();
                 default:
                 {
@@ -254,17 +258,15 @@ namespace HoneydewExtractors.CSharp.Metrics
             }
         }
 
-        public bool IsNamespace(NameSyntax nodeName)
+        public EAliasType GetAliasTypeOfNamespace(NameSyntax nodeName)
         {
             var symbolInfo = Model.GetSymbolInfo(nodeName);
-            switch (symbolInfo.Symbol)
+            return symbolInfo.Symbol switch
             {
-                case null:
-                case INamespaceSymbol:
-                    return true;
-                default:
-                    return false;
-            }
+                null => EAliasType.NotDetermined,
+                INamespaceSymbol => EAliasType.Namespace,
+                _ => EAliasType.Class
+            };
         }
     }
 }

@@ -47,7 +47,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel
 
             if (!string.IsNullOrEmpty(alias))
             {
-                aliasType = HoneydewSemanticModel.IsNamespace(node.Name) ? EAliasType.Namespace : EAliasType.Class;
+                aliasType = HoneydewSemanticModel.GetAliasTypeOfNamespace(node.Name);
             }
 
             var cSharpUsing = new UsingModel()
