@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using HoneydewCore.Models;
+﻿using HoneydewModels.CSharp;
 using Xunit;
 
 namespace HoneydewCoreTest.Models
@@ -19,16 +18,16 @@ namespace HoneydewCoreTest.Models
             _sut.Add(new ClassModel {FullName = "Models.Class"});
 
             Assert.Equal(1, _sut.Namespaces.Count);
-            Assert.Equal("Models", _sut.Namespaces["Models"].Name);
+            Assert.Equal("Models", _sut.Namespaces[0].Name);
         }
-        
+
         [Fact]
         public void Add_ShouldAddNewClass_WhenClassIsFromDefaultNamespace()
         {
             _sut.Add(new ClassModel {FullName = "GlobalClass"});
 
             Assert.Equal(1, _sut.Namespaces.Count);
-            Assert.Equal("", _sut.Namespaces[""].Name);
+            Assert.Equal("", _sut.Namespaces[0].Name);
         }
 
         [Fact]
@@ -40,10 +39,10 @@ namespace HoneydewCoreTest.Models
             _sut.Add(new ClassModel {FullName = "Services.S1"});
 
             Assert.Equal(4, _sut.Namespaces.Count);
-            Assert.Equal("Models", _sut.Namespaces["Models"].Name);
-            Assert.Equal("Models.Domain", _sut.Namespaces["Models.Domain"].Name);
-            Assert.Equal("Items", _sut.Namespaces["Items"].Name);
-            Assert.Equal("Services", _sut.Namespaces["Services"].Name);
+            Assert.Equal("Models", _sut.Namespaces[0].Name);
+            Assert.Equal("Models.Domain", _sut.Namespaces[1].Name);
+            Assert.Equal("Items", _sut.Namespaces[2].Name);
+            Assert.Equal("Services", _sut.Namespaces[3].Name);
         }
 
         [Fact]
@@ -53,7 +52,7 @@ namespace HoneydewCoreTest.Models
             _sut.Add(new ClassModel {FullName = "Models.M2"});
 
             Assert.Equal(1, _sut.Namespaces.Count);
-            Assert.Equal("Models", _sut.Namespaces["Models"].Name);
+            Assert.Equal("Models", _sut.Namespaces[0].Name);
         }
     }
 }

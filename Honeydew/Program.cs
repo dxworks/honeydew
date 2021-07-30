@@ -3,17 +3,23 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using CommandLine;
-using HoneydewCore.Extractors;
-using HoneydewCore.Extractors.Metrics.CompilationUnitMetrics;
-using HoneydewCore.Extractors.Metrics.SemanticMetrics;
-using HoneydewCore.Extractors.Metrics.SyntacticMetrics;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Writers;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Logging;
-using HoneydewCore.Models;
-using HoneydewCore.Models.Representations;
+using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
+using HoneydewExtractors.Core;
+using HoneydewExtractors.Core.Metrics;
+using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
+using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
+using HoneydewExtractors.CSharp.RepositoryLoading;
+using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
+using HoneydewExtractors.Processors;
+using HoneydewModels.CSharp;
+using HoneydewModels.Exporters;
+using HoneydewModels.Importers;
 
 namespace Honeydew
 {
@@ -41,8 +47,7 @@ namespace Honeydew
 
                     case "extract":
                     {
-                        var extractors = LoadExtractors();
-                        repositoryModel = await ExtractModel(progressLogger, inputPath, extractors);
+                        repositoryModel = await ExtractModel(progressLogger, inputPath);
                     }
                         break;
 
@@ -56,10 +61,12 @@ namespace Honeydew
                 progressLogger.LogLine("Resolving Full Name Dependencies");
 
                 ConsoleLoggerWithHistory consoleLoggerWithHistory = new(new ConsoleProgressLogger());
-                // Set fully qualified names to classes
-                repositoryModel = new ProcessorChain(IProcessable.Of(repositoryModel))
-                    .Process(new FullNameModelProcessor(consoleLoggerWithHistory))
-                    .Finish<RepositoryModel>().Value;
+
+                // Post Extraction Repository model processing
+                repositoryModel = new FullNameModelProcessor(consoleLoggerWithHistory).Process(repositoryModel);
+
+                repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
+
 
                 WriteAllRepresentations(repositoryModel, consoleLoggerWithHistory, DefaultPathForAllRepresentations);
 
@@ -68,37 +75,36 @@ namespace Honeydew
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
-        private static IList<IFactExtractor> LoadExtractors()
+        private static CSharpFactExtractor LoadExtractor()
         {
-            var cSharpClassFactExtractor = new CSharpClassFactExtractor();
-            cSharpClassFactExtractor.AddMetric<BaseClassMetric>();
-            cSharpClassFactExtractor.AddMetric<UsingsCountMetric>();
-            cSharpClassFactExtractor.AddMetric<IsAbstractMetric>();
-            cSharpClassFactExtractor.AddMetric<ParameterDependencyMetric>();
-            cSharpClassFactExtractor.AddMetric<ReturnValueDependencyMetric>();
-            cSharpClassFactExtractor.AddMetric<LocalVariablesDependencyMetric>();
+            var cSharpFactExtractor = new CSharpFactExtractor();
+            cSharpFactExtractor.AddMetric<CSharpBaseClassMetric>();
+            cSharpFactExtractor.AddMetric<CSharpUsingsCountMetric>();
+            cSharpFactExtractor.AddMetric<CSharpIsAbstractMetric>();
+            cSharpFactExtractor.AddMetric<CSharpParameterDependencyMetric>();
+            cSharpFactExtractor.AddMetric<CSharpReturnValueDependencyMetric>();
+            cSharpFactExtractor.AddMetric<CSharpLocalVariablesDependencyMetric>();
 
-            var extractors = new List<IFactExtractor>
-            {
-                cSharpClassFactExtractor
-            };
-
-            return extractors;
+            return cSharpFactExtractor;
         }
 
         private static async Task<RepositoryModel> LoadModel(IProgressLogger progressLogger, string inputPath)
         {
             // Load repository model from path
-            IRepositoryLoader repositoryLoader = new RawFileRepositoryLoader(progressLogger, new FileReader());
+            IRepositoryLoader<RepositoryModel> repositoryLoader =
+                new RawCSharpFileRepositoryLoader(progressLogger, new FileReader(), new JsonRepositoryModelImporter());
             var repositoryModel = await repositoryLoader.Load(inputPath);
             return repositoryModel;
         }
 
-        private static async Task<RepositoryModel> ExtractModel(IProgressLogger progressLogger, string inputPath,
-            IList<IFactExtractor> extractors)
+        private static async Task<RepositoryModel> ExtractModel(IProgressLogger progressLogger, string inputPath)
         {
             // Create repository model from path
-            IRepositoryLoader repositoryLoader = new RepositoryLoader(progressLogger, extractors);
+            var projectLoadingStrategy = new BasicProjectLoadingStrategy(progressLogger);
+            var solutionLoadingStrategy = new BasicSolutionLoadingStrategy(progressLogger, projectLoadingStrategy);
+            
+            var repositoryLoader = new CSharpRepositoryLoader(projectLoadingStrategy, solutionLoadingStrategy,
+                progressLogger, LoadExtractor());
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;
@@ -109,18 +115,13 @@ namespace Honeydew
         {
             var writer = new FileWriter();
 
-            writer.WriteFile(Path.Combine(outputPath, "honeydew.json"),
-                repositoryModel.Export(new JsonModelExporter()));
+            var repositoryExporter = GetRepositoryModelExporter();
+            writer.WriteFile(Path.Combine(outputPath, "honeydew.json"), repositoryExporter.Export(repositoryModel));
 
             var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
+            var csvModelExporter = GetClassRelationsRepresentationExporter();
             writer.WriteFile(Path.Combine(outputPath, "honeydew.csv"),
-                classRelationsRepresentation.Export(new CsvModelExporter
-                {
-                    ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
-                    {
-                        new("Total Count", ExportUtils.CsvSumPerLine)
-                    }
-                }));
+                csvModelExporter.Export(classRelationsRepresentation));
 
 
             var ambiguousHistory = consoleLoggerWithHistory.GetHistory();
@@ -130,15 +131,30 @@ namespace Honeydew
             }
         }
 
-        private static IExportable GetClassRelationsRepresentation(RepositoryModel repositoryModel)
+        private static IModelExporter<RepositoryModel> GetRepositoryModelExporter()
         {
-            var classRelationsProcessable = new ProcessorChain(IProcessable.Of(repositoryModel))
-                .Process(new RepositoryModelToClassRelationsProcessor())
-                .Peek<ClassRelationsRepresentation>(relationsRepresentation =>
-                    relationsRepresentation.UsePrettyPrint = true)
-                .Finish<ClassRelationsRepresentation>();
-            IExportable exportable = classRelationsProcessable.Value;
-            return exportable;
+            return new JsonRepositoryModelExporter();
+        }
+
+        private static IModelExporter<ClassRelationsRepresentation> GetClassRelationsRepresentationExporter()
+        {
+            var csvModelExporter = new CsvClassRelationsRepresentationExporter
+            {
+                ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
+                {
+                    new("Total Count", ExportUtils.CsvSumPerLine)
+                }
+            };
+
+            return csvModelExporter;
+        }
+
+        private static ClassRelationsRepresentation GetClassRelationsRepresentation(RepositoryModel repositoryModel)
+        {
+            var classRelationsRepresentation =
+                new RepositoryModelToClassRelationsProcessor(new MetricRelationsProvider(), new MetricPrettier(), true)
+                    .Process(repositoryModel);
+            return classRelationsRepresentation;
         }
     }
 }

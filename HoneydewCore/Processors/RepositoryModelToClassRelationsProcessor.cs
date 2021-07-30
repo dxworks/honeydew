@@ -1,56 +1,55 @@
-﻿using System;
-using HoneydewCore.Extractors.Metrics;
-using HoneydewCore.Models;
-using HoneydewCore.Models.Representations;
+﻿using HoneydewCore.ModelRepresentations;
+using HoneydewModels.CSharp;
 
 namespace HoneydewCore.Processors
 {
     public class
         RepositoryModelToClassRelationsProcessor : IProcessorFunction<RepositoryModel, ClassRelationsRepresentation>
     {
-        public Func<Processable<RepositoryModel>, Processable<ClassRelationsRepresentation>> GetFunction()
+        private readonly IMetricRelationsProvider _metricRelationsProvider;
+        private readonly IMetricPrettier _metricPrettier;
+        private readonly bool _usePrettyPrint;
+
+        public RepositoryModelToClassRelationsProcessor(IMetricRelationsProvider metricRelationsProvider,
+            IMetricPrettier metricPrettier,
+            bool usePrettyPrint)
         {
-            return processable =>
+            _metricRelationsProvider = metricRelationsProvider;
+            _metricPrettier = metricPrettier;
+            _usePrettyPrint = usePrettyPrint;
+        }
+
+        public ClassRelationsRepresentation Process(RepositoryModel repositoryModel)
+        {
+            var classRelationsRepresentation = new ClassRelationsRepresentation(_metricPrettier)
             {
-                var repositoryModel = processable.Value;
+                UsePrettyPrint = _usePrettyPrint
+            };
 
-                var classRelationsRepresentation = new ClassRelationsRepresentation();
+            if (repositoryModel == null)
+                return classRelationsRepresentation;
 
-                if (repositoryModel == null)
-                    return new Processable<ClassRelationsRepresentation>(classRelationsRepresentation);
-
-                foreach (var classModel in repositoryModel.GetEnumerable())
+            foreach (var classModel in repositoryModel.GetEnumerable())
+            {
+                if (classModel.Metrics.Count == 0)
                 {
-                    if (classModel.Metrics.Count == 0)
+                    classRelationsRepresentation.Add(classModel.FullName);
+                }
+                else
+                {
+                    foreach (var classMetric in classModel.Metrics)
                     {
-                        classRelationsRepresentation.Add(classModel.FullName);
-                    }
-                    else
-                    {
-                        foreach (var classMetric in classModel.Metrics)
+                        var relations = _metricRelationsProvider.GetFileRelations(classMetric);
+                        foreach (var relation in relations)
                         {
-                            var extractorType = Type.GetType(classMetric.ExtractorName);
-                            if (extractorType == null || !typeof(IRelationMetric).IsAssignableFrom(extractorType))
-                            {
-                                continue;
-                            }
-
-                            var relationMetric = (IRelationMetric) Activator.CreateInstance(extractorType);
-
-                            if (relationMetric == null) continue;
-
-                            var relations = relationMetric.GetRelations(classMetric.Value);
-                            foreach (var relation in relations)
-                            {
-                                classRelationsRepresentation.Add(classModel.FullName, relation.FileTarget,
-                                    relation.RelationType, relation.RelationCount);
-                            }
+                            classRelationsRepresentation.Add(classModel.FullName, relation.FileTarget,
+                                relation.RelationType, relation.RelationCount);
                         }
                     }
                 }
+            }
 
-                return new Processable<ClassRelationsRepresentation>(classRelationsRepresentation);
-            };
+            return classRelationsRepresentation;
         }
     }
 }

@@ -1,35 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using HoneydewCore.Models;
-using HoneydewCore.Models.Representations.ReferenceModel;
+using HoneydewModels.CSharp;
+using HoneydewModels.CSharp.ReferenceModel;
 
 namespace HoneydewCore.Processors
 {
     public class
         SolutionModelToReferenceSolutionModelProcessor : IProcessorFunction<SolutionModel, ReferenceSolutionModel>
     {
-        public Func<Processable<SolutionModel>, Processable<ReferenceSolutionModel>> GetFunction()
+        public ReferenceSolutionModel Process(SolutionModel solutionModel)
         {
-            return processable =>
-            {
-                var solutionModel = processable.Value;
+            var referenceSolutionModel = new ReferenceSolutionModel();
 
-                var referenceSolutionModel = new ReferenceSolutionModel();
+            if (solutionModel == null)
+                return referenceSolutionModel;
 
-                if (solutionModel == null)
-                    return new Processable<ReferenceSolutionModel>(referenceSolutionModel);
+            PopulateModelWithProjectNamespacesAndClasses(solutionModel, referenceSolutionModel);
 
-                PopulateModelWithProjectNamespacesAndClasses(solutionModel, referenceSolutionModel);
+            PopulateModelWithBaseClassesAndInterfaces(solutionModel, referenceSolutionModel);
 
-                PopulateModelWithBaseClassesAndInterfaces(solutionModel, referenceSolutionModel);
+            PopulateModelWithMethodsAndFields(solutionModel, referenceSolutionModel);
 
-                PopulateModelWithMethodsAndFields(solutionModel, referenceSolutionModel);
+            PopulateModelWithMethodReferences(solutionModel, referenceSolutionModel);
 
-                PopulateModelWithMethodReferences(solutionModel, referenceSolutionModel);
-
-                return new Processable<ReferenceSolutionModel>(referenceSolutionModel);
-            };
+            return referenceSolutionModel;
         }
 
         private static void PopulateModelWithProjectNamespacesAndClasses(SolutionModel solutionModel,
@@ -43,11 +37,11 @@ namespace HoneydewCore.Processors
                     SolutionReference = referenceSolutionModel
                 };
 
-                foreach (var (namespaceName, namespaceModel) in projectModel.Namespaces)
+                foreach (var namespaceModel in projectModel.Namespaces)
                 {
                     var referenceNamespaceModel = new ReferenceNamespaceModel
                     {
-                        Name = namespaceName,
+                        Name = namespaceModel.Name,
                         ProjectReference = referenceProjectModel
                     };
 
@@ -79,11 +73,10 @@ namespace HoneydewCore.Processors
         {
             foreach (var classModel in solutionModel.GetEnumerable())
             {
-                var referenceEntity = referenceSolutionModel.FindFirst(entity =>
-                    entity is ReferenceClassModel && entity.Name == classModel.FullName);
+                var referenceClassModel =
+                    referenceSolutionModel.FindFirstClass(entity => entity.Name == classModel.FullName);
 
-                if (referenceEntity == null) continue;
-                var referenceClassModel = (ReferenceClassModel) referenceEntity;
+                if (referenceClassModel == null) continue;
 
                 referenceClassModel.BaseClass =
                     GetClassReferenceByName(referenceSolutionModel, classModel.BaseClassFullName);
@@ -101,11 +94,8 @@ namespace HoneydewCore.Processors
         {
             foreach (var classModel in solutionModel.GetEnumerable())
             {
-                var referenceEntity = referenceSolutionModel.FindFirst(entity =>
-                    entity is ReferenceClassModel && entity.Name == classModel.FullName);
-
-                if (referenceEntity == null) continue;
-                var referenceClassModel = (ReferenceClassModel) referenceEntity;
+                var referenceClassModel =
+                    referenceSolutionModel.FindFirstClass(entity => entity.Name == classModel.FullName);
 
                 PopulateWithMethodModels(classModel.Methods, referenceClassModel, referenceClassModel.Methods);
 
@@ -156,11 +146,8 @@ namespace HoneydewCore.Processors
         {
             foreach (var classModel in solutionModel.GetEnumerable())
             {
-                var referenceEntity = referenceSolutionModel.FindFirst(entity =>
-                    entity is ReferenceClassModel && entity.Name == classModel.FullName);
-
-                if (referenceEntity == null) continue;
-                var referenceClassModel = (ReferenceClassModel) referenceEntity;
+                var referenceClassModel =
+                    referenceSolutionModel.FindFirstClass(entity => entity.Name == classModel.FullName);
 
                 foreach (var methodModel in classModel.Methods)
                 {
@@ -239,14 +226,10 @@ namespace HoneydewCore.Processors
         private ReferenceClassModel GetClassReferenceByName(ReferenceSolutionModel referenceSolutionModel,
             string className)
         {
-            var referenceEntity = referenceSolutionModel.FindFirst(entity =>
-                entity is ReferenceClassModel && entity.Name == className);
-            if (referenceEntity != null)
-            {
-                return (ReferenceClassModel) referenceEntity;
-            }
-
-            return referenceSolutionModel.FindOrCreateClassModel(className);
+            var referenceClassModel = referenceSolutionModel.FindFirstClass(entity => entity.Name == className);
+            return referenceClassModel != null
+                ? referenceClassModel
+                : referenceSolutionModel.FindOrCreateClassModel(className);
         }
     }
 }

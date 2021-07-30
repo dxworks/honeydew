@@ -1,10 +1,11 @@
 ﻿using System.Threading.Tasks;
-using HoneydewCore.Models;
+using HoneydewModels;
 
 namespace HoneydewCore.IO.Readers
 {
-    public interface IRepositoryLoader
+    public interface IRepositoryLoader<TRepositoryModel>
+        where TRepositoryModel : IRepositoryModel
     {
-        Task<RepositoryModel> Load(string path);
+        Task<TRepositoryModel> Load(string path);
     }
 }

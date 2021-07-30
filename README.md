@@ -17,7 +17,7 @@ If `input_path` is a path to a C# project file (.csproj), Honeydew will extract 
 If `input_path` is a path to a folder, Honeydew will find all the solution files and C# project files and extract facts
 from those
 
-The output files will be places in a folder named `results`
+The output files will be placed in a folder named `results`
 
 ## Load Model from file
 
