@@ -44,7 +44,10 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                         new MsBuildSolutionProvider(),
                         _solutionLoadingStrategy);
                     var solutionModel = await solutionLoader.LoadSolution(path);
-                    repositoryModel.Solutions.Add(solutionModel);
+                    if (solutionModel != null)
+                    {
+                        repositoryModel.Solutions.Add(solutionModel);
+                    }
                 }
                 else if (path.EndsWith(CsprojExtension))
                 {
@@ -54,10 +57,13 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                         _projectLoadingStrategy);
                     var projectModel = await projectLoader.Load(path);
 
-                    repositoryModel.Solutions.Add(new SolutionModel
+                    if (projectModel != null)
                     {
-                        Projects = {projectModel}
-                    });
+                        repositoryModel.Solutions.Add(new SolutionModel
+                        {
+                            Projects = {projectModel}
+                        });
+                    }
                 }
                 else
                 {
@@ -80,7 +86,10 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                         new SolutionFileLoader(_progressLogger, _extractor, new MsBuildSolutionProvider(),
                             _solutionLoadingStrategy);
                     var solutionModel = await solutionLoader.LoadSolution(solutionPath);
-                    repositoryModel.Solutions.Add(solutionModel);
+                    if (solutionModel != null)
+                    {
+                        repositoryModel.Solutions.Add(solutionModel);
+                    }
                 }
 
                 _progressLogger.LogLine(
@@ -103,7 +112,10 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                     var projectLoader = new ProjectLoader(_extractor, new MsBuildProjectProvider(),
                         _projectLoadingStrategy);
                     var projectModel = await projectLoader.Load(projectPath);
-                    defaultSolutionModel.Projects.Add(projectModel);
+                    if (projectModel != null)
+                    {
+                        defaultSolutionModel.Projects.Add(projectModel);
+                    }
                 }
 
                 if (defaultSolutionModel.Projects.Count > 0)

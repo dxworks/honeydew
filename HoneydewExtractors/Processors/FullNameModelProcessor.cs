@@ -185,7 +185,7 @@ namespace HoneydewExtractors.Processors
             {
                 foreach (var calledMethod in calledMethods)
                 {
-                    if (calledMethod.ContainingClassName.StartsWith(namespaceAccess))
+                    if (!string.IsNullOrEmpty(calledMethod.ContainingClassName) && calledMethod.ContainingClassName.StartsWith(namespaceAccess))
                     {
                         return true;
                     }

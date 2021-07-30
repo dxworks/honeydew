@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using HoneydewCore.Logging;
 using HoneydewExtractors.CSharp.Metrics;
@@ -31,13 +32,22 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead
             _progressLogger.LogLine();
             _progressLogger.LogLine($"Opening the solution from {pathToFile}");
 
-            var solution = await _solutionProvider.GetSolution(pathToFile);
+            try
+            {
+                var solution = await _solutionProvider.GetSolution(pathToFile);
 
-            _progressLogger.LogLine($"Found {solution?.Projects.Count()} C# Projects in solution {pathToFile}");
+                _progressLogger.LogLine($"Found {solution?.Projects.Count()} C# Projects in solution {pathToFile}");
 
-            var solutionModel = await _solutionLoadingStrategy.Load(solution, _extractor);
+                var solutionModel = await _solutionLoadingStrategy.Load(solution, _extractor);
 
-            return solutionModel;
+                return solutionModel;
+            }
+            catch (Exception e)
+            {
+                await Console.Error.WriteLineAsync($"Could not open solution from {pathToFile} because {e}");
+            }
+
+            return null;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
 using HoneydewModels.CSharp;
@@ -22,11 +23,20 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead
 
         public async Task<ProjectModel> Load(string path)
         {
-            var solution = await _projectProvider.GetProject(path);
+            try
+            {
+                var solution = await _projectProvider.GetProject(path);
 
-            var projectModel = await _projectLoadingStrategy.Load(solution, _extractor);
+                var projectModel = await _projectLoadingStrategy.Load(solution, _extractor);
 
-            return projectModel;
+                return projectModel;
+            }
+            catch (Exception e)
+            {
+                await Console.Error.WriteLineAsync($"Could not open project from {path} because {e}");
+            }
+            
+            return null;
         }
     }
 }
