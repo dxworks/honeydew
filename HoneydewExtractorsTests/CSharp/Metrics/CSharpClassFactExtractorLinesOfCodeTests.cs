@@ -15,7 +15,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
         [Fact]
         public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithClassWithMethodsAndProperties()
         {
-            const string fileContent = @"using System;
+            const string fileContent = @"// comment
+using System;
 using HoneydewCore.Extractors;
 
 // here is the namespace
@@ -55,7 +56,7 @@ namespace TopLevel
             var classModel = classModels[0];
             Assert.Equal(21, classModel.Loc.SourceLines);
             Assert.Equal(7, classModel.Loc.EmptyLines);
-            Assert.Equal(7, classModel.Loc.CommentedLines);
+            Assert.Equal(8, classModel.Loc.CommentedLines);
 
             Assert.Equal(5, classModel.Methods[0].Loc.SourceLines);
             Assert.Equal(2, classModel.Methods[0].Loc.CommentedLines);

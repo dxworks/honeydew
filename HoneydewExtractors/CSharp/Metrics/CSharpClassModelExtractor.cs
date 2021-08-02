@@ -46,7 +46,7 @@ namespace HoneydewExtractors.CSharp.Metrics
                 var methodInfoDataMetric = ExtractMethodInfo(declarationSyntax, semanticModel);
 
                 var linesOfCode = linesOfCodeCounter.Count(syntaxes.Count == 1
-                    ? root.ToString()
+                    ? root.GetText().ToString()
                     : declarationSyntax.ToString());
 
 
