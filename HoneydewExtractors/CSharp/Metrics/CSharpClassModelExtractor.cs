@@ -3,6 +3,7 @@ using System.Linq;
 using HoneydewCore.Utils;
 using HoneydewExtractors.Core;
 using HoneydewExtractors.Core.Metrics.Extraction;
+using HoneydewExtractors.CSharp.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
 using HoneydewExtractors.CSharp.Utils;
@@ -26,6 +27,9 @@ namespace HoneydewExtractors.CSharp.Metrics
             syntaxes.AddRange(root.DescendantNodes().OfType<BaseTypeDeclarationSyntax>().ToList());
             syntaxes.AddRange(root.DescendantNodes().OfType<DelegateDeclarationSyntax>());
 
+            CSharpLinesOfCodeCounter linesOfCodeCounter = new();
+
+
             foreach (var declarationSyntax in syntaxes)
             {
                 var fullName = semanticModel.GetFullName(declarationSyntax);
@@ -40,6 +44,12 @@ namespace HoneydewExtractors.CSharp.Metrics
                 CSharpConstants.SetModifiers(declarationSyntax.Modifiers.ToString(), ref accessModifier, ref modifier);
 
                 var methodInfoDataMetric = ExtractMethodInfo(declarationSyntax, semanticModel);
+
+                var linesOfCode = linesOfCodeCounter.Count(syntaxes.Count == 1
+                    ? root.ToString()
+                    : declarationSyntax.ToString());
+
+
                 var classModel = new ClassModel
                 {
                     ClassType = classType,
@@ -51,7 +61,8 @@ namespace HoneydewExtractors.CSharp.Metrics
                     Methods = methodInfoDataMetric.MethodInfos,
                     Constructors = methodInfoDataMetric.ConstructorInfos,
                     BaseClassFullName = baseClassName,
-                    BaseInterfaces = baseInterfaces
+                    BaseInterfaces = baseInterfaces,
+                    Loc = linesOfCode
                 };
 
                 var extractionMetrics = metricSpawner.InstantiateMetrics();
@@ -72,6 +83,7 @@ namespace HoneydewExtractors.CSharp.Metrics
 
                     classModel.AddMetricValue(extractionMetric.GetType().FullName, extractionMetric.GetMetric());
                 }
+
                 classModels.Add(classModel);
             }
 
