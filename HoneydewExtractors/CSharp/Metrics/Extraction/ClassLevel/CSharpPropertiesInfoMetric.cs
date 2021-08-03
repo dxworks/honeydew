@@ -79,7 +79,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 {
                     var accessorModifiers = accessor.Modifiers.ToString();
                     var accessorKeyword = accessor.Keyword.ToString();
-                    
+
                     if (string.IsNullOrEmpty(accessorModifiers))
                     {
                         accessors.Add(accessorKeyword);

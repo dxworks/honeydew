@@ -12,7 +12,7 @@ using HoneydewCore.Processors;
 using HoneydewExtractors.Core;
 using HoneydewExtractors.Core.Metrics;
 using HoneydewExtractors.CSharp.Metrics;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
+using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
 using HoneydewExtractors.CSharp.RepositoryLoading;
 using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
@@ -78,12 +78,12 @@ namespace Honeydew
         private static CSharpFactExtractor LoadExtractor()
         {
             var cSharpFactExtractor = new CSharpFactExtractor();
-            cSharpFactExtractor.AddMetric<CSharpBaseClassMetric>();
             cSharpFactExtractor.AddMetric<CSharpUsingsCountMetric>();
-            cSharpFactExtractor.AddMetric<CSharpIsAbstractMetric>();
-            cSharpFactExtractor.AddMetric<CSharpParameterDependencyMetric>();
-            cSharpFactExtractor.AddMetric<CSharpReturnValueDependencyMetric>();
-            cSharpFactExtractor.AddMetric<CSharpLocalVariablesDependencyMetric>();
+
+            cSharpFactExtractor.AddMetric<CSharpPropertiesRelationMetric>();
+            cSharpFactExtractor.AddMetric<CSharpParameterRelationMetric>();
+            cSharpFactExtractor.AddMetric<CSharpReturnValueRelationMetric>();
+            cSharpFactExtractor.AddMetric<CSharpLocalVariablesRelationMetric>();
 
             return cSharpFactExtractor;
         }
@@ -102,7 +102,7 @@ namespace Honeydew
             // Create repository model from path
             var projectLoadingStrategy = new BasicProjectLoadingStrategy(progressLogger);
             var solutionLoadingStrategy = new BasicSolutionLoadingStrategy(progressLogger, projectLoadingStrategy);
-            
+
             var repositoryLoader = new CSharpRepositoryLoader(projectLoadingStrategy, solutionLoadingStrategy,
                 progressLogger, LoadExtractor());
             var repositoryModel = await repositoryLoader.Load(inputPath);

@@ -3,9 +3,9 @@ using HoneydewExtractors.CSharp.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
 {
-    public class CSharpLocalVariablesDependencyMetric : CSharpDependencyMetric
+    public class CSharpLocalVariablesRelationMetric : CSharpRelationMetric
     {
         public override string PrettyPrint()
         {

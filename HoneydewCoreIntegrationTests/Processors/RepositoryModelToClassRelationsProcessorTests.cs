@@ -2,6 +2,7 @@
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
+using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewModels.CSharp;
 using Moq;
 using Xunit;
@@ -145,7 +146,7 @@ namespace HoneydewCoreIntegrationTests.Processors
                 FullName = "Models.Class1", FilePath = "path/Model/Class1.cs"
             });
 
-            var extractorName = typeof(CSharpParameterDependencyMetric).FullName;
+            var extractorName = typeof(CSharpParameterRelationMetric).FullName;
             var classMetric = new ClassMetric
             {
                 ExtractorName = extractorName,

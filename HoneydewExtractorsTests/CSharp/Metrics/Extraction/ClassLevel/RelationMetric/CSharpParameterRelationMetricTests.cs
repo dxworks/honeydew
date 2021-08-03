@@ -1,21 +1,21 @@
 ﻿using System.Collections.Generic;
 using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Metrics;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
+using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using Xunit;
 
-namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
+namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
 {
-    public class CSharpParameterDependencyMetricTests
+    public class CSharpParameterRelationMetricTests
     {
-        private readonly CSharpParameterDependencyMetric _sut;
+        private readonly CSharpParameterRelationMetric _sut;
         private readonly CSharpFactExtractor _factExtractor;
 
-        public CSharpParameterDependencyMetricTests()
+        public CSharpParameterRelationMetricTests()
         {
-            _sut = new CSharpParameterDependencyMetric();
+            _sut = new CSharpParameterRelationMetric();
             _factExtractor = new CSharpFactExtractor();
-            _factExtractor.AddMetric<CSharpParameterDependencyMetric>();
+            _factExtractor.AddMetric<CSharpParameterRelationMetric>();
         }
 
         [Fact]
@@ -47,7 +47,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetricValue<CSharpParameterDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<CSharpParameterRelationMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (IDictionary<string, int>) optional.Value;
@@ -69,7 +69,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetricValue<CSharpParameterDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<CSharpParameterRelationMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (IDictionary<string, int>) optional.Value;
@@ -99,7 +99,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetricValue<CSharpParameterDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<CSharpParameterRelationMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (IDictionary<string, int>) optional.Value;
@@ -131,7 +131,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetricValue<CSharpParameterDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<CSharpParameterRelationMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (IDictionary<string, int>) optional.Value;
@@ -160,7 +160,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                      }";
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetricValue<CSharpParameterDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<CSharpParameterRelationMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (IDictionary<string, int>) optional.Value;
@@ -189,7 +189,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetricValue<CSharpParameterDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<CSharpParameterRelationMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (IDictionary<string, int>) optional.Value;
@@ -219,7 +219,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetricValue<CSharpParameterDependencyMetric>();
+            var optional = classModels[0].GetMetricValue<CSharpParameterRelationMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (IDictionary<string, int>) optional.Value;
@@ -267,12 +267,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             var fileRelation1 = fileRelations[0];
             Assert.Equal("IFactExtractor", fileRelation1.FileTarget);
-            Assert.Equal(typeof(CSharpParameterDependencyMetric).FullName, fileRelation1.RelationType);
+            Assert.Equal(typeof(CSharpParameterRelationMetric).FullName, fileRelation1.RelationType);
             Assert.Equal(2, fileRelation1.RelationCount);
 
             var fileRelation2 = fileRelations[1];
             Assert.Equal("CSharpMetricExtractor", fileRelation2.FileTarget);
-            Assert.Equal(typeof(CSharpParameterDependencyMetric).FullName, fileRelation2.RelationType);
+            Assert.Equal(typeof(CSharpParameterRelationMetric).FullName, fileRelation2.RelationType);
             Assert.Equal(1, fileRelation2.RelationCount);
         }
     }

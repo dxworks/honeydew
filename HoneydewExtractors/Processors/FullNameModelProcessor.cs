@@ -5,6 +5,7 @@ using System.Text;
 using HoneydewCore.Logging;
 using HoneydewCore.Processors;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
+using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewModels.CSharp;
 
 namespace HoneydewExtractors.Processors
@@ -502,7 +503,7 @@ namespace HoneydewExtractors.Processors
             NamespaceModel namespaceModel, ProjectModel projectModel, SolutionModel solutionModel)
         {
             var parameterDependenciesMetrics = classModel.Metrics.Where(metric =>
-                typeof(CSharpDependencyMetric).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
+                typeof(CSharpRelationMetric).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
 
             foreach (var metric in parameterDependenciesMetrics)
             {
