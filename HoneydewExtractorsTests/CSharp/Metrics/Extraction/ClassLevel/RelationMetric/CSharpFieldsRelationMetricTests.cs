@@ -6,16 +6,16 @@ using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
 {
-    public class CSharpPropertiesRelationMetricTests
+    public class CSharpFieldsRelationMetricTests
     {
-        private readonly CSharpPropertiesRelationMetric _sut;
+        private readonly CSharpFieldsRelationMetric _sut;
         private readonly CSharpFactExtractor _factExtractor;
 
-        public CSharpPropertiesRelationMetricTests()
+        public CSharpFieldsRelationMetricTests()
         {
-            _sut = new CSharpPropertiesRelationMetric();
+            _sut = new CSharpFieldsRelationMetric();
             _factExtractor = new CSharpFactExtractor();
-            _factExtractor.AddMetric<CSharpPropertiesRelationMetric>();
+            _factExtractor.AddMetric<CSharpFieldsRelationMetric>();
         }
 
         [Fact]
@@ -27,15 +27,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         [Fact]
         public void PrettyPrint_ShouldReturnReturnValueDependency()
         {
-            Assert.Equal("Properties Dependency", _sut.PrettyPrint());
+            Assert.Equal("Fields Dependency", _sut.PrettyPrint());
         }
 
         [Theory]
         [InlineData("class")]
-        [InlineData("interface")]
         [InlineData("record")]
         [InlineData("struct")]
-        public void Extract_ShouldHavePrimitiveProperties_WhenClassHasPropertiesOfPrimitiveTypes(string classType)
+        public void Extract_ShouldHavePrimitiveFields_WhenClassHasFieldsOfPrimitiveTypes(string classType)
         {
             var fileContent = $@"using System;
 
@@ -43,19 +42,19 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                                      {{                                       
                                          {classType} MyClass
                                          {{                                           
-                                             public int Foo {{get;set;}}
+                                             public int Foo;
 
-                                             public float Bar {{get;private set;}}
+                                             private float Bar;
 
-                                             public int Zoo {{set;}}
+                                             protected int Zoo;
 
-                                             public string Goo {{get;set;}}
+                                             internal string Goo;
                                          }}
                                      }}";
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesRelationMetric>();
+            var optional = classModels[0].GetMetricValue<CSharpFieldsRelationMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (IDictionary<string, int>) optional.Value;
@@ -65,28 +64,27 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, dependencies["float"]);
             Assert.Equal(1, dependencies["string"]);
         }
-
+        
         [Theory]
         [InlineData("class")]
-        [InlineData("interface")]
         [InlineData("record")]
         [InlineData("struct")]
-        public void Extract_ShouldHavePrimitiveProperties_WhenClassHasEventPropertiesOfPrimitiveTypes(string classType)
+        public void Extract_ShouldHavePrimitiveFields_WhenClassHasEventFieldsOfPrimitiveTypes(string classType)
         {
             var fileContent = $@"using System;
                                      namespace App
                                      {{                                       
                                         {classType} MyClass
                                         {{
-                                            public event Func<int> Foo {{add{{}}remove{{}}}}
+                                            public event Func<int> Foo;
                                             
-                                            public event Action<string> Bar {{add{{}}remove{{}}}}
+                                            public event Action<string> Bar;
                                         }}
                                      }}";
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesRelationMetric>();
+            var optional = classModels[0].GetMetricValue<CSharpFieldsRelationMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (IDictionary<string, int>) optional.Value;
@@ -98,10 +96,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
 
         [Theory]
         [InlineData("class")]
-        [InlineData("interface")]
         [InlineData("record")]
         [InlineData("struct")]
-        public void Extract_ShouldHaveDependenciesProperties_WhenClassHasProperties(string classType)
+        public void Extract_ShouldHaveDependenciesFields_WhenClassHasFields(string classType)
         {
             var fileContent = $@"using System;
                                      using HoneydewCore.Extractors;
@@ -111,17 +108,17 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                                      {{                                       
                                          public {classType} IInterface
                                          {{                                           
-                                             public CSharpMetricExtractor Foo {{get;}}
+                                             public CSharpMetricExtractor Foo;
 
-                                             public CSharpMetricExtractor Foo2 {{get; private set;}}
+                                             private CSharpMetricExtractor Foo2 ;
 
-                                             public IFactExtractor Bar {{get;}}
+                                             protected IFactExtractor Bar;
                                          }}
                                      }}";
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesRelationMetric>();
+            var optional = classModels[0].GetMetricValue<CSharpFieldsRelationMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (IDictionary<string, int>) optional.Value;
@@ -133,10 +130,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
 
         [Theory]
         [InlineData("class")]
-        [InlineData("interface")]
         [InlineData("record")]
         [InlineData("struct")]
-        public void Extract_ShouldHaveDependenciesEventProperties_WhenClassHasEventProperties(string classType)
+        public void Extract_ShouldHaveDependenciesEventFields_WhenClassHasEventFields(string classType)
         {
             var fileContent = $@"using System;
                                      using HoneydewCore.Extractors;
@@ -145,17 +141,17 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                                      {{                                       
                                          public {classType} IInterface
                                          {{                                           
-                                             public event Func<CSharpMetricExtractor> Foo {{add{{}} remove{{}}}}
+                                             internal event Func<CSharpMetricExtractor> Foo;
 
-                                             public event Action<IFactExtractor> Bar {{add{{}} remove{{}}}}
+                                             public event Action<IFactExtractor> Bar;
 
-                                             public event Func<IFactExtractor,CSharpMetricExtractor> Goo {{add{{}} remove{{}}}}
+                                             private event Func<IFactExtractor,CSharpMetricExtractor> Goo;
                                          }}
                                      }}";
 
             var classModels = _factExtractor.Extract(fileContent);
 
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesRelationMetric>();
+            var optional = classModels[0].GetMetricValue<CSharpFieldsRelationMetric>();
             Assert.True(optional.HasValue);
 
             var dependencies = (IDictionary<string, int>) optional.Value;
@@ -167,7 +163,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         }
 
         [Fact]
-        public void GetRelations_ShouldHaveNoRelations_WhenClassHasNoProperties()
+        public void GetRelations_ShouldHaveNoRelations_WhenClassHasNoFields()
         {
             var fileRelations = _sut.GetRelations(new Dictionary<string, int>());
 
@@ -202,12 +198,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
 
             var fileRelation1 = fileRelations[0];
             Assert.Equal("IFactExtractor", fileRelation1.FileTarget);
-            Assert.Equal(typeof(CSharpPropertiesRelationMetric).FullName, fileRelation1.RelationType);
+            Assert.Equal(typeof(CSharpFieldsRelationMetric).FullName, fileRelation1.RelationType);
             Assert.Equal(2, fileRelation1.RelationCount);
 
             var fileRelation2 = fileRelations[1];
             Assert.Equal("CSharpMetricExtractor", fileRelation2.FileTarget);
-            Assert.Equal(typeof(CSharpPropertiesRelationMetric).FullName, fileRelation2.RelationType);
+            Assert.Equal(typeof(CSharpFieldsRelationMetric).FullName, fileRelation2.RelationType);
             Assert.Equal(1, fileRelation2.RelationCount);
         }
     }
