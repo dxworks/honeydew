@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using HoneydewCore.Logging;
 using HoneydewCore.Processors;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewModels.CSharp;
 

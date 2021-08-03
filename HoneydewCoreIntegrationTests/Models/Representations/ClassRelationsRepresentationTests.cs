@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using HoneydewCore.ModelRepresentations;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using Moq;
 using Xunit;

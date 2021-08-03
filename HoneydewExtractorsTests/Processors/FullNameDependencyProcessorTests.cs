@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewExtractors.Processors;
 using HoneydewModels.CSharp;

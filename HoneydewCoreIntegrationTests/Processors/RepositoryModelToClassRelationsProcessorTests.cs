@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewModels.CSharp;
 using Moq;
