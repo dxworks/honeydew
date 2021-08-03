@@ -81,6 +81,7 @@ namespace Honeydew
             cSharpFactExtractor.AddMetric<CSharpUsingsCountMetric>();
 
             cSharpFactExtractor.AddMetric<CSharpPropertiesRelationMetric>();
+            cSharpFactExtractor.AddMetric<CSharpFieldsRelationMetric>();
             cSharpFactExtractor.AddMetric<CSharpParameterRelationMetric>();
             cSharpFactExtractor.AddMetric<CSharpReturnValueRelationMetric>();
             cSharpFactExtractor.AddMetric<CSharpLocalVariablesRelationMetric>();

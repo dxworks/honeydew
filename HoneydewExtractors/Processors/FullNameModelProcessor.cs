@@ -5,6 +5,7 @@ using System.Text;
 using HoneydewCore.Logging;
 using HoneydewCore.Processors;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
+using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 
 namespace HoneydewExtractors.Processors
@@ -386,7 +387,7 @@ namespace HoneydewExtractors.Processors
                 {
                     if (fieldModel.Name == containingClassName)
                     {
-                        return ConvertToSystemName(fieldModel.Type);
+                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(fieldModel.Type);
                     }
                 }
 
@@ -394,7 +395,7 @@ namespace HoneydewExtractors.Processors
                 {
                     if (propertyModel.Name == containingClassName)
                     {
-                        return ConvertToSystemName(propertyModel.Type);
+                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(propertyModel.Type);
                     }
                 }
 
@@ -404,7 +405,7 @@ namespace HoneydewExtractors.Processors
                         methodName, methodParameters);
                     if (hasTheSameSignature)
                     {
-                        return ConvertToSystemName(staticImportedClass.FullName);
+                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(staticImportedClass.FullName);
                     }
                 }
             }
@@ -428,8 +429,8 @@ namespace HoneydewExtractors.Processors
 
             for (var i = 0; i < firstMethodParameters.Count; i++)
             {
-                if (ConvertToSystemName(firstMethodParameters[i].Type) !=
-                    ConvertToSystemName(secondMethodParameters[i].Type))
+                if (CSharpConstants.ConvertPrimitiveTypeToSystemType(firstMethodParameters[i].Type) !=
+                    CSharpConstants.ConvertPrimitiveTypeToSystemType(secondMethodParameters[i].Type))
                 {
                     return false;
                 }
@@ -448,54 +449,6 @@ namespace HoneydewExtractors.Processors
             }
 
             return true;
-        }
-
-        // private static string ConvertToPrimitiveName(string type)
-        // {
-        //     return type switch
-        //     {
-        //         "System.Byte" => "byte",
-        //         "System.SByte" => "sbyte",
-        //         "System.Int32" => "int",
-        //         "System.UInt32" => "uint",
-        //         "System.Int16" => "short",
-        //         "System.UInt16" => "ushort",
-        //         "System.Int64" => "long",
-        //         "System.UInt64" => "ulong",
-        //         "System.Single" => "float",
-        //         "System.Double" => "double",
-        //         "System.Char" => "char",
-        //         "System.Boolean" => "bool",
-        //         "System.Object" => "object",
-        //         "System.String" => "string",
-        //         "System.Decimal" => "decimal",
-        //         "System.DateTime" => "DateTime",
-        //         _ => type
-        //     };
-        // }
-
-        private static string ConvertToSystemName(string type)
-        {
-            return type switch
-            {
-                "byte" => "System.Byte",
-                "sbyte" => "System.SByte",
-                "int" => "System.Int32",
-                "uint" => "System.UInt32",
-                "short" => "System.Int16",
-                "ushort" => "System.UInt16",
-                "long" => "System.Int64",
-                "ulong" => "System.UInt64",
-                "float" => "System.Single",
-                "double" => "System.Double",
-                "char" => "System.Char",
-                "bool" => "System.Boolean",
-                "object" => "System.Object",
-                "string" => "System.String",
-                "decimal" => "System.Decimal",
-                "DateTime" => "System.DateTime",
-                _ => type
-            };
         }
 
         private void ChangeDependencyMetricFullName(RepositoryModel repositoryModel, ClassModel classModel,
@@ -569,13 +522,13 @@ namespace HoneydewExtractors.Processors
             if (GetClassModelFullyQualified(className, projectModelToStartSearchFrom, solutionModelToStartSearchFrom,
                 repositoryModel) != null)
             {
-                return ConvertToSystemName(className);
+                return CSharpConstants.ConvertPrimitiveTypeToSystemType(className);
             }
 
             if (TryToGetClassNameFromNamespace(className, namespaceModelToStartSearchFrom,
                 out var fullNameFromNamespace))
             {
-                return ConvertToSystemName(fullNameFromNamespace);
+                return CSharpConstants.ConvertPrimitiveTypeToSystemType(fullNameFromNamespace);
             }
 
             // search in all provided usings
@@ -628,7 +581,7 @@ namespace HoneydewExtractors.Processors
                 switch (fullNamePossibilities.Count)
                 {
                     case 1:
-                        return ConvertToSystemName(fullNamePossibilities.First());
+                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(fullNamePossibilities.First());
                     case > 1:
                         throw new AmbiguousFullNameException(className, fullNamePossibilities);
                 }
@@ -636,13 +589,13 @@ namespace HoneydewExtractors.Processors
 
             if (TryToGetClassNameFromProject(className, projectModelToStartSearchFrom, out var fullNameFromProject))
             {
-                return ConvertToSystemName(fullNameFromProject);
+                return CSharpConstants.ConvertPrimitiveTypeToSystemType(fullNameFromProject);
             }
 
             // search in all projects of solutionModel
             if (TryToGetClassNameFromSolution(className, solutionModelToStartSearchFrom, out var fullNameFromSolution))
             {
-                return ConvertToSystemName(fullNameFromSolution);
+                return CSharpConstants.ConvertPrimitiveTypeToSystemType(fullNameFromSolution);
             }
 
             fullNamePossibilities = new List<string>();
@@ -661,9 +614,9 @@ namespace HoneydewExtractors.Processors
 
             return fullNamePossibilities.Count switch
             {
-                1 => ConvertToSystemName(fullNamePossibilities.First()),
+                1 => CSharpConstants.ConvertPrimitiveTypeToSystemType(fullNamePossibilities.First()),
                 > 1 => throw new AmbiguousFullNameException(className, fullNamePossibilities),
-                _ => ConvertToSystemName(className)
+                _ => CSharpConstants.ConvertPrimitiveTypeToSystemType(className)
             };
         }
 
