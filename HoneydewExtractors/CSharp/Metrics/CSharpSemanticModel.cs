@@ -79,7 +79,7 @@ namespace HoneydewExtractors.CSharp.Metrics
             return typeSyntax.ToString();
         }
 
-        public string GetFullName(ImplicitObjectCreationExpressionSyntax declarationSyntax)
+        public string GetFullName(BaseObjectCreationExpressionSyntax declarationSyntax)
         {
             var symbolInfo = Model.GetSymbolInfo(declarationSyntax);
 
@@ -98,6 +98,11 @@ namespace HoneydewExtractors.CSharp.Metrics
             if (propertyDeclarationSyntax != null)
             {
                 return propertyDeclarationSyntax.Type.ToString();
+            }
+
+            if (declarationSyntax is ObjectCreationExpressionSyntax objectCreationExpressionSyntax)
+            {
+                return GetFullName(objectCreationExpressionSyntax.Type);
             }
 
             return declarationSyntax.ToString();
@@ -140,22 +145,23 @@ namespace HoneydewExtractors.CSharp.Metrics
                     {
                         return "System.Single[]";
                     }
-                    
+
                     if (elementTypesSet.Contains("System.Int32") && elementTypesSet.Contains("System.Double"))
                     {
                         return "System.Double[]";
                     }
-                    
+
                     if (elementTypesSet.Contains("System.Single") && elementTypesSet.Contains("System.Double"))
                     {
                         return "System.Double[]";
                     }
-                    
+
                     return "System.Object[]";
                 }
                 case 3:
                 {
-                    if (elementTypesSet.Contains("System.Int32") && elementTypesSet.Contains("System.Single") && elementTypesSet.Contains("System.Double"))
+                    if (elementTypesSet.Contains("System.Int32") && elementTypesSet.Contains("System.Single") &&
+                        elementTypesSet.Contains("System.Double"))
                     {
                         return "System.Double[]";
                     }
@@ -165,6 +171,53 @@ namespace HoneydewExtractors.CSharp.Metrics
                 default:
                     return "System.Object[]";
             }
+        }
+
+        public string GetFullName(ExpressionSyntax expressionSyntax)
+        {
+            var symbolInfo = Model.GetSymbolInfo(expressionSyntax);
+            switch (symbolInfo.Symbol)
+            {
+                case IPropertySymbol propertySymbol:
+                    return propertySymbol.Type.ToDisplayString();
+                case ILocalSymbol localSymbol:
+                    return localSymbol.Type.ToDisplayString();
+                case IFieldSymbol fieldSymbol:
+                    return fieldSymbol.Type.ToDisplayString();
+                case IMethodSymbol methodSymbol:
+                    if (expressionSyntax is ObjectCreationExpressionSyntax && methodSymbol.ReceiverType != null)
+                    {
+                        return methodSymbol.ReceiverType.ToDisplayString();
+                    }
+
+                    return methodSymbol.ReturnType.ToDisplayString();
+                default:
+                {
+                    if (symbolInfo.Symbol == null)
+                    {
+                        return expressionSyntax switch
+                        {
+                            ObjectCreationExpressionSyntax objectCreationExpressionSyntax => GetFullName(
+                                objectCreationExpressionSyntax),
+                            _ => expressionSyntax.ToString()
+                        };
+                    }
+
+                    return symbolInfo.Symbol.ToString();
+                }
+            }
+        }
+
+        public string GetFullName(ThrowStatementSyntax declarationSyntax)
+        {
+            var parentDeclarationSyntax = GetParentDeclarationSyntax<CatchClauseSyntax>(declarationSyntax);
+            var catchDeclarationSyntax = parentDeclarationSyntax.Declaration;
+            if (catchDeclarationSyntax != null)
+            {
+                return GetFullName(catchDeclarationSyntax.Type);
+            }
+
+            return GetFullName(declarationSyntax.Expression);
         }
 
         private string GetExpressionType(ExpressionSyntax expression)
@@ -185,7 +238,7 @@ namespace HoneydewExtractors.CSharp.Metrics
                     return GetFullName(objectCreationExpressionSyntax);
                 }
             }
-            
+
             return GetFullName(expression);
         }
 
@@ -397,36 +450,6 @@ namespace HoneydewExtractors.CSharp.Metrics
             }
 
             return GetParameterTypes(methodSymbol);
-        }
-
-        private string GetFullName(ExpressionSyntax expressionSyntax)
-        {
-            var symbolInfo = Model.GetSymbolInfo(expressionSyntax);
-            switch (symbolInfo.Symbol)
-            {
-                case IPropertySymbol propertySymbol:
-                    return propertySymbol.Type.ToDisplayString();
-                case ILocalSymbol localSymbol:
-                    return localSymbol.Type.ToDisplayString();
-                case IFieldSymbol fieldSymbol:
-                    return fieldSymbol.Type.ToDisplayString();
-                case IMethodSymbol methodSymbol:
-                    if (expressionSyntax is ObjectCreationExpressionSyntax && methodSymbol.ReceiverType != null)
-                    {
-                        return methodSymbol.ReceiverType.ToDisplayString();
-                    }
-
-                    return methodSymbol.ReturnType.ToDisplayString();
-                default:
-                {
-                    if (symbolInfo.Symbol == null)
-                    {
-                        return expressionSyntax.ToString();
-                    }
-
-                    return symbolInfo.Symbol.ToString();
-                }
-            }
         }
     }
 }

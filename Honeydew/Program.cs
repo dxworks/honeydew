@@ -82,10 +82,11 @@ namespace Honeydew
 
             cSharpFactExtractor.AddMetric<CSharpPropertiesRelationMetric>();
             cSharpFactExtractor.AddMetric<CSharpFieldsRelationMetric>();
-            cSharpFactExtractor.AddMetric<CSharpObjectCreationRelationMetric>();
             cSharpFactExtractor.AddMetric<CSharpParameterRelationMetric>();
             cSharpFactExtractor.AddMetric<CSharpReturnValueRelationMetric>();
             cSharpFactExtractor.AddMetric<CSharpLocalVariablesRelationMetric>();
+            cSharpFactExtractor.AddMetric<CSharpObjectCreationRelationMetric>();
+            cSharpFactExtractor.AddMetric<CSharpExceptionsThrownRelationMetric>();
 
             return cSharpFactExtractor;
         }
