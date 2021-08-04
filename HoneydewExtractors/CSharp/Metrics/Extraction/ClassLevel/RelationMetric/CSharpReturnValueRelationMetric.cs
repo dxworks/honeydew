@@ -1,8 +1,8 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
 {
-    public class CSharpReturnValueDependencyMetric : CSharpDependencyMetric
+    public class CSharpReturnValueRelationMetric : CSharpRelationMetric
     {
         public override string PrettyPrint()
         {

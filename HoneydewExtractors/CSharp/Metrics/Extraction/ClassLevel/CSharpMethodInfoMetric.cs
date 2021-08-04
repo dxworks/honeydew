@@ -19,6 +19,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
         private string _containingClassName = "";
         private string _baseTypeName = CSharpConstants.ObjectIdentifier;
         private bool _isInterface;
+        
+        private readonly CSharpLinesOfCodeCounter _linesOfCodeCounter = new();
 
         public ExtractionMetricType GetMetricType()
         {
@@ -106,7 +108,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 ContainingClassName = _containingClassName,
                 Modifier = modifier,
                 AccessModifier = accessModifier,
-                IsConstructor = true
+                IsConstructor = true,
+                Loc = _linesOfCodeCounter.Count(syntax.ToString())
             };
 
             ExtractInfoAboutParameters(syntax.ParameterList, methodModel);
@@ -131,6 +134,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 ContainingClassName = _containingClassName,
                 Modifier = modifier,
                 AccessModifier = accessModifier,
+                Loc = _linesOfCodeCounter.Count(syntax.ToString())
             };
 
             ExtractInfoAboutParameters(syntax.ParameterList, methodModel);
@@ -165,7 +169,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
             foreach (var invocationExpressionSyntax in syntax.Body.DescendantNodes()
                 .OfType<InvocationExpressionSyntax>())
             {
-                var methodCallModel = HoneydewSemanticModel.GetMethodCallModel(invocationExpressionSyntax, _baseTypeName);
+                var methodCallModel =
+                    HoneydewSemanticModel.GetMethodCallModel(invocationExpressionSyntax, _baseTypeName);
                 if (methodCallModel != null)
                 {
                     methodModel.CalledMethods.Add(methodCallModel);

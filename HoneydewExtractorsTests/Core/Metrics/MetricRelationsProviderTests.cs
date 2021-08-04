@@ -49,16 +49,20 @@ namespace HoneydewExtractorsTests.Core.Metrics
         }
 
         [Theory]
-        [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpReturnValueDependencyMetric")]
-        [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpLocalVariablesDependencyMetric")]
-        [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpParameterDependencyMetric")]
+        [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric.CSharpReturnValueRelationMetric")]
+        [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric.CSharpLocalVariablesRelationMetric")]
+        [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric.CSharpParameterRelationMetric")]
+        [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric.CSharpPropertiesRelationMetric")]
+        [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric.CSharpFieldsRelationMetric")]
+        [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric.CSharpObjectCreationRelationMetric")]
+        [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric.CSharpExceptionsThrownRelationMetric")]
         public void GetFileRelations_ShouldReturnListWithRelations_WhenProvidedClassMetricWithRelationMetrics(
             string extractorName)
         {
             var classMetric = new ClassMetric
             {
                 ExtractorName = extractorName,
-                ValueType = "HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpDependencyDataMetric",
+                ValueType = "HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpRelationDataMetric",
                 Value = new Dictionary<string, int>
                 {
                     {"Class1", 2},

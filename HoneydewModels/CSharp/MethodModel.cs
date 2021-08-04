@@ -5,7 +5,9 @@ namespace HoneydewModels.CSharp
     public record MethodModel
     {
         public string Name { get; init; }
-
+        
+        public LinesOfCode Loc { get; set; }
+        
         public bool IsConstructor { get; init; } = false;
 
         public string ReturnType { get; set; }

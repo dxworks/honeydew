@@ -14,6 +14,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
         public CSharpSyntacticModel HoneydewSyntacticModel { get; set; }
         public CSharpSemanticModel HoneydewSemanticModel { get; set; }
 
+        private readonly CSharpLinesOfCodeCounter _linesOfCodeCounter = new();
 
         public IList<PropertyModel> PropertyInfos { get; } = new List<PropertyModel>();
 
@@ -78,7 +79,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 {
                     var accessorModifiers = accessor.Modifiers.ToString();
                     var accessorKeyword = accessor.Keyword.ToString();
-                    
+
                     if (string.IsNullOrEmpty(accessorModifiers))
                     {
                         accessors.Add(accessorKeyword);
@@ -99,7 +100,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 Name = name,
                 ContainingClassName = containingClass,
                 CalledMethods = calledMethods,
-                Accessors = accessors
+                Accessors = accessors,
+                Loc = _linesOfCodeCounter.Count(node.ToString())
             });
         }
     }

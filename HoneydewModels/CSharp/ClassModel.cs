@@ -13,6 +13,8 @@ namespace HoneydewModels.CSharp
 
         public string FullName { get; set; }
 
+        public LinesOfCode Loc { get; set; }
+
         public string AccessModifier { get; init; }
 
         public string Modifier { get; init; } = "";
