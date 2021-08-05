@@ -1,14 +1,18 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
-namespace HoneydewExtractors.Processors
+namespace HoneydewModels.CSharp
 {
-    internal class FullNameNamespace
+    public class NamespaceTree
     {
-        public string Name { get; set; }
+        public string Name { get; init; }
+        
+        public string FilePath { get; set; }
 
-        public FullNameNamespace Parent { get; init; }
+        [JsonIgnore]
+        public NamespaceTree Parent { get; init; }
 
-        public Dictionary<string, FullNameNamespace> Children { get; set; } = new();
+        public Dictionary<string, NamespaceTree> Children { get; set; } = new();
 
         public string GetFullName()
         {
@@ -22,7 +26,7 @@ namespace HoneydewExtractors.Processors
             return $"{parentName}.{Name}";
         }
 
-        public FullNameNamespace GetChild(string[] nameParts)
+        public NamespaceTree GetChild(string[] nameParts)
         {
             if (nameParts == null || nameParts.Length == 0)
             {
@@ -54,7 +58,7 @@ namespace HoneydewExtractors.Processors
             return GetChild(nameParts) != null;
         }
 
-        public FullNameNamespace AddNamespaceChild(string className, string targetNamespace)
+        public NamespaceTree AddNamespaceChild(string className, string targetNamespace)
         {
             if (string.IsNullOrEmpty(targetNamespace) || string.IsNullOrEmpty(className))
             {
@@ -83,7 +87,7 @@ namespace HoneydewExtractors.Processors
             return childNames;
         }
 
-        private FullNameNamespace AddNamespaceChild(IReadOnlyList<string> classNameParts,
+        private NamespaceTree AddNamespaceChild(IReadOnlyList<string> classNameParts,
             IReadOnlyList<string> namespaceNameParts)
         {
             if (classNameParts[0] == namespaceNameParts[0])
@@ -97,7 +101,7 @@ namespace HoneydewExtractors.Processors
             return AddNamespaceChild(fullClassName);
         }
 
-        private FullNameNamespace AddNamespaceChild(IEnumerable<string> fullClassName)
+        private NamespaceTree AddNamespaceChild(IEnumerable<string> fullClassName)
         {
             var namespaceToSearch = this;
 
@@ -114,7 +118,7 @@ namespace HoneydewExtractors.Processors
                     continue;
                 }
 
-                var child = new FullNameNamespace
+                var child = new NamespaceTree
                 {
                     Parent = namespaceToSearch,
                     Name = namespacePart
@@ -126,24 +130,24 @@ namespace HoneydewExtractors.Processors
             return namespaceToSearch;
         }
 
-        private static IEnumerable<FullNameNamespace> GetLeafChildren(FullNameNamespace nameNamespace)
+        private static IEnumerable<NamespaceTree> GetLeafChildren(NamespaceTree nameNamespaceTree)
         {
-            if (nameNamespace == null)
+            if (nameNamespaceTree == null)
             {
-                return new List<FullNameNamespace>();
+                return new List<NamespaceTree>();
             }
 
-            if (nameNamespace.Children.Count == 0)
+            if (nameNamespaceTree.Children.Count == 0)
             {
-                return new List<FullNameNamespace>
+                return new List<NamespaceTree>
                 {
-                    nameNamespace
+                    nameNamespaceTree
                 };
             }
 
-            var leafChildren = new List<FullNameNamespace>();
+            var leafChildren = new List<NamespaceTree>();
 
-            foreach (var (_, child) in nameNamespace.Children)
+            foreach (var (_, child) in nameNamespaceTree.Children)
             {
                 leafChildren.AddRange(GetLeafChildren(child));
             }
