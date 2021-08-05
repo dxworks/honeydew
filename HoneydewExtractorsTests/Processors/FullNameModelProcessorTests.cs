@@ -780,11 +780,10 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Single(metricDependencies);
             Assert.True(metricDependencies.ContainsKey("AmbiguousClass"));
 
-            _progressLoggerMock.Verify(logger => logger.LogLine($"Multiple full names found for AmbiguousClass: "),
+            _progressLoggerMock.Verify(logger => logger.LogLine("Multiple full names found for AmbiguousClass: "),
                 Times.Once);
-            _progressLoggerMock.Verify(logger => logger.LogLine($"Models.AmbiguousClass"));
-            _progressLoggerMock.Verify(logger => logger.LogLine($"Services.AmbiguousClass"));
-            _progressLoggerMock.Verify(logger => logger.LogLine($"Controllers.AmbiguousClass"));
+            _progressLoggerMock.Verify(logger => logger.LogLine("Models.AmbiguousClass"));
+            _progressLoggerMock.Verify(logger => logger.LogLine("Services.AmbiguousClass"));
         }
 
         [Fact]
