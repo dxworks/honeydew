@@ -12,7 +12,7 @@ using HoneydewCore.Processors;
 using HoneydewExtractors.Core;
 using HoneydewExtractors.Core.Metrics;
 using HoneydewExtractors.CSharp.Metrics;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
+using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
 using HoneydewExtractors.CSharp.RepositoryLoading;
 using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
@@ -67,12 +67,12 @@ namespace Honeydew
                 progressLogger.Log("Resolving Full Name Dependencies");
 
                 // Post Extraction Repository model processing
+                var fullNameModelProcessor = new FullNameModelProcessor(progressLogger);
+                repositoryModel = fullNameModelProcessor.Process(repositoryModel);
+
                 repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
 
-                repositoryModel = new FullNameModelProcessor(progressLogger).Process(repositoryModel);
-
-
-                WriteAllRepresentations(repositoryModel, DefaultPathForAllRepresentations);
+                WriteAllRepresentations(repositoryModel, fullNameModelProcessor.NamespacesDictionary, DefaultPathForAllRepresentations);
 
                 progressLogger.Log();
                 progressLogger.Log("Extraction Complete!");
@@ -86,12 +86,15 @@ namespace Honeydew
         private static CSharpFactExtractor LoadExtractor()
         {
             var cSharpFactExtractor = new CSharpFactExtractor();
-            cSharpFactExtractor.AddMetric<CSharpBaseClassMetric>();
             cSharpFactExtractor.AddMetric<CSharpUsingsCountMetric>();
-            cSharpFactExtractor.AddMetric<CSharpIsAbstractMetric>();
-            cSharpFactExtractor.AddMetric<CSharpParameterDependencyMetric>();
-            cSharpFactExtractor.AddMetric<CSharpReturnValueDependencyMetric>();
-            cSharpFactExtractor.AddMetric<CSharpLocalVariablesDependencyMetric>();
+
+            cSharpFactExtractor.AddMetric<CSharpPropertiesRelationMetric>();
+            cSharpFactExtractor.AddMetric<CSharpFieldsRelationMetric>();
+            cSharpFactExtractor.AddMetric<CSharpParameterRelationMetric>();
+            cSharpFactExtractor.AddMetric<CSharpReturnValueRelationMetric>();
+            cSharpFactExtractor.AddMetric<CSharpLocalVariablesRelationMetric>();
+            cSharpFactExtractor.AddMetric<CSharpObjectCreationRelationMetric>();
+            cSharpFactExtractor.AddMetric<CSharpExceptionsThrownRelationMetric>();
 
             return cSharpFactExtractor;
         }
@@ -118,7 +121,8 @@ namespace Honeydew
             return repositoryModel;
         }
 
-        private static void WriteAllRepresentations(RepositoryModel repositoryModel, string outputPath)
+        private static void WriteAllRepresentations(RepositoryModel repositoryModel,
+            IDictionary<string, NamespaceTree> fullNameNamespaces, string outputPath)
         {
             var writer = new FileWriter();
 
@@ -129,6 +133,9 @@ namespace Honeydew
             var csvModelExporter = GetClassRelationsRepresentationExporter();
             writer.WriteFile(Path.Combine(outputPath, "honeydew.csv"),
                 csvModelExporter.Export(classRelationsRepresentation));
+
+            var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
+            writer.WriteFile(Path.Combine(outputPath,"honeydew_namespaces.json"), fullNameNamespacesExporter.Export(fullNameNamespaces));
         }
 
         private static IModelExporter<RepositoryModel> GetRepositoryModelExporter()

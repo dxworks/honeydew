@@ -6,10 +6,9 @@ using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
 {
-    // ICompilationUnitMetric is used because The Metric uses the Usings statements
-    public abstract class CSharpDependencyMetric : HoneydewCSharpSyntaxWalker,
+    public abstract class CSharpRelationMetric : HoneydewCSharpSyntaxWalker,
         IExtractionMetric<CSharpSyntacticModel, CSharpSemanticModel, CSharpSyntaxNode>, IRelationMetric
     {
         public CSharpSyntacticModel HoneydewSyntacticModel { get; set; }

@@ -601,5 +601,178 @@ namespace MyNamespace
 
             Assert.Equal(EAliasType.Class, myClass.Usings[0].AliasType);
         }
+
+
+        [Theory]
+        [InlineData(@"using HoneydewTestProject.A;
+
+namespace HoneydewTestProject
+{
+    public class ReferencesABViaNamespacePrefix
+    {
+        public void MethodC1A(C1 c1Params)
+        {
+
+        }
+
+        public void MethodC1B(B.C1 c1Params)
+        {
+
+        }
+    }
+}")]
+        [InlineData(@"using HoneydewTestProject.A;
+using C1B = HoneydewTestProject.B.C1;
+
+namespace HoneydewTestProject
+{
+    public class ReferencesABViaUsingAlias
+    {
+        public void MethodC1A(C1 c1Params)
+        {
+
+        }
+
+        public void MethodC1B(C1B c1Params)
+        {
+
+        }
+    }
+}")]
+        public void
+            Process_ShouldReturnFullNameOfParameters_WhenProvidedWithMethodsWithTheSameClassNameInTheSameNamespace_ButInDifferentProjects(
+                string fileContent)
+        {
+            const string fileContent2 = @"namespace HoneydewTestProject.A
+{
+    public class C1
+    {
+        public int X { get; set; }
+    }
+}";
+
+            const string fileContent3 = @"namespace HoneydewTestProject.B
+{
+    public class C1
+    {
+        public int X { get; set; }
+    }
+}";
+
+            var firstProjectClassModels = _extractor.Extract(fileContent2);
+            var secondProjectClassModels = _extractor.Extract(fileContent3);
+
+            var classModels = _extractor.Extract(fileContent);
+
+            var repositoryModel = new RepositoryModel();
+            var solutionModel = new SolutionModel();
+
+            var projectModel1 = new ProjectModel();
+            foreach (var classModel in classModels)
+            {
+                projectModel1.Add(classModel);
+            }
+
+            var projectModel2 = new ProjectModel();
+            foreach (var classModel in firstProjectClassModels)
+            {
+                projectModel2.Add(classModel);
+            }
+
+            var projectModel3 = new ProjectModel();
+            foreach (var classModel in secondProjectClassModels)
+            {
+                projectModel3.Add(classModel);
+            }
+
+            solutionModel.Projects.Add(projectModel1);
+            solutionModel.Projects.Add(projectModel2);
+            solutionModel.Projects.Add(projectModel3);
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var actualRepositoryModel = _sut.Process(repositoryModel);
+
+            var myClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0];
+
+            Assert.Equal("MethodC1A", myClass.Methods[0].Name);
+            Assert.Equal(1, myClass.Methods[0].ParameterTypes.Count);
+            Assert.Equal("HoneydewTestProject.A.C1", myClass.Methods[0].ParameterTypes[0].Type);
+
+            Assert.Equal("MethodC1B", myClass.Methods[1].Name);
+            Assert.Equal(1, myClass.Methods[1].ParameterTypes.Count);
+            Assert.Equal("HoneydewTestProject.B.C1", myClass.Methods[1].ParameterTypes[0].Type);
+        }
+
+        [Fact]
+        public void
+            Process_ShouldReturnFullNameOfParameters_WhenProvidedWithMethodsWithClassImportedFromAnotherProject_AndNamespaceIsImportedWithoutRedundantQualifier()
+        {
+            const string fileContent1 = @"namespace HoneydewTestProject
+{
+    using A;
+
+    public class ReferencesOnlyAUsingInsideOfNamespaceNoRedundantQualifier
+    {
+        public void Method(C1 c1Params)
+        {
+
+        }
+    }
+}";
+            const string fileContent2 = @"namespace HoneydewTestProject.A
+{
+    public class C1
+    {
+        public int X { get; set; }
+    }
+}";
+
+            const string fileContent3 = @"namespace HoneydewTestProject.B
+{
+    public class C1
+    {
+        public int X { get; set; }
+    }
+}";
+
+            var firstProjectClassModels = _extractor.Extract(fileContent2);
+            var secondProjectClassModels = _extractor.Extract(fileContent3);
+
+            var classModels = _extractor.Extract(fileContent1);
+
+            var repositoryModel = new RepositoryModel();
+            var solutionModel = new SolutionModel();
+
+            var projectModel1 = new ProjectModel();
+            foreach (var classModel in classModels)
+            {
+                projectModel1.Add(classModel);
+            }
+
+            var projectModel2 = new ProjectModel();
+            foreach (var classModel in firstProjectClassModels)
+            {
+                projectModel2.Add(classModel);
+            }
+
+            var projectModel3 = new ProjectModel();
+            foreach (var classModel in secondProjectClassModels)
+            {
+                projectModel3.Add(classModel);
+            }
+
+            solutionModel.Projects.Add(projectModel1);
+            solutionModel.Projects.Add(projectModel2);
+            solutionModel.Projects.Add(projectModel3);
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var actualRepositoryModel = _sut.Process(repositoryModel);
+
+            var myClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0];
+
+            Assert.Equal("Method", myClass.Methods[0].Name);
+            Assert.Equal(1, myClass.Methods[0].ParameterTypes.Count);
+            Assert.Equal("HoneydewTestProject.A.C1", myClass.Methods[0].ParameterTypes[0].Type);
+        }
     }
 }

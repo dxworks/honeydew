@@ -4,13 +4,17 @@ using System.Linq;
 using System.Text;
 using HoneydewCore.Logging;
 using HoneydewCore.Processors;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
+using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
+using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 
 namespace HoneydewExtractors.Processors
 {
     public class FullNameModelProcessor : IProcessorFunction<RepositoryModel, RepositoryModel>
     {
+        public readonly IDictionary<string, NamespaceTree> NamespacesDictionary =
+            new Dictionary<string, NamespaceTree>();
+
         private readonly IProgressLogger _progressLogger;
 
         private readonly IDictionary<AmbiguousName, ISet<string>> _ambiguousNames =
@@ -54,7 +58,14 @@ namespace HoneydewExtractors.Processors
             }
             catch (AmbiguousFullNameException e)
             {
-                if (!_ambiguousNames.ContainsKey(e.AmbiguousName))
+                if (_ambiguousNames.TryGetValue(e.AmbiguousName, out var possibleNamesSet))
+                {
+                    foreach (var possibleName in e.PossibleNames)
+                    {
+                        possibleNamesSet.Add(possibleName);
+                    }
+                }
+                else
                 {
                     _ambiguousNames.Add(e.AmbiguousName, e.PossibleNames);
                 }
@@ -73,9 +84,9 @@ namespace HoneydewExtractors.Processors
                         {
                             AddAmbiguousNames(() =>
                             {
-                                classModel.FullName = FindClassFullName(classModel.FullName, classModel.FilePath,
-                                    namespaceModel,
-                                    projectModel, solutionModel, repositoryModel, classModel.Usings);
+                                classModel.FullName = FindClassFullName(classModel.FullName, namespaceModel,
+                                    projectModel, solutionModel, repositoryModel, classModel.Usings,
+                                    classModel.FilePath);
                             });
                         }
                     }
@@ -100,16 +111,16 @@ namespace HoneydewExtractors.Processors
                                     usingModel.AliasType = DetermineUsingType(usingModel, classModel);
                                 }
 
-                                if (usingModel.AliasType != EAliasType.Class)
-                                {
-                                    continue;
-                                }
-
                                 AddAmbiguousNames(() =>
                                 {
-                                    usingModel.Name = FindClassFullName(usingModel.Name, classModel.FilePath,
-                                        namespaceModel,
-                                        projectModel, solutionModel, repositoryModel, classModel.Usings);
+                                    // var beforeName = usingModel.Name;
+                                    usingModel.Name = FindNamespaceFullName(usingModel.Name, namespaceModel,
+                                        classModel.Usings);
+                                    // if (usingModel.Name == beforeName)
+                                    // {
+                                    //     usingModel.Name = FindClassFullName(usingModel.Name, namespaceModel,
+                                    //         projectModel, solutionModel, repositoryModel, classModel.Usings, classModel.FilePath);
+                                    // }
                                 });
                             }
                         }
@@ -211,9 +222,8 @@ namespace HoneydewExtractors.Processors
                             AddAmbiguousNames(() =>
                             {
                                 classModel.BaseClassFullName = FindClassFullName(
-                                    classModel.BaseClassFullName, classModel.FilePath, namespaceModel, projectModel,
-                                    solutionModel,
-                                    repositoryModel, classModel.Usings);
+                                    classModel.BaseClassFullName, namespaceModel, projectModel, solutionModel,
+                                    repositoryModel, classModel.Usings, classModel.FilePath);
                             });
 
                             for (var i = 0; i < classModel.BaseInterfaces.Count; i++)
@@ -222,9 +232,9 @@ namespace HoneydewExtractors.Processors
                                 AddAmbiguousNames(() =>
                                 {
                                     classModel.BaseInterfaces[iCopy] = FindClassFullName(
-                                        classModel.BaseInterfaces[iCopy], classModel.FilePath,
+                                        classModel.BaseInterfaces[iCopy],
                                         namespaceModel, projectModel, solutionModel, repositoryModel,
-                                        classModel.Usings);
+                                        classModel.Usings, classModel.FilePath);
                                 });
                             }
 
@@ -232,9 +242,9 @@ namespace HoneydewExtractors.Processors
                             {
                                 AddAmbiguousNames(() =>
                                 {
-                                    fieldModel.Type = FindClassFullName(fieldModel.Type, classModel.FilePath,
+                                    fieldModel.Type = FindClassFullName(fieldModel.Type,
                                         namespaceModel, projectModel, solutionModel, repositoryModel,
-                                        classModel.Usings);
+                                        classModel.Usings, classModel.FilePath);
                                 });
                             }
 
@@ -242,13 +252,12 @@ namespace HoneydewExtractors.Processors
                             {
                                 AddAmbiguousNames(() =>
                                 {
-                                    propertyModel.Type = FindClassFullName(propertyModel.Type, classModel.FilePath,
+                                    propertyModel.Type = FindClassFullName(propertyModel.Type,
                                         namespaceModel, projectModel, solutionModel, repositoryModel,
-                                        classModel.Usings);
+                                        classModel.Usings, classModel.FilePath);
                                 });
 
-                                SetContainingClassAndCalledMethodsFullNameProperty(classModel.FilePath, propertyModel,
-                                    namespaceModel,
+                                SetContainingClassAndCalledMethodsFullNameProperty(classModel.FilePath,propertyModel, namespaceModel,
                                     projectModel, solutionModel, classModel.Usings);
                             }
 
@@ -257,21 +266,18 @@ namespace HoneydewExtractors.Processors
                                 AddAmbiguousNames(() =>
                                 {
                                     methodModel.ReturnType = FindClassFullName(methodModel.ReturnType,
-                                        classModel.FilePath,
                                         namespaceModel, projectModel, solutionModel, repositoryModel,
-                                        classModel.Usings);
+                                        classModel.Usings, classModel.FilePath);
                                 });
 
-                                SetContainingClassAndCalledMethodsFullName(classModel.FilePath, methodModel,
-                                    namespaceModel,
+                                SetContainingClassAndCalledMethodsFullName(classModel.FilePath,methodModel, namespaceModel,
                                     projectModel, solutionModel, classModel.Usings);
                             }
 
                             foreach (var methodModel in classModel.Constructors)
                             {
-                                SetContainingClassAndCalledMethodsFullName(classModel.FilePath, methodModel,
-                                    namespaceModel,
-                                    projectModel, solutionModel, classModel.Usings);
+                                SetContainingClassAndCalledMethodsFullName(classModel.FilePath,methodModel, namespaceModel,
+                                    projectModel, solutionModel, classModel.Usings );
                             }
 
                             ChangeDependencyMetricFullName(repositoryModel, classModel, namespaceModel,
@@ -288,8 +294,7 @@ namespace HoneydewExtractors.Processors
                 AddAmbiguousNames(() =>
                 {
                     propertyModel.ContainingClassName = FindClassFullName(propertyModel.ContainingClassName,
-                        classFilePath,
-                        namespaceModel, projectModel, solutionModel, repositoryModel, usings);
+                        namespaceModel, projectModel, solutionModel, repositoryModel, usings, classFilePath);
                 });
 
                 SetFullNameForCalledMethods(classFilePath, propertyModel.CalledMethods, namespaceModel,
@@ -302,20 +307,20 @@ namespace HoneydewExtractors.Processors
             {
                 AddAmbiguousNames(() =>
                 {
-                    methodModel.ContainingClassName = FindClassFullName(methodModel.ContainingClassName, classFilePath,
-                        namespaceModel, projectModel, solutionModel, repositoryModel, usings);
+                    methodModel.ContainingClassName = FindClassFullName(methodModel.ContainingClassName,
+                        namespaceModel, projectModel, solutionModel, repositoryModel, usings, classFilePath);
                 });
 
                 foreach (var parameterModel in methodModel.ParameterTypes)
                 {
                     AddAmbiguousNames(() =>
                     {
-                        parameterModel.Type = FindClassFullName(parameterModel.Type, classFilePath, namespaceModel,
-                            projectModel, solutionModel, repositoryModel, usings);
+                        parameterModel.Type = FindClassFullName(parameterModel.Type, namespaceModel,
+                            projectModel, solutionModel, repositoryModel, usings, classFilePath);
                     });
                 }
 
-                SetFullNameForCalledMethods(classFilePath, methodModel.CalledMethods, namespaceModel,
+                SetFullNameForCalledMethods(classFilePath,methodModel.CalledMethods, namespaceModel,
                     projectModel, solutionModel, repositoryModel, usings);
             }
         }
@@ -331,15 +336,16 @@ namespace HoneydewExtractors.Processors
                 {
                     AddAmbiguousNames(() =>
                     {
-                        parameterModel.Type = FindClassFullName(parameterModel.Type, classFilePath, namespaceModel,
-                            projectModel, solutionModel, repositoryModel, usings);
+                        parameterModel.Type = FindClassFullName(parameterModel.Type, namespaceModel,
+                            projectModel, solutionModel, repositoryModel, usings, classFilePath);
                     });
                 }
 
                 AddAmbiguousNames(() =>
                 {
-                    calledMethod.ContainingClassName = FindClassFullName(calledMethod.ContainingClassName,
-                        classFilePath, namespaceModel, projectModel, solutionModel, repositoryModel, usings);
+                    calledMethod.ContainingClassName = FindClassFullName(
+                        calledMethod.ContainingClassName, namespaceModel, projectModel, solutionModel,
+                        repositoryModel, usings, classFilePath);
 
                     var classModel = GetClassModelFullyQualified(calledMethod.ContainingClassName, projectModel,
                         solutionModel,
@@ -390,7 +396,7 @@ namespace HoneydewExtractors.Processors
                 {
                     if (fieldModel.Name == containingClassName)
                     {
-                        return ConvertToSystemName(fieldModel.Type);
+                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(fieldModel.Type);
                     }
                 }
 
@@ -398,7 +404,7 @@ namespace HoneydewExtractors.Processors
                 {
                     if (propertyModel.Name == containingClassName)
                     {
-                        return ConvertToSystemName(propertyModel.Type);
+                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(propertyModel.Type);
                     }
                 }
 
@@ -408,7 +414,7 @@ namespace HoneydewExtractors.Processors
                         methodName, methodParameters);
                     if (hasTheSameSignature)
                     {
-                        return ConvertToSystemName(staticImportedClass.FullName);
+                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(staticImportedClass.FullName);
                     }
                 }
             }
@@ -432,8 +438,8 @@ namespace HoneydewExtractors.Processors
 
             for (var i = 0; i < firstMethodParameters.Count; i++)
             {
-                if (ConvertToSystemName(firstMethodParameters[i].Type) !=
-                    ConvertToSystemName(secondMethodParameters[i].Type))
+                if (CSharpConstants.ConvertPrimitiveTypeToSystemType(firstMethodParameters[i].Type) !=
+                    CSharpConstants.ConvertPrimitiveTypeToSystemType(secondMethodParameters[i].Type))
                 {
                     return false;
                 }
@@ -454,59 +460,11 @@ namespace HoneydewExtractors.Processors
             return true;
         }
 
-        // private static string ConvertToPrimitiveName(string type)
-        // {
-        //     return type switch
-        //     {
-        //         "System.Byte" => "byte",
-        //         "System.SByte" => "sbyte",
-        //         "System.Int32" => "int",
-        //         "System.UInt32" => "uint",
-        //         "System.Int16" => "short",
-        //         "System.UInt16" => "ushort",
-        //         "System.Int64" => "long",
-        //         "System.UInt64" => "ulong",
-        //         "System.Single" => "float",
-        //         "System.Double" => "double",
-        //         "System.Char" => "char",
-        //         "System.Boolean" => "bool",
-        //         "System.Object" => "object",
-        //         "System.String" => "string",
-        //         "System.Decimal" => "decimal",
-        //         "System.DateTime" => "DateTime",
-        //         _ => type
-        //     };
-        // }
-
-        private static string ConvertToSystemName(string type)
-        {
-            return type switch
-            {
-                "byte" => "System.Byte",
-                "sbyte" => "System.SByte",
-                "int" => "System.Int32",
-                "uint" => "System.UInt32",
-                "short" => "System.Int16",
-                "ushort" => "System.UInt16",
-                "long" => "System.Int64",
-                "ulong" => "System.UInt64",
-                "float" => "System.Single",
-                "double" => "System.Double",
-                "char" => "System.Char",
-                "bool" => "System.Boolean",
-                "object" => "System.Object",
-                "string" => "System.String",
-                "decimal" => "System.Decimal",
-                "DateTime" => "System.DateTime",
-                _ => type
-            };
-        }
-
         private void ChangeDependencyMetricFullName(RepositoryModel repositoryModel, ClassModel classModel,
             NamespaceModel namespaceModel, ProjectModel projectModel, SolutionModel solutionModel)
         {
             var parameterDependenciesMetrics = classModel.Metrics.Where(metric =>
-                typeof(CSharpDependencyMetric).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
+                typeof(CSharpRelationMetric).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
 
             foreach (var metric in parameterDependenciesMetrics)
             {
@@ -523,9 +481,8 @@ namespace HoneydewExtractors.Processors
 
                     try
                     {
-                        var fullClassName = FindClassFullName(dependencyName, classModel.FilePath, namespaceModel,
-                            projectModel,
-                            solutionModel, repositoryModel, classModel.Usings);
+                        var fullClassName = FindClassFullName(dependencyName, namespaceModel, projectModel,
+                            solutionModel, repositoryModel, classModel.Usings,classModel.FilePath);
 
                         if (fullNameDependencies.ContainsKey(fullClassName))
                         {
@@ -562,209 +519,319 @@ namespace HoneydewExtractors.Processors
             }
         }
 
-        private static string FindClassFullName(string className, string classFilePath,
-            NamespaceModel namespaceModelToStartSearchFrom,
+        private string FindNamespaceFullName(string namespaceName, NamespaceModel namespaceModel,
+            IList<UsingModel> usingModels)
+        {
+            if (string.IsNullOrEmpty(namespaceName))
+            {
+                return namespaceName;
+            }
+
+            if (IsNameFullyQualified(namespaceName))
+            {
+                return namespaceName;
+            }
+
+            var combinedName = $"{namespaceModel.Name}.{namespaceName}";
+
+            if (IsNameFullyQualified(combinedName))
+            {
+                return combinedName;
+            }
+
+            if (usingModels != null)
+            {
+                // try searching for the aliases
+                // if one class alias is found that matched, return the name
+                // if one namespace alias is found, replace the alias with the real name of the namespace
+                foreach (var usingModel in usingModels)
+                {
+                    if (usingModel.AliasType == EAliasType.Class && namespaceName == usingModel.Alias)
+                    {
+                        return usingModel.Name;
+                    }
+
+                    var tempName = namespaceName;
+                    if (usingModel.AliasType == EAliasType.Namespace && namespaceName.StartsWith(usingModel.Alias))
+                    {
+                        tempName = namespaceName.Replace(usingModel.Alias, usingModel.Name);
+                    }
+
+                    var fullNamePossibilities = GetPossibilitiesFromNamespace(usingModel.Name, tempName);
+                    var firstOrDefault = fullNamePossibilities.FirstOrDefault();
+                    if (firstOrDefault != null)
+                    {
+                        return firstOrDefault;
+                    }
+                }
+            }
+
+            return namespaceName;
+        }
+
+        private string FindClassFullName(string className, NamespaceModel namespaceModelToStartSearchFrom,
             ProjectModel projectModelToStartSearchFrom, SolutionModel solutionModelToStartSearchFrom,
-            RepositoryModel repositoryModel, IList<UsingModel> usings)
+            RepositoryModel repositoryModel, IList<UsingModel> usingModels, string classFilePath = "")
         {
             if (string.IsNullOrEmpty(className))
             {
                 return className;
             }
 
-            if (GetClassModelFullyQualified(className, projectModelToStartSearchFrom, solutionModelToStartSearchFrom,
-                repositoryModel) != null)
+            if (CSharpConstants.IsPrimitive(className))
             {
-                return ConvertToSystemName(className);
+                return CSharpConstants.ConvertPrimitiveTypeToSystemType(className);
             }
 
-            if (TryToGetClassNameFromNamespace(className, namespaceModelToStartSearchFrom,
-                out var fullNameFromNamespace))
+            if (IsNameFullyQualified(className))
             {
-                return ConvertToSystemName(fullNameFromNamespace);
+                return className;
+            }
+
+            // try to find class in provided namespace
+            if (namespaceModelToStartSearchFrom.ClassModels.Any(classModel => classModel.FullName == className))
+            {
+                return AddClassModelToNamespaceGraph(className, classFilePath, namespaceModelToStartSearchFrom.Name);
+            }
+
+            if (namespaceModelToStartSearchFrom.ClassModels.Any(classModel =>
+                classModel.FullName == $"{namespaceModelToStartSearchFrom.Name}.{className}"))
+            {
+                return AddClassModelToNamespaceGraph(className, classFilePath, namespaceModelToStartSearchFrom.Name);
             }
 
             // search in all provided usings
-            HashSet<string> fullNamePossibilities;
-            if (usings != null)
+            var fullNamePossibilities = new HashSet<string>();
+            if (usingModels != null)
             {
                 // try searching for the aliases
                 // if one class alias is found that matched, return the name
                 // if one namespace alias is found, replace the alias with the real name of the namespace
-                foreach (var usingModel in usings)
+                foreach (var usingModel in usingModels)
                 {
                     if (usingModel.AliasType == EAliasType.Class && className == usingModel.Alias)
                     {
                         return usingModel.Name;
                     }
 
-                    if (usingModel.AliasType != EAliasType.Namespace)
+                    var tempName = className;
+                    if (usingModel.AliasType == EAliasType.Namespace && className.StartsWith(usingModel.Alias))
                     {
-                        continue;
+                        tempName = className.Replace(usingModel.Alias, usingModel.Name);
                     }
 
-                    if (!className.StartsWith(usingModel.Alias))
+                    foreach (var name in GetPossibilitiesFromNamespace(usingModel.Name, tempName))
                     {
-                        continue;
+                        fullNamePossibilities.Add(name);
                     }
 
-                    if (projectModelToStartSearchFrom.Namespaces.FirstOrDefault(model =>
-                        model.Name == usingModel.Name) != null)
+                    switch (fullNamePossibilities.Count)
                     {
-                        return className.Replace(usingModel.Alias, usingModel.Name);
+                        case 1:
+                            return fullNamePossibilities.First();
+                        case > 1:
+                            throw new AmbiguousFullNameException(new AmbiguousName
+                            {
+                                Name = className,
+                                Location = classFilePath
+                            }, fullNamePossibilities);
                     }
-                }
-
-                fullNamePossibilities = new HashSet<string>();
-                foreach (var usingModel in usings)
-                {
-                    var usingNamespace =
-                        projectModelToStartSearchFrom.Namespaces.FirstOrDefault(model => model.Name == usingModel.Name);
-                    if (usingNamespace == null)
-                    {
-                        continue;
-                    }
-
-                    if (TryToGetClassNameFromNamespace(className, usingNamespace, out var fullNameFromUsingNamespace))
-                    {
-                        fullNamePossibilities.Add(fullNameFromUsingNamespace);
-                    }
-                }
-
-                switch (fullNamePossibilities.Count)
-                {
-                    case 1:
-                        return ConvertToSystemName(fullNamePossibilities.First());
-                    case > 1:
-                        throw new AmbiguousFullNameException(new AmbiguousName
-                        {
-                            Name = className,
-                            Location = classFilePath
-                        }, fullNamePossibilities);
                 }
             }
 
-            if (TryToGetClassNameFromProject(className, classFilePath, projectModelToStartSearchFrom,
-                out var fullNameFromProject))
+            foreach (var name in TrySearchingInProjectModel(className, projectModelToStartSearchFrom))
             {
-                return ConvertToSystemName(fullNameFromProject);
+                fullNamePossibilities.Add(name);
             }
 
-            // search in all projects of solutionModel
-            if (TryToGetClassNameFromSolution(className, classFilePath, solutionModelToStartSearchFrom,
-                out var fullNameFromSolution))
+            switch (fullNamePossibilities.Count)
             {
-                return ConvertToSystemName(fullNameFromSolution);
+                case 1:
+                    return fullNamePossibilities.First();
+                case > 1:
+                    throw new AmbiguousFullNameException(new AmbiguousName
+                    {
+                        Name = className,
+                        Location = classFilePath
+                    }, fullNamePossibilities);
             }
 
-            fullNamePossibilities = new HashSet<string>();
-            foreach (var solution in repositoryModel.Solutions)
+            foreach (var name in TrySearchingInSolutionModel(className, solutionModelToStartSearchFrom,
+                projectModelToStartSearchFrom))
             {
-                if (solution == solutionModelToStartSearchFrom)
+                fullNamePossibilities.Add(name);
+            }
+
+            switch (fullNamePossibilities.Count)
+            {
+                case 1:
+                    return fullNamePossibilities.First();
+                case > 1:
+                    throw new AmbiguousFullNameException(new AmbiguousName
+                    {
+                        Name = className,
+                        Location = classFilePath
+                    }, fullNamePossibilities);
+            }
+
+            // try searching in all solutions
+            foreach (var solutionModel in repositoryModel.Solutions)
+            {
+                if (solutionModel == solutionModelToStartSearchFrom)
                 {
                     continue;
                 }
 
-                if (TryToGetClassNameFromSolution(className, classFilePath, solution, out var fullName))
+                foreach (var name in TrySearchingInSolutionModel(className, solutionModel,
+                    projectModelToStartSearchFrom))
                 {
-                    fullNamePossibilities.Add(fullName);
+                    fullNamePossibilities.Add(name);
+                }
+
+                if (fullNamePossibilities.Count > 1)
+                {
+                    throw new AmbiguousFullNameException(new AmbiguousName
+                    {
+                        Name = className,
+                        Location = classFilePath
+                    }, fullNamePossibilities);
                 }
             }
 
             return fullNamePossibilities.Count switch
             {
-                1 => ConvertToSystemName(fullNamePossibilities.First()),
+                1 => CSharpConstants.ConvertPrimitiveTypeToSystemType(fullNamePossibilities.First()),
                 > 1 => throw new AmbiguousFullNameException(new AmbiguousName
                 {
                     Name = className,
                     Location = classFilePath
                 }, fullNamePossibilities),
-                _ => ConvertToSystemName(className)
+
+                // unknown className, must be some extern dependency
+                _ => CSharpConstants.ConvertPrimitiveTypeToSystemType(className)
             };
         }
 
-        private static bool TryToGetClassNameFromSolution(string className, string classFilePath,
-            SolutionModel solutionModel,
-            out string outFullName)
+        private IEnumerable<string> TrySearchingInSolutionModel(string className,
+            SolutionModel solutionModel, ProjectModel projectModelToBeIgnored)
         {
             var fullNamePossibilities = new HashSet<string>();
-            outFullName = className;
-
             foreach (var projectModel in solutionModel.Projects)
             {
-                if (TryToGetClassNameFromProject(className, classFilePath, projectModel, out var fullName))
+                if (projectModel == projectModelToBeIgnored)
                 {
-                    fullNamePossibilities.Add(fullName);
+                    continue;
                 }
-            }
 
-            switch (fullNamePossibilities.Count)
-            {
-                case 1:
+                foreach (var name in TrySearchingInProjectModel(className, projectModel))
                 {
-                    outFullName = fullNamePossibilities.First();
-                    return true;
+                    fullNamePossibilities.Add(name);
                 }
-                case > 1:
+
+                if (fullNamePossibilities.Count > 1)
+                {
                     throw new AmbiguousFullNameException(new AmbiguousName
                     {
                         Name = className,
                         Location = classFilePath
                     }, fullNamePossibilities);
+                }
             }
 
-            return false;
+            return fullNamePossibilities;
         }
 
-        private static bool TryToGetClassNameFromProject(string className, string classFilePath,
-            ProjectModel projectModel,
-            out string outFullName)
+        private IEnumerable<string> TrySearchingInProjectModel(string className, ProjectModel projectModel)
         {
             var fullNamePossibilities = new HashSet<string>();
-            outFullName = className;
-
             foreach (var namespaceModel in projectModel.Namespaces)
             {
-                if (TryToGetClassNameFromNamespace(className, namespaceModel, out var fullName))
+                foreach (var name in GetPossibilitiesFromNamespace(namespaceModel.Name, className))
                 {
-                    fullNamePossibilities.Add(fullName);
+                    fullNamePossibilities.Add(name);
                 }
-            }
 
-            switch (fullNamePossibilities.Count)
-            {
-                case 1:
+                if (fullNamePossibilities.Count > 1)
                 {
-                    outFullName = fullNamePossibilities.First();
-                    return true;
-                }
-                case > 1:
                     throw new AmbiguousFullNameException(new AmbiguousName
                     {
                         Name = className,
                         Location = classFilePath
                     }, fullNamePossibilities);
+                }
             }
 
-            return false;
+            return fullNamePossibilities;
         }
 
-        private static bool TryToGetClassNameFromNamespace(string className, NamespaceModel namespaceModel,
-            out string outClassFullName)
+        private IEnumerable<string> GetPossibilitiesFromNamespace(string namespaceName, string className)
         {
-            outClassFullName = className;
-
-            var fullName = $"{namespaceModel.Name}.{className}";
-
-            if (namespaceModel.ClassModels.Any(classModel =>
-                classModel.FullName == fullName || classModel.FullName.Equals(className)))
+            var nameParts = namespaceName.Split('.');
+            if (!NamespacesDictionary.TryGetValue(nameParts[0], out var fullNameNamespace))
             {
-                outClassFullName = fullName;
-                return true;
+                return new List<string>();
+            }
+
+
+            var childNamespace = fullNameNamespace.GetChild(nameParts);
+            if (childNamespace != null)
+            {
+                return childNamespace.GetPossibleChildren(className);
+            }
+
+            return new List<string>();
+        }
+
+        private string AddClassModelToNamespaceGraph(string className, string classFilePath, string namespaceName)
+        {
+            var namespaceNameParts = namespaceName.Split('.');
+
+            NamespaceTree rootNamespaceTree;
+
+            if (NamespacesDictionary.TryGetValue(namespaceNameParts[0], out var fullNameNamespace))
+            {
+                rootNamespaceTree = fullNameNamespace;
+            }
+            else
+            {
+                var nameNamespace = new NamespaceTree
+                {
+                    Name = namespaceNameParts[0]
+                };
+                rootNamespaceTree = nameNamespace;
+
+                NamespacesDictionary.Add(namespaceNameParts[0], rootNamespaceTree);
+            }
+
+            if (namespaceNameParts.Length > 1) // create sub graph if namespaceNames is not trivial
+            {
+                rootNamespaceTree.AddNamespaceChild(namespaceName, namespaceName);
+            }
+
+            var classModelFullName = rootNamespaceTree.AddNamespaceChild(className, namespaceName);
+
+            classModelFullName.FilePath = classFilePath;
+
+            return classModelFullName.GetFullName();
+        }
+
+        private bool IsNameFullyQualified(string name)
+        {
+            var nameParts = name.Split(".");
+            if (nameParts.Length > 0)
+            {
+                if (NamespacesDictionary.TryGetValue(nameParts[0], out var fullNameNamespace))
+                {
+                    if (fullNameNamespace.ContainsNameParts(nameParts))
+                    {
+                        return true;
+                    }
+                }
             }
 
             return false;
         }
+
 
         private static ClassModel GetClassModelFullyQualified(string classNameToSearch,
             ProjectModel projectModelToStartSearchFrom,

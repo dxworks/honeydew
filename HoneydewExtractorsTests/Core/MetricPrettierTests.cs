@@ -34,7 +34,7 @@ namespace HoneydewExtractorsTests.Core
         
         [Theory]
         [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpBaseClassMetric", "Inherits Class")]
-        [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpLocalVariablesDependencyMetric", "Local Variables Dependency")]
+        [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric.CSharpLocalVariablesRelationMetric", "Local Variables Dependency")]
         [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpFieldsInfoMetric", "Fields Info")]
         [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel.CSharpUsingsCountMetric", "Usings Count")]
         public void Pretty_ShouldReturnThePrettyName_WhenProvidedWithClassNamesThatAreMetrics(string name, string prettyName)

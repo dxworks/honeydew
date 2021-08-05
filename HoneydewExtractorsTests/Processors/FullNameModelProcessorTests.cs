@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
+using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewExtractors.Processors;
 using HoneydewModels.CSharp;
 using Moq;
@@ -740,7 +740,7 @@ namespace HoneydewExtractorsTests.Processors
                         {
                             new ClassMetric
                             {
-                                ExtractorName = typeof(CSharpParameterDependencyMetric).FullName,
+                                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
                                 ValueType = typeof(Dictionary<string, int>).FullName,
                                 Value = new Dictionary<string, int>()
                                 {
@@ -786,7 +786,6 @@ namespace HoneydewExtractorsTests.Processors
                 Times.Once);
             _progressLoggerMock.Verify(logger => logger.Log("Models.AmbiguousClass", LogLevels.Information));
             _progressLoggerMock.Verify(logger => logger.Log("Services.AmbiguousClass", LogLevels.Information));
-            _progressLoggerMock.Verify(logger => logger.Log("Controllers.AmbiguousClass", LogLevels.Information));
         }
 
         [Fact]

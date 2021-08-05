@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using HoneydewExtractors.Core.Metrics;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
@@ -39,12 +40,224 @@ namespace HoneydewExtractors.CSharp.Metrics
             return typeName;
         }
 
+        public string GetFullName(PropertyDeclarationSyntax declarationSyntax)
+        {
+            var typeName = declarationSyntax.Type.ToString();
+            var nodeSymbol = Model.GetSymbolInfo(declarationSyntax.Type).Symbol;
+            if (nodeSymbol != null)
+            {
+                typeName = nodeSymbol.ToString();
+            }
+
+            return typeName;
+        }
+
         public string GetFullName(TypeSyntax typeSyntax)
         {
-            var returnValueSymbol = Model.GetSymbolInfo(typeSyntax);
-            return returnValueSymbol.Symbol != null
-                ? returnValueSymbol.Symbol.ToString()
-                : typeSyntax.ToString();
+            var symbolInfo = Model.GetSymbolInfo(typeSyntax);
+            if (symbolInfo.Symbol != null)
+            {
+                return symbolInfo.Symbol.ToString();
+            }
+
+            var variableDeclarationSyntax = GetParentDeclarationSyntax<VariableDeclarationSyntax>(typeSyntax);
+            if (variableDeclarationSyntax != null)
+            {
+                var fullName = GetFullName(variableDeclarationSyntax);
+                if (fullName != CSharpConstants.VarIdentifier)
+                {
+                    return fullName;
+                }
+            }
+
+            var propertyDeclarationSyntax = GetParentDeclarationSyntax<PropertyDeclarationSyntax>(typeSyntax);
+            if (propertyDeclarationSyntax != null)
+            {
+                return GetFullName(propertyDeclarationSyntax);
+            }
+
+            return typeSyntax.ToString();
+        }
+
+        public string GetFullName(BaseObjectCreationExpressionSyntax declarationSyntax)
+        {
+            var symbolInfo = Model.GetSymbolInfo(declarationSyntax);
+
+            if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
+            {
+                return methodSymbol.ContainingType.ToDisplayString();
+            }
+
+            var variableDeclarationSyntax = GetParentDeclarationSyntax<VariableDeclarationSyntax>(declarationSyntax);
+            if (variableDeclarationSyntax != null)
+            {
+                return GetFullName(variableDeclarationSyntax);
+            }
+
+            var propertyDeclarationSyntax = GetParentDeclarationSyntax<PropertyDeclarationSyntax>(declarationSyntax);
+            if (propertyDeclarationSyntax != null)
+            {
+                return propertyDeclarationSyntax.Type.ToString();
+            }
+
+            if (declarationSyntax is ObjectCreationExpressionSyntax objectCreationExpressionSyntax)
+            {
+                return GetFullName(objectCreationExpressionSyntax.Type);
+            }
+
+            return declarationSyntax.ToString();
+        }
+
+
+        public string GetFullName(ImplicitArrayCreationExpressionSyntax declarationSyntax)
+        {
+            var propertyDeclarationSyntax = GetParentDeclarationSyntax<PropertyDeclarationSyntax>(declarationSyntax);
+            if (propertyDeclarationSyntax != null)
+            {
+                return GetFullName(propertyDeclarationSyntax.Type);
+            }
+
+            var variableDeclarationSyntax = GetParentDeclarationSyntax<VariableDeclarationSyntax>(declarationSyntax);
+            if (variableDeclarationSyntax != null)
+            {
+                return GetFullName(variableDeclarationSyntax);
+            }
+
+            // try to infer type from elements
+            var elementTypesSet = new HashSet<string>();
+
+            foreach (var expression in declarationSyntax.Initializer.Expressions)
+            {
+                var fullName = GetExpressionType(expression);
+                fullName = CSharpConstants.ConvertPrimitiveTypeToSystemType(fullName);
+                elementTypesSet.Add(fullName);
+            }
+
+            switch (elementTypesSet.Count)
+            {
+                case 0:
+                    return declarationSyntax.ToString();
+                case 1:
+                    return $"{elementTypesSet.First()}[]";
+                case 2:
+                {
+                    if (elementTypesSet.Contains("System.Int32") && elementTypesSet.Contains("System.Single"))
+                    {
+                        return "System.Single[]";
+                    }
+
+                    if (elementTypesSet.Contains("System.Int32") && elementTypesSet.Contains("System.Double"))
+                    {
+                        return "System.Double[]";
+                    }
+
+                    if (elementTypesSet.Contains("System.Single") && elementTypesSet.Contains("System.Double"))
+                    {
+                        return "System.Double[]";
+                    }
+
+                    return "System.Object[]";
+                }
+                case 3:
+                {
+                    if (elementTypesSet.Contains("System.Int32") && elementTypesSet.Contains("System.Single") &&
+                        elementTypesSet.Contains("System.Double"))
+                    {
+                        return "System.Double[]";
+                    }
+
+                    return "System.Object[]";
+                }
+                default:
+                    return "System.Object[]";
+            }
+        }
+
+        public string GetFullName(ExpressionSyntax expressionSyntax)
+        {
+            var symbolInfo = Model.GetSymbolInfo(expressionSyntax);
+            switch (symbolInfo.Symbol)
+            {
+                case IPropertySymbol propertySymbol:
+                    return propertySymbol.Type.ToDisplayString();
+                case ILocalSymbol localSymbol:
+                    return localSymbol.Type.ToDisplayString();
+                case IFieldSymbol fieldSymbol:
+                    return fieldSymbol.Type.ToDisplayString();
+                case IMethodSymbol methodSymbol:
+                    if (expressionSyntax is ObjectCreationExpressionSyntax && methodSymbol.ReceiverType != null)
+                    {
+                        return methodSymbol.ReceiverType.ToDisplayString();
+                    }
+
+                    return methodSymbol.ReturnType.ToDisplayString();
+                default:
+                {
+                    if (symbolInfo.Symbol == null)
+                    {
+                        return expressionSyntax switch
+                        {
+                            ObjectCreationExpressionSyntax objectCreationExpressionSyntax => GetFullName(
+                                objectCreationExpressionSyntax),
+                            _ => expressionSyntax.ToString()
+                        };
+                    }
+
+                    return symbolInfo.Symbol.ToString();
+                }
+            }
+        }
+
+        public string GetFullName(ThrowStatementSyntax declarationSyntax)
+        {
+            var parentDeclarationSyntax = GetParentDeclarationSyntax<CatchClauseSyntax>(declarationSyntax);
+            var catchDeclarationSyntax = parentDeclarationSyntax.Declaration;
+            if (catchDeclarationSyntax != null)
+            {
+                return GetFullName(catchDeclarationSyntax.Type);
+            }
+
+            return GetFullName(declarationSyntax.Expression);
+        }
+
+        private string GetExpressionType(ExpressionSyntax expression)
+        {
+            switch (expression)
+            {
+                case LiteralExpressionSyntax literalExpressionSyntax:
+                {
+                    if (literalExpressionSyntax.Token.Value != null)
+                    {
+                        return literalExpressionSyntax.Token.Value.GetType().FullName;
+                    }
+                }
+                    break;
+
+                case ObjectCreationExpressionSyntax objectCreationExpressionSyntax:
+                {
+                    return GetFullName(objectCreationExpressionSyntax);
+                }
+            }
+
+            return GetFullName(expression);
+        }
+
+        private static T GetParentDeclarationSyntax<T>(SyntaxNode node) where T : SyntaxNode
+        {
+            while (true)
+            {
+                if (node is T syntax)
+                {
+                    return syntax;
+                }
+
+                if (node.Parent == null)
+                {
+                    return null;
+                }
+
+                node = node.Parent;
+            }
         }
 
         public IList<string> GetBaseInterfaces(TypeDeclarationSyntax node)
@@ -183,6 +396,17 @@ namespace HoneydewExtractors.CSharp.Metrics
             return parameterTypes;
         }
 
+        public EAliasType GetAliasTypeOfNamespace(NameSyntax nodeName)
+        {
+            var symbolInfo = Model.GetSymbolInfo(nodeName);
+            return symbolInfo.Symbol switch
+            {
+                null => EAliasType.NotDetermined,
+                INamespaceSymbol => EAliasType.Namespace,
+                _ => EAliasType.Class
+            };
+        }
+
         private IList<ParameterModel> GetParameterTypes(InvocationExpressionSyntax invocationSyntax)
         {
             var methodSymbol = GetMethodSymbol(invocationSyntax);
@@ -226,47 +450,6 @@ namespace HoneydewExtractors.CSharp.Metrics
             }
 
             return GetParameterTypes(methodSymbol);
-        }
-
-        private string GetFullName(ExpressionSyntax expressionSyntax)
-        {
-            var symbolInfo = Model.GetSymbolInfo(expressionSyntax);
-            switch (symbolInfo.Symbol)
-            {
-                case IPropertySymbol propertySymbol:
-                    return propertySymbol.Type.ToDisplayString();
-                case ILocalSymbol localSymbol:
-                    return localSymbol.Type.ToDisplayString();
-                case IFieldSymbol fieldSymbol:
-                    return fieldSymbol.Type.ToDisplayString();
-                case IMethodSymbol methodSymbol:
-                    if (expressionSyntax is ObjectCreationExpressionSyntax && methodSymbol.ReceiverType != null)
-                    {
-                        return methodSymbol.ReceiverType.ToDisplayString();
-                    }
-
-                    return methodSymbol.ReturnType.ToDisplayString();
-                default:
-                {
-                    if (symbolInfo.Symbol == null)
-                    {
-                        return expressionSyntax.ToString();
-                    }
-
-                    return symbolInfo.Symbol.ToString();
-                }
-            }
-        }
-
-        public EAliasType GetAliasTypeOfNamespace(NameSyntax nodeName)
-        {
-            var symbolInfo = Model.GetSymbolInfo(nodeName);
-            return symbolInfo.Symbol switch
-            {
-                null => EAliasType.NotDetermined,
-                INamespaceSymbol => EAliasType.Namespace,
-                _ => EAliasType.Class
-            };
         }
     }
 }

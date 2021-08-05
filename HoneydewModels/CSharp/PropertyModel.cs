@@ -6,6 +6,8 @@ namespace HoneydewModels.CSharp
     {
         public string Name { get; init; }
 
+        public LinesOfCode Loc { get; set; }
+
         public string Type { get; set; }
 
         public string Modifier { get; init; } = "";
@@ -15,9 +17,9 @@ namespace HoneydewModels.CSharp
         public bool IsEvent { get; init; }
 
         public string ContainingClassName { get; set; }
-        
+
         public IList<string> Accessors { get; set; } = new List<string>();
-        
+
         public IList<MethodCallModel> CalledMethods { get; init; } = new List<MethodCallModel>();
     }
 }
