@@ -9,13 +9,13 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
 {
     public class BasicSolutionLoadingStrategy : ISolutionLoadingStrategy
     {
-        private readonly IProgressLogger _progressLogger;
+        private readonly ILogger _logger;
         private readonly IProjectLoadingStrategy _projectLoadingStrategy;
 
-        public BasicSolutionLoadingStrategy(IProgressLogger progressLogger,
+        public BasicSolutionLoadingStrategy(ILogger logger,
             IProjectLoadingStrategy projectLoadingStrategy)
         {
-            _progressLogger = progressLogger;
+            _logger = logger;
             _projectLoadingStrategy = projectLoadingStrategy;
         }
 
@@ -30,8 +30,8 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
             var projectCount = solution.Projects.Count();
             foreach (var project in solution.Projects)
             {
-                _progressLogger.Log();
-                _progressLogger.Log($"Loading C# Project from {project.FilePath} ({i}/{projectCount})");
+                _logger.Log();
+                _logger.Log($"Loading C# Project from {project.FilePath} ({i}/{projectCount})");
                 var projectModel = await _projectLoadingStrategy.Load(project, extractor);
 
                 solutionModel.Projects.Add(projectModel);

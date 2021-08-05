@@ -9,21 +9,21 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
 {
     public class RawCSharpFileRepositoryLoader : IRepositoryLoader<RepositoryModel>
     {
-        private readonly IProgressLogger _progressLogger;
+        private readonly ILogger _logger;
         private readonly IFileReader _fileReader;
         private readonly IModelImporter<RepositoryModel> _modelImporter;
 
-        public RawCSharpFileRepositoryLoader(IProgressLogger progressLogger, IFileReader fileReader,
+        public RawCSharpFileRepositoryLoader(ILogger logger, IFileReader fileReader,
             IModelImporter<RepositoryModel> modelImporter)
         {
-            _progressLogger = progressLogger;
+            _logger = logger;
             _fileReader = fileReader;
             _modelImporter = modelImporter;
         }
 
         public Task<RepositoryModel> Load(string path)
         {
-            _progressLogger.Log($"Opening File at {path}");
+            _logger.Log($"Opening File at {path}");
 
             var fileContent = _fileReader.ReadFile(path);
 
@@ -36,7 +36,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                     return null;
                 }
 
-                _progressLogger.Log("Model Loaded");
+                _logger.Log("Model Loaded");
 
                 return Task.FromResult(repositoryModel);
             }

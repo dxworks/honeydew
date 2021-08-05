@@ -15,35 +15,35 @@ namespace HoneydewExtractors.Processors
         public readonly IDictionary<string, NamespaceTree> NamespacesDictionary =
             new Dictionary<string, NamespaceTree>();
 
-        private readonly IProgressLogger _progressLogger;
+        private readonly ILogger _logger;
 
         private readonly IDictionary<AmbiguousName, ISet<string>> _ambiguousNames =
             new Dictionary<AmbiguousName, ISet<string>>();
 
-        public FullNameModelProcessor(IProgressLogger progressLogger)
+        public FullNameModelProcessor(ILogger logger)
         {
-            _progressLogger = progressLogger;
+            _logger = logger;
         }
 
         public RepositoryModel Process(RepositoryModel repositoryModel)
         {
-            _progressLogger.Log("Resolving Class Names");
+            _logger.Log("Resolving Class Names");
             SetFullNameForClassModels(repositoryModel);
 
-            _progressLogger.Log("Resolving Using Statements for Each Class");
+            _logger.Log("Resolving Using Statements for Each Class");
             SetFullNameForUsings(repositoryModel);
 
-            _progressLogger.Log("Resolving Class Elements (Fields, Methods, Properties,...)");
+            _logger.Log("Resolving Class Elements (Fields, Methods, Properties,...)");
             SetFullNameForClassModelComponents(repositoryModel);
 
             foreach (var (ambiguousName, possibilities) in _ambiguousNames)
             {
-                _progressLogger.Log();
-                _progressLogger.Log($"Multiple full names found for {ambiguousName.Name} in {ambiguousName.Location} :",
+                _logger.Log();
+                _logger.Log($"Multiple full names found for {ambiguousName.Name} in {ambiguousName.Location} :",
                     LogLevels.Warning);
                 foreach (var possibleName in possibilities)
                 {
-                    _progressLogger.Log(possibleName);
+                    _logger.Log(possibleName);
                 }
             }
 
@@ -813,6 +813,11 @@ namespace HoneydewExtractors.Processors
             }
 
             var classModelFullName = rootNamespaceTree.AddNamespaceChild(className, namespaceName);
+
+            if (classModelFullName == null)
+            {
+                return className;
+            }
 
             classModelFullName.FilePath = classFilePath;
 

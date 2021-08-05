@@ -10,17 +10,17 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead
     public class ProjectLoader : IProjectLoader
     {
         private readonly CSharpFactExtractor _extractor;
-        private readonly IProgressLogger _progressLogger;
+        private readonly ILogger _logger;
         private readonly IProjectProvider _projectProvider;
         private readonly IProjectLoadingStrategy _projectLoadingStrategy;
 
         public ProjectLoader(CSharpFactExtractor extractor, IProjectProvider projectProvider,
-            IProjectLoadingStrategy projectLoadingStrategy, IProgressLogger progressLogger)
+            IProjectLoadingStrategy projectLoadingStrategy, ILogger logger)
         {
             _extractor = extractor;
             _projectProvider = projectProvider;
             _projectLoadingStrategy = projectLoadingStrategy;
-            _progressLogger = progressLogger;
+            _logger = logger;
         }
 
         public async Task<ProjectModel> Load(string path)
@@ -35,7 +35,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead
             }
             catch (Exception e)
             {
-                _progressLogger.Log($"Could not open project from {path} because {e}", LogLevels.Error);
+                _logger.Log($"Could not open project from {path} because {e}", LogLevels.Error);
             }
 
             return null;

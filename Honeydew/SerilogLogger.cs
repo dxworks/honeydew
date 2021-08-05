@@ -1,10 +1,11 @@
 ﻿using HoneydewCore.Logging;
 using Serilog;
 using Serilog.Core;
+using ILogger = HoneydewCore.Logging.ILogger;
 
 namespace Honeydew
 {
-    public class SerilogLogger : IProgressLogger
+    public class SerilogLogger : ILogger
     {
         private readonly Logger _logger;
 

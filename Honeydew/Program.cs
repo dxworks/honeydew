@@ -99,23 +99,23 @@ namespace Honeydew
             return cSharpFactExtractor;
         }
 
-        private static async Task<RepositoryModel> LoadModel(IProgressLogger progressLogger, string inputPath)
+        private static async Task<RepositoryModel> LoadModel(ILogger logger, string inputPath)
         {
             // Load repository model from path
             IRepositoryLoader<RepositoryModel> repositoryLoader =
-                new RawCSharpFileRepositoryLoader(progressLogger, new FileReader(), new JsonRepositoryModelImporter());
+                new RawCSharpFileRepositoryLoader(logger, new FileReader(), new JsonRepositoryModelImporter());
             var repositoryModel = await repositoryLoader.Load(inputPath);
             return repositoryModel;
         }
 
-        private static async Task<RepositoryModel> ExtractModel(IProgressLogger progressLogger, string inputPath)
+        private static async Task<RepositoryModel> ExtractModel(ILogger logger, string inputPath)
         {
             // Create repository model from path
-            var projectLoadingStrategy = new BasicProjectLoadingStrategy(progressLogger);
-            var solutionLoadingStrategy = new BasicSolutionLoadingStrategy(progressLogger, projectLoadingStrategy);
+            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger);
+            var solutionLoadingStrategy = new BasicSolutionLoadingStrategy(logger, projectLoadingStrategy);
 
             var repositoryLoader = new CSharpRepositoryLoader(projectLoadingStrategy, solutionLoadingStrategy,
-                progressLogger, LoadExtractor());
+                logger, LoadExtractor());
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;

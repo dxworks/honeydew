@@ -1,6 +1,6 @@
 ﻿namespace HoneydewCore.Logging
 {
-    public interface IProgressLogger
+    public interface ILogger
     {
         public void Log(string value = "", LogLevels logLevel = LogLevels.Information);
     }
