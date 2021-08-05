@@ -63,12 +63,14 @@ namespace Honeydew
                 ConsoleLoggerWithHistory consoleLoggerWithHistory = new(new ConsoleProgressLogger());
 
                 // Post Extraction Repository model processing
-                repositoryModel = new FullNameModelProcessor(consoleLoggerWithHistory).Process(repositoryModel);
+                var fullNameModelProcessor = new FullNameModelProcessor(consoleLoggerWithHistory);
+                repositoryModel = fullNameModelProcessor.Process(repositoryModel);
 
                 repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
 
 
-                WriteAllRepresentations(repositoryModel, consoleLoggerWithHistory, DefaultPathForAllRepresentations);
+                WriteAllRepresentations(repositoryModel, fullNameModelProcessor.NamespacesDictionary,
+                    consoleLoggerWithHistory, DefaultPathForAllRepresentations);
 
                 progressLogger.LogLine("Extraction Complete!");
                 progressLogger.LogLine($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
@@ -114,6 +116,7 @@ namespace Honeydew
         }
 
         private static void WriteAllRepresentations(RepositoryModel repositoryModel,
+            IDictionary<string, NamespaceTree> fullNameNamespaces,
             ConsoleLoggerWithHistory consoleLoggerWithHistory, string outputPath)
         {
             var writer = new FileWriter();
@@ -126,6 +129,8 @@ namespace Honeydew
             writer.WriteFile(Path.Combine(outputPath, "honeydew.csv"),
                 csvModelExporter.Export(classRelationsRepresentation));
 
+            var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
+            writer.WriteFile(Path.Combine(outputPath,"honeydew_namespaces.json"), fullNameNamespacesExporter.Export(fullNameNamespaces));
 
             var ambiguousHistory = consoleLoggerWithHistory.GetHistory();
             if (!string.IsNullOrEmpty(ambiguousHistory))

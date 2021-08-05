@@ -28,8 +28,8 @@ namespace HoneydewExtractors.Processors
 
         private readonly IDictionary<string, ISet<string>> _ambiguousNames = new Dictionary<string, ISet<string>>();
 
-        private readonly IDictionary<string, FullNameNamespace> _namespacesDictionary =
-            new Dictionary<string, FullNameNamespace>();
+        public readonly IDictionary<string, NamespaceTree> NamespacesDictionary =
+            new Dictionary<string, NamespaceTree>();
 
         public FullNameModelProcessor(IProgressLogger progressLogger)
         {
@@ -92,7 +92,8 @@ namespace HoneydewExtractors.Processors
                             AddAmbiguousNames(() =>
                             {
                                 classModel.FullName = FindClassFullName(classModel.FullName, namespaceModel,
-                                    projectModel, solutionModel, repositoryModel, classModel.Usings);
+                                    projectModel, solutionModel, repositoryModel, classModel.Usings,
+                                    classModel.FilePath);
                             });
                         }
                     }
@@ -575,7 +576,7 @@ namespace HoneydewExtractors.Processors
 
         private string FindClassFullName(string className, NamespaceModel namespaceModelToStartSearchFrom,
             ProjectModel projectModelToStartSearchFrom, SolutionModel solutionModelToStartSearchFrom,
-            RepositoryModel repositoryModel, IList<UsingModel> usingModels)
+            RepositoryModel repositoryModel, IList<UsingModel> usingModels, string classFilePath = "")
         {
             if (string.IsNullOrEmpty(className))
             {
@@ -595,13 +596,13 @@ namespace HoneydewExtractors.Processors
             // try to find class in provided namespace
             if (namespaceModelToStartSearchFrom.ClassModels.Any(classModel => classModel.FullName == className))
             {
-                return AddClassModelToNamespaceGraph(className, namespaceModelToStartSearchFrom.Name);
+                return AddClassModelToNamespaceGraph(className, classFilePath, namespaceModelToStartSearchFrom.Name);
             }
 
             if (namespaceModelToStartSearchFrom.ClassModels.Any(classModel =>
                 classModel.FullName == $"{namespaceModelToStartSearchFrom.Name}.{className}"))
             {
-                return AddClassModelToNamespaceGraph(className, namespaceModelToStartSearchFrom.Name);
+                return AddClassModelToNamespaceGraph(className, classFilePath, namespaceModelToStartSearchFrom.Name);
             }
 
             // search in all provided usings
@@ -743,7 +744,7 @@ namespace HoneydewExtractors.Processors
         private IEnumerable<string> GetPossibilitiesFromNamespace(string namespaceName, string className)
         {
             var nameParts = namespaceName.Split('.');
-            if (!_namespacesDictionary.TryGetValue(nameParts[0], out var fullNameNamespace))
+            if (!NamespacesDictionary.TryGetValue(nameParts[0], out var fullNameNamespace))
             {
                 return new List<string>();
             }
@@ -758,39 +759,36 @@ namespace HoneydewExtractors.Processors
             return new List<string>();
         }
 
-        private string AddClassModelToNamespaceGraph(string className, string namespaceName)
+        private string AddClassModelToNamespaceGraph(string className, string classFilePath, string namespaceName)
         {
             var namespaceNameParts = namespaceName.Split('.');
 
-            FullNameNamespace rootNamespace;
+            NamespaceTree rootNamespaceTree;
 
-            if (_namespacesDictionary.TryGetValue(namespaceNameParts[0], out var fullNameNamespace))
+            if (NamespacesDictionary.TryGetValue(namespaceNameParts[0], out var fullNameNamespace))
             {
-                rootNamespace = fullNameNamespace;
+                rootNamespaceTree = fullNameNamespace;
             }
             else
             {
-                var nameNamespace = new FullNameNamespace
+                var nameNamespace = new NamespaceTree
                 {
                     Name = namespaceNameParts[0]
                 };
-                rootNamespace = nameNamespace;
+                rootNamespaceTree = nameNamespace;
 
-                _namespacesDictionary.Add(namespaceNameParts[0], rootNamespace);
+                NamespacesDictionary.Add(namespaceNameParts[0], rootNamespaceTree);
             }
 
             if (namespaceNameParts.Length > 1) // create sub graph if namespaceNames is not trivial
             {
-                rootNamespace.AddNamespaceChild(namespaceName, namespaceName);
+                rootNamespaceTree.AddNamespaceChild(namespaceName, namespaceName);
             }
 
-            // if (IsClassNameFullyQualified(className))
-            // {
-            //     rootNamespace.AddNamespaceChild(className);
-            //     return className;
-            // }
+            var classModelFullName = rootNamespaceTree.AddNamespaceChild(className, namespaceName);
 
-            var classModelFullName = rootNamespace.AddNamespaceChild(className, namespaceName);
+            classModelFullName.FilePath = classFilePath;
+
             return classModelFullName.GetFullName();
         }
 
@@ -799,7 +797,7 @@ namespace HoneydewExtractors.Processors
             var nameParts = name.Split(".");
             if (nameParts.Length > 0)
             {
-                if (_namespacesDictionary.TryGetValue(nameParts[0], out var fullNameNamespace))
+                if (NamespacesDictionary.TryGetValue(nameParts[0], out var fullNameNamespace))
                 {
                     if (fullNameNamespace.ContainsNameParts(nameParts))
                     {
