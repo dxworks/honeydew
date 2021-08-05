@@ -257,7 +257,8 @@ namespace HoneydewExtractors.Processors
                                         classModel.Usings, classModel.FilePath);
                                 });
 
-                                SetContainingClassAndCalledMethodsFullNameProperty(classModel.FilePath,propertyModel, namespaceModel,
+                                SetContainingClassAndCalledMethodsFullNameProperty(classModel.FilePath, propertyModel,
+                                    namespaceModel,
                                     projectModel, solutionModel, classModel.Usings);
                             }
 
@@ -270,14 +271,16 @@ namespace HoneydewExtractors.Processors
                                         classModel.Usings, classModel.FilePath);
                                 });
 
-                                SetContainingClassAndCalledMethodsFullName(classModel.FilePath,methodModel, namespaceModel,
+                                SetContainingClassAndCalledMethodsFullName(classModel.FilePath, methodModel,
+                                    namespaceModel,
                                     projectModel, solutionModel, classModel.Usings);
                             }
 
                             foreach (var methodModel in classModel.Constructors)
                             {
-                                SetContainingClassAndCalledMethodsFullName(classModel.FilePath,methodModel, namespaceModel,
-                                    projectModel, solutionModel, classModel.Usings );
+                                SetContainingClassAndCalledMethodsFullName(classModel.FilePath, methodModel,
+                                    namespaceModel,
+                                    projectModel, solutionModel, classModel.Usings);
                             }
 
                             ChangeDependencyMetricFullName(repositoryModel, classModel, namespaceModel,
@@ -320,7 +323,7 @@ namespace HoneydewExtractors.Processors
                     });
                 }
 
-                SetFullNameForCalledMethods(classFilePath,methodModel.CalledMethods, namespaceModel,
+                SetFullNameForCalledMethods(classFilePath, methodModel.CalledMethods, namespaceModel,
                     projectModel, solutionModel, repositoryModel, usings);
             }
         }
@@ -482,7 +485,7 @@ namespace HoneydewExtractors.Processors
                     try
                     {
                         var fullClassName = FindClassFullName(dependencyName, namespaceModel, projectModel,
-                            solutionModel, repositoryModel, classModel.Usings,classModel.FilePath);
+                            solutionModel, repositoryModel, classModel.Usings, classModel.FilePath);
 
                         if (fullNameDependencies.ContainsKey(fullClassName))
                         {
@@ -639,7 +642,7 @@ namespace HoneydewExtractors.Processors
                 }
             }
 
-            foreach (var name in TrySearchingInProjectModel(className, projectModelToStartSearchFrom))
+            foreach (var name in TrySearchingInProjectModel(className, classFilePath, projectModelToStartSearchFrom))
             {
                 fullNamePossibilities.Add(name);
             }
@@ -656,7 +659,7 @@ namespace HoneydewExtractors.Processors
                     }, fullNamePossibilities);
             }
 
-            foreach (var name in TrySearchingInSolutionModel(className, solutionModelToStartSearchFrom,
+            foreach (var name in TrySearchingInSolutionModel(className, classFilePath, solutionModelToStartSearchFrom,
                 projectModelToStartSearchFrom))
             {
                 fullNamePossibilities.Add(name);
@@ -682,7 +685,7 @@ namespace HoneydewExtractors.Processors
                     continue;
                 }
 
-                foreach (var name in TrySearchingInSolutionModel(className, solutionModel,
+                foreach (var name in TrySearchingInSolutionModel(className, classFilePath, solutionModel,
                     projectModelToStartSearchFrom))
                 {
                     fullNamePossibilities.Add(name);
@@ -712,7 +715,7 @@ namespace HoneydewExtractors.Processors
             };
         }
 
-        private IEnumerable<string> TrySearchingInSolutionModel(string className,
+        private IEnumerable<string> TrySearchingInSolutionModel(string className, string classFilePath,
             SolutionModel solutionModel, ProjectModel projectModelToBeIgnored)
         {
             var fullNamePossibilities = new HashSet<string>();
@@ -723,7 +726,7 @@ namespace HoneydewExtractors.Processors
                     continue;
                 }
 
-                foreach (var name in TrySearchingInProjectModel(className, projectModel))
+                foreach (var name in TrySearchingInProjectModel(className, classFilePath, projectModel))
                 {
                     fullNamePossibilities.Add(name);
                 }
@@ -741,7 +744,8 @@ namespace HoneydewExtractors.Processors
             return fullNamePossibilities;
         }
 
-        private IEnumerable<string> TrySearchingInProjectModel(string className, ProjectModel projectModel)
+        private IEnumerable<string> TrySearchingInProjectModel(string className, string classFilePath,
+            ProjectModel projectModel)
         {
             var fullNamePossibilities = new HashSet<string>();
             foreach (var namespaceModel in projectModel.Namespaces)
