@@ -15,6 +15,8 @@ using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
 using HoneydewExtractors.CSharp.RepositoryLoading;
+using HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead;
+using HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead;
 using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
 using HoneydewExtractors.Processors;
 using HoneydewModels.CSharp;
@@ -72,7 +74,8 @@ namespace Honeydew
 
                 repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
 
-                WriteAllRepresentations(repositoryModel, fullNameModelProcessor.NamespacesDictionary, DefaultPathForAllRepresentations);
+                WriteAllRepresentations(repositoryModel, fullNameModelProcessor.NamespacesDictionary,
+                    DefaultPathForAllRepresentations);
 
                 progressLogger.Log();
                 progressLogger.Log("Extraction Complete!");
@@ -110,12 +113,20 @@ namespace Honeydew
 
         private static async Task<RepositoryModel> ExtractModel(ILogger logger, string inputPath)
         {
-            // Create repository model from path
-            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger);
-            var solutionLoadingStrategy = new BasicSolutionLoadingStrategy(logger, projectLoadingStrategy);
+            var solutionProvider = new MsBuildSolutionProvider();
+            var projectProvider = new MsBuildProjectProvider();
 
-            var repositoryLoader = new CSharpRepositoryLoader(projectLoadingStrategy, solutionLoadingStrategy,
-                logger, LoadExtractor());
+            var progressLoggerFactory = new ShellProgressBarLoggerFactory();
+
+            // Create repository model from path
+            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger, progressLoggerFactory);
+
+            var solutionLoadingStrategy =
+                new BasicSolutionLoadingStrategy(logger, projectLoadingStrategy, progressLoggerFactory);
+
+            var repositoryLoader = new CSharpRepositoryLoader(solutionProvider, projectProvider, projectLoadingStrategy,
+                solutionLoadingStrategy, logger,
+                progressLoggerFactory, LoadExtractor());
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;
@@ -135,7 +146,8 @@ namespace Honeydew
                 csvModelExporter.Export(classRelationsRepresentation));
 
             var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
-            writer.WriteFile(Path.Combine(outputPath,"honeydew_namespaces.json"), fullNameNamespacesExporter.Export(fullNameNamespaces));
+            writer.WriteFile(Path.Combine(outputPath, "honeydew_namespaces.json"),
+                fullNameNamespacesExporter.Export(fullNameNamespaces));
         }
 
         private static IModelExporter<RepositoryModel> GetRepositoryModelExporter()
