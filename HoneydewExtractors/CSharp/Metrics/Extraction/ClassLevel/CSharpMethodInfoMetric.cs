@@ -50,6 +50,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 ContainingClassName = _containingClassName,
                 Modifier = "",
                 AccessModifier = "",
+                CyclomaticComplexity = 0
             };
 
             ExtractInfoAboutParameters(syntax.ParameterList, methodModel);
@@ -109,7 +110,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 Modifier = modifier,
                 AccessModifier = accessModifier,
                 IsConstructor = true,
-                Loc = _linesOfCodeCounter.Count(syntax.ToString())
+                Loc = _linesOfCodeCounter.Count(syntax.ToString()),
+                CyclomaticComplexity = HoneydewSyntacticModel.CalculateCyclomaticComplexity(syntax)
             };
 
             ExtractInfoAboutParameters(syntax.ParameterList, methodModel);
@@ -134,7 +136,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 ContainingClassName = _containingClassName,
                 Modifier = modifier,
                 AccessModifier = accessModifier,
-                Loc = _linesOfCodeCounter.Count(syntax.ToString())
+                Loc = _linesOfCodeCounter.Count(syntax.ToString()),
+                CyclomaticComplexity = HoneydewSyntacticModel.CalculateCyclomaticComplexity(syntax)
             };
 
             ExtractInfoAboutParameters(syntax.ParameterList, methodModel);
