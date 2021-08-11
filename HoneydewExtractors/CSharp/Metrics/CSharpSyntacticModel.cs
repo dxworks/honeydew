@@ -13,7 +13,7 @@ namespace HoneydewExtractors.CSharp.Metrics
 
         public int CalculateCyclomaticComplexity(MemberDeclarationSyntax syntax)
         {
-            var count = 0;
+            var count = 1;
 
             foreach (var descendantNode in syntax.DescendantNodes())
             {
@@ -36,10 +36,23 @@ namespace HoneydewExtractors.CSharp.Metrics
                         break;
                     case DoStatementSyntax:
                     case CaseSwitchLabelSyntax:
+                    case DefaultSwitchLabelSyntax:
                     case CasePatternSwitchLabelSyntax:
-                    case ReturnStatementSyntax:
-                        // case ElseClauseSyntax:
+                    case ForEachStatementSyntax:
+                    case ConditionalExpressionSyntax:
+                    case ConditionalAccessExpressionSyntax:
                         count++;
+                        break;
+                    default:
+                    {
+                        switch (descendantNode.Kind())
+                        {
+                            case SyntaxKind.CoalesceAssignmentExpression:
+                            case SyntaxKind.CoalesceExpression:
+                                count++;
+                                break;
+                        }
+                    }
                         break;
                 }
             }
@@ -54,15 +67,16 @@ namespace HoneydewExtractors.CSharp.Metrics
                 return 1;
             }
 
-            var binaryExpressionSyntaxCount = conditionExpressionSyntax
+            var logicalOperatorsCount = conditionExpressionSyntax
                 .DescendantTokens()
                 .Count(token =>
                 {
                     var syntaxKind = token.Kind();
-                    return syntaxKind is SyntaxKind.AmpersandAmpersandToken or SyntaxKind.BarBarToken;
+                    return syntaxKind is SyntaxKind.AmpersandAmpersandToken or SyntaxKind.BarBarToken or SyntaxKind
+                        .AndKeyword or SyntaxKind.OrKeyword;
                 });
 
-            return binaryExpressionSyntaxCount + 1;
+            return logicalOperatorsCount + 1;
         }
     }
 }
