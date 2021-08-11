@@ -71,7 +71,7 @@ namespace Honeydew
                 logger.Log();
                 logger.Log("Exporting Intermediate Results");
 
-                WriteIntermediateResults(repositoryModel, DefaultPathForAllRepresentations);
+                WriteRepresentationsToFile(repositoryModel, "_intermediate", DefaultPathForAllRepresentations);
 
 
                 logger.Log();
@@ -137,31 +137,38 @@ namespace Honeydew
         {
             var writer = new FileWriter();
 
-            var repositoryExporter = GetRepositoryModelExporter();
-            writer.WriteFile(Path.Combine(outputPath, "honeydew.json"), repositoryExporter.Export(repositoryModel));
-
-            var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
-            var csvModelExporter = GetClassRelationsRepresentationExporter();
-            writer.WriteFile(Path.Combine(outputPath, "honeydew.csv"),
-                csvModelExporter.Export(classRelationsRepresentation));
+            WriteRepresentationsToFile(repositoryModel, "", outputPath);
 
             var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
             writer.WriteFile(Path.Combine(outputPath, "honeydew_namespaces.json"),
                 fullNameNamespacesExporter.Export(fullNameNamespaces));
         }
 
-        private static void WriteIntermediateResults(RepositoryModel repositoryModel, string outputPath)
+        private static void WriteRepresentationsToFile(RepositoryModel repositoryModel, string nameModifier,
+            string outputPath)
         {
             var writer = new FileWriter();
 
             var repositoryExporter = GetRepositoryModelExporter();
-            writer.WriteFile(Path.Combine(outputPath, "honeydew_intermediate.json"),
+            writer.WriteFile(Path.Combine(outputPath, $"honeydew{nameModifier}.json"),
                 repositoryExporter.Export(repositoryModel));
 
             var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
             var csvModelExporter = GetClassRelationsRepresentationExporter();
-            writer.WriteFile(Path.Combine(outputPath, "honeydew_intermediate.csv"),
+            writer.WriteFile(Path.Combine(outputPath, $"honeydew{nameModifier}.csv"),
                 csvModelExporter.Export(classRelationsRepresentation));
+
+            var cyclomaticComplexityPerFileRepresentation =
+                GetCyclomaticComplexityPerFileRepresentation(repositoryModel);
+            var cyclomaticComplexityPerFileExporter = GetCyclomaticComplexityPerFileExporter();
+            writer.WriteFile(Path.Combine(outputPath, $"honeydew_cyclomatic{nameModifier}.json"),
+                cyclomaticComplexityPerFileExporter.Export(cyclomaticComplexityPerFileRepresentation));
+        }
+
+        private static IModelExporter<CyclomaticComplexityPerFileRepresentation>
+            GetCyclomaticComplexityPerFileExporter()
+        {
+            return new JsonCyclomaticComplexityPerFileRepresentationExporter();
         }
 
         private static IModelExporter<RepositoryModel> GetRepositoryModelExporter()
@@ -188,6 +195,12 @@ namespace Honeydew
                 new RepositoryModelToClassRelationsProcessor(new MetricRelationsProvider(), new MetricPrettier(), true)
                     .Process(repositoryModel);
             return classRelationsRepresentation;
+        }
+
+        private static CyclomaticComplexityPerFileRepresentation GetCyclomaticComplexityPerFileRepresentation(
+            RepositoryModel repositoryModel)
+        {
+            return new RepositoryModelToCyclomaticComplexityPerFileProcessor().Process(repositoryModel);
         }
     }
 }
