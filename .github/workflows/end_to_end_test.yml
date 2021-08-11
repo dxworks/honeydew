@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix: 
-        os: [win, linux]
+        os: [linux]
 
     steps:
     - name: Checkout code
