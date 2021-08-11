@@ -34,10 +34,10 @@ namespace Honeydew
             await result.MapResult(async options =>
             {
                 var logFilePath = $"{DefaultPathForAllRepresentations}/logs.txt";
-                var progressLogger = new SerilogLogger(logFilePath);
+                var logger = new SerilogLogger(logFilePath);
 
-                progressLogger.Log($"Log will be stored at {logFilePath}");
-                progressLogger.Log();
+                logger.Log($"Log will be stored at {logFilePath}");
+                logger.Log();
 
                 var inputPath = options.InputFilePath;
 
@@ -46,13 +46,13 @@ namespace Honeydew
                 {
                     case "load":
                     {
-                        repositoryModel = await LoadModel(progressLogger, inputPath);
+                        repositoryModel = await LoadModel(logger, inputPath);
                     }
                         break;
 
                     case "extract":
                     {
-                        repositoryModel = await ExtractModel(progressLogger, inputPath);
+                        repositoryModel = await ExtractModel(logger, inputPath);
                     }
                         break;
 
@@ -63,23 +63,34 @@ namespace Honeydew
                     }
                 }
 
-                progressLogger.Log();
-                progressLogger.Log("Resolving Full Name Dependencies");
-
-                // Post Extraction Repository model processing
-                var fullNameModelProcessor = new FullNameModelProcessor(progressLogger);
-                repositoryModel = fullNameModelProcessor.Process(repositoryModel);
+                logger.Log();
+                logger.Log("Trimming File Paths");
 
                 repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
 
-                WriteAllRepresentations(repositoryModel, fullNameModelProcessor.NamespacesDictionary, DefaultPathForAllRepresentations);
+                logger.Log();
+                logger.Log("Exporting Intermediate Results");
 
-                progressLogger.Log();
-                progressLogger.Log("Extraction Complete!");
-                progressLogger.Log();
-                progressLogger.Log($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
+                WriteIntermediateResults(repositoryModel, DefaultPathForAllRepresentations);
 
-                progressLogger.CloseAndFlush();
+
+                logger.Log();
+                logger.Log("Resolving Full Name Dependencies");
+
+                // Post Extraction Repository model processing
+                var fullNameModelProcessor = new FullNameModelProcessor(logger);
+                repositoryModel = fullNameModelProcessor.Process(repositoryModel);
+
+
+                WriteAllRepresentations(repositoryModel, fullNameModelProcessor.NamespacesDictionary,
+                    DefaultPathForAllRepresentations);
+
+                logger.Log();
+                logger.Log("Extraction Complete!");
+                logger.Log();
+                logger.Log($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
+
+                logger.CloseAndFlush();
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
@@ -135,7 +146,22 @@ namespace Honeydew
                 csvModelExporter.Export(classRelationsRepresentation));
 
             var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
-            writer.WriteFile(Path.Combine(outputPath,"honeydew_namespaces.json"), fullNameNamespacesExporter.Export(fullNameNamespaces));
+            writer.WriteFile(Path.Combine(outputPath, "honeydew_namespaces.json"),
+                fullNameNamespacesExporter.Export(fullNameNamespaces));
+        }
+
+        private static void WriteIntermediateResults(RepositoryModel repositoryModel, string outputPath)
+        {
+            var writer = new FileWriter();
+
+            var repositoryExporter = GetRepositoryModelExporter();
+            writer.WriteFile(Path.Combine(outputPath, "honeydew_intermediate.json"),
+                repositoryExporter.Export(repositoryModel));
+
+            var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
+            var csvModelExporter = GetClassRelationsRepresentationExporter();
+            writer.WriteFile(Path.Combine(outputPath, "honeydew_intermediate.csv"),
+                csvModelExporter.Export(classRelationsRepresentation));
         }
 
         private static IModelExporter<RepositoryModel> GetRepositoryModelExporter()
