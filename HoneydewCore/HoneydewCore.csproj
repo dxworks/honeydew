@@ -5,10 +5,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="IO\Writers\"/>
+        <Folder Include="IO\Writers\" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\HoneydewModels\HoneydewModels.csproj"/>
+        <ProjectReference Include="..\HoneydewModels\HoneydewModels.csproj" />
     </ItemGroup>
 </Project>
