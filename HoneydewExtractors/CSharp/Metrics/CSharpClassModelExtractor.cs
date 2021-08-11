@@ -34,7 +34,8 @@ namespace HoneydewExtractors.CSharp.Metrics
             {
                 var fullName = semanticModel.GetFullName(declarationSyntax);
 
-                ExtractBaseClassAndBaseInterfaces(declarationSyntax, semanticModel, out var baseClassName,
+                ExtractBaseClassAndBaseInterfaces(declarationSyntax, syntacticModel, semanticModel,
+                    out var baseClassName,
                     out var baseInterfaces);
 
                 var classType = declarationSyntax.Kind().ToString().Replace("Declaration", "").ToLower();
@@ -43,7 +44,7 @@ namespace HoneydewExtractors.CSharp.Metrics
                 var modifier = "";
                 CSharpConstants.SetModifiers(declarationSyntax.Modifiers.ToString(), ref accessModifier, ref modifier);
 
-                var methodInfoDataMetric = ExtractMethodInfo(declarationSyntax, semanticModel);
+                var methodInfoDataMetric = ExtractMethodInfo(declarationSyntax, syntacticModel, semanticModel);
 
                 var linesOfCode = linesOfCodeCounter.Count(syntaxes.Count == 1
                     ? root.GetText().ToString()
@@ -56,8 +57,8 @@ namespace HoneydewExtractors.CSharp.Metrics
                     AccessModifier = accessModifier,
                     Modifier = modifier,
                     FullName = fullName,
-                    Fields = ExtractFieldsInfo(declarationSyntax, semanticModel),
-                    Properties = ExtractPropertiesInfo(declarationSyntax, semanticModel),
+                    Fields = ExtractFieldsInfo(declarationSyntax, syntacticModel, semanticModel),
+                    Properties = ExtractPropertiesInfo(declarationSyntax, syntacticModel, semanticModel),
                     Methods = methodInfoDataMetric.MethodInfos,
                     Constructors = methodInfoDataMetric.ConstructorInfos,
                     BaseClassFullName = baseClassName,
@@ -104,44 +105,52 @@ namespace HoneydewExtractors.CSharp.Metrics
         }
 
         private static IList<PropertyModel> ExtractPropertiesInfo(SyntaxNode declarationSyntax,
+            CSharpSyntacticModel syntacticModel,
             CSharpSemanticModel semanticModel)
         {
             var fieldsInfoMetric = new CSharpPropertiesInfoMetric
             {
-                HoneydewSemanticModel = semanticModel
+                HoneydewSemanticModel = semanticModel,
+                HoneydewSyntacticModel = syntacticModel
             };
             fieldsInfoMetric.Visit(declarationSyntax);
             return fieldsInfoMetric.PropertyInfos;
         }
 
         private static IList<FieldModel> ExtractFieldsInfo(SyntaxNode declarationSyntax,
+            CSharpSyntacticModel syntacticModel,
             CSharpSemanticModel semanticModel)
         {
             var fieldsInfoMetric = new CSharpFieldsInfoMetric
             {
-                HoneydewSemanticModel = semanticModel
+                HoneydewSemanticModel = semanticModel,
+                HoneydewSyntacticModel = syntacticModel
             };
             fieldsInfoMetric.Visit(declarationSyntax);
             return fieldsInfoMetric.FieldInfos;
         }
 
         private static CSharpMethodInfoDataMetric ExtractMethodInfo(SyntaxNode declarationSyntax,
+            CSharpSyntacticModel syntacticModel,
             CSharpSemanticModel semanticModel)
         {
             var fieldsInfoMetric = new CSharpMethodInfoMetric
             {
-                HoneydewSemanticModel = semanticModel
+                HoneydewSemanticModel = semanticModel,
+                HoneydewSyntacticModel = syntacticModel
             };
             fieldsInfoMetric.Visit(declarationSyntax);
             return fieldsInfoMetric.DataMetric;
         }
 
         private static void ExtractBaseClassAndBaseInterfaces(SyntaxNode declarationSyntax,
+            CSharpSyntacticModel syntacticModel,
             CSharpSemanticModel semanticModel, out string baseClass, out IList<string> baseInterfaces)
         {
             var fieldsInfoMetric = new CSharpBaseClassMetric
             {
-                HoneydewSemanticModel = semanticModel
+                HoneydewSemanticModel = semanticModel,
+                HoneydewSyntacticModel = syntacticModel
             };
             fieldsInfoMetric.Visit(declarationSyntax);
 

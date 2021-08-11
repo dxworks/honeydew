@@ -155,6 +155,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
                                 EmptyLines = 4,
                                 SourceLines = 6
                             },
+                            CyclomaticComplexity = 7,
                             CalledMethods =
                             {
                                 new MethodCallModel
@@ -183,7 +184,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""A Project"",""FilePath"":""some_path"",""ProjectReferences"":[],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""Loc"":{""SourceLines"":20,""CommentedLines"":5,""EmptyLines"":30},""AccessModifier"":""protected"",""Modifier"":"""",""BaseClassFullName"":""object"",""BaseInterfaces"":[],""Usings"":[{""Name"":""System"",""IsStatic"":false,""Alias"":""Sys"",""AliasType"":1},{""Name"":""System.Collections"",""IsStatic"":true,""Alias"":"""",""AliasType"":0}],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[{""Name"":""Method1"",""Loc"":{""SourceLines"":6,""CommentedLines"":0,""EmptyLines"":4},""IsConstructor"":false,""ReturnType"":""int"",""Modifier"":""static"",""AccessModifier"":""public"",""ParameterTypes"":[{""Type"":""string"",""Modifier"":"""",""DefaultValue"":null}],""ContainingClassName"":""SomeNamespace.FirstClass"",""CalledMethods"":[{""MethodName"":""Parse"",""ContainingClassName"":""int"",""ParameterTypes"":[{""Type"":""string"",""Modifier"":"""",""DefaultValue"":null}]}]}],""Metrics"":[],""Namespace"":""SomeNamespace""}]}]}]}";
+                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""A Project"",""FilePath"":""some_path"",""ProjectReferences"":[],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""Loc"":{""SourceLines"":20,""CommentedLines"":5,""EmptyLines"":30},""AccessModifier"":""protected"",""Modifier"":"""",""BaseClassFullName"":""object"",""BaseInterfaces"":[],""Usings"":[{""Name"":""System"",""IsStatic"":false,""Alias"":""Sys"",""AliasType"":1},{""Name"":""System.Collections"",""IsStatic"":true,""Alias"":"""",""AliasType"":0}],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[{""Name"":""Method1"",""Loc"":{""SourceLines"":6,""CommentedLines"":0,""EmptyLines"":4},""CyclomaticComplexity"":7,""IsConstructor"":false,""ReturnType"":""int"",""Modifier"":""static"",""AccessModifier"":""public"",""ParameterTypes"":[{""Type"":""string"",""Modifier"":"""",""DefaultValue"":null}],""ContainingClassName"":""SomeNamespace.FirstClass"",""CalledMethods"":[{""MethodName"":""Parse"",""ContainingClassName"":""int"",""ParameterTypes"":[{""Type"":""string"",""Modifier"":"""",""DefaultValue"":null}]}]}],""Metrics"":[],""Namespace"":""SomeNamespace""}]}]}]}";
 
             var projectModel = new ProjectModel("A Project")
             {

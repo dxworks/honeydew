@@ -5,8 +5,10 @@ namespace HoneydewModels.CSharp
     public record MethodModel
     {
         public string Name { get; init; }
-        
+
         public LinesOfCode Loc { get; set; }
+
+        public int CyclomaticComplexity { get; set; }
         
         public bool IsConstructor { get; init; } = false;
 
