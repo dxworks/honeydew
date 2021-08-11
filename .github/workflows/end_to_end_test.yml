@@ -1,0 +1,40 @@
+﻿name: End to End test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix: 
+        os: [win, linux]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+        
+    - name: Release for OS
+      run: |
+        mkdir bin
+        dotnet publish -r ${{matrix.os}}-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
+
+    - name: Checkout Test Project
+      uses: actions/checkout@v2
+      with: 
+        repository: dxworks/HoneydewTestProject
+        path: test_folder
+      
+    - name: Run Honeydew
+      run: ./bin/Honeydew extract test_folder 
+      
+    - name: Compare results
+      run: sh e2e_scripts/compare.sh e2e_results bin/results
