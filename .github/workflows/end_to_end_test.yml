@@ -31,10 +31,9 @@ jobs:
       uses: actions/checkout@v2
       with: 
         repository: dxworks/HoneydewTestProject
-        path: test_folder
       
     - name: Run Honeydew
-      run: ./bin/Honeydew extract test_folder 
+      run: ./bin/Honeydew extract HoneydewTestProject 
       
     - name: Compare results
-      run: sh e2e_scripts/compare.sh e2e_results bin/results
+      run: sh e2e_scripts/compare.sh e2e_results honeydew/results
