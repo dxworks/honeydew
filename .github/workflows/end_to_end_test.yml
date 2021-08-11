@@ -34,11 +34,11 @@ jobs:
         path: test_folder
       
       
-    - if: ${{matrix.os}} == 'linux'
+    - if: ${{matrix.os}} == linux
       name: Run Honeydew
       run: ./bin/Honeydew extract test_folder
 
-    - if: ${{matrix.os}} == 'win'
+    - if: ${{matrix.os}} == win
       name: Run Honeydew
       run: .\bin\Honeydew.exe extract test_folder
       
