@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix: 
-        os: [win, linux]
+        os: [windows-latest, ubuntu-latest]
         
     runs-on: ${{matrix.os}}
    
@@ -21,11 +21,18 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
-        
-    - name: Release for OS
+     
+    - if: matrix.os == 'windows-latest'
+      name: Release for OS
       run: |
         mkdir bin
-        dotnet publish -r ${{matrix.os}}-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
+        dotnet publish -r win-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
+
+    - if: matrix.os == 'ubuntu-latest'
+      name: Release for OS
+      run: |
+        mkdir bin
+        dotnet publish -r linux-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
 
     - name: Checkout Test Project
       uses: actions/checkout@v2
