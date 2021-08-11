@@ -40,8 +40,8 @@ jobs:
     - if: matrix.os == 'win'
       name: Run Honeydew
       run: |
-        ls
-        ./bin/Honeydew.exe extract test_folder
+        ls bin
+        .\\bin\\Honeydew.exe extract test_folder
       
     - name: Compare results
       run: sh e2e_scripts/compare.sh e2e_results ./results
