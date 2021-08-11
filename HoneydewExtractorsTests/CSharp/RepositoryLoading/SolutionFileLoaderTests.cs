@@ -18,7 +18,7 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
 
         private readonly Mock<ISolutionProvider> _solutionProviderMock = new();
         private readonly Mock<ISolutionLoadingStrategy> _solutionLoadingStrategyMock = new();
-        private readonly Mock<IProgressLogger> _progressLoggerMock = new();
+        private readonly Mock<ILogger> _progressLoggerMock = new();
         private readonly Mock<CSharpFactExtractor> _factExtractorMock = new();
 
         public SolutionFileLoaderTests()

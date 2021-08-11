@@ -33,8 +33,13 @@ namespace Honeydew
 
             await result.MapResult(async options =>
             {
+                var logFilePath = $"{DefaultPathForAllRepresentations}/logs.txt";
+                var progressLogger = new SerilogLogger(logFilePath);
+
+                progressLogger.Log($"Log will be stored at {logFilePath}");
+                progressLogger.Log();
+
                 var inputPath = options.InputFilePath;
-                var progressLogger = new ConsoleProgressLogger();
 
                 RepositoryModel repositoryModel;
                 switch (options.Command)
@@ -58,22 +63,23 @@ namespace Honeydew
                     }
                 }
 
-                progressLogger.LogLine("Resolving Full Name Dependencies");
-
-                ConsoleLoggerWithHistory consoleLoggerWithHistory = new(new ConsoleProgressLogger());
+                progressLogger.Log();
+                progressLogger.Log("Resolving Full Name Dependencies");
 
                 // Post Extraction Repository model processing
-                var fullNameModelProcessor = new FullNameModelProcessor(consoleLoggerWithHistory);
+                var fullNameModelProcessor = new FullNameModelProcessor(progressLogger);
                 repositoryModel = fullNameModelProcessor.Process(repositoryModel);
 
                 repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
 
+                WriteAllRepresentations(repositoryModel, fullNameModelProcessor.NamespacesDictionary, DefaultPathForAllRepresentations);
 
-                WriteAllRepresentations(repositoryModel, fullNameModelProcessor.NamespacesDictionary,
-                    consoleLoggerWithHistory, DefaultPathForAllRepresentations);
+                progressLogger.Log();
+                progressLogger.Log("Extraction Complete!");
+                progressLogger.Log();
+                progressLogger.Log($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
 
-                progressLogger.LogLine("Extraction Complete!");
-                progressLogger.LogLine($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
+                progressLogger.CloseAndFlush();
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
@@ -93,31 +99,30 @@ namespace Honeydew
             return cSharpFactExtractor;
         }
 
-        private static async Task<RepositoryModel> LoadModel(IProgressLogger progressLogger, string inputPath)
+        private static async Task<RepositoryModel> LoadModel(ILogger logger, string inputPath)
         {
             // Load repository model from path
             IRepositoryLoader<RepositoryModel> repositoryLoader =
-                new RawCSharpFileRepositoryLoader(progressLogger, new FileReader(), new JsonRepositoryModelImporter());
+                new RawCSharpFileRepositoryLoader(logger, new FileReader(), new JsonRepositoryModelImporter());
             var repositoryModel = await repositoryLoader.Load(inputPath);
             return repositoryModel;
         }
 
-        private static async Task<RepositoryModel> ExtractModel(IProgressLogger progressLogger, string inputPath)
+        private static async Task<RepositoryModel> ExtractModel(ILogger logger, string inputPath)
         {
             // Create repository model from path
-            var projectLoadingStrategy = new BasicProjectLoadingStrategy(progressLogger);
-            var solutionLoadingStrategy = new BasicSolutionLoadingStrategy(progressLogger, projectLoadingStrategy);
+            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger);
+            var solutionLoadingStrategy = new BasicSolutionLoadingStrategy(logger, projectLoadingStrategy);
 
             var repositoryLoader = new CSharpRepositoryLoader(projectLoadingStrategy, solutionLoadingStrategy,
-                progressLogger, LoadExtractor());
+                logger, LoadExtractor());
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;
         }
 
         private static void WriteAllRepresentations(RepositoryModel repositoryModel,
-            IDictionary<string, NamespaceTree> fullNameNamespaces,
-            ConsoleLoggerWithHistory consoleLoggerWithHistory, string outputPath)
+            IDictionary<string, NamespaceTree> fullNameNamespaces, string outputPath)
         {
             var writer = new FileWriter();
 
@@ -131,12 +136,6 @@ namespace Honeydew
 
             var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
             writer.WriteFile(Path.Combine(outputPath,"honeydew_namespaces.json"), fullNameNamespacesExporter.Export(fullNameNamespaces));
-
-            var ambiguousHistory = consoleLoggerWithHistory.GetHistory();
-            if (!string.IsNullOrEmpty(ambiguousHistory))
-            {
-                writer.WriteFile(Path.Combine(outputPath, "honeydew_ambiguous.txt"), ambiguousHistory);
-            }
         }
 
         private static IModelExporter<RepositoryModel> GetRepositoryModelExporter()

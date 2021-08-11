@@ -10,17 +10,17 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead
 {
     public class SolutionFileLoader : ISolutionLoader
     {
-        private readonly IProgressLogger _progressLogger;
+        private readonly ILogger _logger;
         private readonly CSharpFactExtractor _extractor;
 
         private readonly ISolutionProvider _solutionProvider;
         private readonly ISolutionLoadingStrategy _solutionLoadingStrategy;
 
-        public SolutionFileLoader(IProgressLogger progressLogger, CSharpFactExtractor extractor,
+        public SolutionFileLoader(ILogger logger, CSharpFactExtractor extractor,
             ISolutionProvider solutionProvider,
             ISolutionLoadingStrategy solutionLoadingStrategy)
         {
-            _progressLogger = progressLogger;
+            _logger = logger;
             _extractor = extractor;
             _solutionProvider = solutionProvider;
             _solutionLoadingStrategy = solutionLoadingStrategy;
@@ -28,15 +28,15 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead
 
         public async Task<SolutionModel> LoadSolution(string pathToFile)
         {
-            _progressLogger.LogLine();
-            _progressLogger.LogLine();
-            _progressLogger.LogLine($"Opening the solution from {pathToFile}");
+            _logger.Log();
+            _logger.Log();
+            _logger.Log($"Opening the solution from {pathToFile}");
 
             try
             {
                 var solution = await _solutionProvider.GetSolution(pathToFile);
 
-                _progressLogger.LogLine($"Found {solution?.Projects.Count()} C# Projects in solution {pathToFile}");
+                _logger.Log($"Found {solution?.Projects.Count()} C# Projects in solution {pathToFile}");
 
                 var solutionModel = await _solutionLoadingStrategy.Load(solution, _extractor);
 
@@ -44,7 +44,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead
             }
             catch (Exception e)
             {
-                await Console.Error.WriteLineAsync($"Could not open solution from {pathToFile} because {e}");
+                _logger.Log($"Could not open solution from {pathToFile} because {e}", LogLevels.Error);
             }
 
             return null;

@@ -11,7 +11,7 @@ namespace HoneydewExtractorsTests.Processors
     public class FullNameDependencyProcessorTests
     {
         private readonly FullNameModelProcessor _sut;
-        private readonly Mock<IProgressLogger> _progressLoggerMock = new();
+        private readonly Mock<ILogger> _progressLoggerMock = new();
 
         public FullNameDependencyProcessorTests()
         {

@@ -10,7 +10,7 @@ namespace HoneydewExtractorsTests.Processors
     public class FullNameModelProcessorWithExtractionTests
     {
         private readonly FullNameModelProcessor _sut;
-        private readonly Mock<IProgressLogger> _progressLoggerMock = new();
+        private readonly Mock<ILogger> _progressLoggerMock = new();
         private readonly CSharpFactExtractor _extractor;
 
         public FullNameModelProcessorWithExtractionTests()

@@ -11,7 +11,7 @@ namespace HoneydewExtractorsTests.Processors
     public class FullNameModelProcessorTests
     {
         private readonly FullNameModelProcessor _sut;
-        private readonly Mock<IProgressLogger> _progressLoggerMock = new();
+        private readonly Mock<ILogger> _progressLoggerMock = new();
 
         public FullNameModelProcessorTests()
         {
@@ -682,6 +682,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
+                        FilePath = "SomePath/SomeClass.cs",
                         FullName = "SomeClass",
                         BaseClassFullName = "AmbiguousClass",
                         BaseInterfaces =
@@ -780,10 +781,11 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Single(metricDependencies);
             Assert.True(metricDependencies.ContainsKey("AmbiguousClass"));
 
-            _progressLoggerMock.Verify(logger => logger.LogLine("Multiple full names found for AmbiguousClass: "),
+            _progressLoggerMock.Verify(
+                logger => logger.Log("Multiple full names found for AmbiguousClass in SomePath/SomeClass.cs :", LogLevels.Warning),
                 Times.Once);
-            _progressLoggerMock.Verify(logger => logger.LogLine("Models.AmbiguousClass"));
-            _progressLoggerMock.Verify(logger => logger.LogLine("Services.AmbiguousClass"));
+            _progressLoggerMock.Verify(logger => logger.Log("Models.AmbiguousClass", LogLevels.Information));
+            _progressLoggerMock.Verify(logger => logger.Log("Services.AmbiguousClass", LogLevels.Information));
         }
 
         [Fact]
@@ -828,6 +830,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         FullName = "MyController",
+                        FilePath = "SomePath/MyController.cs",
                         Fields =
                         {
                             new FieldModel
@@ -850,10 +853,11 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Equal("MyService",
                 actualRepositoryModel.Solutions[0].Projects[2].Namespaces[0].ClassModels[0].Fields[0].Type);
 
-            _progressLoggerMock.Verify(logger => logger.LogLine($"Multiple full names found for MyService: "),
+            _progressLoggerMock.Verify(
+                logger => logger.Log("Multiple full names found for MyService in SomePath/MyController.cs :", LogLevels.Warning),
                 Times.Once);
-            _progressLoggerMock.Verify(logger => logger.LogLine($"Project1.Services.MyService"));
-            _progressLoggerMock.Verify(logger => logger.LogLine($"Project2.Services.MyService"));
+            _progressLoggerMock.Verify(logger => logger.Log("Project1.Services.MyService", LogLevels.Information));
+            _progressLoggerMock.Verify(logger => logger.Log("Project2.Services.MyService", LogLevels.Information));
         }
 
         [Fact]
@@ -906,6 +910,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         FullName = "MyController",
+                        FilePath = "SomePath/MyController.cs",
                         Fields =
                         {
                             new FieldModel
@@ -928,10 +933,11 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Equal("MyService",
                 actualRepositoryModel.Solutions[2].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
 
-            _progressLoggerMock.Verify(logger => logger.LogLine($"Multiple full names found for MyService: "),
+            _progressLoggerMock.Verify(
+                logger => logger.Log("Multiple full names found for MyService in SomePath/MyController.cs :", LogLevels.Warning),
                 Times.Once);
-            _progressLoggerMock.Verify(logger => logger.LogLine($"Project1.Services.MyService"));
-            _progressLoggerMock.Verify(logger => logger.LogLine($"Project2.Services.MyService"));
+            _progressLoggerMock.Verify(logger => logger.Log("Project1.Services.MyService", LogLevels.Information));
+            _progressLoggerMock.Verify(logger => logger.Log("Project2.Services.MyService", LogLevels.Information));
         }
 
         [Fact]
@@ -1001,7 +1007,7 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Equal("OutOfRepositoryClass",
                 actualRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
 
-            _progressLoggerMock.Verify(logger => logger.LogLine("Multiple full names found for MyService: "),
+            _progressLoggerMock.Verify(logger => logger.Log("Multiple full names found for MyService: ",LogLevels.Warning),
                 Times.Never);
         }
 
