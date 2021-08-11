@@ -36,7 +36,7 @@ jobs:
     - name: Run Honeydew
       run: |
         ./bin/Honeydew extract test_folder 
-        ls
+        ls results
       
     - name: Compare results
-      run: sh e2e_scripts/compare.sh e2e_results ./bin/results
+      run: sh e2e_scripts/compare.sh e2e_results ./results
