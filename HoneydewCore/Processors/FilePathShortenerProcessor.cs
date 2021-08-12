@@ -44,6 +44,14 @@ namespace HoneydewCore.Processors
                         projectModel.FilePath = TrimPath(projectModel.FilePath);
                     }
 
+                    for (var i = 0; i < projectModel.ProjectReferences.Count; i++)
+                    {
+                        if (!string.IsNullOrWhiteSpace(projectModel.ProjectReferences[i]))
+                        {
+                            projectModel.ProjectReferences[i] = TrimPath(projectModel.ProjectReferences[i]);
+                        }
+                    }
+
                     foreach (var namespaceModel in projectModel.Namespaces)
                     {
                         foreach (var classModel in namespaceModel.ClassModels)
