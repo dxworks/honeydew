@@ -25,7 +25,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
             {
                 FilePath = project.FilePath,
                 ProjectReferences = project.AllProjectReferences
-                    .Select(reference => reference.ProjectId.ToString()).ToList()
+                    .Select(reference => ExtractPathFromProjectId(reference.ProjectId.ToString())).ToList()
             };
 
             var i = 1;
@@ -68,6 +68,23 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
             progressLogger.Stop();
 
             return projectModel;
+        }
+
+        private string ExtractPathFromProjectId(string s)
+        {
+            if (string.IsNullOrEmpty(s))
+            {
+                return s;
+            }
+
+            var parts = s.Split(" - ");
+
+            if (parts.Length != 2)
+            {
+                return s;
+            }
+
+            return parts[1][..^1];
         }
     }
 }

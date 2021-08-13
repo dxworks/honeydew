@@ -36,10 +36,10 @@ namespace Honeydew
             await result.MapResult(async options =>
             {
                 var logFilePath = $"{DefaultPathForAllRepresentations}/logs.txt";
-                var progressLogger = new SerilogLogger(logFilePath);
+                var logger = new SerilogLogger(logFilePath);
 
-                progressLogger.Log($"Log will be stored at {logFilePath}");
-                progressLogger.Log();
+                logger.Log($"Log will be stored at {logFilePath}");
+                logger.Log();
 
                 var inputPath = options.InputFilePath;
 
@@ -48,13 +48,13 @@ namespace Honeydew
                 {
                     case "load":
                     {
-                        repositoryModel = await LoadModel(progressLogger, inputPath);
+                        repositoryModel = await LoadModel(logger, inputPath);
                     }
                         break;
 
                     case "extract":
                     {
-                        repositoryModel = await ExtractModel(progressLogger, inputPath);
+                        repositoryModel = await ExtractModel(logger, inputPath);
                     }
                         break;
 
@@ -65,24 +65,34 @@ namespace Honeydew
                     }
                 }
 
-                progressLogger.Log();
-                progressLogger.Log("Resolving Full Name Dependencies");
-
-                // Post Extraction Repository model processing
-                var fullNameModelProcessor = new FullNameModelProcessor(progressLogger);
-                repositoryModel = fullNameModelProcessor.Process(repositoryModel);
+                logger.Log();
+                logger.Log("Trimming File Paths");
 
                 repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
+
+                logger.Log();
+                logger.Log("Exporting Intermediate Results");
+
+                WriteRepresentationsToFile(repositoryModel, "_intermediate", DefaultPathForAllRepresentations);
+
+
+                logger.Log();
+                logger.Log("Resolving Full Name Dependencies");
+
+                // Post Extraction Repository model processing
+                var fullNameModelProcessor = new FullNameModelProcessor(logger);
+                repositoryModel = fullNameModelProcessor.Process(repositoryModel);
+
 
                 WriteAllRepresentations(repositoryModel, fullNameModelProcessor.NamespacesDictionary,
                     DefaultPathForAllRepresentations);
 
-                progressLogger.Log();
-                progressLogger.Log("Extraction Complete!");
-                progressLogger.Log();
-                progressLogger.Log($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
+                logger.Log();
+                logger.Log("Extraction Complete!");
+                logger.Log();
+                logger.Log($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
 
-                progressLogger.CloseAndFlush();
+                logger.CloseAndFlush();
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
@@ -137,17 +147,38 @@ namespace Honeydew
         {
             var writer = new FileWriter();
 
-            var repositoryExporter = GetRepositoryModelExporter();
-            writer.WriteFile(Path.Combine(outputPath, "honeydew.json"), repositoryExporter.Export(repositoryModel));
-
-            var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
-            var csvModelExporter = GetClassRelationsRepresentationExporter();
-            writer.WriteFile(Path.Combine(outputPath, "honeydew.csv"),
-                csvModelExporter.Export(classRelationsRepresentation));
+            WriteRepresentationsToFile(repositoryModel, "", outputPath);
 
             var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
             writer.WriteFile(Path.Combine(outputPath, "honeydew_namespaces.json"),
                 fullNameNamespacesExporter.Export(fullNameNamespaces));
+        }
+
+        private static void WriteRepresentationsToFile(RepositoryModel repositoryModel, string nameModifier,
+            string outputPath)
+        {
+            var writer = new FileWriter();
+
+            var repositoryExporter = GetRepositoryModelExporter();
+            writer.WriteFile(Path.Combine(outputPath, $"honeydew{nameModifier}.json"),
+                repositoryExporter.Export(repositoryModel));
+
+            var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
+            var csvModelExporter = GetClassRelationsRepresentationExporter();
+            writer.WriteFile(Path.Combine(outputPath, $"honeydew{nameModifier}.csv"),
+                csvModelExporter.Export(classRelationsRepresentation));
+
+            var cyclomaticComplexityPerFileRepresentation =
+                GetCyclomaticComplexityPerFileRepresentation(repositoryModel);
+            var cyclomaticComplexityPerFileExporter = GetCyclomaticComplexityPerFileExporter();
+            writer.WriteFile(Path.Combine(outputPath, $"honeydew_cyclomatic{nameModifier}.json"),
+                cyclomaticComplexityPerFileExporter.Export(cyclomaticComplexityPerFileRepresentation));
+        }
+
+        private static IModelExporter<CyclomaticComplexityPerFileRepresentation>
+            GetCyclomaticComplexityPerFileExporter()
+        {
+            return new JsonCyclomaticComplexityPerFileRepresentationExporter();
         }
 
         private static IModelExporter<RepositoryModel> GetRepositoryModelExporter()
@@ -174,6 +205,12 @@ namespace Honeydew
                 new RepositoryModelToClassRelationsProcessor(new MetricRelationsProvider(), new MetricPrettier(), true)
                     .Process(repositoryModel);
             return classRelationsRepresentation;
+        }
+
+        private static CyclomaticComplexityPerFileRepresentation GetCyclomaticComplexityPerFileRepresentation(
+            RepositoryModel repositoryModel)
+        {
+            return new RepositoryModelToCyclomaticComplexityPerFileProcessor().Process(repositoryModel);
         }
     }
 }

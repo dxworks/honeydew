@@ -34,6 +34,7 @@ namespace HoneydewExtractors.Processors
             SetFullNameForUsings(repositoryModel);
 
             _logger.Log("Resolving Class Elements (Fields, Methods, Properties,...)");
+            _logger.Log();
             SetFullNameForClassModelComponents(repositoryModel);
 
             foreach (var (ambiguousName, possibilities) in _ambiguousNames)
@@ -219,6 +220,8 @@ namespace HoneydewExtractors.Processors
                     {
                         foreach (var classModel in namespaceModel.ClassModels)
                         {
+                            _logger.Log($"Resolving Elements for {classModel.FilePath}");
+
                             AddAmbiguousNames(() =>
                             {
                                 classModel.BaseClassFullName = FindClassFullName(
@@ -287,6 +290,8 @@ namespace HoneydewExtractors.Processors
                                 projectModel, solutionModel);
                         }
                     }
+
+                    _logger.Log();
                 }
             }
 

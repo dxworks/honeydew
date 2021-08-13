@@ -101,7 +101,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 ContainingClassName = containingClass,
                 CalledMethods = calledMethods,
                 Accessors = accessors,
-                Loc = _linesOfCodeCounter.Count(node.ToString())
+                Loc = _linesOfCodeCounter.Count(node.ToString()),
+                CyclomaticComplexity = HoneydewSyntacticModel.CalculateCyclomaticComplexity(node)
             });
         }
     }
