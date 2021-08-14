@@ -101,6 +101,7 @@ jobs:
 
       - name: Notarize Binaries
         run: "sh macSigningScripts/Notarize.sh \"mario.rivis@gmail.com\" \"${{ secrets.MAC_DEV_PASSWORD }}\" \"group.org.dxworks\" \"3L7BS894T6\" \"./honeydew-osx.zip\""
+        continue-on-error: true
 
       - name: Upload artifact
         uses: actions\upload-artifact@v2
