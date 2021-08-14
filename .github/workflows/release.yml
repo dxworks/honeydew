@@ -53,63 +53,63 @@ jobs:
           name: honeydew-${{ matrix.os }}.zip
           path: honeydew-${{ matrix.os }}.zip
 
-#  build-publish-and-sign-for-mac:
-#    name: Build, Publish and Sign (osx)
-#    runs-on: macos-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#
-#      - name: Set up .NET Core
-#        uses: actions/setup-dotnet@v1
-#        with:
-#          dotnet-version: '6.0.100-preview.5'
-#          include-prerelease: true
-#
-#      - name: Extract Semver
-#        id: semver_parser
-#        run: |
-#          semver=${TAG#"refs/tags/v"}
-#          semver=${semver%"-voyager"}
-#
-#          echo ::set-output name=semver::$semver
-#        env:
-#          TAG: ${{ github.ref }}
-#
-#      - name: dotnet publish
-#        run: |
-#          mkdir bin
-#          dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
-#
-#      - name: Prepare Assets
-#        run: |
-#          mkdir -p honeydew-release/results
-#          cp README.md honeydew-release/README.md
-#          rm ./bin/*.pdb
-#          cp ./bin/Honeydew honeydew-release/Honeydew
-#          chmod +x honeydew-release/Honeydew
-#          ls -R -al honeydew-release
-#
-#      - name: Add Cert to Keychain
-#        uses: apple-actions/import-codesign-certs@v1
-#        with:
-#          p12-file-base64: ${{ secrets.MAC_CERT_BASE64 }}
-#          p12-password: ${{ secrets.MAC_CERT_PASSWORD }}
-#
-#      - name: Sign Binaries
-#        run: "sh macSigningScripts/SignMac.sh \"honeydew-release/Honeydew\" \"honeydew-release/*\" \"Developer ID Application: Andrei Mario Rivis (3L7BS894T6)\" \"macSigningScripts/entitlements.plist\""
-#
-#      - name: Zip Binary for Notarizing
-#        run:
-#          zip -r honeydew-osx.zip honeydew-release
-#
-#      - name: Notarize Binaries
-#        run: "sh macSigningScripts/Notarize.sh \"mario.rivis@gmail.com\" \"${{ secrets.MAC_DEV_PASSWORD }}\" \"group.org.dxworks\" \"3L7BS894T6\" \"./honeydew-osx.zip\""
-#
-#      - name: Upload artifact
-#        uses: actions\upload-artifact@v2
-#        with:
-#          name: honeydew-osx.zip
-#          path: honeydew-osx.zip
+  build-publish-and-sign-for-mac:
+    name: Build, Publish and Sign (osx)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+          include-prerelease: true
+
+      - name: Extract Semver
+        id: semver_parser
+        run: |
+          semver=${TAG#"refs/tags/v"}
+          semver=${semver%"-voyager"}
+
+          echo ::set-output name=semver::$semver
+        env:
+          TAG: ${{ github.ref }}
+
+      - name: dotnet publish
+        run: |
+          mkdir bin
+          dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
+
+      - name: Prepare Assets
+        run: |
+          mkdir -p honeydew-release/results
+          cp README.md honeydew-release/README.md
+          rm ./bin/*.pdb
+          cp ./bin/Honeydew honeydew-release/Honeydew
+          chmod +x honeydew-release/Honeydew
+          ls -R -al honeydew-release
+
+      - name: Add Cert to Keychain
+        uses: apple-actions/import-codesign-certs@v1
+        with:
+          p12-file-base64: ${{ secrets.MAC_CERT_BASE64 }}
+          p12-password: ${{ secrets.MAC_CERT_PASSWORD }}
+
+      - name: Sign Binaries
+        run: "sh macSigningScripts/SignMac.sh \"honeydew-release/Honeydew\" \"honeydew-release/*\" \"Developer ID Application: Andrei Mario Rivis (3L7BS894T6)\" \"macSigningScripts/entitlements.plist\""
+
+      - name: Zip Binary for Notarizing
+        run:
+          zip -r honeydew-osx.zip honeydew-release
+
+      - name: Notarize Binaries
+        run: "sh macSigningScripts/Notarize.sh \"mario.rivis@gmail.com\" \"${{ secrets.MAC_DEV_PASSWORD }}\" \"group.org.dxworks\" \"3L7BS894T6\" \"./honeydew-osx.zip\""
+
+      - name: Upload artifact
+        uses: actions\upload-artifact@v2
+        with:
+          name: honeydew-osx.zip
+          path: honeydew-osx.zip
 
   release-and-upload:
     name: Release and Upload
@@ -155,12 +155,12 @@ jobs:
           asset_name: honeydew-linux.zip
           asset_content_type: application/zip
 
-#      - name: Upload MacOS Release Asset
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ./honeydew-osx.zip/honeydew-osx.zip
-#          asset_name: honeydew-osx.zip
-#          asset_content_type: application/zip
+      - name: Upload MacOS Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./honeydew-osx.zip/honeydew-osx.zip
+          asset_name: honeydew-osx.zip
+          asset_content_type: application/zip

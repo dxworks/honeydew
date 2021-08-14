@@ -17,12 +17,12 @@ do
     if [ "$f" = "$1" ];
     then
         echo "Runtime Signing $f"
-        codesign --timestamp --sign "$3" $f --options=runtime --no-strict --entitlements $4
+        codesign --force --timestamp --sign "$3" $f --options=runtime --no-strict --entitlements $4
     else
         if [ ! -d "$f" ]
         then
             echo "Signing $f"
-            codesign --timestamp --sign "$3" $f --no-strict
+            codesign --force --timestamp --sign "$3" $f --no-strict
         fi
     fi
 done
