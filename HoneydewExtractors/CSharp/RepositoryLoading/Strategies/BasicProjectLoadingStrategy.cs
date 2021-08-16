@@ -11,12 +11,10 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
     public class BasicProjectLoadingStrategy : IProjectLoadingStrategy
     {
         private readonly ILogger _logger;
-        private readonly IProgressLoggerFactory _progressLoggerFactory;
 
-        public BasicProjectLoadingStrategy(ILogger logger, IProgressLoggerFactory progressLoggerFactory)
+        public BasicProjectLoadingStrategy(ILogger logger)
         {
             _logger = logger;
-            _progressLoggerFactory = progressLoggerFactory;
         }
 
         public async Task<ProjectModel> Load(Project project, CSharpFactExtractor extractor)
@@ -30,12 +28,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
 
             var i = 1;
             var documentCount = project.Documents.Count();
-
-            var progressLogger =
-                _progressLoggerFactory.CreateProgressLogger(documentCount, project.FilePath, project.Solution.FilePath, ConsoleColor.Blue);
-
-            progressLogger.Start();
-
+            
             foreach (var document in project.Documents)
             {
                 try
@@ -59,14 +52,10 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     _logger.Log($"Could not extract from {document.FilePath} ({i}/{documentCount}) because {e}",
                         LogLevels.Warning);
                 }
-
-                progressLogger.Step($"{document.FilePath} ({i}/{documentCount})...");
-
+                
                 i++;
             }
-
-            progressLogger.Stop();
-
+            
             return projectModel;
         }
 

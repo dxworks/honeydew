@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using HoneydewCore.Logging;
 using HoneydewExtractors.CSharp.Metrics;
@@ -13,14 +12,14 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
         private readonly ILogger _logger;
         private readonly IProjectLoadingStrategy _projectLoadingStrategy;
 
-        private readonly IProgressLoggerFactory _progressLoggerFactory;
+        private readonly IProgressLogger _progressLogger;
 
         public BasicSolutionLoadingStrategy(ILogger logger, IProjectLoadingStrategy projectLoadingStrategy,
-            IProgressLoggerFactory progressLoggerFactory)
+            IProgressLogger progressLogger)
         {
             _logger = logger;
             _projectLoadingStrategy = projectLoadingStrategy;
-            _progressLoggerFactory = progressLoggerFactory;
+            _progressLogger = progressLogger;
         }
 
         public async Task<SolutionModel> Load(Solution solution, CSharpFactExtractor extractor)
@@ -34,7 +33,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
             var projectCount = solution.Projects.Count();
 
             var progressLogger =
-                _progressLoggerFactory.CreateProgressLogger(projectCount, solution.FilePath, "root",ConsoleColor.Green);
+                _progressLogger.CreateProgressLogger(projectCount == 0 ? 1 : projectCount, solution.FilePath);
 
             progressLogger.Start();
 
@@ -53,7 +52,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     _logger.Log();
                     _logger.Log($"{project.Language} type projects are not currently supported!", LogLevels.Warning);
                     _logger.Log($"Skipping {project.FilePath} ({i}/{projectCount})", LogLevels.Warning);
-                    progressLogger.Step($"{project.FilePath} ({i}/{projectCount})...");
+                    progressLogger.Step($"{project.FilePath}");
                     i++;
                     continue;
                 }
@@ -62,7 +61,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                 _logger.Log($"Loading C# Project from {project.FilePath} ({i}/{projectCount})");
                 var projectModel = await _projectLoadingStrategy.Load(project, extractor);
 
-                progressLogger.Step($"{project.FilePath} ({i}/{projectCount})...");
+                progressLogger.Step($"{project.FilePath}");
 
                 solutionModel.Projects.Add(projectModel);
                 i++;
