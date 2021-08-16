@@ -37,9 +37,13 @@ namespace Honeydew
             {
                 var logFilePath = $"{DefaultPathForAllRepresentations}/logs.txt";
                 var logger = new SerilogLogger(logFilePath);
+                var progressLogger = new ProgressLogger();
 
                 logger.Log($"Log will be stored at {logFilePath}");
                 logger.Log();
+                
+                progressLogger.Log($"Log will be stored at {logFilePath}");
+                progressLogger.Log();
 
                 var inputPath = options.InputFilePath;
 
@@ -54,7 +58,7 @@ namespace Honeydew
 
                     case "extract":
                     {
-                        repositoryModel = await ExtractModel(logger, inputPath);
+                        repositoryModel = await ExtractModel(logger, progressLogger, inputPath);
                     }
                         break;
 
@@ -67,20 +71,27 @@ namespace Honeydew
 
                 logger.Log();
                 logger.Log("Trimming File Paths");
+                progressLogger.Log();
+                progressLogger.Log("Trimming File Paths");
 
                 repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
 
                 logger.Log();
                 logger.Log("Exporting Intermediate Results");
+                progressLogger.Log();
+                progressLogger.Log("Exporting Intermediate Results");
 
                 WriteRepresentationsToFile(repositoryModel, "_intermediate", DefaultPathForAllRepresentations);
 
 
                 logger.Log();
                 logger.Log("Resolving Full Name Dependencies");
+                progressLogger.Log();
+                progressLogger.Log("Resolving Full Name Dependencies");
+                progressLogger.Log();
 
                 // Post Extraction Repository model processing
-                var fullNameModelProcessor = new FullNameModelProcessor(logger);
+                var fullNameModelProcessor = new FullNameModelProcessor(logger, progressLogger);
                 repositoryModel = fullNameModelProcessor.Process(repositoryModel);
 
 
@@ -91,6 +102,11 @@ namespace Honeydew
                 logger.Log("Extraction Complete!");
                 logger.Log();
                 logger.Log($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
+                
+                progressLogger.Log();
+                progressLogger.Log("Extraction Complete!");
+                progressLogger.Log();
+                progressLogger.Log($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
 
                 logger.CloseAndFlush();
             }, _ => Task.FromResult("Some Error Occurred"));
@@ -121,22 +137,20 @@ namespace Honeydew
             return repositoryModel;
         }
 
-        private static async Task<RepositoryModel> ExtractModel(ILogger logger, string inputPath)
+        private static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger progressLogger,
+            string inputPath)
         {
             var solutionProvider = new MsBuildSolutionProvider();
             var projectProvider = new MsBuildProjectProvider();
 
-            var progressLoggerFactory = new ShellProgressBarLoggerFactory();
-
             // Create repository model from path
-            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger, progressLoggerFactory);
+            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger);
 
             var solutionLoadingStrategy =
-                new BasicSolutionLoadingStrategy(logger, projectLoadingStrategy, progressLoggerFactory);
+                new BasicSolutionLoadingStrategy(logger, projectLoadingStrategy, progressLogger);
 
             var repositoryLoader = new CSharpRepositoryLoader(solutionProvider, projectProvider, projectLoadingStrategy,
-                solutionLoadingStrategy, logger,
-                progressLoggerFactory, LoadExtractor());
+                solutionLoadingStrategy, logger, progressLogger, LoadExtractor());
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;

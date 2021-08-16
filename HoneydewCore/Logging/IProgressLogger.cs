@@ -1,9 +1,15 @@
-﻿namespace HoneydewCore.Logging
+﻿using System.Collections.Generic;
+
+namespace HoneydewCore.Logging
 {
     public interface IProgressLogger
     {
-        void Start();
-        void Step(string text);
-        void Stop();
+        void Log(object value);
+        void Log();
+
+        void CreateProgressBars(IEnumerable<string> progressBarNames);
+
+        IProgressLoggerBar CreateProgressLogger(int totalCount, string text);
+        void StopProgressBar(string solutionPath);
     }
 }
