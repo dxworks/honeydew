@@ -29,6 +29,47 @@ namespace HoneydewCoreIntegrationTests.Processors
         }
 
         [Fact]
+        public void Process_ShouldReturn4ConcernsWith0Strength_WhenRepositoryModelHasOneClassWithNoMethodsOrProperties()
+        {
+            var repositoryModel = new RepositoryModel();
+            var solutionModel = new SolutionModel();
+            var projectModel = new ProjectModel();
+            var namespaceModel = new NamespaceModel();
+            var classModel = new ClassModel
+            {
+                FilePath = "path",
+                Fields = new List<FieldModel>
+                {
+                    new()
+                    {
+                        Name = "MyField",
+                        Modifier = "static",
+                        Type = "System.Int32",
+                        AccessModifier = "public",
+                    }
+                }
+            };
+            namespaceModel.ClassModels.Add(classModel);
+            projectModel.Namespaces.Add(namespaceModel);
+            solutionModel.Projects.Add(projectModel);
+            repositoryModel.Solutions.Add(solutionModel);
+
+            var representation = _sut.Process(repositoryModel);
+            Assert.Equal(4, representation.File.Concerns.Count);
+
+            foreach (var concern in representation.File.Concerns)
+            {
+                Assert.Equal("path", concern.Entity);
+                Assert.Equal("0", concern.Strength);
+            }
+
+            Assert.Equal("maxCyclo", representation.File.Concerns[0].Tag);
+            Assert.Equal("minCyclo", representation.File.Concerns[1].Tag);
+            Assert.Equal("avgCyclo", representation.File.Concerns[2].Tag);
+            Assert.Equal("sumCyclo", representation.File.Concerns[3].Tag);
+        }
+        
+        [Fact]
         public void Process_ShouldReturn4Concerns_WhenRepositoryModelHasOneClassWithOneMethodInOneFile()
         {
             var repositoryModel = new RepositoryModel();
