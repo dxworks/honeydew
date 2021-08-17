@@ -20,7 +20,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             var classModel = classModels[0];
             Assert.Equal(21, classModel.Loc.SourceLines);
-            Assert.Equal(7, classModel.Loc.EmptyLines);
+            Assert.Equal(8, classModel.Loc.EmptyLines);
             Assert.Equal(8, classModel.Loc.CommentedLines);
 
             Assert.Equal(5, classModel.Methods[0].Loc.SourceLines);

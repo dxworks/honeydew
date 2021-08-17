@@ -59,6 +59,18 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
 
             var typeName = HoneydewSemanticModel.GetFullName(node.Type);
 
+            var nodeTypeString = node.Type.ToString();
+            if (nodeTypeString.StartsWith(CSharpConstants.RefReadonlyIdentifier))
+            {
+                modifier += $" {CSharpConstants.RefReadonlyIdentifier}";
+                modifier = modifier.Trim();
+            }
+            else if (nodeTypeString.StartsWith(CSharpConstants.RefIdentifier))
+            {
+                modifier += $" {CSharpConstants.RefIdentifier}";
+                modifier = modifier.Trim();
+            }
+
             var calledMethods = new List<MethodCallModel>();
             foreach (var invocationExpressionSyntax in node.DescendantNodes()
                 .OfType<InvocationExpressionSyntax>())
