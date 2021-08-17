@@ -21,7 +21,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\HoneydewExtractors\HoneydewExtractors.csproj" />
+        <ProjectReference Include="..\HoneydewExtractors\HoneydewExtractors.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="TestData\**">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
 </Project>

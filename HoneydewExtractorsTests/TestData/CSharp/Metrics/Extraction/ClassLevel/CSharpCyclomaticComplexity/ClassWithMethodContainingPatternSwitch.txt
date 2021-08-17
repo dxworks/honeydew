@@ -1,0 +1,38 @@
+﻿public class PatternSwitchCycloWithClassHierarchy
+{
+    public void Function(IInterface i)
+    {
+        switch (i)
+        {
+            case MyClass1: break;
+            case MyClass2 myClass2:
+            {
+                
+            }
+                break;
+
+            case MyClass3:
+            {
+                break;
+            }
+            
+            default: break;
+        }
+    }
+}
+
+public interface IInterface
+{
+}
+
+abstract class MyClass1 : IInterface
+{
+}
+
+class MyClass2 : IInterface
+{
+}
+
+class MyClass3 : IInterface
+{
+}
