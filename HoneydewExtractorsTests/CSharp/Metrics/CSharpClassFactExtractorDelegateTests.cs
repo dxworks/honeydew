@@ -221,7 +221,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal("MyDelegates.Class1.Delegate2", delegateModel1.FullName);
             Assert.Equal("MyDelegates.Class1.Delegate2", delegateModel1.Methods[0].ContainingClassName);
             Assert.Equal("int", delegateModel1.Methods[0].ReturnType);
-            Assert.Empty( delegateModel1.Methods[0].ParameterTypes);
+            Assert.Empty(delegateModel1.Methods[0].ParameterTypes);
 
             var delegateModel2 = classModels[4];
             Assert.Equal("MyDelegates.Class1.InnerClass", delegateModel2.Namespace);
