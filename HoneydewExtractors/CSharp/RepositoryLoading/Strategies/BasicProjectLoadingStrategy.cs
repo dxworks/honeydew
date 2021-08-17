@@ -28,7 +28,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
 
             var i = 1;
             var documentCount = project.Documents.Count();
-            
+
             foreach (var document in project.Documents)
             {
                 try
@@ -52,10 +52,10 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     _logger.Log($"Could not extract from {document.FilePath} ({i}/{documentCount}) because {e}",
                         LogLevels.Warning);
                 }
-                
+
                 i++;
             }
-            
+
             return projectModel;
         }
 

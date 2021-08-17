@@ -21,7 +21,8 @@ namespace HoneydewCore.Processors
 
             foreach (var (filePath, classModels) in classesGroupedByFilePath)
             {
-                CalculateMaxCyclo(classModels, out var maxCyclo, out var minCyclo, out var avgCyclo, out var sumCyclo);
+                CalculateCycloComponents(classModels, out var maxCyclo, out var minCyclo, out var avgCyclo,
+                    out var sumCyclo);
 
                 representation.AddConcern(new Concern
                 {
@@ -55,7 +56,7 @@ namespace HoneydewCore.Processors
             return representation;
         }
 
-        private static void CalculateMaxCyclo(List<ClassModel> classModels, out int maxCyclo, out int minCyclo,
+        private static void CalculateCycloComponents(List<ClassModel> classModels, out int maxCyclo, out int minCyclo,
             out int avgCyclo, out int sumCyclo)
         {
             var maxCyclomatic = 1;
@@ -116,6 +117,10 @@ namespace HoneydewCore.Processors
             if (count != 0)
             {
                 avgCyclo = sumCyclomatic / count;
+            }
+            else
+            {
+                maxCyclo = minCyclo = sumCyclo = avgCyclo = 0;
             }
         }
 

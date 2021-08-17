@@ -12,14 +12,18 @@ namespace HoneydewExtractors.Processors
 {
     public class FullNameModelProcessor : IProcessorFunction<RepositoryModel, RepositoryModel>
     {
-        public readonly IDictionary<string, NamespaceTree> NamespacesDictionary =
-            new Dictionary<string, NamespaceTree>();
-
         private readonly ILogger _logger;
         private readonly IProgressLogger _progressLogger;
 
+        public readonly IDictionary<string, NamespaceTree> NamespacesDictionary =
+            new Dictionary<string, NamespaceTree>();
+
         private readonly IDictionary<AmbiguousName, ISet<string>> _ambiguousNames =
             new Dictionary<AmbiguousName, ISet<string>>();
+
+        private readonly ISet<string> _notFoundClassNames = new HashSet<string>();
+
+        private readonly RepositoryClassSet _repositoryClassSet = new();
 
         private int _classCount;
 
@@ -107,6 +111,8 @@ namespace HoneydewExtractors.Processors
                                 classModel.FullName = FindClassFullName(classModel.FullName, namespaceModel,
                                     projectModel, solutionModel, repositoryModel, classModel.Usings,
                                     classModel.FilePath);
+
+                                _repositoryClassSet.Add(projectModel.FilePath, classModel.FullName);
                             });
                         }
                     }
@@ -623,9 +629,19 @@ namespace HoneydewExtractors.Processors
                 return className;
             }
 
+            if (_notFoundClassNames.Contains(className))
+            {
+                return className;
+            }
+
             if (CSharpConstants.IsPrimitive(className))
             {
                 return CSharpConstants.ConvertPrimitiveTypeToSystemType(className);
+            }
+
+            if (_repositoryClassSet.Contains(projectModelToStartSearchFrom.FilePath, className))
+            {
+                return className;
             }
 
             if (IsNameFullyQualified(className))
@@ -682,6 +698,24 @@ namespace HoneydewExtractors.Processors
                             }, fullNamePossibilities);
                     }
                 }
+            }
+
+            // search in current namespace for classes that used a class located in the parent namespace 
+            foreach (var name in GetPossibilitiesFromNamespace(namespaceModelToStartSearchFrom.Name, className))
+            {
+                fullNamePossibilities.Add(name);
+            }
+
+            switch (fullNamePossibilities.Count)
+            {
+                case 1:
+                    return fullNamePossibilities.First();
+                case > 1:
+                    throw new AmbiguousFullNameException(new AmbiguousName
+                    {
+                        Name = className,
+                        Location = classFilePath
+                    }, fullNamePossibilities);
             }
 
             foreach (var name in TrySearchingInProjectModel(className, classFilePath, projectModelToStartSearchFrom))
@@ -743,18 +777,19 @@ namespace HoneydewExtractors.Processors
                 }
             }
 
-            return fullNamePossibilities.Count switch
+            switch (fullNamePossibilities.Count)
             {
-                1 => CSharpConstants.ConvertPrimitiveTypeToSystemType(fullNamePossibilities.First()),
-                > 1 => throw new AmbiguousFullNameException(new AmbiguousName
+                case 1:
+                    return CSharpConstants.ConvertPrimitiveTypeToSystemType(fullNamePossibilities.First());
+                case > 1:
+                    throw new AmbiguousFullNameException(
+                        new AmbiguousName { Name = className, Location = classFilePath }, fullNamePossibilities);
+                default:
                 {
-                    Name = className,
-                    Location = classFilePath
-                }, fullNamePossibilities),
-
-                // unknown className, must be some extern dependency
-                _ => CSharpConstants.ConvertPrimitiveTypeToSystemType(className)
-            };
+                    _notFoundClassNames.Add(className);
+                    return className;
+                }
+            }
         }
 
         private IEnumerable<string> TrySearchingInSolutionModel(string className, string classFilePath,
@@ -767,6 +802,12 @@ namespace HoneydewExtractors.Processors
                 {
                     continue;
                 }
+
+                if (!projectModelToBeIgnored.ProjectReferences.Contains(projectModel.FilePath))
+                {
+                    continue;
+                }
+
 
                 foreach (var name in TrySearchingInProjectModel(className, classFilePath, projectModel))
                 {
@@ -818,14 +859,48 @@ namespace HoneydewExtractors.Processors
                 return new List<string>();
             }
 
-
             var childNamespace = fullNameNamespace.GetChild(nameParts);
-            if (childNamespace != null)
+            if (childNamespace == null)
             {
-                return childNamespace.GetPossibleChildren(className);
+                return new List<string>();
             }
 
-            return new List<string>();
+            var childClassNamespace = GetClassInNamespaceAmongChildrenNamespaces(childNamespace, className);
+            if (childClassNamespace != null)
+            {
+                return new List<string>
+                {
+                    childClassNamespace.GetFullName()
+                };
+            }
+
+            if (childNamespace.Parent != null)
+            {
+                var brotherClassNamespace =
+                    GetClassInNamespaceAmongChildrenNamespaces(childNamespace.Parent, className);
+                if (brotherClassNamespace != null)
+                {
+                    return new List<string>
+                    {
+                        brotherClassNamespace.GetFullName()
+                    };
+                }
+            }
+
+            return childNamespace.GetPossibleChildren(className);
+        }
+
+        private NamespaceTree GetClassInNamespaceAmongChildrenNamespaces(NamespaceTree namespaceTree, string className)
+        {
+            foreach (var (childName, childNode) in namespaceTree.Children)
+            {
+                if (className == childName && childNode.Children.Count == 0)
+                {
+                    return childNode;
+                }
+            }
+
+            return null;
         }
 
         private string AddClassModelToNamespaceGraph(string className, string classFilePath, string namespaceName)

@@ -178,7 +178,7 @@ namespace MyNamespace
                     logger.CreateProgressLogger(4, "Resolving Class Elements (Fields, Methods, Properties,...)"))
                 .Returns(_progressLoggerBarMock.Object);
 
-            
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var utilClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[2];
@@ -296,7 +296,7 @@ namespace MyCompany
                     logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
                 .Returns(_progressLoggerBarMock.Object);
 
-            
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var classA = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0];
@@ -475,7 +475,7 @@ namespace MyNamespace
 
             solutionModel.Projects.Add(projectModel);
             repositoryModel.Solutions.Add(solutionModel);
-            
+
             _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(2, "Resolving Class Names"))
                 .Returns(_progressLoggerBarMock.Object);
             _progressLoggerMock.Setup(logger =>
@@ -548,7 +548,7 @@ namespace MyNamespace
                     logger.CreateProgressLogger(1, "Resolving Class Elements (Fields, Methods, Properties,...)"))
                 .Returns(_progressLoggerBarMock.Object);
 
-            
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var myClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0];
@@ -768,7 +768,6 @@ namespace HoneydewTestProject
                 .Returns(_progressLoggerBarMock.Object);
 
 
-            
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var myClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0];
@@ -861,6 +860,137 @@ namespace HoneydewTestProject
             Assert.Equal("Method", myClass.Methods[0].Name);
             Assert.Equal(1, myClass.Methods[0].ParameterTypes.Count);
             Assert.Equal("HoneydewTestProject.A.C1", myClass.Methods[0].ParameterTypes[0].Type);
+        }
+
+        [Fact]
+        public void Process_ShouldReturnFullName_WhenProvidedWithClassInNamespaceAndChildNamespace()
+        {
+            const string fileContent1 = @"
+namespace NameSpace1.N1
+{
+    public class MyClass { }
+}";
+
+            const string fileContent2 = @"
+namespace NameSpace1.N1.Child
+{
+    public class MyClass { }
+}";
+            const string fileContent3 = @"using NameSpace1.N1;
+
+namespace NameSpace3
+{
+    public class MainClass : MyClass
+    {
+        public void Function(MyClass c) {   }
+    }
+}";
+
+            var classModels1 = _extractor.Extract(fileContent1);
+            var classModels2 = _extractor.Extract(fileContent2);
+            var classModels3 = _extractor.Extract(fileContent3);
+
+            var repositoryModel = new RepositoryModel();
+            var solutionModel = new SolutionModel();
+            var projectModel = new ProjectModel();
+
+            foreach (var classModel in classModels1)
+            {
+                projectModel.Add(classModel);
+            }
+
+            foreach (var classModel in classModels2)
+            {
+                projectModel.Add(classModel);
+            }
+
+            foreach (var classModel in classModels3)
+            {
+                projectModel.Add(classModel);
+            }
+
+            solutionModel.Projects.Add(projectModel);
+            repositoryModel.Solutions.Add(solutionModel);
+
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
+            var actualRepositoryModel = _sut.Process(repositoryModel);
+
+            var mainClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0];
+            Assert.Equal("NameSpace1.N1.MyClass", mainClass.BaseClassFullName);
+            Assert.Equal("NameSpace1.N1.MyClass", mainClass.Methods[0].ParameterTypes[0].Type);
+        }
+        
+         [Fact]
+        public void Process_ShouldReturnFullName_WhenProvidedWithClassInNamespaceAndChildNamespaceButUsedInSomeOtherChildNamespace()
+        {
+            const string fileContent1 = @"
+namespace NameSpace1.N1
+{
+    public class MyClass { }
+}";
+
+            const string fileContent2 = @"
+namespace NameSpace1.N1.Child
+{
+    public class MyClass { }
+}";
+            const string fileContent3 = @"
+namespace NameSpace1.N1.OtherChild
+{
+    public class MainClass : MyClass
+    {
+        public MyClass Function() { return null;  }
+    }
+}";
+
+            var classModels1 = _extractor.Extract(fileContent1);
+            var classModels2 = _extractor.Extract(fileContent2);
+            var classModels3 = _extractor.Extract(fileContent3);
+
+            var repositoryModel = new RepositoryModel();
+            var solutionModel = new SolutionModel();
+            var projectModel = new ProjectModel();
+
+            foreach (var classModel in classModels1)
+            {
+                projectModel.Add(classModel);
+            }
+
+            foreach (var classModel in classModels2)
+            {
+                projectModel.Add(classModel);
+            }
+
+            foreach (var classModel in classModels3)
+            {
+                projectModel.Add(classModel);
+            }
+
+            solutionModel.Projects.Add(projectModel);
+            repositoryModel.Solutions.Add(solutionModel);
+
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
+            var actualRepositoryModel = _sut.Process(repositoryModel);
+
+            var mainClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0];
+            Assert.Equal("NameSpace1.N1.MyClass", mainClass.BaseClassFullName);
+            Assert.Equal("NameSpace1.N1.MyClass", mainClass.Methods[0].ReturnType);
         }
     }
 }

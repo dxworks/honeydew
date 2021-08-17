@@ -1,0 +1,12 @@
+﻿class MyClass
+{    
+    public string Function(string a)
+    {
+        return a switch
+        {
+            "object" => "obj",
+            "value" => "val",
+            _ => a
+        };
+    }
+}

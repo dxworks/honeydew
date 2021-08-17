@@ -41,7 +41,7 @@ namespace Honeydew
 
                 logger.Log($"Log will be stored at {logFilePath}");
                 logger.Log();
-                
+
                 progressLogger.Log($"Log will be stored at {logFilePath}");
                 progressLogger.Log();
 
@@ -102,7 +102,7 @@ namespace Honeydew
                 logger.Log("Extraction Complete!");
                 logger.Log();
                 logger.Log($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
-                
+
                 progressLogger.Log();
                 progressLogger.Log("Extraction Complete!");
                 progressLogger.Log();

@@ -1,0 +1,21 @@
+﻿class MyClass
+{    
+    public void Function(int a, int b)
+    {
+        var s = 0;
+        if (a is > 7 or < 8)
+        {
+            s++;
+        }
+
+        if (b is > 6 and > 5)
+        {
+            s++;
+        }
+
+        if (a is not < 8)
+        {
+            s++;
+        }
+    }
+}

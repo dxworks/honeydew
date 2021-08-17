@@ -1,0 +1,14 @@
+﻿class MyClass
+{
+    delegate void A();
+
+    public int Value { get; set; }
+
+    public MyClass(int a)
+    {
+    }
+
+    public void Function()
+    {
+    }
+}

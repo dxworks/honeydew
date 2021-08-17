@@ -96,7 +96,7 @@ namespace HoneydewExtractorsTests.Processors
                     logger.CreateProgressLogger(5, "Resolving Class Elements (Fields, Methods, Properties,...)"))
                 .Returns(_progressLoggerBarMock.Object);
 
-            
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.Class1",
@@ -151,7 +151,7 @@ namespace HoneydewExtractorsTests.Processors
                     logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
                 .Returns(_progressLoggerBarMock.Object);
 
-            
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var namespaceModel = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
@@ -315,6 +315,9 @@ namespace HoneydewExtractorsTests.Processors
                 }
             });
 
+            projectModel1.FilePath = "path1";
+            projectModel2.ProjectReferences = new List<string> { "path1" };
+
             solutionModel.Projects.Add(projectModel2);
             repositoryModel.Solutions.Add(solutionModel);
 
@@ -419,6 +422,9 @@ namespace HoneydewExtractorsTests.Processors
                     }
                 }
             });
+
+            projectModel2.FilePath = "path2";
+            projectModel1.ProjectReferences = new List<string> { "path2" };
 
             solutionModel.Projects.Add(projectModel2);
 
@@ -531,7 +537,7 @@ namespace HoneydewExtractorsTests.Processors
                     logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
                 .Returns(_progressLoggerBarMock.Object);
 
-            
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var modelInterfacesNamespace =
@@ -601,6 +607,8 @@ namespace HoneydewExtractorsTests.Processors
                 }
             });
 
+            projectModel1.FilePath = "path1";
+            projectModel2.ProjectReferences = new List<string> { "path1" };
 
             solutionModel.Projects.Add(projectModel2);
             repositoryModel.Solutions.Add(solutionModel);
@@ -685,6 +693,10 @@ namespace HoneydewExtractorsTests.Processors
                     }
                 }
             });
+
+            projectModel1.FilePath = "path1";
+            projectModel2.FilePath = "path2";
+            projectModel3.ProjectReferences = new List<string> { "path1", "path2" };
 
             solutionModel2.Projects.Add(projectModel3);
 
@@ -935,6 +947,10 @@ namespace HoneydewExtractorsTests.Processors
             solutionModel.Projects.Add(projectModel2);
             solutionModel.Projects.Add(projectModel3);
 
+            projectModel1.FilePath = "path1";
+            projectModel2.FilePath = "path2";
+            projectModel3.ProjectReferences = new List<string> { "path1", "path2" };
+
             repositoryModel.Solutions.Add(solutionModel);
 
             _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
@@ -1021,6 +1037,10 @@ namespace HoneydewExtractorsTests.Processors
                 }
             });
             solutionModel3.Projects.Add(projectModel3);
+
+            projectModel1.FilePath = "path1";
+            projectModel2.FilePath = "path2";
+            projectModel3.ProjectReferences = new List<string> { "path1", "path2" };
 
             repositoryModel.Solutions.Add(solutionModel1);
             repositoryModel.Solutions.Add(solutionModel2);
