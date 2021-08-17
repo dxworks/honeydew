@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using HoneydewCore.Logging;
 using HoneydewCore.Processors;
-using HoneydewExtractors.Core;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
@@ -14,7 +13,6 @@ namespace HoneydewExtractors.Processors
     public class FullNameModelProcessor : IProcessorFunction<RepositoryModel, RepositoryModel>
     {
         private readonly ILogger _logger;
-        private readonly IRepositoryClassSet _repositoryClassSet;
         private readonly IProgressLogger _progressLogger;
 
         public readonly IDictionary<string, NamespaceTree> NamespacesDictionary =
@@ -25,13 +23,14 @@ namespace HoneydewExtractors.Processors
 
         private readonly ISet<string> _notFoundClassNames = new HashSet<string>();
 
+        private readonly RepositoryClassSet _repositoryClassSet = new();
+
         private int _classCount;
 
-        public FullNameModelProcessor(ILogger logger, IProgressLogger progressLogger, IRepositoryClassSet repositoryClassSet)
+        public FullNameModelProcessor(ILogger logger, IProgressLogger progressLogger)
         {
             _logger = logger;
             _progressLogger = progressLogger;
-            _repositoryClassSet = repositoryClassSet;
         }
 
         public RepositoryModel Process(RepositoryModel repositoryModel)
@@ -112,6 +111,8 @@ namespace HoneydewExtractors.Processors
                                 classModel.FullName = FindClassFullName(classModel.FullName, namespaceModel,
                                     projectModel, solutionModel, repositoryModel, classModel.Usings,
                                     classModel.FilePath);
+
+                                _repositoryClassSet.Add(projectModel.FilePath, classModel.FullName);
                             });
                         }
                     }
@@ -699,6 +700,24 @@ namespace HoneydewExtractors.Processors
                 }
             }
 
+            // search in current namespace for classes that used a class located in the parent namespace 
+            foreach (var name in GetPossibilitiesFromNamespace(namespaceModelToStartSearchFrom.Name, className))
+            {
+                fullNamePossibilities.Add(name);
+            }
+
+            switch (fullNamePossibilities.Count)
+            {
+                case 1:
+                    return fullNamePossibilities.First();
+                case > 1:
+                    throw new AmbiguousFullNameException(new AmbiguousName
+                    {
+                        Name = className,
+                        Location = classFilePath
+                    }, fullNamePossibilities);
+            }
+
             foreach (var name in TrySearchingInProjectModel(className, classFilePath, projectModelToStartSearchFrom))
             {
                 fullNamePossibilities.Add(name);
@@ -784,6 +803,12 @@ namespace HoneydewExtractors.Processors
                     continue;
                 }
 
+                if (!projectModelToBeIgnored.ProjectReferences.Contains(projectModel.FilePath))
+                {
+                    continue;
+                }
+
+
                 foreach (var name in TrySearchingInProjectModel(className, classFilePath, projectModel))
                 {
                     fullNamePossibilities.Add(name);
@@ -834,14 +859,48 @@ namespace HoneydewExtractors.Processors
                 return new List<string>();
             }
 
-
             var childNamespace = fullNameNamespace.GetChild(nameParts);
-            if (childNamespace != null)
+            if (childNamespace == null)
             {
-                return childNamespace.GetPossibleChildren(className);
+                return new List<string>();
             }
 
-            return new List<string>();
+            var childClassNamespace = GetClassInNamespaceAmongChildrenNamespaces(childNamespace, className);
+            if (childClassNamespace != null)
+            {
+                return new List<string>
+                {
+                    childClassNamespace.GetFullName()
+                };
+            }
+
+            if (childNamespace.Parent != null)
+            {
+                var brotherClassNamespace =
+                    GetClassInNamespaceAmongChildrenNamespaces(childNamespace.Parent, className);
+                if (brotherClassNamespace != null)
+                {
+                    return new List<string>
+                    {
+                        brotherClassNamespace.GetFullName()
+                    };
+                }
+            }
+
+            return childNamespace.GetPossibleChildren(className);
+        }
+
+        private NamespaceTree GetClassInNamespaceAmongChildrenNamespaces(NamespaceTree namespaceTree, string className)
+        {
+            foreach (var (childName, childNode) in namespaceTree.Children)
+            {
+                if (className == childName && childNode.Children.Count == 0)
+                {
+                    return childNode;
+                }
+            }
+
+            return null;
         }
 
         private string AddClassModelToNamespaceGraph(string className, string classFilePath, string namespaceName)

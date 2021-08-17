@@ -41,12 +41,11 @@ namespace Honeydew
 
                 logger.Log($"Log will be stored at {logFilePath}");
                 logger.Log();
-                
+
                 progressLogger.Log($"Log will be stored at {logFilePath}");
                 progressLogger.Log();
 
                 var inputPath = options.InputFilePath;
-                var repositoryClassSet = new RepositoryClassSet();
 
                 RepositoryModel repositoryModel;
                 switch (options.Command)
@@ -59,7 +58,7 @@ namespace Honeydew
 
                     case "extract":
                     {
-                        repositoryModel = await ExtractModel(logger, progressLogger, inputPath, repositoryClassSet);
+                        repositoryModel = await ExtractModel(logger, progressLogger, inputPath);
                     }
                         break;
 
@@ -92,7 +91,7 @@ namespace Honeydew
                 progressLogger.Log();
 
                 // Post Extraction Repository model processing
-                var fullNameModelProcessor = new FullNameModelProcessor(logger, progressLogger, repositoryClassSet);
+                var fullNameModelProcessor = new FullNameModelProcessor(logger, progressLogger);
                 repositoryModel = fullNameModelProcessor.Process(repositoryModel);
 
 
@@ -103,7 +102,7 @@ namespace Honeydew
                 logger.Log("Extraction Complete!");
                 logger.Log();
                 logger.Log($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
-                
+
                 progressLogger.Log();
                 progressLogger.Log("Extraction Complete!");
                 progressLogger.Log();
@@ -139,13 +138,13 @@ namespace Honeydew
         }
 
         private static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger progressLogger,
-            string inputPath, RepositoryClassSet repositoryClassSet)
+            string inputPath)
         {
             var solutionProvider = new MsBuildSolutionProvider();
             var projectProvider = new MsBuildProjectProvider();
 
             // Create repository model from path
-            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger, repositoryClassSet);
+            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger);
 
             var solutionLoadingStrategy =
                 new BasicSolutionLoadingStrategy(logger, projectLoadingStrategy, progressLogger);

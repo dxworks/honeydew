@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using HoneydewCore.Logging;
-using HoneydewExtractors.Core;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
 using Microsoft.CodeAnalysis;
@@ -12,12 +11,10 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
     public class BasicProjectLoadingStrategy : IProjectLoadingStrategy
     {
         private readonly ILogger _logger;
-        private readonly IRepositoryClassSet _repositoryClassSet;
 
-        public BasicProjectLoadingStrategy(ILogger logger, IRepositoryClassSet repositoryClassSet)
+        public BasicProjectLoadingStrategy(ILogger logger)
         {
             _logger = logger;
-            _repositoryClassSet = repositoryClassSet;
         }
 
         public async Task<ProjectModel> Load(Project project, CSharpFactExtractor extractor)
@@ -31,7 +28,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
 
             var i = 1;
             var documentCount = project.Documents.Count();
-            
+
             foreach (var document in project.Documents)
             {
                 try
@@ -48,7 +45,6 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     {
                         classModel.FilePath = document.FilePath;
                         projectModel.Add(classModel);
-                        _repositoryClassSet.Add(project.FilePath, classModel.FullName);
                     }
                 }
                 catch (Exception e)
@@ -56,10 +52,10 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     _logger.Log($"Could not extract from {document.FilePath} ({i}/{documentCount}) because {e}",
                         LogLevels.Warning);
                 }
-                
+
                 i++;
             }
-            
+
             return projectModel;
         }
 
