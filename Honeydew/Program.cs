@@ -40,6 +40,7 @@ namespace Honeydew
                 logger.Log();
 
                 var inputPath = options.InputFilePath;
+                var repositoryClassSet = new RepositoryClassSet();
 
                 RepositoryModel repositoryModel;
                 switch (options.Command)
@@ -52,7 +53,7 @@ namespace Honeydew
 
                     case "extract":
                     {
-                        repositoryModel = await ExtractModel(logger, inputPath);
+                        repositoryModel = await ExtractModel(logger, repositoryClassSet, inputPath);
                     }
                         break;
 
@@ -78,7 +79,7 @@ namespace Honeydew
                 logger.Log("Resolving Full Name Dependencies");
 
                 // Post Extraction Repository model processing
-                var fullNameModelProcessor = new FullNameModelProcessor(logger);
+                var fullNameModelProcessor = new FullNameModelProcessor(logger, repositoryClassSet);
                 repositoryModel = fullNameModelProcessor.Process(repositoryModel);
 
 
@@ -119,10 +120,11 @@ namespace Honeydew
             return repositoryModel;
         }
 
-        private static async Task<RepositoryModel> ExtractModel(ILogger logger, string inputPath)
+        private static async Task<RepositoryModel> ExtractModel(ILogger logger, RepositoryClassSet repositoryClassSet,
+            string inputPath)
         {
             // Create repository model from path
-            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger);
+            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger, repositoryClassSet);
             var solutionLoadingStrategy = new BasicSolutionLoadingStrategy(logger, projectLoadingStrategy);
 
             var repositoryLoader = new CSharpRepositoryLoader(projectLoadingStrategy, solutionLoadingStrategy,

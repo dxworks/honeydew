@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
+using HoneydewExtractors.Core;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewExtractors.Processors;
 using HoneydewModels.CSharp;
@@ -12,10 +13,11 @@ namespace HoneydewExtractorsTests.Processors
     {
         private readonly FullNameModelProcessor _sut;
         private readonly Mock<ILogger> _progressLoggerMock = new();
+        private readonly Mock<IRepositoryClassSet> _repositoryClassSetMock = new();
 
         public FullNameDependencyProcessorTests()
         {
-            _sut = new FullNameModelProcessor(_progressLoggerMock.Object);
+            _sut = new FullNameModelProcessor(_progressLoggerMock.Object, _repositoryClassSetMock.Object);
         }
 
         [Fact]

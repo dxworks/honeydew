@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using HoneydewCore.Logging;
+using HoneydewExtractors.Core;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
 using Microsoft.CodeAnalysis;
@@ -11,10 +12,12 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
     public class BasicProjectLoadingStrategy : IProjectLoadingStrategy
     {
         private readonly ILogger _logger;
+        private readonly IRepositoryClassSet _repositoryClassSet;
 
-        public BasicProjectLoadingStrategy(ILogger logger)
+        public BasicProjectLoadingStrategy(ILogger logger, IRepositoryClassSet repositoryClassSet)
         {
             _logger = logger;
+            _repositoryClassSet = repositoryClassSet;
         }
 
         public async Task<ProjectModel> Load(Project project, CSharpFactExtractor extractors)
@@ -43,6 +46,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     {
                         classModel.FilePath = document.FilePath;
                         projectModel.Add(classModel);
+                        _repositoryClassSet.Add(project.FilePath, classModel.FullName);
                     }
                 }
                 catch (Exception e)

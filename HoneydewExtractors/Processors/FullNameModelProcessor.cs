@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using HoneydewCore.Logging;
 using HoneydewCore.Processors;
+using HoneydewExtractors.Core;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
@@ -12,17 +13,21 @@ namespace HoneydewExtractors.Processors
 {
     public class FullNameModelProcessor : IProcessorFunction<RepositoryModel, RepositoryModel>
     {
+        private readonly ILogger _logger;
+        private readonly IRepositoryClassSet _repositoryClassSet;
+
         public readonly IDictionary<string, NamespaceTree> NamespacesDictionary =
             new Dictionary<string, NamespaceTree>();
-
-        private readonly ILogger _logger;
 
         private readonly IDictionary<AmbiguousName, ISet<string>> _ambiguousNames =
             new Dictionary<AmbiguousName, ISet<string>>();
 
-        public FullNameModelProcessor(ILogger logger)
+        private readonly ISet<string> _notFoundClassNames = new HashSet<string>();
+
+        public FullNameModelProcessor(ILogger logger, IRepositoryClassSet repositoryClassSet)
         {
             _logger = logger;
+            _repositoryClassSet = repositoryClassSet;
         }
 
         public RepositoryModel Process(RepositoryModel repositoryModel)
@@ -586,9 +591,19 @@ namespace HoneydewExtractors.Processors
                 return className;
             }
 
+            if (_notFoundClassNames.Contains(className))
+            {
+                return className;
+            }
+
             if (CSharpConstants.IsPrimitive(className))
             {
                 return CSharpConstants.ConvertPrimitiveTypeToSystemType(className);
+            }
+
+            if (_repositoryClassSet.Contains(projectModelToStartSearchFrom.FilePath, className))
+            {
+                return className;
             }
 
             if (IsNameFullyQualified(className))
@@ -706,18 +721,19 @@ namespace HoneydewExtractors.Processors
                 }
             }
 
-            return fullNamePossibilities.Count switch
+            switch (fullNamePossibilities.Count)
             {
-                1 => CSharpConstants.ConvertPrimitiveTypeToSystemType(fullNamePossibilities.First()),
-                > 1 => throw new AmbiguousFullNameException(new AmbiguousName
+                case 1:
+                    return CSharpConstants.ConvertPrimitiveTypeToSystemType(fullNamePossibilities.First());
+                case > 1:
+                    throw new AmbiguousFullNameException(
+                        new AmbiguousName { Name = className, Location = classFilePath }, fullNamePossibilities);
+                default:
                 {
-                    Name = className,
-                    Location = classFilePath
-                }, fullNamePossibilities),
-
-                // unknown className, must be some extern dependency
-                _ => CSharpConstants.ConvertPrimitiveTypeToSystemType(className)
-            };
+                    _notFoundClassNames.Add(className);
+                    return className;
+                }
+            }
         }
 
         private IEnumerable<string> TrySearchingInSolutionModel(string className, string classFilePath,

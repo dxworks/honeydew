@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
+using HoneydewExtractors.Core;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewExtractors.Processors;
 using HoneydewModels.CSharp;
@@ -12,10 +13,11 @@ namespace HoneydewExtractorsTests.Processors
     {
         private readonly FullNameModelProcessor _sut;
         private readonly Mock<ILogger> _progressLoggerMock = new();
+        private readonly Mock<IRepositoryClassSet> _repositoryClassSetMock = new();
 
         public FullNameModelProcessorTests()
         {
-            _sut = new FullNameModelProcessor(_progressLoggerMock.Object);
+            _sut = new FullNameModelProcessor(_progressLoggerMock.Object, _repositoryClassSetMock.Object);
         }
 
         [Fact]
@@ -325,12 +327,12 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         FullName = "Models.Interfaces.IInterface2",
-                        BaseInterfaces = {"IInterface1"}
+                        BaseInterfaces = { "IInterface1" }
                     },
                     new ClassModel
                     {
                         FullName = "Models.Interfaces.IInterface3",
-                        BaseInterfaces = {"Models.Interfaces.IInterface1", "IInterface2"}
+                        BaseInterfaces = { "Models.Interfaces.IInterface1", "IInterface2" }
                     }
                 }
             });
@@ -343,22 +345,22 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         FullName = "Models.Class1",
-                        BaseInterfaces = {"IInterface3"}
+                        BaseInterfaces = { "IInterface3" }
                     },
                     new ClassModel
                     {
                         FullName = "Class2",
-                        BaseInterfaces = {"IInterface1"}
+                        BaseInterfaces = { "IInterface1" }
                     },
                     new ClassModel
                     {
                         FullName = "Models.Class3",
-                        BaseInterfaces = {"IInterface1", "IInterface2", "Models.Interfaces.IInterface3"}
+                        BaseInterfaces = { "IInterface1", "IInterface2", "Models.Interfaces.IInterface3" }
                     },
                     new ClassModel
                     {
                         FullName = "Models.TheClass",
-                        BaseInterfaces = {"Models.Interfaces.IInterface1", "AInterface"}
+                        BaseInterfaces = { "Models.Interfaces.IInterface1", "AInterface" }
                     }
                 }
             });
@@ -744,7 +746,7 @@ namespace HoneydewExtractorsTests.Processors
                                 ValueType = typeof(Dictionary<string, int>).FullName,
                                 Value = new Dictionary<string, int>()
                                 {
-                                    {"AmbiguousClass", 2}
+                                    { "AmbiguousClass", 2 }
                                 },
                             }
                         }
@@ -777,12 +779,13 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].ContainingClassName);
             Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].ParameterTypes[0].Type);
             Assert.Equal("AmbiguousClass", someClassModel.Fields[0].Type);
-            var metricDependencies = ((Dictionary<string, int>) someClassModel.Metrics[0].Value);
+            var metricDependencies = ((Dictionary<string, int>)someClassModel.Metrics[0].Value);
             Assert.Single(metricDependencies);
             Assert.True(metricDependencies.ContainsKey("AmbiguousClass"));
 
             _progressLoggerMock.Verify(
-                logger => logger.Log("Multiple full names found for AmbiguousClass in SomePath/SomeClass.cs :", LogLevels.Warning),
+                logger => logger.Log("Multiple full names found for AmbiguousClass in SomePath/SomeClass.cs :",
+                    LogLevels.Warning),
                 Times.Once);
             _progressLoggerMock.Verify(logger => logger.Log("Models.AmbiguousClass", LogLevels.Information));
             _progressLoggerMock.Verify(logger => logger.Log("Services.AmbiguousClass", LogLevels.Information));
@@ -854,7 +857,8 @@ namespace HoneydewExtractorsTests.Processors
                 actualRepositoryModel.Solutions[0].Projects[2].Namespaces[0].ClassModels[0].Fields[0].Type);
 
             _progressLoggerMock.Verify(
-                logger => logger.Log("Multiple full names found for MyService in SomePath/MyController.cs :", LogLevels.Warning),
+                logger => logger.Log("Multiple full names found for MyService in SomePath/MyController.cs :",
+                    LogLevels.Warning),
                 Times.Once);
             _progressLoggerMock.Verify(logger => logger.Log("Project1.Services.MyService", LogLevels.Information));
             _progressLoggerMock.Verify(logger => logger.Log("Project2.Services.MyService", LogLevels.Information));
@@ -934,7 +938,8 @@ namespace HoneydewExtractorsTests.Processors
                 actualRepositoryModel.Solutions[2].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
 
             _progressLoggerMock.Verify(
-                logger => logger.Log("Multiple full names found for MyService in SomePath/MyController.cs :", LogLevels.Warning),
+                logger => logger.Log("Multiple full names found for MyService in SomePath/MyController.cs :",
+                    LogLevels.Warning),
                 Times.Once);
             _progressLoggerMock.Verify(logger => logger.Log("Project1.Services.MyService", LogLevels.Information));
             _progressLoggerMock.Verify(logger => logger.Log("Project2.Services.MyService", LogLevels.Information));
@@ -1007,7 +1012,8 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Equal("OutOfRepositoryClass",
                 actualRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
 
-            _progressLoggerMock.Verify(logger => logger.Log("Multiple full names found for MyService: ",LogLevels.Warning),
+            _progressLoggerMock.Verify(
+                logger => logger.Log("Multiple full names found for MyService: ", LogLevels.Warning),
                 Times.Never);
         }
 
