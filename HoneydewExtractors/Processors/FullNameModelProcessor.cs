@@ -16,17 +16,27 @@ namespace HoneydewExtractors.Processors
             new Dictionary<string, NamespaceTree>();
 
         private readonly ILogger _logger;
+        private readonly IProgressLogger _progressLogger;
 
         private readonly IDictionary<AmbiguousName, ISet<string>> _ambiguousNames =
             new Dictionary<AmbiguousName, ISet<string>>();
 
-        public FullNameModelProcessor(ILogger logger)
+        private int _classCount;
+
+        public FullNameModelProcessor(ILogger logger, IProgressLogger progressLogger)
         {
             _logger = logger;
+            _progressLogger = progressLogger;
         }
 
         public RepositoryModel Process(RepositoryModel repositoryModel)
         {
+            _classCount = (from solutionModel in repositoryModel.Solutions
+                from projectModel in solutionModel.Projects
+                from namespaceModel in projectModel.Namespaces
+                from classModel in namespaceModel.ClassModels
+                select classModel).Count();
+
             _logger.Log("Resolving Class Names");
             SetFullNameForClassModels(repositoryModel);
 
@@ -42,9 +52,13 @@ namespace HoneydewExtractors.Processors
                 _logger.Log();
                 _logger.Log($"Multiple full names found for {ambiguousName.Name} in {ambiguousName.Location} :",
                     LogLevels.Warning);
+                _progressLogger.Log();
+                _progressLogger.Log(
+                    $"Multiple full names found for {ambiguousName.Name} in {ambiguousName.Location} :");
                 foreach (var possibleName in possibilities)
                 {
                     _logger.Log(possibleName);
+                    _progressLogger.Log(possibleName);
                 }
             }
 
@@ -75,6 +89,9 @@ namespace HoneydewExtractors.Processors
 
         private void SetFullNameForClassModels(RepositoryModel repositoryModel)
         {
+            var progressBar = _progressLogger.CreateProgressLogger(_classCount, "Resolving Class Names");
+            progressBar.Start();
+
             foreach (var solutionModel in repositoryModel.Solutions)
             {
                 foreach (var projectModel in solutionModel.Projects)
@@ -83,6 +100,8 @@ namespace HoneydewExtractors.Processors
                     {
                         foreach (var classModel in namespaceModel.ClassModels)
                         {
+                            progressBar.Step($"{classModel.FullName} from {classModel.FilePath}");
+
                             AddAmbiguousNames(() =>
                             {
                                 classModel.FullName = FindClassFullName(classModel.FullName, namespaceModel,
@@ -93,10 +112,16 @@ namespace HoneydewExtractors.Processors
                     }
                 }
             }
+
+            progressBar.Stop();
         }
 
         private void SetFullNameForUsings(RepositoryModel repositoryModel)
         {
+            var progressBar =
+                _progressLogger.CreateProgressLogger(_classCount, "Resolving Using Statements for Each Class");
+            progressBar.Start();
+
             foreach (var solutionModel in repositoryModel.Solutions)
             {
                 foreach (var projectModel in solutionModel.Projects)
@@ -105,6 +130,8 @@ namespace HoneydewExtractors.Processors
                     {
                         foreach (var classModel in namespaceModel.ClassModels)
                         {
+                            progressBar.Step($"{classModel.FullName} from {classModel.FilePath}");
+
                             foreach (var usingModel in classModel.Usings)
                             {
                                 if (usingModel.AliasType == EAliasType.NotDetermined)
@@ -128,6 +155,8 @@ namespace HoneydewExtractors.Processors
                     }
                 }
             }
+
+            progressBar.Stop();
         }
 
         private static EAliasType DetermineUsingType(UsingModel usingModel, ClassModel classModel)
@@ -212,6 +241,11 @@ namespace HoneydewExtractors.Processors
 
         private void SetFullNameForClassModelComponents(RepositoryModel repositoryModel)
         {
+            var progressBar =
+                _progressLogger.CreateProgressLogger(_classCount,
+                    "Resolving Class Elements (Fields, Methods, Properties,...)");
+            progressBar.Start();
+
             foreach (var solutionModel in repositoryModel.Solutions)
             {
                 foreach (var projectModel in solutionModel.Projects)
@@ -220,7 +254,8 @@ namespace HoneydewExtractors.Processors
                     {
                         foreach (var classModel in namespaceModel.ClassModels)
                         {
-                            _logger.Log($"Resolving Elements for {classModel.FilePath}");
+                            _logger.Log($"Resolving Elements for {classModel.FullName} from {classModel.FilePath}");
+                            progressBar.Step($"{classModel.FullName} from {classModel.FilePath}");
 
                             AddAmbiguousNames(() =>
                             {
@@ -293,6 +328,8 @@ namespace HoneydewExtractors.Processors
 
                     _logger.Log();
                 }
+
+                progressBar.Stop();
             }
 
             void SetContainingClassAndCalledMethodsFullNameProperty(string classFilePath, PropertyModel propertyModel,

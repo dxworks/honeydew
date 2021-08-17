@@ -11,8 +11,8 @@ namespace Honeydew
 
         public SerilogLogger(string filePath = "")
         {
-            var loggerConfiguration = new LoggerConfiguration()
-                .WriteTo.Console();
+            var loggerConfiguration = new LoggerConfiguration();
+                // .WriteTo.Console();
             if (!string.IsNullOrEmpty(filePath))
             {
                 loggerConfiguration = loggerConfiguration.WriteTo.File(filePath);

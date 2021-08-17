@@ -11,11 +11,13 @@ namespace HoneydewExtractorsTests.Processors
     public class FullNameDependencyProcessorTests
     {
         private readonly FullNameModelProcessor _sut;
-        private readonly Mock<ILogger> _progressLoggerMock = new();
+        private readonly Mock<ILogger> _loggerMock = new();
+        private readonly Mock<IProgressLogger> _progressLoggerMock = new();
+        private readonly Mock<IProgressLoggerBar> _progressLoggerBarMock = new();
 
         public FullNameDependencyProcessorTests()
         {
-            _sut = new FullNameModelProcessor(_progressLoggerMock.Object);
+            _sut = new FullNameModelProcessor(_loggerMock.Object, _progressLoggerMock.Object);
         }
 
         [Fact]
@@ -33,7 +35,7 @@ namespace HoneydewExtractorsTests.Processors
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
-                    {"Dependency1", 1}
+                    { "Dependency1", 1 }
                 }
             });
 
@@ -47,7 +49,7 @@ namespace HoneydewExtractorsTests.Processors
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
-                    {"Dependency1", 2}
+                    { "Dependency1", 2 }
                 }
             });
 
@@ -61,8 +63,8 @@ namespace HoneydewExtractorsTests.Processors
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
-                    {"Dependency1", 6},
-                    {"Dependency2", 2}
+                    { "Dependency1", 6 },
+                    { "Dependency2", 2 }
                 }
             });
 
@@ -76,7 +78,7 @@ namespace HoneydewExtractorsTests.Processors
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
-                    {"Dependency2", 2}
+                    { "Dependency2", 2 }
                 }
             });
 
@@ -104,24 +106,33 @@ namespace HoneydewExtractorsTests.Processors
             var repositoryModel = new RepositoryModel();
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(5, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(5, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(5, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+            
             var processedRepositoryModel = _sut.Process(repositoryModel);
 
             var processedProjectModel = processedRepositoryModel.Solutions[0].Projects[0];
 
             Assert.False(
-                ((Dictionary<string, int>) processedProjectModel.Namespaces[0].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.Namespaces[0].ClassModels[0].Metrics[0].Value)
                 .TryGetValue("Full.Path.Dependency1", out _));
             Assert.False(
-                ((Dictionary<string, int>) processedProjectModel.Namespaces[1].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.Namespaces[1].ClassModels[0].Metrics[0].Value)
                 .TryGetValue("Full.Path.Dependency1", out _));
             Assert.False(
-                ((Dictionary<string, int>) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
                 .TryGetValue("Full.Path.Dependency1", out _));
             Assert.False(
-                ((Dictionary<string, int>) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
                 .TryGetValue("Full.Path.Dependency2", out _));
             Assert.False(
-                ((Dictionary<string, int>) processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0].Value)
                 .TryGetValue("Full.Path.Dependency2", out _));
         }
 
@@ -151,7 +162,7 @@ namespace HoneydewExtractorsTests.Processors
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
-                    {"Class1", 2}
+                    { "Class1", 2 }
                 }
             });
 
@@ -165,8 +176,8 @@ namespace HoneydewExtractorsTests.Processors
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
-                    {"Class1", 6},
-                    {"Class2", 2}
+                    { "Class1", 6 },
+                    { "Class2", 2 }
                 }
             });
 
@@ -180,8 +191,8 @@ namespace HoneydewExtractorsTests.Processors
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
-                    {"Class3", 4},
-                    {"Class5", 1},
+                    { "Class3", 4 },
+                    { "Class5", 1 },
                 }
             });
 
@@ -209,34 +220,42 @@ namespace HoneydewExtractorsTests.Processors
             var repositoryModel = new RepositoryModel();
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(5, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(5, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(5, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
 
             var processedRepositoryModel = _sut.Process(repositoryModel);
 
             var processedProjectModel = processedRepositoryModel.Solutions[0].Projects[0];
 
             Assert.Empty(
-                (Dictionary<string, int>) processedProjectModel.Namespaces[0].ClassModels[0].Metrics[0].Value);
+                (Dictionary<string, int>)processedProjectModel.Namespaces[0].ClassModels[0].Metrics[0].Value);
 
             Assert.True(
-                ((Dictionary<string, int>) processedProjectModel.Namespaces[1].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.Namespaces[1].ClassModels[0].Metrics[0].Value)
                 .TryGetValue("Models.Class1", out var depCount1));
             Assert.Equal(2, depCount1);
 
             Assert.True(
-                ((Dictionary<string, int>) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
                 .TryGetValue("Models.Class1", out var depCount2));
             Assert.Equal(6, depCount2);
             Assert.True(
-                ((Dictionary<string, int>) processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
                 .TryGetValue("Services.Class2", out var depCount3));
             Assert.Equal(2, depCount3);
 
             Assert.True(
-                ((Dictionary<string, int>) processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0].Value)
                 .TryGetValue("Controllers.Class3", out var depCount4));
             Assert.Equal(4, depCount4);
             Assert.True(
-                ((Dictionary<string, int>) processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0].Value)
                 .TryGetValue("Controllers.Class5", out var depCount5));
             Assert.Equal(1, depCount5);
         }
