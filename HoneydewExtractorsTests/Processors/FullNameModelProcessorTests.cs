@@ -12,12 +12,14 @@ namespace HoneydewExtractorsTests.Processors
     public class FullNameModelProcessorTests
     {
         private readonly FullNameModelProcessor _sut;
-        private readonly Mock<ILogger> _progressLoggerMock = new();
         private readonly Mock<IRepositoryClassSet> _repositoryClassSetMock = new();
+        private readonly Mock<ILogger> _loggerMock = new();
+        private readonly Mock<IProgressLogger> _progressLoggerMock = new();
+        private readonly Mock<IProgressLoggerBar> _progressLoggerBarMock = new();
 
         public FullNameModelProcessorTests()
         {
-            _sut = new FullNameModelProcessor(_progressLoggerMock.Object, _repositoryClassSetMock.Object);
+            _sut = new FullNameModelProcessor(_loggerMock.Object, _progressLoggerMock.Object, _repositoryClassSetMock.Object);
         }
 
         [Fact]
@@ -87,6 +89,16 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(5, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(5, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(5, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
+            
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.Class1",
@@ -132,6 +144,16 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
+            
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var namespaceModel = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
@@ -196,6 +218,16 @@ namespace HoneydewExtractorsTests.Processors
             solutionModel.Projects.Add(projectModel1);
 
             repositoryModel.Solutions.Add(solutionModel);
+
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(2, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(2, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(2, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
@@ -287,6 +319,15 @@ namespace HoneydewExtractorsTests.Processors
 
             solutionModel.Projects.Add(projectModel2);
             repositoryModel.Solutions.Add(solutionModel);
+
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(9, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(9, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(9, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
@@ -385,6 +426,16 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(8, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(8, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(8, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var modelInterfacesNamespace = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
@@ -473,6 +524,16 @@ namespace HoneydewExtractorsTests.Processors
             solutionModel.Projects.Add(projectModel1);
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
+            
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var modelInterfacesNamespace =
@@ -545,6 +606,15 @@ namespace HoneydewExtractorsTests.Processors
 
             solutionModel.Projects.Add(projectModel2);
             repositoryModel.Solutions.Add(solutionModel);
+
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(2, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(2, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(2, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
@@ -622,6 +692,15 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel1);
             repositoryModel.Solutions.Add(solutionModel2);
+
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
@@ -758,6 +837,15 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(4, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(4, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(4, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.AmbiguousClass",
@@ -783,12 +871,12 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Single(metricDependencies);
             Assert.True(metricDependencies.ContainsKey("AmbiguousClass"));
 
-            _progressLoggerMock.Verify(
+            _loggerMock.Verify(
                 logger => logger.Log("Multiple full names found for AmbiguousClass in SomePath/SomeClass.cs :",
                     LogLevels.Warning),
                 Times.Once);
-            _progressLoggerMock.Verify(logger => logger.Log("Models.AmbiguousClass", LogLevels.Information));
-            _progressLoggerMock.Verify(logger => logger.Log("Services.AmbiguousClass", LogLevels.Information));
+            _loggerMock.Verify(logger => logger.Log("Models.AmbiguousClass", LogLevels.Information));
+            _loggerMock.Verify(logger => logger.Log("Services.AmbiguousClass", LogLevels.Information));
         }
 
         [Fact]
@@ -851,17 +939,26 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("MyService",
                 actualRepositoryModel.Solutions[0].Projects[2].Namespaces[0].ClassModels[0].Fields[0].Type);
 
-            _progressLoggerMock.Verify(
+            _loggerMock.Verify(
                 logger => logger.Log("Multiple full names found for MyService in SomePath/MyController.cs :",
                     LogLevels.Warning),
                 Times.Once);
-            _progressLoggerMock.Verify(logger => logger.Log("Project1.Services.MyService", LogLevels.Information));
-            _progressLoggerMock.Verify(logger => logger.Log("Project2.Services.MyService", LogLevels.Information));
+            _loggerMock.Verify(logger => logger.Log("Project1.Services.MyService", LogLevels.Information));
+            _loggerMock.Verify(logger => logger.Log("Project2.Services.MyService", LogLevels.Information));
         }
 
         [Fact]
@@ -931,18 +1028,26 @@ namespace HoneydewExtractorsTests.Processors
             repositoryModel.Solutions.Add(solutionModel2);
             repositoryModel.Solutions.Add(solutionModel3);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("MyService",
                 actualRepositoryModel.Solutions[2].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
 
-            _progressLoggerMock.Verify(
+            _loggerMock.Verify(
                 logger => logger.Log("Multiple full names found for MyService in SomePath/MyController.cs :",
                     LogLevels.Warning),
                 Times.Once);
-            _progressLoggerMock.Verify(logger => logger.Log("Project1.Services.MyService", LogLevels.Information));
-            _progressLoggerMock.Verify(logger => logger.Log("Project2.Services.MyService", LogLevels.Information));
+            _loggerMock.Verify(logger => logger.Log("Project1.Services.MyService", LogLevels.Information));
+            _loggerMock.Verify(logger => logger.Log("Project2.Services.MyService", LogLevels.Information));
         }
 
         [Fact]
@@ -1007,12 +1112,21 @@ namespace HoneydewExtractorsTests.Processors
             repositoryModel.Solutions.Add(solutionModel1);
             repositoryModel.Solutions.Add(solutionModel2);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("OutOfRepositoryClass",
                 actualRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
 
-            _progressLoggerMock.Verify(
+            _loggerMock.Verify(
                 logger => logger.Log("Multiple full names found for MyService: ", LogLevels.Warning),
                 Times.Never);
         }
@@ -1092,6 +1206,15 @@ namespace HoneydewExtractorsTests.Processors
             solutionModel.Projects.Add(projectModel1);
 
             repositoryModel.Solutions.Add(solutionModel);
+
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
