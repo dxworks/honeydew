@@ -5,11 +5,11 @@ using Xunit.Sdk;
 
 namespace HoneydewExtractorsTests
 {
-    public class FileData : DataAttribute
+    public class FileDataAttribute : DataAttribute
     {
         private readonly string _filePath;
 
-        public FileData(string filePath, bool addRootDirectoryPath = true)
+        public FileDataAttribute(string filePath, bool addRootDirectoryPath = true)
         {
             _filePath = addRootDirectoryPath ? Path.Combine(Directory.GetCurrentDirectory(), filePath) : filePath;
         }

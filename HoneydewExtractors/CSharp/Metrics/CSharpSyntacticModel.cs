@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using HoneydewExtractors.Core.Metrics;
+using HoneydewExtractors.CSharp.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,6 +12,22 @@ namespace HoneydewExtractors.CSharp.Metrics
         public SyntaxTree Tree { get; set; }
         public CompilationUnitSyntax CompilationUnitSyntax { get; set; }
 
+        public string SetTypeModifier(string typeString, string modifier)
+        {
+            if (typeString.StartsWith(CSharpConstants.RefReadonlyIdentifier))
+            {
+                modifier += $" {CSharpConstants.RefReadonlyIdentifier}";
+                modifier = modifier.Trim();
+            }
+            else if (typeString.StartsWith(CSharpConstants.RefIdentifier))
+            {
+                modifier += $" {CSharpConstants.RefIdentifier}";
+                modifier = modifier.Trim();
+            }
+
+            return modifier;
+        }
+        
         public int CalculateCyclomaticComplexity(MemberDeclarationSyntax syntax)
         {
             var count = 1;

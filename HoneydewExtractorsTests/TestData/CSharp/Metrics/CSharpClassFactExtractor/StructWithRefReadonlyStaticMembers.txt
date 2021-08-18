@@ -1,0 +1,11 @@
+﻿namespace Geometry
+{
+    public struct Point
+    {
+        private static Point origin = new Point();
+    
+        public ref Point Origin => ref origin;
+    
+        public static ref readonly Point Origin2 => ref origin;
+    }
+}

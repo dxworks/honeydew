@@ -44,7 +44,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var functionMethod = classModels[0].Methods[0];
             Assert.Equal("Function", functionMethod.Name);
             Assert.False(functionMethod.IsConstructor);
-            Assert.Equal("void", functionMethod.ReturnType);
+            Assert.Equal("void", functionMethod.ReturnType.Type);
             Assert.Equal(1, functionMethod.ParameterTypes.Count);
             Assert.Equal("int", functionMethod.ParameterTypes[0].Type);
             Assert.Equal("", functionMethod.ParameterTypes[0].Modifier);
@@ -57,7 +57,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var computeMethod = classModels[0].Methods[1];
             Assert.Equal("Compute", computeMethod.Name);
             Assert.False(computeMethod.IsConstructor);
-            Assert.Equal("int", computeMethod.ReturnType);
+            Assert.Equal("int", computeMethod.ReturnType.Type);
             Assert.Equal(1, computeMethod.ParameterTypes.Count);
             Assert.Equal("int", computeMethod.ParameterTypes[0].Type);
             Assert.Equal("", computeMethod.ParameterTypes[0].Modifier);
@@ -189,7 +189,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("Print", printMethod.Name);
             Assert.Equal("TopLevel.Foo", printMethod.ContainingClassName);
             Assert.False(printMethod.IsConstructor);
-            Assert.Equal("void", printMethod.ReturnType);
+            Assert.Equal("void", printMethod.ReturnType.Type);
             Assert.Empty(printMethod.ParameterTypes);
             Assert.Equal("public", printMethod.AccessModifier);
             Assert.Equal("", printMethod.Modifier);

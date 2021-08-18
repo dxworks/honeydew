@@ -30,7 +30,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
         [Fact]
         public void Export_ShouldReturnRawModel_WhenModelHasOneCompilationUnitWithOneClassAndNoMetrics()
         {
-            var solutionModel = new SolutionModel {FilePath = "path_to_solution"};
+            var solutionModel = new SolutionModel { FilePath = "path_to_solution" };
             var classModels = new List<ClassModel>
             {
                 new()
@@ -65,7 +65,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
         [Fact]
         public void Export_ShouldReturnRawModel_WhenModelHasOneCompilationUnitWithOneClassAndMetrics()
         {
-            var solutionModel = new SolutionModel {FilePath = "path_to_solution"};
+            var solutionModel = new SolutionModel { FilePath = "path_to_solution" };
 
             var classModel = new ClassModel
             {
@@ -80,7 +80,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
             {
                 ExtractorName = typeof(CSharpBaseClassMetric).FullName,
                 ValueType = typeof(CSharpInheritanceMetric).FullName,
-                Value = new CSharpInheritanceMetric {Interfaces = {"Interface1"}, BaseClassName = "SomeParent"}
+                Value = new CSharpInheritanceMetric { Interfaces = { "Interface1" }, BaseClassName = "SomeParent" }
             });
 
             var classModels = new List<ClassModel>
@@ -94,7 +94,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
             var projectModel = new ProjectModel("ProjectName")
             {
                 FilePath = "some_path",
-                ProjectReferences = {"HoneydewCore"}
+                ProjectReferences = { "HoneydewCore" }
             };
             foreach (var model in classModels)
             {
@@ -111,7 +111,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
         [Fact]
         public void Export_ShouldReturnRawModel_WhenModelHasOneCompilationUnitWithOneClassAndMethodCalls()
         {
-            var solutionModel = new SolutionModel {FilePath = "path_to_solution"};
+            var solutionModel = new SolutionModel { FilePath = "path_to_solution" };
             var classModels = new List<ClassModel>
             {
                 new()
@@ -145,7 +145,11 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
                         new()
                         {
                             Name = "Method1",
-                            ReturnType = "int",
+                            ReturnType = new ReturnTypeModel
+                            {
+                                Type = "int",
+                                Modifier = "ref"
+                            },
                             Modifier = "static",
                             AccessModifier = "public",
                             ContainingClassName = "SomeNamespace.FirstClass",
@@ -184,7 +188,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""A Project"",""FilePath"":""some_path"",""ProjectReferences"":[],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""Loc"":{""SourceLines"":20,""CommentedLines"":5,""EmptyLines"":30},""AccessModifier"":""protected"",""Modifier"":"""",""BaseClassFullName"":""object"",""BaseInterfaces"":[],""Usings"":[{""Name"":""System"",""IsStatic"":false,""Alias"":""Sys"",""AliasType"":1},{""Name"":""System.Collections"",""IsStatic"":true,""Alias"":"""",""AliasType"":0}],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[{""Name"":""Method1"",""Loc"":{""SourceLines"":6,""CommentedLines"":0,""EmptyLines"":4},""CyclomaticComplexity"":7,""IsConstructor"":false,""ReturnType"":""int"",""Modifier"":""static"",""AccessModifier"":""public"",""ParameterTypes"":[{""Type"":""string"",""Modifier"":"""",""DefaultValue"":null}],""ContainingClassName"":""SomeNamespace.FirstClass"",""CalledMethods"":[{""MethodName"":""Parse"",""ContainingClassName"":""int"",""ParameterTypes"":[{""Type"":""string"",""Modifier"":"""",""DefaultValue"":null}]}]}],""Metrics"":[],""Namespace"":""SomeNamespace""}]}]}]}";
+                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""A Project"",""FilePath"":""some_path"",""ProjectReferences"":[],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""FilePath"":""pathToClass"",""FullName"":""SomeNamespace.FirstClass"",""Loc"":{""SourceLines"":20,""CommentedLines"":5,""EmptyLines"":30},""AccessModifier"":""protected"",""Modifier"":"""",""BaseClassFullName"":""object"",""BaseInterfaces"":[],""Usings"":[{""Name"":""System"",""IsStatic"":false,""Alias"":""Sys"",""AliasType"":1},{""Name"":""System.Collections"",""IsStatic"":true,""Alias"":"""",""AliasType"":0}],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[{""Name"":""Method1"",""Loc"":{""SourceLines"":6,""CommentedLines"":0,""EmptyLines"":4},""CyclomaticComplexity"":7,""IsConstructor"":false,""ReturnType"":{""Type"":""int"",""Modifier"":""ref""},""Modifier"":""static"",""AccessModifier"":""public"",""ParameterTypes"":[{""Type"":""string"",""Modifier"":"""",""DefaultValue"":null}],""ContainingClassName"":""SomeNamespace.FirstClass"",""CalledMethods"":[{""MethodName"":""Parse"",""ContainingClassName"":""int"",""ParameterTypes"":[{""Type"":""string"",""Modifier"":"""",""DefaultValue"":null}]}]}],""Metrics"":[],""Namespace"":""SomeNamespace""}]}]}]}";
 
             var projectModel = new ProjectModel("A Project")
             {

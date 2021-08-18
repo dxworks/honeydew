@@ -59,6 +59,12 @@ namespace HoneydewExtractors.CSharp.Metrics
             {
                 return symbolInfo.Symbol.ToString();
             }
+            
+            var refTypeSyntax = GetParentDeclarationSyntax<RefTypeSyntax>(typeSyntax);
+            if (refTypeSyntax != null)
+            {
+                return GetFullName(refTypeSyntax.Type);
+            }
 
             var variableDeclarationSyntax = GetParentDeclarationSyntax<VariableDeclarationSyntax>(typeSyntax);
             if (variableDeclarationSyntax != null)
@@ -69,7 +75,7 @@ namespace HoneydewExtractors.CSharp.Metrics
                     return fullName;
                 }
             }
-
+            
             var propertyDeclarationSyntax = GetParentDeclarationSyntax<PropertyDeclarationSyntax>(typeSyntax);
             if (propertyDeclarationSyntax != null)
             {

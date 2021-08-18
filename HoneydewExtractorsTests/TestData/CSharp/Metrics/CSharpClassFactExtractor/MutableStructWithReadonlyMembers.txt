@@ -1,0 +1,28 @@
+﻿namespace Geometry {
+    public struct Point2D
+    {
+        public Point3D(double x, double y)
+        {
+            _x = x;
+            _y = y;
+        }
+    
+        private double _x;
+        public double X
+        {
+            readonly get => _x;
+            set => _x = value;
+        }
+    
+        private double _y;
+        public double Y
+        {
+            readonly get => _y;
+            set => _y = value;
+        }
+    
+        public readonly double Distance => Math.Sqrt(X * X + Y * Y);
+    
+        public readonly override string ToString() => $"{X}, {Y}";
+    }
+}

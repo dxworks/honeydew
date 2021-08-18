@@ -90,7 +90,7 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
                                         FullName = "CreateService",
                                         FilePath = "validPathToProject/Project1/Services/CreateService.cs",
                                         BaseClassFullName = "object",
-                                        BaseInterfaces = {"IService"},
+                                        BaseInterfaces = { "IService" },
                                         Methods = new List<MethodModel>
                                         {
                                             new()
@@ -105,7 +105,10 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
                                                         Type = "string"
                                                     }
                                                 },
-                                                ReturnType = "int",
+                                                ReturnType = new ReturnTypeModel
+                                                {
+                                                    Type = "int"
+                                                },
                                                 ContainingClassName = "Project1.Services.CreateService",
                                                 CalledMethods =
                                                 {
@@ -128,7 +131,10 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
                                                         Type = "string"
                                                     }
                                                 },
-                                                ReturnType = "int",
+                                                ReturnType = new ReturnTypeModel
+                                                {
+                                                    Type = "int"
+                                                },
                                                 ContainingClassName = "Project1.Services.CreateService",
                                                 CalledMethods =
                                                 {
@@ -185,7 +191,7 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
             Assert.Equal("string", methodA.ParameterTypes[0].Type);
             Assert.Equal("", methodA.ParameterTypes[0].Modifier);
             Assert.Null(methodA.ParameterTypes[0].DefaultValue);
-            Assert.Equal("int", methodA.ReturnType);
+            Assert.Equal("int", methodA.ReturnType.Type);
             Assert.Equal("Project1.Services.CreateService", methodA.ContainingClassName);
             Assert.Equal(1, methodA.CalledMethods.Count);
             Assert.Equal("Project1.Services.CreateService", methodA.CalledMethods[0].ContainingClassName);
@@ -199,7 +205,7 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
             Assert.Equal("string", methodConvert.ParameterTypes[0].Type);
             Assert.Equal("", methodConvert.ParameterTypes[0].Modifier);
             Assert.Null(methodConvert.ParameterTypes[0].DefaultValue);
-            Assert.Equal("int", methodConvert.ReturnType);
+            Assert.Equal("int", methodConvert.ReturnType.Type);
             Assert.Equal("Project1.Services.CreateService", methodConvert.ContainingClassName);
             Assert.Equal(1, methodConvert.CalledMethods.Count);
             Assert.Equal("int", methodConvert.CalledMethods[0].ContainingClassName);

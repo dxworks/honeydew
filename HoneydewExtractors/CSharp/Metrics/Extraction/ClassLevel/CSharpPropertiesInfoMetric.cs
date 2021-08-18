@@ -59,6 +59,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
 
             var typeName = HoneydewSemanticModel.GetFullName(node.Type);
 
+            modifier = HoneydewSyntacticModel.SetTypeModifier(node.Type.ToString(), modifier);
+
             var calledMethods = new List<MethodCallModel>();
             foreach (var invocationExpressionSyntax in node.DescendantNodes()
                 .OfType<InvocationExpressionSyntax>())

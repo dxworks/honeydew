@@ -12,50 +12,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             _sut = new CSharpFactExtractor();
         }
 
-        [Fact]
-        public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithClassWithMethodsAndProperties()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/ClassWithCommentsWithPropertyAndMethod.txt")]
+        public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithClassWithMethodsAndProperties(string fileContent)
         {
-            const string fileContent = @"// comment
-using System;
-using HoneydewCore.Extractors;
-
-// here is the namespace
-namespace TopLevel
-{
-    // some code
-    public class Foo
-    {
-        // this is a field
-        private int _f;
-
-        public int Field
-         {
-            get
-            {
-                // should return calculated
-
-                return Calc(_f);
-            }
-         }
-
-
-        // this method calculates
-        public int Calc(int a)
-        {
- 
-            // calculate double
-
-            var d = a*2;
-            return d;
-           // return a*2;
-        }        
-    }                                    
-}";
             var classModels = _sut.Extract(fileContent);
 
             var classModel = classModels[0];
             Assert.Equal(21, classModel.Loc.SourceLines);
-            Assert.Equal(7, classModel.Loc.EmptyLines);
+            Assert.Equal(8, classModel.Loc.EmptyLines);
             Assert.Equal(8, classModel.Loc.CommentedLines);
 
             Assert.Equal(5, classModel.Methods[0].Loc.SourceLines);
@@ -67,46 +32,10 @@ namespace TopLevel
             Assert.Equal(1, classModel.Properties[0].Loc.EmptyLines);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithClassAndDelegate()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/ClassWithPropertyAndMethodAndDelegateWithComments.txt")]
+        public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithClassAndDelegate(string fileContent)
         {
-            const string fileContent = @"using System;
-using HoneydewCore.Extractors;
-
-// here is the namespace
-namespace TopLevel
-{
-    // some code
-    public class Foo
-    {
-        // this is a field
-        private int _f;
-
-        public int Field
-         {
-            get
-            {
-                // should return calculated
-
-                return Calc(_f);
-            }
-         }
-
-
-        // this method calculates
-        public int Calc(int a)
-        {
- 
-            // calculate double
-
-            var d = a*2;
-            return d;
-           // return a*2;
-        }        
-    }
-
-    public delegate void A();                                        
-}";
             var classModels = _sut.Extract(fileContent);
 
             var classModel = classModels[0];

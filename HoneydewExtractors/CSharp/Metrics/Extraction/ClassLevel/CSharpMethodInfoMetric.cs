@@ -19,7 +19,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
         private string _containingClassName = "";
         private string _baseTypeName = CSharpConstants.ObjectIdentifier;
         private bool _isInterface;
-        
+
         private readonly CSharpLinesOfCodeCounter _linesOfCodeCounter = new();
 
         public ExtractionMetricType GetMetricType()
@@ -46,7 +46,10 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
             var methodModel = new MethodModel
             {
                 Name = _containingClassName,
-                ReturnType = returnType,
+                ReturnType = new ReturnTypeModel
+                {
+                    Type = returnType
+                },
                 ContainingClassName = _containingClassName,
                 Modifier = "",
                 AccessModifier = "",
@@ -129,10 +132,16 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
 
             var returnType = HoneydewSemanticModel.GetFullName(syntax.ReturnType);
 
+            var returnTypeModifier = HoneydewSyntacticModel.SetTypeModifier(syntax.ReturnType.ToString(), "");
+
             var methodModel = new MethodModel
             {
                 Name = syntax.Identifier.ToString(),
-                ReturnType = returnType,
+                ReturnType = new ReturnTypeModel
+                {
+                    Type = returnType,
+                    Modifier = returnTypeModifier
+                },
                 ContainingClassName = _containingClassName,
                 Modifier = modifier,
                 AccessModifier = accessModifier,
