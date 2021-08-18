@@ -1,0 +1,15 @@
+﻿using System.Collections.Generic;
+
+namespace HoneydewModels.Types
+{
+    public interface IMembersClassType : IClassType
+    {
+        public IList<IFieldType> Fields { get; init; }
+
+        public IList<IConstructorType> Constructors { get; init; }
+
+        public IList<IMethodType> Methods { get; init; }
+
+        public LinesOfCode Loc { get; set; }
+    }
+}
