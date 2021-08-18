@@ -1,9 +1,14 @@
-﻿namespace HoneydewModels.CSharp
+﻿using System.Collections.Generic;
+using HoneydewModels.Types;
+
+namespace HoneydewModels.CSharp
 {
-    public record ReturnTypeModel
+    public record ReturnTypeModel : IModelEntity, IReturnType
     {
-        public string Type { get; set; }
+        public string Name { get; set; }
 
         public string Modifier { get; set; } = "";
+
+        public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
     }
 }

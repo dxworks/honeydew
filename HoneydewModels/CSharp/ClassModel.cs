@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 
 namespace HoneydewModels.CSharp
 {
-    public record ClassModel : IClassModel
+    public record ClassModel : IPropertyMembersClassType, IModelEntity, IClassModel
     {
         public string ClassType { get; init; }
 
-        public string FilePath { get; set; }
+        public string Name { get; set; }
 
-        public string FullName { get; set; }
+        public string FilePath { get; set; }
 
         public LinesOfCode Loc { get; set; }
 
@@ -19,35 +20,41 @@ namespace HoneydewModels.CSharp
 
         public string Modifier { get; init; } = "";
 
-        public string BaseClassFullName { get; set; } = "object";
+        public string ContainingTypeName
+        {
+            get => Namespace;
+            set => _namespace = value;
+        }
 
-        public IList<string> BaseInterfaces { get; init; } = new List<string>();
+        public IList<IBaseType> BaseTypes { get; set; } = new List<IBaseType>();
 
-        public IList<UsingModel> Usings { get; set; } = new List<UsingModel>();
+        public IList<IImportType> Imports { get; set; } = new List<IImportType>();
 
-        public IList<FieldModel> Fields { get; init; } = new List<FieldModel>();
+        public IList<IFieldType> Fields { get; init; } = new List<IFieldType>();
 
-        public IList<PropertyModel> Properties { get; init; } = new List<PropertyModel>();
+        public IList<IPropertyType> Properties { get; set; } = new List<IPropertyType>();
 
-        public IList<MethodModel> Constructors { get; init; } = new List<MethodModel>();
+        public IList<IConstructorType> Constructors { get; init; } = new List<IConstructorType>();
 
-        public IList<MethodModel> Methods { get; init; } = new List<MethodModel>();
+        public IList<IMethodType> Methods { get; init; } = new List<IMethodType>();
 
         public IList<ClassMetric> Metrics { get; init; } = new List<ClassMetric>();
+
+        public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
 
         public string Namespace
         {
             get
             {
-                if (!string.IsNullOrEmpty(_namespace) || string.IsNullOrEmpty(FullName)) return _namespace;
+                if (!string.IsNullOrEmpty(_namespace) || string.IsNullOrEmpty(Name)) return _namespace;
 
-                var lastIndexOf = FullName.LastIndexOf(".", StringComparison.Ordinal);
+                var lastIndexOf = Name.LastIndexOf(".", StringComparison.Ordinal);
                 if (lastIndexOf < 0)
                 {
                     return "";
                 }
 
-                _namespace = FullName[..lastIndexOf];
+                _namespace = Name[..lastIndexOf];
                 return _namespace;
             }
         }
