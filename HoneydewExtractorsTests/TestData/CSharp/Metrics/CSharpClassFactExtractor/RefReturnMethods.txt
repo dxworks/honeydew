@@ -1,0 +1,26 @@
+﻿using System;
+
+namespace Namespace1
+{
+    public class Class1 
+    {
+        public static ref int Find(int[,] matrix, Func<int, bool> predicate)
+        {
+            for (int i = 0; i < matrix.GetLength(0); i++)
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                    if (predicate(matrix[i, j]))
+                        return ref matrix[i, j];
+            throw new InvalidOperationException("Not found");
+        }
+        
+        public static ref readonly int Find(int[,] matrix, bool value)
+        {
+            if (value)
+            {
+                return ref matrix[0, 0];
+            }
+
+            return ref matrix[1, 1];
+        }
+    }
+}
