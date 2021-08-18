@@ -1,4 +1,5 @@
 ﻿using HoneydewExtractors.CSharp.Metrics;
+using HoneydewModels.CSharp;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics
@@ -30,52 +31,54 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             foreach (var delegateModel in classModels)
             {
                 Assert.Equal("MyDelegates", delegateModel.Namespace);
-                Assert.Equal("System.Delegate", delegateModel.BaseClassFullName);
+                Assert.Equal(1, delegateModel.BaseTypes.Count);
+                Assert.Equal("System.Delegate", delegateModel.BaseTypes[0].Name);
                 Assert.Equal("delegate", delegateModel.ClassType);
                 Assert.Equal("public", delegateModel.AccessModifier);
                 Assert.Equal("", delegateModel.Modifier);
-                Assert.Empty(delegateModel.BaseInterfaces);
                 Assert.Empty(delegateModel.Constructors);
                 Assert.Empty(delegateModel.Fields);
                 Assert.Empty(delegateModel.Properties);
                 Assert.Empty(delegateModel.Metrics);
 
                 Assert.Equal(1, delegateModel.Methods.Count);
-                Assert.Equal(delegateModel.FullName, delegateModel.Methods[0].Name);
+                Assert.Equal(delegateModel.Name, delegateModel.Methods[0].Name);
                 Assert.Equal("", delegateModel.Methods[0].Modifier);
                 Assert.Equal("", delegateModel.Methods[0].AccessModifier);
-                Assert.False(delegateModel.Methods[0].IsConstructor);
                 Assert.Empty(delegateModel.Methods[0].CalledMethods);
             }
 
             var delegateModel0 = classModels[0];
-            Assert.Equal("MyDelegates.Delegate1", delegateModel0.FullName);
-            Assert.Equal("MyDelegates.Delegate1", delegateModel0.Methods[0].ContainingClassName);
-            Assert.Equal("void", delegateModel0.Methods[0].ReturnType.Type);
+            Assert.Equal("MyDelegates.Delegate1", delegateModel0.Name);
+            Assert.Equal("MyDelegates.Delegate1", delegateModel0.Methods[0].ContainingTypeName);
+            Assert.Equal("void", delegateModel0.Methods[0].ReturnType.Name);
             Assert.Empty(delegateModel0.Methods[0].ParameterTypes);
 
             var delegateModel1 = classModels[1];
-            Assert.Equal("MyDelegates.Delegate2", delegateModel1.FullName);
-            Assert.Equal("MyDelegates.Delegate2", delegateModel1.Methods[0].ContainingClassName);
-            Assert.Equal("void", delegateModel1.Methods[0].ReturnType.Type);
+            Assert.Equal("MyDelegates.Delegate2", delegateModel1.Name);
+            Assert.Equal("MyDelegates.Delegate2", delegateModel1.Methods[0].ContainingTypeName);
+            Assert.Equal("void", delegateModel1.Methods[0].ReturnType.Name);
             Assert.Equal(1, delegateModel1.Methods[0].ParameterTypes.Count);
-            Assert.Equal("", delegateModel1.Methods[0].ParameterTypes[0].Modifier);
-            Assert.Equal("string", delegateModel1.Methods[0].ParameterTypes[0].Type);
-            Assert.Null(delegateModel1.Methods[0].ParameterTypes[0].DefaultValue);
+            var parameterModel1 = (ParameterModel)delegateModel1.Methods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel1.Modifier);
+            Assert.Equal("string", parameterModel1.Name);
+            Assert.Null(parameterModel1.DefaultValue);
 
             var delegateModel2 = classModels[2];
-            Assert.Equal("MyDelegates.Delegate3", delegateModel2.FullName);
-            Assert.Equal("MyDelegates.Delegate3", delegateModel2.Methods[0].ContainingClassName);
-            Assert.Equal("int", delegateModel2.Methods[0].ReturnType.Type);
+            Assert.Equal("MyDelegates.Delegate3", delegateModel2.Name);
+            Assert.Equal("MyDelegates.Delegate3", delegateModel2.Methods[0].ContainingTypeName);
+            Assert.Equal("int", delegateModel2.Methods[0].ReturnType.Name);
             Assert.Equal(2, delegateModel2.Methods[0].ParameterTypes.Count);
 
-            Assert.Equal("", delegateModel2.Methods[0].ParameterTypes[0].Modifier);
-            Assert.Equal("double", delegateModel2.Methods[0].ParameterTypes[0].Type);
-            Assert.Null(delegateModel2.Methods[0].ParameterTypes[0].DefaultValue);
+            var parameterModel2 = (ParameterModel)delegateModel2.Methods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel2.Modifier);
+            Assert.Equal("double", parameterModel2.Name);
+            Assert.Null(parameterModel2.DefaultValue);
 
-            Assert.Equal("", delegateModel2.Methods[0].ParameterTypes[1].Modifier);
-            Assert.Equal("char", delegateModel2.Methods[0].ParameterTypes[1].Type);
-            Assert.Null(delegateModel2.Methods[0].ParameterTypes[1].DefaultValue);
+            var parameterModel3 = (ParameterModel)delegateModel2.Methods[0].ParameterTypes[1];
+            Assert.Equal("", parameterModel3.Modifier);
+            Assert.Equal("char", parameterModel3.Name);
+            Assert.Null(parameterModel3.DefaultValue);
         }
 
         [Fact]
@@ -97,41 +100,42 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             {
                 var delegateModel = classModels[i];
                 Assert.Equal("MyDelegates", delegateModel.Namespace);
-                Assert.Equal("System.Delegate", delegateModel.BaseClassFullName);
+                Assert.Equal(1, delegateModel.BaseTypes.Count);
+                Assert.Equal("System.Delegate", delegateModel.BaseTypes[0].Name);
                 Assert.Equal("delegate", delegateModel.ClassType);
                 Assert.Equal("public", delegateModel.AccessModifier);
                 Assert.Equal("", delegateModel.Modifier);
-                Assert.Empty(delegateModel.BaseInterfaces);
                 Assert.Empty(delegateModel.Constructors);
                 Assert.Empty(delegateModel.Fields);
                 Assert.Empty(delegateModel.Properties);
                 Assert.Empty(delegateModel.Metrics);
 
                 Assert.Equal(1, delegateModel.Methods.Count);
-                Assert.Equal(delegateModel.FullName, delegateModel.Methods[0].Name);
+                Assert.Equal(delegateModel.Name, delegateModel.Methods[0].Name);
                 Assert.Equal("", delegateModel.Methods[0].Modifier);
                 Assert.Equal("", delegateModel.Methods[0].AccessModifier);
-                Assert.False(delegateModel.Methods[0].IsConstructor);
                 Assert.Empty(delegateModel.Methods[0].CalledMethods);
             }
 
             var delegateModel0 = classModels[1];
-            Assert.Equal("MyDelegates.Delegate1", delegateModel0.FullName);
-            Assert.Equal("MyDelegates.Delegate1", delegateModel0.Methods[0].ContainingClassName);
-            Assert.Equal("void", delegateModel0.Methods[0].ReturnType.Type);
+            Assert.Equal("MyDelegates.Delegate1", delegateModel0.Name);
+            Assert.Equal("MyDelegates.Delegate1", delegateModel0.Methods[0].ContainingTypeName);
+            Assert.Equal("void", delegateModel0.Methods[0].ReturnType.Name);
             Assert.Equal(1, delegateModel0.Methods[0].ParameterTypes.Count);
-            Assert.Equal("", delegateModel0.Methods[0].ParameterTypes[0].Modifier);
-            Assert.Equal("MyDelegates.Class1", delegateModel0.Methods[0].ParameterTypes[0].Type);
-            Assert.Null(delegateModel0.Methods[0].ParameterTypes[0].DefaultValue);
+            var parameterModel1 = (ParameterModel)delegateModel0.Methods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel1.Modifier);
+            Assert.Equal("MyDelegates.Class1", parameterModel1.Name);
+            Assert.Null(parameterModel1.DefaultValue);
 
             var delegateModel1 = classModels[2];
-            Assert.Equal("MyDelegates.Delegate2", delegateModel1.FullName);
-            Assert.Equal("MyDelegates.Delegate2", delegateModel1.Methods[0].ContainingClassName);
-            Assert.Equal("MyDelegates.Class1", delegateModel1.Methods[0].ReturnType.Type);
+            Assert.Equal("MyDelegates.Delegate2", delegateModel1.Name);
+            Assert.Equal("MyDelegates.Delegate2", delegateModel1.Methods[0].ContainingTypeName);
+            Assert.Equal("MyDelegates.Class1", delegateModel1.Methods[0].ReturnType.Name);
             Assert.Equal(1, delegateModel1.Methods[0].ParameterTypes.Count);
-            Assert.Equal("", delegateModel1.Methods[0].ParameterTypes[0].Modifier);
-            Assert.Equal("ExternClass", delegateModel1.Methods[0].ParameterTypes[0].Type);
-            Assert.Null(delegateModel1.Methods[0].ParameterTypes[0].DefaultValue);
+            var parameterModel2 = (ParameterModel)delegateModel1.Methods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel2.Modifier);
+            Assert.Equal("ExternClass", parameterModel2.Name);
+            Assert.Null(parameterModel2.DefaultValue);
         }
 
         [Fact]
@@ -146,22 +150,25 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal(1, classModels.Count);
 
             var delegateModel0 = classModels[0];
-            Assert.Equal("MyDelegates.Delegate1", delegateModel0.FullName);
-            Assert.Equal("MyDelegates.Delegate1", delegateModel0.Methods[0].ContainingClassName);
-            Assert.Equal("void", delegateModel0.Methods[0].ReturnType.Type);
+            Assert.Equal("MyDelegates.Delegate1", delegateModel0.Name);
+            Assert.Equal("MyDelegates.Delegate1", delegateModel0.Methods[0].ContainingTypeName);
+            Assert.Equal("void", delegateModel0.Methods[0].ReturnType.Name);
             Assert.Equal(3, delegateModel0.Methods[0].ParameterTypes.Count);
 
-            Assert.Equal("out", delegateModel0.Methods[0].ParameterTypes[0].Modifier);
-            Assert.Equal("int", delegateModel0.Methods[0].ParameterTypes[0].Type);
-            Assert.Null(delegateModel0.Methods[0].ParameterTypes[0].DefaultValue);
+            var parameterModel1 = (ParameterModel)delegateModel0.Methods[0].ParameterTypes[0];
+            Assert.Equal("out", parameterModel1.Modifier);
+            Assert.Equal("int", parameterModel1.Name);
+            Assert.Null(parameterModel1.DefaultValue);
 
-            Assert.Equal("in", delegateModel0.Methods[0].ParameterTypes[1].Modifier);
-            Assert.Equal("string", delegateModel0.Methods[0].ParameterTypes[1].Type);
-            Assert.Null(delegateModel0.Methods[0].ParameterTypes[1].DefaultValue);
+            var parameterModel2 = (ParameterModel)delegateModel0.Methods[0].ParameterTypes[1];
+            Assert.Equal("in", parameterModel2.Modifier);
+            Assert.Equal("string", parameterModel2.Name);
+            Assert.Null(parameterModel2.DefaultValue);
 
-            Assert.Equal("", delegateModel0.Methods[0].ParameterTypes[2].Modifier);
-            Assert.Equal("char", delegateModel0.Methods[0].ParameterTypes[2].Type);
-            Assert.Equal("'a'", delegateModel0.Methods[0].ParameterTypes[2].DefaultValue);
+            var parameterModel3 = (ParameterModel)delegateModel0.Methods[0].ParameterTypes[2];
+            Assert.Equal("", parameterModel3.Modifier);
+            Assert.Equal("char", parameterModel3.Name);
+            Assert.Equal("'a'", parameterModel3.DefaultValue);
         }
 
         [Fact]
@@ -188,50 +195,51 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             for (var i = 2; i < classModels.Count; i++)
             {
                 var delegateModel = classModels[i];
-                Assert.Equal("System.Delegate", delegateModel.BaseClassFullName);
+                Assert.Equal(1, delegateModel.BaseTypes.Count);
+                Assert.Equal("System.Delegate", delegateModel.BaseTypes[0].Name);
                 Assert.Equal("delegate", delegateModel.ClassType);
                 Assert.Equal("internal", delegateModel.AccessModifier);
                 Assert.Equal("", delegateModel.Modifier);
-                Assert.Empty(delegateModel.BaseInterfaces);
                 Assert.Empty(delegateModel.Constructors);
                 Assert.Empty(delegateModel.Fields);
                 Assert.Empty(delegateModel.Properties);
                 Assert.Empty(delegateModel.Metrics);
 
                 Assert.Equal(1, delegateModel.Methods.Count);
-                Assert.Equal(delegateModel.FullName, delegateModel.Methods[0].Name);
+                Assert.Equal(delegateModel.Name, delegateModel.Methods[0].Name);
                 Assert.Equal("", delegateModel.Methods[0].Modifier);
                 Assert.Equal("", delegateModel.Methods[0].AccessModifier);
-                Assert.False(delegateModel.Methods[0].IsConstructor);
                 Assert.Empty(delegateModel.Methods[0].CalledMethods);
             }
 
             var delegateModel0 = classModels[2];
             Assert.Equal("MyDelegates", delegateModel0.Namespace);
-            Assert.Equal("MyDelegates.Delegate1", delegateModel0.FullName);
-            Assert.Equal("MyDelegates.Delegate1", delegateModel0.Methods[0].ContainingClassName);
-            Assert.Equal("void", delegateModel0.Methods[0].ReturnType.Type);
+            Assert.Equal("MyDelegates.Delegate1", delegateModel0.Name);
+            Assert.Equal("MyDelegates.Delegate1", delegateModel0.Methods[0].ContainingTypeName);
+            Assert.Equal("void", delegateModel0.Methods[0].ReturnType.Name);
             Assert.Equal(1, delegateModel0.Methods[0].ParameterTypes.Count);
-            Assert.Equal("", delegateModel0.Methods[0].ParameterTypes[0].Modifier);
-            Assert.Equal("int", delegateModel0.Methods[0].ParameterTypes[0].Type);
-            Assert.Null(delegateModel0.Methods[0].ParameterTypes[0].DefaultValue);
+            var parameterModel1 = (ParameterModel)delegateModel0.Methods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel1.Modifier);
+            Assert.Equal("int", parameterModel1.Name);
+            Assert.Null(parameterModel1.DefaultValue);
 
             var delegateModel1 = classModels[3];
             Assert.Equal("MyDelegates.Class1", delegateModel1.Namespace);
-            Assert.Equal("MyDelegates.Class1.Delegate2", delegateModel1.FullName);
-            Assert.Equal("MyDelegates.Class1.Delegate2", delegateModel1.Methods[0].ContainingClassName);
-            Assert.Equal("int", delegateModel1.Methods[0].ReturnType.Type);
+            Assert.Equal("MyDelegates.Class1.Delegate2", delegateModel1.Name);
+            Assert.Equal("MyDelegates.Class1.Delegate2", delegateModel1.Methods[0].ContainingTypeName);
+            Assert.Equal("int", delegateModel1.Methods[0].ReturnType.Name);
             Assert.Empty(delegateModel1.Methods[0].ParameterTypes);
 
             var delegateModel2 = classModels[4];
             Assert.Equal("MyDelegates.Class1.InnerClass", delegateModel2.Namespace);
-            Assert.Equal("MyDelegates.Class1.InnerClass.Delegate3", delegateModel2.FullName);
-            Assert.Equal("MyDelegates.Class1.InnerClass.Delegate3", delegateModel2.Methods[0].ContainingClassName);
-            Assert.Equal("int", delegateModel2.Methods[0].ReturnType.Type);
+            Assert.Equal("MyDelegates.Class1.InnerClass.Delegate3", delegateModel2.Name);
+            Assert.Equal("MyDelegates.Class1.InnerClass.Delegate3", delegateModel2.Methods[0].ContainingTypeName);
+            Assert.Equal("int", delegateModel2.Methods[0].ReturnType.Name);
             Assert.Equal(1, delegateModel2.Methods[0].ParameterTypes.Count);
-            Assert.Equal("", delegateModel2.Methods[0].ParameterTypes[0].Modifier);
-            Assert.Equal("string", delegateModel2.Methods[0].ParameterTypes[0].Type);
-            Assert.Null(delegateModel2.Methods[0].ParameterTypes[0].DefaultValue);
+            var parameterModel2 = (ParameterModel)delegateModel2.Methods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel2.Modifier);
+            Assert.Equal("string", parameterModel2.Name);
+            Assert.Null(parameterModel2.DefaultValue);
         }
     }
 }

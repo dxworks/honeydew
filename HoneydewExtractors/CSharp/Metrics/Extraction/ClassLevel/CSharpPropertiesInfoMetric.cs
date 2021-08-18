@@ -4,6 +4,7 @@ using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
@@ -16,7 +17,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
 
         private readonly CSharpLinesOfCodeCounter _linesOfCodeCounter = new();
 
-        public IList<PropertyModel> PropertyInfos { get; } = new List<PropertyModel>();
+        public IList<IPropertyType> PropertyInfos { get; } = new List<IPropertyType>();
 
         public ExtractionMetricType GetMetricType()
         {
@@ -25,7 +26,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
 
         public override IMetricValue GetMetric()
         {
-            return new MetricValue<IList<PropertyModel>>(PropertyInfos);
+            return new MetricValue<IList<IPropertyType>>(PropertyInfos);
         }
 
         public override string PrettyPrint()
@@ -61,7 +62,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
 
             modifier = HoneydewSyntacticModel.SetTypeModifier(node.Type.ToString(), modifier);
 
-            var calledMethods = new List<MethodCallModel>();
+            var calledMethods = new List<IMethodSignatureType>();
             foreach (var invocationExpressionSyntax in node.DescendantNodes()
                 .OfType<InvocationExpressionSyntax>())
             {
@@ -100,7 +101,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 IsEvent = isEvent,
                 Type = typeName,
                 Name = name,
-                ContainingClassName = containingClass,
+                ContainingTypeName = containingClass,
                 CalledMethods = calledMethods,
                 Accessors = accessors,
                 Loc = _linesOfCodeCounter.Count(node.ToString()),

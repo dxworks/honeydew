@@ -2,6 +2,7 @@
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.Processors;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Moq;
 using Xunit;
 
@@ -83,7 +84,7 @@ namespace Services
 
             var model = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0];
             Assert.Equal("Models.Model", model.Properties[0].Type);
-            Assert.Equal("Models.Model", model.Methods[0].ReturnType.Type);
+            Assert.Equal("Models.Model", model.Methods[0].ReturnType.Name);
         }
 
         [Fact]
@@ -182,16 +183,16 @@ namespace MyNamespace
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var utilClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[2];
-            Assert.Equal("Sqrt", utilClass.Methods[0].CalledMethods[0].MethodName);
-            Assert.Equal("System.Math", utilClass.Methods[0].CalledMethods[0].ContainingClassName);
+            Assert.Equal("Sqrt", utilClass.Methods[0].CalledMethods[0].Name);
+            Assert.Equal("System.Math", utilClass.Methods[0].CalledMethods[0].ContainingTypeName);
             Assert.Equal(1, utilClass.Methods[0].CalledMethods[0].ParameterTypes.Count);
-            Assert.Equal("System.Double", utilClass.Methods[0].CalledMethods[0].ParameterTypes[0].Type);
+            Assert.Equal("System.Double", utilClass.Methods[0].CalledMethods[0].ParameterTypes[0].Name);
 
             var clientClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0];
 
             Assert.Equal(3, clientClass.Methods[0].CalledMethods.Count);
 
-            var methodArray = new[]
+            var methodArray = new IMethodSkeletonType[]
             {
                 clientClass.Methods[0],
                 clientClass.Constructors[0],
@@ -200,19 +201,19 @@ namespace MyNamespace
             foreach (var methodModel in methodArray)
             {
                 var radicalCall = methodModel.CalledMethods[0];
-                Assert.Equal("Radical", radicalCall.MethodName);
-                Assert.Equal("Utils.Util", radicalCall.ContainingClassName);
+                Assert.Equal("Radical", radicalCall.Name);
+                Assert.Equal("Utils.Util", radicalCall.ContainingTypeName);
                 Assert.Equal(1, radicalCall.ParameterTypes.Count);
-                Assert.Equal("System.Double", radicalCall.ParameterTypes[0].Type);
+                Assert.Equal("System.Double", radicalCall.ParameterTypes[0].Name);
 
                 var intCall = methodModel.CalledMethods[1];
-                Assert.Equal("Call", intCall.MethodName);
-                Assert.Equal("Utils.IntWrapper", intCall.ContainingClassName);
+                Assert.Equal("Call", intCall.Name);
+                Assert.Equal("Utils.IntWrapper", intCall.ContainingTypeName);
                 Assert.Empty(intCall.ParameterTypes);
 
                 var stringCall = methodModel.CalledMethods[2];
-                Assert.Equal("Call", stringCall.MethodName);
-                Assert.Equal("Utils.StringWrapper", stringCall.ContainingClassName);
+                Assert.Equal("Call", stringCall.Name);
+                Assert.Equal("Utils.StringWrapper", stringCall.ContainingTypeName);
                 Assert.Empty(stringCall.ParameterTypes);
             }
         }
@@ -301,20 +302,20 @@ namespace MyCompany
 
             var classA = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0];
             Assert.Equal("M", classA.Methods[0].Name);
-            Assert.Equal("MyCompany.Project.MyClass", classA.Methods[0].ReturnType.Type);
+            Assert.Equal("MyCompany.Project.MyClass", classA.Methods[0].ReturnType.Name);
 
             var myClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0];
 
             Assert.Equal("Method", myClass.Methods[0].Name);
-            Assert.Equal("PC.A", myClass.Methods[0].ReturnType.Type);
+            Assert.Equal("PC.A", myClass.Methods[0].ReturnType.Name);
 
             Assert.Equal(2, myClass.Methods[0].CalledMethods.Count);
 
-            Assert.Equal("M", myClass.Methods[0].CalledMethods[0].MethodName);
-            Assert.Equal("PC.A", myClass.Methods[0].CalledMethods[0].ContainingClassName);
+            Assert.Equal("M", myClass.Methods[0].CalledMethods[0].Name);
+            Assert.Equal("PC.A", myClass.Methods[0].CalledMethods[0].ContainingTypeName);
 
-            Assert.Equal("F", myClass.Methods[0].CalledMethods[1].MethodName);
-            Assert.Equal("MyCompany.Other.SomeClass", myClass.Methods[0].CalledMethods[1].ContainingClassName);
+            Assert.Equal("F", myClass.Methods[0].CalledMethods[1].Name);
+            Assert.Equal("MyCompany.Other.SomeClass", myClass.Methods[0].CalledMethods[1].ContainingTypeName);
         }
 
         [Fact]
@@ -407,12 +408,12 @@ namespace NameSpace3
 
             Assert.Equal(2, mainClass.Methods[0].CalledMethods.Count);
 
-            Assert.Equal("ToString", mainClass.Methods[0].CalledMethods[0].MethodName);
-            Assert.Equal("NameSpace1.MyClass", mainClass.Methods[0].CalledMethods[0].ContainingClassName);
+            Assert.Equal("ToString", mainClass.Methods[0].CalledMethods[0].Name);
+            Assert.Equal("NameSpace1.MyClass", mainClass.Methods[0].CalledMethods[0].ContainingTypeName);
             Assert.Empty(mainClass.Methods[0].CalledMethods[0].ParameterTypes);
 
-            Assert.Equal("ToString", mainClass.Methods[0].CalledMethods[1].MethodName);
-            Assert.Equal("NameSpace2.MyClass<int>", mainClass.Methods[0].CalledMethods[1].ContainingClassName);
+            Assert.Equal("ToString", mainClass.Methods[0].CalledMethods[1].Name);
+            Assert.Equal("NameSpace2.MyClass<int>", mainClass.Methods[0].CalledMethods[1].ContainingTypeName);
             Assert.Empty(mainClass.Methods[0].CalledMethods[1].ParameterTypes);
         }
 
@@ -490,11 +491,11 @@ namespace MyNamespace
             var myClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0];
 
             Assert.Equal("Call", myClass.Methods[0].Name);
-            Assert.Equal("Models.SomeModels.MyModel", myClass.Methods[0].ReturnType.Type);
+            Assert.Equal("Models.SomeModels.MyModel", myClass.Methods[0].ReturnType.Name);
 
             Assert.Equal(1, myClass.Methods[0].CalledMethods.Count);
-            Assert.Equal("Method", myClass.Methods[0].CalledMethods[0].MethodName);
-            Assert.Equal("Models.SomeModels.MyModel", myClass.Methods[0].CalledMethods[0].ContainingClassName);
+            Assert.Equal("Method", myClass.Methods[0].CalledMethods[0].Name);
+            Assert.Equal("Models.SomeModels.MyModel", myClass.Methods[0].CalledMethods[0].ContainingTypeName);
         }
 
 
@@ -554,11 +555,11 @@ namespace MyNamespace
             var myClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0];
 
             Assert.Equal("Call", myClass.Methods[0].Name);
-            Assert.Equal("System.Collections.Comparer", myClass.Methods[0].ReturnType.Type);
+            Assert.Equal("System.Collections.Comparer", myClass.Methods[0].ReturnType.Name);
 
             Assert.Equal(1, myClass.Methods[0].CalledMethods.Count);
-            Assert.Equal("ToString", myClass.Methods[0].CalledMethods[0].MethodName);
-            Assert.Equal("System.Collections.Comparer", myClass.Methods[0].CalledMethods[0].ContainingClassName);
+            Assert.Equal("ToString", myClass.Methods[0].CalledMethods[0].Name);
+            Assert.Equal("System.Collections.Comparer", myClass.Methods[0].CalledMethods[0].ContainingTypeName);
         }
 
         [Theory]
@@ -667,7 +668,7 @@ namespace MyNamespace
 
             var myClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0];
 
-            Assert.Equal(EAliasType.Class, myClass.Usings[0].AliasType);
+            Assert.Equal(EAliasType.Class, myClass.Imports[0].AliasType);
         }
 
 
@@ -774,11 +775,11 @@ namespace HoneydewTestProject
 
             Assert.Equal("MethodC1A", myClass.Methods[0].Name);
             Assert.Equal(1, myClass.Methods[0].ParameterTypes.Count);
-            Assert.Equal("HoneydewTestProject.A.C1", myClass.Methods[0].ParameterTypes[0].Type);
+            Assert.Equal("HoneydewTestProject.A.C1", myClass.Methods[0].ParameterTypes[0].Name);
 
             Assert.Equal("MethodC1B", myClass.Methods[1].Name);
             Assert.Equal(1, myClass.Methods[1].ParameterTypes.Count);
-            Assert.Equal("HoneydewTestProject.B.C1", myClass.Methods[1].ParameterTypes[0].Type);
+            Assert.Equal("HoneydewTestProject.B.C1", myClass.Methods[1].ParameterTypes[0].Name);
         }
 
         [Fact]
@@ -859,7 +860,7 @@ namespace HoneydewTestProject
 
             Assert.Equal("Method", myClass.Methods[0].Name);
             Assert.Equal(1, myClass.Methods[0].ParameterTypes.Count);
-            Assert.Equal("HoneydewTestProject.A.C1", myClass.Methods[0].ParameterTypes[0].Type);
+            Assert.Equal("HoneydewTestProject.A.C1", myClass.Methods[0].ParameterTypes[0].Name);
         }
 
         [Fact]
@@ -924,12 +925,13 @@ namespace NameSpace3
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var mainClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0];
-            Assert.Equal("NameSpace1.N1.MyClass", mainClass.BaseClassFullName);
-            Assert.Equal("NameSpace1.N1.MyClass", mainClass.Methods[0].ParameterTypes[0].Type);
+            Assert.Equal("NameSpace1.N1.MyClass", mainClass.BaseTypes[0].Name);
+            Assert.Equal("NameSpace1.N1.MyClass", mainClass.Methods[0].ParameterTypes[0].Name);
         }
-        
-         [Fact]
-        public void Process_ShouldReturnFullName_WhenProvidedWithClassInNamespaceAndChildNamespaceButUsedInSomeOtherChildNamespace()
+
+        [Fact]
+        public void
+            Process_ShouldReturnFullName_WhenProvidedWithClassInNamespaceAndChildNamespaceButUsedInSomeOtherChildNamespace()
         {
             const string fileContent1 = @"
 namespace NameSpace1.N1
@@ -989,8 +991,8 @@ namespace NameSpace1.N1.OtherChild
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var mainClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0];
-            Assert.Equal("NameSpace1.N1.MyClass", mainClass.BaseClassFullName);
-            Assert.Equal("NameSpace1.N1.MyClass", mainClass.Methods[0].ReturnType.Type);
+            Assert.Equal("NameSpace1.N1.MyClass", mainClass.BaseTypes[0].Name);
+            Assert.Equal("NameSpace1.N1.MyClass", mainClass.Methods[0].ReturnType.Name);
         }
     }
 }

@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
 {
     public class CSharpMethodInfoDataMetric
     {
-        public IList<MethodModel> MethodInfos { get; } = new List<MethodModel>();
-        public IList<MethodModel> ConstructorInfos { get; } = new List<MethodModel>();
+        public IList<IMethodType> MethodInfos { get; } = new List<IMethodType>();
+        public IList<IConstructorType> ConstructorInfos { get; } = new List<IConstructorType>();
     }
 }

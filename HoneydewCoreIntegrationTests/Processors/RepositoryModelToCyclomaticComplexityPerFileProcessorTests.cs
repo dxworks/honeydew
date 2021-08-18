@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Processors;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewCoreIntegrationTests.Processors
@@ -38,9 +39,9 @@ namespace HoneydewCoreIntegrationTests.Processors
             var classModel = new ClassModel
             {
                 FilePath = "path",
-                Fields = new List<FieldModel>
+                Fields = new List<IFieldType>
                 {
-                    new()
+                    new FieldModel
                     {
                         Name = "MyField",
                         Modifier = "static",
@@ -68,7 +69,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("avgCyclo", representation.File.Concerns[2].Tag);
             Assert.Equal("sumCyclo", representation.File.Concerns[3].Tag);
         }
-        
+
         [Fact]
         public void Process_ShouldReturn4Concerns_WhenRepositoryModelHasOneClassWithOneMethodInOneFile()
         {
@@ -79,9 +80,9 @@ namespace HoneydewCoreIntegrationTests.Processors
             var classModel = new ClassModel
             {
                 FilePath = "path",
-                Methods = new List<MethodModel>
+                Methods = new List<IMethodType>
                 {
-                    new()
+                    new MethodModel
                     {
                         CyclomaticComplexity = 12
                     }
@@ -117,9 +118,9 @@ namespace HoneydewCoreIntegrationTests.Processors
             var classModel1 = new ClassModel
             {
                 FilePath = "path",
-                Methods = new List<MethodModel>
+                Methods = new List<IMethodType>
                 {
-                    new()
+                    new MethodModel
                     {
                         CyclomaticComplexity = 12
                     }
@@ -128,9 +129,9 @@ namespace HoneydewCoreIntegrationTests.Processors
             var classModel2 = new ClassModel
             {
                 FilePath = "path",
-                Methods = new List<MethodModel>
+                Methods = new List<IMethodType>
                 {
-                    new()
+                    new MethodModel
                     {
                         CyclomaticComplexity = 6
                     }
@@ -174,17 +175,17 @@ namespace HoneydewCoreIntegrationTests.Processors
             var classModel1 = new ClassModel
             {
                 FilePath = "path",
-                Methods = new List<MethodModel>
+                Methods = new List<IMethodType>
                 {
-                    new()
+                    new MethodModel
                     {
                         CyclomaticComplexity = 12
                     },
-                    new()
+                    new MethodModel
                     {
                         CyclomaticComplexity = 7
                     },
-                    new()
+                    new MethodModel
                     {
                         CyclomaticComplexity = 1
                     }
@@ -228,13 +229,13 @@ namespace HoneydewCoreIntegrationTests.Processors
             var classModel1 = new ClassModel
             {
                 FilePath = "path1",
-                Methods = new List<MethodModel>
+                Methods = new List<IMethodType>
                 {
-                    new()
+                    new MethodModel
                     {
                         CyclomaticComplexity = 12
                     },
-                    new()
+                    new MethodModel
                     {
                         CyclomaticComplexity = 8
                     }
@@ -243,23 +244,23 @@ namespace HoneydewCoreIntegrationTests.Processors
             var classModel2 = new ClassModel
             {
                 FilePath = "path2",
-                Properties = new List<PropertyModel>
+                Properties = new List<IPropertyType>
                 {
-                    new()
+                    new PropertyModel
                     {
                         CyclomaticComplexity = 1
                     }
                 },
-                Methods = new List<MethodModel>
+                Methods = new List<IMethodType>
                 {
-                    new()
+                    new MethodModel
                     {
                         CyclomaticComplexity = 6
                     },
                 },
-                Constructors = new List<MethodModel>()
+                Constructors = new List<IConstructorType>
                 {
-                    new()
+                    new ConstructorModel
                     {
                         CyclomaticComplexity = 1
                     }

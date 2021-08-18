@@ -123,14 +123,14 @@ namespace HoneydewCoreIntegrationTests.Processors
 
              Assert.Equal("ToString", toStringMethodModel.Name);
              Assert.Equal(intClassModel, toStringMethodModel.ContainingClass);
-             Assert.Empty(toStringMethodModel.ParameterTypes);
+             Assert.Empty(toStringMethodModel.Parameters);
 
              Assert.Equal("Parse", parseMethodModel.Name);
              Assert.Equal(intClassModel, parseMethodModel.ContainingClass);
-             Assert.Equal(1, parseMethodModel.ParameterTypes.Count);
-             Assert.Equal(stringClassModel, parseMethodModel.ParameterTypes[0].Type);
-             Assert.Equal("", parseMethodModel.ParameterTypes[0].Modifier);
-             Assert.Null(parseMethodModel.ParameterTypes[0].DefaultValue);
+             Assert.Equal(1, parseMethodModel.Parameters.Count);
+             Assert.Equal(stringClassModel, parseMethodModel.Parameters[0].Type);
+             Assert.Equal("", parseMethodModel.Parameters[0].Modifier);
+             Assert.Null(parseMethodModel.Parameters[0].DefaultValue);
 
              var referenceNamespaceServices = referenceSolutionModel.Projects[0].Namespaces[0];
              var referenceMyClass = referenceNamespaceServices.ClassModels[0];
@@ -153,13 +153,13 @@ namespace HoneydewCoreIntegrationTests.Processors
              Assert.Equal("", methodFunction1.Modifier);
              Assert.Equal("public", methodFunction1.AccessModifier);
              Assert.Equal(floatClassModel, methodFunction1.ReturnTypeReferenceClassModel);
-             Assert.Equal(2, methodFunction1.ParameterTypes.Count);
-             Assert.Equal(intClassModel, methodFunction1.ParameterTypes[0].Type);
-             Assert.Equal("", methodFunction1.ParameterTypes[0].Modifier);
-             Assert.Null(methodFunction1.ParameterTypes[0].DefaultValue);
-             Assert.Equal(intClassModel, methodFunction1.ParameterTypes[1].Type);
-             Assert.Equal("", methodFunction1.ParameterTypes[1].Modifier);
-             Assert.Null(methodFunction1.ParameterTypes[1].DefaultValue);
+             Assert.Equal(2, methodFunction1.Parameters.Count);
+             Assert.Equal(intClassModel, methodFunction1.Parameters[0].Type);
+             Assert.Equal("", methodFunction1.Parameters[0].Modifier);
+             Assert.Null(methodFunction1.Parameters[0].DefaultValue);
+             Assert.Equal(intClassModel, methodFunction1.Parameters[1].Type);
+             Assert.Equal("", methodFunction1.Parameters[1].Modifier);
+             Assert.Null(methodFunction1.Parameters[1].DefaultValue);
              Assert.Equal(5, methodFunction1.CalledMethods.Count);
              Assert.Equal(methodFunction3, methodFunction1.CalledMethods[0]);
              Assert.Equal(methodFunction3, methodFunction1.CalledMethods[1]);
@@ -172,10 +172,10 @@ namespace HoneydewCoreIntegrationTests.Processors
              Assert.Equal("", methodFunction2.Modifier);
              Assert.Equal("public", methodFunction2.AccessModifier);
              Assert.Equal(intClassModel, methodFunction2.ReturnTypeReferenceClassModel);
-             Assert.Equal(1, methodFunction2.ParameterTypes.Count);
-             Assert.Equal(stringClassModel, methodFunction2.ParameterTypes[0].Type);
-             Assert.Equal("", methodFunction2.ParameterTypes[0].Modifier);
-             Assert.Null(methodFunction2.ParameterTypes[0].DefaultValue);
+             Assert.Equal(1, methodFunction2.Parameters.Count);
+             Assert.Equal(stringClassModel, methodFunction2.Parameters[0].Type);
+             Assert.Equal("", methodFunction2.Parameters[0].Modifier);
+             Assert.Null(methodFunction2.Parameters[0].DefaultValue);
              Assert.Equal(1, methodFunction2.CalledMethods.Count);
              Assert.Equal(parseMethodModel, methodFunction2.CalledMethods[0]);
 
@@ -184,10 +184,10 @@ namespace HoneydewCoreIntegrationTests.Processors
              Assert.Equal("", methodFunction3.Modifier);
              Assert.Equal("public", methodFunction3.AccessModifier);
              Assert.Equal(stringClassModel, methodFunction3.ReturnTypeReferenceClassModel);
-             Assert.Equal(1, methodFunction3.ParameterTypes.Count);
-             Assert.Equal(intClassModel, methodFunction3.ParameterTypes[0].Type);
-             Assert.Equal("", methodFunction3.ParameterTypes[0].Modifier);
-             Assert.Null(methodFunction3.ParameterTypes[0].DefaultValue);
+             Assert.Equal(1, methodFunction3.Parameters.Count);
+             Assert.Equal(intClassModel, methodFunction3.Parameters[0].Type);
+             Assert.Equal("", methodFunction3.Parameters[0].Modifier);
+             Assert.Null(methodFunction3.Parameters[0].DefaultValue);
              Assert.Equal(1, methodFunction3.CalledMethods.Count);
              Assert.Equal(toStringMethodModel, methodFunction3.CalledMethods[0]);
 
@@ -196,10 +196,10 @@ namespace HoneydewCoreIntegrationTests.Processors
              Assert.Equal("static", methodPrint1.Modifier);
              Assert.Equal("private", methodPrint1.AccessModifier);
              Assert.Equal(voidClassModel, methodPrint1.ReturnTypeReferenceClassModel);
-             Assert.Equal(1, methodPrint1.ParameterTypes.Count);
-             Assert.Equal(floatClassModel, methodPrint1.ParameterTypes[0].Type);
-             Assert.Equal("", methodPrint1.ParameterTypes[0].Modifier);
-             Assert.Null(methodPrint1.ParameterTypes[0].DefaultValue);
+             Assert.Equal(1, methodPrint1.Parameters.Count);
+             Assert.Equal(floatClassModel, methodPrint1.Parameters[0].Type);
+             Assert.Equal("", methodPrint1.Parameters[0].Modifier);
+             Assert.Null(methodPrint1.Parameters[0].DefaultValue);
              Assert.Empty(methodPrint1.CalledMethods);
 
              Assert.Equal("Print", methodPrint2.Name);
@@ -207,10 +207,10 @@ namespace HoneydewCoreIntegrationTests.Processors
              Assert.Equal("", methodPrint2.Modifier);
              Assert.Equal("private", methodPrint2.AccessModifier);
              Assert.Equal(voidClassModel, methodPrint2.ReturnTypeReferenceClassModel);
-             Assert.Equal(1, methodPrint2.ParameterTypes.Count);
-             Assert.Equal(intClassModel, methodPrint2.ParameterTypes[0].Type);
-             Assert.Equal("", methodPrint2.ParameterTypes[0].Modifier);
-             Assert.Null(methodPrint2.ParameterTypes[0].DefaultValue);
+             Assert.Equal(1, methodPrint2.Parameters.Count);
+             Assert.Equal(intClassModel, methodPrint2.Parameters[0].Type);
+             Assert.Equal("", methodPrint2.Parameters[0].Modifier);
+             Assert.Null(methodPrint2.Parameters[0].DefaultValue);
              Assert.Equal(1, methodPrint2.CalledMethods.Count);
              Assert.Equal(methodPrint2, methodPrint2.CalledMethods[0]);
          }
@@ -222,7 +222,7 @@ namespace HoneydewCoreIntegrationTests.Processors
              const string fileContent = @"
          namespace Project1.Services
          {
-              public class MyClass
+             public class MyClass
              {
                  public void Print()
                  {
@@ -330,7 +330,7 @@ namespace HoneydewCoreIntegrationTests.Processors
              Assert.Equal("", printNoArg.Modifier);
              Assert.Equal("public", printNoArg.AccessModifier);
              Assert.Equal(voidClassModel, printNoArg.ReturnTypeReferenceClassModel);
-             Assert.Empty(printNoArg.ParameterTypes);
+             Assert.Empty(printNoArg.Parameters);
              Assert.Equal(4, printNoArg.CalledMethods.Count);
              Assert.Equal(printInt, printNoArg.CalledMethods[0]);
              Assert.Equal(printLong, printNoArg.CalledMethods[1]);
@@ -342,10 +342,10 @@ namespace HoneydewCoreIntegrationTests.Processors
              Assert.Equal("", printInt.Modifier);
              Assert.Equal("private", printInt.AccessModifier);
              Assert.Equal(voidClassModel, printInt.ReturnTypeReferenceClassModel);
-             Assert.Equal(1, printInt.ParameterTypes.Count);
-             Assert.Equal(intClassModel, printInt.ParameterTypes[0].Type);
-             Assert.Equal("", printInt.ParameterTypes[0].Modifier);
-             Assert.Null(printInt.ParameterTypes[0].DefaultValue);
+             Assert.Equal(1, printInt.Parameters.Count);
+             Assert.Equal(intClassModel, printInt.Parameters[0].Type);
+             Assert.Equal("", printInt.Parameters[0].Modifier);
+             Assert.Null(printInt.Parameters[0].DefaultValue);
              Assert.Empty(printInt.CalledMethods);
 
              Assert.Equal("Print", printShort.Name);
@@ -353,10 +353,10 @@ namespace HoneydewCoreIntegrationTests.Processors
              Assert.Equal("", printShort.Modifier);
              Assert.Equal("private", printShort.AccessModifier);
              Assert.Equal(voidClassModel, printShort.ReturnTypeReferenceClassModel);
-             Assert.Equal(1, printShort.ParameterTypes.Count);
-             Assert.Equal(shortClassModel, printShort.ParameterTypes[0].Type);
-             Assert.Equal("", printShort.ParameterTypes[0].Modifier);
-             Assert.Null(printShort.ParameterTypes[0].DefaultValue);
+             Assert.Equal(1, printShort.Parameters.Count);
+             Assert.Equal(shortClassModel, printShort.Parameters[0].Type);
+             Assert.Equal("", printShort.Parameters[0].Modifier);
+             Assert.Null(printShort.Parameters[0].DefaultValue);
              Assert.Empty(printShort.CalledMethods);
 
              Assert.Equal("Print", printLong.Name);
@@ -364,10 +364,10 @@ namespace HoneydewCoreIntegrationTests.Processors
              Assert.Equal("", printLong.Modifier);
              Assert.Equal("private", printLong.AccessModifier);
              Assert.Equal(voidClassModel, printLong.ReturnTypeReferenceClassModel);
-             Assert.Equal(1, printLong.ParameterTypes.Count);
-             Assert.Equal(longClassModel, printLong.ParameterTypes[0].Type);
-             Assert.Equal("", printLong.ParameterTypes[0].Modifier);
-             Assert.Null(printLong.ParameterTypes[0].DefaultValue);
+             Assert.Equal(1, printLong.Parameters.Count);
+             Assert.Equal(longClassModel, printLong.Parameters[0].Type);
+             Assert.Equal("", printLong.Parameters[0].Modifier);
+             Assert.Null(printLong.Parameters[0].DefaultValue);
              Assert.Empty(printLong.CalledMethods);
 
              Assert.Equal("Print", printByte.Name);
@@ -375,10 +375,10 @@ namespace HoneydewCoreIntegrationTests.Processors
              Assert.Equal("", printByte.Modifier);
              Assert.Equal("private", printByte.AccessModifier);
              Assert.Equal(voidClassModel, printByte.ReturnTypeReferenceClassModel);
-             Assert.Equal(1, printByte.ParameterTypes.Count);
-             Assert.Equal(byteClassModel, printByte.ParameterTypes[0].Type);
-             Assert.Equal("", printByte.ParameterTypes[0].Modifier);
-             Assert.Null(printByte.ParameterTypes[0].DefaultValue);
+             Assert.Equal(1, printByte.Parameters.Count);
+             Assert.Equal(byteClassModel, printByte.Parameters[0].Type);
+             Assert.Equal("", printByte.Parameters[0].Modifier);
+             Assert.Null(printByte.Parameters[0].DefaultValue);
              Assert.Empty(printByte.CalledMethods);
          }
 
@@ -642,8 +642,7 @@ namespace HoneydewCoreIntegrationTests.Processors
              Assert.Equal("public", baseClass.Constructors[0].AccessModifier);
              Assert.Empty(baseClass.Constructors[0].CalledMethods);
              Assert.Equal(baseClass, baseClass.Constructors[0].ContainingClass);
-             Assert.True(baseClass.Constructors[0].IsConstructor);
-             Assert.Empty(baseClass.Constructors[0].ParameterTypes);
+             Assert.Empty(baseClass.Constructors[0].Parameters);
              Assert.Null(baseClass.Constructors[0].ReturnTypeReferenceClassModel);
              Assert.Empty(baseClass.Methods);
              Assert.Empty(baseClass.Metrics);
@@ -714,10 +713,10 @@ namespace HoneydewCoreIntegrationTests.Processors
              Assert.Equal("", callMethod0.Modifier);
              Assert.Equal("public", callMethod0.AccessModifier);
              Assert.Equal(voidClassModel, callMethod0.ReturnTypeReferenceClassModel);
-             Assert.Equal(1, callMethod0.ParameterTypes.Count);
-             Assert.Equal(baseClass, callMethod0.ParameterTypes[0].Type);
-             Assert.Equal("", callMethod0.ParameterTypes[0].Modifier);
-             Assert.Null(callMethod0.ParameterTypes[0].DefaultValue);
+             Assert.Equal(1, callMethod0.Parameters.Count);
+             Assert.Equal(baseClass, callMethod0.Parameters[0].Type);
+             Assert.Equal("", callMethod0.Parameters[0].Modifier);
+             Assert.Null(callMethod0.Parameters[0].DefaultValue);
              Assert.Empty(callMethod0.CalledMethods);
              Assert.False(callMethod0.IsConstructor);
 
@@ -728,7 +727,7 @@ namespace HoneydewCoreIntegrationTests.Processors
              Assert.Equal("static", callMethod1.Modifier);
              Assert.Equal("public", callMethod1.AccessModifier);
              Assert.Equal(voidClassModel, callMethod1.ReturnTypeReferenceClassModel);
-             Assert.Empty(callMethod1.ParameterTypes);
+             Assert.Empty(callMethod1.Parameters);
              Assert.Equal(6, callMethod1.CalledMethods.Count);
              Assert.False(callMethod1.IsConstructor);
 

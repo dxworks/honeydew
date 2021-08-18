@@ -2,7 +2,7 @@
 using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
-using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
@@ -51,7 +51,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                 var optional = classModel.GetMetricValue<CSharpFieldsInfoMetric>();
                 Assert.True(optional.HasValue);
 
-                var fieldInfos = (IList<FieldModel>) optional.Value;
+                var fieldInfos = (IList<IFieldType>) optional.Value;
 
                 Assert.Empty(fieldInfos);
             }
@@ -78,7 +78,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var optional = classModels[0].GetMetricValue<CSharpFieldsInfoMetric>();
             Assert.True(optional.HasValue);
 
-            var fieldInfos = (IList<FieldModel>) optional.Value;
+            var fieldInfos = (IList<IFieldType>) optional.Value;
 
             Assert.Equal(3, fieldInfos.Count);
 
@@ -86,21 +86,21 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("int", fieldInfos[0].Type);
             Assert.Equal("readonly", fieldInfos[0].Modifier);
             Assert.Equal("private", fieldInfos[0].AccessModifier);
-            Assert.Equal("TopLevel.Foo", fieldInfos[0].ContainingClassName);
+            Assert.Equal("TopLevel.Foo", fieldInfos[0].ContainingTypeName);
             Assert.False(fieldInfos[0].IsEvent);
 
             Assert.Equal("X", fieldInfos[1].Name);
             Assert.Equal("float", fieldInfos[1].Type);
             Assert.Equal("volatile", fieldInfos[1].Modifier);
             Assert.Equal("private", fieldInfos[1].AccessModifier);
-            Assert.Equal("TopLevel.Foo", fieldInfos[1].ContainingClassName);
+            Assert.Equal("TopLevel.Foo", fieldInfos[1].ContainingTypeName);
             Assert.False(fieldInfos[1].IsEvent);
 
             Assert.Equal("Y", fieldInfos[2].Name);
             Assert.Equal("string", fieldInfos[2].Type);
             Assert.Equal("static", fieldInfos[2].Modifier);
             Assert.Equal("private", fieldInfos[2].AccessModifier);
-            Assert.Equal("TopLevel.Foo", fieldInfos[2].ContainingClassName);
+            Assert.Equal("TopLevel.Foo", fieldInfos[2].ContainingTypeName);
             Assert.False(fieldInfos[2].IsEvent);
         }
 
@@ -129,7 +129,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var optional = classModels[0].GetMetricValue<CSharpFieldsInfoMetric>();
             Assert.True(optional.HasValue);
 
-            var fieldInfos = (IList<FieldModel>) optional.Value;
+            var fieldInfos = (IList<IFieldType>) optional.Value;
 
             Assert.Equal(5, fieldInfos.Count);
 
@@ -189,7 +189,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var optional = classModels[0].GetMetricValue<CSharpFieldsInfoMetric>();
             Assert.True(optional.HasValue);
 
-            var fieldInfos = (IList<FieldModel>) optional.Value;
+            var fieldInfos = (IList<IFieldType>) optional.Value;
 
             Assert.Equal(4, fieldInfos.Count);
 
@@ -242,7 +242,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var optional = classModels[0].GetMetricValue<CSharpFieldsInfoMetric>();
             Assert.True(optional.HasValue);
 
-            var fieldInfos = (IList<FieldModel>) optional.Value;
+            var fieldInfos = (IList<IFieldType>) optional.Value;
 
             Assert.Equal(5, fieldInfos.Count);
 

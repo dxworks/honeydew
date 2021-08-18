@@ -4,6 +4,7 @@ using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
@@ -17,7 +18,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
         public CSharpMethodInfoDataMetric DataMetric { get; set; } = new();
 
         private string _containingClassName = "";
-        private string _baseTypeName = CSharpConstants.ObjectIdentifier;
+        private string _baseName = CSharpConstants.ObjectIdentifier;
         private bool _isInterface;
 
         private readonly CSharpLinesOfCodeCounter _linesOfCodeCounter = new();
@@ -48,9 +49,9 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 Name = _containingClassName,
                 ReturnType = new ReturnTypeModel
                 {
-                    Type = returnType
+                    Name = returnType
                 },
-                ContainingClassName = _containingClassName,
+                ContainingTypeName = _containingClassName,
                 Modifier = "",
                 AccessModifier = "",
                 CyclomaticComplexity = 0
@@ -85,7 +86,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
         private void AddInfoForNode(TypeDeclarationSyntax node)
         {
             _containingClassName = HoneydewSemanticModel.GetFullName(node);
-            _baseTypeName = HoneydewSemanticModel.GetBaseClassName(node);
+            _baseName = HoneydewSemanticModel.GetBaseClassName(node);
 
             foreach (var memberDeclarationSyntax in node.Members)
             {
@@ -105,25 +106,23 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
         {
             GetModifiersForNode(syntax, out var accessModifier, out var modifier);
 
-            var methodModel = new MethodModel
+            var constructorModel = new ConstructorModel
             {
                 Name = syntax.Identifier.ToString(),
-                ReturnType = null,
-                ContainingClassName = _containingClassName,
+                ContainingTypeName = _containingClassName,
                 Modifier = modifier,
                 AccessModifier = accessModifier,
-                IsConstructor = true,
                 Loc = _linesOfCodeCounter.Count(syntax.ToString()),
                 CyclomaticComplexity = HoneydewSyntacticModel.CalculateCyclomaticComplexity(syntax)
             };
 
-            ExtractInfoAboutParameters(syntax.ParameterList, methodModel);
+            ExtractInfoAboutParameters(syntax.ParameterList, constructorModel);
 
-            ExtractInfoAboutConstructorCalls(syntax, methodModel);
+            ExtractInfoAboutConstructorCalls(syntax, constructorModel);
 
-            ExtractInfoAboutCalledMethods(syntax, methodModel);
+            ExtractInfoAboutCalledMethods(syntax, constructorModel);
 
-            DataMetric.ConstructorInfos.Add(methodModel);
+            DataMetric.ConstructorInfos.Add(constructorModel);
         }
 
         private void AddMethodInfo(MethodDeclarationSyntax syntax)
@@ -139,10 +138,10 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 Name = syntax.Identifier.ToString(),
                 ReturnType = new ReturnTypeModel
                 {
-                    Type = returnType,
+                    Name = returnType,
                     Modifier = returnTypeModifier
                 },
-                ContainingClassName = _containingClassName,
+                ContainingTypeName = _containingClassName,
                 Modifier = modifier,
                 AccessModifier = accessModifier,
                 Loc = _linesOfCodeCounter.Count(syntax.ToString()),
@@ -156,7 +155,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
             DataMetric.MethodInfos.Add(methodModel);
         }
 
-        private void ExtractInfoAboutParameters(BaseParameterListSyntax parameterList, MethodModel methodModel)
+        private void ExtractInfoAboutParameters(BaseParameterListSyntax parameterList, IMethodSignatureType methodModel)
         {
             foreach (var parameter in parameterList.Parameters)
             {
@@ -164,14 +163,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
 
                 methodModel.ParameterTypes.Add(new ParameterModel
                 {
-                    Type = parameterType,
+                    Name = parameterType,
                     Modifier = parameter.Modifiers.ToString(),
                     DefaultValue = parameter.Default?.Value.ToString()
                 });
             }
         }
 
-        private void ExtractInfoAboutCalledMethods(BaseMethodDeclarationSyntax syntax, MethodModel methodModel)
+        private void ExtractInfoAboutCalledMethods(BaseMethodDeclarationSyntax syntax, ICallingMethodsType methodModel)
         {
             if (syntax.Body == null)
             {
@@ -182,7 +181,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                 .OfType<InvocationExpressionSyntax>())
             {
                 var methodCallModel =
-                    HoneydewSemanticModel.GetMethodCallModel(invocationExpressionSyntax, _baseTypeName);
+                    HoneydewSemanticModel.GetMethodCallModel(invocationExpressionSyntax, _baseName);
                 if (methodCallModel != null)
                 {
                     methodModel.CalledMethods.Add(methodCallModel);
@@ -190,7 +189,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
             }
         }
 
-        private void ExtractInfoAboutConstructorCalls(ConstructorDeclarationSyntax syntax, MethodModel methodModel)
+        private void ExtractInfoAboutConstructorCalls(ConstructorDeclarationSyntax syntax,
+            ICallingMethodsType methodModel)
         {
             if (syntax.Initializer == null)
             {
@@ -202,24 +202,24 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
             var methodName = syntax.Identifier.ToString();
             if (syntax.Initializer.ThisOrBaseKeyword.ValueText == "base")
             {
-                containingClassName = _baseTypeName;
-                methodName = _baseTypeName;
+                containingClassName = _baseName;
+                methodName = _baseName;
             }
 
-            IList<ParameterModel> parameterModels = new List<ParameterModel>();
+            IList<IParameterType> parameterModels = new List<IParameterType>();
 
             var methodSymbol = HoneydewSemanticModel.GetMethodSymbol(syntax.Initializer);
 
             if (methodSymbol != null)
             {
-                parameterModels = HoneydewSemanticModel.GetParameterTypes(methodSymbol);
+                parameterModels = HoneydewSemanticModel.GetParameters(methodSymbol);
                 methodName = methodSymbol.ContainingType.Name;
             }
 
             methodModel.CalledMethods.Add(new MethodCallModel
             {
-                MethodName = methodName,
-                ContainingClassName = containingClassName,
+                Name = methodName,
+                ContainingTypeName = containingClassName,
                 ParameterTypes = parameterModels
             });
         }

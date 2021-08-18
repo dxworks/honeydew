@@ -3,6 +3,7 @@ using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
@@ -13,7 +14,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
         public CSharpSyntacticModel HoneydewSyntacticModel { get; set; }
         public CSharpSemanticModel HoneydewSemanticModel { get; set; }
         
-        public IList<FieldModel> FieldInfos { get; } = new List<FieldModel>();
+        public IList<IFieldType> FieldInfos { get; } = new List<IFieldType>();
 
         public ExtractionMetricType GetMetricType()
         {
@@ -22,7 +23,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
 
         public override IMetricValue GetMetric()
         {
-            return new MetricValue<IList<FieldModel>>(FieldInfos);
+            return new MetricValue<IList<IFieldType>>(FieldInfos);
         }
 
         public override string PrettyPrint()
@@ -65,7 +66,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
                     IsEvent = isEvent,
                     Type = typeName,
                     Name = variable.Identifier.ToString(),
-                    ContainingClassName = containingClass
+                    ContainingTypeName = containingClass
                 });
             }
         }

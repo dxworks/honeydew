@@ -1,6 +1,8 @@
-﻿using HoneydewExtractors.Core.Metrics.Extraction;
+﻿using System.Collections.Generic;
+using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
+using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
@@ -48,15 +50,16 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var classModel = classModels[0];
 
             Assert.Equal(1, classModel.Metrics.Count);
-            Assert.Equal("App.MyClass", classModel.FullName);
+            Assert.Equal("App.MyClass", classModel.Name);
 
             var optional = classModel.GetMetricValue<CSharpBaseClassMetric>();
             Assert.True(optional.HasValue);
 
-            var inheritanceMetric = (CSharpInheritanceMetric) optional.Value;
+            var baseTypes = (IList<IBaseType>)optional.Value;
 
-            Assert.Equal(0, inheritanceMetric.Interfaces.Count);
-            Assert.Equal("object", inheritanceMetric.BaseClassName);
+            Assert.Equal(1, baseTypes.Count);
+            Assert.Equal("object", baseTypes[0].Name);
+            Assert.Equal("class", baseTypes[0].ClassType);
         }
 
         [Fact]
@@ -83,16 +86,17 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             Assert.Equal(1, classModel.Metrics.Count);
 
-            Assert.Equal("App.Domain.MyClass", classModel.FullName);
+            Assert.Equal("App.Domain.MyClass", classModel.Name);
 
             var optional = classModel.GetMetricValue<CSharpBaseClassMetric>();
             Assert.True(optional.HasValue);
 
-            var inheritanceMetric = (CSharpInheritanceMetric) optional.Value;
+            var baseTypes = (IList<IBaseType>)optional.Value;
 
-            Assert.Empty(inheritanceMetric.Interfaces);
+            Assert.Equal(1, baseTypes.Count);
             // IMetric instead of object because the Semantic model doesn't know that IMetric is an interface
-            Assert.Equal("IMetric", inheritanceMetric.BaseClassName);
+            Assert.Equal("IMetric", baseTypes[0].Name);
+            Assert.Equal("class", baseTypes[0].ClassType);
         }
 
         [Fact]
@@ -122,24 +126,26 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             Assert.True(parentOptional.HasValue);
 
-            var inheritanceMetric = (CSharpInheritanceMetric) parentOptional.Value;
+            var baseTypes = (IList<IBaseType>)parentOptional.Value;
 
-            Assert.Equal("App.Parent", baseclassModel.FullName);
-            Assert.Equal(0, inheritanceMetric.Interfaces.Count);
-            Assert.Equal("object", inheritanceMetric.BaseClassName);
+            Assert.Equal("App.Parent", baseclassModel.Name);
+            Assert.Equal(1, baseTypes.Count);
+            Assert.Equal("object", baseTypes[0].Name);
+            Assert.Equal("class", baseTypes[0].ClassType);
 
             var classModel = classModels[1];
 
             Assert.Equal(1, classModel.Metrics.Count);
-            Assert.Equal("App.ChildClass", classModel.FullName);
+            Assert.Equal("App.ChildClass", classModel.Name);
 
             var optional = classModel.GetMetricValue<CSharpBaseClassMetric>();
             Assert.True(optional.HasValue);
 
-            var baseClassMetric = (CSharpInheritanceMetric) optional.Value;
-
-            Assert.Equal("App.Parent", baseClassMetric.BaseClassName);
-            Assert.Equal(0, baseClassMetric.Interfaces.Count);
+            var baseClassBaseTypes = (IList<IBaseType>)optional.Value;
+            
+            Assert.Equal(1, baseClassBaseTypes.Count);
+            Assert.Equal("App.Parent", baseClassBaseTypes[0].Name);
+            Assert.Equal("class", baseClassBaseTypes[0].ClassType);
         }
 
         [Fact]
@@ -173,27 +179,32 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var parentOptional = baseClassModel.GetMetricValue<CSharpBaseClassMetric>();
             Assert.True(parentOptional.HasValue);
 
-            var inheritanceMetric = (CSharpInheritanceMetric) parentOptional.Value;
+            var baseTypes = (IList<IBaseType>)parentOptional.Value;
 
-            Assert.Equal("App.Parent", baseClassModel.FullName);
-            Assert.Equal(0, inheritanceMetric.Interfaces.Count);
-            Assert.Equal("object", inheritanceMetric.BaseClassName);
+            Assert.Equal("App.Parent", baseClassModel.Name);
+            Assert.Equal(1, baseTypes.Count);
+            Assert.Equal("object", baseTypes[0].Name);
+            Assert.Equal("class", baseTypes[0].ClassType);
 
             var classModel = classModels[1];
             Assert.Equal(1, classModel.Metrics.Count);
 
-            Assert.Equal("App.ChildClass", classModel.FullName);
+            Assert.Equal("App.ChildClass", classModel.Name);
 
             var optional = classModel.GetMetricValue<CSharpBaseClassMetric>();
             Assert.True(optional.HasValue);
 
-            var baseClassMetric = (CSharpInheritanceMetric) optional.Value;
+            var baseClassBaseTypes = (IList<IBaseType>)optional.Value;
 
-            Assert.Equal("App.Parent", baseClassMetric.BaseClassName);
-            Assert.Equal(2, baseClassMetric.Interfaces.Count);
+            Assert.Equal(3, baseClassBaseTypes.Count);
+            Assert.Equal("App.Parent", baseClassBaseTypes[0].Name);
+            Assert.Equal("class", baseClassBaseTypes[0].ClassType);
 
-            Assert.Equal("IMetric", baseClassMetric.Interfaces[0]);
-            Assert.Equal("IMetricExtractor", baseClassMetric.Interfaces[1]);
+            Assert.Equal("IMetric", baseClassBaseTypes[1].Name);
+            Assert.Equal("interface", baseClassBaseTypes[1].ClassType);
+            
+            Assert.Equal("IMetricExtractor", baseClassBaseTypes[2].Name);
+            Assert.Equal("interface", baseClassBaseTypes[2].ClassType);
         }
     }
 }

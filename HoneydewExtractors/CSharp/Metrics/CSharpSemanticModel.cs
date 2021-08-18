@@ -3,6 +3,7 @@ using System.Linq;
 using HoneydewExtractors.Core.Metrics;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -315,7 +316,7 @@ namespace HoneydewExtractors.CSharp.Metrics
         }
 
         public MethodCallModel GetMethodCallModel(InvocationExpressionSyntax invocationExpressionSyntax,
-            string baseTypeName = "object")
+            string baseName = "object")
         {
             string containingClassName = null;
 
@@ -330,9 +331,9 @@ namespace HoneydewExtractors.CSharp.Metrics
                 case IdentifierNameSyntax:
                     return new MethodCallModel
                     {
-                        MethodName = invocationExpressionSyntax.Expression.ToString(),
-                        ContainingClassName = containingClassName,
-                        ParameterTypes = GetParameterTypes(invocationExpressionSyntax)
+                        Name = invocationExpressionSyntax.Expression.ToString(),
+                        ContainingTypeName = containingClassName,
+                        ParameterTypes = GetParameters(invocationExpressionSyntax)
                     };
 
                 case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
@@ -342,7 +343,7 @@ namespace HoneydewExtractors.CSharp.Metrics
                     if (memberAccessExpressionSyntax.Expression.ToFullString() ==
                         CSharpConstants.BaseClassIdentifier)
                     {
-                        className = baseTypeName;
+                        className = baseName;
                     }
                     else
                     {
@@ -352,9 +353,9 @@ namespace HoneydewExtractors.CSharp.Metrics
 
                     return new MethodCallModel
                     {
-                        MethodName = memberAccessExpressionSyntax.Name.ToString(),
-                        ContainingClassName = className,
-                        ParameterTypes = GetParameterTypes(invocationExpressionSyntax)
+                        Name = memberAccessExpressionSyntax.Name.ToString(),
+                        ContainingTypeName = className,
+                        ParameterTypes = GetParameters(invocationExpressionSyntax)
                     };
                 }
             }
@@ -362,9 +363,9 @@ namespace HoneydewExtractors.CSharp.Metrics
             return null;
         }
 
-        public IList<ParameterModel> GetParameterTypes(IMethodSymbol methodSymbol)
+        public IList<IParameterType> GetParameters(IMethodSymbol methodSymbol)
         {
-            IList<ParameterModel> parameterTypes = new List<ParameterModel>();
+            IList<IParameterType> parameters = new List<IParameterType>();
             foreach (var parameter in methodSymbol.Parameters)
             {
                 var modifier = parameter.RefKind switch
@@ -391,15 +392,15 @@ namespace HoneydewExtractors.CSharp.Metrics
                     defaultValue = parameter.ExplicitDefaultValue?.ToString();
                 }
 
-                parameterTypes.Add(new ParameterModel
+                parameters.Add(new ParameterModel
                 {
-                    Type = parameter.Type.ToString(),
+                    Name = parameter.Type.ToString(),
                     Modifier = modifier,
                     DefaultValue = defaultValue
                 });
             }
 
-            return parameterTypes;
+            return parameters;
         }
 
         public EAliasType GetAliasTypeOfNamespace(NameSyntax nodeName)
@@ -413,13 +414,13 @@ namespace HoneydewExtractors.CSharp.Metrics
             };
         }
 
-        private IList<ParameterModel> GetParameterTypes(InvocationExpressionSyntax invocationSyntax)
+        private IList<IParameterType> GetParameters(InvocationExpressionSyntax invocationSyntax)
         {
             var methodSymbol = GetMethodSymbol(invocationSyntax);
             if (methodSymbol == null)
             {
                 // try to reconstruct the parameters from the method call
-                var parameterList = new List<ParameterModel>();
+                var parameterList = new List<IParameterType>();
                 var success = true;
 
                 foreach (var argumentSyntax in invocationSyntax.ArgumentList.Arguments)
@@ -429,7 +430,7 @@ namespace HoneydewExtractors.CSharp.Metrics
                     {
                         parameterList.Add(new ParameterModel
                         {
-                            Type = GetFullName(argumentSyntax.Expression)
+                            Name = GetFullName(argumentSyntax.Expression)
                         });
                         continue;
                     }
@@ -448,14 +449,14 @@ namespace HoneydewExtractors.CSharp.Metrics
 
                     parameterList.Add(new ParameterModel
                     {
-                        Type = literalExpressionSyntax.Token.Value.GetType().FullName
+                        Name = literalExpressionSyntax.Token.Value.GetType().FullName
                     });
                 }
 
-                return success ? parameterList : new List<ParameterModel>();
+                return success ? parameterList : new List<IParameterType>();
             }
 
-            return GetParameterTypes(methodSymbol);
+            return GetParameters(methodSymbol);
         }
     }
 }

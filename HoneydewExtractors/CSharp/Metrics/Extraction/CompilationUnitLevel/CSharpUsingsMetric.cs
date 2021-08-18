@@ -3,6 +3,7 @@ using System.Linq;
 using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewModels;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,8 +16,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel
         public CSharpSyntacticModel HoneydewSyntacticModel { get; set; }
         public CSharpSemanticModel HoneydewSemanticModel { get; set; }
 
-        public IDictionary<string, ISet<UsingModel>> Usings { get; private set; } =
-            new Dictionary<string, ISet<UsingModel>>();
+        public IDictionary<string, ISet<IImportType>> Usings { get; private set; } =
+            new Dictionary<string, ISet<IImportType>>();
 
         private readonly ISet<UsingModel> _commonUsings = new HashSet<UsingModel>();
 
@@ -30,7 +31,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel
 
         public override IMetricValue GetMetric()
         {
-            return new MetricValue<IDictionary<string, ISet<UsingModel>>>(Usings);
+            return new MetricValue<IDictionary<string, ISet<IImportType>>>(Usings);
         }
 
         public override string PrettyPrint()
@@ -144,7 +145,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel
             };
         }
 
-        private void AddToUsings(string name, ISet<UsingModel> usingsSet)
+        private void AddToUsings(string name, ISet<IImportType> usingsSet)
         {
             if (Usings.ContainsKey(name))
             {
@@ -154,9 +155,9 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel
             Usings.Add(name, usingsSet);
         }
 
-        private ISet<UsingModel> AddUsingsFromParent(NamespaceDeclarationSyntax node)
+        private ISet<IImportType> AddUsingsFromParent(NamespaceDeclarationSyntax node)
         {
-            var usings = new HashSet<UsingModel>();
+            var usings = new HashSet<IImportType>();
 
             if (node == null)
             {

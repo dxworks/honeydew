@@ -7,6 +7,7 @@ using HoneydewCore.Processors;
 using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 
 namespace HoneydewExtractors.Processors
 {
@@ -104,15 +105,15 @@ namespace HoneydewExtractors.Processors
                     {
                         foreach (var classModel in namespaceModel.ClassModels)
                         {
-                            progressBar.Step($"{classModel.FullName} from {classModel.FilePath}");
+                            progressBar.Step($"{classModel.Name} from {classModel.FilePath}");
 
                             AddAmbiguousNames(() =>
                             {
-                                classModel.FullName = FindClassFullName(classModel.FullName, namespaceModel,
-                                    projectModel, solutionModel, repositoryModel, classModel.Usings,
+                                classModel.Name = FindClassFullName(classModel.Name, namespaceModel,
+                                    projectModel, solutionModel, repositoryModel, classModel.Imports,
                                     classModel.FilePath);
 
-                                _repositoryClassSet.Add(projectModel.FilePath, classModel.FullName);
+                                _repositoryClassSet.Add(projectModel.FilePath, classModel.Name);
                             });
                         }
                     }
@@ -136,9 +137,9 @@ namespace HoneydewExtractors.Processors
                     {
                         foreach (var classModel in namespaceModel.ClassModels)
                         {
-                            progressBar.Step($"{classModel.FullName} from {classModel.FilePath}");
+                            progressBar.Step($"{classModel.Name} from {classModel.FilePath}");
 
-                            foreach (var usingModel in classModel.Usings)
+                            foreach (var usingModel in classModel.Imports)
                             {
                                 if (usingModel.AliasType == EAliasType.NotDetermined)
                                 {
@@ -149,7 +150,7 @@ namespace HoneydewExtractors.Processors
                                 {
                                     // var beforeName = usingModel.Name;
                                     usingModel.Name = FindNamespaceFullName(usingModel.Name, namespaceModel,
-                                        classModel.Usings);
+                                        classModel.Imports);
                                     // if (usingModel.Name == beforeName)
                                     // {
                                     //     usingModel.Name = FindClassFullName(usingModel.Name, namespaceModel,
@@ -165,7 +166,7 @@ namespace HoneydewExtractors.Processors
             progressBar.Stop();
         }
 
-        private static EAliasType DetermineUsingType(UsingModel usingModel, ClassModel classModel)
+        private static EAliasType DetermineUsingType(IImportType usingModel, IPropertyMembersClassType classModel)
         {
             var namespaceAccess = $"{usingModel.Alias}.";
 
@@ -192,25 +193,25 @@ namespace HoneydewExtractors.Processors
                 return EAliasType.Namespace;
             }
 
-            if (IsAliasNamespaceSearchInMethodModels(classModel.Constructors))
+            if (IsAliasNamespaceSearchInConstructorModels(classModel.Constructors))
             {
                 return EAliasType.Namespace;
             }
 
             return EAliasType.Class;
 
-            bool IsAliasNamespaceSearchInMethodModels(IEnumerable<MethodModel> methodModels)
+            bool IsAliasNamespaceSearchInMethodModels(IEnumerable<IMethodType> methodTypes)
             {
-                foreach (var methodModel in methodModels)
+                foreach (var methodModel in methodTypes)
                 {
-                    if (!string.IsNullOrEmpty(methodModel.ReturnType.Type) &&
-                        methodModel.ReturnType.Type.StartsWith(namespaceAccess))
+                    if (!string.IsNullOrEmpty(methodModel.ReturnType.Name) &&
+                        methodModel.ReturnType.Name.StartsWith(namespaceAccess))
                     {
                         return true;
                     }
 
                     if (methodModel.ParameterTypes.Any(parameterModel =>
-                        parameterModel.Type.StartsWith(namespaceAccess)))
+                        parameterModel.Name.StartsWith(namespaceAccess)))
                     {
                         return true;
                     }
@@ -224,18 +225,37 @@ namespace HoneydewExtractors.Processors
                 return false;
             }
 
-            bool IsAliasNamespaceSearchInCalledMethods(IEnumerable<MethodCallModel> calledMethods)
+            bool IsAliasNamespaceSearchInConstructorModels(IEnumerable<IConstructorType> constructorTypes)
+            {
+                foreach (var methodModel in constructorTypes)
+                {
+                    if (methodModel.ParameterTypes.Any(parameterModel =>
+                        parameterModel.Name.StartsWith(namespaceAccess)))
+                    {
+                        return true;
+                    }
+
+                    if (IsAliasNamespaceSearchInCalledMethods(methodModel.CalledMethods))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            bool IsAliasNamespaceSearchInCalledMethods(IEnumerable<IMethodSignatureType> calledMethods)
             {
                 foreach (var calledMethod in calledMethods)
                 {
-                    if (!string.IsNullOrEmpty(calledMethod.ContainingClassName) &&
-                        calledMethod.ContainingClassName.StartsWith(namespaceAccess))
+                    if (!string.IsNullOrEmpty(calledMethod.ContainingTypeName) &&
+                        calledMethod.ContainingTypeName.StartsWith(namespaceAccess))
                     {
                         return true;
                     }
 
                     if (calledMethod.ParameterTypes.Any(parameterModel =>
-                        parameterModel.Type.StartsWith(namespaceAccess)))
+                        parameterModel.Name.StartsWith(namespaceAccess)))
                     {
                         return true;
                     }
@@ -260,25 +280,18 @@ namespace HoneydewExtractors.Processors
                     {
                         foreach (var classModel in namespaceModel.ClassModels)
                         {
-                            _logger.Log($"Resolving Elements for {classModel.FullName} from {classModel.FilePath}");
-                            progressBar.Step($"{classModel.FullName} from {classModel.FilePath}");
+                            _logger.Log($"Resolving Elements for {classModel.Name} from {classModel.FilePath}");
+                            progressBar.Step($"{classModel.Name} from {classModel.FilePath}");
 
-                            AddAmbiguousNames(() =>
-                            {
-                                classModel.BaseClassFullName = FindClassFullName(
-                                    classModel.BaseClassFullName, namespaceModel, projectModel, solutionModel,
-                                    repositoryModel, classModel.Usings, classModel.FilePath);
-                            });
-
-                            for (var i = 0; i < classModel.BaseInterfaces.Count; i++)
+                            for (var i = 0; i < classModel.BaseTypes.Count; i++)
                             {
                                 var iCopy = i;
                                 AddAmbiguousNames(() =>
                                 {
-                                    classModel.BaseInterfaces[iCopy] = FindClassFullName(
-                                        classModel.BaseInterfaces[iCopy],
+                                    classModel.BaseTypes[iCopy].Name = FindClassFullName(
+                                        classModel.BaseTypes[iCopy].Name,
                                         namespaceModel, projectModel, solutionModel, repositoryModel,
-                                        classModel.Usings, classModel.FilePath);
+                                        classModel.Imports, classModel.FilePath);
                                 });
                             }
 
@@ -288,7 +301,7 @@ namespace HoneydewExtractors.Processors
                                 {
                                     fieldModel.Type = FindClassFullName(fieldModel.Type,
                                         namespaceModel, projectModel, solutionModel, repositoryModel,
-                                        classModel.Usings, classModel.FilePath);
+                                        classModel.Imports, classModel.FilePath);
                                 });
                             }
 
@@ -298,12 +311,12 @@ namespace HoneydewExtractors.Processors
                                 {
                                     propertyModel.Type = FindClassFullName(propertyModel.Type,
                                         namespaceModel, projectModel, solutionModel, repositoryModel,
-                                        classModel.Usings, classModel.FilePath);
+                                        classModel.Imports, classModel.FilePath);
                                 });
 
                                 SetContainingClassAndCalledMethodsFullNameProperty(classModel.FilePath, propertyModel,
                                     namespaceModel,
-                                    projectModel, solutionModel, classModel.Usings);
+                                    projectModel, solutionModel, classModel.Imports);
                             }
 
                             foreach (var methodModel in classModel.Methods)
@@ -312,22 +325,22 @@ namespace HoneydewExtractors.Processors
                                 {
                                     AddAmbiguousNames(() =>
                                     {
-                                        methodModel.ReturnType.Type = FindClassFullName(methodModel.ReturnType.Type,
+                                        methodModel.ReturnType.Name = FindClassFullName(methodModel.ReturnType.Name,
                                             namespaceModel, projectModel, solutionModel, repositoryModel,
-                                            classModel.Usings, classModel.FilePath);
+                                            classModel.Imports, classModel.FilePath);
                                     });
                                 }
 
                                 SetContainingClassAndCalledMethodsFullName(classModel.FilePath, methodModel,
                                     namespaceModel,
-                                    projectModel, solutionModel, classModel.Usings);
+                                    projectModel, solutionModel, classModel.Imports);
                             }
 
-                            foreach (var methodModel in classModel.Constructors)
+                            foreach (var constructorType in classModel.Constructors)
                             {
-                                SetContainingClassAndCalledMethodsFullName(classModel.FilePath, methodModel,
+                                SetContainingClassAndCalledMethodsFullName(classModel.FilePath, constructorType,
                                     namespaceModel,
-                                    projectModel, solutionModel, classModel.Usings);
+                                    projectModel, solutionModel, classModel.Imports);
                             }
 
                             ChangeDependencyMetricFullName(repositoryModel, classModel, namespaceModel,
@@ -341,13 +354,14 @@ namespace HoneydewExtractors.Processors
                 progressBar.Stop();
             }
 
-            void SetContainingClassAndCalledMethodsFullNameProperty(string classFilePath, PropertyModel propertyModel,
+            void SetContainingClassAndCalledMethodsFullNameProperty(string classFilePath,
+                ICallingMethodsType propertyModel,
                 NamespaceModel namespaceModel,
-                ProjectModel projectModel, SolutionModel solutionModel, IList<UsingModel> usings)
+                ProjectModel projectModel, SolutionModel solutionModel, IList<IImportType> usings)
             {
                 AddAmbiguousNames(() =>
                 {
-                    propertyModel.ContainingClassName = FindClassFullName(propertyModel.ContainingClassName,
+                    propertyModel.ContainingTypeName = FindClassFullName(propertyModel.ContainingTypeName,
                         namespaceModel, projectModel, solutionModel, repositoryModel, usings, classFilePath);
                 });
 
@@ -355,13 +369,13 @@ namespace HoneydewExtractors.Processors
                     projectModel, solutionModel, repositoryModel, usings);
             }
 
-            void SetContainingClassAndCalledMethodsFullName(string classFilePath, MethodModel methodModel,
+            void SetContainingClassAndCalledMethodsFullName(string classFilePath, IMethodSkeletonType methodModel,
                 NamespaceModel namespaceModel,
-                ProjectModel projectModel, SolutionModel solutionModel, IList<UsingModel> usings)
+                ProjectModel projectModel, SolutionModel solutionModel, IList<IImportType> usings)
             {
                 AddAmbiguousNames(() =>
                 {
-                    methodModel.ContainingClassName = FindClassFullName(methodModel.ContainingClassName,
+                    methodModel.ContainingTypeName = FindClassFullName(methodModel.ContainingTypeName,
                         namespaceModel, projectModel, solutionModel, repositoryModel, usings, classFilePath);
                 });
 
@@ -369,7 +383,7 @@ namespace HoneydewExtractors.Processors
                 {
                     AddAmbiguousNames(() =>
                     {
-                        parameterModel.Type = FindClassFullName(parameterModel.Type, namespaceModel,
+                        parameterModel.Name = FindClassFullName(parameterModel.Name, namespaceModel,
                             projectModel, solutionModel, repositoryModel, usings, classFilePath);
                     });
                 }
@@ -380,9 +394,9 @@ namespace HoneydewExtractors.Processors
         }
 
         private void SetFullNameForCalledMethods(string classFilePath,
-            IEnumerable<MethodCallModel> methodModelCalledMethods,
+            IEnumerable<IMethodSignatureType> methodModelCalledMethods,
             NamespaceModel namespaceModel, ProjectModel projectModel, SolutionModel solutionModel,
-            RepositoryModel repositoryModel, IList<UsingModel> usings)
+            RepositoryModel repositoryModel, IList<IImportType> usings)
         {
             foreach (var calledMethod in methodModelCalledMethods)
             {
@@ -390,36 +404,37 @@ namespace HoneydewExtractors.Processors
                 {
                     AddAmbiguousNames(() =>
                     {
-                        parameterModel.Type = FindClassFullName(parameterModel.Type, namespaceModel,
+                        parameterModel.Name = FindClassFullName(parameterModel.Name, namespaceModel,
                             projectModel, solutionModel, repositoryModel, usings, classFilePath);
                     });
                 }
 
                 AddAmbiguousNames(() =>
                 {
-                    calledMethod.ContainingClassName = FindClassFullName(
-                        calledMethod.ContainingClassName, namespaceModel, projectModel, solutionModel,
+                    calledMethod.ContainingTypeName = FindClassFullName(
+                        calledMethod.ContainingTypeName, namespaceModel, projectModel, solutionModel,
                         repositoryModel, usings, classFilePath);
 
-                    var classModel = GetClassModelFullyQualified(calledMethod.ContainingClassName, projectModel,
+                    var classModel = GetClassModelFullyQualified(calledMethod.ContainingTypeName, projectModel,
                         solutionModel,
                         repositoryModel);
 
                     // search for static import of a class
                     if (classModel == null)
                     {
-                        calledMethod.ContainingClassName = SearchForMethodNameInStaticImports(
-                            calledMethod.ContainingClassName, calledMethod.MethodName,
-                            calledMethod.ParameterTypes, projectModel, solutionModel, repositoryModel, usings);
+                        calledMethod.ContainingTypeName = SearchForMethodNameInStaticImports(
+                            calledMethod.ContainingTypeName, calledMethod.Name, calledMethod.ParameterTypes, projectModel,
+                            solutionModel,
+                            repositoryModel, usings);
                     }
                 });
             }
         }
 
         private string SearchForMethodNameInStaticImports(string containingClassName, string methodName,
-            IList<ParameterModel> methodParameters,
+            IList<IParameterType> methodParameters,
             ProjectModel projectModel, SolutionModel solutionModel,
-            RepositoryModel repositoryModel, IList<UsingModel> usings)
+            RepositoryModel repositoryModel, IList<IImportType> usings)
         {
             if (!string.IsNullOrEmpty(containingClassName) && containingClassName.StartsWith("System."))
             {
@@ -431,15 +446,15 @@ namespace HoneydewExtractors.Processors
                 return "";
             }
 
-            foreach (var usingModel in usings)
+            foreach (var importType in usings)
             {
-                if (!usingModel.IsStatic)
+                if (importType is UsingModel { IsStatic: false })
                 {
                     continue;
                 }
 
                 var staticImportedClass =
-                    GetClassModelFullyQualified(usingModel.Name, projectModel, solutionModel, repositoryModel);
+                    GetClassModelFullyQualified(importType.Name, projectModel, solutionModel, repositoryModel);
 
                 if (staticImportedClass == null)
                 {
@@ -464,11 +479,12 @@ namespace HoneydewExtractors.Processors
 
                 foreach (var methodModel in staticImportedClass.Methods)
                 {
-                    var hasTheSameSignature = MethodsHaveTheSameSignature(methodModel.Name, methodModel.ParameterTypes,
+                    var hasTheSameSignature = MethodsHaveTheSameSignature(methodModel.Name,
+                        methodModel.ParameterTypes,
                         methodName, methodParameters);
                     if (hasTheSameSignature)
                     {
-                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(staticImportedClass.FullName);
+                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(staticImportedClass.Name);
                     }
                 }
             }
@@ -477,8 +493,8 @@ namespace HoneydewExtractors.Processors
         }
 
         private static bool MethodsHaveTheSameSignature(string firstMethodName,
-            IList<ParameterModel> firstMethodParameters,
-            string secondMethodName, IList<ParameterModel> secondMethodParameters)
+            IList<IParameterType> firstMethodParameters,
+            string secondMethodName, IList<IParameterType> secondMethodParameters)
         {
             if (firstMethodName != secondMethodName)
             {
@@ -492,22 +508,26 @@ namespace HoneydewExtractors.Processors
 
             for (var i = 0; i < firstMethodParameters.Count; i++)
             {
-                if (CSharpConstants.ConvertPrimitiveTypeToSystemType(firstMethodParameters[i].Type) !=
-                    CSharpConstants.ConvertPrimitiveTypeToSystemType(secondMethodParameters[i].Type))
+                if (CSharpConstants.ConvertPrimitiveTypeToSystemType(firstMethodParameters[i].Name) !=
+                    CSharpConstants.ConvertPrimitiveTypeToSystemType(secondMethodParameters[i].Name))
                 {
                     return false;
                 }
 
-                if (string.IsNullOrEmpty(firstMethodParameters[i].Modifier) &&
-                    !string.IsNullOrEmpty(secondMethodParameters[i].Modifier))
+                if (firstMethodParameters[i] is ParameterModel firstMethodParameter &&
+                    secondMethodParameters[i] is ParameterModel secondMethodParameter)
                 {
-                    return false;
-                }
+                    if (string.IsNullOrEmpty(firstMethodParameter.Modifier) &&
+                        !string.IsNullOrEmpty(secondMethodParameter.Modifier))
+                    {
+                        return false;
+                    }
 
-                if (!string.IsNullOrEmpty(firstMethodParameters[i].Modifier) &&
-                    string.IsNullOrEmpty(secondMethodParameters[i].Modifier))
-                {
-                    return false;
+                    if (!string.IsNullOrEmpty(firstMethodParameter.Modifier) &&
+                        string.IsNullOrEmpty(secondMethodParameter.Modifier))
+                    {
+                        return false;
+                    }
                 }
             }
 
@@ -536,7 +556,7 @@ namespace HoneydewExtractors.Processors
                     try
                     {
                         var fullClassName = FindClassFullName(dependencyName, namespaceModel, projectModel,
-                            solutionModel, repositoryModel, classModel.Usings, classModel.FilePath);
+                            solutionModel, repositoryModel, classModel.Imports, classModel.FilePath);
 
                         if (fullNameDependencies.ContainsKey(fullClassName))
                         {
@@ -574,7 +594,7 @@ namespace HoneydewExtractors.Processors
         }
 
         private string FindNamespaceFullName(string namespaceName, NamespaceModel namespaceModel,
-            IList<UsingModel> usingModels)
+            IList<IImportType> usingModels)
         {
             if (string.IsNullOrEmpty(namespaceName))
             {
@@ -625,7 +645,7 @@ namespace HoneydewExtractors.Processors
 
         private string FindClassFullName(string className, NamespaceModel namespaceModelToStartSearchFrom,
             ProjectModel projectModelToStartSearchFrom, SolutionModel solutionModelToStartSearchFrom,
-            RepositoryModel repositoryModel, IList<UsingModel> usingModels, string classFilePath = "")
+            RepositoryModel repositoryModel, IList<IImportType> usingModels, string classFilePath = "")
         {
             if (string.IsNullOrEmpty(className))
             {
@@ -653,13 +673,13 @@ namespace HoneydewExtractors.Processors
             }
 
             // try to find class in provided namespace
-            if (namespaceModelToStartSearchFrom.ClassModels.Any(classModel => classModel.FullName == className))
+            if (namespaceModelToStartSearchFrom.ClassModels.Any(classModel => classModel.Name == className))
             {
                 return AddClassModelToNamespaceGraph(className, classFilePath, namespaceModelToStartSearchFrom.Name);
             }
 
             if (namespaceModelToStartSearchFrom.ClassModels.Any(classModel =>
-                classModel.FullName == $"{namespaceModelToStartSearchFrom.Name}.{className}"))
+                classModel.Name == $"{namespaceModelToStartSearchFrom.Name}.{className}"))
             {
                 return AddClassModelToNamespaceGraph(className, classFilePath, namespaceModelToStartSearchFrom.Name);
             }
@@ -1041,7 +1061,7 @@ namespace HoneydewExtractors.Processors
                             var fullyQualifiedName = $"{namespaceName}.{className}";
                             fullyQualifiedName = fullyQualifiedName.Remove(fullyQualifiedName.Length - 1);
 
-                            return model.FullName == fullyQualifiedName;
+                            return model.Name == fullyQualifiedName;
                         });
                     if (classModel != null)
                     {

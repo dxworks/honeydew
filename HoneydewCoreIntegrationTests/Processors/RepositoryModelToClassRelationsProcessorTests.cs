@@ -60,7 +60,7 @@ namespace HoneydewCoreIntegrationTests.Processors
 
             projectModel.Add(new ClassModel
             {
-                FullName = "Models.Class", FilePath = "path/Model/Class.cs"
+                Name = "Models.Class", FilePath = "path/Model/Class.cs"
             });
 
             solutionModel.Projects.Add(projectModel);
@@ -81,7 +81,7 @@ namespace HoneydewCoreIntegrationTests.Processors
 
             projectModel.Add(new ClassModel
             {
-                FullName = "Models.Class", FilePath = "path/Model/Class.cs"
+                Name = "Models.Class", FilePath = "path/Model/Class.cs"
             });
 
             solutionModel.Projects.Add(projectModel);
@@ -108,7 +108,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             {
                 projectModel.Add(new ClassModel
                 {
-                    FullName = "Items.Item" + i,
+                    Name = "Items.Item" + i,
                     FilePath = "path/Items/Item" + i + ".cs"
                 });
             }
@@ -142,7 +142,7 @@ namespace HoneydewCoreIntegrationTests.Processors
 
             projectModel.Add(new ClassModel
             {
-                FullName = "Models.Class1", FilePath = "path/Model/Class1.cs"
+                Name = "Models.Class1", FilePath = "path/Model/Class1.cs"
             });
 
             var extractorName = typeof(CSharpParameterRelationMetric).FullName;
@@ -157,7 +157,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             };
             projectModel.Add(new ClassModel
             {
-                FullName = "Models.Class2", FilePath = "path/Model/Class2.cs",
+                Name = "Models.Class2", FilePath = "path/Model/Class2.cs",
                 Metrics =
                 {
                     classMetric
@@ -218,7 +218,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             };
             projectModel.Add(new ClassModel
             {
-                FullName = "Models.Class2", FilePath = "path/Model/Class2.cs",
+                Name = "Models.Class2", FilePath = "path/Model/Class2.cs",
                 Metrics =
                 {
                     classMetric

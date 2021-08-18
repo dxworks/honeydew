@@ -33,7 +33,7 @@ namespace HoneydewCore.Processors
             {
                 if (classModel.Metrics.Count == 0)
                 {
-                    classRelationsRepresentation.Add(classModel.FullName);
+                    classRelationsRepresentation.Add(classModel.Name);
                 }
                 else
                 {
@@ -42,7 +42,7 @@ namespace HoneydewCore.Processors
                         var relations = _metricRelationsProvider.GetFileRelations(classMetric);
                         foreach (var relation in relations)
                         {
-                            classRelationsRepresentation.Add(classModel.FullName, relation.FileTarget,
+                            classRelationsRepresentation.Add(classModel.Name, relation.FileTarget,
                                 relation.RelationType, relation.RelationCount);
                         }
                     }

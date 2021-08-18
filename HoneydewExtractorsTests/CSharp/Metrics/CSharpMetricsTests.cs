@@ -53,7 +53,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
              Assert.Equal(2, classModels.Count);
 
              var foo = classModels[0];
-             Assert.Equal("TopLevel.Child1.Foo", foo.FullName);
+             Assert.Equal("TopLevel.Child1.Foo", foo.Name);
              Assert.Equal("TopLevel.Child1", foo.Namespace);
              Assert.Equal(1, foo.Metrics.Count);
              var optional1 = foo.GetMetricValue<CSharpUsingsCountMetric>();
@@ -62,7 +62,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
 
              var bar = classModels[1];
-             Assert.Equal("TopLevel.Child2.Bar", bar.FullName);
+             Assert.Equal("TopLevel.Child2.Bar", bar.Name);
              Assert.Equal("TopLevel.Child2", bar.Namespace);
              Assert.Equal(1, bar.Metrics.Count);
              var optional2 = bar.GetMetricValue<CSharpUsingsCountMetric>();

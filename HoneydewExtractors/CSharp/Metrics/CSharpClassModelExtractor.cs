@@ -8,6 +8,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -34,10 +35,6 @@ namespace HoneydewExtractors.CSharp.Metrics
             {
                 var fullName = semanticModel.GetFullName(declarationSyntax);
 
-                ExtractBaseClassAndBaseInterfaces(declarationSyntax, syntacticModel, semanticModel,
-                    out var baseClassName,
-                    out var baseInterfaces);
-
                 var classType = declarationSyntax.Kind().ToString().Replace("Declaration", "").ToLower();
 
                 var accessModifier = CSharpConstants.DefaultClassAccessModifier;
@@ -50,19 +47,17 @@ namespace HoneydewExtractors.CSharp.Metrics
                     ? root.GetText().ToString()
                     : declarationSyntax.ToString());
 
-
                 var classModel = new ClassModel
                 {
                     ClassType = classType,
                     AccessModifier = accessModifier,
                     Modifier = modifier,
-                    FullName = fullName,
+                    Name = fullName,
+                    BaseTypes = ExtractBaseClassAndBaseInterfaces(declarationSyntax, syntacticModel, semanticModel),
                     Fields = ExtractFieldsInfo(declarationSyntax, syntacticModel, semanticModel),
                     Properties = ExtractPropertiesInfo(declarationSyntax, syntacticModel, semanticModel),
                     Methods = methodInfoDataMetric.MethodInfos,
                     Constructors = methodInfoDataMetric.ConstructorInfos,
-                    BaseClassFullName = baseClassName,
-                    BaseInterfaces = baseInterfaces,
                     Loc = linesOfCode
                 };
 
@@ -90,21 +85,22 @@ namespace HoneydewExtractors.CSharp.Metrics
 
             var usingsMetric = new CSharpUsingsMetric
             {
+                HoneydewSyntacticModel = syntacticModel,
                 HoneydewSemanticModel = semanticModel
             };
             usingsMetric.Visit(root);
             foreach (var classModel in classModels)
             {
-                if (usingsMetric.Usings.TryGetValue(classModel.FullName, out var usings))
+                if (usingsMetric.Usings.TryGetValue(classModel.Name, out var usings))
                 {
-                    classModel.Usings = usings.ToList();
+                    classModel.Imports = usings.ToList();
                 }
             }
 
             return classModels;
         }
 
-        private static IList<PropertyModel> ExtractPropertiesInfo(SyntaxNode declarationSyntax,
+        private static IList<IPropertyType> ExtractPropertiesInfo(SyntaxNode declarationSyntax,
             CSharpSyntacticModel syntacticModel,
             CSharpSemanticModel semanticModel)
         {
@@ -117,7 +113,7 @@ namespace HoneydewExtractors.CSharp.Metrics
             return fieldsInfoMetric.PropertyInfos;
         }
 
-        private static IList<FieldModel> ExtractFieldsInfo(SyntaxNode declarationSyntax,
+        private static IList<IFieldType> ExtractFieldsInfo(SyntaxNode declarationSyntax,
             CSharpSyntacticModel syntacticModel,
             CSharpSemanticModel semanticModel)
         {
@@ -143,9 +139,9 @@ namespace HoneydewExtractors.CSharp.Metrics
             return fieldsInfoMetric.DataMetric;
         }
 
-        private static void ExtractBaseClassAndBaseInterfaces(SyntaxNode declarationSyntax,
+        private static IList<IBaseType> ExtractBaseClassAndBaseInterfaces(SyntaxNode declarationSyntax,
             CSharpSyntacticModel syntacticModel,
-            CSharpSemanticModel semanticModel, out string baseClass, out IList<string> baseInterfaces)
+            CSharpSemanticModel semanticModel)
         {
             var fieldsInfoMetric = new CSharpBaseClassMetric
             {
@@ -154,8 +150,7 @@ namespace HoneydewExtractors.CSharp.Metrics
             };
             fieldsInfoMetric.Visit(declarationSyntax);
 
-            baseClass = fieldsInfoMetric.InheritanceMetric.BaseClassName;
-            baseInterfaces = fieldsInfoMetric.InheritanceMetric.Interfaces;
+            return fieldsInfoMetric.BaseTypes;
         }
     }
 }

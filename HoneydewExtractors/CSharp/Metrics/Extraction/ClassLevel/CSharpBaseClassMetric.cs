@@ -1,5 +1,8 @@
-﻿using HoneydewExtractors.Core.Metrics.Extraction;
+﻿using System.Collections.Generic;
+using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewModels;
+using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
@@ -13,7 +16,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
         public CSharpSyntacticModel HoneydewSyntacticModel { get; set; }
         public CSharpSemanticModel HoneydewSemanticModel { get; set; }
 
-        public CSharpInheritanceMetric InheritanceMetric { get; set; } = new();
+        public IList<IBaseType> BaseTypes { get; set; } = new List<IBaseType>();
 
         public ExtractionMetricType GetMetricType()
         {
@@ -22,7 +25,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
 
         public override IMetricValue GetMetric()
         {
-            return new MetricValue<CSharpInheritanceMetric>(InheritanceMetric);
+            return new MetricValue<IList<IBaseType>>(BaseTypes);
         }
 
         public override string PrettyPrint()
@@ -32,19 +35,41 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel
 
         public override void VisitDelegateDeclaration(DelegateDeclarationSyntax node)
         {
-            InheritanceMetric.BaseClassName = "System.Delegate";
+            BaseTypes.Add(new BaseTypeModel
+            {
+                Name = "System.Delegate",
+                ClassType = "class"
+            });
         }
 
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
         {
-            InheritanceMetric.BaseClassName = null;
-            InheritanceMetric.Interfaces = HoneydewSemanticModel.GetBaseInterfaces(node);
+            foreach (var baseInterface in HoneydewSemanticModel.GetBaseInterfaces(node))
+            {
+                BaseTypes.Add(new BaseTypeModel
+                {
+                    Name = baseInterface,
+                    ClassType = "interface"
+                });
+            }
         }
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            InheritanceMetric.BaseClassName = HoneydewSemanticModel.GetBaseClassName(node);
-            InheritanceMetric.Interfaces = HoneydewSemanticModel.GetBaseInterfaces(node);
+            BaseTypes.Add(new BaseTypeModel
+            {
+                Name = HoneydewSemanticModel.GetBaseClassName(node),
+                ClassType = "class"
+            });
+
+            foreach (var baseInterface in HoneydewSemanticModel.GetBaseInterfaces(node))
+            {
+                BaseTypes.Add(new BaseTypeModel
+                {
+                    Name = baseInterface,
+                    ClassType = "interface"
+                });
+            }
         }
     }
 }
