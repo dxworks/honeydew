@@ -19,6 +19,7 @@ using HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead;
 using HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead;
 using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
 using HoneydewExtractors.Processors;
+using HoneydewModels;
 using HoneydewModels.CSharp;
 using HoneydewModels.Exporters;
 using HoneydewModels.Importers;
@@ -197,7 +198,7 @@ namespace Honeydew
 
         private static IModelExporter<RepositoryModel> GetRepositoryModelExporter()
         {
-            return new JsonRepositoryModelExporter();
+            return new JsonRepositoryModelExporter(new ConverterList());
         }
 
         private static IModelExporter<ClassRelationsRepresentation> GetClassRelationsRepresentationExporter()
