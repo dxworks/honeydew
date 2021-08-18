@@ -65,7 +65,7 @@ namespace HoneydewCoreIntegrationTests.Processors
                     }
                 }
             };
-            
+
             var referenceSolutionModel = _sut.Process(solutionModel);
 
             Assert.Equal(2, referenceSolutionModel.Projects.Count);
@@ -214,7 +214,10 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                 Name = "Create",
                                                 Modifier = "",
                                                 AccessModifier = "public",
-                                                ReturnType = "Project1.Models.MyModel",
+                                                ReturnType = new ReturnTypeModel
+                                                {
+                                                    Type = "Project1.Models.MyModel"
+                                                },
                                                 ContainingClassName = "Project1.Services.CreateService",
                                             },
                                             new()
@@ -229,7 +232,10 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                         Type = "Project1.Models.MyModel"
                                                     }
                                                 },
-                                                ReturnType = "Project1.Models.MyModel",
+                                                ReturnType = new ReturnTypeModel
+                                                {
+                                                    Type = "Project1.Models.MyModel"
+                                                },
                                                 ContainingClassName = "Project1.Services.CreateService",
                                                 CalledMethods =
                                                 {
@@ -252,7 +258,10 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                         Type = "Project1.Models.OtherModel"
                                                     }
                                                 },
-                                                ReturnType = "Project1.Models.MyModel",
+                                                ReturnType = new ReturnTypeModel
+                                                {
+                                                    Type = "Project1.Models.MyModel"
+                                                },
                                                 ContainingClassName = "Project1.Services.CreateService",
                                                 CalledMethods =
                                                 {
@@ -286,7 +295,10 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                         Type = "Project1.Models.MyModel"
                                                     }
                                                 },
-                                                ReturnType = "Project1.Models.MyModel",
+                                                ReturnType = new ReturnTypeModel
+                                                {
+                                                    Type = "Project1.Models.MyModel"
+                                                },
                                                 ContainingClassName = "Project1.Services.CreateService",
                                                 CalledMethods =
                                                 {

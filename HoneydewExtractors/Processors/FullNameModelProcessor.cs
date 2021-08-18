@@ -203,8 +203,8 @@ namespace HoneydewExtractors.Processors
             {
                 foreach (var methodModel in methodModels)
                 {
-                    if (!string.IsNullOrEmpty(methodModel.ReturnType) &&
-                        methodModel.ReturnType.StartsWith(namespaceAccess))
+                    if (!string.IsNullOrEmpty(methodModel.ReturnType.Type) &&
+                        methodModel.ReturnType.Type.StartsWith(namespaceAccess))
                     {
                         return true;
                     }
@@ -308,12 +308,15 @@ namespace HoneydewExtractors.Processors
 
                             foreach (var methodModel in classModel.Methods)
                             {
-                                AddAmbiguousNames(() =>
+                                if (methodModel.ReturnType != null)
                                 {
-                                    methodModel.ReturnType = FindClassFullName(methodModel.ReturnType,
-                                        namespaceModel, projectModel, solutionModel, repositoryModel,
-                                        classModel.Usings, classModel.FilePath);
-                                });
+                                    AddAmbiguousNames(() =>
+                                    {
+                                        methodModel.ReturnType.Type = FindClassFullName(methodModel.ReturnType.Type,
+                                            namespaceModel, projectModel, solutionModel, repositoryModel,
+                                            classModel.Usings, classModel.FilePath);
+                                    });
+                                }
 
                                 SetContainingClassAndCalledMethodsFullName(classModel.FilePath, methodModel,
                                     namespaceModel,

@@ -131,8 +131,9 @@ namespace HoneydewCore.Processors
                         IsConstructor = constructorModel.IsConstructor,
                         AccessModifier = constructorModel.AccessModifier,
                         ContainingClass = referenceClassModel,
-                        ReturnTypeReferenceClassModel =
-                            GetClassReferenceByName(referenceSolutionModel, constructorModel.ReturnType),
+                        ReturnTypeReferenceClassModel = constructorModel.ReturnType != null
+                            ? GetClassReferenceByName(referenceSolutionModel, constructorModel.ReturnType.Type)
+                            : null,
                         ParameterTypes = referenceClassModels
                     };
 

@@ -98,7 +98,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(3, classModels[0].Methods.Count);
 
             Assert.Equal("G", classModels[0].Methods[0].Name);
-            Assert.Equal("int", classModels[0].Methods[0].ReturnType);
+            Assert.Equal("int", classModels[0].Methods[0].ReturnType.Type);
             Assert.Equal(1, classModels[0].Methods[0].ParameterTypes.Count);
             Assert.Equal("float", classModels[0].Methods[0].ParameterTypes[0].Type);
             Assert.Equal("", classModels[0].Methods[0].ParameterTypes[0].Modifier);
@@ -109,7 +109,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Empty(classModels[0].Methods[0].CalledMethods);
 
             Assert.Equal("H", classModels[0].Methods[1].Name);
-            Assert.Equal("bool", classModels[0].Methods[1].ReturnType);
+            Assert.Equal("bool", classModels[0].Methods[1].ReturnType.Type);
             Assert.Empty(classModels[0].Methods[1].ParameterTypes);
             Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[1].AccessModifier);
@@ -117,7 +117,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Empty(classModels[0].Methods[1].CalledMethods);
 
             Assert.Equal("X", classModels[0].Methods[2].Name);
-            Assert.Equal("int", classModels[0].Methods[2].ReturnType);
+            Assert.Equal("int", classModels[0].Methods[2].ReturnType.Type);
             Assert.Empty(classModels[0].Methods[2].ParameterTypes);
             Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[2].AccessModifier);
@@ -127,7 +127,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(2, classModels[1].Methods.Count);
 
             Assert.Equal("X", classModels[1].Methods[0].Name);
-            Assert.Equal("int", classModels[1].Methods[0].ReturnType);
+            Assert.Equal("int", classModels[1].Methods[0].ReturnType.Type);
             Assert.Empty(classModels[1].Methods[0].ParameterTypes);
             Assert.Equal("TopLevel.Bar", classModels[1].Methods[0].ContainingClassName);
             Assert.Equal("public", classModels[1].Methods[0].AccessModifier);
@@ -135,7 +135,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Empty(classModels[1].Methods[0].CalledMethods);
 
             Assert.Equal("H", classModels[1].Methods[1].Name);
-            Assert.Equal("bool", classModels[1].Methods[1].ReturnType);
+            Assert.Equal("bool", classModels[1].Methods[1].ReturnType.Type);
             Assert.Empty(classModels[0].Methods[1].ParameterTypes);
             Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].ContainingClassName);
             Assert.Equal("public", classModels[1].Methods[1].AccessModifier);
@@ -185,7 +185,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(2, classModels[0].Methods.Count);
 
             Assert.Equal("G", classModels[0].Methods[0].Name);
-            Assert.Equal("int", classModels[0].Methods[0].ReturnType);
+            Assert.Equal("int", classModels[0].Methods[0].ReturnType.Type);
             Assert.Equal(1, classModels[0].Methods[0].ParameterTypes.Count);
             Assert.Equal("float", classModels[0].Methods[0].ParameterTypes[0].Type);
             Assert.Equal("", classModels[0].Methods[0].ParameterTypes[0].Modifier);
@@ -196,7 +196,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Empty(classModels[0].Methods[0].CalledMethods);
 
             Assert.Equal("H", classModels[0].Methods[1].Name);
-            Assert.Equal("bool", classModels[0].Methods[1].ReturnType);
+            Assert.Equal("bool", classModels[0].Methods[1].ReturnType.Type);
             Assert.Empty(classModels[0].Methods[1].ParameterTypes);
             Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingClassName);
             Assert.Equal("public", classModels[0].Methods[1].AccessModifier);
@@ -206,7 +206,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(2, classModels[1].Methods.Count);
 
             Assert.Equal("M", classModels[1].Methods[0].Name);
-            Assert.Equal("int", classModels[1].Methods[0].ReturnType);
+            Assert.Equal("int", classModels[1].Methods[0].ReturnType.Type);
             Assert.Empty(classModels[1].Methods[0].ParameterTypes);
             Assert.Equal("TopLevel.Bar", classModels[1].Methods[0].ContainingClassName);
             Assert.Equal("private", classModels[1].Methods[0].AccessModifier);
@@ -214,7 +214,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Empty(classModels[1].Methods[0].CalledMethods);
 
             Assert.Equal("H", classModels[1].Methods[1].Name);
-            Assert.Equal("bool", classModels[1].Methods[1].ReturnType);
+            Assert.Equal("bool", classModels[1].Methods[1].ReturnType.Type);
             Assert.Empty(classModels[0].Methods[1].ParameterTypes);
             Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].ContainingClassName);
             Assert.Equal("public", classModels[1].Methods[1].AccessModifier);
@@ -276,7 +276,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(2, classModels[0].Methods.Count);
 
             Assert.Equal("A", classModels[0].Methods[0].Name);
-            Assert.Equal("int", classModels[0].Methods[0].ReturnType);
+            Assert.Equal("int", classModels[0].Methods[0].ReturnType.Type);
             Assert.Equal(1, classModels[0].Methods[0].ParameterTypes.Count);
             Assert.Equal("int", classModels[0].Methods[0].ParameterTypes[0].Type);
             Assert.Equal("", classModels[0].Methods[0].ParameterTypes[0].Modifier);
@@ -287,7 +287,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Empty(classModels[0].Methods[0].CalledMethods);
 
             Assert.Equal("B", classModels[0].Methods[1].Name);
-            Assert.Equal("int", classModels[0].Methods[1].ReturnType);
+            Assert.Equal("int", classModels[0].Methods[1].ReturnType.Type);
             Assert.Equal(2, classModels[0].Methods[1].ParameterTypes.Count);
             Assert.Equal("int", classModels[0].Methods[1].ParameterTypes[0].Type);
             Assert.Equal("", classModels[0].Methods[1].ParameterTypes[0].Modifier);
@@ -316,7 +316,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             var methodModelF = classModels[1].Methods[0];
             Assert.Equal("F", methodModelF.Name);
-            Assert.Equal("int", methodModelF.ReturnType);
+            Assert.Equal("int", methodModelF.ReturnType.Type);
             Assert.Equal(3, methodModelF.ParameterTypes.Count);
             Assert.Equal("int", methodModelF.ParameterTypes[0].Type);
             Assert.Equal("", methodModelF.ParameterTypes[0].Modifier);
@@ -361,7 +361,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             var methodModelK = classModels[1].Methods[1];
             Assert.Equal("K", methodModelK.Name);
-            Assert.Equal("int", methodModelK.ReturnType);
+            Assert.Equal("int", methodModelK.ReturnType.Type);
             Assert.Equal(1, methodModelK.ParameterTypes.Count);
             Assert.Equal("string", methodModelK.ParameterTypes[0].Type);
             Assert.Equal("", methodModelK.ParameterTypes[0].Modifier);
@@ -427,7 +427,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             Assert.Equal("Print", printMethod.Name);
             Assert.False(printMethod.IsConstructor);
-            Assert.Equal("void", printMethod.ReturnType);
+            Assert.Equal("void", printMethod.ReturnType.Type);
             Assert.Empty(printMethod.ParameterTypes);
             Assert.Equal("TopLevel.Foo", printMethod.ContainingClassName);
             Assert.Equal("public", printMethod.AccessModifier);
@@ -458,7 +458,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             Assert.Equal("F", fMethod.Name);
             Assert.False(fMethod.IsConstructor);
-            Assert.Equal("int", fMethod.ReturnType);
+            Assert.Equal("int", fMethod.ReturnType.Type);
             Assert.Equal("TopLevel.Foo", fMethod.ContainingClassName);
             Assert.Equal("public", fMethod.AccessModifier);
             Assert.Equal("", fMethod.Modifier);
@@ -470,7 +470,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             Assert.Equal("K", kMethod.Name);
             Assert.False(kMethod.IsConstructor);
-            Assert.Equal("int", kMethod.ReturnType);
+            Assert.Equal("int", kMethod.ReturnType.Type);
             Assert.Equal("TopLevel.Foo", kMethod.ContainingClassName);
             Assert.Equal("private", kMethod.AccessModifier);
             Assert.Equal("", kMethod.Modifier);
@@ -482,7 +482,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             Assert.Equal("Z", zMethod.Name);
             Assert.False(zMethod.IsConstructor);
-            Assert.Equal("int", zMethod.ReturnType);
+            Assert.Equal("int", zMethod.ReturnType.Type);
             Assert.Equal("TopLevel.Foo", zMethod.ContainingClassName);
             Assert.Equal("private", zMethod.AccessModifier);
             Assert.Equal("", zMethod.Modifier);

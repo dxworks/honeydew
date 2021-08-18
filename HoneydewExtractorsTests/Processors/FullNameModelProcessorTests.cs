@@ -687,7 +687,11 @@ namespace HoneydewExtractorsTests.Processors
                         {
                             new MethodModel
                             {
-                                ReturnType = "Service"
+                                ReturnType = new ReturnTypeModel
+                                {
+                                    Type = "Service",
+                                    Modifier = "ref"
+                                }
                             }
                         }
                     }
@@ -719,7 +723,10 @@ namespace HoneydewExtractorsTests.Processors
                     .Fields[0].Type);
             Assert.Equal("Services.Service",
                 actualRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0]
-                    .Methods[0].ReturnType);
+                    .Methods[0].ReturnType.Type);
+            Assert.Equal("ref",
+                actualRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0]
+                    .Methods[0].ReturnType.Modifier);
         }
 
         [Fact]

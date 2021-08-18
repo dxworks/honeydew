@@ -9,10 +9,10 @@ namespace HoneydewModels.CSharp
         public LinesOfCode Loc { get; set; }
 
         public int CyclomaticComplexity { get; set; }
-        
+
         public bool IsConstructor { get; init; } = false;
 
-        public string ReturnType { get; set; }
+        public ReturnTypeModel ReturnType { get; set; }
 
         public string Modifier { get; init; } = "";
         public string AccessModifier { get; init; }
