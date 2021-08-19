@@ -6,7 +6,7 @@ namespace HoneydewExtractors.Core.Metrics.Visitors
     {
         private readonly ISet<ITypeVisitor> _visitors = new HashSet<ITypeVisitor>();
 
-        public void Add(ITypeVisitor visitor)
+        protected void Add(ITypeVisitor visitor)
         {
             _visitors.Add(visitor);
         }
