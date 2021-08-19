@@ -33,7 +33,6 @@ namespace HoneydewCoreIntegrationTests.Utils
 
             extractionMetricSpawner.LoadType<CSharpIsAbstractMetric>();
             extractionMetricSpawner.LoadType<CSharpUsingsCountMetric>();
-            extractionMetricSpawner.LoadType<CSharpMethodInfoMetric>();
 
 
             var instantiateMetrics = extractionMetricSpawner.InstantiateMetrics();
@@ -42,7 +41,6 @@ namespace HoneydewCoreIntegrationTests.Utils
 
             Assert.Equal(typeof(CSharpIsAbstractMetric),instantiateMetrics[0].GetType());
             Assert.Equal(typeof(CSharpUsingsCountMetric),instantiateMetrics[1].GetType());
-            Assert.Equal(typeof(CSharpMethodInfoMetric),instantiateMetrics[2].GetType());
         }
     }
 }

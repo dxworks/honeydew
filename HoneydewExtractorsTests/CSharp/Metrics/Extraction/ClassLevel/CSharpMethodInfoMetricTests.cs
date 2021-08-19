@@ -1,6 +1,15 @@
-﻿using HoneydewExtractors.Core.Metrics.Extraction;
+﻿using System.Collections.Generic;
+using HoneydewExtractors.Core.Metrics.Extraction.Class;
+using HoneydewExtractors.Core.Metrics.Extraction.Common;
+using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.Method;
+using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
+using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
+using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.CSharp.Metrics;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewModels.CSharp;
 using Xunit;
 
@@ -12,20 +21,23 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
         public CSharpMethodInfoMetricTests()
         {
-            _factExtractor = new CSharpFactExtractor();
-            _factExtractor.AddMetric<CSharpMethodInfoMetric>();
-        }
-
-        [Fact]
-        public void GetMetricType_ShouldReturnClassLevel()
-        {
-            Assert.Equal(ExtractionMetricType.ClassLevel, new CSharpMethodInfoMetric().GetMetricType());
-        }
-
-        [Fact]
-        public void PrettyPrint_ShouldReturnFieldsInfo()
-        {
-            Assert.Equal("Methods Info", new CSharpMethodInfoMetric().PrettyPrint());
+            var visitorList = new VisitorList();
+            visitorList.Add(new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(
+                new List<ICSharpClassVisitor>
+                {
+                    new BaseInfoClassVisitor(),
+                    new MethodSetterClassVisitor(new CSharpMethodModelCreator(new List<ICSharpMethodVisitor>
+                    {
+                        new MethodInfoVisitor(),
+                        new CalledMethodSetterVisitor(new CSharpMethodCallModelCreator(
+                            new List<ICSharpMethodSignatureVisitor>
+                            {
+                                new MethodCallInfoVisitor()
+                            }))
+                    }))
+                })));
+            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
         }
 
         [Fact]
@@ -41,19 +53,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                       }";
 
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(2, classModels.Count);
+            Assert.Equal(2, classTypes.Count);
 
-            foreach (var classModel in classModels)
+            foreach (var classType in classTypes)
             {
-                var optional = classModel.GetMetricValue<CSharpMethodInfoMetric>();
-                Assert.True(optional.HasValue);
+                var classModel = (ClassModel)classType;
 
-                var infoDataMetric = (CSharpMethodInfoDataMetric)optional.Value;
-
-                Assert.Empty(infoDataMetric.ConstructorInfos);
-                Assert.Empty(infoDataMetric.MethodInfos);
+                Assert.Empty(classModel.Methods);
             }
         }
 
@@ -92,57 +100,59 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                                  }
                                              }                                  
                                       }";
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(2, classModels.Count);
+            Assert.Equal(2, classTypes.Count);
 
-            Assert.Equal(3, classModels[0].Methods.Count);
+            var classModel1 = (ClassModel)classTypes[0];
+            Assert.Equal(3, classModel1.Methods.Count);
 
-            Assert.Equal("G", classModels[0].Methods[0].Name);
-            Assert.Equal("int", classModels[0].Methods[0].ReturnType.Name);
-            Assert.Equal(1, classModels[0].Methods[0].ParameterTypes.Count);
-            var parameterModel = (ParameterModel)classModels[0].Methods[0].ParameterTypes[0];
+            Assert.Equal("G", classModel1.Methods[0].Name);
+            Assert.Equal("int", classModel1.Methods[0].ReturnType.Name);
+            Assert.Equal(1, classModel1.Methods[0].ParameterTypes.Count);
+            var parameterModel = (ParameterModel)classModel1.Methods[0].ParameterTypes[0];
             Assert.Equal("float", parameterModel.Name);
             Assert.Equal("", parameterModel.Modifier);
             Assert.Null(parameterModel.DefaultValue);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingTypeName);
-            Assert.Equal("protected", classModels[0].Methods[0].AccessModifier);
-            Assert.Equal("", classModels[0].Methods[0].Modifier);
-            Assert.Empty(classModels[0].Methods[0].CalledMethods);
+            Assert.Equal("TopLevel.Foo", classModel1.Methods[0].ContainingTypeName);
+            Assert.Equal("protected", classModel1.Methods[0].AccessModifier);
+            Assert.Equal("", classModel1.Methods[0].Modifier);
+            Assert.Empty(classModel1.Methods[0].CalledMethods);
 
-            Assert.Equal("H", classModels[0].Methods[1].Name);
-            Assert.Equal("bool", classModels[0].Methods[1].ReturnType.Name);
-            Assert.Empty(classModels[0].Methods[1].ParameterTypes);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingTypeName);
-            Assert.Equal("public", classModels[0].Methods[1].AccessModifier);
-            Assert.Equal("virtual", classModels[0].Methods[1].Modifier);
-            Assert.Empty(classModels[0].Methods[1].CalledMethods);
+            Assert.Equal("H", classModel1.Methods[1].Name);
+            Assert.Equal("bool", classModel1.Methods[1].ReturnType.Name);
+            Assert.Empty(classModel1.Methods[1].ParameterTypes);
+            Assert.Equal("TopLevel.Foo", classModel1.Methods[1].ContainingTypeName);
+            Assert.Equal("public", classModel1.Methods[1].AccessModifier);
+            Assert.Equal("virtual", classModel1.Methods[1].Modifier);
+            Assert.Empty(classModel1.Methods[1].CalledMethods);
 
-            Assert.Equal("X", classModels[0].Methods[2].Name);
-            Assert.Equal("int", classModels[0].Methods[2].ReturnType.Name);
-            Assert.Empty(classModels[0].Methods[2].ParameterTypes);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].ContainingTypeName);
-            Assert.Equal("public", classModels[0].Methods[2].AccessModifier);
-            Assert.Equal("abstract", classModels[0].Methods[2].Modifier);
-            Assert.Empty(classModels[0].Methods[2].CalledMethods);
+            Assert.Equal("X", classModel1.Methods[2].Name);
+            Assert.Equal("int", classModel1.Methods[2].ReturnType.Name);
+            Assert.Empty(classModel1.Methods[2].ParameterTypes);
+            Assert.Equal("TopLevel.Foo", classModel1.Methods[2].ContainingTypeName);
+            Assert.Equal("public", classModel1.Methods[2].AccessModifier);
+            Assert.Equal("abstract", classModel1.Methods[2].Modifier);
+            Assert.Empty(classModel1.Methods[2].CalledMethods);
 
-            Assert.Equal(2, classModels[1].Methods.Count);
+            var classModel2 = (ClassModel)classTypes[1];
+            Assert.Equal(2, classModel2.Methods.Count);
 
-            Assert.Equal("X", classModels[1].Methods[0].Name);
-            Assert.Equal("int", classModels[1].Methods[0].ReturnType.Name);
-            Assert.Empty(classModels[1].Methods[0].ParameterTypes);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[0].ContainingTypeName);
-            Assert.Equal("public", classModels[1].Methods[0].AccessModifier);
-            Assert.Equal("override", classModels[1].Methods[0].Modifier);
-            Assert.Empty(classModels[1].Methods[0].CalledMethods);
+            Assert.Equal("X", classModel2.Methods[0].Name);
+            Assert.Equal("int", classModel2.Methods[0].ReturnType.Name);
+            Assert.Empty(classModel2.Methods[0].ParameterTypes);
+            Assert.Equal("TopLevel.Bar", classModel2.Methods[0].ContainingTypeName);
+            Assert.Equal("public", classModel2.Methods[0].AccessModifier);
+            Assert.Equal("override", classModel2.Methods[0].Modifier);
+            Assert.Empty(classModel2.Methods[0].CalledMethods);
 
-            Assert.Equal("H", classModels[1].Methods[1].Name);
-            Assert.Equal("bool", classModels[1].Methods[1].ReturnType.Name);
-            Assert.Empty(classModels[0].Methods[1].ParameterTypes);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].ContainingTypeName);
-            Assert.Equal("public", classModels[1].Methods[1].AccessModifier);
-            Assert.Equal("override", classModels[1].Methods[1].Modifier);
-            Assert.Empty(classModels[1].Methods[1].CalledMethods);
+            Assert.Equal("H", classModel2.Methods[1].Name);
+            Assert.Equal("bool", classModel2.Methods[1].ReturnType.Name);
+            Assert.Empty(classModel1.Methods[1].ParameterTypes);
+            Assert.Equal("TopLevel.Bar", classModel2.Methods[1].ContainingTypeName);
+            Assert.Equal("public", classModel2.Methods[1].AccessModifier);
+            Assert.Equal("override", classModel2.Methods[1].Modifier);
+            Assert.Empty(classModel2.Methods[1].CalledMethods);
         }
 
         [Fact]
@@ -180,62 +190,64 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                                  }
                                              }                                  
                                       }";
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(2, classModels.Count);
+            Assert.Equal(2, classTypes.Count);
 
-            Assert.Equal(2, classModels[0].Methods.Count);
+            var classModel1 = (ClassModel)classTypes[0];
+            Assert.Equal(2, classModel1.Methods.Count);
 
-            Assert.Equal("G", classModels[0].Methods[0].Name);
-            Assert.Equal("int", classModels[0].Methods[0].ReturnType.Name);
-            Assert.Equal(1, classModels[0].Methods[0].ParameterTypes.Count);
-            var parameterModel1 = (ParameterModel)classModels[0].Methods[0].ParameterTypes[0];
+            Assert.Equal("G", classModel1.Methods[0].Name);
+            Assert.Equal("int", classModel1.Methods[0].ReturnType.Name);
+            Assert.Equal(1, classModel1.Methods[0].ParameterTypes.Count);
+            var parameterModel1 = (ParameterModel)classModel1.Methods[0].ParameterTypes[0];
             Assert.Equal("float", parameterModel1.Name);
             Assert.Equal("", parameterModel1.Modifier);
             Assert.Null(parameterModel1.DefaultValue);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingTypeName);
-            Assert.Equal("protected", classModels[0].Methods[0].AccessModifier);
-            Assert.Equal("", classModels[0].Methods[0].Modifier);
-            Assert.Empty(classModels[0].Methods[0].CalledMethods);
+            Assert.Equal("TopLevel.Foo", classModel1.Methods[0].ContainingTypeName);
+            Assert.Equal("protected", classModel1.Methods[0].AccessModifier);
+            Assert.Equal("", classModel1.Methods[0].Modifier);
+            Assert.Empty(classModel1.Methods[0].CalledMethods);
 
-            Assert.Equal("H", classModels[0].Methods[1].Name);
-            Assert.Equal("bool", classModels[0].Methods[1].ReturnType.Name);
-            Assert.Empty(classModels[0].Methods[1].ParameterTypes);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingTypeName);
-            Assert.Equal("public", classModels[0].Methods[1].AccessModifier);
-            Assert.Equal("virtual", classModels[0].Methods[1].Modifier);
-            Assert.Empty(classModels[0].Methods[1].CalledMethods);
+            Assert.Equal("H", classModel1.Methods[1].Name);
+            Assert.Equal("bool", classModel1.Methods[1].ReturnType.Name);
+            Assert.Empty(classModel1.Methods[1].ParameterTypes);
+            Assert.Equal("TopLevel.Foo", classModel1.Methods[1].ContainingTypeName);
+            Assert.Equal("public", classModel1.Methods[1].AccessModifier);
+            Assert.Equal("virtual", classModel1.Methods[1].Modifier);
+            Assert.Empty(classModel1.Methods[1].CalledMethods);
 
-            Assert.Equal(2, classModels[1].Methods.Count);
+            var classModel2 = (ClassModel)classTypes[1];
+            Assert.Equal(2, classModel2.Methods.Count);
 
-            Assert.Equal("M", classModels[1].Methods[0].Name);
-            Assert.Equal("int", classModels[1].Methods[0].ReturnType.Name);
-            Assert.Empty(classModels[1].Methods[0].ParameterTypes);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[0].ContainingTypeName);
-            Assert.Equal("private", classModels[1].Methods[0].AccessModifier);
-            Assert.Equal("", classModels[1].Methods[0].Modifier);
-            Assert.Empty(classModels[1].Methods[0].CalledMethods);
+            Assert.Equal("M", classModel2.Methods[0].Name);
+            Assert.Equal("int", classModel2.Methods[0].ReturnType.Name);
+            Assert.Empty(classModel2.Methods[0].ParameterTypes);
+            Assert.Equal("TopLevel.Bar", classModel2.Methods[0].ContainingTypeName);
+            Assert.Equal("private", classModel2.Methods[0].AccessModifier);
+            Assert.Equal("", classModel2.Methods[0].Modifier);
+            Assert.Empty(classModel2.Methods[0].CalledMethods);
 
-            Assert.Equal("H", classModels[1].Methods[1].Name);
-            Assert.Equal("bool", classModels[1].Methods[1].ReturnType.Name);
-            Assert.Empty(classModels[0].Methods[1].ParameterTypes);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].ContainingTypeName);
-            Assert.Equal("public", classModels[1].Methods[1].AccessModifier);
-            Assert.Equal("override", classModels[1].Methods[1].Modifier);
-            Assert.Equal(3, classModels[1].Methods[1].CalledMethods.Count);
-            Assert.Equal("G", classModels[1].Methods[1].CalledMethods[0].Name);
-            Assert.Equal("TopLevel.Foo", classModels[1].Methods[1].CalledMethods[0].ContainingTypeName);
-            Assert.Equal(1, classModels[1].Methods[1].CalledMethods[0].ParameterTypes.Count);
-            var parameterModel2 = (ParameterModel)classModels[1].Methods[1].CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("H", classModel2.Methods[1].Name);
+            Assert.Equal("bool", classModel2.Methods[1].ReturnType.Name);
+            Assert.Empty(classModel1.Methods[1].ParameterTypes);
+            Assert.Equal("TopLevel.Bar", classModel2.Methods[1].ContainingTypeName);
+            Assert.Equal("public", classModel2.Methods[1].AccessModifier);
+            Assert.Equal("override", classModel2.Methods[1].Modifier);
+            Assert.Equal(3, classModel2.Methods[1].CalledMethods.Count);
+            Assert.Equal("G", classModel2.Methods[1].CalledMethods[0].Name);
+            Assert.Equal("TopLevel.Foo", classModel2.Methods[1].CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, classModel2.Methods[1].CalledMethods[0].ParameterTypes.Count);
+            var parameterModel2 = (ParameterModel)classModel2.Methods[1].CalledMethods[0].ParameterTypes[0];
             Assert.Equal("float", parameterModel2.Name);
             Assert.Equal("", parameterModel2.Modifier);
             Assert.Null(parameterModel2.DefaultValue);
-            Assert.Equal("H", classModels[1].Methods[1].CalledMethods[1].Name);
-            Assert.Equal("TopLevel.Foo", classModels[1].Methods[1].CalledMethods[1].ContainingTypeName);
-            Assert.Empty(classModels[1].Methods[1].CalledMethods[1].ParameterTypes);
-            Assert.Equal("M", classModels[1].Methods[1].CalledMethods[2].Name);
-            Assert.Equal("TopLevel.Bar", classModels[1].Methods[1].CalledMethods[2].ContainingTypeName);
-            Assert.Empty(classModels[1].Methods[1].CalledMethods[2].ParameterTypes);
+            Assert.Equal("H", classModel2.Methods[1].CalledMethods[1].Name);
+            Assert.Equal("TopLevel.Foo", classModel2.Methods[1].CalledMethods[1].ContainingTypeName);
+            Assert.Empty(classModel2.Methods[1].CalledMethods[1].ParameterTypes);
+            Assert.Equal("M", classModel2.Methods[1].CalledMethods[2].Name);
+            Assert.Equal("TopLevel.Bar", classModel2.Methods[1].CalledMethods[2].ContainingTypeName);
+            Assert.Empty(classModel2.Methods[1].CalledMethods[2].ParameterTypes);
         }
 
         [Fact]
@@ -273,57 +285,59 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                              }
                                          }                       
                                       }";
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(2, classModels.Count);
+            Assert.Equal(2, classTypes.Count);
 
-            Assert.Equal(2, classModels[0].Methods.Count);
+            var classModel1 = (ClassModel)classTypes[0];
+            Assert.Equal(2, classModel1.Methods.Count);
 
-            Assert.Equal("A", classModels[0].Methods[0].Name);
-            Assert.Equal("int", classModels[0].Methods[0].ReturnType.Name);
-            Assert.Equal(1, classModels[0].Methods[0].ParameterTypes.Count);
-            var parameterModel1 = (ParameterModel)classModels[0].Methods[0].ParameterTypes[0];
+            Assert.Equal("A", classModel1.Methods[0].Name);
+            Assert.Equal("int", classModel1.Methods[0].ReturnType.Name);
+            Assert.Equal(1, classModel1.Methods[0].ParameterTypes.Count);
+            var parameterModel1 = (ParameterModel)classModel1.Methods[0].ParameterTypes[0];
             Assert.Equal("int", parameterModel1.Name);
             Assert.Equal("", parameterModel1.Modifier);
             Assert.Null(parameterModel1.DefaultValue);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingTypeName);
-            Assert.Equal("public", classModels[0].Methods[0].AccessModifier);
-            Assert.Equal("", classModels[0].Methods[0].Modifier);
-            Assert.Empty(classModels[0].Methods[0].CalledMethods);
+            Assert.Equal("TopLevel.Foo", classModel1.Methods[0].ContainingTypeName);
+            Assert.Equal("public", classModel1.Methods[0].AccessModifier);
+            Assert.Equal("", classModel1.Methods[0].Modifier);
+            Assert.Empty(classModel1.Methods[0].CalledMethods);
 
-            Assert.Equal("B", classModels[0].Methods[1].Name);
-            Assert.Equal("int", classModels[0].Methods[1].ReturnType.Name);
-            Assert.Equal(2, classModels[0].Methods[1].ParameterTypes.Count);
-            var parameterModel2 = (ParameterModel)classModels[0].Methods[1].ParameterTypes[0];
+            Assert.Equal("B", classModel1.Methods[1].Name);
+            Assert.Equal("int", classModel1.Methods[1].ReturnType.Name);
+            Assert.Equal(2, classModel1.Methods[1].ParameterTypes.Count);
+            var parameterModel2 = (ParameterModel)classModel1.Methods[1].ParameterTypes[0];
             Assert.Equal("int", parameterModel2.Name);
             Assert.Equal("", parameterModel2.Modifier);
             Assert.Null(parameterModel2.DefaultValue);
-            var parameterModel3 = (ParameterModel)classModels[0].Methods[1].ParameterTypes[1];
+            var parameterModel3 = (ParameterModel)classModel1.Methods[1].ParameterTypes[1];
             Assert.Equal("int", parameterModel3.Name);
             Assert.Equal("", parameterModel3.Modifier);
             Assert.Null(parameterModel3.DefaultValue);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingTypeName);
-            Assert.Equal("public", classModels[0].Methods[1].AccessModifier);
-            Assert.Equal("", classModels[0].Methods[1].Modifier);
-            Assert.Equal(2, classModels[0].Methods[1].CalledMethods.Count);
-            Assert.Equal("A", classModels[0].Methods[1].CalledMethods[0].Name);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[0].ContainingTypeName);
-            Assert.Equal(1, classModels[0].Methods[1].CalledMethods[0].ParameterTypes.Count);
-            var parameterModel4 = (ParameterModel)classModels[0].Methods[1].CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("TopLevel.Foo", classModel1.Methods[1].ContainingTypeName);
+            Assert.Equal("public", classModel1.Methods[1].AccessModifier);
+            Assert.Equal("", classModel1.Methods[1].Modifier);
+            Assert.Equal(2, classModel1.Methods[1].CalledMethods.Count);
+            Assert.Equal("A", classModel1.Methods[1].CalledMethods[0].Name);
+            Assert.Equal("TopLevel.Foo", classModel1.Methods[1].CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, classModel1.Methods[1].CalledMethods[0].ParameterTypes.Count);
+            var parameterModel4 = (ParameterModel)classModel1.Methods[1].CalledMethods[0].ParameterTypes[0];
             Assert.Equal("int", parameterModel4.Name);
             Assert.Equal("", parameterModel4.Modifier);
             Assert.Null(parameterModel4.DefaultValue);
-            Assert.Equal("A", classModels[0].Methods[1].CalledMethods[1].Name);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[1].ContainingTypeName);
-            Assert.Equal(1, classModels[0].Methods[1].CalledMethods[1].ParameterTypes.Count);
-            var parameterModel5 = (ParameterModel)classModels[0].Methods[1].CalledMethods[1].ParameterTypes[0];
+            Assert.Equal("A", classModel1.Methods[1].CalledMethods[1].Name);
+            Assert.Equal("TopLevel.Foo", classModel1.Methods[1].CalledMethods[1].ContainingTypeName);
+            Assert.Equal(1, classModel1.Methods[1].CalledMethods[1].ParameterTypes.Count);
+            var parameterModel5 = (ParameterModel)classModel1.Methods[1].CalledMethods[1].ParameterTypes[0];
             Assert.Equal("int", parameterModel5.Name);
             Assert.Equal("", parameterModel5.Modifier);
             Assert.Null(parameterModel5.DefaultValue);
 
-            Assert.Equal(2, classModels[1].Methods.Count);
+            var classModel2 = (ClassModel)classTypes[1];
+            Assert.Equal(2, classModel2.Methods.Count);
 
-            var methodModelF = classModels[1].Methods[0];
+            var methodModelF = classModel2.Methods[0];
             Assert.Equal("F", methodModelF.Name);
             Assert.Equal("int", methodModelF.ReturnType.Name);
             Assert.Equal(3, methodModelF.ParameterTypes.Count);
@@ -376,7 +390,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("", parameterModel13.Modifier);
             Assert.Null(parameterModel13.DefaultValue);
 
-            var methodModelK = classModels[1].Methods[1];
+            var methodModelK = classModel2.Methods[1];
             Assert.Equal("K", methodModelK.Name);
             Assert.Equal("int", methodModelK.ReturnType.Name);
             Assert.Equal(1, methodModelK.ParameterTypes.Count);
@@ -431,17 +445,18 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                          }                                   
                                       }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            Assert.Equal(4, classModels[0].Methods.Count);
-            Assert.Empty(classModels[0].Constructors);
+            var classModel = (ClassModel)classTypes[0];
+            Assert.Equal(4, classModel.Methods.Count);
+            Assert.Empty(classModel.Constructors);
 
-            var printMethod = classModels[0].Methods[0];
-            var fMethod = classModels[0].Methods[1];
-            var kMethod = classModels[0].Methods[2];
-            var zMethod = classModels[0].Methods[3];
+            var printMethod = classModel.Methods[0];
+            var fMethod = classModel.Methods[1];
+            var kMethod = classModel.Methods[2];
+            var zMethod = classModel.Methods[3];
 
             Assert.Equal("Print", printMethod.Name);
             Assert.Equal("void", printMethod.ReturnType.Name);
@@ -514,67 +529,6 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         }
 
         [Fact]
-        public void Extract_ShouldHaveConstructors_WhenGivenClassWithConstructors()
-        {
-            const string fileContent = @"using System;
-                                      using HoneydewCore.Extractors;
-                                      namespace TopLevel
-                                      {
-                                          public class Foo {
-                                             
-                                             public Foo() {}
-     
-                                             private Foo(int a) {}
-
-                                             public Foo(string a, int b=2) {}  
-                                         }                                        
-                                      }";
-
-            var classModels = _factExtractor.Extract(fileContent);
-
-            Assert.Equal(1, classModels.Count);
-
-            Assert.Empty(classModels[0].Methods);
-            Assert.Equal(3, classModels[0].Constructors.Count);
-
-            var noArgConstructor = classModels[0].Constructors[0];
-            Assert.Equal("Foo", noArgConstructor.Name);
-            Assert.Empty(noArgConstructor.ParameterTypes);
-            Assert.Equal("TopLevel.Foo", noArgConstructor.ContainingTypeName);
-            Assert.Equal("public", noArgConstructor.AccessModifier);
-            Assert.Equal("", noArgConstructor.Modifier);
-            Assert.Empty(noArgConstructor.CalledMethods);
-
-            var intArgConstructor = classModels[0].Constructors[1];
-            Assert.Equal("Foo", intArgConstructor.Name);
-            Assert.Equal(1, intArgConstructor.ParameterTypes.Count);
-            var parameterModel1 = (ParameterModel)intArgConstructor.ParameterTypes[0];
-            Assert.Equal("int", parameterModel1.Name);
-            Assert.Equal("", parameterModel1.Modifier);
-            Assert.Null(parameterModel1.DefaultValue);
-            Assert.Equal("TopLevel.Foo", intArgConstructor.ContainingTypeName);
-            Assert.Equal("private", intArgConstructor.AccessModifier);
-            Assert.Equal("", intArgConstructor.Modifier);
-            Assert.Empty(intArgConstructor.CalledMethods);
-
-            var stringIntArgConstructor = classModels[0].Constructors[2];
-            Assert.Equal("Foo", stringIntArgConstructor.Name);
-            Assert.Equal(2, stringIntArgConstructor.ParameterTypes.Count);
-            var parameterModel2 = (ParameterModel)stringIntArgConstructor.ParameterTypes[0];
-            Assert.Equal("string", parameterModel2.Name);
-            Assert.Equal("", parameterModel2.Modifier);
-            Assert.Null(parameterModel2.DefaultValue);
-            var parameterModel3 = (ParameterModel)stringIntArgConstructor.ParameterTypes[1];
-            Assert.Equal("int", parameterModel3.Name);
-            Assert.Equal("", parameterModel3.Modifier);
-            Assert.Equal("2", parameterModel3.DefaultValue);
-            Assert.Equal("TopLevel.Foo", stringIntArgConstructor.ContainingTypeName);
-            Assert.Equal("public", stringIntArgConstructor.AccessModifier);
-            Assert.Equal("", stringIntArgConstructor.Modifier);
-            Assert.Empty(stringIntArgConstructor.CalledMethods);
-        }
-
-        [Fact]
         public void Extract_ShouldExtractNullDefaultValue()
         {
             const string fileContent = @"using System;
@@ -587,8 +541,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                              }                                  
                                       }";
 
-            var classModels = _factExtractor.Extract(fileContent);
-            Assert.Equal("null", ((ParameterModel)classModels[0].Methods[0].ParameterTypes[0]).DefaultValue);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            Assert.Equal("null",
+                ((ParameterModel)((ClassModel)classTypes[0]).Methods[0].ParameterTypes[0]).DefaultValue);
         }
     }
 }

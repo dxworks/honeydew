@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
 using HoneydewExtractors.Core.Metrics.Extraction.Class;
+using HoneydewExtractors.Core.Metrics.Extraction.Common;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
 using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
 using HoneydewExtractors.Core.Metrics.Extraction.Property;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
@@ -26,7 +29,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                     new PropertySetterClassVisitor(new CSharpPropertyModelCreator(new List<ICSharpPropertyVisitor>
                     {
                         new PropertyInfoVisitor(),
-                        new CalledMethodsPropertyVisitor()
+                        new CalledMethodSetterVisitor(new CSharpMethodCallModelCreator(
+                            new List<ICSharpMethodSignatureVisitor>
+                            {
+                                new MethodCallInfoVisitor()
+                            }))
                     }))
                 })));
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
@@ -373,7 +380,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
-            
+
             var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
@@ -502,7 +509,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
-            
+
             var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
