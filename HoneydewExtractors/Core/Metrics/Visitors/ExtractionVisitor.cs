@@ -1,6 +1,4 @@
-﻿using HoneydewExtractors.Core.Metrics.Visitors;
-
-namespace HoneydewExtractors.Core.Metrics.Extraction.Implementation
+﻿namespace HoneydewExtractors.Core.Metrics.Visitors
 {
     public abstract class
         ExtractionVisitor<TSyntacticModel, TSemanticModel> : IExtractionVisitor<TSyntacticModel, TSemanticModel>
