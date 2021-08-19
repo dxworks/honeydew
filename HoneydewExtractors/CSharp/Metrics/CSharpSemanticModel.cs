@@ -60,7 +60,7 @@ namespace HoneydewExtractors.CSharp.Metrics
             {
                 return symbolInfo.Symbol.ToString();
             }
-            
+
             var refTypeSyntax = GetParentDeclarationSyntax<RefTypeSyntax>(typeSyntax);
             if (refTypeSyntax != null)
             {
@@ -76,7 +76,7 @@ namespace HoneydewExtractors.CSharp.Metrics
                     return fullName;
                 }
             }
-            
+
             var propertyDeclarationSyntax = GetParentDeclarationSyntax<PropertyDeclarationSyntax>(typeSyntax);
             if (propertyDeclarationSyntax != null)
             {
@@ -303,6 +303,16 @@ namespace HoneydewExtractors.CSharp.Metrics
             return typeSymbol.BaseType.ToString();
         }
 
+        public string GetBaseClassName(BaseTypeDeclarationSyntax baseTypeDeclarationSyntax)
+        {
+            if (baseTypeDeclarationSyntax is TypeDeclarationSyntax typeDeclarationSyntax)
+            {
+                return GetBaseClassName(typeDeclarationSyntax);
+            }
+
+            return CSharpConstants.ObjectIdentifier;
+        }
+
         public IMethodSymbol GetMethodSymbol(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode expressionSyntax)
         {
             var symbolInfo = Model.GetSymbolInfo(expressionSyntax);
@@ -315,8 +325,7 @@ namespace HoneydewExtractors.CSharp.Metrics
             return null;
         }
 
-        public MethodCallModel GetMethodCallModel(InvocationExpressionSyntax invocationExpressionSyntax,
-            string baseName = "object")
+        public MethodCallModel GetMethodCallModel(InvocationExpressionSyntax invocationExpressionSyntax)
         {
             string containingClassName = null;
 
@@ -338,14 +347,9 @@ namespace HoneydewExtractors.CSharp.Metrics
 
                 case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
                 {
-                    string className;
+                    var className = containingClassName;
 
-                    if (memberAccessExpressionSyntax.Expression.ToFullString() ==
-                        CSharpConstants.BaseClassIdentifier)
-                    {
-                        className = baseName;
-                    }
-                    else
+                    if (memberAccessExpressionSyntax.Expression.ToFullString() != CSharpConstants.BaseClassIdentifier)
                     {
                         className = GetFullName(memberAccessExpressionSyntax.Expression) ??
                                     containingClassName;
@@ -412,6 +416,26 @@ namespace HoneydewExtractors.CSharp.Metrics
                 INamespaceSymbol => EAliasType.Namespace,
                 _ => EAliasType.Class
             };
+        }
+
+        public IList<IParameterType> ExtractInfoAboutParameters(BaseParameterListSyntax parameterList)
+        {
+            var parameterTypes = new List<IParameterType>();
+
+            foreach (var parameter in parameterList.Parameters)
+            {
+                var parameterType = GetFullName(parameter.Type);
+
+
+                parameterTypes.Add(new ParameterModel
+                {
+                    Name = parameterType,
+                    Modifier = parameter.Modifiers.ToString(),
+                    DefaultValue = parameter.Default?.Value.ToString()
+                });
+            }
+
+            return parameterTypes;
         }
 
         private IList<IParameterType> GetParameters(InvocationExpressionSyntax invocationSyntax)

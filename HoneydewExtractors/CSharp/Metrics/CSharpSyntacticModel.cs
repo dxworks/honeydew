@@ -27,7 +27,7 @@ namespace HoneydewExtractors.CSharp.Metrics
 
             return modifier;
         }
-        
+
         public int CalculateCyclomaticComplexity(MemberDeclarationSyntax syntax)
         {
             var count = 1;
@@ -75,6 +75,11 @@ namespace HoneydewExtractors.CSharp.Metrics
             }
 
             return count;
+        }
+
+        public bool IsAbstractModifier(string modifier)
+        {
+            return CSharpConstants.AbstractIdentifier == modifier;
         }
 
         private int CalculateCyclomaticComplexity(ExpressionSyntax conditionExpressionSyntax)

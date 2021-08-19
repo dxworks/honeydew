@@ -24,7 +24,7 @@ namespace HoneydewExtractorsTests.Core.Metrics
             GetFileRelations_ShouldReturnEmptyList_WhenProvidedWithClassMetricWithInvalidExtractorName(
                 string extractorName)
         {
-            var classMetric = new ClassMetric
+            var classMetric = new MetricModel
             {
                 ExtractorName = extractorName
             };
@@ -40,7 +40,7 @@ namespace HoneydewExtractorsTests.Core.Metrics
             GetFileRelations_ShouldReturnEmptyList_WhenProvidedWithClassMetricWithExtractorNameOfMetricsThatAreNotRelationMetrics(
                 string extractorName)
         {
-            var classMetric = new ClassMetric
+            var classMetric = new MetricModel
             {
                 ExtractorName = extractorName
             };
@@ -59,7 +59,7 @@ namespace HoneydewExtractorsTests.Core.Metrics
         public void GetFileRelations_ShouldReturnListWithRelations_WhenProvidedClassMetricWithRelationMetrics(
             string extractorName)
         {
-            var classMetric = new ClassMetric
+            var classMetric = new MetricModel
             {
                 ExtractorName = extractorName,
                 ValueType = "HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpRelationDataMetric",
