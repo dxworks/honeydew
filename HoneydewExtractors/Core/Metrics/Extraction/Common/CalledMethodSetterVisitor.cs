@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
 using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewModels.CSharp;
@@ -9,7 +10,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 {
-    public class CalledMethodSetterVisitor : CompositeTypeVisitor, ICSharpPropertyVisitor, ICSharpMethodVisitor
+    public class CalledMethodSetterVisitor : CompositeTypeVisitor, ICSharpPropertyVisitor, ICSharpMethodVisitor,
+        ICSharpConstructorVisitor
     {
         private readonly CSharpMethodCallModelCreator _cSharpMethodCallModelCreator;
 
@@ -36,6 +38,18 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
         }
 
         public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
+        {
+            foreach (var invocationExpressionSyntax in
+                syntaxNode.DescendantNodes().OfType<InvocationExpressionSyntax>())
+            {
+                modelType.CalledMethods.Add(_cSharpMethodCallModelCreator.Create(invocationExpressionSyntax,
+                    new MethodModel()));
+            }
+
+            return modelType;
+        }
+
+        public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, IConstructorType modelType)
         {
             foreach (var invocationExpressionSyntax in
                 syntaxNode.DescendantNodes().OfType<InvocationExpressionSyntax>())

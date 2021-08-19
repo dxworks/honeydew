@@ -37,7 +37,7 @@ namespace HoneydewCoreIntegrationTests.Utils
 
             var instantiateMetrics = extractionMetricSpawner.InstantiateMetrics();
 
-            Assert.Equal(3, instantiateMetrics.Count);
+            Assert.Equal(2, instantiateMetrics.Count);
 
             Assert.Equal(typeof(CSharpIsAbstractMetric),instantiateMetrics[0].GetType());
             Assert.Equal(typeof(CSharpUsingsCountMetric),instantiateMetrics[1].GetType());

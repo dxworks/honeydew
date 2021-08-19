@@ -20,9 +20,5 @@
         <ProjectReference Include="..\HoneydewCore\HoneydewCore.csproj" />
         <ProjectReference Include="..\HoneydewModels\HoneydewModels.csproj" />
     </ItemGroup>
-    
-    <ItemGroup>
-      <Folder Include="Core\Metrics\Extraction\Method" />
-    </ItemGroup>
 
 </Project>

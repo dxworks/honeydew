@@ -46,7 +46,10 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Method
             modelType.AccessModifier = accessModifier;
             modelType.CyclomaticComplexity = InheritedSyntacticModel.CalculateCyclomaticComplexity(syntaxNode);
 
-            ExtractInfoAboutParameters(syntaxNode.ParameterList, modelType);
+            foreach (var parameterType in InheritedSemanticModel.ExtractInfoAboutParameters(syntaxNode.ParameterList))
+            {
+                modelType.ParameterTypes.Add(parameterType);
+            }
 
             return modelType;
         }
@@ -62,21 +65,6 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Method
             modifier = isInterface ? CSharpConstants.DefaultInterfaceMethodModifier : allModifiers;
 
             CSharpConstants.SetModifiers(allModifiers, ref accessModifier, ref modifier);
-        }
-
-        private void ExtractInfoAboutParameters(BaseParameterListSyntax parameterList, IMethodSignatureType methodModel)
-        {
-            foreach (var parameter in parameterList.Parameters)
-            {
-                var parameterType = InheritedSemanticModel.GetFullName(parameter.Type);
-
-                methodModel.ParameterTypes.Add(new ParameterModel
-                {
-                    Name = parameterType,
-                    Modifier = parameter.Modifiers.ToString(),
-                    DefaultValue = parameter.Default?.Value.ToString()
-                });
-            }
         }
     }
 }
