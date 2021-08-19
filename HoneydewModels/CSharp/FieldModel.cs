@@ -18,5 +18,7 @@ namespace HoneydewModels.CSharp
         public bool IsEvent { get; set; }
 
         public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
+
+        public IList<MetricModel> Metrics { get; init; } = new List<MetricModel>();
     }
 }

@@ -146,7 +146,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             });
 
             var extractorName = typeof(CSharpParameterRelationMetric).FullName;
-            var classMetric = new ClassMetric
+            var classMetric = new MetricModel
             {
                 ExtractorName = extractorName,
                 ValueType = typeof(IDictionary<string, int>).FullName,
@@ -210,7 +210,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             var projectModel = new ProjectModel();
 
             const string extractorName = "some_string";
-            var classMetric = new ClassMetric
+            var classMetric = new MetricModel
             {
                 ExtractorName = extractorName,
                 ValueType = typeof(string).FullName,

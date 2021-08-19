@@ -1,6 +1,6 @@
 ﻿namespace HoneydewModels.CSharp
 {
-    public record ClassMetric
+    public record MetricModel
     {
         public string ExtractorName { get; set; }
         public string ValueType { get; set; }

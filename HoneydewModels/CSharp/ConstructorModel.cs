@@ -19,6 +19,9 @@ namespace HoneydewModels.CSharp
         public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
 
         public LinesOfCode Loc { get; set; }
+
         public int CyclomaticComplexity { get; set; }
+
+        public IList<MetricModel> Metrics { get; init; } = new List<MetricModel>();
     }
 }

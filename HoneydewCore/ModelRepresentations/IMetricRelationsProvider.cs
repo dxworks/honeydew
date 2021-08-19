@@ -5,6 +5,6 @@ namespace HoneydewCore.ModelRepresentations
 {
     public interface IMetricRelationsProvider
     {
-        IList<FileRelation> GetFileRelations(ClassMetric classMetric);
+        IList<FileRelation> GetFileRelations(MetricModel metricModel);
     }
 }

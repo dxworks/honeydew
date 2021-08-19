@@ -38,7 +38,7 @@ namespace HoneydewModels.CSharp
 
         public IList<IMethodType> Methods { get; init; } = new List<IMethodType>();
 
-        public IList<ClassMetric> Metrics { get; init; } = new List<ClassMetric>();
+        public IList<MetricModel> Metrics { get; init; } = new List<MetricModel>();
 
         public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
 
@@ -63,7 +63,7 @@ namespace HoneydewModels.CSharp
 
         public void AddMetricValue(string extractorName, IMetricValue metricValue)
         {
-            Metrics.Add(new ClassMetric
+            Metrics.Add(new MetricModel
             {
                 ExtractorName = extractorName,
                 ValueType = metricValue.GetValueType(),

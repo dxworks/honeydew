@@ -81,7 +81,7 @@ namespace HoneydewCoreIntegrationTests.Models
             {
                 Name = "Items.Pencil"
             };
-            classModel.Metrics.Add(new ClassMetric
+            classModel.Metrics.Add(new MetricModel
             {
                 Value = 0,
                 ExtractorName = typeof(CSharpUsingsCountMetric).FullName,
@@ -110,7 +110,7 @@ namespace HoneydewCoreIntegrationTests.Models
             {
                 Name = "Items.Pencil"
             };
-            classModel1.Metrics.Add(new ClassMetric
+            classModel1.Metrics.Add(new MetricModel
             {
                 Value = 0,
                 ExtractorName = typeof(CSharpUsingsCountMetric).FullName,
@@ -123,7 +123,7 @@ namespace HoneydewCoreIntegrationTests.Models
             {
                 Name = "Items.Notebook"
             };
-            classModel2.Metrics.Add(new ClassMetric
+            classModel2.Metrics.Add(new MetricModel
             {
                 Value = new List<IBaseType>
                 {
@@ -143,13 +143,13 @@ namespace HoneydewCoreIntegrationTests.Models
             {
                 Name = "Items.IItemService"
             };
-            classModel3.Metrics.Add(new ClassMetric
+            classModel3.Metrics.Add(new MetricModel
             {
                 Value = 0,
                 ExtractorName = typeof(CSharpUsingsCountMetric).FullName,
                 ValueType = typeof(int).FullName
             });
-            classModel3.Metrics.Add(new ClassMetric
+            classModel3.Metrics.Add(new MetricModel
             {
                 Value = new List<IBaseType>
                 {

@@ -124,7 +124,7 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
                                         },
                                         Metrics =
                                         {
-                                            new ClassMetric
+                                            new MetricModel
                                             {
                                                 ExtractorName =
                                                     "HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpBaseClassMetric",

@@ -25,5 +25,7 @@ namespace HoneydewModels.CSharp
         public IList<string> Accessors { get; set; } = new List<string>();
 
         public LinesOfCode Loc { get; set; }
+
+        public IList<MetricModel> Metrics { get; init; } = new List<MetricModel>();
     }
 }

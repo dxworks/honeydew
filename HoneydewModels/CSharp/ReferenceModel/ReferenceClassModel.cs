@@ -24,6 +24,6 @@ namespace HoneydewModels.CSharp.ReferenceModel
         
         public IList<ReferenceMethodModel> Constructors { get; } = new List<ReferenceMethodModel>();
 
-        public IList<ClassMetric> Metrics { get; init; } = new List<ClassMetric>();
+        public IList<MetricModel> Metrics { get; init; } = new List<MetricModel>();
     }
 }

@@ -998,7 +998,7 @@ namespace HoneydewExtractorsTests.Processors
                         },
                         Metrics =
                         {
-                            new ClassMetric
+                            new MetricModel
                             {
                                 ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
                                 ValueType = typeof(Dictionary<string, int>).FullName,

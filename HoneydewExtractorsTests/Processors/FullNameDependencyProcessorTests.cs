@@ -29,7 +29,7 @@ namespace HoneydewExtractorsTests.Processors
             {
                 Name = "Models.Class1", FilePath = "path/Models/Class1.cs"
             };
-            classModel1.Metrics.Add(new ClassMetric
+            classModel1.Metrics.Add(new MetricModel
             {
                 ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
@@ -43,7 +43,7 @@ namespace HoneydewExtractorsTests.Processors
             {
                 Name = "Services.Class2", FilePath = "path/Services/Class2.cs"
             };
-            classModel2.Metrics.Add(new ClassMetric
+            classModel2.Metrics.Add(new MetricModel
             {
                 ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
@@ -57,7 +57,7 @@ namespace HoneydewExtractorsTests.Processors
             {
                 Name = "Controllers.Class3", FilePath = "path/Controllers/Class3.cs"
             };
-            classModel3.Metrics.Add(new ClassMetric
+            classModel3.Metrics.Add(new MetricModel
             {
                 ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
@@ -72,7 +72,7 @@ namespace HoneydewExtractorsTests.Processors
             {
                 Name = "Domain.Data.Class4", FilePath = "path/Domain/Data/Class4.cs"
             };
-            classModel4.Metrics.Add(new ClassMetric
+            classModel4.Metrics.Add(new MetricModel
             {
                 ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
@@ -86,7 +86,7 @@ namespace HoneydewExtractorsTests.Processors
             {
                 Name = "Controllers.Class5", FilePath = "path/Controllers/Class5.cs"
             };
-            classModel5.Metrics.Add(new ClassMetric
+            classModel5.Metrics.Add(new MetricModel
             {
                 ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
@@ -145,7 +145,7 @@ namespace HoneydewExtractorsTests.Processors
             {
                 Name = "Models.Class1", FilePath = "path/Models/Class1.cs"
             };
-            classModel1.Metrics.Add(new ClassMetric
+            classModel1.Metrics.Add(new MetricModel
             {
                 ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
@@ -156,7 +156,7 @@ namespace HoneydewExtractorsTests.Processors
             {
                 Name = "Services.Class2", FilePath = "path/Services/Class2.cs"
             };
-            classModel2.Metrics.Add(new ClassMetric
+            classModel2.Metrics.Add(new MetricModel
             {
                 ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
@@ -170,7 +170,7 @@ namespace HoneydewExtractorsTests.Processors
             {
                 Name = "Controllers.Class3", FilePath = "path/Controllers/Class3.cs"
             };
-            classModel3.Metrics.Add(new ClassMetric
+            classModel3.Metrics.Add(new MetricModel
             {
                 ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
@@ -185,7 +185,7 @@ namespace HoneydewExtractorsTests.Processors
             {
                 Name = "Domain.Data.Class4", FilePath = "path/Domain/Data/Class4.cs"
             };
-            classModel4.Metrics.Add(new ClassMetric
+            classModel4.Metrics.Add(new MetricModel
             {
                 ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
@@ -200,7 +200,7 @@ namespace HoneydewExtractorsTests.Processors
             {
                 Name = "Controllers.Class5", FilePath = "path/Controllers/Class5.cs"
             };
-            classModel5.Metrics.Add(new ClassMetric
+            classModel5.Metrics.Add(new MetricModel
             {
                 ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
