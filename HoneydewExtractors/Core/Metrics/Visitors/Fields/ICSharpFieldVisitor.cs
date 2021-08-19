@@ -1,10 +1,11 @@
-﻿using HoneydewModels.Types;
+﻿using System.Collections.Generic;
+using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Visitors.Fields
 {
     public interface ICSharpFieldVisitor : IFieldVisitor, ICSharpTypeVisitor,
-        IVisitorType<BaseFieldDeclarationSyntax, IFieldType>
+        IVisitorType<BaseFieldDeclarationSyntax, IList<IFieldType>>
     {
     }
 }

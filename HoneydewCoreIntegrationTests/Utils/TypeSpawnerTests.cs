@@ -15,19 +15,14 @@ namespace HoneydewCoreIntegrationTests.Utils
             TypeSpawner<IExtractionMetric<CSharpSyntacticModel, CSharpSemanticModel, CSharpSyntaxNode>>
                 extractionMetricSpawner = new();
 
-            extractionMetricSpawner.LoadType<CSharpBaseClassMetric>();
             extractionMetricSpawner.LoadType<CSharpUsingsCountMetric>();
-            extractionMetricSpawner.LoadType<CSharpBaseClassMetric>();
             extractionMetricSpawner.LoadType<CSharpUsingsCountMetric>();
-            extractionMetricSpawner.LoadType<CSharpBaseClassMetric>();
 
 
             var instantiateMetrics = extractionMetricSpawner.InstantiateMetrics();
 
-            Assert.Equal(2, instantiateMetrics.Count);
-
-            Assert.Equal(typeof(CSharpBaseClassMetric),instantiateMetrics[0].GetType());
-            Assert.Equal(typeof(CSharpUsingsCountMetric),instantiateMetrics[1].GetType());
+            Assert.Equal(1, instantiateMetrics.Count);
+            Assert.Equal(typeof(CSharpUsingsCountMetric),instantiateMetrics[0].GetType());
         }
         
         [Fact]
@@ -36,22 +31,18 @@ namespace HoneydewCoreIntegrationTests.Utils
             TypeSpawner<IExtractionMetric<CSharpSyntacticModel, CSharpSemanticModel, CSharpSyntaxNode>>
                 extractionMetricSpawner = new();
 
-            extractionMetricSpawner.LoadType<CSharpBaseClassMetric>();
             extractionMetricSpawner.LoadType<CSharpIsAbstractMetric>();
-            extractionMetricSpawner.LoadType<CSharpFieldsInfoMetric>();
             extractionMetricSpawner.LoadType<CSharpUsingsCountMetric>();
             extractionMetricSpawner.LoadType<CSharpMethodInfoMetric>();
 
 
             var instantiateMetrics = extractionMetricSpawner.InstantiateMetrics();
 
-            Assert.Equal(5, instantiateMetrics.Count);
+            Assert.Equal(3, instantiateMetrics.Count);
 
-            Assert.Equal(typeof(CSharpBaseClassMetric),instantiateMetrics[0].GetType());
-            Assert.Equal(typeof(CSharpIsAbstractMetric),instantiateMetrics[1].GetType());
-            Assert.Equal(typeof(CSharpFieldsInfoMetric),instantiateMetrics[2].GetType());
-            Assert.Equal(typeof(CSharpUsingsCountMetric),instantiateMetrics[3].GetType());
-            Assert.Equal(typeof(CSharpMethodInfoMetric),instantiateMetrics[4].GetType());
+            Assert.Equal(typeof(CSharpIsAbstractMetric),instantiateMetrics[0].GetType());
+            Assert.Equal(typeof(CSharpUsingsCountMetric),instantiateMetrics[1].GetType());
+            Assert.Equal(typeof(CSharpMethodInfoMetric),instantiateMetrics[2].GetType());
         }
     }
 }

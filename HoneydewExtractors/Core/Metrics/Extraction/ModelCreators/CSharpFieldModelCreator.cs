@@ -6,7 +6,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace HoneydewExtractors.Core.Metrics.Extraction.ModelCreators
 {
     public class
-        CSharpFieldModelCreator : AbstractModelCreator<BaseFieldDeclarationSyntax, IFieldType, ICSharpFieldVisitor>
+        CSharpFieldModelCreator : AbstractModelCreator<BaseFieldDeclarationSyntax, IList<IFieldType>,
+            ICSharpFieldVisitor>
     {
         public CSharpFieldModelCreator(IEnumerable<ICSharpFieldVisitor> visitors) : base(visitors)
         {

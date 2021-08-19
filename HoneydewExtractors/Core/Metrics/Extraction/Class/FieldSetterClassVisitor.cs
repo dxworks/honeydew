@@ -1,8 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
-using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -27,8 +27,11 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class
             foreach (var baseFieldDeclarationSyntax in
                 syntaxNode.DescendantNodes().OfType<BaseFieldDeclarationSyntax>())
             {
-                modelType.Fields.Add(
-                    _cSharpFieldModelCreator.Create(baseFieldDeclarationSyntax, new FieldModel()));
+                foreach (var fieldType in _cSharpFieldModelCreator.Create(baseFieldDeclarationSyntax,
+                    new List<IFieldType>()))
+                {
+                    modelType.Fields.Add(fieldType);
+                }
             }
 
             return modelType;

@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
-using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.CSharp.Metrics;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
@@ -26,18 +24,6 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                 })));
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
                 new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
-        }
-
-        [Fact]
-        public void GetMetricType_ShouldReturnClassLevel()
-        {
-            Assert.Equal(ExtractionMetricType.ClassLevel, new CSharpBaseClassMetric().GetMetricType());
-        }
-
-        [Fact]
-        public void PrettyPrint_ShouldReturnInheritsClass()
-        {
-            Assert.Equal("Inherits Class", new CSharpBaseClassMetric().PrettyPrint());
         }
 
         [Fact]
