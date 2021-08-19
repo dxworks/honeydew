@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using HoneydewExtractors.Core.Metrics.Extraction;
-using HoneydewExtractors.Core.Metrics.Extraction.Implementation;
+using HoneydewExtractors.Core.Metrics.Extraction.Class;
+using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;

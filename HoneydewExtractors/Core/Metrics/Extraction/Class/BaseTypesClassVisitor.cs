@@ -1,10 +1,11 @@
-﻿using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+﻿using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.Core.Metrics.Extraction.Implementation
+namespace HoneydewExtractors.Core.Metrics.Extraction.Class
 {
     public class BaseTypesClassVisitor : ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>,
         ICSharpClassVisitor
