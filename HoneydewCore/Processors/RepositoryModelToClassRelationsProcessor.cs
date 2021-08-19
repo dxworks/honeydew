@@ -43,7 +43,7 @@ namespace HoneydewCore.Processors
                         foreach (var relation in relations)
                         {
                             classRelationsRepresentation.Add(classModel.Name, relation.FileTarget,
-                                relation.RelationType, relation.RelationCount);
+                                relation.FileSource, relation.RelationCount);
                         }
                     }
                 }

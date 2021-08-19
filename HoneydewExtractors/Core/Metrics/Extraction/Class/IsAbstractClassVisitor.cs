@@ -37,8 +37,8 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class
             modelType.Metrics.Add(new MetricModel
             {
                 Value = isAbstract,
-                ValueType = isAbstract.GetType().FullName,
-                ExtractorName = GetType().FullName
+                ValueType = isAbstract.GetType().ToString(),
+                ExtractorName = GetType().ToString()
             });
 
             return modelType;

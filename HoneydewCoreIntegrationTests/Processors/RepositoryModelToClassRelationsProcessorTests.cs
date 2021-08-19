@@ -175,7 +175,7 @@ namespace HoneydewCoreIntegrationTests.Processors
                     {
                         FileTarget = "Models.Class1",
                         RelationCount = 2,
-                        RelationType = extractorName
+                        FileSource = extractorName
                     }
                 });
 

@@ -5,6 +5,8 @@ namespace HoneydewExtractors.Core.Metrics
 {
     public interface IRelationMetric
     {
-        IList<FileRelation> GetRelations(object metricValue);
+        string PrettyPrint();
+        
+        IList<FileRelation> GetRelations(IDictionary<string, IDictionary<string, int>> dependencies);
     }
 }

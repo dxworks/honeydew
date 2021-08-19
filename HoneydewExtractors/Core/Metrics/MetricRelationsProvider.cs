@@ -20,9 +20,11 @@ namespace HoneydewExtractors.Core.Metrics
                 return new List<FileRelation>();
             }
 
-            var relationMetric = (IRelationMetric) Activator.CreateInstance(extractorType);
+            var relationMetric = (IRelationMetric)Activator.CreateInstance(extractorType);
 
-            return relationMetric == null ? new List<FileRelation>() : relationMetric.GetRelations(metricModel.Value);
+            return relationMetric == null
+                ? new List<FileRelation>()
+                : relationMetric.GetRelations((IDictionary<string, IDictionary<string, int>>)metricModel.Value);
         }
     }
 }

@@ -75,17 +75,17 @@ namespace HoneydewExtractorsTests.Core.Metrics
             Assert.Equal(3, fileRelations.Count);
 
             var fileRelation0 = fileRelations[0];
-            Assert.Equal(extractorName, fileRelation0.RelationType);
+            Assert.Equal(extractorName, fileRelation0.FileSource);
             Assert.Equal(2, fileRelation0.RelationCount);
             Assert.Equal("Class1", fileRelation0.FileTarget);
 
             var fileRelation1 = fileRelations[1];
-            Assert.Equal(extractorName, fileRelation1.RelationType);
+            Assert.Equal(extractorName, fileRelation1.FileSource);
             Assert.Equal(12, fileRelation1.RelationCount);
             Assert.Equal("Class2", fileRelation1.FileTarget);
 
             var fileRelation2 = fileRelations[2];
-            Assert.Equal(extractorName, fileRelation2.RelationType);
+            Assert.Equal(extractorName, fileRelation2.FileSource);
             Assert.Equal(5, fileRelation2.RelationCount);
             Assert.Equal("Class3", fileRelation2.FileTarget);
         }

@@ -19,8 +19,8 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit
             modelType.Metrics.Add(new MetricModel
             {
                 Value = importsCount,
-                ValueType = importsCount.GetType().FullName,
-                ExtractorName = GetType().FullName
+                ValueType = importsCount.GetType().ToString(),
+                ExtractorName = GetType().ToString()
             });
             
             return modelType;

@@ -48,7 +48,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
                     {
                         FileTarget = dependency,
                         RelationCount = count,
-                        RelationType = relationType
+                        FileSource = relationType
                     };
                     fileRelations.Add(fileRelation);
                 }
@@ -71,6 +71,11 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
             {
                 Dependencies.Add(dependencyName, 1);
             }
+        }
+
+        public IList<FileRelation> GetRelations(IDictionary<string, IDictionary<string, int>> dependencies)
+        {
+            return new List<FileRelation>();
         }
     }
 }
