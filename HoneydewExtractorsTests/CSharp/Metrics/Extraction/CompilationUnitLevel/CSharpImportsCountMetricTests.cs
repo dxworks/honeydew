@@ -1,30 +1,21 @@
-﻿using HoneydewExtractors.Core.Metrics.Extraction;
+﻿using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.CSharp.Metrics;
-using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
 {
-    public class CSharpUsingsCountMetricTests
+    public class CSharpImportsCountMetricTests
     {
         private readonly CSharpFactExtractor _factExtractor;
 
-        public CSharpUsingsCountMetricTests()
+        public CSharpImportsCountMetricTests()
         {
-            _factExtractor = new CSharpFactExtractor();
-            _factExtractor.AddMetric<CSharpUsingsCountMetric>();
-        }
+            var visitorList = new VisitorList();
+            visitorList.Add(new ImportCountCompilationUnitVisitor());
 
-        [Fact]
-        public void GetMetricType_ShouldReturnCompilationUnitLevel()
-        {
-            Assert.Equal(ExtractionMetricType.CompilationUnitLevel, new CSharpUsingsCountMetric().GetMetricType());
-        }
-
-        [Fact]
-        public void PrettyPrint_ShouldReturnUsingsCount()
-        {
-            Assert.Equal("Usings Count", new CSharpUsingsCountMetric().PrettyPrint());
+            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
         }
 
         [Fact]
@@ -42,15 +33,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
                                          public class Foo { int a; public void f(); }                                        
                                      }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var compilationUnit = _factExtractor.Extract(fileContent);
 
-            Assert.Equal(1, classModels.Count);
-
-            var optional = classModels[0].GetMetricValue<CSharpUsingsCountMetric>();
-            Assert.True(optional.HasValue);
-            var count = (int) optional.Value;
-
-            Assert.Equal(6, count);
+            Assert.Equal(1, compilationUnit.Metrics.Count);
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit.ImportCountCompilationUnitVisitor",
+                compilationUnit.Metrics[0].ExtractorName);
+            Assert.Equal("System.Int32", compilationUnit.Metrics[0].ValueType);
+            Assert.Equal(6, compilationUnit.Metrics[0].Value);
         }
 
         [Fact]
@@ -85,16 +74,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
                                          }
                                      }";
 
-            var classModels = _factExtractor.Extract(fileContent);
-            Assert.Equal(2, classModels.Count);
+            var compilationUnit = _factExtractor.Extract(fileContent);
 
-            var optional1 = classModels[0].GetMetricValue<CSharpUsingsCountMetric>();
-            Assert.True(optional1.HasValue);
-            Assert.Equal(12, (int) optional1.Value);
-
-            var optional2 = classModels[0].GetMetricValue<CSharpUsingsCountMetric>();
-            Assert.True(optional2.HasValue);
-            Assert.Equal(12, (int) optional2.Value);
+            Assert.Equal(1, compilationUnit.Metrics.Count);
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit.ImportCountCompilationUnitVisitor",
+                compilationUnit.Metrics[0].ExtractorName);
+            Assert.Equal("System.Int32", compilationUnit.Metrics[0].ValueType);
+            Assert.Equal(12, compilationUnit.Metrics[0].Value);
         }
     }
 }

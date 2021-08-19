@@ -12,5 +12,7 @@ namespace HoneydewModels.CSharp
         public IList<IImportType> Imports { get; set; } = new List<IImportType>();
 
         public LinesOfCode Loc { get; set; }
+
+        public IList<MetricModel> Metrics { get; init; } = new List<MetricModel>();
     }
 }
