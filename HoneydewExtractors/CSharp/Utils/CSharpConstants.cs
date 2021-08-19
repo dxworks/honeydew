@@ -11,12 +11,16 @@
         public const string AbstractIdentifier = "abstract";
         public const string BaseClassIdentifier = "base";
         public const string ObjectIdentifier = "object";
+        public const string ClassIdentifier = "class";
+        public const string DelegateIdentifier = "delegate";
+        public const string SystemDelegate = "System.Delegate";
         public const string VarIdentifier = "var";
         public const string RefIdentifier = "ref";
         public const string RefReadonlyIdentifier = "ref readonly";
 
         private static readonly string[] AccessModifiers =
             { "private protected", "protected internal", "public", "private", "protected", "internal" };
+
 
         public static void SetModifiers(string allModifiers, ref string accessModifier, ref string modifier)
         {

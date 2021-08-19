@@ -33,5 +33,6 @@ namespace TopLevel
         }        
     }
 
+    // this is a delegate declaration
     public delegate void A();                                        
 }

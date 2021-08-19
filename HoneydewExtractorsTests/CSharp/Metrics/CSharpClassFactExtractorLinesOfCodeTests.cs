@@ -1,4 +1,15 @@
-﻿using HoneydewExtractors.CSharp.Metrics;
+﻿using System.Collections.Generic;
+using HoneydewExtractors.Core.Metrics.Extraction.Class;
+using HoneydewExtractors.Core.Metrics.Extraction.Common;
+using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
+using HoneydewExtractors.Core.Metrics.Visitors.Properties;
+using HoneydewExtractors.CSharp.Metrics;
+using HoneydewModels.CSharp;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics
@@ -9,19 +20,46 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
         public CSharpClassFactExtractorLinesOfCodeTests()
         {
-            _sut = new CSharpFactExtractor();
+            var visitorList = new VisitorList();
+            var linesOfCodeVisitor = new LinesOfCodeVisitor();
+            visitorList.Add(linesOfCodeVisitor);
+            visitorList.Add(new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(
+                new List<ICSharpClassVisitor>
+                {
+                    linesOfCodeVisitor,
+                    new ConstructorSetterClassVisitor(new CSharpConstructorMethodModelCreator(
+                        new List<ICSharpConstructorVisitor>
+                        {
+                            linesOfCodeVisitor
+                        })),
+                    new MethodSetterClassVisitor(new CSharpMethodModelCreator(new List<ICSharpMethodVisitor>
+                    {
+                        linesOfCodeVisitor
+                    })),
+                    new PropertySetterClassVisitor(new CSharpPropertyModelCreator(new List<ICSharpPropertyVisitor>
+                    {
+                        linesOfCodeVisitor
+                    }))
+                })));
+            _sut = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
         }
 
         [Theory]
         [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/ClassWithCommentsWithPropertyAndMethod.txt")]
         public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithClassWithMethodsAndProperties(string fileContent)
         {
-            var classModels = _sut.Extract(fileContent);
+            var compilationUnit = _sut.Extract(fileContent);
+            var classModels = compilationUnit.ClassTypes;
 
-            var classModel = classModels[0];
-            Assert.Equal(21, classModel.Loc.SourceLines);
-            Assert.Equal(8, classModel.Loc.EmptyLines);
-            Assert.Equal(8, classModel.Loc.CommentedLines);
+            Assert.Equal(21, compilationUnit.Loc.SourceLines);
+            Assert.Equal(10, compilationUnit.Loc.EmptyLines);
+            Assert.Equal(8, compilationUnit.Loc.CommentedLines);
+            
+            var classModel = (ClassModel)classModels[0];
+            Assert.Equal(16, classModel.Loc.SourceLines);
+            Assert.Equal(6, classModel.Loc.EmptyLines);
+            Assert.Equal(5, classModel.Loc.CommentedLines);
 
             Assert.Equal(5, classModel.Methods[0].Loc.SourceLines);
             Assert.Equal(2, classModel.Methods[0].Loc.CommentedLines);
@@ -36,9 +74,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
         [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/ClassWithPropertyAndMethodAndDelegateWithComments.txt")]
         public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithClassAndDelegate(string fileContent)
         {
-            var classModels = _sut.Extract(fileContent);
+            var compilationUnit = _sut.Extract(fileContent);
+            var classModels = compilationUnit.ClassTypes;
 
-            var classModel = classModels[0];
+            Assert.Equal(22, compilationUnit.Loc.SourceLines);
+            Assert.Equal(9, compilationUnit.Loc.EmptyLines);
+            Assert.Equal(8, compilationUnit.Loc.CommentedLines);
+            
+            var classModel = (ClassModel)classModels[0];
             Assert.Equal(16, classModel.Loc.SourceLines);
             Assert.Equal(6, classModel.Loc.EmptyLines);
             Assert.Equal(5, classModel.Loc.CommentedLines);
@@ -50,11 +93,6 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal(7, classModel.Properties[0].Loc.SourceLines);
             Assert.Equal(1, classModel.Properties[0].Loc.CommentedLines);
             Assert.Equal(1, classModel.Properties[0].Loc.EmptyLines);
-
-            var delegateModel = classModels[1];
-            Assert.Equal(1, delegateModel.Loc.SourceLines);
-            Assert.Equal(0, delegateModel.Loc.EmptyLines);
-            Assert.Equal(0, delegateModel.Loc.CommentedLines);
         }
     }
 }

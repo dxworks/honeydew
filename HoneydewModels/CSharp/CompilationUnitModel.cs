@@ -10,5 +10,7 @@ namespace HoneydewModels.CSharp
         public string FilePath { get; set; }
 
         public IList<IImportType> Imports { get; set; } = new List<IImportType>();
+
+        public LinesOfCode Loc { get; set; }
     }
 }
