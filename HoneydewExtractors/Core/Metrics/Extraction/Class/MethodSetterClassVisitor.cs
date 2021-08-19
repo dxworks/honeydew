@@ -19,7 +19,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class
             _cSharpMethodModelCreator = cSharpMethodModelCreator;
         }
 
-        public IMembersClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IMembersClassType classType)
+        public IPropertyMembersClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IPropertyMembersClassType classType)
         {
             foreach (var baseTypeDeclarationSyntax in syntaxNode.DescendantNodes().OfType<MethodDeclarationSyntax>())
             {

@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace HoneydewExtractors.Core.Metrics.Extraction.ModelCreators
 {
     public class
-        CSharpClassModelCreator : AbstractModelCreator<BaseTypeDeclarationSyntax, IMembersClassType, ICSharpClassVisitor>
+        CSharpClassModelCreator : AbstractModelCreator<BaseTypeDeclarationSyntax, IPropertyMembersClassType, ICSharpClassVisitor>
     {
         public CSharpClassModelCreator(IEnumerable<ICSharpClassVisitor> visitors) : base(visitors)
         {

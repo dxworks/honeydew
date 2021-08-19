@@ -1,9 +1,13 @@
 ﻿using System.Collections.Generic;
-using HoneydewExtractors.Core.Metrics.Extraction;
+using HoneydewExtractors.Core.Metrics.Extraction.Class;
+using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+using HoneydewExtractors.Core.Metrics.Extraction.Property;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewModels.CSharp;
-using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
@@ -14,22 +18,20 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
         public CSharpPropertiesInfoMetricTests()
         {
-            _factExtractor = new CSharpFactExtractor();
-            _factExtractor.AddMetric<CSharpPropertiesInfoMetric>();
+            var visitorList = new VisitorList();
+            visitorList.Add(new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(
+                new List<ICSharpClassVisitor>
+                {
+                    new BaseInfoClassVisitor(),
+                    new PropertySetterClassVisitor(new CSharpPropertyModelCreator(new List<ICSharpPropertyVisitor>
+                    {
+                        new PropertyInfoVisitor(),
+                        new CalledMethodsPropertyVisitor()
+                    }))
+                })));
+            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
         }
-
-        [Fact]
-        public void GetMetricType_ShouldReturnClassLevel()
-        {
-            Assert.Equal(ExtractionMetricType.ClassLevel, new CSharpPropertiesInfoMetric().GetMetricType());
-        }
-
-        [Fact]
-        public void PrettyPrint_ShouldReturnPropertiesInfo()
-        {
-            Assert.Equal("Properties Info", new CSharpPropertiesInfoMetric().PrettyPrint());
-        }
-
 
         [Fact]
         public void Extract_ShouldHaveProperties_WhenGivenAnInterface()
@@ -42,11 +44,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                       }";
 
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var propertyModel = classModels[0].Properties[0];
+            var propertyModel = ((ClassModel)classTypes[0]).Properties[0];
             Assert.Equal("Value", propertyModel.Name);
             Assert.Equal("", propertyModel.Modifier);
             Assert.Equal("public", propertyModel.AccessModifier);
@@ -71,32 +73,29 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                       }";
 
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
+            var propertyTypes = ((ClassModel)classTypes[0]).Properties;
 
-            var propertyModels = (IList<IPropertyType>)optional.Value;
+            Assert.Equal(2, propertyTypes.Count);
 
-            Assert.Equal(2, propertyModels.Count);
+            Assert.Equal("A", propertyTypes[0].Name);
+            Assert.Equal("int", propertyTypes[0].Type);
+            Assert.Equal("static", propertyTypes[0].Modifier);
+            Assert.Equal("private", propertyTypes[0].AccessModifier);
+            Assert.False(propertyTypes[0].IsEvent);
+            Assert.Equal("TopLevel.Foo", propertyTypes[0].ContainingTypeName);
+            Assert.Empty(propertyTypes[0].CalledMethods);
 
-            Assert.Equal("A", propertyModels[0].Name);
-            Assert.Equal("int", propertyModels[0].Type);
-            Assert.Equal("static", propertyModels[0].Modifier);
-            Assert.Equal("private", propertyModels[0].AccessModifier);
-            Assert.False(propertyModels[0].IsEvent);
-            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingTypeName);
-            Assert.Empty(propertyModels[0].CalledMethods);
-
-            Assert.Equal("X", propertyModels[1].Name);
-            Assert.Equal("float", propertyModels[1].Type);
-            Assert.Equal("", propertyModels[1].Modifier);
-            Assert.Equal("private", propertyModels[1].AccessModifier);
-            Assert.False(propertyModels[1].IsEvent);
-            Assert.Equal("TopLevel.Foo", propertyModels[1].ContainingTypeName);
-            Assert.Empty(propertyModels[1].CalledMethods);
+            Assert.Equal("X", propertyTypes[1].Name);
+            Assert.Equal("float", propertyTypes[1].Type);
+            Assert.Equal("", propertyTypes[1].Modifier);
+            Assert.Equal("private", propertyTypes[1].AccessModifier);
+            Assert.False(propertyTypes[1].IsEvent);
+            Assert.Equal("TopLevel.Foo", propertyTypes[1].ContainingTypeName);
+            Assert.Empty(propertyTypes[1].CalledMethods);
         }
 
         [Theory]
@@ -117,14 +116,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                       }}";
 
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<IPropertyType>)optional.Value;
+            var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(3, propertyModels.Count);
 
@@ -172,14 +168,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                       }}";
 
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<IPropertyType>)optional.Value;
+            var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(3, propertyModels.Count);
 
@@ -232,14 +225,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                         }                                    
                                       }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<IPropertyType>)optional.Value;
+            var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(5, propertyModels.Count);
 
@@ -295,15 +285,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                         }                                        
                                       }";
 
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            var classModels = _factExtractor.Extract(fileContent);
+            Assert.Equal(2, classTypes.Count);
 
-            Assert.Equal(2, classModels.Count);
-
-            var optional = classModels[1].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<IPropertyType>)optional.Value;
+            var propertyModels = ((ClassModel)classTypes[1]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
 
@@ -335,14 +321,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                       }";
 
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<IPropertyType>)optional.Value;
+            var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
 
@@ -387,14 +370,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                         }                                        
                                       }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
-
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<IPropertyType>)optional.Value;
+            Assert.Equal(1, classTypes.Count);
+            
+            var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
 
@@ -461,14 +441,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                         }
                                     }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(2, classModels.Count);
+            Assert.Equal(2, classTypes.Count);
 
-            var optional = classModels[1].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<IPropertyType>)optional.Value;
+            var propertyModels = ((ClassModel)classTypes[1]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
 
@@ -522,14 +499,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                         }
                                     }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
-
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<IPropertyType>)optional.Value;
+            Assert.Equal(1, classTypes.Count);
+            
+            var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
 
@@ -591,14 +565,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                         }                                        
                                       }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<IPropertyType>)optional.Value;
+            var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
 
@@ -665,14 +636,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                         }
                                     }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(2, classModels.Count);
+            Assert.Equal(2, classTypes.Count);
 
-            var optional = classModels[1].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<IPropertyType>)optional.Value;
+            var propertyModels = ((ClassModel)classTypes[1]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
 
@@ -725,14 +693,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                         }
                                     }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<IPropertyType>)optional.Value;
+            var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
 
@@ -799,14 +764,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                         }
                                     }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(2, classModels.Count);
+            Assert.Equal(2, classTypes.Count);
 
-            var optional = classModels[1].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<IPropertyType>)optional.Value;
+            var propertyModels = ((ClassModel)classTypes[1]).Properties;
 
             Assert.Equal(2, propertyModels.Count);
 

@@ -9,9 +9,9 @@ namespace HoneydewModels.CSharp
 
         public string ContainingTypeName { get; set; }
 
-        public string AccessModifier { get; init; }
+        public string AccessModifier { get; set; }
 
-        public string Modifier { get; init; }
+        public string Modifier { get; set; }
 
         public IList<IParameterType> ParameterTypes { get; set; } = new List<IParameterType>();
         public IList<IMethodSignatureType> CalledMethods { get; set; } = new List<IMethodSignatureType>();

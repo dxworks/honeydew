@@ -16,9 +16,9 @@ namespace HoneydewModels.CSharp
 
         public LinesOfCode Loc { get; set; }
 
-        public string AccessModifier { get; init; }
+        public string AccessModifier { get; set; }
 
-        public string Modifier { get; init; } = "";
+        public string Modifier { get; set; } = "";
 
         public string ContainingTypeName
         {

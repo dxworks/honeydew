@@ -22,7 +22,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class
             }
         }
 
-        public IMembersClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IMembersClassType modelType)
+        public IPropertyMembersClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IPropertyMembersClassType modelType)
         {
             foreach (var baseFieldDeclarationSyntax in
                 syntaxNode.DescendantNodes().OfType<BaseFieldDeclarationSyntax>())

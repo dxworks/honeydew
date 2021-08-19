@@ -4,6 +4,6 @@
     {
         public string Type { get; set; }
 
-        public bool IsEvent { get; init; }
+        public bool IsEvent { get; set; }
     }
 }
