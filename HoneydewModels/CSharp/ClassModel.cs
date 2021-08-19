@@ -8,7 +8,7 @@ namespace HoneydewModels.CSharp
 {
     public record ClassModel : IPropertyMembersClassType, IModelEntity, IClassModel
     {
-        public string ClassType { get; init; }
+        public string ClassType { get; set; }
 
         public string Name { get; set; }
 
