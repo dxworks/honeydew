@@ -1,5 +1,18 @@
-﻿using HoneydewExtractors.CSharp.Metrics;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
+﻿using System.Collections.Generic;
+using HoneydewExtractors.Core.Metrics.Extraction.Class;
+using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.Constructor;
+using HoneydewExtractors.Core.Metrics.Extraction.Delegate;
+using HoneydewExtractors.Core.Metrics.Extraction.Method;
+using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+using HoneydewExtractors.Core.Metrics.Extraction.Property;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
+using HoneydewExtractors.Core.Metrics.Visitors.Properties;
+using HoneydewExtractors.CSharp.Metrics;
+using HoneydewModels.CSharp;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
@@ -10,9 +23,32 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
         public CSharpCyclomaticComplexityTests()
         {
-            _factExtractor = new CSharpFactExtractor();
-            _factExtractor.AddMetric<CSharpFieldsInfoMetric>();
-            _factExtractor.AddMetric<CSharpMethodInfoMetric>();
+            var visitorList = new VisitorList();
+            visitorList.Add(new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(
+                new List<ICSharpClassVisitor>
+                {
+                    new BaseInfoClassVisitor(),
+                    new PropertySetterClassVisitor(new CSharpPropertyModelCreator(new List<ICSharpPropertyVisitor>
+                    {
+                        new PropertyInfoVisitor()
+                    })),
+                    new MethodSetterClassVisitor(new CSharpMethodModelCreator(new List<ICSharpMethodVisitor>
+                    {
+                        new MethodInfoVisitor()
+                    })),
+                    new ConstructorSetterClassVisitor(new CSharpConstructorMethodModelCreator(
+                        new List<ICSharpConstructorVisitor>
+                        {
+                            new ConstructorInfoVisitor()
+                        }))
+                })));
+            visitorList.Add(new DelegateSetterCompilationUnitVisitor(new CSharpDelegateModelCreator(
+                new List<ICSharpDelegateVisitor>
+                {
+                    new BaseInfoDelegateVisitor()
+                })));
+            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
         }
 
         [Theory]
@@ -21,15 +57,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void Extract_ShouldHave1CyclomaticComplexity_WhenGivenClassWithMethodsAndPropertiesAndDelegate(
             string fileContent)
         {
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(2, classModels.Count);
+            Assert.Equal(2, classTypes.Count);
 
-            Assert.Equal(1, classModels[0].Constructors[0].CyclomaticComplexity);
-            Assert.Equal(1, classModels[0].Methods[0].CyclomaticComplexity);
-            Assert.Equal(1, classModels[0].Properties[0].CyclomaticComplexity);
-
-            Assert.Equal(0, classModels[1].Methods[0].CyclomaticComplexity);
+            var classModel = (ClassModel)classTypes[0];
+            Assert.Equal(1, classModel.Constructors[0].CyclomaticComplexity);
+            Assert.Equal(1, classModel.Methods[0].CyclomaticComplexity);
+            Assert.Equal(1, classModel.Properties[0].CyclomaticComplexity);
         }
 
         [Theory]
@@ -39,15 +74,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Extract_ShouldCountCyclomaticComplexityFromWhiles_WhenGivenClassWithMethodsAndPropertiesAndDelegate(
                 string fileContent)
         {
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(2, classModels.Count);
+            Assert.Equal(2, classTypes.Count);
 
-            Assert.Equal(2, classModels[0].Constructors[0].CyclomaticComplexity);
-            Assert.Equal(4, classModels[0].Methods[0].CyclomaticComplexity);
-            Assert.Equal(3, classModels[0].Properties[0].CyclomaticComplexity);
-
-            Assert.Equal(0, classModels[1].Methods[0].CyclomaticComplexity);
+            var classModel = (ClassModel)classTypes[0];
+            Assert.Equal(2, classModel.Constructors[0].CyclomaticComplexity);
+            Assert.Equal(4, classModel.Methods[0].CyclomaticComplexity);
+            Assert.Equal(3, classModel.Properties[0].CyclomaticComplexity);
         }
 
         [Theory]
@@ -56,13 +90,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void
             Extract_ShouldCountCyclomaticComplexityFromIfs_WhenGivenClassWithMethodsAndProperties(string fileContent)
         {
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            Assert.Equal(3, classModels[0].Constructors[0].CyclomaticComplexity);
-            Assert.Equal(4, classModels[0].Methods[0].CyclomaticComplexity);
-            Assert.Equal(3, classModels[0].Properties[0].CyclomaticComplexity);
+            var classModel = (ClassModel)classTypes[0];
+            Assert.Equal(3, classModel.Constructors[0].CyclomaticComplexity);
+            Assert.Equal(4, classModel.Methods[0].CyclomaticComplexity);
+            Assert.Equal(3, classModel.Properties[0].CyclomaticComplexity);
         }
 
         [Theory]
@@ -71,11 +106,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void
             Extract_ShouldCountCyclomaticComplexityFromFors_WhenGivenClassWithMethods(string fileContent)
         {
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            Assert.Equal(5, classModels[0].Methods[0].CyclomaticComplexity);
+            Assert.Equal(5, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
         }
 
         [Theory]
@@ -84,11 +119,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void
             Extract_ShouldCountCyclomaticComplexityFromUnaryExpression_WhenGivenClassWithMethods(string fileContent)
         {
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            Assert.Equal(7, classModels[0].Methods[0].CyclomaticComplexity);
+            Assert.Equal(7, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
         }
 
         [Theory]
@@ -98,11 +133,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Extract_ShouldCountCyclomaticComplexityFromComplexBinaryExpression_WhenGivenClassWithMethods(
                 string fileContent)
         {
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            Assert.Equal(7, classModels[0].Methods[0].CyclomaticComplexity);
+            Assert.Equal(7, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
         }
 
         [Theory]
@@ -112,11 +147,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Extract_ShouldCountCyclomaticComplexityFromComplexBinaryExpressionWithIsAndOr_WhenGivenClassWithMethods(
                 string fileContent)
         {
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            Assert.Equal(6, classModels[0].Methods[0].CyclomaticComplexity);
+            Assert.Equal(6, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
         }
 
         [Theory]
@@ -125,11 +160,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void
             Extract_ShouldCountCyclomaticComplexityFromDoWhile_WhenGivenClassWithMethods(string fileContent)
         {
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            Assert.Equal(2, classModels[0].Methods[0].CyclomaticComplexity);
+            Assert.Equal(2, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
         }
 
         [Theory]
@@ -138,11 +173,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void
             Extract_ShouldCountCyclomaticComplexityFromForeach_WhenGivenClassWithMethods(string fileContent)
         {
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            Assert.Equal(2, classModels[0].Methods[0].CyclomaticComplexity);
+            Assert.Equal(2, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
         }
 
         [Theory]
@@ -151,11 +186,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void
             Extract_ShouldCountCyclomaticComplexityFromSwitch_WhenGivenClassWithMethods(string fileContent)
         {
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            Assert.Equal(7, classModels[0].Methods[0].CyclomaticComplexity);
+            Assert.Equal(7, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
         }
 
         [Theory]
@@ -165,11 +200,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Extract_ShouldCountCyclomaticComplexityFromPatternSwitchWithOperators_WhenGivenClassWithMethods(
                 string fileContent)
         {
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            Assert.Equal(6, classModels[0].Methods[0].CyclomaticComplexity);
+            Assert.Equal(6, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
         }
 
         [Theory]
@@ -179,11 +214,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Extract_ShouldCountCyclomaticComplexityFromReturnSwitchWithStrings_WhenGivenClassWithMethods(
                 string fileContent)
         {
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            Assert.Equal(1, classModels[0].Methods[0].CyclomaticComplexity);
+            Assert.Equal(1, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
         }
 
         [Theory]
@@ -193,11 +228,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Extract_ShouldCountCyclomaticComplexityFromPatternSwitchWithClassHierarchy_WhenGivenClassWithMethods(
                 string fileContent)
         {
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(5, classModels.Count);
+            Assert.Equal(5, classTypes.Count);
 
-            Assert.Equal(5, classModels[0].Methods[0].CyclomaticComplexity);
+            Assert.Equal(5, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
         }
 
         [Theory]
@@ -206,11 +241,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void
             Extract_ShouldCountCyclomaticComplexityForConditionalOperators_WhenGivenClassWithMethods(string fileContent)
         {
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            Assert.Equal(5, classModels[0].Methods[0].CyclomaticComplexity);
+            Assert.Equal(5, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
         }
     }
 }
