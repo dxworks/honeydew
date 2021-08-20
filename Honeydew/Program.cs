@@ -10,10 +10,25 @@ using HoneydewCore.Logging;
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
 using HoneydewExtractors.Core;
-using HoneydewExtractors.Core.Metrics;
-using HoneydewExtractors.CSharp.Metrics;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
-using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
+using HoneydewExtractors.Core.Metrics.Extraction.Class;
+using HoneydewExtractors.Core.Metrics.Extraction.Class.Relations;
+using HoneydewExtractors.Core.Metrics.Extraction.Common;
+using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.Constructor;
+using HoneydewExtractors.Core.Metrics.Extraction.Delegate;
+using HoneydewExtractors.Core.Metrics.Extraction.Field;
+using HoneydewExtractors.Core.Metrics.Extraction.Method;
+using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
+using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+using HoneydewExtractors.Core.Metrics.Extraction.Property;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
+using HoneydewExtractors.Core.Metrics.Visitors.Fields;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
+using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.RepositoryLoading;
 using HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead;
 using HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead;
@@ -48,6 +63,7 @@ namespace Honeydew
 
                 var inputPath = options.InputFilePath;
 
+                var relationMetricHolder = new RelationMetricHolder();
                 RepositoryModel repositoryModel;
                 switch (options.Command)
                 {
@@ -59,7 +75,7 @@ namespace Honeydew
 
                     case "extract":
                     {
-                        repositoryModel = await ExtractModel(logger, progressLogger, inputPath);
+                        repositoryModel = await ExtractModel(logger, progressLogger, relationMetricHolder, inputPath);
                     }
                         break;
 
@@ -82,7 +98,8 @@ namespace Honeydew
                 progressLogger.Log();
                 progressLogger.Log("Exporting Intermediate Results");
 
-                WriteRepresentationsToFile(repositoryModel, "_intermediate", DefaultPathForAllRepresentations);
+                WriteRepresentationsToFile(repositoryModel, relationMetricHolder, "_intermediate",
+                    DefaultPathForAllRepresentations);
 
 
                 logger.Log();
@@ -96,7 +113,8 @@ namespace Honeydew
                 repositoryModel = fullNameModelProcessor.Process(repositoryModel);
 
 
-                WriteAllRepresentations(repositoryModel, fullNameModelProcessor.NamespacesDictionary,
+                WriteAllRepresentations(repositoryModel, relationMetricHolder,
+                    fullNameModelProcessor.NamespacesDictionary,
                     DefaultPathForAllRepresentations);
 
                 logger.Log();
@@ -113,20 +131,83 @@ namespace Honeydew
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
-        private static CSharpFactExtractor LoadExtractor()
+        private static IVisitorList LoadVisitors(IRelationMetricHolder relationMetricHolder)
         {
-            var cSharpFactExtractor = new CSharpFactExtractor();
-            cSharpFactExtractor.AddMetric<CSharpUsingsCountMetric>();
+            var linesOfCodeVisitor = new LinesOfCodeVisitor();
+            var calledMethodSignatureVisitors = new List<ICSharpMethodSignatureVisitor>
+            {
+                new MethodCallInfoVisitor()
+            };
 
-            cSharpFactExtractor.AddMetric<CSharpPropertiesRelationMetric>();
-            cSharpFactExtractor.AddMetric<CSharpFieldsRelationMetric>();
-            cSharpFactExtractor.AddMetric<CSharpParameterRelationMetric>();
-            cSharpFactExtractor.AddMetric<CSharpReturnValueRelationMetric>();
-            cSharpFactExtractor.AddMetric<CSharpLocalVariablesRelationMetric>();
-            cSharpFactExtractor.AddMetric<CSharpObjectCreationRelationMetric>();
-            cSharpFactExtractor.AddMetric<CSharpExceptionsThrownRelationMetric>();
+            var calledMethodSetterVisitor =
+                new CalledMethodSetterVisitor(new CSharpMethodCallModelCreator(calledMethodSignatureVisitors));
 
-            return cSharpFactExtractor;
+            var methodVisitors = new List<ICSharpMethodVisitor>
+            {
+                new MethodInfoVisitor(),
+                linesOfCodeVisitor,
+                calledMethodSetterVisitor,
+            };
+
+            var constructorVisitors = new List<ICSharpConstructorVisitor>
+            {
+                new ConstructorInfoVisitor(),
+                linesOfCodeVisitor,
+                calledMethodSetterVisitor,
+                new ConstructorCallsVisitor(),
+            };
+
+            var fieldVisitors = new List<ICSharpFieldVisitor>
+            {
+                new FieldInfoVisitor()
+            };
+
+            var propertyVisitors = new List<ICSharpPropertyVisitor>
+            {
+                new PropertyInfoVisitor(),
+                calledMethodSetterVisitor,
+                linesOfCodeVisitor,
+            };
+
+            var classVisitors = new List<ICSharpClassVisitor>
+            {
+                new BaseInfoClassVisitor(),
+                new BaseTypesClassVisitor(),
+                new MethodSetterClassVisitor(new CSharpMethodModelCreator(methodVisitors)),
+                new ConstructorSetterClassVisitor(new CSharpConstructorMethodModelCreator(constructorVisitors)),
+                new FieldSetterClassVisitor(new CSharpFieldModelCreator(fieldVisitors)),
+                new PropertySetterClassVisitor(new CSharpPropertyModelCreator(propertyVisitors)),
+                new ImportsVisitor(),
+                linesOfCodeVisitor,
+
+                // metrics visitor
+                new IsAbstractClassVisitor(),
+                new FieldsRelationVisitor(relationMetricHolder),
+                new PropertiesRelationVisitor(relationMetricHolder),
+                new ParameterRelationVisitor(relationMetricHolder),
+                new ReturnValueRelationVisitor(relationMetricHolder),
+                new ExceptionsThrownRelationVisitor(relationMetricHolder),
+                new ObjectCreationRelationVisitor(relationMetricHolder),
+                new LocalVariablesRelationVisitor(relationMetricHolder)
+            };
+
+            var delegateVisitors = new List<ICSharpDelegateVisitor>
+            {
+                new BaseInfoDelegateVisitor(),
+                new ImportsVisitor(),
+            };
+            var compilationUnitVisitors = new List<ICompilationUnitVisitor>
+            {
+                new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(classVisitors)),
+                new DelegateSetterCompilationUnitVisitor(new CSharpDelegateModelCreator(delegateVisitors)),
+                new ImportsVisitor(),
+                linesOfCodeVisitor,
+            };
+
+            var visitorList = new VisitorList();
+            visitorList.AddRange(compilationUnitVisitors);
+
+            return visitorList;
         }
 
         private static async Task<RepositoryModel> LoadModel(ILogger logger, string inputPath)
@@ -139,6 +220,7 @@ namespace Honeydew
         }
 
         private static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger progressLogger,
+            IRelationMetricHolder relationMetricHolder,
             string inputPath)
         {
             var solutionProvider = new MsBuildSolutionProvider();
@@ -151,25 +233,28 @@ namespace Honeydew
                 new BasicSolutionLoadingStrategy(logger, projectLoadingStrategy, progressLogger);
 
             var repositoryLoader = new CSharpRepositoryLoader(solutionProvider, projectProvider, projectLoadingStrategy,
-                solutionLoadingStrategy, logger, progressLogger, LoadExtractor());
+                solutionLoadingStrategy, logger, progressLogger,
+                new FactExtractorCreator(LoadVisitors(relationMetricHolder)));
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;
         }
 
         private static void WriteAllRepresentations(RepositoryModel repositoryModel,
+            IRelationMetricHolder relationMetricHolder,
             IDictionary<string, NamespaceTree> fullNameNamespaces, string outputPath)
         {
             var writer = new FileWriter();
 
-            WriteRepresentationsToFile(repositoryModel, "", outputPath);
+            WriteRepresentationsToFile(repositoryModel, relationMetricHolder, "", outputPath);
 
             var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
             writer.WriteFile(Path.Combine(outputPath, "honeydew_namespaces.json"),
                 fullNameNamespacesExporter.Export(fullNameNamespaces));
         }
 
-        private static void WriteRepresentationsToFile(RepositoryModel repositoryModel, string nameModifier,
+        private static void WriteRepresentationsToFile(RepositoryModel repositoryModel,
+            IRelationMetricHolder relationMetricHolder, string nameModifier,
             string outputPath)
         {
             var writer = new FileWriter();
@@ -178,7 +263,7 @@ namespace Honeydew
             writer.WriteFile(Path.Combine(outputPath, $"honeydew{nameModifier}.json"),
                 repositoryExporter.Export(repositoryModel));
 
-            var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
+            var classRelationsRepresentation = GetClassRelationsRepresentation(relationMetricHolder);
             var csvModelExporter = GetClassRelationsRepresentationExporter();
             writer.WriteFile(Path.Combine(outputPath, $"honeydew{nameModifier}.csv"),
                 csvModelExporter.Export(classRelationsRepresentation));
@@ -214,11 +299,12 @@ namespace Honeydew
             return csvModelExporter;
         }
 
-        private static ClassRelationsRepresentation GetClassRelationsRepresentation(RepositoryModel repositoryModel)
+        private static ClassRelationsRepresentation GetClassRelationsRepresentation(
+            IRelationMetricHolder relationMetricHolder)
         {
             var classRelationsRepresentation =
-                new RepositoryModelToClassRelationsProcessor(new MetricRelationsProvider(), new MetricPrettier(), true)
-                    .Process(repositoryModel);
+                new RelationMetricHolderToClassRelationsProcessor()
+                    .Process(relationMetricHolder);
             return classRelationsRepresentation;
         }
 

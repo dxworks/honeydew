@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace HoneydewExtractors.Core.Metrics.Visitors
 {
-    public class VisitorList
+    public class VisitorList : IVisitorList
     {
         private readonly ISet<ITypeVisitor> _visitors = new HashSet<ITypeVisitor>();
 

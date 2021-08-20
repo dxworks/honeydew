@@ -41,7 +41,8 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Delegate
                 ClassType = CSharpConstants.ClassIdentifier,
                 Name = CSharpConstants.SystemDelegate
             });
-
+            modelType.ContainingTypeName = InheritedSemanticModel.GetFullName(syntaxNode)
+                .Replace(syntaxNode.Identifier.ToString(), "").Trim('.');
 
             return modelType;
         }

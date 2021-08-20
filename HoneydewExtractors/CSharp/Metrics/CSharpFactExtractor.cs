@@ -12,10 +12,10 @@ namespace HoneydewExtractors.CSharp.Metrics
     {
         private readonly CSharpSyntacticModelCreator _syntacticModelCreator;
         private readonly CSharpSemanticModelCreator _semanticModelCreator;
-        private readonly VisitorList _visitorList;
+        private readonly IVisitorList _visitorList;
 
         public CSharpFactExtractor(CSharpSyntacticModelCreator syntacticModelCreator,
-            CSharpSemanticModelCreator semanticModelCreator, VisitorList visitorList)
+            CSharpSemanticModelCreator semanticModelCreator, IVisitorList visitorList)
         {
             _syntacticModelCreator = syntacticModelCreator;
             _semanticModelCreator = semanticModelCreator;

@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using HoneydewCore.Logging;
-using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.Core;
 using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
 using HoneydewModels.CSharp;
 
@@ -11,17 +11,16 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead
     public class SolutionFileLoader : ISolutionLoader
     {
         private readonly ILogger _logger;
-        private readonly CSharpFactExtractor _extractor;
+        private readonly IFactExtractorCreator _extractorCreator;
 
         private readonly ISolutionProvider _solutionProvider;
         private readonly ISolutionLoadingStrategy _solutionLoadingStrategy;
 
-        public SolutionFileLoader(ILogger logger, CSharpFactExtractor extractor,
-            ISolutionProvider solutionProvider,
-            ISolutionLoadingStrategy solutionLoadingStrategy)
+        public SolutionFileLoader(ILogger logger, IFactExtractorCreator extractorCreator,
+            ISolutionProvider solutionProvider, ISolutionLoadingStrategy solutionLoadingStrategy)
         {
             _logger = logger;
-            _extractor = extractor;
+            _extractorCreator = extractorCreator;
             _solutionProvider = solutionProvider;
             _solutionLoadingStrategy = solutionLoadingStrategy;
         }
@@ -38,7 +37,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead
 
                 _logger.Log($"Found {solution?.Projects.Count()} C# Projects in solution {pathToFile}");
 
-                var solutionModel = await _solutionLoadingStrategy.Load(solution, _extractor);
+                var solutionModel = await _solutionLoadingStrategy.Load(solution, _extractorCreator);
 
                 return solutionModel;
             }

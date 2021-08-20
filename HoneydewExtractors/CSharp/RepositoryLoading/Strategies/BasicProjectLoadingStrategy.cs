@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using HoneydewCore.Logging;
-using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.Core;
 using HoneydewModels.CSharp;
 using Microsoft.CodeAnalysis;
 
@@ -17,7 +17,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
             _logger = logger;
         }
 
-        public async Task<ProjectModel> Load(Project project, CSharpFactExtractor extractor)
+        public async Task<ProjectModel> Load(Project project, IFactExtractorCreator extractorCreator)
         {
             var projectModel = new ProjectModel(project.Name)
             {
@@ -25,6 +25,16 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                 ProjectReferences = project.AllProjectReferences
                     .Select(reference => ExtractPathFromProjectId(reference.ProjectId.ToString())).ToList()
             };
+
+            var extractor = extractorCreator.Create(project.Language);
+
+            if (extractor == null)
+            {
+                _logger.Log();
+                _logger.Log($"{project.Language} type projects are not currently supported!", LogLevels.Warning);
+
+                return null;
+            }
 
             var i = 1;
             var documentCount = project.Documents.Count();
@@ -37,14 +47,17 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
 
                     var fileContent = await document.GetTextAsync();
 
-                    var classModels = extractor.Extract(fileContent.ToString());
+
+                    var compilationUnitType = extractor.Extract(fileContent.ToString());
+                    compilationUnitType.FilePath = document.FilePath;
+                    var classTypes = compilationUnitType.ClassTypes;
 
                     _logger.Log($"Done extracting from {document.FilePath} ({i}/{documentCount})");
 
-                    foreach (var classModel in classModels)
+                    foreach (var classModel in classTypes)
                     {
                         classModel.FilePath = document.FilePath;
-                        projectModel.Add(classModel);
+                        projectModel.Add(classModel as ClassModel);
                     }
                 }
                 catch (Exception e)

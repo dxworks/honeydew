@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace HoneydewModels.CSharp
 {
-    public record ClassModel : IPropertyMembersClassType, IModelEntity, IClassModel
+    public record ClassModel : IPropertyMembersClassType, IModelEntity
     {
         public string ClassType { get; set; }
 

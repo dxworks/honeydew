@@ -20,8 +20,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             visitorList.Add(new DelegateSetterCompilationUnitVisitor(new CSharpDelegateModelCreator(
                 new List<ICSharpDelegateVisitor>
                 {
-                    new BaseInfoDelegateVisitor(),
-                    new ContainingTypeDelegateVisitor()
+                    new BaseInfoDelegateVisitor()
                 })));
             _sut = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
                 new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);

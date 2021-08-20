@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using HoneydewCore.Logging;
-using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.Core;
 using HoneydewModels.CSharp;
 using Microsoft.CodeAnalysis;
 
@@ -11,7 +11,6 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
     {
         private readonly ILogger _logger;
         private readonly IProjectLoadingStrategy _projectLoadingStrategy;
-
         private readonly IProgressLogger _progressLogger;
 
         public BasicSolutionLoadingStrategy(ILogger logger, IProjectLoadingStrategy projectLoadingStrategy,
@@ -22,7 +21,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
             _progressLogger = progressLogger;
         }
 
-        public async Task<SolutionModel> Load(Solution solution, CSharpFactExtractor extractor)
+        public async Task<SolutionModel> Load(Solution solution, IFactExtractorCreator extractorCreator)
         {
             SolutionModel solutionModel = new()
             {
@@ -47,23 +46,21 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     continue;
                 }
 
-                if (project.Language != "C#") // currently only c# projects are supported
-                {
-                    _logger.Log();
-                    _logger.Log($"{project.Language} type projects are not currently supported!", LogLevels.Warning);
-                    _logger.Log($"Skipping {project.FilePath} ({i}/{projectCount})", LogLevels.Warning);
-                    progressLogger.Step($"{project.FilePath}");
-                    i++;
-                    continue;
-                }
-
                 _logger.Log();
                 _logger.Log($"Loading C# Project from {project.FilePath} ({i}/{projectCount})");
-                var projectModel = await _projectLoadingStrategy.Load(project, extractor);
+                var projectModel = await _projectLoadingStrategy.Load(project, extractorCreator);
 
                 progressLogger.Step($"{project.FilePath}");
 
-                solutionModel.Projects.Add(projectModel);
+                if (projectModel != null)
+                {
+                    solutionModel.Projects.Add(projectModel);
+                }
+                else
+                {
+                    _logger.Log($"Skipping {project.FilePath} ({i}/{projectCount})", LogLevels.Warning);
+                }
+
                 i++;
             }
 
