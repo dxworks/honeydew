@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using HoneydewCore.ModelRepresentations;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
+using HoneydewExtractors.Core.Metrics.Extraction.Class.Relations;
 using Moq;
 using Xunit;
 
@@ -165,18 +165,18 @@ namespace HoneydewCoreIntegrationTests.Models.Representations
         [Fact]
         public void GetDependenciesTypePretty_ShouldReturnTheDependencies_WhenUsePrettyIsFalse()
         {
-            _sut.Add("source", "target", typeof(CSharpParameterRelationMetric).FullName, 4);
+            _sut.Add("source", "target", typeof(ParameterRelationVisitor).FullName, 4);
 
             var dependenciesTypePretty = _sut.DependenciesType;
 
             Assert.Single(dependenciesTypePretty);
-            Assert.Equal(typeof(CSharpParameterRelationMetric).FullName, dependenciesTypePretty.First());
+            Assert.Equal(typeof(ParameterRelationVisitor).FullName, dependenciesTypePretty.First());
         }
 
         [Fact]
         public void GetDependenciesTypePretty_ShouldReturnTheDependenciesPrettyPrint_WhenUsePrettyIsTrue()
         {
-            var dependencyType = typeof(CSharpParameterRelationMetric).FullName;
+            var dependencyType = typeof(ParameterRelationVisitor).FullName;
 
             _metricPrettierMock.Setup(prettier => prettier.Pretty(dependencyType)).Returns("Parameter Dependency");
 

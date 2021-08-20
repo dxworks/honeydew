@@ -13,11 +13,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
     public class CSharpExceptionsThrownRelationMetricTests
     {
         private readonly CSharpFactExtractor _factExtractor;
-        private readonly ExceptionsThrownVisitor _sut;
+        private readonly ExceptionsThrownRelationVisitor _sut;
 
         public CSharpExceptionsThrownRelationMetricTests()
         {
-            _sut = new ExceptionsThrownVisitor(new RelationMetricHolder());
+            _sut = new ExceptionsThrownRelationVisitor(new RelationMetricHolder());
 
             var visitorList = new VisitorList();
             visitorList.Add(new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(
@@ -71,7 +71,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[1].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownVisitor",
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[1].Metrics[0].ExtractorName);
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[1].Metrics[0].ValueType);
@@ -115,7 +115,7 @@ namespace Throw2
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownVisitor",
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
@@ -173,7 +173,7 @@ namespace Throwing
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[3].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownVisitor",
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[3].Metrics[0].ExtractorName);
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[3].Metrics[0].ValueType);
@@ -231,7 +231,7 @@ namespace Throwing
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[1].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownVisitor",
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[1].Metrics[0].ExtractorName);
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[1].Metrics[0].ValueType);
@@ -279,7 +279,7 @@ namespace Throwing
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownVisitor",
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
@@ -339,7 +339,7 @@ namespace Throwing
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[1].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownVisitor",
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[1].Metrics[0].ExtractorName);
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[1].Metrics[0].ValueType);
@@ -408,7 +408,7 @@ namespace Throwing
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownVisitor",
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
@@ -442,7 +442,7 @@ namespace Throwing
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownVisitor",
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
@@ -473,7 +473,7 @@ namespace Throwing
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownVisitor",
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
@@ -503,7 +503,7 @@ namespace Throwing
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownVisitor",
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
