@@ -10,14 +10,14 @@ using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
 {
-    public class CSharpFieldsRelationMetricTests
+    public class CSharpFieldsRelationVisitorTests
     {
-        private readonly FieldsRelationMetric _sut;
+        private readonly FieldsRelationVisitor _sut;
         private readonly CSharpFactExtractor _factExtractor;
 
-        public CSharpFieldsRelationMetricTests()
+        public CSharpFieldsRelationVisitorTests()
         {
-            _sut = new FieldsRelationMetric(new RelationMetricHolder());
+            _sut = new FieldsRelationVisitor(new RelationMetricHolder());
 
             var visitorList = new VisitorList();
             visitorList.Add(new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(
@@ -61,7 +61,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.FieldsRelationMetric",
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.FieldsRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
@@ -94,7 +94,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.FieldsRelationMetric",
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.FieldsRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
@@ -131,7 +131,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.FieldsRelationMetric",
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.FieldsRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
@@ -167,7 +167,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.FieldsRelationMetric",
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.FieldsRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
