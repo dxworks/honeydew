@@ -4,7 +4,7 @@
     {
         public string Alias { get; init; }
 
-        public EAliasType AliasType { get; set; }
+        public string AliasType { get; set; }
     }
 
     public enum EAliasType

@@ -1,20 +1,17 @@
-﻿using HoneydewExtractors.Core.Metrics.Visitors;
-using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+﻿using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
-using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using CSharpSyntaxNode = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 {
-    public class LinesOfCodeVisitor : ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>,
-        ICSharpPropertyVisitor, ICSharpMethodVisitor, ICSharpConstructorVisitor, ICSharpClassVisitor,
-        ICSharpCompilationUnitVisitor
+    public class LinesOfCodeVisitor : ICSharpPropertyVisitor, ICSharpMethodVisitor, ICSharpConstructorVisitor,
+        ICSharpClassVisitor, ICSharpCompilationUnitVisitor
     {
         private readonly CSharpLinesOfCodeCounter _linesOfCodeCounter = new();
 

@@ -92,7 +92,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
             var usingName = usingDirectiveSyntax.Name.ToString();
             var isStatic = usingDirectiveSyntax.StaticKeyword.Value != null;
             var alias = usingDirectiveSyntax.Alias == null ? "" : usingDirectiveSyntax.Alias.Name.ToString();
-            var aliasType = EAliasType.None;
+            var aliasType = nameof(EAliasType.None);
 
             if (!string.IsNullOrEmpty(alias))
             {

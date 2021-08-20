@@ -5,6 +5,7 @@ using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics
@@ -15,7 +16,7 @@ namespace HoneydewExtractors.CSharp.Metrics
 
         public string GetFullName(MemberDeclarationSyntax declarationSyntax)
         {
-            var declaredSymbol = Model.GetDeclaredSymbol(declarationSyntax);
+            var declaredSymbol = ModelExtensions.GetDeclaredSymbol(Model, declarationSyntax);
             if (declaredSymbol != null)
             {
                 return declaredSymbol.ToDisplayString();
@@ -32,7 +33,7 @@ namespace HoneydewExtractors.CSharp.Metrics
         public string GetFullName(VariableDeclarationSyntax declarationSyntax)
         {
             var typeName = declarationSyntax.Type.ToString();
-            var nodeSymbol = Model.GetSymbolInfo(declarationSyntax.Type).Symbol;
+            var nodeSymbol = ModelExtensions.GetSymbolInfo(Model, declarationSyntax.Type).Symbol;
             if (nodeSymbol != null)
             {
                 typeName = nodeSymbol.ToString();
@@ -44,7 +45,7 @@ namespace HoneydewExtractors.CSharp.Metrics
         public string GetFullName(PropertyDeclarationSyntax declarationSyntax)
         {
             var typeName = declarationSyntax.Type.ToString();
-            var nodeSymbol = Model.GetSymbolInfo(declarationSyntax.Type).Symbol;
+            var nodeSymbol = ModelExtensions.GetSymbolInfo(Model, declarationSyntax.Type).Symbol;
             if (nodeSymbol != null)
             {
                 typeName = nodeSymbol.ToString();
@@ -55,7 +56,7 @@ namespace HoneydewExtractors.CSharp.Metrics
 
         public string GetFullName(TypeSyntax typeSyntax)
         {
-            var symbolInfo = Model.GetSymbolInfo(typeSyntax);
+            var symbolInfo = ModelExtensions.GetSymbolInfo(Model, typeSyntax);
             if (symbolInfo.Symbol != null)
             {
                 return symbolInfo.Symbol.ToString();
@@ -77,7 +78,7 @@ namespace HoneydewExtractors.CSharp.Metrics
 
         public string GetFullName(BaseObjectCreationExpressionSyntax declarationSyntax)
         {
-            var symbolInfo = Model.GetSymbolInfo(declarationSyntax);
+            var symbolInfo = ModelExtensions.GetSymbolInfo(Model, declarationSyntax);
 
             if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
             {
@@ -171,7 +172,7 @@ namespace HoneydewExtractors.CSharp.Metrics
 
         public string GetFullName(ExpressionSyntax expressionSyntax)
         {
-            var symbolInfo = Model.GetSymbolInfo(expressionSyntax);
+            var symbolInfo = ModelExtensions.GetSymbolInfo(Model, expressionSyntax);
             switch (symbolInfo.Symbol)
             {
                 case IPropertySymbol propertySymbol:
@@ -258,7 +259,7 @@ namespace HoneydewExtractors.CSharp.Metrics
 
         public IList<string> GetBaseInterfaces(TypeDeclarationSyntax node)
         {
-            var declaredSymbol = Model.GetDeclaredSymbol(node);
+            var declaredSymbol = ModelExtensions.GetDeclaredSymbol(Model, node);
 
             IList<string> interfaces = new List<string>();
 
@@ -277,7 +278,7 @@ namespace HoneydewExtractors.CSharp.Metrics
 
         public string GetBaseClassName(TypeDeclarationSyntax node)
         {
-            var declaredSymbol = Model.GetDeclaredSymbol(node);
+            var declaredSymbol = ModelExtensions.GetDeclaredSymbol(Model, node);
 
             if (declaredSymbol is not ITypeSymbol typeSymbol)
             {
@@ -302,7 +303,7 @@ namespace HoneydewExtractors.CSharp.Metrics
             return CSharpConstants.ObjectIdentifier;
         }
 
-        public IMethodSymbol GetMethodSymbol(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode expressionSyntax)
+        public IMethodSymbol GetMethodSymbol(CSharpSyntaxNode expressionSyntax)
         {
             var symbolInfo = Model.GetSymbolInfo(expressionSyntax);
             var symbol = symbolInfo.Symbol;
@@ -318,7 +319,7 @@ namespace HoneydewExtractors.CSharp.Metrics
         {
             string containingClassName = null;
 
-            var symbolInfo = Model.GetSymbolInfo(invocationExpressionSyntax);
+            var symbolInfo = ModelExtensions.GetSymbolInfo(Model, invocationExpressionSyntax);
             if (symbolInfo.Symbol != null)
             {
                 containingClassName = symbolInfo.Symbol.ContainingType.ToString();
@@ -401,14 +402,14 @@ namespace HoneydewExtractors.CSharp.Metrics
             return parameters;
         }
 
-        public EAliasType GetAliasTypeOfNamespace(NameSyntax nodeName)
+        public string GetAliasTypeOfNamespace(NameSyntax nodeName)
         {
-            var symbolInfo = Model.GetSymbolInfo(nodeName);
+            var symbolInfo = ModelExtensions.GetSymbolInfo(Model, nodeName);
             return symbolInfo.Symbol switch
             {
-                null => EAliasType.NotDetermined,
-                INamespaceSymbol => EAliasType.Namespace,
-                _ => EAliasType.Class
+                null => nameof(EAliasType.NotDetermined),
+                INamespaceSymbol => nameof(EAliasType.Namespace),
+                _ => nameof(EAliasType.Class)
             };
         }
 
@@ -464,7 +465,7 @@ namespace HoneydewExtractors.CSharp.Metrics
 
                 foreach (var argumentSyntax in invocationSyntax.ArgumentList.Arguments)
                 {
-                    var parameterSymbolInfo = Model.GetSymbolInfo(argumentSyntax.Expression);
+                    var parameterSymbolInfo = ModelExtensions.GetSymbolInfo(Model, argumentSyntax.Expression);
                     if (parameterSymbolInfo.Symbol != null)
                     {
                         parameterList.Add(new ParameterModel

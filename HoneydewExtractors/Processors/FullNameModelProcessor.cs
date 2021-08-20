@@ -141,7 +141,7 @@ namespace HoneydewExtractors.Processors
 
                             foreach (var usingModel in classModel.Imports)
                             {
-                                if (usingModel.AliasType == EAliasType.NotDetermined)
+                                if (usingModel.AliasType == nameof(EAliasType.NotDetermined))
                                 {
                                     usingModel.AliasType = DetermineUsingType(usingModel, classModel);
                                 }
@@ -166,39 +166,39 @@ namespace HoneydewExtractors.Processors
             progressBar.Stop();
         }
 
-        private static EAliasType DetermineUsingType(IImportType usingModel, IPropertyMembersClassType classModel)
+        private static string DetermineUsingType(IImportType usingModel, IPropertyMembersClassType classModel)
         {
             var namespaceAccess = $"{usingModel.Alias}.";
 
             if (classModel.Fields.Any(fieldModel => fieldModel.Type.StartsWith(namespaceAccess)))
             {
-                return EAliasType.Namespace;
+                return nameof(EAliasType.Namespace);
             }
 
             foreach (var propertyModel in classModel.Properties)
             {
                 if (propertyModel.Type.StartsWith(namespaceAccess))
                 {
-                    return EAliasType.Namespace;
+                    return nameof(EAliasType.Namespace);
                 }
 
                 if (IsAliasNamespaceSearchInCalledMethods(propertyModel.CalledMethods))
                 {
-                    return EAliasType.Namespace;
+                    return nameof(EAliasType.Namespace);
                 }
             }
 
             if (IsAliasNamespaceSearchInMethodModels(classModel.Methods))
             {
-                return EAliasType.Namespace;
+                return nameof(EAliasType.Namespace);
             }
 
             if (IsAliasNamespaceSearchInConstructorModels(classModel.Constructors))
             {
-                return EAliasType.Namespace;
+                return nameof(EAliasType.Namespace);
             }
 
-            return EAliasType.Class;
+            return nameof(EAliasType.Class);
 
             bool IsAliasNamespaceSearchInMethodModels(IEnumerable<IMethodType> methodTypes)
             {
@@ -621,13 +621,14 @@ namespace HoneydewExtractors.Processors
                 // if one namespace alias is found, replace the alias with the real name of the namespace
                 foreach (var usingModel in usingModels)
                 {
-                    if (usingModel.AliasType == EAliasType.Class && namespaceName == usingModel.Alias)
+                    if (usingModel.AliasType == nameof(EAliasType.Class) && namespaceName == usingModel.Alias)
                     {
                         return usingModel.Name;
                     }
 
                     var tempName = namespaceName;
-                    if (usingModel.AliasType == EAliasType.Namespace && namespaceName.StartsWith(usingModel.Alias))
+                    if (usingModel.AliasType == nameof(EAliasType.Namespace) &&
+                        namespaceName.StartsWith(usingModel.Alias))
                     {
                         tempName = namespaceName.Replace(usingModel.Alias, usingModel.Name);
                     }
@@ -694,13 +695,13 @@ namespace HoneydewExtractors.Processors
                 // if one namespace alias is found, replace the alias with the real name of the namespace
                 foreach (var usingModel in usingModels)
                 {
-                    if (usingModel.AliasType == EAliasType.Class && className == usingModel.Alias)
+                    if (usingModel.AliasType == nameof(EAliasType.Class) && className == usingModel.Alias)
                     {
                         return usingModel.Name;
                     }
 
                     var tempName = className;
-                    if (usingModel.AliasType == EAliasType.Namespace && className.StartsWith(usingModel.Alias))
+                    if (usingModel.AliasType == nameof(EAliasType.Namespace) && className.StartsWith(usingModel.Alias))
                     {
                         tempName = className.Replace(usingModel.Alias, usingModel.Name);
                     }

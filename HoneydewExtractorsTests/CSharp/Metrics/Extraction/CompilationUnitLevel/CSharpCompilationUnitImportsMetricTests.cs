@@ -173,12 +173,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
             Assert.Equal(3, compilationUnit.Imports.Count);
 
             Assert.NotNull(compilationUnit.Imports.SingleOrDefault(model =>
-                model.Name == "System" && model.AliasType == EAliasType.None && model.Alias == ""));
+                model.Name == "System" && model.AliasType == nameof(EAliasType.None) && model.Alias == ""));
             Assert.NotNull(compilationUnit.Imports.SingleOrDefault(model =>
-                model.Name == "PC.MyCompany.Project" && model.AliasType == EAliasType.Namespace &&
+                model.Name == "PC.MyCompany.Project" && model.AliasType == nameof(EAliasType.Namespace) &&
                 model.Alias == "Project"));
             Assert.NotNull(compilationUnit.Imports.SingleOrDefault(
-                model => model.Name == "MyCompany" && model.AliasType == EAliasType.Namespace &&
+                model => model.Name == "MyCompany" && model.AliasType == nameof(EAliasType.Namespace) &&
                          model.Alias == "Company"));
         }
 
@@ -192,12 +192,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
             Assert.Equal(3, compilationUnit.Imports.Count);
 
             Assert.NotNull(compilationUnit.Imports.SingleOrDefault(model =>
-                model.Name == "System" && model.AliasType == EAliasType.None && model.Alias == ""));
+                model.Name == "System" && model.AliasType == nameof(EAliasType.None) && model.Alias == ""));
             Assert.NotNull(compilationUnit.Imports.SingleOrDefault(model =>
-                model.Name == "NameSpace1.MyClass" && model.AliasType == EAliasType.Class &&
+                model.Name == "NameSpace1.MyClass" && model.AliasType == nameof(EAliasType.Class) &&
                 model.Alias == "AliasToMyClass"));
             Assert.NotNull(compilationUnit.Imports.SingleOrDefault(model =>
-                model.Name == "NameSpace2.MyClass<int>" && model.AliasType == EAliasType.Class &&
+                model.Name == "NameSpace2.MyClass<int>" && model.AliasType == nameof(EAliasType.Class) &&
                 model.Alias == "UsingAlias"));
         }
     }
