@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using HoneydewCore.Logging;
 using HoneydewCore.Processors;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
+using HoneydewExtractors.Core.Metrics;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -423,7 +423,8 @@ namespace HoneydewExtractors.Processors
                     if (classModel == null)
                     {
                         calledMethod.ContainingTypeName = SearchForMethodNameInStaticImports(
-                            calledMethod.ContainingTypeName, calledMethod.Name, calledMethod.ParameterTypes, projectModel,
+                            calledMethod.ContainingTypeName, calledMethod.Name, calledMethod.ParameterTypes,
+                            projectModel,
                             solutionModel,
                             repositoryModel, usings);
                     }
@@ -538,7 +539,7 @@ namespace HoneydewExtractors.Processors
             NamespaceModel namespaceModel, ProjectModel projectModel, SolutionModel solutionModel)
         {
             var parameterDependenciesMetrics = classModel.Metrics.Where(metric =>
-                typeof(CSharpRelationMetric).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
+                typeof(IRelationMetric).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
 
             foreach (var metric in parameterDependenciesMetrics)
             {

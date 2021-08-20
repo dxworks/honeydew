@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
+using HoneydewExtractors.Core.Metrics.Extraction.Class.Relations;
 using HoneydewExtractors.Processors;
 using HoneydewModels.CSharp;
 using Moq;
@@ -31,7 +31,7 @@ namespace HoneydewExtractorsTests.Processors
             };
             classModel1.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
@@ -45,7 +45,7 @@ namespace HoneydewExtractorsTests.Processors
             };
             classModel2.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
@@ -59,7 +59,7 @@ namespace HoneydewExtractorsTests.Processors
             };
             classModel3.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
@@ -74,7 +74,7 @@ namespace HoneydewExtractorsTests.Processors
             };
             classModel4.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
@@ -88,7 +88,7 @@ namespace HoneydewExtractorsTests.Processors
             };
             classModel5.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>()
             });
@@ -114,7 +114,7 @@ namespace HoneydewExtractorsTests.Processors
             _progressLoggerMock.Setup(logger =>
                     logger.CreateProgressLogger(5, "Resolving Class Elements (Fields, Methods, Properties,...)"))
                 .Returns(_progressLoggerBarMock.Object);
-            
+
             var processedRepositoryModel = _sut.Process(repositoryModel);
 
             var processedProjectModel = processedRepositoryModel.Solutions[0].Projects[0];
@@ -147,7 +147,7 @@ namespace HoneydewExtractorsTests.Processors
             };
             classModel1.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>()
             });
@@ -158,7 +158,7 @@ namespace HoneydewExtractorsTests.Processors
             };
             classModel2.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
@@ -172,7 +172,7 @@ namespace HoneydewExtractorsTests.Processors
             };
             classModel3.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
@@ -187,7 +187,7 @@ namespace HoneydewExtractorsTests.Processors
             };
             classModel4.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
@@ -202,7 +202,7 @@ namespace HoneydewExtractorsTests.Processors
             };
             classModel5.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>()
             });

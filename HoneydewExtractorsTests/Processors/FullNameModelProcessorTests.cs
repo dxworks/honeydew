@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewExtractors.Processors;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -1000,7 +999,7 @@ namespace HoneydewExtractorsTests.Processors
                         {
                             new MetricModel
                             {
-                                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                                ExtractorName = "ParametersExtractor",
                                 ValueType = typeof(Dictionary<string, int>).FullName,
                                 Value = new Dictionary<string, int>()
                                 {
