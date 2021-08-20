@@ -67,20 +67,9 @@ namespace HoneydewExtractors.CSharp.Metrics
                 return GetFullName(refTypeSyntax.Type);
             }
 
-            var variableDeclarationSyntax = GetParentDeclarationSyntax<VariableDeclarationSyntax>(typeSyntax);
-            if (variableDeclarationSyntax != null)
+            if (typeSyntax is ArrayTypeSyntax arrayTypeSyntax)
             {
-                var fullName = GetFullName(variableDeclarationSyntax);
-                if (fullName != CSharpConstants.VarIdentifier)
-                {
-                    return fullName;
-                }
-            }
-
-            var propertyDeclarationSyntax = GetParentDeclarationSyntax<PropertyDeclarationSyntax>(typeSyntax);
-            if (propertyDeclarationSyntax != null)
-            {
-                return GetFullName(propertyDeclarationSyntax);
+                return $"{GetFullName(arrayTypeSyntax.ElementType)}{arrayTypeSyntax.RankSpecifiers.ToString()}";
             }
 
             return typeSyntax.ToString();
@@ -436,6 +425,27 @@ namespace HoneydewExtractors.CSharp.Metrics
             }
 
             return parameterTypes;
+        }
+
+        public string GetContainingType(SyntaxNode expressionSyntax)
+        {
+            var variableDeclarationSyntax = GetParentDeclarationSyntax<VariableDeclarationSyntax>(expressionSyntax);
+            if (variableDeclarationSyntax != null)
+            {
+                var fullName = GetFullName(variableDeclarationSyntax);
+                if (fullName != CSharpConstants.VarIdentifier)
+                {
+                    return fullName;
+                }
+            }
+
+            var propertyDeclarationSyntax = GetParentDeclarationSyntax<PropertyDeclarationSyntax>(expressionSyntax);
+            if (propertyDeclarationSyntax != null)
+            {
+                return GetFullName(propertyDeclarationSyntax);
+            }
+
+            return expressionSyntax.ToString();
         }
 
         private IList<IParameterType> GetParameters(InvocationExpressionSyntax invocationSyntax)

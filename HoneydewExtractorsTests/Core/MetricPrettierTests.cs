@@ -31,13 +31,5 @@ namespace HoneydewExtractorsTests.Core
         {
             Assert.Equal(name, _sut.Pretty(name));
         }
-        
-        [Theory]
-        [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric.CSharpLocalVariablesRelationMetric", "Local Variables Dependency")]
-        [InlineData("HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel.CSharpUsingsCountMetric", "Usings Count")]
-        public void Pretty_ShouldReturnThePrettyName_WhenProvidedWithClassNamesThatAreMetrics(string name, string prettyName)
-        {
-            Assert.Equal(prettyName, _sut.Pretty(name));
-        }
     }
 }

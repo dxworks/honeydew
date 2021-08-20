@@ -1,29 +1,35 @@
 ﻿using System.Collections.Generic;
-using HoneydewExtractors.Core.Metrics.Extraction;
+using HoneydewExtractors.Core.Metrics.Extraction.Class;
+using HoneydewExtractors.Core.Metrics.Extraction.Class.Relations;
+using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.CSharp.Metrics;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
 {
     public class CSharpObjectCreationRelationMetricTests
     {
-        private readonly CSharpObjectCreationRelationMetric _sut;
+        private readonly ObjectCreationRelationVisitor _sut;
         private readonly CSharpFactExtractor _factExtractor;
 
         public CSharpObjectCreationRelationMetricTests()
         {
-            _sut = new CSharpObjectCreationRelationMetric();
-            _factExtractor = new CSharpFactExtractor();
-            _factExtractor.AddMetric<CSharpObjectCreationRelationMetric>();
-        }
+            _sut = new ObjectCreationRelationVisitor(new RelationMetricHolder());
 
-        [Fact]
-        public void GetMetricType_ShouldReturnClassLevel()
-        {
-            Assert.Equal(ExtractionMetricType.ClassLevel, _sut.GetMetricType());
+            var visitorList = new VisitorList();
+            visitorList.Add(new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(
+                new List<ICSharpClassVisitor>
+                {
+                    new BaseInfoClassVisitor(),
+                    _sut
+                })));
+            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
         }
-
+        
         [Fact]
         public void PrettyPrint_ShouldReturnReturnValueDependency()
         {
@@ -62,12 +68,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                                          }
                                      }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            var optional = classModels[1].GetMetricValue<CSharpObjectCreationRelationMetric>();
-            Assert.True(optional.HasValue);
+            Assert.Equal(1, classTypes[1].Metrics.Count);
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ObjectCreationRelationVisitor",
+                classTypes[1].Metrics[0].ExtractorName);
+            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+                classTypes[1].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>) optional.Value;
+            var dependencies = (IDictionary<string, int>)classTypes[1].Metrics[0].Value;
 
             Assert.Equal(1, dependencies.Count);
             Assert.Equal(8, dependencies["App.C"]);
@@ -114,15 +123,20 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
 
                                      }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            var optional = classModels[1].GetMetricValue<CSharpObjectCreationRelationMetric>();
-            Assert.True(optional.HasValue);
+            Assert.Equal(1, classTypes[1].Metrics.Count);
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ObjectCreationRelationVisitor",
+                classTypes[1].Metrics[0].ExtractorName);
+            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+                classTypes[1].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>) optional.Value;
+            var dependencies = (IDictionary<string, int>)classTypes[1].Metrics[0].Value;
 
-            Assert.Equal(2, dependencies.Count);
-            Assert.Equal(6, dependencies["App.C[]"]);
+            Assert.Equal(3, dependencies.Count);
+            Assert.Equal(8, dependencies["App.C[]"]);
+            Assert.Equal(1, dependencies["App.C[2]"]);
+            Assert.Equal(10, dependencies["App.C"]);
         }
 
 
@@ -156,12 +170,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                                          }
                                      }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            var optional = classModels[0].GetMetricValue<CSharpObjectCreationRelationMetric>();
-            Assert.True(optional.HasValue);
+            Assert.Equal(1, classTypes[0].Metrics.Count);
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ObjectCreationRelationVisitor",
+                classTypes[0].Metrics[0].ExtractorName);
+            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+                classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>) optional.Value;
+            var dependencies = (IDictionary<string, int>)classTypes[0].Metrics[0].Value;
 
             Assert.Equal(1, dependencies.Count);
             Assert.Equal(8, dependencies["ExternClass"]);
@@ -205,15 +222,20 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                                         }
                                     }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            var optional = classModels[0].GetMetricValue<CSharpObjectCreationRelationMetric>();
-            Assert.True(optional.HasValue);
+            Assert.Equal(1, classTypes[0].Metrics.Count);
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ObjectCreationRelationVisitor",
+                classTypes[0].Metrics[0].ExtractorName);
+            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+                classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>) optional.Value;
+            var dependencies = (IDictionary<string, int>)classTypes[0].Metrics[0].Value;
 
-            Assert.Equal(1, dependencies.Count);
-            Assert.Equal(9, dependencies["ExternClass[]"]);
+            Assert.Equal(3, dependencies.Count);
+            Assert.Equal(8, dependencies["ExternClass[]"]);
+            Assert.Equal(1, dependencies["ExternClass[2]"]);
+            Assert.Equal(10, dependencies["ExternClass"]);
         }
 
         [Fact]
@@ -254,17 +276,21 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                                         }
                                     }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            var optional = classModels[0].GetMetricValue<CSharpObjectCreationRelationMetric>();
-            Assert.True(optional.HasValue);
+            Assert.Equal(1, classTypes[0].Metrics.Count);
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ObjectCreationRelationVisitor",
+                classTypes[0].Metrics[0].ExtractorName);
+            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+                classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>) optional.Value;
+            var dependencies = (IDictionary<string, int>)classTypes[0].Metrics[0].Value;
 
-            Assert.Equal(4, dependencies.Count);
+            Assert.Equal(5, dependencies.Count);
             Assert.Equal(3, dependencies["string[]"]);
-            Assert.Equal(1, dependencies["int[]"]);
-            Assert.Equal(1, dependencies["double[]"]);
+            Assert.Equal(2, dependencies["int[]"]);
+            Assert.Equal(1, dependencies["int[2]"]);
+            Assert.Equal(2, dependencies["double[]"]);
             Assert.Equal(1, dependencies["bool[]"]);
         }
 
@@ -288,12 +314,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                                         }
                                     }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            var optional = classModels[0].GetMetricValue<CSharpObjectCreationRelationMetric>();
-            Assert.True(optional.HasValue);
+            Assert.Equal(1, classTypes[0].Metrics.Count);
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ObjectCreationRelationVisitor",
+                classTypes[0].Metrics[0].ExtractorName);
+            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+                classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>) optional.Value;
+            var dependencies = (IDictionary<string, int>)classTypes[0].Metrics[0].Value;
 
             Assert.Equal(6, dependencies.Count);
             Assert.Equal(1, dependencies["System.String[]"]);
@@ -335,12 +364,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                                         }
                                     }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            var optional = classModels[0].GetMetricValue<CSharpObjectCreationRelationMetric>();
-            Assert.True(optional.HasValue);
+            Assert.Equal(1, classTypes[0].Metrics.Count);
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ObjectCreationRelationVisitor",
+                classTypes[0].Metrics[0].ExtractorName);
+            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+                classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>) optional.Value;
+            var dependencies = (IDictionary<string, int>)classTypes[0].Metrics[0].Value;
 
             Assert.Equal(4, dependencies.Count);
             Assert.Equal(1, dependencies["System.String[]"]);
@@ -367,61 +399,20 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                                         }
                                     }";
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            var optional = classModels[1].GetMetricValue<CSharpObjectCreationRelationMetric>();
-            Assert.True(optional.HasValue);
+            Assert.Equal(1, classTypes[1].Metrics.Count);
+            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ObjectCreationRelationVisitor",
+                classTypes[1].Metrics[0].ExtractorName);
+            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+                classTypes[1].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>) optional.Value;
+            var dependencies = (IDictionary<string, int>)classTypes[1].Metrics[0].Value;
 
-            Assert.Equal(2, dependencies.Count);
+            Assert.Equal(3, dependencies.Count);
+            Assert.Equal(4, dependencies["App.Class1"]);
             Assert.Equal(2, dependencies["App.Class1[]"]);
             Assert.Equal(1, dependencies["System.Object[]"]);
-        }
-
-        [Fact]
-        public void GetRelations_ShouldHaveNoRelations_WhenClassHasNoFields()
-        {
-            var fileRelations = _sut.GetRelations(new Dictionary<string, int>());
-
-            Assert.Empty(fileRelations);
-        }
-
-        [Fact]
-        public void GetRelations_ShouldHaveNoRelations_WhenDependenciesAreOnlyPrimitiveTypes()
-        {
-            var fileRelations = _sut.GetRelations(new Dictionary<string, int>
-            {
-                {"int", 3},
-                {"float", 2},
-                {"string", 1}
-            });
-
-            Assert.Empty(fileRelations);
-        }
-
-        [Fact]
-        public void GetRelations_Extract_ShouldHaveRelations_WhenThereAreNonPrimitiveDependencies()
-        {
-            var fileRelations = _sut.GetRelations(new Dictionary<string, int>
-            {
-                {"int", 3},
-                {"IFactExtractor", 2},
-                {"CSharpMetricExtractor", 1}
-            });
-
-            Assert.NotEmpty(fileRelations);
-            Assert.Equal(2, fileRelations.Count);
-
-            var fileRelation1 = fileRelations[0];
-            Assert.Equal("IFactExtractor", fileRelation1.FileTarget);
-            Assert.Equal(typeof(CSharpObjectCreationRelationMetric).FullName, fileRelation1.RelationType);
-            Assert.Equal(2, fileRelation1.RelationCount);
-
-            var fileRelation2 = fileRelations[1];
-            Assert.Equal("CSharpMetricExtractor", fileRelation2.FileTarget);
-            Assert.Equal(typeof(CSharpObjectCreationRelationMetric).FullName, fileRelation2.RelationType);
-            Assert.Equal(1, fileRelation2.RelationCount);
         }
     }
 }
