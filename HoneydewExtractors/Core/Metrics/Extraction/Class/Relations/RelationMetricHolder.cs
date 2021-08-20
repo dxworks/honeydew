@@ -77,10 +77,17 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
                     {
                         foreach (var (dependency, count) in dependencyDictionary)
                         {
-                            var type = Type.GetType(dependency);
-                            if (type is { IsPrimitive: true } || CSharpConstants.IsPrimitive(dependency))
+                            try
                             {
-                                continue;
+                                var type = Type.GetType(dependency);
+                                if (type is { IsPrimitive: true } || CSharpConstants.IsPrimitive(dependency))
+                                {
+                                    continue;
+                                }
+                            }
+                            catch (Exception)
+                            {
+                                // if exception occurs means 'dependency' is not a primitive type
                             }
 
                             var fileRelation = new FileRelation
