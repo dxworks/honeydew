@@ -353,7 +353,12 @@ namespace HoneydewExtractors.CSharp.Metrics
                 }
             }
 
-            return null;
+            return new MethodCallModel
+            {
+                Name = invocationExpressionSyntax.Expression.ToString(),
+                ContainingTypeName = containingClassName,
+                ParameterTypes = GetParameters(invocationExpressionSyntax)
+            };
         }
 
         public IList<IParameterType> GetParameters(IMethodSymbol methodSymbol)

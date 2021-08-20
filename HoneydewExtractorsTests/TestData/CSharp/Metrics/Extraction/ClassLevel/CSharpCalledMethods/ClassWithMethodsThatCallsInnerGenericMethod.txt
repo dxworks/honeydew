@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;                                        
+namespace TopLevel
+{                                                                                       
+    public class Bar
+    {
+        public void Method<T>(T a)
+        {
+        }
+
+        void Caller()
+        {
+            Method<int>(2);
+            Method(6);
+            Method<double>(6);
+        }
+    }
+}

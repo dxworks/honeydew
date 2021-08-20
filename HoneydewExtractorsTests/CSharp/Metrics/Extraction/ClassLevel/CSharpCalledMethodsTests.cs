@@ -665,5 +665,42 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("string", method0Parameter.Name);
             Assert.Null(method0Parameter.DefaultValue);
         }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpCalledMethods/ClassWithMethodsThatCallsInnerGenericMethod.txt")]
+        public void Extract_ShouldHaveCalledMethods_WhenProvidedWithGenericMethods(string fileContent)
+        {
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var genericMethodModel = ((ClassModel)classTypes[0]).Methods[0];
+            Assert.Equal("Method", genericMethodModel.Name);
+            Assert.Equal(1, genericMethodModel.ParameterTypes.Count);
+            Assert.Equal("T", genericMethodModel.ParameterTypes[0].Name);
+            Assert.Equal(0, genericMethodModel.CalledMethods.Count);
+
+            var methodCaller = ((ClassModel)classTypes[0]).Methods[1];
+            Assert.Equal("Caller", methodCaller.Name);
+            Assert.Empty(methodCaller.ParameterTypes);
+            Assert.Equal(3, methodCaller.CalledMethods.Count);
+
+            var calledMethod0 = methodCaller.CalledMethods[0];
+            Assert.Equal("Method<int>", calledMethod0.Name);
+            Assert.Equal("TopLevel.Bar", calledMethod0.ContainingTypeName);
+            Assert.Equal(1, calledMethod0.ParameterTypes.Count);
+            Assert.Equal("int", calledMethod0.ParameterTypes[0].Name);
+
+            var calledMethod1 = methodCaller.CalledMethods[1];
+            Assert.Equal("Method", calledMethod1.Name);
+            Assert.Equal("TopLevel.Bar", calledMethod1.ContainingTypeName);
+            Assert.Equal(1, calledMethod1.ParameterTypes.Count);
+            Assert.Equal("int", calledMethod1.ParameterTypes[0].Name);
+            
+            var calledMethod2 = methodCaller.CalledMethods[2];
+            Assert.Equal("Method<double>", calledMethod2.Name);
+            Assert.Equal("TopLevel.Bar", calledMethod2.ContainingTypeName);
+            Assert.Equal(1, calledMethod2.ParameterTypes.Count);
+            Assert.Equal("double", calledMethod2.ParameterTypes[0].Name);
+        }
     }
 }
