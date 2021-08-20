@@ -1,4 +1,21 @@
-﻿using HoneydewExtractors.Core;
+﻿using System.Collections.Generic;
+using HoneydewExtractors.Core;
+using HoneydewExtractors.Core.Metrics.Extraction.Class;
+using HoneydewExtractors.Core.Metrics.Extraction.Common;
+using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.Constructor;
+using HoneydewExtractors.Core.Metrics.Extraction.Field;
+using HoneydewExtractors.Core.Metrics.Extraction.Method;
+using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
+using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+using HoneydewExtractors.Core.Metrics.Extraction.Property;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
+using HoneydewExtractors.Core.Metrics.Visitors.Fields;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
+using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
 using Xunit;
@@ -11,7 +28,39 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
         public CSharpClassFactExtractorsTests()
         {
-            _sut = new CSharpFactExtractor();
+            var visitorList = new VisitorList();
+            var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new CSharpMethodCallModelCreator(
+                new List<ICSharpMethodSignatureVisitor>
+                {
+                    new MethodCallInfoVisitor()
+                }));
+            visitorList.Add(new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(
+                new List<ICSharpClassVisitor>
+                {
+                    new BaseInfoClassVisitor(),
+                    new MethodSetterClassVisitor(new CSharpMethodModelCreator(new List<ICSharpMethodVisitor>
+                    {
+                        new MethodInfoVisitor(),
+                        calledMethodSetterVisitor
+                    })),
+                    new ConstructorSetterClassVisitor(new CSharpConstructorMethodModelCreator(
+                        new List<ICSharpConstructorVisitor>
+                        {
+                            new ConstructorInfoVisitor(),
+                            calledMethodSetterVisitor
+                        })),
+                    new FieldSetterClassVisitor(new CSharpFieldModelCreator(new List<ICSharpFieldVisitor>
+                    {
+                        new FieldInfoVisitor()
+                    })),
+                    new PropertySetterClassVisitor(new CSharpPropertyModelCreator(new List<ICSharpPropertyVisitor>
+                    {
+                        new PropertyInfoVisitor()
+                    }))
+                })));
+
+            _sut = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
         }
 
         [Theory]
@@ -53,7 +102,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                      ")]
         public void Extract_ShouldThrowExtractionException_WhenParsingTextWithParsingErrors(string fileContent)
         {
-            Assert.Throws<ExtractionException>(() => _sut.Extract(fileContent));
+            Assert.Throws<ExtractionException>(() => _sut.Extract(fileContent).ClassTypes);
         }
 
         [Theory]
@@ -72,12 +121,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                        }}
                                      }}
                                      ";
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            foreach (var classModel in classModels)
+            foreach (var classType in classTypes)
             {
+                var classModel = (ClassModel)classType;
                 Assert.Equal(entityType, classModel.ClassType);
                 Assert.Equal("Models.Main.Items", classModel.Namespace);
                 Assert.Equal("Models.Main.Items.MainItem", classModel.Name);
@@ -101,12 +151,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                        }}
                                      }}
                                      ";
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            foreach (var classModel in classModels)
+            foreach (var classType in classTypes)
             {
+                var classModel = (ClassModel)classType;
+                Assert.Equal("Models.Main.Items", classModel.ContainingTypeName);
                 Assert.Equal("Models.Main.Items", classModel.Namespace);
                 Assert.Equal("Models.Main.Items.MainItem", classModel.Name);
                 Assert.Equal(accessModifier, classModel.AccessModifier);
@@ -132,12 +184,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                        }}
                                      }}
                                      ";
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            foreach (var classModel in classModels)
+            foreach (var classType in classTypes)
             {
+                var classModel = (ClassModel)classType;
                 Assert.Equal("Models.Main.Items", classModel.Namespace);
                 Assert.Equal("Models.Main.Items.MainItem", classModel.Name);
 
@@ -169,12 +222,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                        }
                                      }
                                      ";
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            foreach (var classModel in classModels)
+            foreach (var classType in classTypes)
             {
+                var classModel = (ClassModel)classType;
                 Assert.Equal("Models.Main.Items", classModel.Namespace);
                 Assert.Equal("Models.Main.Items.MainItem", classModel.Name);
                 Assert.Equal(1, classModel.Methods.Count);
@@ -189,23 +243,24 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
         [Fact]
         public void Extract_ShouldSetParameters_WhenParsingTextWithOneClassWithMethodWithParameterWithParamsModifiers()
         {
-            var fileContent = $@"        
+            var fileContent = @"        
                                      namespace Models.Main.Items
-                                     {{
+                                     {
                                        public class MainItem
-                                       {{
-                                             public void Method(params int[] a) {{}}
+                                       {
+                                             public void Method(params int[] a) {}
 
-                                             public MainItem(params int[] a) {{}}
-                                       }}
-                                     }}
+                                             public MainItem(params int[] a) {}
+                                       }
+                                     }
                                      ";
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            foreach (var classModel in classModels)
+            foreach (var classType in classTypes)
             {
+                var classModel = (ClassModel)classType;
                 Assert.Equal("Models.Main.Items", classModel.Namespace);
                 Assert.Equal("Models.Main.Items.MainItem", classModel.Name);
 
@@ -228,26 +283,27 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
         [Fact]
         public void Extract_ShouldSetParameters_WhenParsingTextWithOneClassWithMethodWithParameterWithDefaultValues()
         {
-            var fileContent = $@"        
+            var fileContent = @"        
                                      namespace Models.Main.Items
-                                     {{
+                                     {
                                        public class MainItem
-                                       {{
-                                             public void Method() {{}}
-                                             public void Method1(object a=null) {{}}
-                                             public void Method2(int a=15) {{}}
-                                             public void Method3(int a, int b) {{}}
-                                             public void Method4(int a,in int b=15, string c="""") {{}}
-                                             public void Method5(string c=""null"") {{}}
-                                       }}
-                                     }}
+                                       {
+                                             public void Method() {}
+                                             public void Method1(object a=null) {}
+                                             public void Method2(int a=15) {}
+                                             public void Method3(int a, int b) {}
+                                             public void Method4(int a,in int b=15, string c="""") {}
+                                             public void Method5(string c=""null"") {}
+                                       }
+                                     }
                                      ";
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            foreach (var classModel in classModels)
+            foreach (var classType in classTypes)
             {
+                var classModel = (ClassModel)classType;
                 Assert.Equal(6, classModel.Methods.Count);
 
                 Assert.Empty(classModel.Methods[0].ParameterTypes);
@@ -311,10 +367,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                        }
                                      }
                                      ";
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            foreach (var classModel in classModels)
+            foreach (var classType in classTypes)
             {
+                var classModel = (ClassModel)classType;
                 Assert.Equal(typeof(ClassModel), classModel.GetType());
 
                 Assert.Empty(classModel.Metrics);
@@ -336,20 +393,21 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                        }
                                      }
                                      ";
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(2, classModels.Count);
+            Assert.Equal(2, classTypes.Count);
 
-            foreach (var classModel in classModels)
+            foreach (var classType in classTypes)
             {
+                var classModel = (ClassModel)classType;
                 Assert.Equal(typeof(ClassModel), classModel.GetType());
             }
 
-            Assert.Equal("Models.Main.Items", classModels[0].Namespace);
-            Assert.Equal("Models.Main.Items.MainItem", classModels[0].Name);
+            Assert.Equal("Models.Main.Items", ((ClassModel)classTypes[0]).Namespace);
+            Assert.Equal("Models.Main.Items.MainItem", classTypes[0].Name);
 
-            Assert.Equal("Models.Main.Items", classModels[1].Namespace);
-            Assert.Equal("Models.Main.Items.IInterface", classModels[1].Name);
+            Assert.Equal("Models.Main.Items", ((ClassModel)classTypes[1]).Namespace);
+            Assert.Equal("Models.Main.Items.IInterface", classTypes[1].Name);
         }
 
         [Fact]
@@ -363,11 +421,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                       }";
 
 
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            Assert.Empty(classModels[0].Fields);
+            Assert.Empty(((ClassModel)classTypes[0]).Fields);
         }
 
 
@@ -384,12 +442,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                       }";
 
 
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(2, classModels.Count);
+            Assert.Equal(2, classTypes.Count);
 
-            foreach (var classModel in classModels)
+            foreach (var classType in classTypes)
             {
+                var classModel = (ClassModel)classType;
                 Assert.Empty(classModel.Fields);
             }
         }
@@ -408,11 +467,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                       }";
 
 
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var fieldInfos = classModels[0].Fields;
+            var fieldInfos = ((ClassModel)classTypes[0]).Fields;
 
             Assert.Equal(3, fieldInfos.Count);
 
@@ -453,11 +512,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                       }}";
 
 
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var fieldInfos = classModels[0].Fields;
+            var fieldInfos = ((ClassModel)classTypes[0]).Fields;
 
             Assert.Equal(5, fieldInfos.Count);
 
@@ -510,11 +569,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                       }}";
 
 
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var fieldInfos = classModels[0].Fields;
+            var fieldInfos = ((ClassModel)classTypes[0]).Fields;
 
             Assert.Equal(4, fieldInfos.Count);
 
@@ -560,11 +619,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                       }}";
 
 
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var fieldInfos = classModels[0].Fields;
+            var fieldInfos = ((ClassModel)classTypes[0]).Fields;
 
             Assert.Equal(5, fieldInfos.Count);
 
@@ -609,10 +668,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                           public record Foo { readonly int A = 12; volatile float X; static string Y = """";                                                                                                     
                                                            }                                        
                                       }";
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
-            Assert.Empty(classModels[0].Methods);
+            Assert.Equal(1, classTypes.Count);
+            Assert.Empty(((ClassModel)classTypes[0]).Methods);
         }
 
         [Fact]
@@ -625,10 +684,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                           public struct Foo {  int A = 12;  float X;  string Y = """";                                                                                                     
                                                            }                                        
                                       }";
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
-            Assert.Empty(classModels[0].Methods);
+            Assert.Equal(1, classTypes.Count);
+            Assert.Empty(((ClassModel)classTypes[0]).Methods);
         }
 
 
@@ -645,53 +704,57 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                                              string h(float a,  CSharpExtractor b);                                                                                                    
                                                            }                                        
                                       }";
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
-            Assert.Equal(3, classModels[0].Methods.Count);
+            Assert.Equal(1, classTypes.Count);
+            var classModel = (ClassModel)classTypes[0];
+            Assert.Equal(3, classModel.Methods.Count);
 
-            Assert.Equal("f", classModels[0].Methods[0].Name);
-            Assert.Equal("CSharpExtractor", classModels[0].Methods[0].ReturnType.Name);
-            Assert.Equal("", ((ReturnTypeModel)classModels[0].Methods[0].ReturnType).Modifier);
-            Assert.Equal(1, classModels[0].Methods[0].ParameterTypes.Count);
-            var parameterModel1 = (ParameterModel)classModels[0].Methods[0].ParameterTypes[0];
+            var methodF = classModel.Methods[0];
+            Assert.Equal("f", methodF.Name);
+            Assert.Equal("CSharpExtractor", methodF.ReturnType.Name);
+            Assert.Equal("", ((ReturnTypeModel)methodF.ReturnType).Modifier);
+            Assert.Equal(1, methodF.ParameterTypes.Count);
+            var parameterModel1 = (ParameterModel)methodF.ParameterTypes[0];
             Assert.Equal("int", parameterModel1.Name);
             Assert.Equal("", parameterModel1.Modifier);
             Assert.Null(parameterModel1.DefaultValue);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingTypeName);
-            Assert.Equal("public", classModels[0].Methods[0].AccessModifier);
-            Assert.Equal("abstract", classModels[0].Methods[0].Modifier);
-            Assert.Empty(classModels[0].Methods[0].CalledMethods);
+            Assert.Equal("TopLevel.Foo", methodF.ContainingTypeName);
+            Assert.Equal("public", methodF.AccessModifier);
+            Assert.Equal("abstract", methodF.Modifier);
+            Assert.Empty(methodF.CalledMethods);
 
-            Assert.Equal("g", classModels[0].Methods[1].Name);
-            Assert.Equal("int", classModels[0].Methods[1].ReturnType.Name);
-            Assert.Equal("", ((ReturnTypeModel)classModels[0].Methods[1].ReturnType).Modifier);
-            Assert.Equal(1, classModels[0].Methods[1].ParameterTypes.Count);
-            var parameterModel2 = (ParameterModel)classModels[0].Methods[1].ParameterTypes[0];
+            var methodG = classModel.Methods[1];
+            Assert.Equal("g", methodG.Name);
+            Assert.Equal("int", methodG.ReturnType.Name);
+            Assert.Equal("", ((ReturnTypeModel)methodG.ReturnType).Modifier);
+            Assert.Equal(1, methodG.ParameterTypes.Count);
+            var parameterModel2 = (ParameterModel)methodG.ParameterTypes[0];
             Assert.Equal("CSharpExtractor", parameterModel2.Name);
             Assert.Equal("", parameterModel2.Modifier);
             Assert.Null(parameterModel2.DefaultValue);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingTypeName);
-            Assert.Equal("public", classModels[0].Methods[1].AccessModifier);
-            Assert.Equal("abstract", classModels[0].Methods[1].Modifier);
-            Assert.Empty(classModels[0].Methods[1].CalledMethods);
+            Assert.Equal("TopLevel.Foo", methodG.ContainingTypeName);
+            Assert.Equal("public", methodG.AccessModifier);
+            Assert.Equal("abstract", methodG.Modifier);
+            Assert.Empty(methodG.CalledMethods);
 
-            Assert.Equal("h", classModels[0].Methods[2].Name);
-            Assert.Equal("string", classModels[0].Methods[2].ReturnType.Name);
-            Assert.Equal("", ((ReturnTypeModel)classModels[0].Methods[2].ReturnType).Modifier);
-            Assert.Equal(2, classModels[0].Methods[2].ParameterTypes.Count);
-            var parameterModel3 = (ParameterModel)classModels[0].Methods[2].ParameterTypes[0];
+            var methodH = classModel.Methods[2];
+            Assert.Equal("h", methodH.Name);
+            Assert.Equal("string", methodH.ReturnType.Name);
+            Assert.Equal("", ((ReturnTypeModel)methodH.ReturnType).Modifier);
+            Assert.Equal(2, methodH.ParameterTypes.Count);
+            var parameterModel3 = (ParameterModel)methodH.ParameterTypes[0];
             Assert.Equal("float", parameterModel3.Name);
             Assert.Equal("", parameterModel3.Modifier);
             Assert.Null(parameterModel3.DefaultValue);
-            var parameterModel4 = (ParameterModel)classModels[0].Methods[2].ParameterTypes[1];
+            var parameterModel4 = (ParameterModel)methodH.ParameterTypes[1];
             Assert.Equal("CSharpExtractor", parameterModel4.Name);
             Assert.Equal("", parameterModel4.Modifier);
             Assert.Null(parameterModel4.DefaultValue);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].ContainingTypeName);
-            Assert.Equal("public", classModels[0].Methods[2].AccessModifier);
-            Assert.Equal("abstract", classModels[0].Methods[2].Modifier);
-            Assert.Empty(classModels[0].Methods[2].CalledMethods);
+            Assert.Equal("TopLevel.Foo", methodH.ContainingTypeName);
+            Assert.Equal("public", methodH.AccessModifier);
+            Assert.Equal("abstract", methodH.Modifier);
+            Assert.Empty(methodH.CalledMethods);
         }
 
         [Fact]
@@ -707,73 +770,75 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                                              protected string h(float a,  CSharpExtractor b) { g(b); f(4); return ""A"";}                                                                                                    
                                                            }                                        
                                       }";
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
-            Assert.Equal(3, classModels[0].Methods.Count);
+            Assert.Equal(1, classTypes.Count);
+            var classModel = (ClassModel)classTypes[0];
+            Assert.Equal(3, classModel.Methods.Count);
 
-            Assert.Equal("f", classModels[0].Methods[0].Name);
-            Assert.Equal("void", classModels[0].Methods[0].ReturnType.Name);
-            Assert.Equal("", ((ReturnTypeModel)classModels[0].Methods[0].ReturnType).Modifier);
-            Assert.Equal(1, classModels[0].Methods[0].ParameterTypes.Count);
-            var parameterModel1 = (ParameterModel)classModels[0].Methods[0].ParameterTypes[0];
+            Assert.Equal("f", classModel.Methods[0].Name);
+            Assert.Equal("void", classModel.Methods[0].ReturnType.Name);
+            Assert.Equal("", ((ReturnTypeModel)classModel.Methods[0].ReturnType).Modifier);
+            Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
+            var parameterModel1 = (ParameterModel)classModel.Methods[0].ParameterTypes[0];
             Assert.Equal("int", parameterModel1.Name);
             Assert.Equal("", parameterModel1.Modifier);
             Assert.Null(parameterModel1.DefaultValue);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[0].ContainingTypeName);
-            Assert.Equal("public", classModels[0].Methods[0].AccessModifier);
-            Assert.Equal("static", classModels[0].Methods[0].Modifier);
-            Assert.Empty(classModels[0].Methods[0].CalledMethods);
+            Assert.Equal("TopLevel.Foo", classModel.Methods[0].ContainingTypeName);
+            Assert.Equal("public", classModel.Methods[0].AccessModifier);
+            Assert.Equal("static", classModel.Methods[0].Modifier);
+            Assert.Empty(classModel.Methods[0].CalledMethods);
 
-            Assert.Equal("g", classModels[0].Methods[1].Name);
-            Assert.Equal("int", classModels[0].Methods[1].ReturnType.Name);
-            Assert.Equal("", ((ReturnTypeModel)classModels[0].Methods[1].ReturnType).Modifier);
-            Assert.Equal(1, classModels[0].Methods[1].ParameterTypes.Count);
-            var parameterModel2 = (ParameterModel)classModels[0].Methods[1].ParameterTypes[0];
+            Assert.Equal("g", classModel.Methods[1].Name);
+            Assert.Equal("int", classModel.Methods[1].ReturnType.Name);
+            Assert.Equal("", ((ReturnTypeModel)classModel.Methods[1].ReturnType).Modifier);
+            Assert.Equal(1, classModel.Methods[1].ParameterTypes.Count);
+            var parameterModel2 = (ParameterModel)classModel.Methods[1].ParameterTypes[0];
             Assert.Equal("CSharpExtractor", parameterModel2.Name);
             Assert.Equal("", parameterModel2.Modifier);
             Assert.Null(parameterModel2.DefaultValue);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].ContainingTypeName);
-            Assert.Equal("private", classModels[0].Methods[1].AccessModifier);
-            Assert.Equal("", classModels[0].Methods[1].Modifier);
-            Assert.Equal(1, classModels[0].Methods[1].CalledMethods.Count);
-            Assert.Equal("f", classModels[0].Methods[1].CalledMethods[0].Name);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[1].CalledMethods[0].ContainingTypeName);
+            Assert.Equal("TopLevel.Foo", classModel.Methods[1].ContainingTypeName);
+            Assert.Equal("private", classModel.Methods[1].AccessModifier);
+            Assert.Equal("", classModel.Methods[1].Modifier);
+            Assert.Equal(1, classModel.Methods[1].CalledMethods.Count);
+            Assert.Equal("f", classModel.Methods[1].CalledMethods[0].Name);
+            Assert.Equal("TopLevel.Foo", classModel.Methods[1].CalledMethods[0].ContainingTypeName);
 
-            Assert.Equal("h", classModels[0].Methods[2].Name);
-            Assert.Equal("string", classModels[0].Methods[2].ReturnType.Name);
-            Assert.Equal("", ((ReturnTypeModel)classModels[0].Methods[2].ReturnType).Modifier);
-            Assert.Equal(2, classModels[0].Methods[2].ParameterTypes.Count);
-            var parameterModel3 = (ParameterModel)classModels[0].Methods[2].ParameterTypes[0];
+            Assert.Equal("h", classModel.Methods[2].Name);
+            Assert.Equal("string", classModel.Methods[2].ReturnType.Name);
+            Assert.Equal("", ((ReturnTypeModel)classModel.Methods[2].ReturnType).Modifier);
+            Assert.Equal(2, classModel.Methods[2].ParameterTypes.Count);
+            var parameterModel3 = (ParameterModel)classModel.Methods[2].ParameterTypes[0];
             Assert.Equal("float", parameterModel3.Name);
             Assert.Equal("", parameterModel3.Modifier);
             Assert.Null(parameterModel3.DefaultValue);
-            var parameterModel4 = (ParameterModel)classModels[0].Methods[2].ParameterTypes[1];
+            var parameterModel4 = (ParameterModel)classModel.Methods[2].ParameterTypes[1];
             Assert.Equal("CSharpExtractor", parameterModel4.Name);
             Assert.Equal("", parameterModel4.Modifier);
             Assert.Null(parameterModel4.DefaultValue);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].ContainingTypeName);
-            Assert.Equal("protected", classModels[0].Methods[2].AccessModifier);
-            Assert.Equal("", classModels[0].Methods[2].Modifier);
-            Assert.Equal(2, classModels[0].Methods[2].CalledMethods.Count);
-            Assert.Equal("g", classModels[0].Methods[2].CalledMethods[0].Name);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].CalledMethods[0].ContainingTypeName);
-            Assert.Equal("f", classModels[0].Methods[2].CalledMethods[1].Name);
-            Assert.Equal("TopLevel.Foo", classModels[0].Methods[2].CalledMethods[1].ContainingTypeName);
+            Assert.Equal("TopLevel.Foo", classModel.Methods[2].ContainingTypeName);
+            Assert.Equal("protected", classModel.Methods[2].AccessModifier);
+            Assert.Equal("", classModel.Methods[2].Modifier);
+            Assert.Equal(2, classModel.Methods[2].CalledMethods.Count);
+            Assert.Equal("g", classModel.Methods[2].CalledMethods[0].Name);
+            Assert.Equal("TopLevel.Foo", classModel.Methods[2].CalledMethods[0].ContainingTypeName);
+            Assert.Equal("f", classModel.Methods[2].CalledMethods[1].Name);
+            Assert.Equal("TopLevel.Foo", classModel.Methods[2].CalledMethods[1].ContainingTypeName);
         }
 
         [Theory]
         [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/ReadonlyStructs.txt")]
         public void Extract_ShouldHaveReadonlyStructs_WhenGivenPathToAFileWithReadonlyStructs(string fileContent)
         {
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(2, classModels.Count);
-            Assert.Equal("Points.ReadonlyPoint3D", classModels[0].Name);
-            Assert.Equal("Points.ReadonlyPoint2D", classModels[1].Name);
+            Assert.Equal(2, classTypes.Count);
+            Assert.Equal("Points.ReadonlyPoint3D", classTypes[0].Name);
+            Assert.Equal("Points.ReadonlyPoint2D", classTypes[1].Name);
 
-            foreach (var classModel in classModels)
+            foreach (var classType in classTypes)
             {
+                var classModel = (ClassModel)classType;
                 Assert.Equal("struct", classModel.ClassType);
                 Assert.Equal("public", classModel.AccessModifier);
                 Assert.Equal("readonly", classModel.Modifier);
@@ -785,10 +850,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
         public void Extract_ShouldHaveReadonlyStructMembers_WhenGivenPathToAFileWithMutableStructWithReadonlyMembers(
             string fileContent)
         {
-            var classModels = _sut.Extract(fileContent);
+            var classModels = _sut.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classModels.Count);
-            var classModel = classModels[0];
+            var classModel = (ClassModel)classModels[0];
             Assert.Equal("Geometry.Point2D", classModel.Name);
 
             Assert.Equal("struct", classModel.ClassType);
@@ -833,10 +898,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Extract_ShouldHaveReadonlyStaticStructMembers_WhenGivenPathToAFileWithStructWithStaticReadonlyMembers(
                 string fileContent)
         {
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
-            var classModel = classModels[0];
+            Assert.Equal(1, classTypes.Count);
+            var classModel = (ClassModel)classTypes[0];
 
             Assert.Equal("Geometry.Point", classModel.Name);
             Assert.Equal("struct", classModel.ClassType);
@@ -863,11 +928,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
         [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/RefStructs.txt")]
         public void Extract_ShouldHaveRefStructs_WhenGivenPathToAFileWithRefStructs(string fileContent)
         {
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(2, classModels.Count);
+            Assert.Equal(2, classTypes.Count);
 
-            var classModel1 = classModels[0];
+            var classModel1 = (ClassModel)classTypes[0];
             Assert.Equal("Namespace1.CustomRef", classModel1.Name);
             Assert.Equal("struct", classModel1.ClassType);
             Assert.Equal("public", classModel1.AccessModifier);
@@ -881,7 +946,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                 Assert.Equal("System.Span<int>", fieldModel.Type);
             }
 
-            var classModel2 = classModels[1];
+            var classModel2 = (ClassModel)classTypes[1];
             Assert.Equal("Namespace1.ConversionRequest", classModel2.Name);
             Assert.Equal("struct", classModel2.ClassType);
             Assert.Equal("public", classModel2.AccessModifier);
@@ -908,11 +973,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
         [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/RefReturnMethods.txt")]
         public void Extract_ShouldHaveRefReturnMethod_WhenGivenPathToAFileWithRefStructs(string fileContent)
         {
-            var classModels = _sut.Extract(fileContent);
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var classModel = classModels[0];
+            var classModel = (ClassModel)classTypes[0];
             Assert.Equal("Namespace1.Class1", classModel.Name);
 
             Assert.Equal(2, classModel.Methods.Count);
