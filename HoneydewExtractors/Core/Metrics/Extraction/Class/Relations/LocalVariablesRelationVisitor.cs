@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using HoneydewCore.ModelRepresentations;
 using HoneydewExtractors.CSharp.Utils;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -25,14 +26,14 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
 
                 if (fullName != CSharpConstants.VarIdentifier)
                 {
-                    MetricHolder.Add(className, fullName);
+                    MetricHolder.Add(className, fullName, this);
                 }
                 else
                 {
                     fullName = InheritedSemanticModel.GetFullName(variableDeclarationSyntax);
                     if (fullName != CSharpConstants.VarIdentifier)
                     {
-                        MetricHolder.Add(className, fullName);
+                        MetricHolder.Add(className, fullName, this);
                     }
                     else
                     {
@@ -45,7 +46,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
                             })
                             {
                                 MetricHolder.Add(className,
-                                    InheritedSemanticModel.GetFullName(objectCreationExpressionSyntax.Type));
+                                    InheritedSemanticModel.GetFullName(objectCreationExpressionSyntax.Type), this);
                             }
                         }
                     }

@@ -2,6 +2,8 @@
 {
     public record FileRelation
     {
+        public string Type { get; set; }
+
         public string FileSource { get; set; } = "";
 
         public string FileTarget { get; set; } = "";

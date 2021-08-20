@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.ModelRepresentations;
 using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.Class.Relations;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
@@ -73,9 +74,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, classTypes[1].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[1].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            Assert.Equal(
+                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
                 classTypes[1].Metrics[0].ValueType);
-            Assert.Empty((IDictionary<string, int>)classTypes[1].Metrics[0].Value);
+            Assert.Empty((Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[1].Metrics[0].Value);
         }
 
         [Fact]
@@ -117,10 +119,12 @@ namespace Throw2
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            Assert.Equal(
+                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
                 classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>)classTypes[0].Metrics[0].Value;
+            var dependencies =
+                ((Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[0].Metrics[0].Value)[_sut];
 
             Assert.Equal(3, dependencies.Count);
             Assert.Equal(1, dependencies["System.ArgumentNullException"]);
@@ -175,10 +179,12 @@ namespace Throwing
             Assert.Equal(1, classTypes[3].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[3].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            Assert.Equal(
+                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
                 classTypes[3].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>)classTypes[3].Metrics[0].Value;
+            var dependencies =
+                ((Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[3].Metrics[0].Value)[_sut];
 
             Assert.Equal(3, dependencies.Count);
             Assert.Equal(1, dependencies["Throwing.MyArgumentNullException"]);
@@ -233,10 +239,12 @@ namespace Throwing
             Assert.Equal(1, classTypes[1].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[1].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            Assert.Equal(
+                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
                 classTypes[1].Metrics[0].ValueType);
 
-            var dependencies = (Dictionary<string, int>)classTypes[1].Metrics[0].Value;
+            var dependencies =
+                ((Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[1].Metrics[0].Value)[_sut];
 
             Assert.Equal(2, dependencies.Count);
             Assert.Equal(2, dependencies["Throwing.MyArgumentException"]);
@@ -281,10 +289,12 @@ namespace Throwing
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            Assert.Equal(
+                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
                 classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>)classTypes[0].Metrics[0].Value;
+            var dependencies =
+                ((Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[0].Metrics[0].Value)[_sut];
 
             Assert.Equal(2, dependencies.Count);
             Assert.Equal(1, dependencies["System.IndexOutOfRangeException"]);
@@ -341,10 +351,12 @@ namespace Throwing
             Assert.Equal(1, classTypes[1].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[1].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            Assert.Equal(
+                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
                 classTypes[1].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>)classTypes[1].Metrics[0].Value;
+            var dependencies =
+                ((Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[1].Metrics[0].Value)[_sut];
 
             Assert.Equal(5, dependencies.Count);
             Assert.Equal(1, dependencies["System.IndexOutOfRangeException"]);
@@ -410,12 +422,14 @@ namespace Throwing
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            Assert.Equal(
+                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
                 classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>)classTypes[0].Metrics[0].Value;
+            var dependencies =
+                ((Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[0].Metrics[0].Value)[_sut];
 
-            Assert.Equal(1, dependencies.Count);
+            Assert.Single(dependencies);
             Assert.Equal(8, dependencies["ExternException"]);
         }
 
@@ -444,12 +458,14 @@ namespace Throwing
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            Assert.Equal(
+                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
                 classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>)classTypes[0].Metrics[0].Value;
+            var dependencies =
+                ((Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[0].Metrics[0].Value)[_sut];
 
-            Assert.Equal(1, dependencies.Count);
+            Assert.Single(dependencies);
             Assert.Equal(1, dependencies["System.ArgumentException"]);
         }
 
@@ -475,12 +491,14 @@ namespace Throwing
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            Assert.Equal(
+                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
                 classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>)classTypes[0].Metrics[0].Value;
+            var dependencies =
+                ((Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[0].Metrics[0].Value)[_sut];
 
-            Assert.Equal(1, dependencies.Count);
+            Assert.Single(dependencies);
             Assert.Equal(1, dependencies["System.ArgumentNullException"]);
         }
 
@@ -505,12 +523,14 @@ namespace Throwing
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            Assert.Equal(
+                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
                 classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>)classTypes[0].Metrics[0].Value;
+            var dependencies =
+                ((Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[0].Metrics[0].Value)[_sut];
 
-            Assert.Equal(1, dependencies.Count);
+            Assert.Single(dependencies);
             Assert.Equal(1, dependencies["System.InvalidCastException"]);
         }
     }

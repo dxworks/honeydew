@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using HoneydewCore.ModelRepresentations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
@@ -20,35 +21,35 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
                 .OfType<ObjectCreationExpressionSyntax>())
             {
                 MetricHolder.Add(className,
-                    InheritedSemanticModel.GetFullName(objectCreationExpressionSyntax.Type));
+                    InheritedSemanticModel.GetFullName(objectCreationExpressionSyntax.Type), this);
             }
 
             foreach (var implicitObjectCreationExpressionSyntax in syntaxNode.DescendantNodes()
                 .OfType<ImplicitObjectCreationExpressionSyntax>())
             {
                 MetricHolder.Add(className,
-                    InheritedSemanticModel.GetFullName(implicitObjectCreationExpressionSyntax));
+                    InheritedSemanticModel.GetFullName(implicitObjectCreationExpressionSyntax), this);
             }
 
             foreach (var arrayCreationExpressionSyntax in syntaxNode.DescendantNodes()
                 .OfType<ArrayCreationExpressionSyntax>())
             {
                 MetricHolder.Add(className,
-                    InheritedSemanticModel.GetFullName(arrayCreationExpressionSyntax.Type));
+                    InheritedSemanticModel.GetFullName(arrayCreationExpressionSyntax.Type), this);
             }
 
             foreach (var implicitArrayCreationExpressionSyntax in syntaxNode.DescendantNodes()
                 .OfType<ImplicitArrayCreationExpressionSyntax>())
             {
                 MetricHolder.Add(className,
-                    InheritedSemanticModel.GetFullName(implicitArrayCreationExpressionSyntax));
+                    InheritedSemanticModel.GetFullName(implicitArrayCreationExpressionSyntax), this);
             }
 
             foreach (var expressionSyntax in syntaxNode.DescendantNodes().OfType<InitializerExpressionSyntax>()
                 .Where(syntax => syntax.Parent is EqualsValueClauseSyntax)
                 .Select(syntax => syntax.Parent))
             {
-                MetricHolder.Add(className, InheritedSemanticModel.GetContainingType(expressionSyntax));
+                MetricHolder.Add(className, InheritedSemanticModel.GetContainingType(expressionSyntax), this);
             }
         }
     }

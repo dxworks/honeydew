@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using HoneydewCore.ModelRepresentations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
@@ -19,14 +20,14 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
             foreach (var fieldDeclarationSyntax in syntaxNode.DescendantNodes().OfType<FieldDeclarationSyntax>())
             {
                 MetricHolder.Add(className,
-                    InheritedSemanticModel.GetFullName(fieldDeclarationSyntax.Declaration.Type));
+                    InheritedSemanticModel.GetFullName(fieldDeclarationSyntax.Declaration.Type), this);
             }
 
             foreach (var eventFieldDeclarationSyntax in syntaxNode.DescendantNodes()
                 .OfType<EventFieldDeclarationSyntax>())
             {
                 MetricHolder.Add(className,
-                    InheritedSemanticModel.GetFullName(eventFieldDeclarationSyntax.Declaration.Type));
+                    InheritedSemanticModel.GetFullName(eventFieldDeclarationSyntax.Declaration.Type), this);
             }
         }
     }

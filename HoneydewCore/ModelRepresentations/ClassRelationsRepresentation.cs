@@ -4,18 +4,14 @@ namespace HoneydewCore.ModelRepresentations
 {
     public class ClassRelationsRepresentation
     {
-        public bool UsePrettyPrint { private get; set; }
-
         public ISet<string> DependenciesType { get; } = new HashSet<string>();
 
         public IDictionary<string, IDictionary<string, IDictionary<string, int>>> ClassRelations { get; } =
             new Dictionary<string, IDictionary<string, IDictionary<string, int>>>();
 
-        private readonly IMetricPrettier _metricPrettier;
-
-        public ClassRelationsRepresentation(IMetricPrettier metricPrettier)
+        public void Add(FileRelation relation)
         {
-            _metricPrettier = metricPrettier;
+            Add(relation.FileSource, relation.FileTarget, relation.Type, relation.RelationCount);
         }
 
         public void Add(string sourceName, string targetName, string dependencyType, int dependencyValue)
@@ -36,19 +32,13 @@ namespace HoneydewCore.ModelRepresentations
                 return;
             }
 
-
-            if (UsePrettyPrint)
-            {
-                dependencyType = _metricPrettier.Pretty(dependencyType);
-            }
-
             DependenciesType.Add(dependencyType);
 
             if (!ClassRelations.TryGetValue(sourceName, out var targetDictionary))
             {
                 ClassRelations.Add(sourceName, new Dictionary<string, IDictionary<string, int>>
                 {
-                    {targetName, new Dictionary<string, int> {{dependencyType, dependencyValue}}}
+                    { targetName, new Dictionary<string, int> { { dependencyType, dependencyValue } } }
                 });
             }
             else
@@ -63,7 +53,7 @@ namespace HoneydewCore.ModelRepresentations
                 else
                 {
                     targetDictionary.Add(targetName, new Dictionary<string, int>
-                        {{dependencyType, dependencyValue}});
+                        { { dependencyType, dependencyValue } });
                 }
             }
         }

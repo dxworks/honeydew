@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using HoneydewCore.ModelRepresentations;
-using HoneydewExtractors.Core.Metrics.Extraction.Class.Relations;
-using Moq;
+﻿using HoneydewCore.ModelRepresentations;
 using Xunit;
 
 namespace HoneydewCoreIntegrationTests.Models.Representations
@@ -9,11 +6,10 @@ namespace HoneydewCoreIntegrationTests.Models.Representations
     public class ClassRelationsRepresentationTests
     {
         private readonly ClassRelationsRepresentation _sut;
-        private readonly Mock<IMetricPrettier> _metricPrettierMock = new();
 
         public ClassRelationsRepresentationTests()
         {
-            _sut = new ClassRelationsRepresentation(_metricPrettierMock.Object);
+            _sut = new ClassRelationsRepresentation();
         }
 
         [Theory]
@@ -160,43 +156,6 @@ namespace HoneydewCoreIntegrationTests.Models.Representations
             Assert.True(_sut.DependenciesType.Contains("dependency2"));
             Assert.True(_sut.DependenciesType.Contains("dependency3"));
             Assert.True(_sut.DependenciesType.Contains("dependency4"));
-        }
-
-        [Fact]
-        public void GetDependenciesTypePretty_ShouldReturnTheDependencies_WhenUsePrettyIsFalse()
-        {
-            _sut.Add("source", "target", typeof(ParameterRelationVisitor).FullName, 4);
-
-            var dependenciesTypePretty = _sut.DependenciesType;
-
-            Assert.Single(dependenciesTypePretty);
-            Assert.Equal(typeof(ParameterRelationVisitor).FullName, dependenciesTypePretty.First());
-        }
-
-        [Fact]
-        public void GetDependenciesTypePretty_ShouldReturnTheDependenciesPrettyPrint_WhenUsePrettyIsTrue()
-        {
-            var dependencyType = typeof(ParameterRelationVisitor).FullName;
-
-            _metricPrettierMock.Setup(prettier => prettier.Pretty(dependencyType)).Returns("Parameter Dependency");
-
-            _sut.UsePrettyPrint = true;
-            _sut.Add("source", "target", dependencyType, 4);
-
-            Assert.Single(_sut.DependenciesType);
-            Assert.Equal("Parameter Dependency", _sut.DependenciesType.First());
-        }
-
-        [Fact]
-        public void GetDependenciesTypePretty_ShouldReturnTheDependencies_WhenUsePrettyIsTrueAndTheClassIsNotAMetric()
-        {
-            _metricPrettierMock.Setup(prettier => prettier.Pretty("string")).Returns("string");
-
-            _sut.UsePrettyPrint = true;
-            _sut.Add("source", "target", "string", 4);
-
-            Assert.Single(_sut.DependenciesType);
-            Assert.Equal("string", _sut.DependenciesType.First());
         }
     }
 }

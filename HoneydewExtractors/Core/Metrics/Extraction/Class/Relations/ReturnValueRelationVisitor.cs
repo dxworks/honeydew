@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using HoneydewCore.ModelRepresentations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
@@ -19,7 +20,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
             foreach (var methodDeclarationSyntax in syntaxNode.DescendantNodes().OfType<MethodDeclarationSyntax>())
             {
                 MetricHolder.Add(className,
-                    InheritedSemanticModel.GetFullName(methodDeclarationSyntax.ReturnType));
+                    InheritedSemanticModel.GetFullName(methodDeclarationSyntax.ReturnType), this);
             }
         }
     }

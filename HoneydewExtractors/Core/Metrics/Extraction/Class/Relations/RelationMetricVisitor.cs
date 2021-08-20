@@ -23,9 +23,10 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
 
         protected abstract void AddDependencies(string className, BaseTypeDeclarationSyntax syntaxNode);
 
-        public IList<FileRelation> GetRelations(IDictionary<string, IDictionary<string, int>> dependencies)
+        public IList<FileRelation> GetRelations(
+            IDictionary<string, IDictionary<IRelationMetric, IDictionary<string, int>>> dependencies)
         {
-            return MetricHolder.GetRelations(dependencies);
+            return MetricHolder.GetRelations();
         }
 
         public IPropertyMembersClassType Visit(BaseTypeDeclarationSyntax syntaxNode,

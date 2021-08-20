@@ -7,61 +7,82 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
 {
     public class RelationMetricHolder : IRelationMetricHolder
     {
-        private readonly Dictionary<string, IDictionary<string, int>> _dependencies = new();
+        private readonly Dictionary<string, Dictionary<IRelationMetric, IDictionary<string, int>>>
+            _dependencies = new();
 
-        public void Add(string className, string dependencyName)
+        public void Add(string className, string dependencyName, IRelationMetric relationMetric)
         {
-            if (_dependencies.TryGetValue(className, out var dependenciesDictionary))
+            if (_dependencies.TryGetValue(className, out var relationMetricDictionary))
             {
-                if (dependenciesDictionary.ContainsKey(dependencyName))
+                if (relationMetricDictionary.TryGetValue(relationMetric, out var dependenciesDictionary))
                 {
-                    dependenciesDictionary[dependencyName]++;
+                    if (dependenciesDictionary.ContainsKey(dependencyName))
+                    {
+                        dependenciesDictionary[dependencyName]++;
+                    }
+                    else
+                    {
+                        dependenciesDictionary.Add(dependencyName, 1);
+                    }
                 }
                 else
                 {
-                    dependenciesDictionary.Add(dependencyName, 1);
+                    relationMetricDictionary.Add(relationMetric, new Dictionary<string, int>
+                    {
+                        { dependencyName, 1 }
+                    });
                 }
             }
             else
             {
-                var dictionary = new Dictionary<string, int>
+                var dictionary = new Dictionary<IRelationMetric, IDictionary<string, int>>
                 {
-                    { dependencyName, 1 }
+                    {
+                        relationMetric, new Dictionary<string, int>
+                        {
+                            { dependencyName, 1 }
+                        }
+                    }
                 };
                 _dependencies.Add(className, dictionary);
             }
         }
 
-        public IDictionary<string, int> GetDependencies(string className)
+        public IDictionary<IRelationMetric, IDictionary<string, int>> GetDependencies(
+            string className)
         {
             return _dependencies.TryGetValue(className, out var dictionary)
                 ? dictionary
-                : new Dictionary<string, int>();
+                : new Dictionary<IRelationMetric, IDictionary<string, int>>();
         }
 
-        public IList<FileRelation> GetRelations(IDictionary<string, IDictionary<string, int>> dependencies)
+        public IList<FileRelation> GetRelations()
         {
             try
             {
                 IList<FileRelation> fileRelations = new List<FileRelation>();
 
-                foreach (var (className, dependencyDictionary) in dependencies)
+                foreach (var (className, relationDictionary) in _dependencies)
                 {
-                    foreach (var (dependency, count) in dependencyDictionary)
+                    foreach (var (relationMetric, dependencyDictionary) in relationDictionary)
                     {
-                        var type = Type.GetType(dependency);
-                        if (type is { IsPrimitive: true } || CSharpConstants.IsPrimitive(dependency))
+                        foreach (var (dependency, count) in dependencyDictionary)
                         {
-                            continue;
-                        }
+                            var type = Type.GetType(dependency);
+                            if (type is { IsPrimitive: true } || CSharpConstants.IsPrimitive(dependency))
+                            {
+                                continue;
+                            }
 
-                        var fileRelation = new FileRelation
-                        {
-                            FileTarget = dependency,
-                            RelationCount = count,
-                            FileSource = className
-                        };
-                        fileRelations.Add(fileRelation);
+                            var fileRelation = new FileRelation
+                            {
+                                Type = relationMetric.PrettyPrint(),
+                                FileTarget = dependency,
+                                RelationCount = count,
+                                FileSource = className
+                            };
+                            fileRelations.Add(fileRelation);
+                        }
                     }
                 }
 
