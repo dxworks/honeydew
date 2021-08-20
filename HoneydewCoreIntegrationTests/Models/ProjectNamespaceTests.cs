@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
-using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Xunit;
@@ -84,7 +82,7 @@ namespace HoneydewCoreIntegrationTests.Models
             classModel.Metrics.Add(new MetricModel
             {
                 Value = 0,
-                ExtractorName = typeof(CSharpUsingsCountMetric).FullName,
+                ExtractorName = "MetricExtractor",
                 ValueType = typeof(int).FullName
             });
 
@@ -97,8 +95,7 @@ namespace HoneydewCoreIntegrationTests.Models
 
             Assert.Equal(1, sutClassModel.Metrics.Count);
 
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel.CSharpUsingsCountMetric",
-                sutClassModel.Metrics[0].ExtractorName);
+            Assert.Equal("MetricExtractor", sutClassModel.Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", sutClassModel.Metrics[0].ValueType);
             Assert.Equal(0, (int)sutClassModel.Metrics[0].Value);
         }
@@ -113,7 +110,7 @@ namespace HoneydewCoreIntegrationTests.Models
             classModel1.Metrics.Add(new MetricModel
             {
                 Value = 0,
-                ExtractorName = typeof(CSharpUsingsCountMetric).FullName,
+                ExtractorName = "MetricExtractor",
                 ValueType = typeof(int).FullName
             });
 
@@ -133,7 +130,7 @@ namespace HoneydewCoreIntegrationTests.Models
                         ClassType = "class"
                     }
                 },
-                ExtractorName = typeof(CSharpBaseClassMetric).FullName,
+                ExtractorName = "BaseTypesExtractor",
                 ValueType = typeof(List<IBaseType>).FullName
             });
 
@@ -146,7 +143,7 @@ namespace HoneydewCoreIntegrationTests.Models
             classModel3.Metrics.Add(new MetricModel
             {
                 Value = 0,
-                ExtractorName = typeof(CSharpUsingsCountMetric).FullName,
+                ExtractorName = "MetricExtractor",
                 ValueType = typeof(int).FullName
             });
             classModel3.Metrics.Add(new MetricModel
@@ -164,7 +161,7 @@ namespace HoneydewCoreIntegrationTests.Models
                         ClassType = "interface"
                     }
                 },
-                ExtractorName = typeof(CSharpBaseClassMetric).FullName,
+                ExtractorName = "BaseTypesExtractor",
                 ValueType = typeof(List<IBaseType>).FullName
             });
 
@@ -175,17 +172,14 @@ namespace HoneydewCoreIntegrationTests.Models
 
             Assert.Equal("Items.Pencil", _sut.ClassModels[0].Name);
             Assert.Equal(1, _sut.ClassModels[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel.CSharpUsingsCountMetric",
-                _sut.ClassModels[0].Metrics[0].ExtractorName);
+            Assert.Equal("MetricExtractor", _sut.ClassModels[0].Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", _sut.ClassModels[0].Metrics[0].ValueType);
             Assert.Equal(0, (int)_sut.ClassModels[0].Metrics[0].Value);
 
             Assert.Equal("Items.Notebook", _sut.ClassModels[1].Name);
             Assert.Equal(1, _sut.ClassModels[1].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpBaseClassMetric",
-                _sut.ClassModels[1].Metrics[0].ExtractorName);
-            Assert.Equal(typeof(List<IBaseType>).FullName,
-                _sut.ClassModels[1].Metrics[0].ValueType);
+            Assert.Equal("BaseTypesExtractor", _sut.ClassModels[1].Metrics[0].ExtractorName);
+            Assert.Equal(typeof(List<IBaseType>).FullName, _sut.ClassModels[1].Metrics[0].ValueType);
             Assert.Equal(typeof(List<IBaseType>), _sut.ClassModels[1].Metrics[0].Value.GetType());
             var baseTypes = (List<IBaseType>)_sut.ClassModels[1].Metrics[0].Value;
             Assert.Single(baseTypes);
@@ -195,14 +189,12 @@ namespace HoneydewCoreIntegrationTests.Models
 
             Assert.Equal("Items.IItemService", _sut.ClassModels[2].Name);
             Assert.Equal(2, _sut.ClassModels[2].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel.CSharpUsingsCountMetric",
-                _sut.ClassModels[2].Metrics[0].ExtractorName);
+            Assert.Equal("MetricExtractor", _sut.ClassModels[2].Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", _sut.ClassModels[2].Metrics[0].ValueType);
             Assert.Equal(0, (int)_sut.ClassModels[2].Metrics[0].Value);
 
 
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpBaseClassMetric",
-                _sut.ClassModels[2].Metrics[1].ExtractorName);
+            Assert.Equal("BaseTypesExtractor", _sut.ClassModels[2].Metrics[1].ExtractorName);
             Assert.Equal(typeof(List<IBaseType>).FullName,
                 _sut.ClassModels[2].Metrics[1].ValueType);
             Assert.Equal(typeof(List<IBaseType>), _sut.ClassModels[2].Metrics[1].Value.GetType());

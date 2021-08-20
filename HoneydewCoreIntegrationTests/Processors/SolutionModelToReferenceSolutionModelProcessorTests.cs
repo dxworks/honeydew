@@ -1,5 +1,16 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using HoneydewCore.Processors;
+using HoneydewExtractors.Core.Metrics.Extraction.Class;
+using HoneydewExtractors.Core.Metrics.Extraction.Common;
+using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.Method;
+using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
+using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
+using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -114,7 +125,7 @@ namespace HoneydewCoreIntegrationTests.Processors
                                     {
                                         Name = "Project1.Services.RetrieveService",
                                         FilePath = "validPathToProject/Project1/Services/RetrieveService.cs",
-                                        Metrics = new List<ClassMetric>
+                                        Metrics = new List<MetricModel>
                                         {
                                             new()
                                             {
@@ -501,8 +512,26 @@ namespace Project1.Services
         }
     }
 }";
-            var extractor = new CSharpFactExtractor();
-            var classModels = extractor.Extract(fileContent);
+            var visitorList = new VisitorList();
+            visitorList.Add(new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(
+                new List<ICSharpClassVisitor>
+                {
+                    new BaseInfoClassVisitor(),
+                    new BaseTypesClassVisitor(),
+                    new MethodSetterClassVisitor(new CSharpMethodModelCreator(new List<ICSharpMethodVisitor>
+                    {
+                        new MethodInfoVisitor(),
+                        new CalledMethodSetterVisitor(new CSharpMethodCallModelCreator(
+                            new List<ICSharpMethodSignatureVisitor>
+                            {
+                                new MethodCallInfoVisitor()
+                            }))
+                    }))
+                })));
+
+            var extractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
+            var classModels = extractor.Extract(fileContent).ClassTypes;
 
             var solutionModel = new SolutionModel
             {
@@ -516,7 +545,7 @@ namespace Project1.Services
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = classModels,
+                                ClassModels = classModels.Cast<ClassModel>().ToList(),
                             }
                         }
                     }

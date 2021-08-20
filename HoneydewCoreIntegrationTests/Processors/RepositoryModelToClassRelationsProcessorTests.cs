@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewModels.CSharp;
 using Moq;
 using Xunit;
@@ -145,14 +144,14 @@ namespace HoneydewCoreIntegrationTests.Processors
                 Name = "Models.Class1", FilePath = "path/Model/Class1.cs"
             });
 
-            var extractorName = typeof(CSharpParameterRelationMetric).FullName;
+            var extractorName = "ExtractorName";
             var classMetric = new MetricModel
             {
                 ExtractorName = extractorName,
                 ValueType = typeof(IDictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
-                    {"Models.Class1", 2}
+                    { "Models.Class1", 2 }
                 }
             };
             projectModel.Add(new ClassModel
@@ -195,6 +194,7 @@ namespace HoneydewCoreIntegrationTests.Processors
 
             Assert.True(targetDictionary2.TryGetValue("Models.Class1", out var dependencyDictionary));
             Assert.Equal(1, dependencyDictionary.Count);
+
             Assert.True(dependencyDictionary.TryGetValue(extractorName!, out var count));
             Assert.Equal(2, count);
 
