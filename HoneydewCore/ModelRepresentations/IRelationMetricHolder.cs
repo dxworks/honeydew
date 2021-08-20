@@ -6,7 +6,7 @@ namespace HoneydewCore.ModelRepresentations
     {
         void Add(string className, string dependencyName, IRelationMetric relationMetric);
 
-        IDictionary<IRelationMetric, IDictionary<string, int>> GetDependencies(string className);
+        IDictionary<string, IDictionary<string, int>> GetDependencies(string className);
 
         IList<FileRelation> GetRelations();
     }

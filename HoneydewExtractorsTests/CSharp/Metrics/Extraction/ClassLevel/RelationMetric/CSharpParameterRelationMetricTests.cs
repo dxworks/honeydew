@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.ModelRepresentations;
 using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.Class.Relations;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
@@ -57,12 +56,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ParameterRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal(
-                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
+            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
 
-            var dictionary = (Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[0].Metrics[0].Value;
-            Assert.False(dictionary.ContainsKey(_sut));
+            var dictionary = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
+            Assert.Empty(dictionary);
         }
 
         [Fact]
@@ -82,12 +80,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ParameterRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal(
-                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
+            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
 
-            var dictionary = (Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[0].Metrics[0].Value;
-            Assert.False(dictionary.ContainsKey(_sut));
+            var dictionary = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
+            Assert.Empty(dictionary);
         }
 
         [Fact]
@@ -115,12 +112,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ParameterRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal(
-                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
+            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
 
-            var dependencies =
-                ((Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[0].Metrics[0].Value)[_sut];
+            var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
 
             Assert.Equal(3, dependencies.Count);
             Assert.Equal(3, dependencies["int"]);
@@ -152,12 +147,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ParameterRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal(
-                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
+            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
 
-            var dependencies =
-                ((Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[0].Metrics[0].Value)[_sut];
+            var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
 
             Assert.Equal(3, dependencies.Count);
             Assert.Equal(3, dependencies["int"]);
@@ -186,12 +179,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ParameterRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal(
-                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
+            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
 
-            var dependencies =
-                ((Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[0].Metrics[0].Value)[_sut];
+            var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
 
             Assert.Equal(3, dependencies.Count);
             Assert.Equal(2, dependencies["CSharpMetricExtractor"]);
@@ -220,12 +211,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ParameterRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal(
-                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
+            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
 
-            var dependencies =
-                ((Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[0].Metrics[0].Value)[_sut];
+            var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
 
             Assert.Equal(4, dependencies.Count);
             Assert.Equal(2, dependencies["CSharpMetricExtractor"]);
@@ -255,12 +244,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.Relations.ParameterRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal(
-                "System.Collections.Generic.Dictionary`2[HoneydewCore.ModelRepresentations.IRelationMetric,System.Collections.Generic.IDictionary`2[System.String,System.Int32]]",
+            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[0].Metrics[0].ValueType);
 
-            var dependencies =
-                ((Dictionary<IRelationMetric, IDictionary<string, int>>)classTypes[0].Metrics[0].Value)[_sut];
+            var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
 
             Assert.Equal(4, dependencies.Count);
             Assert.Equal(2, dependencies["CSharpMetricExtractor"]);

@@ -48,12 +48,21 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
             }
         }
 
-        public IDictionary<IRelationMetric, IDictionary<string, int>> GetDependencies(
-            string className)
+        public IDictionary<string, IDictionary<string, int>> GetDependencies(string className)
         {
-            return _dependencies.TryGetValue(className, out var dictionary)
-                ? dictionary
-                : new Dictionary<IRelationMetric, IDictionary<string, int>>();
+            if (!_dependencies.TryGetValue(className, out var dictionary))
+            {
+                return new Dictionary<string, IDictionary<string, int>>();
+            }
+
+            IDictionary<string, IDictionary<string, int>> metricDependencies =
+                new Dictionary<string, IDictionary<string, int>>();
+            foreach (var (relationMetric, dependencies) in dictionary)
+            {
+                metricDependencies.Add(relationMetric.PrettyPrint(), dependencies);
+            }
+
+            return metricDependencies;
         }
 
         public IList<FileRelation> GetRelations()

@@ -43,8 +43,17 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
 
         private MetricModel GetMetricModel(string className)
         {
-            var dependencies = MetricHolder.GetDependencies(className);
+            if (MetricHolder.GetDependencies(className).TryGetValue(PrettyPrint(), out var dictionary))
+            {
+                return new MetricModel
+                {
+                    ExtractorName = GetType().ToString(),
+                    Value = dictionary,
+                    ValueType = dictionary.GetType().ToString()
+                };
+            }
 
+            Dictionary<string, int> dependencies = new Dictionary<string, int>();
             var metricModel = new MetricModel
             {
                 ExtractorName = GetType().ToString(),
