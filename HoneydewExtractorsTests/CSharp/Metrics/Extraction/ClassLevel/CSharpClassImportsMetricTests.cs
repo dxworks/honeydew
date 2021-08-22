@@ -4,7 +4,6 @@ using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.Common;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Extraction.Delegate;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.CSharp.Metrics;
@@ -20,22 +19,22 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
         public CSharpClassImportsMetricTests()
         {
-            var visitorList = new VisitorList();
+            var compositeVisitor = new CompositeVisitor<ICompilationUnitType>();
+
             var importsVisitor = new ImportsVisitor();
-            visitorList.Add(new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(
-                new List<ICSharpClassVisitor>
-                {
-                    new BaseInfoClassVisitor(),
-                    importsVisitor
-                })));
-            visitorList.Add(new DelegateSetterCompilationUnitVisitor(new CSharpDelegateModelCreator(
-                new List<ICSharpDelegateVisitor>
-                {
-                    new BaseInfoDelegateVisitor(),
-                    importsVisitor
-                })));
+            compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
+            {
+                new BaseInfoClassVisitor(),
+                importsVisitor
+            }));
+            compositeVisitor.Add(new DelegateSetterCompilationUnitVisitor(new List<ICSharpDelegateVisitor>
+            {
+                new BaseInfoDelegateVisitor(),
+                importsVisitor
+            }));
+
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }
 
         [Theory]

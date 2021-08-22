@@ -1,28 +1,21 @@
-﻿using System.Linq;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+﻿using System.Collections.Generic;
+using System.Linq;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method
 {
-    public class LocalFunctionsSetterClassVisitor : CompositeTypeVisitor, ICSharpMethodVisitor,
+    public class LocalFunctionsSetterClassVisitor : CompositeVisitor, ICSharpMethodVisitor,
         ICSharpConstructorVisitor, ICSharpPropertyVisitor, ICSharpLocalFunctionVisitor
     {
-        private readonly CSharpLocalFunctionsModelCreator _cSharpLocalFunctionsModelCreator;
-
-        public LocalFunctionsSetterClassVisitor(CSharpLocalFunctionsModelCreator cSharpLocalFunctionsModelCreator)
+        public LocalFunctionsSetterClassVisitor(IEnumerable<ILocalFunctionVisitor> visitors) : base(visitors)
         {
-            _cSharpLocalFunctionsModelCreator = cSharpLocalFunctionsModelCreator;
-
-            foreach (var visitor in _cSharpLocalFunctionsModelCreator.GetVisitors())
-            {
-                Add(visitor);
-            }
         }
 
         public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
@@ -37,12 +30,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method
                 return methodModel;
             }
 
-            foreach (var localFunctionStatementSyntax in
-                syntaxNode.Body.ChildNodes().OfType<LocalFunctionStatementSyntax>())
-            {
-                methodModel.LocalFunctions.Add(
-                    _cSharpLocalFunctionsModelCreator.Create(localFunctionStatementSyntax, new MethodModel()));
-            }
+            SetLocalFunctionInfo(syntaxNode.Body, methodModel);
 
             return methodModel;
         }
@@ -59,12 +47,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method
                 return constructorModel;
             }
 
-            foreach (var localFunctionStatementSyntax in
-                syntaxNode.Body.ChildNodes().OfType<LocalFunctionStatementSyntax>())
-            {
-                constructorModel.LocalFunctions.Add(
-                    _cSharpLocalFunctionsModelCreator.Create(localFunctionStatementSyntax, new MethodModel()));
-            }
+            SetLocalFunctionInfo(syntaxNode.Body, constructorModel);
 
             return constructorModel;
         }
@@ -88,12 +71,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method
                     continue;
                 }
 
-                foreach (var localFunctionStatementSyntax in accessor.Body.ChildNodes()
-                    .OfType<LocalFunctionStatementSyntax>())
-                {
-                    propertyModel.LocalFunctions.Add(
-                        _cSharpLocalFunctionsModelCreator.Create(localFunctionStatementSyntax, new MethodModel()));
-                }
+                SetLocalFunctionInfo(accessor.Body, propertyModel);
             }
 
             return propertyModel;
@@ -107,14 +85,28 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method
                 return modelType;
             }
 
-            foreach (var localFunctionStatementSyntax in
-                syntaxNode.Body.ChildNodes().OfType<LocalFunctionStatementSyntax>())
-            {
-                modelType.LocalFunctions.Add(
-                    _cSharpLocalFunctionsModelCreator.Create(localFunctionStatementSyntax, new MethodModel()));
-            }
+            SetLocalFunctionInfo(syntaxNode.Body, modelType);
 
             return modelType;
+        }
+
+        private void SetLocalFunctionInfo(SyntaxNode syntaxNode, ITypeWithLocalFunctions typeWithLocalFunctions)
+        {
+            foreach (var localFunctionStatementSyntax in
+                syntaxNode.ChildNodes().OfType<LocalFunctionStatementSyntax>())
+            {
+                IMethodTypeWithLocalFunctions localFunction = new MethodModel();
+
+                foreach (var visitor in GetContainedVisitors())
+                {
+                    if (visitor is ICSharpLocalFunctionVisitor extractionVisitor)
+                    {
+                        localFunction = extractionVisitor.Visit(localFunctionStatementSyntax, localFunction);
+                    }
+                }
+
+                typeWithLocalFunctions.LocalFunctions.Add(localFunction);
+            }
         }
     }
 }

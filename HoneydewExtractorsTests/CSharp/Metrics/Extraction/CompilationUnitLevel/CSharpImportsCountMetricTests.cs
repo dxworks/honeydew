@@ -1,6 +1,7 @@
 ﻿using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.CSharp.Metrics;
+using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
@@ -11,11 +12,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
 
         public CSharpImportsCountMetricTests()
         {
-            var visitorList = new VisitorList();
-            visitorList.Add(new ImportCountCompilationUnitVisitor());
+            var compositeVisitor = new CompositeVisitor<ICompilationUnitType>();
+            
+            compositeVisitor.Add(new ImportCountCompilationUnitVisitor());
 
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }
 
         [Fact]

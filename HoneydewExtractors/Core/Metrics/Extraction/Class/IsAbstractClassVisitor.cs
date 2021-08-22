@@ -10,8 +10,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class
     public class IsAbstractClassVisitor : ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>,
         ICSharpClassVisitor
     {
-        public IPropertyMembersClassType Visit(BaseTypeDeclarationSyntax syntaxNode,
-            IPropertyMembersClassType modelType)
+        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
         {
             var isAbstract = false;
 

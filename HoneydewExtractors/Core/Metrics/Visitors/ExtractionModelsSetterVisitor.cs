@@ -15,13 +15,13 @@ namespace HoneydewExtractors.Core.Metrics.Visitors
 
         public void Visit(ITypeVisitor visitor)
         {
-            if (visitor is IExtractionDependencyVisitor<CSharpSyntacticModel, CSharpSemanticModel>
+            if (visitor is ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>
                 extractionVisitor)
             {
-                extractionVisitor.SetSyntacticModel(_syntacticModel);
-                extractionVisitor.SetSemanticModel(_semanticModel);
+                extractionVisitor.InheritedSyntacticModel = _syntacticModel;
+                extractionVisitor.InheritedSemanticModel = _semanticModel;
             }
-            
+
             visitor.Accept(this);
         }
     }

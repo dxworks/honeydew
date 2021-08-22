@@ -6,12 +6,12 @@ namespace HoneydewExtractors.Core
 {
     public class FactExtractorCreator : IFactExtractorCreator
     {
-        private readonly IVisitorList _visitorList;
+        private readonly ICompositeVisitor _compositeVisitor;
         private CSharpFactExtractor _cSharpFactExtractor;
 
-        public FactExtractorCreator(IVisitorList visitorList)
+        public FactExtractorCreator(ICompositeVisitor compositeVisitor)
         {
-            _visitorList = visitorList;
+            _compositeVisitor = compositeVisitor;
         }
 
         public IFactExtractor Create(string language)
@@ -21,7 +21,7 @@ namespace HoneydewExtractors.Core
                 case "C#":
 
                     return _cSharpFactExtractor ??= new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                        new CSharpSemanticModelCreator(new CSharpCompilationMaker()), _visitorList);
+                        new CSharpSemanticModelCreator(new CSharpCompilationMaker()), _compositeVisitor);
 
                 case "Visual Basic":
                     break;

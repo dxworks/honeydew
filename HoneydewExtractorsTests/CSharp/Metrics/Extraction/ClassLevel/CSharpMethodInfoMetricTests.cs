@@ -4,13 +4,13 @@ using HoneydewExtractors.Core.Metrics.Extraction.Common;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Extraction.Method;
 using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
@@ -21,23 +21,23 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
         public CSharpMethodInfoMetricTests()
         {
-            var visitorList = new VisitorList();
-            visitorList.Add(new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(
-                new List<ICSharpClassVisitor>
+            var compositeVisitor = new CompositeVisitor<ICompilationUnitType>();
+
+            compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
+            {
+                new BaseInfoClassVisitor(),
+                new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
                 {
-                    new BaseInfoClassVisitor(),
-                    new MethodSetterClassVisitor(new CSharpMethodModelCreator(new List<ICSharpMethodVisitor>
+                    new MethodInfoVisitor(),
+                    new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
                     {
-                        new MethodInfoVisitor(),
-                        new CalledMethodSetterVisitor(new CSharpMethodCallModelCreator(
-                            new List<ICSharpMethodSignatureVisitor>
-                            {
-                                new MethodCallInfoVisitor()
-                            }))
-                    }))
-                })));
+                        new MethodCallInfoVisitor()
+                    })
+                })
+            }));
+            
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }
 
         [Fact]

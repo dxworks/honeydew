@@ -1,4 +1,5 @@
-﻿using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+﻿using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
@@ -15,6 +16,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
         ICSharpClassVisitor, ICSharpCompilationUnitVisitor, ICSharpLocalFunctionVisitor
     {
         private readonly CSharpLinesOfCodeCounter _linesOfCodeCounter = new();
+        private bool _visited;
 
         public IPropertyType Visit(BasePropertyDeclarationSyntax syntaxNode, IPropertyType modelType)
         {
@@ -34,14 +36,19 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
             return modelType;
         }
 
-        public IPropertyMembersClassType Visit(BaseTypeDeclarationSyntax syntaxNode,
-            IPropertyMembersClassType modelType)
+        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
         {
-            modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
-            return modelType;
+            if (modelType is not IMembersClassType membersClassType)
+            {
+                return modelType;
+            }
+
+            membersClassType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
+            return membersClassType;
         }
 
-        public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode, IMethodTypeWithLocalFunctions modelType)
+        public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode,
+            IMethodTypeWithLocalFunctions modelType)
         {
             modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
             return modelType;
@@ -61,6 +68,17 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 
             modelType.Loc = linesOfCode;
             return modelType;
+        }
+
+        public void Accept(IVisitor visitor)
+        {
+            if (_visited)
+            {
+                return;
+            }
+
+            _visited = true;
+            visitor.Visit(this);
         }
     }
 }

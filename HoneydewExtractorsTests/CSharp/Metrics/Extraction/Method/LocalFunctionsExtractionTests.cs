@@ -5,7 +5,6 @@ using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Extraction.Constructor;
 using HoneydewExtractors.Core.Metrics.Extraction.Method;
 using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
 using HoneydewExtractors.Core.Metrics.Extraction.Property;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -17,6 +16,7 @@ using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
@@ -27,49 +27,47 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
 
         public LocalFunctionsExtractionTests()
         {
-            var visitorList = new VisitorList();
-
-            var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new CSharpMethodCallModelCreator(
-                new List<ICSharpMethodSignatureVisitor>
-                {
-                    new MethodCallInfoVisitor(),
-                }));
+            var compositeVisitor = new CompositeVisitor<ICompilationUnitType>();
+            
+            var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
+            {
+                new MethodCallInfoVisitor(),
+            });
             var localFunctionsSetterClassVisitor = new LocalFunctionsSetterClassVisitor(
-                new CSharpLocalFunctionsModelCreator(
-                    new List<ICSharpLocalFunctionVisitor>
+                new List<ICSharpLocalFunctionVisitor>
+                {
+                    new LocalFunctionInfoVisitor(),
+                    calledMethodSetterVisitor,
+                    new LocalFunctionNestedFunctionsVisitor(new List<ICSharpLocalFunctionVisitor>
                     {
                         new LocalFunctionInfoVisitor(),
-                        calledMethodSetterVisitor,
-                        new LocalFunctionNestedFunctionsVisitor(new List<ICSharpLocalFunctionVisitor>
-                        {
-                            new LocalFunctionInfoVisitor(),
-                            calledMethodSetterVisitor
-                        }),
-                    }));
-            visitorList.Add(new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(
-                new List<ICSharpClassVisitor>
+                        calledMethodSetterVisitor
+                    }),
+                });
+            
+            compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
+            {
+                new BaseInfoClassVisitor(),
+                new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
                 {
-                    new BaseInfoClassVisitor(),
-                    new MethodSetterClassVisitor(new CSharpMethodModelCreator(new List<ICSharpMethodVisitor>
-                    {
-                        new MethodInfoVisitor(),
-                        calledMethodSetterVisitor,
-                        localFunctionsSetterClassVisitor,
-                    })),
-                    new ConstructorSetterClassVisitor(new CSharpConstructorMethodModelCreator(
-                        new List<ICSharpConstructorVisitor>
-                        {
-                            new ConstructorInfoVisitor(),
-                            localFunctionsSetterClassVisitor
-                        })),
-                    new PropertySetterClassVisitor(new CSharpPropertyModelCreator(new List<ICSharpPropertyVisitor>
-                    {
-                        new PropertyInfoVisitor(),
-                        localFunctionsSetterClassVisitor
-                    }))
-                })));
+                    new MethodInfoVisitor(),
+                    calledMethodSetterVisitor,
+                    localFunctionsSetterClassVisitor,
+                }),
+                new ConstructorSetterClassVisitor(new List<ICSharpConstructorVisitor>
+                {
+                    new ConstructorInfoVisitor(),
+                    localFunctionsSetterClassVisitor
+                }),
+                new PropertySetterClassVisitor(new List<ICSharpPropertyVisitor>
+                {
+                    new PropertyInfoVisitor(),
+                    localFunctionsSetterClassVisitor
+                })
+            }));
+            
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }
 
         [Theory]

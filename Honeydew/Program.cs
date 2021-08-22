@@ -19,7 +19,6 @@ using HoneydewExtractors.Core.Metrics.Extraction.Delegate;
 using HoneydewExtractors.Core.Metrics.Extraction.Field;
 using HoneydewExtractors.Core.Metrics.Extraction.Method;
 using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
 using HoneydewExtractors.Core.Metrics.Extraction.Property;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -38,6 +37,7 @@ using HoneydewModels;
 using HoneydewModels.CSharp;
 using HoneydewModels.Exporters;
 using HoneydewModels.Importers;
+using HoneydewModels.Types;
 
 namespace Honeydew
 {
@@ -131,7 +131,7 @@ namespace Honeydew
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
-        private static IVisitorList LoadVisitors(IRelationMetricHolder relationMetricHolder)
+        private static ICompositeVisitor LoadVisitors(IRelationMetricHolder relationMetricHolder)
         {
             var linesOfCodeVisitor = new LinesOfCodeVisitor();
             var calledMethodSignatureVisitors = new List<ICSharpMethodSignatureVisitor>
@@ -140,7 +140,7 @@ namespace Honeydew
             };
 
             var calledMethodSetterVisitor =
-                new CalledMethodSetterVisitor(new CSharpMethodCallModelCreator(calledMethodSignatureVisitors));
+                new CalledMethodSetterVisitor(calledMethodSignatureVisitors);
 
             var methodVisitors = new List<ICSharpMethodVisitor>
             {
@@ -173,10 +173,10 @@ namespace Honeydew
             {
                 new BaseInfoClassVisitor(),
                 new BaseTypesClassVisitor(),
-                new MethodSetterClassVisitor(new CSharpMethodModelCreator(methodVisitors)),
-                new ConstructorSetterClassVisitor(new CSharpConstructorMethodModelCreator(constructorVisitors)),
-                new FieldSetterClassVisitor(new CSharpFieldModelCreator(fieldVisitors)),
-                new PropertySetterClassVisitor(new CSharpPropertyModelCreator(propertyVisitors)),
+                new MethodSetterClassVisitor(methodVisitors),
+                new ConstructorSetterClassVisitor(constructorVisitors),
+                new FieldSetterClassVisitor(fieldVisitors),
+                new PropertySetterClassVisitor(propertyVisitors),
                 new ImportsVisitor(),
                 linesOfCodeVisitor,
 
@@ -196,18 +196,22 @@ namespace Honeydew
                 new BaseInfoDelegateVisitor(),
                 new ImportsVisitor(),
             };
-            var compilationUnitVisitors = new List<ICompilationUnitVisitor>
+            var compilationUnitVisitors = new List<ICSharpCompilationUnitVisitor>
             {
-                new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(classVisitors)),
-                new DelegateSetterCompilationUnitVisitor(new CSharpDelegateModelCreator(delegateVisitors)),
+                new ClassSetterCompilationUnitVisitor(classVisitors),
+                new DelegateSetterCompilationUnitVisitor(delegateVisitors),
                 new ImportsVisitor(),
                 linesOfCodeVisitor,
             };
 
-            var visitorList = new VisitorList();
-            visitorList.AddRange(compilationUnitVisitors);
+            var compositeVisitor = new CompositeVisitor<ICompilationUnitType>();
 
-            return visitorList;
+            foreach (var compilationUnitVisitor in compilationUnitVisitors)
+            {
+                compositeVisitor.Add(compilationUnitVisitor);
+            }
+
+            return compositeVisitor;
         }
 
         private static async Task<RepositoryModel> LoadModel(ILogger logger, string inputPath)

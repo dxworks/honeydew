@@ -10,14 +10,13 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class
     public class BaseInfoClassVisitor : ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>,
         ICSharpClassVisitor
     {
-        public IPropertyMembersClassType Visit(BaseTypeDeclarationSyntax syntaxNode,
-            IPropertyMembersClassType modelType)
+        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
         {
             var accessModifier = CSharpConstants.DefaultClassAccessModifier;
             var modifier = "";
             CSharpConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier,
                 ref modifier);
-            
+
             modelType.Name = InheritedSemanticModel.GetFullName(syntaxNode);
             modelType.AccessModifier = accessModifier;
             modelType.Modifier = modifier;

@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Extraction.Delegate;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics
@@ -16,14 +16,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
         public CSharpClassFactExtractorDelegateTests()
         {
-            var visitorList = new VisitorList();
-            visitorList.Add(new DelegateSetterCompilationUnitVisitor(new CSharpDelegateModelCreator(
-                new List<ICSharpDelegateVisitor>
-                {
-                    new BaseInfoDelegateVisitor()
-                })));
+            var compositeVisitor = new CompositeVisitor<ICompilationUnitType>();
+            
+            compositeVisitor.Add(new DelegateSetterCompilationUnitVisitor(new List<ICSharpDelegateVisitor>
+            {
+                new BaseInfoDelegateVisitor()
+            }));
+            
             _sut = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }
 
         [Fact]

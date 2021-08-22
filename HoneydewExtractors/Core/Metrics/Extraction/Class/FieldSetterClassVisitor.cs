@@ -1,40 +1,46 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Fields;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Class
 {
-    public class FieldSetterClassVisitor : CompositeTypeVisitor, ICSharpClassVisitor
+    public class FieldSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
     {
-        private readonly CSharpFieldModelCreator _cSharpFieldModelCreator;
-
-        public FieldSetterClassVisitor(CSharpFieldModelCreator cSharpFieldModelCreator)
+        public FieldSetterClassVisitor(IEnumerable<IFieldVisitor> visitors) : base(visitors)
         {
-            _cSharpFieldModelCreator = cSharpFieldModelCreator;
-
-            foreach (var visitor in _cSharpFieldModelCreator.GetVisitors())
-            {
-                Add(visitor);
-            }
         }
 
-        public IPropertyMembersClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IPropertyMembersClassType modelType)
+        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
         {
+            if (modelType is not IMembersClassType membersClassType)
+            {
+                return modelType;
+            }
+
             foreach (var baseFieldDeclarationSyntax in
                 syntaxNode.DescendantNodes().OfType<BaseFieldDeclarationSyntax>())
             {
-                foreach (var fieldType in _cSharpFieldModelCreator.Create(baseFieldDeclarationSyntax,
-                    new List<IFieldType>()))
+                IList<IFieldType> fieldTypes = new List<IFieldType>();
+
+                foreach (var visitor in GetContainedVisitors())
                 {
-                    modelType.Fields.Add(fieldType);
+                    if (visitor is ICSharpFieldVisitor extractionVisitor)
+                    {
+                        fieldTypes = extractionVisitor.Visit(baseFieldDeclarationSyntax, fieldTypes);
+                    }
+                }
+
+                foreach (var fieldType in fieldTypes)
+                {
+                    membersClassType.Fields.Add(fieldType);
                 }
             }
 
-            return modelType;
+            return membersClassType;
         }
     }
 }

@@ -4,7 +4,6 @@ using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Extraction.Constructor;
 using HoneydewExtractors.Core.Metrics.Extraction.Delegate;
 using HoneydewExtractors.Core.Metrics.Extraction.Method;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
 using HoneydewExtractors.Core.Metrics.Extraction.Property;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -13,6 +12,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
@@ -23,32 +23,31 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
         public CSharpCyclomaticComplexityTests()
         {
-            var visitorList = new VisitorList();
-            visitorList.Add(new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(
-                new List<ICSharpClassVisitor>
+            var compositeVisitor = new CompositeVisitor<ICompilationUnitType>();
+            
+            compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
+            {
+                new BaseInfoClassVisitor(),
+                new PropertySetterClassVisitor(new List<ICSharpPropertyVisitor>
                 {
-                    new BaseInfoClassVisitor(),
-                    new PropertySetterClassVisitor(new CSharpPropertyModelCreator(new List<ICSharpPropertyVisitor>
-                    {
-                        new PropertyInfoVisitor()
-                    })),
-                    new MethodSetterClassVisitor(new CSharpMethodModelCreator(new List<ICSharpMethodVisitor>
-                    {
-                        new MethodInfoVisitor()
-                    })),
-                    new ConstructorSetterClassVisitor(new CSharpConstructorMethodModelCreator(
-                        new List<ICSharpConstructorVisitor>
-                        {
-                            new ConstructorInfoVisitor()
-                        }))
-                })));
-            visitorList.Add(new DelegateSetterCompilationUnitVisitor(new CSharpDelegateModelCreator(
-                new List<ICSharpDelegateVisitor>
+                    new PropertyInfoVisitor()
+                }),
+                new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
                 {
-                    new BaseInfoDelegateVisitor()
-                })));
+                    new MethodInfoVisitor()
+                }),
+                new ConstructorSetterClassVisitor(new List<ICSharpConstructorVisitor>
+                {
+                    new ConstructorInfoVisitor()
+                })
+            }));
+            compositeVisitor.Add(new DelegateSetterCompilationUnitVisitor(new List<ICSharpDelegateVisitor>
+            {
+                new BaseInfoDelegateVisitor()
+            }));
+            
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }
 
         [Theory]

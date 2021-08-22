@@ -1,38 +1,44 @@
-﻿using System.Linq;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+﻿using System.Collections.Generic;
+using System.Linq;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Class
 {
-    public class ConstructorSetterClassVisitor : CompositeTypeVisitor, ICSharpClassVisitor
+    public class ConstructorSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
     {
-        private readonly CSharpConstructorMethodModelCreator _cSharpConstructorMethodModelCreator;
-
-        public ConstructorSetterClassVisitor(CSharpConstructorMethodModelCreator cSharpConstructorMethodModelCreator)
+        public ConstructorSetterClassVisitor(IEnumerable<IConstructorVisitor> visitors) : base(visitors)
         {
-            _cSharpConstructorMethodModelCreator = cSharpConstructorMethodModelCreator;
-
-            foreach (var visitor in _cSharpConstructorMethodModelCreator.GetVisitors())
-            {
-                Add(visitor);
-            }
         }
 
-        public IPropertyMembersClassType Visit(BaseTypeDeclarationSyntax syntaxNode,
-            IPropertyMembersClassType modelType)
+        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
         {
+            if (modelType is not IMembersClassType membersClassType)
+            {
+                return modelType;
+            }
+
             foreach (var constructorDeclarationSyntax in syntaxNode.DescendantNodes()
                 .OfType<ConstructorDeclarationSyntax>())
             {
-                modelType.Constructors.Add(
-                    _cSharpConstructorMethodModelCreator.Create(constructorDeclarationSyntax, new ConstructorModel()));
+                IConstructorType constructorModel = new ConstructorModel();
+
+                foreach (var visitor in GetContainedVisitors())
+                {
+                    if (visitor is ICSharpConstructorVisitor extractionVisitor)
+                    {
+                        constructorModel = extractionVisitor.Visit(constructorDeclarationSyntax, constructorModel);
+                    }
+                }
+
+                membersClassType.Constructors.Add(constructorModel);
             }
 
-            return modelType;
+            return membersClassType;
         }
     }
 }

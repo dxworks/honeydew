@@ -29,8 +29,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
             return MetricHolder.GetRelations();
         }
 
-        public IPropertyMembersClassType Visit(BaseTypeDeclarationSyntax syntaxNode,
-            IPropertyMembersClassType modelType)
+        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
         {
             var className = InheritedSemanticModel.GetFullName(syntaxNode);
 

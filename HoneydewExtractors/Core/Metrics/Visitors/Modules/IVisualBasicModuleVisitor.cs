@@ -2,7 +2,7 @@
 
 namespace HoneydewExtractors.Core.Metrics.Visitors.Modules
 {
-    public interface IVisualBasicModuleVisitor : IModuleVisitor, IVisualBasicTypeVisitor
+    public interface IVisualBasicModuleVisitor : IModuleVisitor
     {
         void Visit(ModuleStatementSyntax syntax);
     }

@@ -1,21 +1,15 @@
 ﻿namespace HoneydewExtractors.Core.Metrics.Visitors
 {
     public abstract class
-        ExtractionVisitor<TSyntacticModel, TSemanticModel> : IExtractionVisitor<TSyntacticModel, TSemanticModel>
+        ExtractionVisitor<TSyntacticModel, TSemanticModel> : ITypeVisitor
         where TSyntacticModel : ISyntacticModel
         where TSemanticModel : ISemanticModel
     {
-        protected TSyntacticModel InheritedSyntacticModel;
-        protected TSemanticModel InheritedSemanticModel;
+        public TSyntacticModel InheritedSyntacticModel { get; set; }
+        public TSemanticModel InheritedSemanticModel { get; set; }
 
-        public void SetSyntacticModel(TSyntacticModel syntacticModel)
+        public virtual void Accept(IVisitor visitor)
         {
-            InheritedSyntacticModel = syntacticModel;
-        }
-
-        public void SetSemanticModel(TSemanticModel semanticModel)
-        {
-            InheritedSemanticModel = semanticModel;
         }
     }
 }

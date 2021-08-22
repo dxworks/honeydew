@@ -38,8 +38,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions
                         continue;
                     }
 
-                    extractionVisitor.SetSyntacticModel(InheritedSyntacticModel);
-                    extractionVisitor.SetSemanticModel(InheritedSemanticModel);
+                    extractionVisitor.InheritedSyntacticModel = InheritedSyntacticModel;
+                    extractionVisitor.InheritedSemanticModel = InheritedSemanticModel;
                 }
             }
 

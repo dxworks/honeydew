@@ -1,6 +1,7 @@
-﻿using System.Linq;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+﻿using System.Collections.Generic;
+using System.Linq;
 using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -9,29 +10,30 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit
 {
-    public class ClassSetterCompilationUnitVisitor : CompositeTypeVisitor, ICSharpCompilationUnitVisitor
+    public class ClassSetterCompilationUnitVisitor : CompositeVisitor, ICSharpCompilationUnitVisitor
     {
-        private readonly CSharpClassModelCreator _cSharpClassTypeModelCreator;
-
-        public ClassSetterCompilationUnitVisitor(CSharpClassModelCreator cSharpClassTypeModelCreator)
+        public ClassSetterCompilationUnitVisitor(IEnumerable<IClassVisitor> visitors) : base(visitors)
         {
-            _cSharpClassTypeModelCreator = cSharpClassTypeModelCreator;
-
-            foreach (var visitor in _cSharpClassTypeModelCreator.GetVisitors())
-            {
-                Add(visitor);
-            }
         }
 
-        public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, ICompilationUnitType compilationUnitType)
+        public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, ICompilationUnitType modelType)
         {
             foreach (var baseTypeDeclarationSyntax in syntaxNode.DescendantNodes().OfType<BaseTypeDeclarationSyntax>())
             {
-                compilationUnitType.ClassTypes.Add(
-                    _cSharpClassTypeModelCreator.Create(baseTypeDeclarationSyntax, new ClassModel()));
+                IClassType classModel = new ClassModel();
+
+                foreach (var visitor in GetContainedVisitors())
+                {
+                    if (visitor is ICSharpClassVisitor extractionVisitor)
+                    {
+                        classModel = extractionVisitor.Visit(baseTypeDeclarationSyntax, classModel);
+                    }
+                }
+
+                modelType.ClassTypes.Add(classModel);
             }
 
-            return compilationUnitType;
+            return modelType;
         }
     }
 }

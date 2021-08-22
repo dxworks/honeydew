@@ -1,36 +1,43 @@
-﻿using System.Linq;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+﻿using System.Collections.Generic;
+using System.Linq;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Class
 {
-    public class MethodSetterClassVisitor : CompositeTypeVisitor, ICSharpClassVisitor
+    public class MethodSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
     {
-        private readonly CSharpMethodModelCreator _cSharpMethodModelCreator;
-
-        public MethodSetterClassVisitor(CSharpMethodModelCreator cSharpMethodModelCreator)
+        public MethodSetterClassVisitor(IEnumerable<IMethodVisitor> visitors): base(visitors)
         {
-            _cSharpMethodModelCreator = cSharpMethodModelCreator;
-            
-            foreach (var visitor in _cSharpMethodModelCreator.GetVisitors())
-            {
-                Add(visitor);
-            }
         }
 
-        public IPropertyMembersClassType Visit(BaseTypeDeclarationSyntax syntaxNode,
-            IPropertyMembersClassType classType)
+        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
         {
-            foreach (var baseTypeDeclarationSyntax in syntaxNode.DescendantNodes().OfType<MethodDeclarationSyntax>())
+            if (modelType is not IMembersClassType membersClassType)
             {
-                classType.Methods.Add(_cSharpMethodModelCreator.Create(baseTypeDeclarationSyntax, new MethodModel()));
+                return modelType;
             }
 
-            return classType;
+            foreach (var methodDeclarationSyntax in syntaxNode.DescendantNodes().OfType<MethodDeclarationSyntax>())
+            {
+                IMethodType methodModel = new MethodModel();
+
+                foreach (var visitor in GetContainedVisitors())
+                {
+                    if (visitor is ICSharpMethodVisitor extractionVisitor)
+                    {
+                        methodModel = extractionVisitor.Visit(methodDeclarationSyntax, methodModel);
+                    }
+                }
+
+                membersClassType.Methods.Add(methodModel);
+            }
+
+            return membersClassType;
         }
     }
 }

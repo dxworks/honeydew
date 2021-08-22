@@ -1,37 +1,44 @@
-﻿using System.Linq;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+﻿using System.Collections.Generic;
+using System.Linq;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Class
 {
-    public class PropertySetterClassVisitor : CompositeTypeVisitor, ICSharpClassVisitor
+    public class PropertySetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
     {
-        private readonly CSharpPropertyModelCreator _cSharpPropertyModelCreator;
-
-        public PropertySetterClassVisitor(CSharpPropertyModelCreator cSharpPropertyModelCreator)
+        public PropertySetterClassVisitor(IEnumerable<IPropertyVisitor> visitors): base(visitors)
         {
-            _cSharpPropertyModelCreator = cSharpPropertyModelCreator;
-
-            foreach (var visitor in _cSharpPropertyModelCreator.GetVisitors())
-            {
-                Add(visitor);
-            }
         }
 
-        public IPropertyMembersClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IPropertyMembersClassType modelType)
+        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
         {
+            if (modelType is not IPropertyMembersClassType propertyMembersClassType)
+            {
+                return modelType;
+            }
+
             foreach (var basePropertyDeclarationSyntax in syntaxNode.DescendantNodes()
                 .OfType<BasePropertyDeclarationSyntax>())
             {
-                modelType.Properties.Add(
-                    _cSharpPropertyModelCreator.Create(basePropertyDeclarationSyntax, new PropertyModel()));
+                IPropertyType propertyModel = new PropertyModel();
+
+                foreach (var visitor in GetContainedVisitors())
+                {
+                    if (visitor is ICSharpPropertyVisitor extractionVisitor)
+                    {
+                        propertyModel = extractionVisitor.Visit(basePropertyDeclarationSyntax, propertyModel);
+                    }
+                }
+
+                propertyMembersClassType.Properties.Add(propertyModel);
             }
 
-            return modelType;
+            return propertyMembersClassType;
         }
     }
 }

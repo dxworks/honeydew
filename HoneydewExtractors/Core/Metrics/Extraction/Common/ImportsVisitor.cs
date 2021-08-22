@@ -37,8 +37,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
             return modelType;
         }
 
-        public IPropertyMembersClassType Visit(BaseTypeDeclarationSyntax syntaxNode,
-            IPropertyMembersClassType modelType)
+        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
         {
             foreach (var importType in ExtractParentImports(syntaxNode))
             {

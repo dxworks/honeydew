@@ -5,8 +5,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method
 {
-    public interface ICSharpLocalFunctionVisitor : IMethodVisitor, ICSharpTypeVisitor,
-        IVisitorType<LocalFunctionStatementSyntax, IMethodTypeWithLocalFunctions>
+    public interface ICSharpLocalFunctionVisitor : ILocalFunctionVisitor,
+        IExtractionVisitor<LocalFunctionStatementSyntax, IMethodTypeWithLocalFunctions>
     {
     }
 }

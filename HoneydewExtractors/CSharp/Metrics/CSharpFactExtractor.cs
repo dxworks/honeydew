@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using HoneydewExtractors.Core.Metrics.Extraction;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+﻿using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
 using HoneydewModels.CSharp;
@@ -12,14 +10,14 @@ namespace HoneydewExtractors.CSharp.Metrics
     {
         private readonly CSharpSyntacticModelCreator _syntacticModelCreator;
         private readonly CSharpSemanticModelCreator _semanticModelCreator;
-        private readonly IVisitorList _visitorList;
+        private readonly ICompositeVisitor _compositeVisitor;
 
         public CSharpFactExtractor(CSharpSyntacticModelCreator syntacticModelCreator,
-            CSharpSemanticModelCreator semanticModelCreator, IVisitorList visitorList)
+            CSharpSemanticModelCreator semanticModelCreator, ICompositeVisitor compositeVisitor)
         {
             _syntacticModelCreator = syntacticModelCreator;
             _semanticModelCreator = semanticModelCreator;
-            _visitorList = visitorList;
+            _compositeVisitor = compositeVisitor;
         }
 
         public ICompilationUnitType Extract(string text)
@@ -27,19 +25,20 @@ namespace HoneydewExtractors.CSharp.Metrics
             var syntacticModel = _syntacticModelCreator.Create(text);
             var semanticModel = _semanticModelCreator.Create(syntacticModel);
 
-            foreach (var extractionVisitor in
-                _visitorList.OfType<IExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>>())
+            _compositeVisitor.Accept(new ExtractionModelsSetterVisitor(syntacticModel, semanticModel));
+
+            ICompilationUnitType compilationUnitModel = new CompilationUnitModel();
+
+            foreach (var visitor in _compositeVisitor.GetContainedVisitors())
             {
-                extractionVisitor.SetSyntacticModel(syntacticModel);
-                extractionVisitor.SetSemanticModel(semanticModel);
+                if (visitor is ICSharpCompilationUnitVisitor compilationUnitVisitor)
+                {
+                    compilationUnitModel =
+                        compilationUnitVisitor.Visit(syntacticModel.CompilationUnitSyntax, compilationUnitModel);
+                }
             }
 
-            var compilationUnitType = new CompilationUnitModel();
-
-            var compilationUnitModelCreator =
-                new CSharpCompilationUnitModelCreator(_visitorList.OfType<ICSharpCompilationUnitVisitor>().ToList());
-
-            return compilationUnitModelCreator.Create(syntacticModel.CompilationUnitSyntax, compilationUnitType);
+            return compilationUnitModel;
         }
     }
 }

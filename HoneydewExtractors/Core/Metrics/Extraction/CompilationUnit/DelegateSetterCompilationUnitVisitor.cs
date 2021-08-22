@@ -1,6 +1,7 @@
-﻿using System.Linq;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+﻿using System.Collections.Generic;
+using System.Linq;
 using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -9,26 +10,27 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit
 {
-    public class DelegateSetterCompilationUnitVisitor : CompositeTypeVisitor, ICSharpCompilationUnitVisitor
+    public class DelegateSetterCompilationUnitVisitor : CompositeVisitor, ICSharpCompilationUnitVisitor
     {
-        private readonly CSharpDelegateModelCreator _cSharpDelegateModelCreator;
-
-        public DelegateSetterCompilationUnitVisitor(CSharpDelegateModelCreator cSharpDelegateModelCreator)
+        public DelegateSetterCompilationUnitVisitor(IEnumerable<IDelegateVisitor> visitors) : base(visitors)
         {
-            _cSharpDelegateModelCreator = cSharpDelegateModelCreator;
-
-            foreach (var visitor in _cSharpDelegateModelCreator.GetVisitors())
-            {
-                Add(visitor);
-            }
         }
 
         public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, ICompilationUnitType modelType)
         {
-            foreach (var baseTypeDeclarationSyntax in syntaxNode.DescendantNodes().OfType<DelegateDeclarationSyntax>())
+            foreach (var delegateDeclarationSyntax in syntaxNode.DescendantNodes().OfType<DelegateDeclarationSyntax>())
             {
-                modelType.ClassTypes.Add(
-                    _cSharpDelegateModelCreator.Create(baseTypeDeclarationSyntax, new DelegateModel()));
+                IDelegateType delegateModel = new DelegateModel();
+
+                foreach (var visitor in GetContainedVisitors())
+                {
+                    if (visitor is ICSharpDelegateVisitor extractionVisitor)
+                    {
+                        delegateModel = extractionVisitor.Visit(delegateDeclarationSyntax, delegateModel);
+                    }
+                }
+
+                modelType.ClassTypes.Add(delegateModel);
             }
 
             return modelType;

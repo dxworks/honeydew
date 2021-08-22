@@ -2,5 +2,6 @@
 {
     public interface ITypeVisitor
     {
+        void Accept(IVisitor visitor);
     }
 }

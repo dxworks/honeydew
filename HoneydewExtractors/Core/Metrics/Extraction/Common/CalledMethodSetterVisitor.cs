@@ -1,8 +1,9 @@
-﻿using System.Linq;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
+﻿using System.Collections.Generic;
+using System.Linq;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
+using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewModels.CSharp;
@@ -12,19 +13,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 {
-    public class CalledMethodSetterVisitor : CompositeTypeVisitor, ICSharpPropertyVisitor, ICSharpMethodVisitor,
+    public class CalledMethodSetterVisitor : CompositeVisitor, ICSharpPropertyVisitor, ICSharpMethodVisitor,
         ICSharpConstructorVisitor, ICSharpLocalFunctionVisitor
     {
-        private readonly CSharpMethodCallModelCreator _cSharpMethodCallModelCreator;
-
-        public CalledMethodSetterVisitor(CSharpMethodCallModelCreator cSharpMethodCallModelCreator)
+        public CalledMethodSetterVisitor(IEnumerable<IMethodSignatureVisitor> visitors) : base(visitors)
         {
-            _cSharpMethodCallModelCreator = cSharpMethodCallModelCreator;
-
-            foreach (var visitor in _cSharpMethodCallModelCreator.GetVisitors())
-            {
-                Add(visitor);
-            }
         }
 
         public IPropertyType Visit(BasePropertyDeclarationSyntax syntaxNode, IPropertyType modelType)
@@ -60,18 +53,28 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
             foreach (var invocationExpressionSyntax in
                 syntaxNode.Body.ChildNodes().OfType<InvocationExpressionSyntax>())
             {
-                modelType.CalledMethods.Add(_cSharpMethodCallModelCreator.Create(invocationExpressionSyntax,
-                    new MethodModel()));
+                IMethodSignatureType methodModel = new MethodModel();
+
+                foreach (var visitor in GetContainedVisitors())
+                {
+                    if (visitor is ICSharpMethodSignatureVisitor extractionVisitor)
+                    {
+                        methodModel = extractionVisitor.Visit(invocationExpressionSyntax, methodModel);
+                    }
+                }
+
+                modelType.CalledMethods.Add(methodModel);
             }
 
             foreach (var returnStatementSyntax in syntaxNode.Body.ChildNodes().OfType<ReturnStatementSyntax>())
             {
-                foreach (var invocationExpressionSyntax in
-                    returnStatementSyntax.DescendantNodes().OfType<InvocationExpressionSyntax>())
-                {
-                    modelType.CalledMethods.Add(_cSharpMethodCallModelCreator.Create(invocationExpressionSyntax,
-                        new MethodModel()));
-                }
+                SetMethodCalls(returnStatementSyntax, modelType);
+                // foreach (var invocationExpressionSyntax in
+                //     returnStatementSyntax.DescendantNodes().OfType<InvocationExpressionSyntax>())
+                // {
+                //     modelType.CalledMethods.Add(_cSharpMethodCallModelCreator.Create(invocationExpressionSyntax,
+                //         new MethodModel()));
+                // }
             }
 
             return modelType;
@@ -82,8 +85,17 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
             foreach (var invocationExpressionSyntax in
                 syntaxNode.DescendantNodes().OfType<InvocationExpressionSyntax>())
             {
-                callingMethodsType.CalledMethods.Add(_cSharpMethodCallModelCreator.Create(invocationExpressionSyntax,
-                    new MethodModel()));
+                IMethodSignatureType methodModel = new MethodModel();
+
+                foreach (var visitor in GetContainedVisitors())
+                {
+                    if (visitor is ICSharpMethodSignatureVisitor extractionVisitor)
+                    {
+                        methodModel = extractionVisitor.Visit(invocationExpressionSyntax, methodModel);
+                    }
+                }
+
+                callingMethodsType.CalledMethods.Add(methodModel);
             }
         }
     }

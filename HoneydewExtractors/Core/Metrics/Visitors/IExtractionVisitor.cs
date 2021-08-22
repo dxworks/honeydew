@@ -1,11 +1,7 @@
 ﻿namespace HoneydewExtractors.Core.Metrics.Visitors
 {
-    public interface IExtractionVisitor<in TSyntacticModel, in TSemanticModel> : ITypeVisitor
-        where TSyntacticModel : ISyntacticModel
-        where TSemanticModel : ISemanticModel
+    public interface IExtractionVisitor<in TSyntaxNode, TModelType> : ITypeVisitor
     {
-        void SetSyntacticModel(TSyntacticModel syntacticModel);
-
-        void SetSemanticModel(TSemanticModel semanticModel);
+        TModelType Visit(TSyntaxNode syntaxNode, TModelType modelType);
     }
 }

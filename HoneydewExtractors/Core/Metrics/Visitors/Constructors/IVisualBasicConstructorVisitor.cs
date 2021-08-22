@@ -4,8 +4,8 @@ using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Visitors.Constructors
 {
-    public interface IVisualBasicConstructorVisitor : IMethodVisitor, IVisualBasicTypeVisitor,
-        IVisitorType<ConstructorBlockSyntax, IConstructorType>
+    public interface IVisualBasicConstructorVisitor : IMethodVisitor,
+        IExtractionVisitor<ConstructorBlockSyntax, IConstructorType>
     {
     }
 }

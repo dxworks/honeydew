@@ -2,7 +2,6 @@
 using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.Common;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
@@ -12,6 +11,7 @@ using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics
@@ -22,34 +22,36 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
         public CSharpClassFactExtractorLinesOfCodeTests()
         {
-            var visitorList = new VisitorList();
             var linesOfCodeVisitor = new LinesOfCodeVisitor();
-            visitorList.Add(linesOfCodeVisitor);
-            visitorList.Add(new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(
-                new List<ICSharpClassVisitor>
+            var compositeVisitor = new CompositeVisitor<ICompilationUnitType>();
+
+            compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
+            {
+                linesOfCodeVisitor,
+                new ConstructorSetterClassVisitor(new List<ICSharpConstructorVisitor>
+                {
+                    linesOfCodeVisitor
+                }),
+                new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
                 {
                     linesOfCodeVisitor,
-                    new ConstructorSetterClassVisitor(new CSharpConstructorMethodModelCreator(
-                        new List<ICSharpConstructorVisitor>
+                    new LocalFunctionsSetterClassVisitor(
+                        new List<ICSharpLocalFunctionVisitor>
                         {
+                            new LocalFunctionInfoVisitor(),
                             linesOfCodeVisitor
-                        })),
-                    new MethodSetterClassVisitor(new CSharpMethodModelCreator(new List<ICSharpMethodVisitor>
-                    {
-                        linesOfCodeVisitor, new LocalFunctionsSetterClassVisitor(new CSharpLocalFunctionsModelCreator(
-                            new List<ICSharpLocalFunctionVisitor>
-                            {
-                                new LocalFunctionInfoVisitor(),
-                                linesOfCodeVisitor
-                            }))
-                    })),
-                    new PropertySetterClassVisitor(new CSharpPropertyModelCreator(new List<ICSharpPropertyVisitor>
-                    {
-                        linesOfCodeVisitor
-                    }))
-                })));
+                        })
+                }),
+                new PropertySetterClassVisitor(new List<ICSharpPropertyVisitor>
+                {
+                    linesOfCodeVisitor
+                })
+            }));
+
+            compositeVisitor.Add(linesOfCodeVisitor);
+
             _sut = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }
 
         [Theory]
@@ -57,6 +59,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
         public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithClassWithMethodsAndProperties(string fileContent)
         {
             var compilationUnit = _sut.Extract(fileContent);
+            
             var classModels = compilationUnit.ClassTypes;
 
             Assert.Equal(21, compilationUnit.Loc.SourceLines);
@@ -82,6 +85,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
         public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithClassAndDelegate(string fileContent)
         {
             var compilationUnit = _sut.Extract(fileContent);
+            
             var classModels = compilationUnit.ClassTypes;
 
             Assert.Equal(22, compilationUnit.Loc.SourceLines);
@@ -107,6 +111,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
         public void Extract_ShouldHaveLinesOfCode_WhenMethodWithLocalFunction(string fileContent)
         {
             var compilationUnit = _sut.Extract(fileContent);
+            
             var classTypes = compilationUnit.ClassTypes;
 
             var localFunction = ((MethodModel)((ClassModel)classTypes[0]).Methods[0]).LocalFunctions[0];

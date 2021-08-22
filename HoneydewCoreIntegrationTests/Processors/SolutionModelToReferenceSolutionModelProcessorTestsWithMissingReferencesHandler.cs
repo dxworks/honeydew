@@ -8,7 +8,6 @@ using HoneydewExtractors.Core.Metrics.Extraction.Constructor;
 using HoneydewExtractors.Core.Metrics.Extraction.Field;
 using HoneydewExtractors.Core.Metrics.Extraction.Method;
 using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
-using HoneydewExtractors.Core.Metrics.Extraction.ModelCreators;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
@@ -17,6 +16,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewCoreIntegrationTests.Processors
@@ -30,38 +30,36 @@ namespace HoneydewCoreIntegrationTests.Processors
         public SolutionModelToReferenceSolutionModelProcessorTestsWithMissingReferencesHandler()
         {
             _sut = new SolutionModelToReferenceSolutionModelProcessor();
-
-            var visitorList = new VisitorList();
-            var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new CSharpMethodCallModelCreator(
-                new List<ICSharpMethodSignatureVisitor>
+            
+            var compositeVisitor = new CompositeVisitor<ICompilationUnitType>();
+            
+            var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
+            {
+                new MethodCallInfoVisitor()
+            });
+            compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
+            {
+                new BaseInfoClassVisitor(),
+                new BaseTypesClassVisitor(),
+                new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
                 {
-                    new MethodCallInfoVisitor()
-                }));
-            visitorList.Add(new ClassSetterCompilationUnitVisitor(new CSharpClassModelCreator(
-                new List<ICSharpClassVisitor>
+                    new MethodInfoVisitor(),
+                    calledMethodSetterVisitor
+                }),
+                new ConstructorSetterClassVisitor(new List<ICSharpConstructorVisitor>
                 {
-                    new BaseInfoClassVisitor(),
-                    new BaseTypesClassVisitor(),
-                    new MethodSetterClassVisitor(new CSharpMethodModelCreator(new List<ICSharpMethodVisitor>
+                    new ConstructorInfoVisitor(),
+                    calledMethodSetterVisitor
+                }),
+                new FieldSetterClassVisitor(new List<ICSharpFieldVisitor>(
+                    new List<ICSharpFieldVisitor>
                     {
-                        new MethodInfoVisitor(),
-                        calledMethodSetterVisitor
-                    })),
-                    new ConstructorSetterClassVisitor(new CSharpConstructorMethodModelCreator(
-                        new List<ICSharpConstructorVisitor>
-                        {
-                            new ConstructorInfoVisitor(),
-                            calledMethodSetterVisitor
-                        })),
-                    new FieldSetterClassVisitor(new CSharpFieldModelCreator(new List<ICSharpFieldVisitor>(
-                        new List<ICSharpFieldVisitor>
-                        {
-                            new FieldInfoVisitor()
-                        })))
-                })));
+                        new FieldInfoVisitor()
+                    }))
+            }));
 
             _extractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }
 
         [Fact]

@@ -3,8 +3,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Visitors.Methods
 {
-    public interface ICSharpMethodVisitor : IMethodVisitor, ICSharpTypeVisitor,
-        IVisitorType<MethodDeclarationSyntax, IMethodType>
+    public interface ICSharpMethodVisitor : IMethodVisitor,
+        IExtractionVisitor<MethodDeclarationSyntax, IMethodType>
     {
     }
 }

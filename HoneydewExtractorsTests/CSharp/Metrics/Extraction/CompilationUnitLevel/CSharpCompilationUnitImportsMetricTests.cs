@@ -14,11 +14,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
 
         public CSharpCompilationUnitImportsMetricTests()
         {
-            var visitorList = new VisitorList();
-            visitorList.Add(new ImportsVisitor());
+            var compositeVisitor = new CompositeVisitor<ICompilationUnitType>();
+            
+            compositeVisitor.Add(new ImportsVisitor());
 
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), visitorList);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }
 
         [Theory]
