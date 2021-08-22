@@ -3,7 +3,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public class ConstructorModel : IModelEntity, IConstructorType
+    public class ConstructorModel : IModelEntity, IConstructorType, ITypeWithLocalFunctions
     {
         public string Name { get; set; }
 
@@ -17,6 +17,8 @@ namespace HoneydewModels.CSharp
         public IList<IMethodSignatureType> CalledMethods { get; set; } = new List<IMethodSignatureType>();
 
         public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
+
+        public IList<IMethodTypeWithLocalFunctions> LocalFunctions { get; set; } = new List<IMethodTypeWithLocalFunctions>();
 
         public LinesOfCode Loc { get; set; }
 

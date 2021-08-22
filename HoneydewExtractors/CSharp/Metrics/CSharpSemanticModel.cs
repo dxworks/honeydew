@@ -56,14 +56,13 @@ namespace HoneydewExtractors.CSharp.Metrics
 
         public string GetFullName(TypeSyntax typeSyntax)
         {
-            var symbolInfo = ModelExtensions.GetSymbolInfo(Model, typeSyntax);
+            var symbolInfo = Model.GetSymbolInfo(typeSyntax);
             if (symbolInfo.Symbol != null)
             {
                 return symbolInfo.Symbol.ToString();
             }
 
-            var refTypeSyntax = GetParentDeclarationSyntax<RefTypeSyntax>(typeSyntax);
-            if (refTypeSyntax != null)
+            if (typeSyntax is RefTypeSyntax refTypeSyntax)
             {
                 return GetFullName(refTypeSyntax.Type);
             }
@@ -241,9 +240,10 @@ namespace HoneydewExtractors.CSharp.Metrics
 
         private static T GetParentDeclarationSyntax<T>(SyntaxNode node) where T : SyntaxNode
         {
+            var rootNode = node;
             while (true)
             {
-                if (node is T syntax)
+                if (node is T syntax && node != rootNode)
                 {
                     return syntax;
                 }
@@ -317,12 +317,49 @@ namespace HoneydewExtractors.CSharp.Metrics
 
         public MethodCallModel GetMethodCallModel(InvocationExpressionSyntax invocationExpressionSyntax)
         {
+            var calledMethodName = invocationExpressionSyntax.Expression.ToString();
+
             string containingClassName = null;
 
-            var symbolInfo = ModelExtensions.GetSymbolInfo(Model, invocationExpressionSyntax);
-            if (symbolInfo.Symbol != null)
+            var parentLocalFunctionSyntax =
+                GetParentDeclarationSyntax<LocalFunctionStatementSyntax>(invocationExpressionSyntax);
+
+            if (parentLocalFunctionSyntax == null)
             {
-                containingClassName = symbolInfo.Symbol.ContainingType.ToString();
+                var symbolInfo = ModelExtensions.GetSymbolInfo(Model, invocationExpressionSyntax);
+                if (symbolInfo.Symbol != null)
+                {
+                    containingClassName = symbolInfo.Symbol.ContainingType.ToString();
+                }
+            }
+            else
+            {
+                while (parentLocalFunctionSyntax != null)
+                {
+                    if (parentLocalFunctionSyntax.Body != null)
+                    {
+                        var localFunctionStatementSyntax = parentLocalFunctionSyntax.Body.ChildNodes()
+                            .OfType<LocalFunctionStatementSyntax>()
+                            .SingleOrDefault(childNode => childNode.Identifier.ToString() == calledMethodName);
+                        if (localFunctionStatementSyntax != null)
+                        {
+                            parentLocalFunctionSyntax = localFunctionStatementSyntax;
+                            break;
+                        }
+                    }
+
+                    parentLocalFunctionSyntax =
+                        GetParentDeclarationSyntax<LocalFunctionStatementSyntax>(parentLocalFunctionSyntax.Parent);
+                }
+
+                if (parentLocalFunctionSyntax != null)
+                {
+                    containingClassName = GetParentDeclaredType(parentLocalFunctionSyntax);
+                }
+                else
+                {
+                    containingClassName = GetParentDeclaredType(invocationExpressionSyntax);
+                }
             }
 
             switch (invocationExpressionSyntax.Expression)
@@ -330,7 +367,7 @@ namespace HoneydewExtractors.CSharp.Metrics
                 case IdentifierNameSyntax:
                     return new MethodCallModel
                     {
-                        Name = invocationExpressionSyntax.Expression.ToString(),
+                        Name = calledMethodName,
                         ContainingTypeName = containingClassName,
                         ParameterTypes = GetParameters(invocationExpressionSyntax)
                     };
@@ -356,7 +393,7 @@ namespace HoneydewExtractors.CSharp.Metrics
 
             return new MethodCallModel
             {
-                Name = invocationExpressionSyntax.Expression.ToString(),
+                Name = calledMethodName,
                 ContainingTypeName = containingClassName,
                 ParameterTypes = GetParameters(invocationExpressionSyntax)
             };
@@ -433,9 +470,49 @@ namespace HoneydewExtractors.CSharp.Metrics
             return parameterTypes;
         }
 
-        public string GetContainingType(SyntaxNode expressionSyntax)
+
+        public string GetParentDeclaredType(SyntaxNode syntaxNode)
         {
-            var variableDeclarationSyntax = GetParentDeclarationSyntax<VariableDeclarationSyntax>(expressionSyntax);
+            CSharpSyntaxNode declarationSyntax = GetParentDeclarationSyntax<LocalFunctionStatementSyntax>(syntaxNode);
+
+            if (declarationSyntax == null)
+            {
+                declarationSyntax = GetParentDeclarationSyntax<BaseMethodDeclarationSyntax>(syntaxNode);
+            }
+
+            if (declarationSyntax == null)
+            {
+                declarationSyntax = GetParentDeclarationSyntax<PropertyDeclarationSyntax>(syntaxNode);
+            }
+
+            if (declarationSyntax == null)
+            {
+                declarationSyntax = GetParentDeclarationSyntax<EventDeclarationSyntax>(syntaxNode);
+            }
+
+            if (declarationSyntax != null)
+            {
+                var declaredSymbol = Model.GetDeclaredSymbol(declarationSyntax);
+                if (declaredSymbol == null)
+                {
+                    return syntaxNode.ToString();
+                }
+
+                if (declarationSyntax is LocalFunctionStatementSyntax)
+                {
+                    var parent = GetParentDeclaredType(declarationSyntax.Parent);
+                    return $"{parent}.{declaredSymbol}";
+                }
+
+                return declaredSymbol.ToString();
+            }
+
+            return syntaxNode.ToString();
+        }
+
+        public string GetContainingType(SyntaxNode syntaxNode)
+        {
+            var variableDeclarationSyntax = GetParentDeclarationSyntax<VariableDeclarationSyntax>(syntaxNode);
             if (variableDeclarationSyntax != null)
             {
                 var fullName = GetFullName(variableDeclarationSyntax);
@@ -445,13 +522,13 @@ namespace HoneydewExtractors.CSharp.Metrics
                 }
             }
 
-            var propertyDeclarationSyntax = GetParentDeclarationSyntax<PropertyDeclarationSyntax>(expressionSyntax);
+            var propertyDeclarationSyntax = GetParentDeclarationSyntax<PropertyDeclarationSyntax>(syntaxNode);
             if (propertyDeclarationSyntax != null)
             {
                 return GetFullName(propertyDeclarationSyntax);
             }
 
-            return expressionSyntax.ToString();
+            return syntaxNode.ToString();
         }
 
         private IList<IParameterType> GetParameters(InvocationExpressionSyntax invocationSyntax)

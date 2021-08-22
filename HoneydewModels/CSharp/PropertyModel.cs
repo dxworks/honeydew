@@ -3,7 +3,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public record PropertyModel : IModelEntity, IPropertyType
+    public record PropertyModel : IModelEntity, IPropertyType, ITypeWithLocalFunctions
     {
         public int CyclomaticComplexity { get; set; }
         public string Name { get; set; }
@@ -23,6 +23,9 @@ namespace HoneydewModels.CSharp
         public IList<IMethodSignatureType> CalledMethods { get; set; } = new List<IMethodSignatureType>();
 
         public IList<string> Accessors { get; set; } = new List<string>();
+
+        public IList<IMethodTypeWithLocalFunctions> LocalFunctions { get; set; } =
+            new List<IMethodTypeWithLocalFunctions>();
 
         public LinesOfCode Loc { get; set; }
 

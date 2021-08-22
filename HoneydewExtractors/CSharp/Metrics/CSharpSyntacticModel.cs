@@ -30,8 +30,41 @@ namespace HoneydewExtractors.CSharp.Metrics
 
         public int CalculateCyclomaticComplexity(MemberDeclarationSyntax syntax)
         {
-            var count = 1;
+            return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
+        }
 
+        public int CalculateCyclomaticComplexity(LocalFunctionStatementSyntax syntax)
+        {
+            return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
+        }
+
+        public bool IsAbstractModifier(string modifier)
+        {
+            return CSharpConstants.AbstractIdentifier == modifier;
+        }
+
+        private int CalculateCyclomaticComplexity(ExpressionSyntax conditionExpressionSyntax)
+        {
+            if (conditionExpressionSyntax == null)
+            {
+                return 1;
+            }
+
+            var logicalOperatorsCount = conditionExpressionSyntax
+                .DescendantTokens()
+                .Count(token =>
+                {
+                    var syntaxKind = token.Kind();
+                    return syntaxKind is SyntaxKind.AmpersandAmpersandToken or SyntaxKind.BarBarToken or SyntaxKind
+                        .AndKeyword or SyntaxKind.OrKeyword;
+                });
+
+            return logicalOperatorsCount + 1;
+        }
+
+        private int CalculateCyclomaticComplexityForSyntaxNode(SyntaxNode syntax)
+        {
+            var count = 0;
             foreach (var descendantNode in syntax.DescendantNodes())
             {
                 switch (descendantNode)
@@ -75,30 +108,6 @@ namespace HoneydewExtractors.CSharp.Metrics
             }
 
             return count;
-        }
-
-        public bool IsAbstractModifier(string modifier)
-        {
-            return CSharpConstants.AbstractIdentifier == modifier;
-        }
-
-        private int CalculateCyclomaticComplexity(ExpressionSyntax conditionExpressionSyntax)
-        {
-            if (conditionExpressionSyntax == null)
-            {
-                return 1;
-            }
-
-            var logicalOperatorsCount = conditionExpressionSyntax
-                .DescendantTokens()
-                .Count(token =>
-                {
-                    var syntaxKind = token.Kind();
-                    return syntaxKind is SyntaxKind.AmpersandAmpersandToken or SyntaxKind.BarBarToken or SyntaxKind
-                        .AndKeyword or SyntaxKind.OrKeyword;
-                });
-
-            return logicalOperatorsCount + 1;
         }
     }
 }

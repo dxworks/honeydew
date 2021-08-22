@@ -4,6 +4,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics.Extraction;
+using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,7 +12,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 {
     public class LinesOfCodeVisitor : ICSharpPropertyVisitor, ICSharpMethodVisitor, ICSharpConstructorVisitor,
-        ICSharpClassVisitor, ICSharpCompilationUnitVisitor
+        ICSharpClassVisitor, ICSharpCompilationUnitVisitor, ICSharpLocalFunctionVisitor
     {
         private readonly CSharpLinesOfCodeCounter _linesOfCodeCounter = new();
 
@@ -35,6 +36,12 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 
         public IPropertyMembersClassType Visit(BaseTypeDeclarationSyntax syntaxNode,
             IPropertyMembersClassType modelType)
+        {
+            modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
+            return modelType;
+        }
+
+        public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode, IMethodTypeWithLocalFunctions modelType)
         {
             modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
             return modelType;

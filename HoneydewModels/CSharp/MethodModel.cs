@@ -3,7 +3,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public record MethodModel : IModelEntity, IMethodType
+    public record MethodModel : IModelEntity, IMethodTypeWithLocalFunctions
     {
         public string Name { get; set; }
 
@@ -18,6 +18,8 @@ namespace HoneydewModels.CSharp
         public IList<IMethodSignatureType> CalledMethods { get; set; } = new List<IMethodSignatureType>();
 
         public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
+
+        public IList<IMethodTypeWithLocalFunctions> LocalFunctions { get; set; } = new List<IMethodTypeWithLocalFunctions>();
 
         public LinesOfCode Loc { get; set; }
 

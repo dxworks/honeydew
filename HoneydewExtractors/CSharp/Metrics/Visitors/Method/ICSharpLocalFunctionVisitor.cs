@@ -1,0 +1,12 @@
+﻿using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
+using HoneydewModels.Types;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method
+{
+    public interface ICSharpLocalFunctionVisitor : IMethodVisitor, ICSharpTypeVisitor,
+        IVisitorType<LocalFunctionStatementSyntax, IMethodTypeWithLocalFunctions>
+    {
+    }
+}

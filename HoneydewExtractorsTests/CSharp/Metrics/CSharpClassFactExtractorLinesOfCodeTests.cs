@@ -9,6 +9,8 @@ using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
+using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.CSharp;
 using Xunit;
 
@@ -34,7 +36,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                         })),
                     new MethodSetterClassVisitor(new CSharpMethodModelCreator(new List<ICSharpMethodVisitor>
                     {
-                        linesOfCodeVisitor
+                        linesOfCodeVisitor, new LocalFunctionsSetterClassVisitor(new CSharpLocalFunctionsModelCreator(
+                            new List<ICSharpLocalFunctionVisitor>
+                            {
+                                new LocalFunctionInfoVisitor(),
+                                linesOfCodeVisitor
+                            }))
                     })),
                     new PropertySetterClassVisitor(new CSharpPropertyModelCreator(new List<ICSharpPropertyVisitor>
                     {
@@ -55,7 +62,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal(21, compilationUnit.Loc.SourceLines);
             Assert.Equal(10, compilationUnit.Loc.EmptyLines);
             Assert.Equal(8, compilationUnit.Loc.CommentedLines);
-            
+
             var classModel = (ClassModel)classModels[0];
             Assert.Equal(16, classModel.Loc.SourceLines);
             Assert.Equal(6, classModel.Loc.EmptyLines);
@@ -80,7 +87,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal(22, compilationUnit.Loc.SourceLines);
             Assert.Equal(9, compilationUnit.Loc.EmptyLines);
             Assert.Equal(8, compilationUnit.Loc.CommentedLines);
-            
+
             var classModel = (ClassModel)classModels[0];
             Assert.Equal(16, classModel.Loc.SourceLines);
             Assert.Equal(6, classModel.Loc.EmptyLines);
@@ -93,6 +100,20 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal(7, classModel.Properties[0].Loc.SourceLines);
             Assert.Equal(1, classModel.Properties[0].Loc.CommentedLines);
             Assert.Equal(1, classModel.Properties[0].Loc.EmptyLines);
+        }
+
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/LocalFunctionWithComments.txt")]
+        public void Extract_ShouldHaveLinesOfCode_WhenMethodWithLocalFunction(string fileContent)
+        {
+            var compilationUnit = _sut.Extract(fileContent);
+            var classTypes = compilationUnit.ClassTypes;
+
+            var localFunction = ((MethodModel)((ClassModel)classTypes[0]).Methods[0]).LocalFunctions[0];
+
+            Assert.Equal(4, localFunction.Loc.SourceLines);
+            Assert.Equal(1, localFunction.Loc.CommentedLines);
+            Assert.Equal(1, localFunction.Loc.EmptyLines);
         }
     }
 }

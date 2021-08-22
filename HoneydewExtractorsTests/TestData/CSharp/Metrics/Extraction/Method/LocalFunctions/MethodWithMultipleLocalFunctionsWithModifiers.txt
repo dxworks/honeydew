@@ -1,0 +1,30 @@
+﻿using System.Threading.Tasks;
+
+namespace Namespace1
+{
+    class Class1
+    {
+        public async Task<int> Method(int a, int b)
+        {
+            var af = await Function(a);
+            var bf = await Function(b);
+
+            async Task<int> Function(int x)
+            {
+                var i = await StaticFunction();
+                return x + i;
+            }
+
+            static Task<int> StaticFunction()
+            {
+                return Task.FromResult(7);
+            }
+
+            static extern int ExternFunction(string s);
+
+            var c = ExternFunction("7");
+
+            return af + bf + c;
+        }
+    }
+}
