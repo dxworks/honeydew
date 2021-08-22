@@ -1,6 +1,6 @@
 ﻿namespace HoneydewModels.Types
 {
-    public interface IImportType : IType
+    public interface IImportType : INamedType
     {
         public string Alias { get; init; }
 

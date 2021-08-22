@@ -1,6 +1,6 @@
 ﻿namespace HoneydewModels.Types
 {
-    public interface IContainedType : IType
+    public interface IContainedType : INamedType
     {
         public string ContainingTypeName { get; set; }
     }

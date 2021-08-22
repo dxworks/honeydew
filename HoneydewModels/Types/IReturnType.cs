@@ -1,6 +1,6 @@
 ﻿namespace HoneydewModels.Types
 {
-    public interface IReturnType : IType, ITypeWithAttributes
+    public interface IReturnType : INamedType, ITypeWithAttributes
     {
     }
 }

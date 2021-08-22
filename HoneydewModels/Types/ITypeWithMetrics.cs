@@ -3,7 +3,7 @@ using HoneydewModels.CSharp;
 
 namespace HoneydewModels.Types
 {
-    public interface ITypeWithMetrics
+    public interface ITypeWithMetrics : IType
     {
         public IList<MetricModel> Metrics { get; init; }
     }

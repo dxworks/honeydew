@@ -2,7 +2,7 @@
 
 namespace HoneydewModels.Types
 {
-    public interface ITypeWithAttributes
+    public interface ITypeWithAttributes : IType
     {
         IList<IAttributeType> Attributes { get; set; }
     }

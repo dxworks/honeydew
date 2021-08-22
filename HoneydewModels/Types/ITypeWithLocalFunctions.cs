@@ -2,7 +2,7 @@
 
 namespace HoneydewModels.Types
 {
-    public interface ITypeWithLocalFunctions
+    public interface ITypeWithLocalFunctions : IType
     {
         public IList<IMethodTypeWithLocalFunctions> LocalFunctions { get; set; }
     }
