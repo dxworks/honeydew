@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
+using HoneydewExtractors.Core.Metrics.Extraction.Class.Relations;
 using HoneydewExtractors.Processors;
 using HoneydewModels.CSharp;
 using Moq;
@@ -27,11 +27,11 @@ namespace HoneydewExtractorsTests.Processors
 
             ClassModel classModel1 = new()
             {
-                FullName = "Models.Class1", FilePath = "path/Models/Class1.cs"
+                Name = "Models.Class1", FilePath = "path/Models/Class1.cs"
             };
-            classModel1.Metrics.Add(new ClassMetric
+            classModel1.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
@@ -41,11 +41,11 @@ namespace HoneydewExtractorsTests.Processors
 
             ClassModel classModel2 = new()
             {
-                FullName = "Services.Class2", FilePath = "path/Services/Class2.cs"
+                Name = "Services.Class2", FilePath = "path/Services/Class2.cs"
             };
-            classModel2.Metrics.Add(new ClassMetric
+            classModel2.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
@@ -55,11 +55,11 @@ namespace HoneydewExtractorsTests.Processors
 
             ClassModel classModel3 = new()
             {
-                FullName = "Controllers.Class3", FilePath = "path/Controllers/Class3.cs"
+                Name = "Controllers.Class3", FilePath = "path/Controllers/Class3.cs"
             };
-            classModel3.Metrics.Add(new ClassMetric
+            classModel3.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
@@ -70,11 +70,11 @@ namespace HoneydewExtractorsTests.Processors
 
             ClassModel classModel4 = new()
             {
-                FullName = "Domain.Data.Class4", FilePath = "path/Domain/Data/Class4.cs"
+                Name = "Domain.Data.Class4", FilePath = "path/Domain/Data/Class4.cs"
             };
-            classModel4.Metrics.Add(new ClassMetric
+            classModel4.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
@@ -84,11 +84,11 @@ namespace HoneydewExtractorsTests.Processors
 
             ClassModel classModel5 = new()
             {
-                FullName = "Controllers.Class5", FilePath = "path/Controllers/Class5.cs"
+                Name = "Controllers.Class5", FilePath = "path/Controllers/Class5.cs"
             };
-            classModel5.Metrics.Add(new ClassMetric
+            classModel5.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>()
             });
@@ -114,7 +114,7 @@ namespace HoneydewExtractorsTests.Processors
             _progressLoggerMock.Setup(logger =>
                     logger.CreateProgressLogger(5, "Resolving Class Elements (Fields, Methods, Properties,...)"))
                 .Returns(_progressLoggerBarMock.Object);
-            
+
             var processedRepositoryModel = _sut.Process(repositoryModel);
 
             var processedProjectModel = processedRepositoryModel.Solutions[0].Projects[0];
@@ -143,22 +143,22 @@ namespace HoneydewExtractorsTests.Processors
 
             ClassModel classModel1 = new()
             {
-                FullName = "Models.Class1", FilePath = "path/Models/Class1.cs"
+                Name = "Models.Class1", FilePath = "path/Models/Class1.cs"
             };
-            classModel1.Metrics.Add(new ClassMetric
+            classModel1.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>()
             });
 
             ClassModel classModel2 = new()
             {
-                FullName = "Services.Class2", FilePath = "path/Services/Class2.cs"
+                Name = "Services.Class2", FilePath = "path/Services/Class2.cs"
             };
-            classModel2.Metrics.Add(new ClassMetric
+            classModel2.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
@@ -168,11 +168,11 @@ namespace HoneydewExtractorsTests.Processors
 
             ClassModel classModel3 = new()
             {
-                FullName = "Controllers.Class3", FilePath = "path/Controllers/Class3.cs"
+                Name = "Controllers.Class3", FilePath = "path/Controllers/Class3.cs"
             };
-            classModel3.Metrics.Add(new ClassMetric
+            classModel3.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
@@ -183,11 +183,11 @@ namespace HoneydewExtractorsTests.Processors
 
             ClassModel classModel4 = new()
             {
-                FullName = "Domain.Data.Class4", FilePath = "path/Domain/Data/Class4.cs"
+                Name = "Domain.Data.Class4", FilePath = "path/Domain/Data/Class4.cs"
             };
-            classModel4.Metrics.Add(new ClassMetric
+            classModel4.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>
                 {
@@ -198,11 +198,11 @@ namespace HoneydewExtractorsTests.Processors
 
             ClassModel classModel5 = new()
             {
-                FullName = "Controllers.Class5", FilePath = "path/Controllers/Class5.cs"
+                Name = "Controllers.Class5", FilePath = "path/Controllers/Class5.cs"
             };
-            classModel5.Metrics.Add(new ClassMetric
+            classModel5.Metrics.Add(new MetricModel
             {
-                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                ExtractorName = typeof(ParameterRelationVisitor).FullName,
                 ValueType = typeof(Dictionary<string, int>).FullName,
                 Value = new Dictionary<string, int>()
             });

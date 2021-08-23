@@ -1,7 +1,6 @@
 ﻿using System;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.ModelRepresentations;
-using Moq;
 using Xunit;
 
 namespace HoneydewCoreTest.IO.Writers.Exporters
@@ -13,9 +12,8 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
 
         public CsvClassRelationsRepresentationExporterTests()
         {
-            var metricPrettierMock = new Mock<IMetricPrettier>();
-            _classRelationsRepresentation = new ClassRelationsRepresentation(metricPrettierMock.Object);
-            
+            _classRelationsRepresentation = new ClassRelationsRepresentation();
+
             _sut = new CsvClassRelationsRepresentationExporter();
         }
 
@@ -112,14 +110,15 @@ namespace HoneydewCoreTest.IO.Writers.Exporters
             _classRelationsRepresentation.Add("source3", "target1", "dependency3", 31);
 
             var newLine = Environment.NewLine;
-            var expectedString = $@"""Source"",""Target"",""dependency1"",""dependency2"",""dependency3"",""Length"",""Count""{newLine}" +
-                                 $@"""source1"",""target1"",""4"","""","""",""29"",""33""{newLine}" +
-                                 $@"""source1"",""target2"",""2"",""6"","""",""30"",""38""{newLine}" +
-                                 $@"""source1"",""target3"","""","""",""8"",""29"",""37""{newLine}" +
-                                 $@"""source2"",""target3"","""",""4"","""",""29"",""33""{newLine}" +
-                                 $@"""source2"",""target4"",""8"","""","""",""29"",""37""{newLine}" +
-                                 $@"""source2"",""target5"",""1"","""","""",""29"",""30""{newLine}" +
-                                 @"""source3"",""target1"",""9"",""12"",""31"",""33"",""85""";
+            var expectedString =
+                $@"""Source"",""Target"",""dependency1"",""dependency2"",""dependency3"",""Length"",""Count""{newLine}" +
+                $@"""source1"",""target1"",""4"","""","""",""29"",""33""{newLine}" +
+                $@"""source1"",""target2"",""2"",""6"","""",""30"",""38""{newLine}" +
+                $@"""source1"",""target3"","""","""",""8"",""29"",""37""{newLine}" +
+                $@"""source2"",""target3"","""",""4"","""",""29"",""33""{newLine}" +
+                $@"""source2"",""target4"",""8"","""","""",""29"",""37""{newLine}" +
+                $@"""source2"",""target5"",""1"","""","""",""29"",""30""{newLine}" +
+                @"""source3"",""target1"",""9"",""12"",""31"",""33"",""85""";
 
 
             _sut.ColumnFunctionForEachRow.Add(

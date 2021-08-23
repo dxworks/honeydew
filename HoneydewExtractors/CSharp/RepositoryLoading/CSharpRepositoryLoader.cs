@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.Logging;
-using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.Core;
 using HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead;
 using HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead;
 using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
@@ -20,19 +20,19 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
         private readonly ISolutionLoadingStrategy _solutionLoadingStrategy;
         private readonly ILogger _logger;
         private readonly IProgressLogger _progressLogger;
-        private readonly CSharpFactExtractor _extractor;
+        private readonly IFactExtractorCreator _extractorCreator;
         private const string CsprojExtension = ".csproj";
         private const string SlnExtension = ".sln";
 
         public CSharpRepositoryLoader(ISolutionProvider solutionProvider, IProjectProvider projectProvider,
             IProjectLoadingStrategy projectLoadingStrategy, ISolutionLoadingStrategy solutionLoadingStrategy,
-            ILogger logger, IProgressLogger progressLogger, CSharpFactExtractor extractor)
+            ILogger logger, IProgressLogger progressLogger, IFactExtractorCreator extractorCreator)
         {
             _projectLoadingStrategy = projectLoadingStrategy;
             _solutionLoadingStrategy = solutionLoadingStrategy;
             _logger = logger;
             _progressLogger = progressLogger;
-            _extractor = extractor;
+            _extractorCreator = extractorCreator;
             _projectProvider = projectProvider;
             _solutionProvider = solutionProvider;
         }
@@ -51,7 +51,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
 
                     _progressLogger.CreateProgressBars(new[] { path });
 
-                    var solutionLoader = new SolutionFileLoader(_logger, _extractor,
+                    var solutionLoader = new SolutionFileLoader(_logger, _extractorCreator,
                         _solutionProvider,
                         _solutionLoadingStrategy);
                     var solutionModel = await solutionLoader.LoadSolution(path);
@@ -67,7 +67,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                     _progressLogger.Log($"C# Project file found at {path}");
                     _progressLogger.Log("Started Extracting...");
 
-                    var projectLoader = new ProjectLoader(_extractor, _projectProvider,
+                    var projectLoader = new ProjectLoader(_extractorCreator, _projectProvider,
                         _projectLoadingStrategy, _logger);
                     var projectModel = await projectLoader.Load(path);
 
@@ -110,7 +110,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                 foreach (var solutionPath in solutionPaths)
                 {
                     var solutionLoader =
-                        new SolutionFileLoader(_logger, _extractor, _solutionProvider,
+                        new SolutionFileLoader(_logger, _extractorCreator, _solutionProvider,
                             _solutionLoadingStrategy);
                     var solutionModel = await solutionLoader.LoadSolution(solutionPath);
                     if (solutionModel != null)
@@ -162,7 +162,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                         _logger.Log($"C# Project file found at {projectPath}");
                         progressBar.Step(projectPath);
 
-                        var projectLoader = new ProjectLoader(_extractor, _projectProvider,
+                        var projectLoader = new ProjectLoader(_extractorCreator, _projectProvider,
                             _projectLoadingStrategy, _logger);
                         var projectModel = await projectLoader.Load(projectPath);
                         if (projectModel != null)

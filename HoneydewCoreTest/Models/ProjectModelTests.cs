@@ -15,7 +15,7 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldAddNamespace_WhenANewClassModelWithNamespaceIsAdded()
         {
-            _sut.Add(new ClassModel {FullName = "Models.Class"});
+            _sut.Add(new ClassModel {Name = "Models.Class"});
 
             Assert.Equal(1, _sut.Namespaces.Count);
             Assert.Equal("Models", _sut.Namespaces[0].Name);
@@ -24,7 +24,7 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldAddNewClass_WhenClassIsFromDefaultNamespace()
         {
-            _sut.Add(new ClassModel {FullName = "GlobalClass"});
+            _sut.Add(new ClassModel {Name = "GlobalClass"});
 
             Assert.Equal(1, _sut.Namespaces.Count);
             Assert.Equal("", _sut.Namespaces[0].Name);
@@ -33,10 +33,10 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldAddNamespace_WhenMultipleClassModelsWithNamespaceIsAdded()
         {
-            _sut.Add(new ClassModel {FullName = "Models.M1"});
-            _sut.Add(new ClassModel {FullName = "Models.Domain.M2"});
-            _sut.Add(new ClassModel {FullName = "Items.I1"});
-            _sut.Add(new ClassModel {FullName = "Services.S1"});
+            _sut.Add(new ClassModel {Name = "Models.M1"});
+            _sut.Add(new ClassModel {Name = "Models.Domain.M2"});
+            _sut.Add(new ClassModel {Name = "Items.I1"});
+            _sut.Add(new ClassModel {Name = "Services.S1"});
 
             Assert.Equal(4, _sut.Namespaces.Count);
             Assert.Equal("Models", _sut.Namespaces[0].Name);
@@ -48,8 +48,8 @@ namespace HoneydewCoreTest.Models
         [Fact]
         public void Add_ShouldAddNamespaceOnce_WhenDifferentClassesAreAddedFromTheSameNamespace()
         {
-            _sut.Add(new ClassModel {FullName = "Models.M1"});
-            _sut.Add(new ClassModel {FullName = "Models.M2"});
+            _sut.Add(new ClassModel {Name = "Models.M1"});
+            _sut.Add(new ClassModel {Name = "Models.M2"});
 
             Assert.Equal(1, _sut.Namespaces.Count);
             Assert.Equal("Models", _sut.Namespaces[0].Name);

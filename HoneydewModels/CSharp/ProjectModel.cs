@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace HoneydewModels.CSharp
 {
-    public record ProjectModel
+    public record ProjectModel : IModelEntity
     {
         public string Name { get; set; }
 

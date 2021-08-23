@@ -1,0 +1,17 @@
+﻿namespace TopLevel
+{    
+    public class Foo
+    { 
+        public int Calc(int a)
+        {
+            return Doubled(a);           
+
+            int Doubled(int x)
+            {
+                // calculate double
+                
+                return x * 2;
+            }            
+        }        
+    }                                    
+}

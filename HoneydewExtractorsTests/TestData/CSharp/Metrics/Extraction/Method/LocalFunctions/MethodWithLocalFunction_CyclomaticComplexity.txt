@@ -1,0 +1,60 @@
+﻿namespace Namespace1
+{
+    public class Class1
+    {
+        public int Method(int a, int b)
+        {
+            return Function(a,b);
+        
+            int Function(int x, int y)
+            {
+                var array = new int[y];
+                for (var i = 0; i < y; i++)
+                {
+                    array[i] = i;
+                }
+                
+                var sum = 0;
+                
+                foreach(var i in array) 
+                {
+                    if (i % 2 == 0)
+                    {
+                        sum += i;
+                    }
+                }
+                
+                while(x > 0)
+                {
+                    var h = x/2;
+                    do
+                    {
+                        sum++;
+                        h /= 2;
+                    } while(h != 0);
+                }
+                
+                switch(sum)
+                {
+                    case 0: return 0;
+                    case 1:
+                    case 2:
+                    {
+                        sum += 3;
+                    } break;
+                }
+                
+                if (sum > 6)
+                {
+                    sum *= 2;
+                }
+                else if (sum < 5)
+                {
+                    sum += 8;
+                }
+                
+                return sum;
+            }
+        }
+    }
+}

@@ -126,7 +126,7 @@ namespace HoneydewCoreTest.Models.Representations.ReferenceModel
                                         {
                                             Name = "string"
                                         },
-                                        ParameterTypes =
+                                        Parameters =
                                         {
                                             new ReferenceParameterModel
                                             {

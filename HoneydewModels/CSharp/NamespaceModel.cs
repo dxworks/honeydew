@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace HoneydewModels.CSharp
 {
-    public record NamespaceModel
+    public record NamespaceModel : IModelEntity
     {
         public string Name { get; set; }
         public IList<ClassModel> ClassModels { get; set; } = new List<ClassModel>();
@@ -15,7 +15,7 @@ namespace HoneydewModels.CSharp
                 return;
             }
 
-            if (ClassModels.Any(model => model.FullName == classModel.FullName))
+            if (ClassModels.Any(model => model.Name == classModel.Name))
             {
                 return;
             }
