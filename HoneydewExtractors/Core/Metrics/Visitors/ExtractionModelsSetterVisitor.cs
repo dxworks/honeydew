@@ -1,25 +1,22 @@
-﻿using HoneydewExtractors.CSharp.Metrics;
+﻿using HoneydewExtractors.CSharp.Metrics.Extraction;
 
 namespace HoneydewExtractors.Core.Metrics.Visitors
 {
     public class ExtractionModelsSetterVisitor : IVisitor
     {
-        private readonly CSharpSyntacticModel _syntacticModel;
-        private readonly CSharpSemanticModel _semanticModel;
+        private readonly CSharpExtractionHelperMethods _extractionHelperMethods;
 
-        public ExtractionModelsSetterVisitor(CSharpSyntacticModel syntacticModel, CSharpSemanticModel semanticModel)
+        public ExtractionModelsSetterVisitor(CSharpExtractionHelperMethods extractionHelperMethods)
         {
-            _syntacticModel = syntacticModel;
-            _semanticModel = semanticModel;
+            _extractionHelperMethods = extractionHelperMethods;
         }
 
         public void Visit(ITypeVisitor visitor)
         {
-            if (visitor is ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>
-                extractionVisitor)
+            if (visitor is IRequireCSharpExtractionHelperMethodsVisitor
+                requireExtractionHelperMethodsVisitor)
             {
-                extractionVisitor.InheritedSyntacticModel = _syntacticModel;
-                extractionVisitor.InheritedSemanticModel = _semanticModel;
+                requireExtractionHelperMethodsVisitor.CSharpHelperMethods = _extractionHelperMethods;
             }
 
             visitor.Accept(this);

@@ -1,6 +1,6 @@
 ﻿using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
-using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -8,9 +8,15 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Delegate
 {
-    public class BaseInfoDelegateVisitor : ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>,
+    public class BaseInfoDelegateVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
         ICSharpDelegateVisitor
     {
+        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+
+        public void Accept(IVisitor visitor)
+        {
+        }
+
         public IDelegateType Visit(DelegateDeclarationSyntax syntaxNode, IDelegateType modelType)
         {
             var accessModifier = CSharpConstants.DefaultClassAccessModifier;
@@ -18,11 +24,11 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Delegate
             CSharpConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier,
                 ref modifier);
 
-            var returnType = InheritedSemanticModel.GetFullName(syntaxNode.ReturnType);
+            var returnType = CSharpHelperMethods.GetFullName(syntaxNode.ReturnType);
 
-            var returnTypeModifier = InheritedSyntacticModel.SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
+            var returnTypeModifier = CSharpHelperMethods.SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
 
-            modelType.Name = InheritedSemanticModel.GetFullName(syntaxNode);
+            modelType.Name = CSharpHelperMethods.GetFullName(syntaxNode);
             modelType.AccessModifier = accessModifier;
             modelType.Modifier = modifier;
             modelType.ReturnType = new ReturnTypeModel
@@ -30,7 +36,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Delegate
                 Name = returnType,
                 Modifier = returnTypeModifier
             };
-            foreach (var parameterType in InheritedSemanticModel.ExtractInfoAboutParameters(syntaxNode.ParameterList))
+            foreach (var parameterType in CSharpHelperMethods.ExtractInfoAboutParameters(syntaxNode.ParameterList))
             {
                 modelType.ParameterTypes.Add(parameterType);
             }
@@ -41,7 +47,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Delegate
                 ClassType = CSharpConstants.ClassIdentifier,
                 Name = CSharpConstants.SystemDelegate
             });
-            modelType.ContainingTypeName = InheritedSemanticModel.GetFullName(syntaxNode)
+            modelType.ContainingTypeName = CSharpHelperMethods.GetFullName(syntaxNode)
                 .Replace(syntaxNode.Identifier.ToString(), "").Trim('.');
 
             return modelType;

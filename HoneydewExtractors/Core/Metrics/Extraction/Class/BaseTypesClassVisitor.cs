@@ -1,22 +1,28 @@
 ﻿using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
-using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Class
 {
-    public class BaseTypesClassVisitor : ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>,
+    public class BaseTypesClassVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
         ICSharpClassVisitor
     {
+        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+        
+        public void Accept(IVisitor visitor)
+        {
+        }
+        
         public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
         {
             switch (syntaxNode)
             {
                 case InterfaceDeclarationSyntax interfaceDeclarationSyntax:
                 {
-                    foreach (var baseInterface in InheritedSemanticModel.GetBaseInterfaces(interfaceDeclarationSyntax))
+                    foreach (var baseInterface in CSharpHelperMethods.GetBaseInterfaces(interfaceDeclarationSyntax))
                     {
                         modelType.BaseTypes.Add(new BaseTypeModel
                         {
@@ -31,11 +37,11 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class
                 {
                     modelType.BaseTypes.Add(new BaseTypeModel
                     {
-                        Name = InheritedSemanticModel.GetBaseClassName(classDeclarationSyntax),
+                        Name = CSharpHelperMethods.GetBaseClassName(classDeclarationSyntax),
                         ClassType = "class"
                     });
 
-                    foreach (var baseInterface in InheritedSemanticModel.GetBaseInterfaces(classDeclarationSyntax))
+                    foreach (var baseInterface in CSharpHelperMethods.GetBaseInterfaces(classDeclarationSyntax))
                     {
                         modelType.BaseTypes.Add(new BaseTypeModel
                         {

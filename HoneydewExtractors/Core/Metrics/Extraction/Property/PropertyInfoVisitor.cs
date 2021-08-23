@@ -1,16 +1,21 @@
 ﻿using System.Collections.Generic;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
-using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Property
 {
-    public class PropertyInfoVisitor : ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>,
-        ICSharpPropertyVisitor
+    public class PropertyInfoVisitor : IRequireCSharpExtractionHelperMethodsVisitor, ICSharpPropertyVisitor
     {
+        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+
+        public void Accept(IVisitor visitor)
+        {
+        }
+
         public IPropertyType Visit(BasePropertyDeclarationSyntax syntaxNode, IPropertyType modelType)
         {
             var allModifiers = syntaxNode.Modifiers.ToString();
@@ -20,14 +25,14 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Property
             var containingClass = "";
             if (syntaxNode.Parent is BaseTypeDeclarationSyntax classDeclarationSyntax)
             {
-                containingClass = InheritedSemanticModel.GetFullName(classDeclarationSyntax);
+                containingClass = CSharpHelperMethods.GetFullName(classDeclarationSyntax);
             }
 
             CSharpConstants.SetModifiers(allModifiers, ref accessModifier, ref modifier);
 
-            var typeName = InheritedSemanticModel.GetFullName(syntaxNode.Type);
+            var typeName = CSharpHelperMethods.GetFullName(syntaxNode.Type);
 
-            modifier = InheritedSyntacticModel.SetTypeModifier(syntaxNode.Type.ToString(), modifier);
+            modifier = CSharpHelperMethods.SetTypeModifier(syntaxNode.Type.ToString(), modifier);
 
             var accessors = new List<string>();
 
@@ -70,7 +75,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Property
             modelType.Name = name;
             modelType.ContainingTypeName = containingClass;
             modelType.Accessors = accessors;
-            modelType.CyclomaticComplexity = InheritedSyntacticModel.CalculateCyclomaticComplexity(syntaxNode);
+            modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
 
             return modelType;
         }

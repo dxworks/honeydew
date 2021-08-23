@@ -20,7 +20,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
             foreach (var methodDeclarationSyntax in syntaxNode.DescendantNodes().OfType<MethodDeclarationSyntax>())
             {
                 MetricHolder.Add(className,
-                    InheritedSemanticModel.GetFullName(methodDeclarationSyntax.ReturnType), this);
+                    CSharpHelperMethods.GetFullName(methodDeclarationSyntax.ReturnType), this);
             }
         }
     }

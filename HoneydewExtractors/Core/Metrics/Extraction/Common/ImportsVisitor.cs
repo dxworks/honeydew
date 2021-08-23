@@ -3,18 +3,20 @@ using System.Linq;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
-using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using CSharpSyntaxNode = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 {
-    public class ImportsVisitor : ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>,
+    public class ImportsVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
         ICSharpCompilationUnitVisitor, ICSharpClassVisitor, ICSharpDelegateVisitor
     {
+        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+
         public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, ICompilationUnitType modelType)
         {
             var usingSet = new HashSet<string>();
@@ -95,7 +97,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 
             if (!string.IsNullOrEmpty(alias))
             {
-                aliasType = InheritedSemanticModel.GetAliasTypeOfNamespace(usingDirectiveSyntax.Name);
+                aliasType = CSharpHelperMethods.GetAliasTypeOfNamespace(usingDirectiveSyntax.Name);
             }
 
             var usingModel = new UsingModel
@@ -106,6 +108,10 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
                 AliasType = aliasType
             };
             return usingModel;
+        }
+
+        public void Accept(IVisitor visitor)
+        {
         }
     }
 }

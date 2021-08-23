@@ -16,7 +16,6 @@ using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.CSharp;
-using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
@@ -27,7 +26,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
 
         public LocalFunctionsExtractionTests()
         {
-            var compositeVisitor = new CompositeVisitor<ICompilationUnitType>();
+            var compositeVisitor = new CompositeVisitor();
             
             var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
             {

@@ -20,15 +20,15 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
             foreach (var throwExpressionSyntax in syntaxNode.DescendantNodes().OfType<ThrowExpressionSyntax>())
             {
                 MetricHolder.Add(className,
-                    InheritedSemanticModel.GetFullName(throwExpressionSyntax.Expression), this);
+                    CSharpHelperMethods.GetFullName(throwExpressionSyntax.Expression), this);
             }
 
             foreach (var throwStatementSyntax in syntaxNode.DescendantNodes().OfType<ThrowStatementSyntax>())
             {
                 MetricHolder.Add(className,
                     throwStatementSyntax.Expression == null
-                        ? InheritedSemanticModel.GetFullName(throwStatementSyntax)
-                        : InheritedSemanticModel.GetFullName(throwStatementSyntax.Expression), this);
+                        ? CSharpHelperMethods.GetFullName(throwStatementSyntax)
+                        : CSharpHelperMethods.GetFullName(throwStatementSyntax.Expression), this);
             }
         }
     }

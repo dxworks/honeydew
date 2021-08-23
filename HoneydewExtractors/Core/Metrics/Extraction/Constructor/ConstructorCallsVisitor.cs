@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
-using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -9,9 +9,15 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Constructor
 {
-    public class ConstructorCallsVisitor : ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>,
+    public class ConstructorCallsVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
         ICSharpConstructorVisitor
     {
+        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+
+        public void Accept(IVisitor visitor)
+        {
+        }
+
         public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, IConstructorType modelType)
         {
             var methodCall = ExtractInfoAboutConstructorCalls(syntaxNode);
@@ -33,11 +39,11 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Constructor
 
             var containingClassName = "";
             var baseName = CSharpConstants.ObjectIdentifier;
-            
+
             if (syntax.Parent is BaseTypeDeclarationSyntax baseTypeDeclarationSyntax)
             {
-                containingClassName = InheritedSemanticModel.GetFullName(baseTypeDeclarationSyntax);
-                baseName = InheritedSemanticModel.GetBaseClassName(baseTypeDeclarationSyntax);
+                containingClassName = CSharpHelperMethods.GetFullName(baseTypeDeclarationSyntax);
+                baseName = CSharpHelperMethods.GetBaseClassName(baseTypeDeclarationSyntax);
             }
 
             var methodName = syntax.Identifier.ToString();
@@ -49,11 +55,11 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Constructor
 
             IList<IParameterType> parameterModels = new List<IParameterType>();
 
-            var methodSymbol = InheritedSemanticModel.GetMethodSymbol(syntax.Initializer);
+            var methodSymbol = CSharpHelperMethods.GetMethodSymbol(syntax.Initializer);
 
             if (methodSymbol != null)
             {
-                parameterModels = InheritedSemanticModel.GetParameters(methodSymbol);
+                parameterModels = CSharpHelperMethods.GetParameters(methodSymbol);
                 methodName = methodSymbol.ContainingType.Name;
             }
 

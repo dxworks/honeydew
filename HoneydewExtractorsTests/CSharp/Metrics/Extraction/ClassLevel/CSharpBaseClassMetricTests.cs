@@ -4,7 +4,6 @@ using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.CSharp.Metrics;
-using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
@@ -15,7 +14,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
         public CSharpBaseClassMetricTests()
         {
-            var compositeVisitor = new CompositeVisitor<ICompilationUnitType>();
+            var compositeVisitor = new CompositeVisitor();
 
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {

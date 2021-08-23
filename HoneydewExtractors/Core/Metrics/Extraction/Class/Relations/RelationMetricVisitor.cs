@@ -2,16 +2,18 @@
 using HoneydewCore.ModelRepresentations;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
-using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
 {
-    public abstract class RelationMetricVisitor : ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>,
+    public abstract class RelationMetricVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
         IRelationMetric, ICSharpClassVisitor
     {
+        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+
         protected readonly IRelationMetricHolder MetricHolder;
 
         protected RelationMetricVisitor(IRelationMetricHolder metricHolder)
@@ -23,6 +25,11 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
 
         protected abstract void AddDependencies(string className, BaseTypeDeclarationSyntax syntaxNode);
 
+
+        public void Accept(IVisitor visitor)
+        {
+        }
+
         public IList<FileRelation> GetRelations(
             IDictionary<string, IDictionary<IRelationMetric, IDictionary<string, int>>> dependencies)
         {
@@ -31,7 +38,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
 
         public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
         {
-            var className = InheritedSemanticModel.GetFullName(syntaxNode);
+            var className = CSharpHelperMethods.GetFullName(syntaxNode);
 
             AddDependencies(className, syntaxNode);
 

@@ -1,22 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions
 {
-    public class LocalFunctionNestedFunctionsVisitor : ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>,
+    public class LocalFunctionNestedFunctionsVisitor : CompositeVisitor,
         ICSharpLocalFunctionVisitor
     {
-        private readonly IList<ICSharpLocalFunctionVisitor> _localFunctionVisitor;
-
-        private bool _inheritedModelsSet;
-
-        public LocalFunctionNestedFunctionsVisitor(IList<ICSharpLocalFunctionVisitor> localFunctionVisitor)
+        public LocalFunctionNestedFunctionsVisitor(IEnumerable<ILocalFunctionVisitor> visitors) : base(visitors)
         {
-            _localFunctionVisitor = localFunctionVisitor;
         }
 
         public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode,
@@ -27,29 +23,16 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions
                 return modelType;
             }
 
-            if (!_inheritedModelsSet)
-            {
-                _inheritedModelsSet = true;
-                foreach (var visitor in _localFunctionVisitor)
-                {
-                    if (visitor is not ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>
-                        extractionVisitor)
-                    {
-                        continue;
-                    }
-
-                    extractionVisitor.InheritedSyntacticModel = InheritedSyntacticModel;
-                    extractionVisitor.InheritedSemanticModel = InheritedSemanticModel;
-                }
-            }
-
             foreach (var localFunctionStatementSyntax in syntaxNode.Body.ChildNodes()
                 .OfType<LocalFunctionStatementSyntax>())
             {
                 IMethodTypeWithLocalFunctions localFunction = new MethodModel();
-                foreach (var visitor in _localFunctionVisitor)
+                foreach (var visitor in GetContainedVisitors())
                 {
-                    localFunction = visitor.Visit(localFunctionStatementSyntax, localFunction);
+                    if (visitor is ICSharpLocalFunctionVisitor extractionVisitor)
+                    {
+                        localFunction = extractionVisitor.Visit(localFunctionStatementSyntax, localFunction);
+                    }
                 }
 
                 localFunction = Visit(localFunctionStatementSyntax, localFunction);

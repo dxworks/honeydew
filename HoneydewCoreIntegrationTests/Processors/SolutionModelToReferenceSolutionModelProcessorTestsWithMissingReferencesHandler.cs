@@ -16,7 +16,6 @@ using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
-using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewCoreIntegrationTests.Processors
@@ -31,7 +30,7 @@ namespace HoneydewCoreIntegrationTests.Processors
         {
             _sut = new SolutionModelToReferenceSolutionModelProcessor();
             
-            var compositeVisitor = new CompositeVisitor<ICompilationUnitType>();
+            var compositeVisitor = new CompositeVisitor();
             
             var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
             {

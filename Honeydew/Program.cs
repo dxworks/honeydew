@@ -37,7 +37,6 @@ using HoneydewModels;
 using HoneydewModels.CSharp;
 using HoneydewModels.Exporters;
 using HoneydewModels.Importers;
-using HoneydewModels.Types;
 
 namespace Honeydew
 {
@@ -204,7 +203,7 @@ namespace Honeydew
                 linesOfCodeVisitor,
             };
 
-            var compositeVisitor = new CompositeVisitor<ICompilationUnitType>();
+            var compositeVisitor = new CompositeVisitor();
 
             foreach (var compilationUnitVisitor in compilationUnitVisitors)
             {

@@ -1,6 +1,7 @@
 ﻿using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
+using HoneydewExtractors.CSharp.Metrics.Extraction;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 
@@ -25,7 +26,11 @@ namespace HoneydewExtractors.CSharp.Metrics
             var syntacticModel = _syntacticModelCreator.Create(text);
             var semanticModel = _semanticModelCreator.Create(syntacticModel);
 
-            _compositeVisitor.Accept(new ExtractionModelsSetterVisitor(syntacticModel, semanticModel));
+
+            IVisitor extractionModelsSetterVisitor =
+                new ExtractionModelsSetterVisitor(new CSharpExtractionHelperMethods(semanticModel));
+            
+            _compositeVisitor.Accept(extractionModelsSetterVisitor);
 
             ICompilationUnitType compilationUnitModel = new CompilationUnitModel();
 

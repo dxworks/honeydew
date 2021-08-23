@@ -14,7 +14,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
 
         public CSharpCompilationUnitImportsMetricTests()
         {
-            var compositeVisitor = new CompositeVisitor<ICompilationUnitType>();
+            var compositeVisitor = new CompositeVisitor();
             
             compositeVisitor.Add(new ImportsVisitor());
 

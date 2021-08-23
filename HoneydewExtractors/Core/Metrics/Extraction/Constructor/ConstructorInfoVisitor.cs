@@ -1,21 +1,27 @@
 ﻿using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
-using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Constructor
 {
-    public class ConstructorInfoVisitor : ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>,
+    public class ConstructorInfoVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
         ICSharpConstructorVisitor
     {
+        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+
+        public void Accept(IVisitor visitor)
+        {
+        }
+
         public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, IConstructorType modelType)
         {
             var containingClassName = "";
             if (syntaxNode.Parent is BaseTypeDeclarationSyntax baseTypeDeclarationSyntax)
             {
-                containingClassName = InheritedSemanticModel.GetFullName(baseTypeDeclarationSyntax);
+                containingClassName = CSharpHelperMethods.GetFullName(baseTypeDeclarationSyntax);
             }
 
             GetModifiersForNode(syntaxNode, out var accessModifier, out var modifier);
@@ -24,9 +30,9 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Constructor
             modelType.ContainingTypeName = containingClassName;
             modelType.Modifier = modifier;
             modelType.AccessModifier = accessModifier;
-            modelType.CyclomaticComplexity = InheritedSyntacticModel.CalculateCyclomaticComplexity(syntaxNode);
+            modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
 
-            foreach (var parameterType in InheritedSemanticModel.ExtractInfoAboutParameters(syntaxNode.ParameterList))
+            foreach (var parameterType in CSharpHelperMethods.ExtractInfoAboutParameters(syntaxNode.ParameterList))
             {
                 modelType.ParameterTypes.Add(parameterType);
             }

@@ -22,7 +22,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
                 .SelectMany(syntax => syntax.DescendantNodes().OfType<VariableDeclarationSyntax>())
             )
             {
-                var fullName = InheritedSemanticModel.GetFullName(variableDeclarationSyntax.Type);
+                var fullName = CSharpHelperMethods.GetFullName(variableDeclarationSyntax.Type);
 
                 if (fullName != CSharpConstants.VarIdentifier)
                 {
@@ -30,7 +30,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
                 }
                 else
                 {
-                    fullName = InheritedSemanticModel.GetFullName(variableDeclarationSyntax);
+                    fullName = CSharpHelperMethods.GetFullName(variableDeclarationSyntax);
                     if (fullName != CSharpConstants.VarIdentifier)
                     {
                         MetricHolder.Add(className, fullName, this);
@@ -46,7 +46,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
                             })
                             {
                                 MetricHolder.Add(className,
-                                    InheritedSemanticModel.GetFullName(objectCreationExpressionSyntax.Type), this);
+                                    CSharpHelperMethods.GetFullName(objectCreationExpressionSyntax.Type), this);
                             }
                         }
                     }

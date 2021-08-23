@@ -31,7 +31,6 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
         {
             SetMethodCalls(syntaxNode, modelType);
 
-
             return modelType;
         }
 
@@ -69,12 +68,6 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
             foreach (var returnStatementSyntax in syntaxNode.Body.ChildNodes().OfType<ReturnStatementSyntax>())
             {
                 SetMethodCalls(returnStatementSyntax, modelType);
-                // foreach (var invocationExpressionSyntax in
-                //     returnStatementSyntax.DescendantNodes().OfType<InvocationExpressionSyntax>())
-                // {
-                //     modelType.CalledMethods.Add(_cSharpMethodCallModelCreator.Create(invocationExpressionSyntax,
-                //         new MethodModel()));
-                // }
             }
 
             return modelType;

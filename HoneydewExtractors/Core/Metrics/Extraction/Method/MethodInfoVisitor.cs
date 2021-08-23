@@ -1,6 +1,6 @@
 ﻿using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
-using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -8,9 +8,15 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Method
 {
-    public class MethodInfoVisitor : ExtractionVisitor<CSharpSyntacticModel, CSharpSemanticModel>,
+    public class MethodInfoVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
         ICSharpMethodVisitor
     {
+        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+
+        public void Accept(IVisitor visitor)
+        {
+        }
+
         public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
         {
             var isInterface = false;
@@ -24,15 +30,15 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Method
 
                 if (syntaxNode.Parent is BaseTypeDeclarationSyntax baseTypeDeclarationSyntax)
                 {
-                    containingClassName = InheritedSemanticModel.GetFullName(baseTypeDeclarationSyntax);
+                    containingClassName = CSharpHelperMethods.GetFullName(baseTypeDeclarationSyntax);
                 }
             }
 
             GetModifiersForNode(syntaxNode, out var accessModifier, out var modifier, isInterface);
 
-            var returnType = InheritedSemanticModel.GetFullName(syntaxNode.ReturnType);
+            var returnType = CSharpHelperMethods.GetFullName(syntaxNode.ReturnType);
 
-            var returnTypeModifier = InheritedSyntacticModel.SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
+            var returnTypeModifier = CSharpHelperMethods.SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
 
 
             modelType.Name = syntaxNode.Identifier.ToString();
@@ -44,9 +50,9 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Method
             modelType.ContainingTypeName = containingClassName;
             modelType.Modifier = modifier;
             modelType.AccessModifier = accessModifier;
-            modelType.CyclomaticComplexity = InheritedSyntacticModel.CalculateCyclomaticComplexity(syntaxNode);
+            modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
 
-            foreach (var parameterType in InheritedSemanticModel.ExtractInfoAboutParameters(syntaxNode.ParameterList))
+            foreach (var parameterType in CSharpHelperMethods.ExtractInfoAboutParameters(syntaxNode.ParameterList))
             {
                 modelType.ParameterTypes.Add(parameterType);
             }
