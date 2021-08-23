@@ -27,7 +27,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public LocalFunctionsExtractionTests()
         {
             var compositeVisitor = new CompositeVisitor();
-            
+
             var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
             {
                 new MethodCallInfoVisitor(),
@@ -35,15 +35,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             var localFunctionsSetterClassVisitor = new LocalFunctionsSetterClassVisitor(
                 new List<ICSharpLocalFunctionVisitor>
                 {
-                    new LocalFunctionInfoVisitor(),
                     calledMethodSetterVisitor,
-                    new LocalFunctionNestedFunctionsVisitor(new List<ICSharpLocalFunctionVisitor>
+                    new LocalFunctionInfoVisitor(new List<ICSharpLocalFunctionVisitor>
                     {
-                        new LocalFunctionInfoVisitor(),
                         calledMethodSetterVisitor
                     }),
                 });
-            
+
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {
                 new BaseInfoClassVisitor(),
@@ -64,7 +62,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                     localFunctionsSetterClassVisitor
                 })
             }));
-            
+
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
                 new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }

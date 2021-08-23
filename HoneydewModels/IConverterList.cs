@@ -26,6 +26,7 @@ namespace HoneydewModels
                 new ModelJsonConverter<IReturnType, ReturnTypeModel>(),
                 new ModelJsonConverter<IImportType, UsingModel>(),
                 new ModelJsonConverter<IMethodSignatureType, MethodCallModel>(),
+                new ModelJsonConverter<IMethodTypeWithLocalFunctions, MethodModel>(),
             };
         }
     }

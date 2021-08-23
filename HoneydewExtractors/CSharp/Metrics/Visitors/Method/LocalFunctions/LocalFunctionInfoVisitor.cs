@@ -1,4 +1,7 @@
-﻿using HoneydewExtractors.Core.Metrics.Visitors;
+﻿using System.Collections.Generic;
+using System.Linq;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.CSharp.Metrics.Extraction;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -6,12 +9,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions
 {
-    public class LocalFunctionInfoVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
+    public class LocalFunctionInfoVisitor : CompositeVisitor, IRequireCSharpExtractionHelperMethodsVisitor,
         ICSharpLocalFunctionVisitor
     {
         public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
 
-        public void Accept(IVisitor visitor)
+        public LocalFunctionInfoVisitor(IEnumerable<ILocalFunctionVisitor> visitors) : base(visitors)
         {
         }
 
@@ -38,6 +41,28 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions
                 modelType.ParameterTypes.Add(parameterType);
             }
 
+            if (syntaxNode.Body == null)
+            {
+                return modelType;
+            }
+
+            foreach (var localFunctionStatementSyntax in syntaxNode.Body.ChildNodes()
+                .OfType<LocalFunctionStatementSyntax>())
+            {
+                IMethodTypeWithLocalFunctions localFunction = new MethodModel();
+                foreach (var visitor in GetContainedVisitors())
+                {
+                    if (visitor is ICSharpLocalFunctionVisitor extractionVisitor)
+                    {
+                        localFunction = extractionVisitor.Visit(localFunctionStatementSyntax, localFunction);
+                    }
+                }
+
+                localFunction = Visit(localFunctionStatementSyntax, localFunction);
+
+                modelType.LocalFunctions.Add(localFunction);
+            }
+            
             return modelType;
         }
     }
