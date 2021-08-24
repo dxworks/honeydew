@@ -222,8 +222,11 @@ namespace HoneydewCoreIntegrationTests.Processors
                                         {
                                             new BaseTypeModel
                                             {
-                                                Name = "object",
-                                                ClassType = "class"
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "object"
+                                                },
+                                                Kind = "class"
                                             }
                                         },
                                         Methods = new List<IMethodType>
@@ -233,9 +236,12 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                 Name = "Create",
                                                 Modifier = "",
                                                 AccessModifier = "public",
-                                                ReturnType = new ReturnTypeModel
+                                                ReturnValue = new ReturnValueModel
                                                 {
-                                                    Name = "Project1.Models.MyModel"
+                                                    Type = new EntityTypeModel
+                                                    {
+                                                        Name = "Project1.Models.MyModel"
+                                                    }
                                                 },
                                                 ContainingTypeName = "Project1.Services.CreateService",
                                             },
@@ -248,12 +254,18 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                 {
                                                     new ParameterModel
                                                     {
-                                                        Name = "Project1.Models.MyModel"
+                                                        Type = new EntityTypeModel
+                                                        {
+                                                            Name = "Project1.Models.MyModel"
+                                                        }
                                                     }
                                                 },
-                                                ReturnType = new ReturnTypeModel
+                                                ReturnValue = new ReturnValueModel
                                                 {
-                                                    Name = "Project1.Models.MyModel"
+                                                    Type = new EntityTypeModel
+                                                    {
+                                                        Name = "Project1.Models.MyModel"
+                                                    }
                                                 },
                                                 ContainingTypeName = "Project1.Services.CreateService",
                                                 CalledMethods =
@@ -274,12 +286,18 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                 {
                                                     new ParameterModel
                                                     {
-                                                        Name = "Project1.Models.OtherModel"
+                                                        Type = new EntityTypeModel
+                                                        {
+                                                            Name = "Project1.Models.OtherModel"
+                                                        }
                                                     }
                                                 },
-                                                ReturnType = new ReturnTypeModel
+                                                ReturnValue = new ReturnValueModel
                                                 {
-                                                    Name = "Project1.Models.MyModel"
+                                                    Type = new EntityTypeModel
+                                                    {
+                                                        Name = "Project1.Models.MyModel"
+                                                    }
                                                 },
                                                 ContainingTypeName = "Project1.Services.CreateService",
                                                 CalledMethods =
@@ -292,7 +310,10 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                         {
                                                             new ParameterModel
                                                             {
-                                                                Name = "Project1.Models.MyModel"
+                                                                Type = new EntityTypeModel
+                                                                {
+                                                                    Name = "Project1.Models.MyModel"
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -307,16 +328,25 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                 {
                                                     new ParameterModel
                                                     {
-                                                        Name = "Project1.Models.MyModel",
+                                                        Type = new EntityTypeModel
+                                                        {
+                                                            Name = "Project1.Models.MyModel",
+                                                        }
                                                     },
                                                     new ParameterModel
                                                     {
-                                                        Name = "Project1.Models.MyModel"
+                                                        Type = new EntityTypeModel
+                                                        {
+                                                            Name = "Project1.Models.MyModel"
+                                                        }
                                                     }
                                                 },
-                                                ReturnType = new ReturnTypeModel
+                                                ReturnValue = new ReturnValueModel
                                                 {
-                                                    Name = "Project1.Models.MyModel"
+                                                    Type = new EntityTypeModel
+                                                    {
+                                                        Name = "Project1.Models.MyModel"
+                                                    }
                                                 },
                                                 ContainingTypeName = "Project1.Services.CreateService",
                                                 CalledMethods =
@@ -334,7 +364,10 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                         {
                                                             new ParameterModel
                                                             {
-                                                                Name = "Project1.Models.OtherModel"
+                                                                Type = new EntityTypeModel
+                                                                {
+                                                                    Name = "Project1.Models.OtherModel"
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -512,7 +545,7 @@ namespace Project1.Services
     }
 }";
             var compositeVisitor = new CompositeVisitor();
-            
+
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {
                 new BaseInfoClassVisitor(),
@@ -529,7 +562,7 @@ namespace Project1.Services
 
             var extractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
                 new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
-            
+
             var classModels = extractor.Extract(fileContent).ClassTypes;
 
             var solutionModel = new SolutionModel
@@ -694,7 +727,10 @@ namespace Project1.Services
                                             new FieldModel
                                             {
                                                 Name = "Model",
-                                                Type = "Project1.Models.MyModel",
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "Project1.Models.MyModel",
+                                                },
                                                 AccessModifier = "private",
                                                 IsEvent = false
                                             }
@@ -715,8 +751,11 @@ namespace Project1.Services
                                         {
                                             new BaseTypeModel
                                             {
-                                                Name = "object",
-                                                ClassType = "class"
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "object"
+                                                },
+                                                Kind = "class"
                                             }
                                         },
                                         Fields = new List<IFieldType>
@@ -724,14 +763,20 @@ namespace Project1.Services
                                             new FieldModel
                                             {
                                                 Name = "_value",
-                                                Type = "int",
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "int",
+                                                },
                                                 Modifier = "readonly",
                                                 AccessModifier = "private"
                                             },
                                             new FieldModel
                                             {
                                                 Name = "ValueEvent",
-                                                Type = "int",
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "int",
+                                                },
                                                 Modifier = "",
                                                 AccessModifier = "public",
                                                 IsEvent = true

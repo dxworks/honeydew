@@ -1,6 +1,6 @@
 ﻿namespace HoneydewModels.Types
 {
-    public interface IModifierType
+    public interface ITypeWithModifiers : IType
     {
         public string AccessModifier { get; set; }
 

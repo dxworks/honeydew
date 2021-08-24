@@ -85,7 +85,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("", method.LocalFunctions[0].AccessModifier);
             Assert.Equal("Namespace1.Class1.Method()", method.LocalFunctions[0].ContainingTypeName);
             Assert.Empty(method.LocalFunctions[0].ParameterTypes);
-            Assert.Equal("void", method.LocalFunctions[0].ReturnType.Name);
+            Assert.Equal("void", method.LocalFunctions[0].ReturnValue.Type.Name);
         }
 
         [Theory]
@@ -105,9 +105,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("", method.LocalFunctions[0].AccessModifier);
             Assert.Equal("Namespace1.Class1.Method(int, int)", method.LocalFunctions[0].ContainingTypeName);
             Assert.Equal(2, method.LocalFunctions[0].ParameterTypes.Count);
-            Assert.Equal("int", method.LocalFunctions[0].ParameterTypes[0].Name);
-            Assert.Equal("int", method.LocalFunctions[0].ParameterTypes[1].Name);
-            Assert.Equal("int", method.LocalFunctions[0].ReturnType.Name);
+            Assert.Equal("int", method.LocalFunctions[0].ParameterTypes[0].Type.Name);
+            Assert.Equal("int", method.LocalFunctions[0].ParameterTypes[1].Type.Name);
+            Assert.Equal("int", method.LocalFunctions[0].ReturnValue.Type.Name);
         }
 
         [Theory]
@@ -127,23 +127,23 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("async", localFunction.Modifier);
             Assert.Equal("Namespace1.Class1.Method(int, int)", localFunction.ContainingTypeName);
             Assert.Equal(1, localFunction.ParameterTypes.Count);
-            Assert.Equal("int", localFunction.ParameterTypes[0].Name);
-            Assert.Equal("System.Threading.Tasks.Task<int>", localFunction.ReturnType.Name);
+            Assert.Equal("int", localFunction.ParameterTypes[0].Type.Name);
+            Assert.Equal("System.Threading.Tasks.Task<int>", localFunction.ReturnValue.Type.Name);
 
             var staticFunction = method.LocalFunctions[1];
             Assert.Equal("StaticFunction", staticFunction.Name);
             Assert.Equal("static", staticFunction.Modifier);
             Assert.Equal("Namespace1.Class1.Method(int, int)", staticFunction.ContainingTypeName);
             Assert.Empty(staticFunction.ParameterTypes);
-            Assert.Equal("System.Threading.Tasks.Task<int>", staticFunction.ReturnType.Name);
+            Assert.Equal("System.Threading.Tasks.Task<int>", staticFunction.ReturnValue.Type.Name);
 
             var externFunction = method.LocalFunctions[2];
             Assert.Equal("ExternFunction", externFunction.Name);
             Assert.Equal("static extern", externFunction.Modifier);
             Assert.Equal("Namespace1.Class1.Method(int, int)", externFunction.ContainingTypeName);
             Assert.Equal(1, externFunction.ParameterTypes.Count);
-            Assert.Equal("string", externFunction.ParameterTypes[0].Name);
-            Assert.Equal("int", externFunction.ReturnType.Name);
+            Assert.Equal("string", externFunction.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", externFunction.ReturnValue.Type.Name);
         }
 
         [Theory]
@@ -190,8 +190,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 Assert.Equal("Function", localFunction.Name);
                 Assert.Equal("static", localFunction.Modifier);
                 Assert.Equal(1, localFunction.ParameterTypes.Count);
-                Assert.Equal("int", localFunction.ParameterTypes[0].Name);
-                Assert.Equal("string", localFunction.ReturnType.Name);
+                Assert.Equal("int", localFunction.ParameterTypes[0].Type.Name);
+                Assert.Equal("string", localFunction.ReturnValue.Type.Name);
             }
 
             Assert.Equal("Namespace1.Class1.Method(int)", method.LocalFunctions[0].ContainingTypeName);
@@ -232,14 +232,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             var calledMethod1 = method.CalledMethods[0];
             Assert.Equal("Sum", calledMethod1.Name);
             Assert.Equal(2, calledMethod1.ParameterTypes.Count);
-            Assert.Equal("int", calledMethod1.ParameterTypes[0].Name);
-            Assert.Equal("int", calledMethod1.ParameterTypes[1].Name);
+            Assert.Equal("int", calledMethod1.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", calledMethod1.ParameterTypes[1].Type.Name);
 
             var calledMethod2 = method.CalledMethods[1];
             Assert.Equal("Sum", calledMethod2.Name);
             Assert.Equal(2, calledMethod2.ParameterTypes.Count);
-            Assert.Equal("int", calledMethod2.ParameterTypes[0].Name);
-            Assert.Equal("int", calledMethod2.ParameterTypes[1].Name);
+            Assert.Equal("int", calledMethod2.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", calledMethod2.ParameterTypes[1].Type.Name);
 
             var calledMethod3 = method.CalledMethods[2];
             Assert.Equal("CString", calledMethod3.Name);
@@ -248,27 +248,27 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             var calledMethod4 = method.CalledMethods[3];
             Assert.Equal("Print", calledMethod4.Name);
             Assert.Equal(1, calledMethod4.ParameterTypes.Count);
-            Assert.Equal("string", calledMethod4.ParameterTypes[0].Name);
+            Assert.Equal("string", calledMethod4.ParameterTypes[0].Type.Name);
 
             var calledMethod5 = method.CalledMethods[4];
             Assert.Equal("Print", calledMethod5.Name);
             Assert.Equal(1, calledMethod5.ParameterTypes.Count);
-            Assert.Equal("string", calledMethod5.ParameterTypes[0].Name);
+            Assert.Equal("string", calledMethod5.ParameterTypes[0].Type.Name);
 
             var calledMethod6 = method.CalledMethods[5];
             Assert.Equal("Stringify", calledMethod6.Name);
             Assert.Equal(1, calledMethod6.ParameterTypes.Count);
-            Assert.Equal("int", calledMethod6.ParameterTypes[0].Name);
+            Assert.Equal("int", calledMethod6.ParameterTypes[0].Type.Name);
 
             var calledMethod7 = method.CalledMethods[6];
             Assert.Equal("Stringify", calledMethod7.Name);
             Assert.Equal(1, calledMethod7.ParameterTypes.Count);
-            Assert.Equal("int", calledMethod7.ParameterTypes[0].Name);
+            Assert.Equal("int", calledMethod7.ParameterTypes[0].Type.Name);
 
             var calledMethod8 = method.CalledMethods[7];
             Assert.Equal("Print", calledMethod8.Name);
             Assert.Equal(1, calledMethod8.ParameterTypes.Count);
-            Assert.Equal("string", calledMethod8.ParameterTypes[0].Name);
+            Assert.Equal("string", calledMethod8.ParameterTypes[0].Type.Name);
         }
 
         [Theory]
@@ -287,29 +287,29 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             var stringSumFunction = (MethodModel)method.LocalFunctions[0];
             Assert.Equal("Namespace1.Class1.Method(int, int)", stringSumFunction.ContainingTypeName);
             Assert.Equal("StringSum", stringSumFunction.Name);
-            Assert.Equal("string", stringSumFunction.ReturnType.Name);
+            Assert.Equal("string", stringSumFunction.ReturnValue.Type.Name);
             Assert.Equal(2, stringSumFunction.ParameterTypes.Count);
-            Assert.Equal("int", stringSumFunction.ParameterTypes[0].Name);
-            Assert.Equal("int", stringSumFunction.ParameterTypes[1].Name);
+            Assert.Equal("int", stringSumFunction.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", stringSumFunction.ParameterTypes[1].Type.Name);
             Assert.Equal(2, stringSumFunction.LocalFunctions.Count);
 
 
             var sumFunction = (MethodModel)stringSumFunction.LocalFunctions[0];
             Assert.Equal("Namespace1.Class1.Method(int, int).StringSum(int, int)", sumFunction.ContainingTypeName);
             Assert.Equal("Sum", sumFunction.Name);
-            Assert.Equal("int", sumFunction.ReturnType.Name);
+            Assert.Equal("int", sumFunction.ReturnValue.Type.Name);
             Assert.Equal(2, sumFunction.ParameterTypes.Count);
-            Assert.Equal("int", sumFunction.ParameterTypes[0].Name);
-            Assert.Equal("int", sumFunction.ParameterTypes[1].Name);
+            Assert.Equal("int", sumFunction.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", sumFunction.ParameterTypes[1].Type.Name);
             Assert.Equal(1, sumFunction.LocalFunctions.Count);
 
             var doubledFunction = (MethodModel)sumFunction.LocalFunctions[0];
             Assert.Equal("Namespace1.Class1.Method(int, int).StringSum(int, int).Sum(int, int)",
                 doubledFunction.ContainingTypeName);
             Assert.Equal("Doubled", doubledFunction.Name);
-            Assert.Equal("int", doubledFunction.ReturnType.Name);
+            Assert.Equal("int", doubledFunction.ReturnValue.Type.Name);
             Assert.Equal(1, doubledFunction.ParameterTypes.Count);
-            Assert.Equal("int", doubledFunction.ParameterTypes[0].Name);
+            Assert.Equal("int", doubledFunction.ParameterTypes[0].Type.Name);
             Assert.Empty(doubledFunction.LocalFunctions);
 
 
@@ -317,29 +317,29 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("Namespace1.Class1.Method(int, int).StringSum(int, int)",
                 stringifyFunction.ContainingTypeName);
             Assert.Equal("Stringify", stringifyFunction.Name);
-            Assert.Equal("string", stringifyFunction.ReturnType.Name);
+            Assert.Equal("string", stringifyFunction.ReturnValue.Type.Name);
             Assert.Equal(2, stringifyFunction.ParameterTypes.Count);
-            Assert.Equal("int", stringifyFunction.ParameterTypes[0].Name);
-            Assert.Equal("int", stringifyFunction.ParameterTypes[1].Name);
+            Assert.Equal("int", stringifyFunction.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", stringifyFunction.ParameterTypes[1].Type.Name);
             Assert.Equal(2, stringifyFunction.LocalFunctions.Count);
 
             var calculateFunction = (MethodModel)stringifyFunction.LocalFunctions[0];
             Assert.Equal("Namespace1.Class1.Method(int, int).StringSum(int, int).Stringify(int, int)",
                 calculateFunction.ContainingTypeName);
             Assert.Equal("Calculate", calculateFunction.Name);
-            Assert.Equal("int", calculateFunction.ReturnType.Name);
+            Assert.Equal("int", calculateFunction.ReturnValue.Type.Name);
             Assert.Equal(2, calculateFunction.ParameterTypes.Count);
-            Assert.Equal("int", calculateFunction.ParameterTypes[0].Name);
-            Assert.Equal("int", calculateFunction.ParameterTypes[1].Name);
+            Assert.Equal("int", calculateFunction.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", calculateFunction.ParameterTypes[1].Type.Name);
             Assert.Empty(calculateFunction.LocalFunctions);
 
             var stringifyNumberFunction = (MethodModel)stringifyFunction.LocalFunctions[1];
             Assert.Equal("Namespace1.Class1.Method(int, int).StringSum(int, int).Stringify(int, int)",
                 stringifyNumberFunction.ContainingTypeName);
             Assert.Equal("StringifyNumber", stringifyNumberFunction.Name);
-            Assert.Equal("string", stringifyNumberFunction.ReturnType.Name);
+            Assert.Equal("string", stringifyNumberFunction.ReturnValue.Type.Name);
             Assert.Equal(1, stringifyNumberFunction.ParameterTypes.Count);
-            Assert.Equal("int", stringifyNumberFunction.ParameterTypes[0].Name);
+            Assert.Equal("int", stringifyNumberFunction.ParameterTypes[0].Type.Name);
             Assert.Empty(stringifyNumberFunction.LocalFunctions);
         }
 
@@ -364,8 +364,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("Namespace1.Class1.Method(int, int).StringSum(int, int)",
                 stringSumFunction.CalledMethods[0].ContainingTypeName);
             Assert.Equal(2, stringSumFunction.CalledMethods[0].ParameterTypes.Count);
-            Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[0].Name);
-            Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[1].Name);
+            Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[0].Type.Name);
+            Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[1].Type.Name);
 
             var sumFunction = (MethodModel)stringSumFunction.LocalFunctions[0];
             Assert.Equal("Sum", sumFunction.Name);
@@ -377,7 +377,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 Assert.Equal("Namespace1.Class1.Method(int, int).StringSum(int, int).Sum(int, int)",
                     calledMethod.ContainingTypeName);
                 Assert.Equal(1, calledMethod.ParameterTypes.Count);
-                Assert.Equal("int", calledMethod.ParameterTypes[0].Name);
+                Assert.Equal("int", calledMethod.ParameterTypes[0].Type.Name);
             }
 
             var doubledFunction = (MethodModel)sumFunction.LocalFunctions[0];
@@ -396,15 +396,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("Namespace1.Class1.Method(int, int).StringSum(int, int).Stringify(int, int)",
                 stringifyFunctionCalledMethod1.ContainingTypeName);
             Assert.Equal(1, stringifyFunctionCalledMethod1.ParameterTypes.Count);
-            Assert.Equal("int", stringifyFunctionCalledMethod1.ParameterTypes[0].Name);
+            Assert.Equal("int", stringifyFunctionCalledMethod1.ParameterTypes[0].Type.Name);
 
             var stringifyFunctionCalledMethod2 = stringifyFunction.CalledMethods[1];
             Assert.Equal("Calculate", stringifyFunctionCalledMethod2.Name);
             Assert.Equal("Namespace1.Class1.Method(int, int).StringSum(int, int).Stringify(int, int)",
                 stringifyFunctionCalledMethod2.ContainingTypeName);
             Assert.Equal(2, stringifyFunctionCalledMethod2.ParameterTypes.Count);
-            Assert.Equal("int", stringifyFunctionCalledMethod2.ParameterTypes[0].Name);
-            Assert.Equal("int", stringifyFunctionCalledMethod2.ParameterTypes[1].Name);
+            Assert.Equal("int", stringifyFunctionCalledMethod2.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", stringifyFunctionCalledMethod2.ParameterTypes[1].Type.Name);
 
 
             var calculateFunction = (MethodModel)stringifyFunction.LocalFunctions[0];
@@ -417,8 +417,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("Namespace1.Class1.Method(int, int).StringSum(int, int)",
                 calculateFunctionCalledMethod.ContainingTypeName);
             Assert.Equal(2, calculateFunctionCalledMethod.ParameterTypes.Count);
-            Assert.Equal("int", calculateFunctionCalledMethod.ParameterTypes[0].Name);
-            Assert.Equal("int", calculateFunctionCalledMethod.ParameterTypes[1].Name);
+            Assert.Equal("int", calculateFunctionCalledMethod.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", calculateFunctionCalledMethod.ParameterTypes[1].Type.Name);
 
 
             var stringifyNumberFunction = (MethodModel)stringifyFunction.LocalFunctions[1];
@@ -450,29 +450,29 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             var stringSumFunction = (MethodModel)property.LocalFunctions[0];
             Assert.Equal("Namespace1.Class1.Value", stringSumFunction.ContainingTypeName);
             Assert.Equal("StringSum", stringSumFunction.Name);
-            Assert.Equal("string", stringSumFunction.ReturnType.Name);
+            Assert.Equal("string", stringSumFunction.ReturnValue.Type.Name);
             Assert.Equal(2, stringSumFunction.ParameterTypes.Count);
-            Assert.Equal("int", stringSumFunction.ParameterTypes[0].Name);
-            Assert.Equal("int", stringSumFunction.ParameterTypes[1].Name);
+            Assert.Equal("int", stringSumFunction.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", stringSumFunction.ParameterTypes[1].Type.Name);
             Assert.Equal(2, stringSumFunction.LocalFunctions.Count);
 
 
             var sumFunction = (MethodModel)stringSumFunction.LocalFunctions[0];
             Assert.Equal("Namespace1.Class1.Value.StringSum(int, int)", sumFunction.ContainingTypeName);
             Assert.Equal("Sum", sumFunction.Name);
-            Assert.Equal("int", sumFunction.ReturnType.Name);
+            Assert.Equal("int", sumFunction.ReturnValue.Type.Name);
             Assert.Equal(2, sumFunction.ParameterTypes.Count);
-            Assert.Equal("int", sumFunction.ParameterTypes[0].Name);
-            Assert.Equal("int", sumFunction.ParameterTypes[1].Name);
+            Assert.Equal("int", sumFunction.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", sumFunction.ParameterTypes[1].Type.Name);
             Assert.Equal(1, sumFunction.LocalFunctions.Count);
 
             var doubledFunction = (MethodModel)sumFunction.LocalFunctions[0];
             Assert.Equal("Namespace1.Class1.Value.StringSum(int, int).Sum(int, int)",
                 doubledFunction.ContainingTypeName);
             Assert.Equal("Doubled", doubledFunction.Name);
-            Assert.Equal("int", doubledFunction.ReturnType.Name);
+            Assert.Equal("int", doubledFunction.ReturnValue.Type.Name);
             Assert.Equal(1, doubledFunction.ParameterTypes.Count);
-            Assert.Equal("int", doubledFunction.ParameterTypes[0].Name);
+            Assert.Equal("int", doubledFunction.ParameterTypes[0].Type.Name);
             Assert.Empty(doubledFunction.LocalFunctions);
 
 
@@ -480,29 +480,29 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("Namespace1.Class1.Value.StringSum(int, int)",
                 stringifyFunction.ContainingTypeName);
             Assert.Equal("Stringify", stringifyFunction.Name);
-            Assert.Equal("string", stringifyFunction.ReturnType.Name);
+            Assert.Equal("string", stringifyFunction.ReturnValue.Type.Name);
             Assert.Equal(2, stringifyFunction.ParameterTypes.Count);
-            Assert.Equal("int", stringifyFunction.ParameterTypes[0].Name);
-            Assert.Equal("int", stringifyFunction.ParameterTypes[1].Name);
+            Assert.Equal("int", stringifyFunction.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", stringifyFunction.ParameterTypes[1].Type.Name);
             Assert.Equal(2, stringifyFunction.LocalFunctions.Count);
 
             var calculateFunction = (MethodModel)stringifyFunction.LocalFunctions[0];
             Assert.Equal("Namespace1.Class1.Value.StringSum(int, int).Stringify(int, int)",
                 calculateFunction.ContainingTypeName);
             Assert.Equal("Calculate", calculateFunction.Name);
-            Assert.Equal("int", calculateFunction.ReturnType.Name);
+            Assert.Equal("int", calculateFunction.ReturnValue.Type.Name);
             Assert.Equal(2, calculateFunction.ParameterTypes.Count);
-            Assert.Equal("int", calculateFunction.ParameterTypes[0].Name);
-            Assert.Equal("int", calculateFunction.ParameterTypes[1].Name);
+            Assert.Equal("int", calculateFunction.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", calculateFunction.ParameterTypes[1].Type.Name);
             Assert.Empty(calculateFunction.LocalFunctions);
 
             var stringifyNumberFunction = (MethodModel)stringifyFunction.LocalFunctions[1];
             Assert.Equal("Namespace1.Class1.Value.StringSum(int, int).Stringify(int, int)",
                 stringifyNumberFunction.ContainingTypeName);
             Assert.Equal("StringifyNumber", stringifyNumberFunction.Name);
-            Assert.Equal("string", stringifyNumberFunction.ReturnType.Name);
+            Assert.Equal("string", stringifyNumberFunction.ReturnValue.Type.Name);
             Assert.Equal(1, stringifyNumberFunction.ParameterTypes.Count);
-            Assert.Equal("int", stringifyNumberFunction.ParameterTypes[0].Name);
+            Assert.Equal("int", stringifyNumberFunction.ParameterTypes[0].Type.Name);
             Assert.Empty(stringifyNumberFunction.LocalFunctions);
         }
 
@@ -529,8 +529,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("Namespace1.Class1.Value.StringSum(int, int)",
                 stringSumFunction.CalledMethods[0].ContainingTypeName);
             Assert.Equal(2, stringSumFunction.CalledMethods[0].ParameterTypes.Count);
-            Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[0].Name);
-            Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[1].Name);
+            Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[0].Type.Name);
+            Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[1].Type.Name);
 
             var sumFunction = (MethodModel)stringSumFunction.LocalFunctions[0];
             Assert.Equal("Sum", sumFunction.Name);
@@ -542,7 +542,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 Assert.Equal("Namespace1.Class1.Value.StringSum(int, int).Sum(int, int)",
                     calledMethod.ContainingTypeName);
                 Assert.Equal(1, calledMethod.ParameterTypes.Count);
-                Assert.Equal("int", calledMethod.ParameterTypes[0].Name);
+                Assert.Equal("int", calledMethod.ParameterTypes[0].Type.Name);
             }
 
             var doubledFunction = (MethodModel)sumFunction.LocalFunctions[0];
@@ -561,15 +561,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("Namespace1.Class1.Value.StringSum(int, int).Stringify(int, int)",
                 stringifyFunctionCalledMethod1.ContainingTypeName);
             Assert.Equal(1, stringifyFunctionCalledMethod1.ParameterTypes.Count);
-            Assert.Equal("int", stringifyFunctionCalledMethod1.ParameterTypes[0].Name);
+            Assert.Equal("int", stringifyFunctionCalledMethod1.ParameterTypes[0].Type.Name);
 
             var stringifyFunctionCalledMethod2 = stringifyFunction.CalledMethods[1];
             Assert.Equal("Calculate", stringifyFunctionCalledMethod2.Name);
             Assert.Equal("Namespace1.Class1.Value.StringSum(int, int).Stringify(int, int)",
                 stringifyFunctionCalledMethod2.ContainingTypeName);
             Assert.Equal(2, stringifyFunctionCalledMethod2.ParameterTypes.Count);
-            Assert.Equal("int", stringifyFunctionCalledMethod2.ParameterTypes[0].Name);
-            Assert.Equal("int", stringifyFunctionCalledMethod2.ParameterTypes[1].Name);
+            Assert.Equal("int", stringifyFunctionCalledMethod2.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", stringifyFunctionCalledMethod2.ParameterTypes[1].Type.Name);
 
 
             var calculateFunction = (MethodModel)stringifyFunction.LocalFunctions[0];
@@ -582,8 +582,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("Namespace1.Class1.Value.StringSum(int, int)",
                 calculateFunctionCalledMethod.ContainingTypeName);
             Assert.Equal(2, calculateFunctionCalledMethod.ParameterTypes.Count);
-            Assert.Equal("int", calculateFunctionCalledMethod.ParameterTypes[0].Name);
-            Assert.Equal("int", calculateFunctionCalledMethod.ParameterTypes[1].Name);
+            Assert.Equal("int", calculateFunctionCalledMethod.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", calculateFunctionCalledMethod.ParameterTypes[1].Type.Name);
 
 
             var stringifyNumberFunction = (MethodModel)stringifyFunction.LocalFunctions[1];

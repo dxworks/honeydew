@@ -2,7 +2,7 @@
 
 namespace HoneydewModels.Types
 {
-    public interface IPropertyType : IFieldType, ICallingMethodsType, ICyclomaticComplexityType, ITypeWithLinesOfCode
+    public interface IPropertyType : IFieldType, ICallingMethodsType, ITypeWithCyclomaticComplexity, ITypeWithLinesOfCode
     {
         public IList<string> Accessors { get; set; }
     }

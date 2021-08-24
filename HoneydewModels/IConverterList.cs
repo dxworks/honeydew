@@ -16,6 +16,7 @@ namespace HoneydewModels
         {
             return new List<JsonConverter>
             {
+                new ModelJsonConverter<IEntityType, EntityTypeModel>(),
                 new ModelJsonConverter<IParameterType, ParameterModel>(),
                 new ModelJsonConverter<IBaseType, BaseTypeModel>(),
                 new ModelJsonConverter<IConstructorType, ConstructorModel>(),
@@ -23,7 +24,7 @@ namespace HoneydewModels
                 new ModelJsonConverter<IClassType, ClassModel>(),
                 new ModelJsonConverter<IFieldType, FieldModel>(),
                 new ModelJsonConverter<IPropertyType, PropertyModel>(),
-                new ModelJsonConverter<IReturnType, ReturnTypeModel>(),
+                new ModelJsonConverter<IReturnValueType, ReturnValueModel>(),
                 new ModelJsonConverter<IImportType, UsingModel>(),
                 new ModelJsonConverter<IMethodSignatureType, MethodCallModel>(),
                 new ModelJsonConverter<IMethodTypeWithLocalFunctions, MethodModel>(),

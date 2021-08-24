@@ -5,7 +5,7 @@ namespace HoneydewModels.CSharp
 {
     public record ParameterModel : IModelEntity, IParameterType
     {
-        public string Name { get; set; }
+        public IEntityType Type { get; set; }
 
         public string Modifier { get; init; } = "";
 

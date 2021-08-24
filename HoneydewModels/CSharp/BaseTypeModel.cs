@@ -4,8 +4,8 @@ namespace HoneydewModels.CSharp
 {
     public class BaseTypeModel : IModelEntity, IBaseType
     {
-        public string Name { get; set; }
-        
-        public string ClassType { get; set; }
+        public IEntityType Type { get; set; }
+
+        public string Kind { get; set; }
     }
 }

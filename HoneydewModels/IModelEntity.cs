@@ -2,7 +2,7 @@
 
 namespace HoneydewModels
 {
-    public interface IModelEntity : INamedType
+    public interface IModelEntity : IType
     {
     }
 }

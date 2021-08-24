@@ -170,14 +170,14 @@ namespace HoneydewExtractors.Processors
         {
             var namespaceAccess = $"{usingModel.Alias}.";
 
-            if (classModel.Fields.Any(fieldModel => fieldModel.Type.StartsWith(namespaceAccess)))
+            if (classModel.Fields.Any(fieldModel => fieldModel.Type.Name.StartsWith(namespaceAccess)))
             {
                 return nameof(EAliasType.Namespace);
             }
 
             foreach (var propertyModel in classModel.Properties)
             {
-                if (propertyModel.Type.StartsWith(namespaceAccess))
+                if (propertyModel.Type.Name.StartsWith(namespaceAccess))
                 {
                     return nameof(EAliasType.Namespace);
                 }
@@ -204,14 +204,14 @@ namespace HoneydewExtractors.Processors
             {
                 foreach (var methodModel in methodTypes)
                 {
-                    if (!string.IsNullOrEmpty(methodModel.ReturnType.Name) &&
-                        methodModel.ReturnType.Name.StartsWith(namespaceAccess))
+                    if (!string.IsNullOrEmpty(methodModel.ReturnValue.Type.Name) &&
+                        methodModel.ReturnValue.Type.Name.StartsWith(namespaceAccess))
                     {
                         return true;
                     }
 
                     if (methodModel.ParameterTypes.Any(parameterModel =>
-                        parameterModel.Name.StartsWith(namespaceAccess)))
+                        parameterModel.Type.Name.StartsWith(namespaceAccess)))
                     {
                         return true;
                     }
@@ -230,7 +230,7 @@ namespace HoneydewExtractors.Processors
                 foreach (var methodModel in constructorTypes)
                 {
                     if (methodModel.ParameterTypes.Any(parameterModel =>
-                        parameterModel.Name.StartsWith(namespaceAccess)))
+                        parameterModel.Type.Name.StartsWith(namespaceAccess)))
                     {
                         return true;
                     }
@@ -255,7 +255,7 @@ namespace HoneydewExtractors.Processors
                     }
 
                     if (calledMethod.ParameterTypes.Any(parameterModel =>
-                        parameterModel.Name.StartsWith(namespaceAccess)))
+                        parameterModel.Type.Name.StartsWith(namespaceAccess)))
                     {
                         return true;
                     }
@@ -288,8 +288,8 @@ namespace HoneydewExtractors.Processors
                                 var iCopy = i;
                                 AddAmbiguousNames(() =>
                                 {
-                                    classModel.BaseTypes[iCopy].Name = FindClassFullName(
-                                        classModel.BaseTypes[iCopy].Name,
+                                    classModel.BaseTypes[iCopy].Type.Name = FindClassFullName(
+                                        classModel.BaseTypes[iCopy].Type.Name,
                                         namespaceModel, projectModel, solutionModel, repositoryModel,
                                         classModel.Imports, classModel.FilePath);
                                 });
@@ -299,7 +299,7 @@ namespace HoneydewExtractors.Processors
                             {
                                 AddAmbiguousNames(() =>
                                 {
-                                    fieldModel.Type = FindClassFullName(fieldModel.Type,
+                                    fieldModel.Type.Name = FindClassFullName(fieldModel.Type.Name,
                                         namespaceModel, projectModel, solutionModel, repositoryModel,
                                         classModel.Imports, classModel.FilePath);
                                 });
@@ -309,7 +309,7 @@ namespace HoneydewExtractors.Processors
                             {
                                 AddAmbiguousNames(() =>
                                 {
-                                    propertyModel.Type = FindClassFullName(propertyModel.Type,
+                                    propertyModel.Type.Name = FindClassFullName(propertyModel.Type.Name,
                                         namespaceModel, projectModel, solutionModel, repositoryModel,
                                         classModel.Imports, classModel.FilePath);
                                 });
@@ -321,11 +321,11 @@ namespace HoneydewExtractors.Processors
 
                             foreach (var methodModel in classModel.Methods)
                             {
-                                if (methodModel.ReturnType != null)
+                                if (methodModel.ReturnValue != null)
                                 {
                                     AddAmbiguousNames(() =>
                                     {
-                                        methodModel.ReturnType.Name = FindClassFullName(methodModel.ReturnType.Name,
+                                        methodModel.ReturnValue.Type.Name = FindClassFullName(methodModel.ReturnValue.Type.Name,
                                             namespaceModel, projectModel, solutionModel, repositoryModel,
                                             classModel.Imports, classModel.FilePath);
                                     });
@@ -383,7 +383,7 @@ namespace HoneydewExtractors.Processors
                 {
                     AddAmbiguousNames(() =>
                     {
-                        parameterModel.Name = FindClassFullName(parameterModel.Name, namespaceModel,
+                        parameterModel.Type.Name = FindClassFullName(parameterModel.Type.Name, namespaceModel,
                             projectModel, solutionModel, repositoryModel, usings, classFilePath);
                     });
                 }
@@ -404,7 +404,7 @@ namespace HoneydewExtractors.Processors
                 {
                     AddAmbiguousNames(() =>
                     {
-                        parameterModel.Name = FindClassFullName(parameterModel.Name, namespaceModel,
+                        parameterModel.Type.Name = FindClassFullName(parameterModel.Type.Name, namespaceModel,
                             projectModel, solutionModel, repositoryModel, usings, classFilePath);
                     });
                 }
@@ -466,7 +466,7 @@ namespace HoneydewExtractors.Processors
                 {
                     if (fieldModel.Name == containingClassName)
                     {
-                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(fieldModel.Type);
+                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(fieldModel.Type.Name);
                     }
                 }
 
@@ -474,7 +474,7 @@ namespace HoneydewExtractors.Processors
                 {
                     if (propertyModel.Name == containingClassName)
                     {
-                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(propertyModel.Type);
+                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(propertyModel.Type.Name);
                     }
                 }
 
@@ -509,8 +509,8 @@ namespace HoneydewExtractors.Processors
 
             for (var i = 0; i < firstMethodParameters.Count; i++)
             {
-                if (CSharpConstants.ConvertPrimitiveTypeToSystemType(firstMethodParameters[i].Name) !=
-                    CSharpConstants.ConvertPrimitiveTypeToSystemType(secondMethodParameters[i].Name))
+                if (CSharpConstants.ConvertPrimitiveTypeToSystemType(firstMethodParameters[i].Type.Name) !=
+                    CSharpConstants.ConvertPrimitiveTypeToSystemType(secondMethodParameters[i].Type.Name))
                 {
                     return false;
                 }

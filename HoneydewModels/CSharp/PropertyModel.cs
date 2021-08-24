@@ -16,7 +16,7 @@ namespace HoneydewModels.CSharp
 
         public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
 
-        public string Type { get; set; }
+        public IEntityType Type { get; set; }
 
         public bool IsEvent { get; set; }
 

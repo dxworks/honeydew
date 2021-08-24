@@ -25,9 +25,9 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions
             var returnTypeModifier = CSharpHelperMethods.SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
 
             modelType.Name = syntaxNode.Identifier.ToString();
-            modelType.ReturnType = new ReturnTypeModel
+            modelType.ReturnValue = new ReturnValueModel
             {
-                Name = returnType,
+                Type = returnType,
                 Modifier = returnTypeModifier
             };
             modelType.ContainingTypeName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);

@@ -194,14 +194,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                 Assert.Equal(1, classModel.Methods.Count);
                 Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
                 var parameterModel = (ParameterModel)classModel.Methods[0].ParameterTypes[0];
-                Assert.Equal("int", parameterModel.Name);
+                Assert.Equal("int", parameterModel.Type.Name);
                 Assert.Equal(parameterModifier, parameterModel.Modifier);
                 Assert.Null(parameterModel.DefaultValue);
 
                 Assert.Equal(1, classModel.Constructors.Count);
                 Assert.Equal(1, classModel.Constructors[0].ParameterTypes.Count);
                 var parameterModelConstructor = (ParameterModel)classModel.Constructors[0].ParameterTypes[0];
-                Assert.Equal("int", parameterModelConstructor.Name);
+                Assert.Equal("int", parameterModelConstructor.Type.Name);
                 Assert.Equal(parameterModifier, parameterModelConstructor.Modifier);
                 Assert.Null(parameterModelConstructor.DefaultValue);
             }
@@ -231,7 +231,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                 Assert.Equal(1, classModel.Methods.Count);
                 Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
                 var parameterModel = (ParameterModel)classModel.Methods[0].ParameterTypes[0];
-                Assert.Equal("int", parameterModel.Name);
+                Assert.Equal("int", parameterModel.Type.Name);
                 Assert.Equal("this", parameterModel.Modifier);
                 Assert.Null(parameterModel.DefaultValue);
             }
@@ -264,14 +264,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                 Assert.Equal(1, classModel.Methods.Count);
                 Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
                 var parameterModel = (ParameterModel)classModel.Methods[0].ParameterTypes[0];
-                Assert.Equal("int[]", parameterModel.Name);
+                Assert.Equal("int[]", parameterModel.Type.Name);
                 Assert.Equal("params", parameterModel.Modifier);
                 Assert.Null(parameterModel.DefaultValue);
 
                 Assert.Equal(1, classModel.Constructors.Count);
                 Assert.Equal(1, classModel.Constructors[0].ParameterTypes.Count);
                 var parameterModelConstructor = (ParameterModel)classModel.Constructors[0].ParameterTypes[0];
-                Assert.Equal("int[]", parameterModelConstructor.Name);
+                Assert.Equal("int[]", parameterModelConstructor.Type.Name);
                 Assert.Equal("params", parameterModelConstructor.Modifier);
                 Assert.Null(parameterModelConstructor.DefaultValue);
             }
@@ -307,13 +307,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
                 Assert.Equal(1, classModel.Methods[1].ParameterTypes.Count);
                 var method1Parameter = (ParameterModel)classModel.Methods[1].ParameterTypes[0];
-                Assert.Equal("object", method1Parameter.Name);
+                Assert.Equal("object", method1Parameter.Type.Name);
                 Assert.Equal("", method1Parameter.Modifier);
                 Assert.Equal("null", method1Parameter.DefaultValue);
 
                 Assert.Equal(1, classModel.Methods[2].ParameterTypes.Count);
                 var method2Parameter = (ParameterModel)classModel.Methods[2].ParameterTypes[0];
-                Assert.Equal("int", method2Parameter.Name);
+                Assert.Equal("int", method2Parameter.Type.Name);
                 Assert.Equal("", method2Parameter.Modifier);
                 Assert.Equal("15", method2Parameter.DefaultValue);
 
@@ -321,30 +321,30 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                 foreach (var parameterType in classModel.Methods[3].ParameterTypes)
                 {
                     var parameterModel = (ParameterModel)parameterType;
-                    Assert.Equal("int", parameterModel.Name);
+                    Assert.Equal("int", parameterModel.Type.Name);
                     Assert.Equal("", parameterModel.Modifier);
                     Assert.Null(parameterModel.DefaultValue);
                 }
 
                 Assert.Equal(3, classModel.Methods[4].ParameterTypes.Count);
                 var method4Parameter0 = (ParameterModel)classModel.Methods[4].ParameterTypes[0];
-                Assert.Equal("int", method4Parameter0.Name);
+                Assert.Equal("int", method4Parameter0.Type.Name);
                 Assert.Equal("", method4Parameter0.Modifier);
                 Assert.Null(method4Parameter0.DefaultValue);
 
                 var method4Parameter1 = (ParameterModel)classModel.Methods[4].ParameterTypes[1];
-                Assert.Equal("int", method4Parameter1.Name);
+                Assert.Equal("int", method4Parameter1.Type.Name);
                 Assert.Equal("in", method4Parameter1.Modifier);
                 Assert.Equal("15", method4Parameter1.DefaultValue);
 
                 var method4Parameter2 = (ParameterModel)classModel.Methods[4].ParameterTypes[2];
-                Assert.Equal("string", method4Parameter2.Name);
+                Assert.Equal("string", method4Parameter2.Type.Name);
                 Assert.Equal("", method4Parameter2.Modifier);
                 Assert.Equal("\"\"", method4Parameter2.DefaultValue);
 
                 Assert.Equal(1, classModel.Methods[5].ParameterTypes.Count);
                 var method5Parameter = (ParameterModel)classModel.Methods[5].ParameterTypes[0];
-                Assert.Equal("string", method5Parameter.Name);
+                Assert.Equal("string", method5Parameter.Type.Name);
                 Assert.Equal("", method5Parameter.Modifier);
                 Assert.Equal("\"null\"", method5Parameter.DefaultValue);
             }
@@ -473,19 +473,19 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal(3, fieldInfos.Count);
 
             Assert.Equal("A", fieldInfos[0].Name);
-            Assert.Equal("int", fieldInfos[0].Type);
+            Assert.Equal("int", fieldInfos[0].Type.Name);
             Assert.Equal("readonly", fieldInfos[0].Modifier);
             Assert.Equal("private", fieldInfos[0].AccessModifier);
             Assert.False(fieldInfos[0].IsEvent);
 
             Assert.Equal("X", fieldInfos[1].Name);
-            Assert.Equal("float", fieldInfos[1].Type);
+            Assert.Equal("float", fieldInfos[1].Type.Name);
             Assert.Equal("volatile", fieldInfos[1].Modifier);
             Assert.Equal("private", fieldInfos[1].AccessModifier);
             Assert.False(fieldInfos[1].IsEvent);
 
             Assert.Equal("Y", fieldInfos[2].Name);
-            Assert.Equal("string", fieldInfos[2].Type);
+            Assert.Equal("string", fieldInfos[2].Type.Name);
             Assert.Equal("static", fieldInfos[2].Modifier);
             Assert.Equal("private", fieldInfos[2].AccessModifier);
             Assert.False(fieldInfos[2].IsEvent);
@@ -518,31 +518,31 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal(5, fieldInfos.Count);
 
             Assert.Equal("AnimalNest", fieldInfos[0].Name);
-            Assert.Equal("int", fieldInfos[0].Type);
+            Assert.Equal("int", fieldInfos[0].Type.Name);
             Assert.Equal("", fieldInfos[0].Modifier);
             Assert.Equal(modifier, fieldInfos[0].AccessModifier);
             Assert.False(fieldInfos[0].IsEvent);
 
             Assert.Equal("X", fieldInfos[1].Name);
-            Assert.Equal("float", fieldInfos[1].Type);
+            Assert.Equal("float", fieldInfos[1].Type.Name);
             Assert.Equal("", fieldInfos[1].Modifier);
             Assert.Equal(modifier, fieldInfos[1].AccessModifier);
             Assert.False(fieldInfos[1].IsEvent);
 
             Assert.Equal("Yaz_fafa", fieldInfos[2].Name);
-            Assert.Equal("float", fieldInfos[2].Type);
+            Assert.Equal("float", fieldInfos[2].Type.Name);
             Assert.Equal("", fieldInfos[2].Modifier);
             Assert.Equal(modifier, fieldInfos[2].AccessModifier);
             Assert.False(fieldInfos[2].IsEvent);
 
             Assert.Equal("_zxy", fieldInfos[3].Name);
-            Assert.Equal("string", fieldInfos[3].Type);
+            Assert.Equal("string", fieldInfos[3].Type.Name);
             Assert.Equal("", fieldInfos[3].Modifier);
             Assert.Equal(modifier, fieldInfos[3].AccessModifier);
             Assert.False(fieldInfos[3].IsEvent);
 
             Assert.Equal("extractor", fieldInfos[4].Name);
-            Assert.Equal("CSharpMetricExtractor", fieldInfos[4].Type);
+            Assert.Equal("CSharpMetricExtractor", fieldInfos[4].Type.Name);
             Assert.Equal("", fieldInfos[4].Modifier);
             Assert.Equal(modifier, fieldInfos[4].AccessModifier);
             Assert.False(fieldInfos[4].IsEvent);
@@ -575,25 +575,25 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal(4, fieldInfos.Count);
 
             Assert.Equal("extractor", fieldInfos[0].Name);
-            Assert.Equal("CSharpMetricExtractor", fieldInfos[0].Type);
+            Assert.Equal("CSharpMetricExtractor", fieldInfos[0].Type.Name);
             Assert.Equal("", fieldInfos[0].Modifier);
             Assert.Equal(visibility, fieldInfos[0].AccessModifier);
             Assert.True(fieldInfos[0].IsEvent);
 
             Assert.Equal("_some_event", fieldInfos[1].Name);
-            Assert.Equal("int", fieldInfos[1].Type);
+            Assert.Equal("int", fieldInfos[1].Type.Name);
             Assert.Equal("", fieldInfos[1].Modifier);
             Assert.Equal(visibility, fieldInfos[1].AccessModifier);
             Assert.True(fieldInfos[1].IsEvent);
 
             Assert.Equal("MyAction1", fieldInfos[2].Name);
-            Assert.Equal("System.Action", fieldInfos[2].Type);
+            Assert.Equal("System.Action", fieldInfos[2].Type.Name);
             Assert.Equal("", fieldInfos[2].Modifier);
             Assert.Equal(visibility, fieldInfos[2].AccessModifier);
             Assert.True(fieldInfos[2].IsEvent);
 
             Assert.Equal("MyAction2", fieldInfos[3].Name);
-            Assert.Equal("System.Action", fieldInfos[3].Type);
+            Assert.Equal("System.Action", fieldInfos[3].Type.Name);
             Assert.Equal("", fieldInfos[3].Modifier);
             Assert.Equal(visibility, fieldInfos[3].AccessModifier);
             Assert.True(fieldInfos[3].IsEvent);
@@ -625,31 +625,31 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal(5, fieldInfos.Count);
 
             Assert.Equal("AnimalNest", fieldInfos[0].Name);
-            Assert.Equal("int", fieldInfos[0].Type);
+            Assert.Equal("int", fieldInfos[0].Type.Name);
             Assert.Equal(modifier, fieldInfos[0].Modifier);
             Assert.Equal("public", fieldInfos[0].AccessModifier);
             Assert.False(fieldInfos[0].IsEvent);
 
             Assert.Equal("X", fieldInfos[1].Name);
-            Assert.Equal("float", fieldInfos[1].Type);
+            Assert.Equal("float", fieldInfos[1].Type.Name);
             Assert.Equal(modifier, fieldInfos[1].Modifier);
             Assert.Equal("protected", fieldInfos[1].AccessModifier);
             Assert.False(fieldInfos[1].IsEvent);
 
             Assert.Equal("Yaz_fafa", fieldInfos[2].Name);
-            Assert.Equal("float", fieldInfos[2].Type);
+            Assert.Equal("float", fieldInfos[2].Type.Name);
             Assert.Equal(modifier, fieldInfos[2].Modifier);
             Assert.Equal("protected", fieldInfos[2].AccessModifier);
             Assert.False(fieldInfos[2].IsEvent);
 
             Assert.Equal("_zxy", fieldInfos[3].Name);
-            Assert.Equal("string", fieldInfos[3].Type);
+            Assert.Equal("string", fieldInfos[3].Type.Name);
             Assert.Equal(modifier, fieldInfos[3].Modifier);
             Assert.Equal("private", fieldInfos[3].AccessModifier);
             Assert.False(fieldInfos[3].IsEvent);
 
             Assert.Equal("extractor", fieldInfos[4].Name);
-            Assert.Equal("CSharpMetricExtractor", fieldInfos[4].Type);
+            Assert.Equal("CSharpMetricExtractor", fieldInfos[4].Type.Name);
             Assert.Equal(modifier, fieldInfos[4].Modifier);
             Assert.Equal("private", fieldInfos[4].AccessModifier);
             Assert.False(fieldInfos[4].IsEvent);
@@ -709,11 +709,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             var methodF = classModel.Methods[0];
             Assert.Equal("f", methodF.Name);
-            Assert.Equal("CSharpExtractor", methodF.ReturnType.Name);
-            Assert.Equal("", ((ReturnTypeModel)methodF.ReturnType).Modifier);
+            Assert.Equal("CSharpExtractor", methodF.ReturnValue.Type.Name);
+            Assert.Equal("", ((ReturnValueModel)methodF.ReturnValue).Modifier);
             Assert.Equal(1, methodF.ParameterTypes.Count);
             var parameterModel1 = (ParameterModel)methodF.ParameterTypes[0];
-            Assert.Equal("int", parameterModel1.Name);
+            Assert.Equal("int", parameterModel1.Type.Name);
             Assert.Equal("", parameterModel1.Modifier);
             Assert.Null(parameterModel1.DefaultValue);
             Assert.Equal("TopLevel.Foo", methodF.ContainingTypeName);
@@ -723,11 +723,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             var methodG = classModel.Methods[1];
             Assert.Equal("g", methodG.Name);
-            Assert.Equal("int", methodG.ReturnType.Name);
-            Assert.Equal("", ((ReturnTypeModel)methodG.ReturnType).Modifier);
+            Assert.Equal("int", methodG.ReturnValue.Type.Name);
+            Assert.Equal("", ((ReturnValueModel)methodG.ReturnValue).Modifier);
             Assert.Equal(1, methodG.ParameterTypes.Count);
             var parameterModel2 = (ParameterModel)methodG.ParameterTypes[0];
-            Assert.Equal("CSharpExtractor", parameterModel2.Name);
+            Assert.Equal("CSharpExtractor", parameterModel2.Type.Name);
             Assert.Equal("", parameterModel2.Modifier);
             Assert.Null(parameterModel2.DefaultValue);
             Assert.Equal("TopLevel.Foo", methodG.ContainingTypeName);
@@ -737,15 +737,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             var methodH = classModel.Methods[2];
             Assert.Equal("h", methodH.Name);
-            Assert.Equal("string", methodH.ReturnType.Name);
-            Assert.Equal("", ((ReturnTypeModel)methodH.ReturnType).Modifier);
+            Assert.Equal("string", methodH.ReturnValue.Type.Name);
+            Assert.Equal("", ((ReturnValueModel)methodH.ReturnValue).Modifier);
             Assert.Equal(2, methodH.ParameterTypes.Count);
             var parameterModel3 = (ParameterModel)methodH.ParameterTypes[0];
-            Assert.Equal("float", parameterModel3.Name);
+            Assert.Equal("float", parameterModel3.Type.Name);
             Assert.Equal("", parameterModel3.Modifier);
             Assert.Null(parameterModel3.DefaultValue);
             var parameterModel4 = (ParameterModel)methodH.ParameterTypes[1];
-            Assert.Equal("CSharpExtractor", parameterModel4.Name);
+            Assert.Equal("CSharpExtractor", parameterModel4.Type.Name);
             Assert.Equal("", parameterModel4.Modifier);
             Assert.Null(parameterModel4.DefaultValue);
             Assert.Equal("TopLevel.Foo", methodH.ContainingTypeName);
@@ -774,11 +774,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal(3, classModel.Methods.Count);
 
             Assert.Equal("f", classModel.Methods[0].Name);
-            Assert.Equal("void", classModel.Methods[0].ReturnType.Name);
-            Assert.Equal("", ((ReturnTypeModel)classModel.Methods[0].ReturnType).Modifier);
+            Assert.Equal("void", classModel.Methods[0].ReturnValue.Type.Name);
+            Assert.Equal("", ((ReturnValueModel)classModel.Methods[0].ReturnValue).Modifier);
             Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
             var parameterModel1 = (ParameterModel)classModel.Methods[0].ParameterTypes[0];
-            Assert.Equal("int", parameterModel1.Name);
+            Assert.Equal("int", parameterModel1.Type.Name);
             Assert.Equal("", parameterModel1.Modifier);
             Assert.Null(parameterModel1.DefaultValue);
             Assert.Equal("TopLevel.Foo", classModel.Methods[0].ContainingTypeName);
@@ -787,11 +787,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Empty(classModel.Methods[0].CalledMethods);
 
             Assert.Equal("g", classModel.Methods[1].Name);
-            Assert.Equal("int", classModel.Methods[1].ReturnType.Name);
-            Assert.Equal("", ((ReturnTypeModel)classModel.Methods[1].ReturnType).Modifier);
+            Assert.Equal("int", classModel.Methods[1].ReturnValue.Type.Name);
+            Assert.Equal("", ((ReturnValueModel)classModel.Methods[1].ReturnValue).Modifier);
             Assert.Equal(1, classModel.Methods[1].ParameterTypes.Count);
             var parameterModel2 = (ParameterModel)classModel.Methods[1].ParameterTypes[0];
-            Assert.Equal("CSharpExtractor", parameterModel2.Name);
+            Assert.Equal("CSharpExtractor", parameterModel2.Type.Name);
             Assert.Equal("", parameterModel2.Modifier);
             Assert.Null(parameterModel2.DefaultValue);
             Assert.Equal("TopLevel.Foo", classModel.Methods[1].ContainingTypeName);
@@ -802,15 +802,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal("TopLevel.Foo", classModel.Methods[1].CalledMethods[0].ContainingTypeName);
 
             Assert.Equal("h", classModel.Methods[2].Name);
-            Assert.Equal("string", classModel.Methods[2].ReturnType.Name);
-            Assert.Equal("", ((ReturnTypeModel)classModel.Methods[2].ReturnType).Modifier);
+            Assert.Equal("string", classModel.Methods[2].ReturnValue.Type.Name);
+            Assert.Equal("", ((ReturnValueModel)classModel.Methods[2].ReturnValue).Modifier);
             Assert.Equal(2, classModel.Methods[2].ParameterTypes.Count);
             var parameterModel3 = (ParameterModel)classModel.Methods[2].ParameterTypes[0];
-            Assert.Equal("float", parameterModel3.Name);
+            Assert.Equal("float", parameterModel3.Type.Name);
             Assert.Equal("", parameterModel3.Modifier);
             Assert.Null(parameterModel3.DefaultValue);
             var parameterModel4 = (ParameterModel)classModel.Methods[2].ParameterTypes[1];
-            Assert.Equal("CSharpExtractor", parameterModel4.Name);
+            Assert.Equal("CSharpExtractor", parameterModel4.Type.Name);
             Assert.Equal("", parameterModel4.Modifier);
             Assert.Null(parameterModel4.DefaultValue);
             Assert.Equal("TopLevel.Foo", classModel.Methods[2].ContainingTypeName);
@@ -859,8 +859,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             Assert.Equal(1, classModel.Methods.Count);
             Assert.Equal("ToString", classModel.Methods[0].Name);
-            Assert.Equal("string", classModel.Methods[0].ReturnType.Name);
-            Assert.Equal("", ((ReturnTypeModel)classModel.Methods[0].ReturnType).Modifier);
+            Assert.Equal("string", classModel.Methods[0].ReturnValue.Type.Name);
+            Assert.Equal("", ((ReturnValueModel)classModel.Methods[0].ReturnValue).Modifier);
             Assert.Equal("public", classModel.Methods[0].AccessModifier);
             Assert.Equal("readonly override", classModel.Methods[0].Modifier);
 
@@ -868,7 +868,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             foreach (var propertyModel in classModel.Properties)
             {
-                Assert.Equal("double", propertyModel.Type);
+                Assert.Equal("double", propertyModel.Type.Name);
                 Assert.Equal("public", propertyModel.AccessModifier);
             }
 
@@ -909,7 +909,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             foreach (var propertyModel in classModel.Properties)
             {
-                Assert.Equal("Geometry.Point", propertyModel.Type);
+                Assert.Equal("Geometry.Point", propertyModel.Type.Name);
                 Assert.Equal("public", propertyModel.AccessModifier);
                 Assert.Empty(propertyModel.Accessors);
             }
@@ -940,7 +940,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             foreach (var fieldModel in classModel1.Fields)
             {
                 Assert.Equal("public", fieldModel.AccessModifier);
-                Assert.Equal("System.Span<int>", fieldModel.Type);
+                Assert.Equal("System.Span<int>", fieldModel.Type.Name);
             }
 
             var classModel2 = (ClassModel)classTypes[1];
@@ -960,10 +960,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             }
 
             Assert.Equal("Rate", classModel2.Properties[0].Name);
-            Assert.Equal("double", classModel2.Properties[0].Type);
+            Assert.Equal("double", classModel2.Properties[0].Type.Name);
 
             Assert.Equal("Values", classModel2.Properties[1].Name);
-            Assert.Equal("System.ReadOnlySpan<double>", classModel2.Properties[1].Type);
+            Assert.Equal("System.ReadOnlySpan<double>", classModel2.Properties[1].Type.Name);
         }
 
         [Theory]
@@ -985,15 +985,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                 Assert.Equal("static", methodModel.Modifier);
                 Assert.Equal("public", methodModel.AccessModifier);
                 Assert.Equal(2, methodModel.ParameterTypes.Count);
-                Assert.Equal("int[*,*]", methodModel.ParameterTypes[0].Name);
-                Assert.Equal("int", methodModel.ReturnType.Name);
+                Assert.Equal("int[*,*]", methodModel.ParameterTypes[0].Type.Name);
+                Assert.Equal("int", methodModel.ReturnValue.Type.Name);
             }
 
-            Assert.Equal("ref", ((ReturnTypeModel)classModel.Methods[0].ReturnType).Modifier);
-            Assert.Equal("System.Func<int, bool>", classModel.Methods[0].ParameterTypes[1].Name);
+            Assert.Equal("ref", ((ReturnValueModel)classModel.Methods[0].ReturnValue).Modifier);
+            Assert.Equal("System.Func<int, bool>", classModel.Methods[0].ParameterTypes[1].Type.Name);
 
-            Assert.Equal("ref readonly", ((ReturnTypeModel)classModel.Methods[1].ReturnType).Modifier);
-            Assert.Equal("bool", classModel.Methods[1].ParameterTypes[1].Name);
+            Assert.Equal("ref readonly", ((ReturnValueModel)classModel.Methods[1].ReturnValue).Modifier);
+            Assert.Equal("bool", classModel.Methods[1].ParameterTypes[1].Type.Name);
         }
     }
 }

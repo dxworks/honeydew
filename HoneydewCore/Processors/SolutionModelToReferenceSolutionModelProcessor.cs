@@ -79,19 +79,19 @@ namespace HoneydewCore.Processors
 
                 if (referenceClassModel == null) continue;
 
-                var firstOrDefault = classModel.BaseTypes.FirstOrDefault(baseType => baseType.ClassType == "class");
+                var firstOrDefault = classModel.BaseTypes.FirstOrDefault(baseType => baseType.Kind == "class");
                 if (firstOrDefault != null)
                 {
                     referenceClassModel.BaseClass =
-                        GetClassReferenceByName(referenceSolutionModel, firstOrDefault.Name);
+                        GetClassReferenceByName(referenceSolutionModel, firstOrDefault.Type.Name);
                 }
 
                 foreach (var baseType in classModel.BaseTypes)
                 {
-                    if (baseType.ClassType == "interface")
+                    if (baseType.Kind == "interface")
                     {
                         referenceClassModel.BaseInterfaces.Add(GetClassReferenceByName(referenceSolutionModel,
-                            baseType.Name));
+                            baseType.Type.Name));
                     }
                 }
             }
@@ -120,7 +120,7 @@ namespace HoneydewCore.Processors
                         AccessModifier = fieldModel.AccessModifier,
                         IsEvent = fieldModel.IsEvent,
                         ContainingClass = referenceClassModel,
-                        Type = GetClassReferenceByName(referenceSolutionModel, fieldModel.Type)
+                        Type = GetClassReferenceByName(referenceSolutionModel, fieldModel.Type.Name)
                     });
                 }
             }
@@ -139,8 +139,8 @@ namespace HoneydewCore.Processors
                         Name = methodModel.Name,
                         AccessModifier = methodModel.AccessModifier,
                         ContainingClass = referenceClassModel,
-                        ReturnTypeReferenceClassModel = methodModel.ReturnType != null
-                            ? GetClassReferenceByName(referenceSolutionModel, methodModel.ReturnType.Name)
+                        ReturnTypeReferenceClassModel = methodModel.ReturnValue != null
+                            ? GetClassReferenceByName(referenceSolutionModel, methodModel.ReturnValue.Type.Name)
                             : null,
                         Parameters = referenceClassModels
                     };
@@ -209,7 +209,7 @@ namespace HoneydewCore.Processors
 
                 for (var i = 0; i < method.Parameters.Count; i++)
                 {
-                    if (method.Parameters[i].Type.Name != parameters[i].Name)
+                    if (method.Parameters[i].Type.Name != parameters[i].Type.Name)
                     {
                         return false;
                     }
@@ -244,7 +244,7 @@ namespace HoneydewCore.Processors
                 {
                     var parameterModel = (ParameterModel)parameterType;
                     var classReferenceByName =
-                        GetClassReferenceByName(referenceSolutionModel, parameterModel.Name);
+                        GetClassReferenceByName(referenceSolutionModel, parameterModel.Type.Name);
                     return new ReferenceParameterModel
                     {
                         Type = classReferenceByName,

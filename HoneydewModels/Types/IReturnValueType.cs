@@ -1,9 +1,7 @@
 ﻿namespace HoneydewModels.Types
 {
-    public interface IBaseType : IType
+    public interface IReturnValueType : ITypeWithAttributes
     {
         public IEntityType Type { get; set; }
-        
-        public string Kind { get; set; }
     }
 }

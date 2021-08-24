@@ -39,7 +39,7 @@ namespace HoneydewCoreIntegrationTests.IO.Models.Importers
         public void Import_ShouldReturnModel_WhenProvidedCorrectContent()
         {
             const string fileContent =
-                @"{""Projects"":[{""Name"":""ProjectName"",""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""SomePath"",""Name"":""SomeNamespace.FirstClass"",""BaseTypes"":[{""Name"":""object"", ""ClassType"":""class""}],""Fields"":[],""Metrics"":[{""ExtractorName"":""HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpBaseClassMetric"",""ValueType"":""HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpInheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}]}]}]}]}";
+                @"{""Projects"":[{""Name"":""ProjectName"",""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""SomePath"",""Name"":""SomeNamespace.FirstClass"",""BaseTypes"":[{""Type"":{""Name"":""object""}, ""Kind"":""class""}],""Fields"":[],""Metrics"":[{""ExtractorName"":""HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpBaseClassMetric"",""ValueType"":""HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpInheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}]}]}]}]}";
 
             var loadModelFromFile = _sut.Import(fileContent);
 
@@ -56,8 +56,8 @@ namespace HoneydewCoreIntegrationTests.IO.Models.Importers
 
             Assert.Equal("SomePath", classModel.FilePath);
             Assert.Equal("SomeNamespace.FirstClass", classModel.Name);
-            Assert.Equal("object", classModel.BaseTypes[0].Name);
-            Assert.Equal("class", classModel.BaseTypes[0].ClassType);
+            Assert.Equal("object", classModel.BaseTypes[0].Type.Name);
+            Assert.Equal("class", classModel.BaseTypes[0].Kind);
             Assert.Empty(classModel.Fields);
             Assert.Empty(classModel.Methods);
             Assert.Equal(1, classModel.Metrics.Count);

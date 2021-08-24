@@ -26,8 +26,8 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class
                     {
                         modelType.BaseTypes.Add(new BaseTypeModel
                         {
-                            Name = baseInterface,
-                            ClassType = "interface"
+                            Type = baseInterface,
+                            Kind = "interface"
                         });
                     }
                 }
@@ -37,16 +37,16 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class
                 {
                     modelType.BaseTypes.Add(new BaseTypeModel
                     {
-                        Name = CSharpHelperMethods.GetBaseClassName(classDeclarationSyntax),
-                        ClassType = "class"
+                        Type = CSharpHelperMethods.GetBaseClassName(classDeclarationSyntax),
+                        Kind = "class"
                     });
 
                     foreach (var baseInterface in CSharpHelperMethods.GetBaseInterfaces(classDeclarationSyntax))
                     {
                         modelType.BaseTypes.Add(new BaseTypeModel
                         {
-                            Name = baseInterface,
-                            ClassType = "interface"
+                            Type = baseInterface,
+                            Kind = "interface"
                         });
                     }
                 }

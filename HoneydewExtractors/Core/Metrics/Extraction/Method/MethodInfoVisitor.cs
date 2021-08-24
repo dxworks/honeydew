@@ -42,9 +42,9 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Method
 
 
             modelType.Name = syntaxNode.Identifier.ToString();
-            modelType.ReturnType = new ReturnTypeModel
+            modelType.ReturnValue = new ReturnValueModel
             {
-                Name = returnType,
+                Type = returnType,
                 Modifier = returnTypeModifier
             };
             modelType.ContainingTypeName = containingClassName;

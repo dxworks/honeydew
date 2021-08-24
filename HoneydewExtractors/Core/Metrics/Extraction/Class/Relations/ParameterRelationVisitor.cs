@@ -22,7 +22,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
             {
                 foreach (var parameterSyntax in baseMethodDeclarationSyntax.ParameterList.Parameters)
                 {
-                    MetricHolder.Add(className, CSharpHelperMethods.GetFullName(parameterSyntax.Type), this);
+                    MetricHolder.Add(className, CSharpHelperMethods.GetFullName(parameterSyntax.Type).Name, this);
                 }
             }
         }
