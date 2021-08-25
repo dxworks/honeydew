@@ -32,6 +32,5 @@
 
     <ItemGroup>
       <Folder Include="TestData\CSharp\Metrics\Extraction\Constructor" />
-      <Folder Include="TestData\CSharp\Metrics\Extraction\Property" />
     </ItemGroup>
 </Project>
