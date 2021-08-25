@@ -68,11 +68,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                 var attributeTypes = propertyType.Attributes;
 
                 Assert.Equal(1, attributeTypes.Count);
-                Assert.Equal("property", attributeTypes[0].Target);
-                Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
-                Assert.Equal("Namespace1.Class1", attributeTypes[0].ContainingTypeName);
-                Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
-                Assert.Equal("string?", attributeTypes[0].ParameterTypes[0].Type.Name);
+                foreach (var attributeType in attributeTypes)
+                {
+                    Assert.Equal("property", attributeType.Target);
+                    Assert.Equal("System.ObsoleteAttribute", attributeType.Name);
+                    Assert.Equal("Namespace1.Class1", attributeType.ContainingTypeName);
+                    Assert.Equal(1, attributeType.ParameterTypes.Count);
+                    Assert.Equal("string?", attributeType.ParameterTypes[0].Type.Name);
+                }
             }
         }
 
@@ -86,12 +89,19 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(2, classModel.Properties.Count);
 
-            var attributeTypes = classModel.Properties[0].Attributes;
-            Assert.Equal(1, attributeTypes.Count);
-            Assert.Equal("property", attributeTypes[0].Target);
-            Assert.Equal("System.SerializableAttribute", attributeTypes[0].Name);
-            Assert.Equal("Namespace1.Class1", attributeTypes[0].ContainingTypeName);
-            Assert.Empty(attributeTypes[0].ParameterTypes);
+            foreach (var property in classModel.Properties)
+            {
+                var attributeTypes = property.Attributes;
+                Assert.Equal(1, attributeTypes.Count);
+
+                foreach (var attributeType in attributeTypes)
+                {
+                    Assert.Equal("property", attributeType.Target);
+                    Assert.Equal("System.SerializableAttribute", attributeType.Name);
+                    Assert.Equal("Namespace1.Class1", attributeType.ContainingTypeName);
+                    Assert.Empty(attributeType.ParameterTypes);
+                }
+            }
         }
 
         [Theory]
@@ -104,13 +114,20 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
 
             Assert.Equal(2, classModel.Properties.Count);
 
-            var attributeTypes = classModel.Properties[0].Attributes;
-            Assert.Equal(1, attributeTypes.Count);
-            Assert.Equal("property", attributeTypes[0].Target);
-            Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
-            Assert.Equal("Namespace1.Class1", attributeTypes[0].ContainingTypeName);
-            Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
-            Assert.Equal("string?", attributeTypes[0].ParameterTypes[0].Type.Name);
+            foreach (var propertyType in classModel.Properties)
+            {
+                var attributeTypes = propertyType.Attributes;
+                Assert.Equal(1, attributeTypes.Count);
+
+                foreach (var attributeType in attributeTypes)
+                {
+                    Assert.Equal("property", attributeType.Target);
+                    Assert.Equal("System.ObsoleteAttribute", attributeType.Name);
+                    Assert.Equal("Namespace1.Class1", attributeType.ContainingTypeName);
+                    Assert.Equal(1, attributeType.ParameterTypes.Count);
+                    Assert.Equal("string?", attributeType.ParameterTypes[0].Type.Name);
+                }
+            }
         }
 
         [Theory]
