@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [win, linux]
+        os: [win, linux, osx]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -51,63 +51,63 @@ jobs:
           name: honeydew-${{ matrix.os }}.zip
           path: honeydew-${{ matrix.os }}.zip
 
-  build-publish-and-sign-for-mac:
-    name: Build, Publish and Sign (osx)
-    runs-on: macos-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Extract Semver
-        id: semver_parser
-        run: |
-          semver=${TAG#"refs/tags/v"}
-          semver=${semver%"-voyager"}
-
-          echo ::set-output name=semver::$semver
-        env:
-          TAG: ${{ github.ref }}
-
-      - name: Set up .NET Core
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '6.0.x'
-          include-prerelease: true
-
-      - name: dotnet publish
-        run: |
-          mkdir bin
-          dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
-
-      - name: Prepare Assets
-        run: |
-          mkdir -p macos
-          rm ./bin/*.pdb
-          cp ./bin/Honeydew macos/Honeydew
-          chmod +x macos/Honeydew
-
-      - name: Add Cert to Keychain
-        uses: apple-actions/import-codesign-certs@v1
-        with:
-          p12-file-base64: ${{ secrets.MAC_CERT_BASE64 }}
-          p12-password: ${{ secrets.MAC_CERT_PASSWORD }}
-
-      - name: Sign Binaries
-        run: "sh macSigningScripts/SignMac.sh \"macos/Honeydew\" \"macos/*\" \"Developer ID Application: Andrei Mario Rivis (3L7BS894T6)\" \"macSigningScripts/entitlements.plist\""
-
-      - name: Zip Binary for Notarizing
-        run:
-          zip -r honeydew-osx.zip macos
-
-      - name: Notarize Binaries
-        run: "sh macSigningScripts/Notarize.sh \"mario.rivis@gmail.com\" \"${{ secrets.MAC_DEV_PASSWORD }}\" \"group.org.dxworks\" \"3L7BS894T6\" \"./honeydew-osx.zip\""
-        continue-on-error: true
-
-      - name: Upload artifact
-        uses: actions\upload-artifact@v2
-        with:
-          name: honeydew-osx.zip
-          path: honeydew-osx.zip
+#  build-publish-and-sign-for-mac:
+#    name: Build, Publish and Sign (osx)
+#    runs-on: macos-latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v2
+#
+#      - name: Extract Semver
+#        id: semver_parser
+#        run: |
+#          semver=${TAG#"refs/tags/v"}
+#          semver=${semver%"-voyager"}
+#
+#          echo ::set-output name=semver::$semver
+#        env:
+#          TAG: ${{ github.ref }}
+#
+#      - name: Set up .NET Core
+#        uses: actions/setup-dotnet@v1
+#        with:
+#          dotnet-version: '6.0.x'
+#          include-prerelease: true
+#
+#      - name: dotnet publish
+#        run: |
+#          mkdir bin
+#          dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
+#
+#      - name: Prepare Assets
+#        run: |
+#          mkdir -p macos
+#          rm ./bin/*.pdb
+#          cp ./bin/Honeydew macos/Honeydew
+#          chmod +x macos/Honeydew
+#
+#      - name: Add Cert to Keychain
+#        uses: apple-actions/import-codesign-certs@v1
+#        with:
+#          p12-file-base64: ${{ secrets.MAC_CERT_BASE64 }}
+#          p12-password: ${{ secrets.MAC_CERT_PASSWORD }}
+#
+#      - name: Sign Binaries
+#        run: "sh macSigningScripts/SignMac.sh \"macos/Honeydew\" \"macos/*\" \"Developer ID Application: Andrei Mario Rivis (3L7BS894T6)\" \"macSigningScripts/entitlements.plist\""
+#
+#      - name: Zip Binary for Notarizing
+#        run:
+#          zip -r honeydew-osx.zip macos
+#
+#      - name: Notarize Binaries
+#        run: "sh macSigningScripts/Notarize.sh \"mario.rivis@gmail.com\" \"${{ secrets.MAC_DEV_PASSWORD }}\" \"group.org.dxworks\" \"3L7BS894T6\" \"./honeydew-osx.zip\""
+#        continue-on-error: true
+#
+#      - name: Upload artifact
+#        uses: actions\upload-artifact@v2
+#        with:
+#          name: honeydew-osx.zip
+#          path: honeydew-osx.zip
 
   release-and-upload:
     name: Release Honeydew for Voyager
