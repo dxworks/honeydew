@@ -115,7 +115,7 @@ jobs:
   release-and-upload:
     name: Release and Upload
     runs-on: ubuntu-latest
-    needs: [build-and-publish, build-publish-and-sign-for-mac]
+    needs: build-and-publish
     steps:
       - name: Create Release
         id: create_release
