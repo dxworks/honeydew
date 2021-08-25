@@ -136,7 +136,7 @@ jobs:
 
           chmod +x honeydew/bin/win/Honeydew.exe
           chmod +x honeydew/bin/linux/Honeydew
-          chmod +x honeydew/bin/macos/Honeydew
+          chmod +x honeydew/bin/osx/Honeydew
 
       - name: Zip Voyager Release
         run: zip -rl honeydew.zip honeydew
