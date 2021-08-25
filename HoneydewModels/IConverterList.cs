@@ -28,6 +28,7 @@ namespace HoneydewModels
                 new ModelJsonConverter<IImportType, UsingModel>(),
                 new ModelJsonConverter<IMethodSignatureType, MethodCallModel>(),
                 new ModelJsonConverter<IMethodTypeWithLocalFunctions, MethodModel>(),
+                new ModelJsonConverter<IAttributeType, AttributeModel>(),
             };
         }
     }
