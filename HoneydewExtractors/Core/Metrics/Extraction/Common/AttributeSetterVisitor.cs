@@ -30,7 +30,29 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 
         public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
         {
-            ExtractAttributes(syntaxNode, modelType, "method");
+            foreach (var attributeSyntax in syntaxNode.DescendantNodes().OfType<AttributeSyntax>())
+            {
+                IAttributeType attributeModel = new AttributeModel();
+
+                attributeModel.Target = "method";
+
+                foreach (var visitor in GetContainedVisitors())
+                {
+                    if (visitor is ICSharpAttributeVisitor extractionVisitor)
+                    {
+                        attributeModel = extractionVisitor.Visit(attributeSyntax, attributeModel);
+                    }
+                }
+
+                if (attributeModel.Target == "return")
+                {
+                    modelType.ReturnValue.Attributes.Add(attributeModel);
+                }
+                else
+                {
+                    modelType.Attributes.Add(attributeModel);
+                }
+            }
 
             return modelType;
         }

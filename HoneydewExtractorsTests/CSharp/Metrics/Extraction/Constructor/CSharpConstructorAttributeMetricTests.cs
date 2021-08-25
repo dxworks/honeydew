@@ -70,10 +70,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
                 Assert.Equal(1, attributeTypes.Count);
                 Assert.Equal("constructor", attributeTypes[0].Target);
                 Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
-                Assert.Equal("Namespace1.Class1", attributeTypes[0].ContainingTypeName);
                 Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
                 Assert.Equal("string?", attributeTypes[0].ParameterTypes[0].Type.Name);
             }
+            
+            Assert.Equal("Namespace1.Class1.Class1()", classModel.Constructors[0].Attributes[0].ContainingTypeName);
+            Assert.Equal("Namespace1.Class1.Class1(int)", classModel.Constructors[1].Attributes[0].ContainingTypeName);
         }
 
         [Theory]
@@ -90,7 +92,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             Assert.Equal(1, attributeTypes.Count);
             Assert.Equal("constructor", attributeTypes[0].Target);
             Assert.Equal("System.SerializableAttribute", attributeTypes[0].Name);
-            Assert.Equal("Namespace1.Class1", attributeTypes[0].ContainingTypeName);
+            Assert.Equal("Namespace1.Class1.Class1(string)", attributeTypes[0].ContainingTypeName);
             Assert.Empty(attributeTypes[0].ParameterTypes);
         }
 
@@ -109,7 +111,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             Assert.Equal(1, attributeTypes.Count);
             Assert.Equal("constructor", attributeTypes[0].Target);
             Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
-            Assert.Equal("Namespace1.Class1", attributeTypes[0].ContainingTypeName);
+            Assert.Equal("Namespace1.Class1.Class1(int)", attributeTypes[0].ContainingTypeName);
             Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
             Assert.Equal("string?", attributeTypes[0].ParameterTypes[0].Type.Name);
         }
@@ -135,7 +137,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
                 foreach (var attribute in attributeTypes)
                 {
                     Assert.Equal("constructor", attribute.Target);
-                    Assert.Equal("Namespace1.Class1", attribute.ContainingTypeName);
+                    Assert.Equal("Namespace1.Class1.Class1(double, float, short)", attribute.ContainingTypeName);
                 }
 
                 var attribute1 = attributeTypes[0];
@@ -175,7 +177,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
                 foreach (var attribute in constructorTypeAttributes)
                 {
                     Assert.Equal("constructor", attribute.Target);
-                    Assert.Equal("MyNamespace.MyClass", attribute.ContainingTypeName);
+                    Assert.Equal("MyNamespace.MyClass.MyClass(int, int)", attribute.ContainingTypeName);
                     Assert.Equal("MyNamespace.MyAttribute", attribute.Name);
                 }
 
@@ -213,7 +215,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
                 foreach (var attribute in constructorType.Attributes)
                 {
                     Assert.Equal("constructor", attribute.Target);
-                    Assert.Equal("Namespace1.Class1", attribute.ContainingTypeName);
+                    Assert.Equal("Namespace1.Class1.Class1()", attribute.ContainingTypeName);
                 }
 
                 var attribute1 = constructorType.Attributes[0];

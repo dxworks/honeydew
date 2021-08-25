@@ -802,6 +802,12 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
         public string GetAttributeContainingType(AttributeSyntax syntaxNode)
         {
+            var baseMethodDeclarationSyntax = GetParentDeclarationSyntax<BaseMethodDeclarationSyntax>(syntaxNode);
+            if (baseMethodDeclarationSyntax != null)
+            {
+                return GetFullName(baseMethodDeclarationSyntax);
+            }
+
             var delegateDeclarationSyntax = GetParentDeclarationSyntax<DelegateDeclarationSyntax>(syntaxNode);
             if (delegateDeclarationSyntax != null)
             {
@@ -850,7 +856,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                             parameterType = literalExpressionSyntax.Token.Value.GetType().FullName;
                         }
                     }
-                    
+
                     parameterTypes.Add(new ParameterModel
                     {
                         Type = new EntityTypeModel
@@ -869,6 +875,18 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             }
 
             return new List<IParameterType>();
+        }
+
+        public string GetAttributeTarget(AttributeSyntax syntaxNode)
+        {
+            var attributeListSyntax = GetParentDeclarationSyntax<AttributeListSyntax>(syntaxNode);
+
+            if (attributeListSyntax?.Target == null)
+            {
+                return "";
+            }
+
+            return attributeListSyntax.Target.Identifier.ToString();
         }
     }
 }

@@ -18,6 +18,11 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Attribute
         {
             modelType.Name = CSharpHelperMethods.GetFullName(syntaxNode);
             modelType.ContainingTypeName = CSharpHelperMethods.GetAttributeContainingType(syntaxNode);
+            var attributeTarget = CSharpHelperMethods.GetAttributeTarget(syntaxNode);
+            if (!string.IsNullOrEmpty(attributeTarget))
+            {
+                modelType.Target = attributeTarget;
+            }
 
             foreach (var parameterType in CSharpHelperMethods.GetParameters(syntaxNode))
             {

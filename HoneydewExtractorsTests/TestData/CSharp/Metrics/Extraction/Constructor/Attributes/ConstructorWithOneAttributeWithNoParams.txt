@@ -5,7 +5,7 @@
     public class Class1
     {
         [Serializable]
-        public Class1()
+        public Class1(string s)
         {
         }
     }

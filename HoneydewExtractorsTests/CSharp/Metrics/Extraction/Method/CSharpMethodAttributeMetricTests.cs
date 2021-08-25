@@ -70,10 +70,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 Assert.Equal(1, attributeTypes.Count);
                 Assert.Equal("method", attributeTypes[0].Target);
                 Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
-                Assert.Equal("Namespace1.Class1", attributeTypes[0].ContainingTypeName);
                 Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
                 Assert.Equal("string?", attributeTypes[0].ParameterTypes[0].Type.Name);
             }
+
+            Assert.Equal("Namespace1.Class1.Method1()", classModel.Methods[0].Attributes[0].ContainingTypeName);
+            Assert.Equal("Namespace1.Class1.Method2(int)", classModel.Methods[1].Attributes[0].ContainingTypeName);
         }
 
         [Theory]
@@ -86,12 +88,17 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(2, classModel.Methods.Count);
 
-            var attributeTypes = classModel.Methods[0].Attributes;
-            Assert.Equal(1, attributeTypes.Count);
-            Assert.Equal("method", attributeTypes[0].Target);
-            Assert.Equal("System.SerializableAttribute", attributeTypes[0].Name);
-            Assert.Equal("Namespace1.Class1", attributeTypes[0].ContainingTypeName);
-            Assert.Empty(attributeTypes[0].ParameterTypes);
+            foreach (var methodType in classModel.Methods)
+            {
+                var attributeTypes = methodType.Attributes;
+                Assert.Equal(1, attributeTypes.Count);
+                Assert.Equal("method", attributeTypes[0].Target);
+                Assert.Equal("System.SerializableAttribute", attributeTypes[0].Name);
+                Assert.Empty(attributeTypes[0].ParameterTypes);
+            }
+
+            Assert.Equal("Namespace1.Class1.Method1()", classModel.Methods[0].Attributes[0].ContainingTypeName);
+            Assert.Equal("Namespace1.Class1.Method2()", classModel.Methods[1].Attributes[0].ContainingTypeName);
         }
 
         [Theory]
@@ -105,13 +112,18 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
 
             Assert.Equal(2, classModel.Methods.Count);
 
-            var attributeTypes = classModel.Methods[0].Attributes;
-            Assert.Equal(1, attributeTypes.Count);
-            Assert.Equal("method", attributeTypes[0].Target);
-            Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
-            Assert.Equal("Namespace1.Class1", attributeTypes[0].ContainingTypeName);
-            Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
-            Assert.Equal("string?", attributeTypes[0].ParameterTypes[0].Type.Name);
+            foreach (var methodType in classModel.Methods)
+            {
+                var attributeTypes = methodType.Attributes;
+                Assert.Equal(1, attributeTypes.Count);
+                Assert.Equal("method", attributeTypes[0].Target);
+                Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
+                Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
+                Assert.Equal("string?", attributeTypes[0].ParameterTypes[0].Type.Name);
+            }
+
+            Assert.Equal("Namespace1.Class1.Method(int)", classModel.Methods[0].Attributes[0].ContainingTypeName);
+            Assert.Equal("Namespace1.Class1.Method(string)", classModel.Methods[1].Attributes[0].ContainingTypeName);
         }
 
         [Theory]
@@ -135,7 +147,6 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 foreach (var attribute in attributeTypes)
                 {
                     Assert.Equal("method", attribute.Target);
-                    Assert.Equal("Namespace1.Class1", attribute.ContainingTypeName);
                 }
 
                 var attribute1 = attributeTypes[0];
@@ -153,8 +164,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 Assert.Equal(1, attribute3.ParameterTypes.Count);
                 Assert.Equal("System.AttributeTargets", attribute3.ParameterTypes[0].Type.Name);
             }
-        }
 
+            Assert.Equal("Namespace1.Class1.Method(double, float)",
+                ((ClassModel)classTypes[0]).Methods[0].Attributes[0].ContainingTypeName);
+            Assert.Equal("Namespace1.Class1.Method(double, float, double)",
+                ((ClassModel)classTypes[0]).Methods[1].Attributes[0].ContainingTypeName);
+        }
 
         [Theory]
         [FileData(
@@ -175,7 +190,6 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 foreach (var attribute in methodTypeAttributes)
                 {
                     Assert.Equal("method", attribute.Target);
-                    Assert.Equal("MyNamespace.MyClass", attribute.ContainingTypeName);
                     Assert.Equal("MyNamespace.MyAttribute", attribute.Name);
                 }
 
@@ -193,6 +207,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 var attribute4 = methodTypeAttributes[3];
                 Assert.Empty(attribute4.ParameterTypes);
             }
+
+            Assert.Equal("MyNamespace.MyClass.Method1(int, int)",
+                classType.Methods[0].Attributes[0].ContainingTypeName);
+            Assert.Equal("MyNamespace.MyClass.Method2(int)", classType.Methods[1].Attributes[0].ContainingTypeName);
         }
 
         [Theory]
@@ -213,7 +231,6 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 foreach (var attribute in methodType.Attributes)
                 {
                     Assert.Equal("method", attribute.Target);
-                    Assert.Equal("Namespace1.Class1", attribute.ContainingTypeName);
                 }
 
                 var attribute1 = methodType.Attributes[0];
@@ -241,6 +258,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 Assert.Equal(1, attribute5.ParameterTypes.Count);
                 Assert.Equal("System.Object", attribute5.ParameterTypes[0].Type.Name);
             }
+
+            Assert.Equal("Namespace1.Class1.Method()", classType.Methods[0].Attributes[0].ContainingTypeName);
+            Assert.Equal("Namespace1.Class1.Sum(int, int)", classType.Methods[1].Attributes[0].ContainingTypeName);
         }
     }
 }
