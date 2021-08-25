@@ -1,27 +1,27 @@
 ﻿using System.Collections.Generic;
 using HoneydewExtractors.Core.Metrics.Extraction.Attribute;
-using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.Common;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.Delegate;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.CSharp.Metrics;
 using Xunit;
 
-namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
+namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Delegate
 {
-    public class CSharpClassAttributeMetricTests
+    public class CSharpDelegateAttributeMetricTests
     {
         private readonly CSharpFactExtractor _factExtractor;
 
-        public CSharpClassAttributeMetricTests()
+        public CSharpDelegateAttributeMetricTests()
         {
             var compositeVisitor = new CompositeVisitor();
 
-            compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
+            compositeVisitor.Add(new DelegateSetterCompilationUnitVisitor(new List<ICSharpDelegateVisitor>
             {
-                new BaseInfoClassVisitor(),
+                new BaseInfoDelegateVisitor(),
                 new AttributeSetterVisitor(new List<IAttributeVisitor>
                 {
                     new AttributeInfoVisitor()
@@ -33,61 +33,36 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         }
 
         [Theory]
-        [InlineData("class")]
-        [InlineData("interface")]
-        [InlineData("record")]
-        [InlineData("struct")]
-        [InlineData("enum")]
-        public void Extract_ShouldExtractAttribute_WhenProvidedDifferentClassType(string classType)
-        {
-            var fileContent = $@"namespace Namespace1
-{{
-    [System.Obsolete(""Message"")]
-    public {classType} Class1 {{ }}
-}}";
-
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
-
-            Assert.Equal(1, classTypes[0].Attributes.Count);
-            Assert.Equal("class", classTypes[0].Attributes[0].Target);
-            Assert.Equal("System.ObsoleteAttribute", classTypes[0].Attributes[0].Name);
-            Assert.Equal("Namespace1.Class1", classTypes[0].Attributes[0].ContainingTypeName);
-            Assert.Equal(1, classTypes[0].Attributes[0].ParameterTypes.Count);
-            Assert.Equal("string?", classTypes[0].Attributes[0].ParameterTypes[0].Type.Name);
-        }
-
-        [Theory]
-        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/Attributes/ClassWithOneAttributeWithNoParams.txt")]
+        [FileData("TestData/CSharp/Metrics/Extraction/Delegate/Attributes/DelegateWithOneAttributeWithNoParams.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithOneAttributeWithNoParams(string fileContent)
         {
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[0].Attributes.Count);
-            Assert.Equal("class", classTypes[0].Attributes[0].Target);
+            Assert.Equal("delegate", classTypes[0].Attributes[0].Target);
             Assert.Equal("System.SerializableAttribute", classTypes[0].Attributes[0].Name);
-            Assert.Equal("Namespace1.Class1", classTypes[0].Attributes[0].ContainingTypeName);
+            Assert.Equal("Namespace1.Delegate1", classTypes[0].Attributes[0].ContainingTypeName);
             Assert.Empty(classTypes[0].Attributes[0].ParameterTypes);
         }
 
         [Theory]
-        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/Attributes/ClassWithOneAttributeWithOneParam.txt")]
+        [FileData("TestData/CSharp/Metrics/Extraction/Delegate/Attributes/DelegateWithOneAttributeWithOneParam.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithOneAttributeWithOneParams(string fileContent)
         {
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes[0].Attributes.Count);
-            Assert.Equal("class", classTypes[0].Attributes[0].Target);
+            Assert.Equal("delegate", classTypes[0].Attributes[0].Target);
             Assert.Equal("System.ObsoleteAttribute", classTypes[0].Attributes[0].Name);
-            Assert.Equal("Namespace1.Class1", classTypes[0].Attributes[0].ContainingTypeName);
+            Assert.Equal("Namespace1.Delegate1", classTypes[0].Attributes[0].ContainingTypeName);
             Assert.Equal(1, classTypes[0].Attributes[0].ParameterTypes.Count);
             Assert.Equal("string?", classTypes[0].Attributes[0].ParameterTypes[0].Type.Name);
         }
 
         [Theory]
         [FileData(
-            "TestData/CSharp/Metrics/Extraction/ClassLevel/Attributes/ClassWithMultipleAttributesWithMultipleParams.txt")]
-        [FileData(
-            "TestData/CSharp/Metrics/Extraction/ClassLevel/Attributes/ClassWithMultipleAttributesWithMultipleParamsInDifferentSections.txt")]
+            "TestData/CSharp/Metrics/Extraction/Delegate/Attributes/DelegateWithMultipleAttributesWithMultipleParams.txt")]
+        [FileData("TestData/CSharp/Metrics/Extraction/Delegate/Attributes/DelegateWithMultipleAttributesWithMultipleParamsInDifferentSections.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithMultipleAttributesWitMultipleParams(
             string fileContent)
         {
@@ -96,8 +71,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(3, classTypes[0].Attributes.Count);
             foreach (var attribute in classTypes[0].Attributes)
             {
-                Assert.Equal("class", attribute.Target);
-                Assert.Equal("Namespace1.Class1", attribute.ContainingTypeName);
+                Assert.Equal("delegate", attribute.Target);
+                Assert.Equal("Namespace1.Delegate1", attribute.ContainingTypeName);
             }
 
             var attribute1 = classTypes[0].Attributes[0];
@@ -118,19 +93,19 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
         [Theory]
         [FileData(
-            "TestData/CSharp/Metrics/Extraction/ClassLevel/Attributes/ClassWithCustomAttribute.txt")]
+            "TestData/CSharp/Metrics/Extraction/Delegate/Attributes/DelegateWithCustomAttribute.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithCustomAttribute(
             string fileContent)
         {
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            var classType = classTypes[1];
+            var classType = classTypes[0];
 
             Assert.Equal(4, classType.Attributes.Count);
             foreach (var attribute in classType.Attributes)
             {
-                Assert.Equal("class", attribute.Target);
-                Assert.Equal("MyNamespace.MyClass", attribute.ContainingTypeName);
+                Assert.Equal("delegate", attribute.Target);
+                Assert.Equal("MyNamespace.MyDelegate", attribute.ContainingTypeName);
                 Assert.Equal("MyNamespace.MyAttribute", attribute.Name);
             }
 
@@ -151,7 +126,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
         [Theory]
         [FileData(
-            "TestData/CSharp/Metrics/Extraction/ClassLevel/Attributes/ClassWithExternAttribute.txt")]
+            "TestData/CSharp/Metrics/Extraction/Delegate/Attributes/DelegateWithExternAttribute.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithExternAttribute(
             string fileContent)
         {
@@ -162,8 +137,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(5, classType.Attributes.Count);
             foreach (var attribute in classType.Attributes)
             {
-                Assert.Equal("class", attribute.Target);
-                Assert.Equal("Namespace1.Class1", attribute.ContainingTypeName);
+                Assert.Equal("delegate", attribute.Target);
+                Assert.Equal("Namespace1.Delegate1", attribute.ContainingTypeName);
             }
 
             var attribute1 = classType.Attributes[0];

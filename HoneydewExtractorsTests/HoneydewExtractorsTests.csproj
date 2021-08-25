@@ -29,4 +29,10 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="TestData\CSharp\Metrics\Extraction\Constructor" />
+      <Folder Include="TestData\CSharp\Metrics\Extraction\Field" />
+      <Folder Include="TestData\CSharp\Metrics\Extraction\Property" />
+    </ItemGroup>
 </Project>

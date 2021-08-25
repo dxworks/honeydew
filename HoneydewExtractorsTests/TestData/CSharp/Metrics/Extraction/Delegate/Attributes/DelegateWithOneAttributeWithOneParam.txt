@@ -1,0 +1,5 @@
+﻿namespace Namespace1
+{
+    [System.Obsolete("Message")]   
+    public delegate string Delegate1(double d);
+}

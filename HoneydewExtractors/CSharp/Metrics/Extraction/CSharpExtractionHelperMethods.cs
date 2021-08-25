@@ -802,6 +802,12 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
         public string GetAttributeContainingType(AttributeSyntax syntaxNode)
         {
+            var delegateDeclarationSyntax = GetParentDeclarationSyntax<DelegateDeclarationSyntax>(syntaxNode);
+            if (delegateDeclarationSyntax != null)
+            {
+                return GetFullName(delegateDeclarationSyntax);
+            }
+
             var parentDeclarationSyntax = GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>(syntaxNode);
             if (parentDeclarationSyntax != null)
             {
