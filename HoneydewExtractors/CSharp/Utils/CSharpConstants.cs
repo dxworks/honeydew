@@ -14,6 +14,7 @@
         public const string ClassIdentifier = "class";
         public const string DelegateIdentifier = "delegate";
         public const string SystemDelegate = "System.Delegate";
+        public const string SystemObject = "System.Object";
         public const string VarIdentifier = "var";
         public const string RefIdentifier = "ref";
         public const string RefReadonlyIdentifier = "ref readonly";

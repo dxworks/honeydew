@@ -1,0 +1,10 @@
+﻿namespace Namespace1
+{
+    using System;
+    
+    [Serializable]
+    public class Class1
+    {
+        
+    }
+}

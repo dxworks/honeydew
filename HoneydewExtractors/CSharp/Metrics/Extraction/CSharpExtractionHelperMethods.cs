@@ -565,7 +565,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             foreach (var parameter in parameterList.Parameters)
             {
                 var parameterType = GetFullName(parameter.Type);
-                
+
                 parameterTypes.Add(new ParameterModel
                 {
                     Type = parameterType,
@@ -678,7 +678,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                     {
                         Type = new EntityTypeModel
                         {
-                            Name = literalExpressionSyntax.Token.Value.GetType().FullName   
+                            Name = literalExpressionSyntax.Token.Value.GetType().FullName
                         }
                     });
                 }
@@ -787,6 +787,82 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             }
 
             return count;
+        }
+
+        public string GetFullName(AttributeSyntax attributeSyntax)
+        {
+            var symbolInfo = _semanticModel.GetSymbolInfo(attributeSyntax);
+            if (symbolInfo.Symbol != null)
+            {
+                return symbolInfo.Symbol.ContainingType.ToString();
+            }
+
+            return attributeSyntax.Name.ToString();
+        }
+
+        public string GetAttributeContainingType(AttributeSyntax syntaxNode)
+        {
+            var parentDeclarationSyntax = GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>(syntaxNode);
+            if (parentDeclarationSyntax != null)
+            {
+                return GetFullName(parentDeclarationSyntax);
+            }
+
+            return syntaxNode.ToString();
+        }
+
+        public IEnumerable<IParameterType> GetParameters(AttributeSyntax attributeSyntax)
+        {
+            var symbolInfo = _semanticModel.GetSymbolInfo(attributeSyntax);
+            if (symbolInfo.Symbol == null)
+            {
+                // try to reconstruct parameters
+                var parameterTypes = new List<IParameterType>();
+
+                if (attributeSyntax.ArgumentList == null)
+                {
+                    return parameterTypes;
+                }
+
+                foreach (var argumentSyntax in attributeSyntax.ArgumentList.Arguments)
+                {
+                    var parameterSymbolInfo = _semanticModel.GetSymbolInfo(argumentSyntax.Expression);
+                    var parameterType = CSharpConstants.SystemObject;
+                    if (parameterSymbolInfo.Symbol != null)
+                    {
+                        parameterTypes.Add(new ParameterModel
+                        {
+                            Type = GetFullName(argumentSyntax.Expression)
+                        });
+                        continue;
+                    }
+
+                    if (argumentSyntax.Expression is LiteralExpressionSyntax literalExpressionSyntax)
+                    {
+                        if (literalExpressionSyntax.Token.Value != null)
+                        {
+                            parameterType = literalExpressionSyntax.Token.Value.GetType().FullName;
+                        }
+                    }
+                    
+                    parameterTypes.Add(new ParameterModel
+                    {
+                        Type = new EntityTypeModel
+                        {
+                            Name = parameterType
+                        }
+                    });
+                }
+
+                return parameterTypes;
+            }
+
+            if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
+            {
+                return GetParameters(methodSymbol);
+            }
+
+            return new List<IParameterType>();
         }
     }
 }
