@@ -176,7 +176,13 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
         public string GetFullName(ExpressionSyntax expressionSyntax)
         {
-            var symbolInfo = ModelExtensions.GetSymbolInfo(_semanticModel, expressionSyntax);
+            if (expressionSyntax == null)
+            {
+                return "";
+            }
+
+            var symbolInfo = _semanticModel.GetSymbolInfo(expressionSyntax);
+
             switch (symbolInfo.Symbol)
             {
                 case IPropertySymbol propertySymbol:
