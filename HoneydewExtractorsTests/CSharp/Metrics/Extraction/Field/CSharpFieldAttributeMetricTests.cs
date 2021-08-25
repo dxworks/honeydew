@@ -40,12 +40,53 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Field
         }
 
         [Theory]
+        [InlineData("class")]
+        [InlineData("record")]
+        [InlineData("struct")]
+        public void Extract_ShouldExtractAttribute_WhenProvidedDifferentClassType(string classType)
+        {
+            var fileContent = $@"namespace Namespace1
+{{
+    public {classType} Class1 
+    {{
+        [System.Obsolete(""Message"")]
+        private int Field;
+
+        [System.Obsolete(""Message"")]
+        public event System.Func<int> FField;
+    }}
+}}";
+
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            Assert.Equal(2, classModel.Fields.Count);
+
+            foreach (var fieldType in classModel.Fields)
+            {
+                var attributeTypes = fieldType.Attributes;
+
+                Assert.Equal(1, attributeTypes.Count);
+                Assert.Equal("field", attributeTypes[0].Target);
+                Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
+                Assert.Equal("Namespace1.Class1", attributeTypes[0].ContainingTypeName);
+                Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
+                Assert.Equal("string?", attributeTypes[0].ParameterTypes[0].Type.Name);
+            }
+        }
+
+
+        [Theory]
         [FileData("TestData/CSharp/Metrics/Extraction/Field/Attributes/FieldWithOneAttributeWithNoParams.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithOneAttributeWithNoParams(string fileContent)
         {
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            var attributeTypes = ((ClassModel)classTypes[0]).Fields[0].Attributes;
+            var classModel = (ClassModel)classTypes[0];
+            Assert.Equal(2, classModel.Fields.Count);
+
+            var attributeTypes = classModel.Fields[0].Attributes;
             Assert.Equal(1, attributeTypes.Count);
             Assert.Equal("field", attributeTypes[0].Target);
             Assert.Equal("System.SerializableAttribute", attributeTypes[0].Name);
@@ -59,7 +100,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Field
         {
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            var attributeTypes = ((ClassModel)classTypes[0]).Fields[0].Attributes;
+            var classModel = (ClassModel)classTypes[0];
+
+            Assert.Equal(2, classModel.Fields.Count);
+
+            var attributeTypes = classModel.Fields[0].Attributes;
             Assert.Equal(1, attributeTypes.Count);
             Assert.Equal("field", attributeTypes[0].Target);
             Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
@@ -79,6 +124,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Field
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             var fields = ((ClassModel)classTypes[0]).Fields;
+
+            Assert.Equal(2, fields.Count);
+
             foreach (var fieldType in fields)
             {
                 var attributeTypes = fieldType.Attributes;
@@ -155,6 +203,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Field
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             var classType = (ClassModel)classTypes[0];
+
+            Assert.Equal(2, classType.Fields.Count);
 
             foreach (var fieldType in classType.Fields)
             {

@@ -23,6 +23,6 @@ namespace MyNamespace
         [My("Hello")]
         [MyAttribute()]
         [MyAttribute("World"), My]
-        public string Field;
+        public event Action<string> Field;
     }
 }

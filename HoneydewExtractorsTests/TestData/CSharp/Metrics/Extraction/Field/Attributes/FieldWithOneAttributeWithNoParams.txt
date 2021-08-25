@@ -6,5 +6,8 @@
     {
         [Serializable]
         internal char C;
+        
+        [Serializable]
+        internal event Action<char> C;
     }
 }

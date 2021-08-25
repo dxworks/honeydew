@@ -4,5 +4,8 @@
     {
         [Extern("Hello"), ExternAttribute(), ExternAttribute("World", false), Extern(2), Extern(new string[]{})]
         protected string Name;
+        
+        [Extern("Hello"), ExternAttribute(), ExternAttribute("World", false), Extern(2), Extern(new string[]{})]
+        protected event System.Func<string> F;
     }
 }

@@ -6,5 +6,8 @@ namespace Namespace1
     {
         [System.Obsolete("Message", false), System.Serializable, System.AttributeUsage(AttributeTargets.Class)]
         private long L;
+        
+        [System.Obsolete("Message", false), System.Serializable, System.AttributeUsage(AttributeTargets.Class)]
+        private event Action<long> FL;
     }
 }
