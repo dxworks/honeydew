@@ -3,31 +3,31 @@ using HoneydewExtractors.Core.Metrics.Extraction.Attribute;
 using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.Common;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
-using HoneydewExtractors.Core.Metrics.Extraction.Constructor;
+using HoneydewExtractors.Core.Metrics.Extraction.Method;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
-using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
 using Xunit;
 
-namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
+namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
 {
-    public class CSharpConstructorAttributeMetricTests
+    public class CSharpMethodAttributeMetricTests
     {
         private readonly CSharpFactExtractor _factExtractor;
 
-        public CSharpConstructorAttributeMetricTests()
+        public CSharpMethodAttributeMetricTests()
         {
             var compositeVisitor = new CompositeVisitor();
 
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<IClassVisitor>
             {
                 new BaseInfoClassVisitor(),
-                new ConstructorSetterClassVisitor(new List<ICSharpConstructorVisitor>
+                new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
                 {
-                    new ConstructorInfoVisitor(),
+                    new MethodInfoVisitor(),
                     new AttributeSetterVisitor(new List<IAttributeVisitor>
                     {
                         new AttributeInfoVisitor()
@@ -50,10 +50,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
     public {classType} Class1 
     {{
         [System.Obsolete(""Message"")]
-        public Class1() {{}}
+        public void Method1() {{}}
 
         [System.Obsolete(""Message"")]
-        public Class1(int a) {{}}
+        public int Method2(int a) {{return a;}}
     }}
 }}";
 
@@ -61,14 +61,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
 
             var classModel = (ClassModel)classTypes[0];
 
-            Assert.Equal(2, classModel.Constructors.Count);
+            Assert.Equal(2, classModel.Methods.Count);
 
-            foreach (var constructorType in classModel.Constructors)
+            foreach (var methodType in classModel.Methods)
             {
-                var attributeTypes = constructorType.Attributes;
+                var attributeTypes = methodType.Attributes;
 
                 Assert.Equal(1, attributeTypes.Count);
-                Assert.Equal("constructor", attributeTypes[0].Target);
+                Assert.Equal("method", attributeTypes[0].Target);
                 Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
                 Assert.Equal("Namespace1.Class1", attributeTypes[0].ContainingTypeName);
                 Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
@@ -78,17 +78,17 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
 
         [Theory]
         [FileData(
-            "TestData/CSharp/Metrics/Extraction/Constructor/Attributes/ConstructorWithOneAttributeWithNoParams.txt")]
+            "TestData/CSharp/Metrics/Extraction/Method/Attributes/MethodWithOneAttributeWithNoParams.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithOneAttributeWithNoParams(string fileContent)
         {
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
-            Assert.Equal(1, classModel.Constructors.Count);
+            Assert.Equal(2, classModel.Methods.Count);
 
-            var attributeTypes = classModel.Constructors[0].Attributes;
+            var attributeTypes = classModel.Methods[0].Attributes;
             Assert.Equal(1, attributeTypes.Count);
-            Assert.Equal("constructor", attributeTypes[0].Target);
+            Assert.Equal("method", attributeTypes[0].Target);
             Assert.Equal("System.SerializableAttribute", attributeTypes[0].Name);
             Assert.Equal("Namespace1.Class1", attributeTypes[0].ContainingTypeName);
             Assert.Empty(attributeTypes[0].ParameterTypes);
@@ -96,18 +96,18 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
 
         [Theory]
         [FileData(
-            "TestData/CSharp/Metrics/Extraction/Constructor/Attributes/ConstructorWithOneAttributeWithOneParam.txt")]
+            "TestData/CSharp/Metrics/Extraction/Method/Attributes/MethodWithOneAttributeWithOneParam.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithOneAttributeWithOneParams(string fileContent)
         {
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
-            Assert.Equal(1, classModel.Constructors.Count);
+            Assert.Equal(2, classModel.Methods.Count);
 
-            var attributeTypes = classModel.Constructors[0].Attributes;
+            var attributeTypes = classModel.Methods[0].Attributes;
             Assert.Equal(1, attributeTypes.Count);
-            Assert.Equal("constructor", attributeTypes[0].Target);
+            Assert.Equal("method", attributeTypes[0].Target);
             Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
             Assert.Equal("Namespace1.Class1", attributeTypes[0].ContainingTypeName);
             Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
@@ -116,25 +116,25 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
 
         [Theory]
         [FileData(
-            "TestData/CSharp/Metrics/Extraction/Constructor/Attributes/ConstructorWithMultipleAttributesWithMultipleParams.txt")]
+            "TestData/CSharp/Metrics/Extraction/Method/Attributes/MethodWithMultipleAttributesWithMultipleParams.txt")]
         [FileData(
-            "TestData/CSharp/Metrics/Extraction/Constructor/Attributes/ConstructorWithMultipleAttributesWithMultipleParamsInDifferentSections.txt")]
+            "TestData/CSharp/Metrics/Extraction/Method/Attributes/MethodWithMultipleAttributesWithMultipleParamsInDifferentSections.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithMultipleAttributesWitMultipleParams(
             string fileContent)
         {
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            var constructors = ((ClassModel)classTypes[0]).Constructors;
+            var methods = ((ClassModel)classTypes[0]).Methods;
 
-            Assert.Equal(1, constructors.Count);
+            Assert.Equal(2, methods.Count);
 
-            foreach (var constructorType in constructors)
+            foreach (var methodType in methods)
             {
-                var attributeTypes = constructorType.Attributes;
+                var attributeTypes = methodType.Attributes;
                 Assert.Equal(3, attributeTypes.Count);
                 foreach (var attribute in attributeTypes)
                 {
-                    Assert.Equal("constructor", attribute.Target);
+                    Assert.Equal("method", attribute.Target);
                     Assert.Equal("Namespace1.Class1", attribute.ContainingTypeName);
                 }
 
@@ -158,7 +158,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
 
         [Theory]
         [FileData(
-            "TestData/CSharp/Metrics/Extraction/Constructor/Attributes/ConstructorWithCustomAttribute.txt")]
+            "TestData/CSharp/Metrics/Extraction/Method/Attributes/MethodWithCustomAttribute.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithCustomAttribute(
             string fileContent)
         {
@@ -166,38 +166,38 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
 
             var classType = (ClassModel)classTypes[1];
 
-            Assert.Equal(1, classType.Constructors.Count);
+            Assert.Equal(2, classType.Methods.Count);
 
-            foreach (var constructorType in classType.Constructors)
+            foreach (var methodType in classType.Methods)
             {
-                var constructorTypeAttributes = constructorType.Attributes;
-                Assert.Equal(4, constructorTypeAttributes.Count);
-                foreach (var attribute in constructorTypeAttributes)
+                var methodTypeAttributes = methodType.Attributes;
+                Assert.Equal(4, methodTypeAttributes.Count);
+                foreach (var attribute in methodTypeAttributes)
                 {
-                    Assert.Equal("constructor", attribute.Target);
+                    Assert.Equal("method", attribute.Target);
                     Assert.Equal("MyNamespace.MyClass", attribute.ContainingTypeName);
                     Assert.Equal("MyNamespace.MyAttribute", attribute.Name);
                 }
 
-                var attribute1 = constructorTypeAttributes[0];
+                var attribute1 = methodTypeAttributes[0];
                 Assert.Equal(1, attribute1.ParameterTypes.Count);
                 Assert.Equal("string", attribute1.ParameterTypes[0].Type.Name);
 
-                var attribute2 = constructorTypeAttributes[1];
+                var attribute2 = methodTypeAttributes[1];
                 Assert.Empty(attribute2.ParameterTypes);
 
-                var attribute3 = constructorTypeAttributes[2];
+                var attribute3 = methodTypeAttributes[2];
                 Assert.Equal(1, attribute3.ParameterTypes.Count);
                 Assert.Equal("string", attribute3.ParameterTypes[0].Type.Name);
 
-                var attribute4 = constructorTypeAttributes[3];
+                var attribute4 = methodTypeAttributes[3];
                 Assert.Empty(attribute4.ParameterTypes);
             }
         }
 
         [Theory]
         [FileData(
-            "TestData/CSharp/Metrics/Extraction/Constructor/Attributes/ConstructorWithExternAttribute.txt")]
+            "TestData/CSharp/Metrics/Extraction/Method/Attributes/MethodWithExternAttribute.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithExternAttribute(
             string fileContent)
         {
@@ -205,38 +205,38 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
 
             var classType = (ClassModel)classTypes[0];
 
-            Assert.Equal(1, classType.Constructors.Count);
+            Assert.Equal(2, classType.Methods.Count);
 
-            foreach (var constructorType in classType.Constructors)
+            foreach (var methodType in classType.Methods)
             {
-                Assert.Equal(5, constructorType.Attributes.Count);
-                foreach (var attribute in constructorType.Attributes)
+                Assert.Equal(5, methodType.Attributes.Count);
+                foreach (var attribute in methodType.Attributes)
                 {
-                    Assert.Equal("constructor", attribute.Target);
+                    Assert.Equal("method", attribute.Target);
                     Assert.Equal("Namespace1.Class1", attribute.ContainingTypeName);
                 }
 
-                var attribute1 = constructorType.Attributes[0];
+                var attribute1 = methodType.Attributes[0];
                 Assert.Equal("Extern", attribute1.Name);
                 Assert.Equal(1, attribute1.ParameterTypes.Count);
                 Assert.Equal("System.String", attribute1.ParameterTypes[0].Type.Name);
 
-                var attribute2 = constructorType.Attributes[1];
+                var attribute2 = methodType.Attributes[1];
                 Assert.Equal("ExternAttribute", attribute2.Name);
                 Assert.Empty(attribute2.ParameterTypes);
 
-                var attribute3 = constructorType.Attributes[2];
+                var attribute3 = methodType.Attributes[2];
                 Assert.Equal("ExternAttribute", attribute3.Name);
                 Assert.Equal(2, attribute3.ParameterTypes.Count);
                 Assert.Equal("System.String", attribute3.ParameterTypes[0].Type.Name);
                 Assert.Equal("System.Boolean", attribute3.ParameterTypes[1].Type.Name);
 
-                var attribute4 = constructorType.Attributes[3];
+                var attribute4 = methodType.Attributes[3];
                 Assert.Equal("Extern", attribute4.Name);
                 Assert.Equal(1, attribute4.ParameterTypes.Count);
                 Assert.Equal("System.Int32", attribute4.ParameterTypes[0].Type.Name);
 
-                var attribute5 = constructorType.Attributes[4];
+                var attribute5 = methodType.Attributes[4];
                 Assert.Equal("Extern", attribute5.Name);
                 Assert.Equal(1, attribute5.ParameterTypes.Count);
                 Assert.Equal("System.Object", attribute5.ParameterTypes[0].Type.Name);

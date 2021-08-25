@@ -1,0 +1,17 @@
+﻿using System;
+
+namespace Namespace1
+{
+    public class Class1
+    {
+        [System.Obsolete("Message", false), System.Serializable, System.AttributeUsage(AttributeTargets.Class)]
+        public void Method1(string v)
+        {
+        }
+        
+        [System.Obsolete("Message", false), System.Serializable, System.AttributeUsage(AttributeTargets.Class)]
+        public void Method2(double d)
+        {
+        }
+    }
+}

@@ -1,0 +1,17 @@
+﻿namespace Namespace1
+{
+    using System;
+    
+    public class Class1
+    {
+        [Serializable]
+        public void Method1()
+        {
+        }
+        
+        [Serializable]
+        public void Method2()
+        {
+        }
+    }
+}
