@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
 {
-    public class ExceptionsThrownRelationVisitor : RelationMetricVisitor
+    public class ExceptionsThrownRelationVisitor : RelationVisitor
     {
         public ExceptionsThrownRelationVisitor(IRelationMetricHolder metricHolder) : base(metricHolder)
         {

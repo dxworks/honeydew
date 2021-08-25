@@ -9,14 +9,14 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
 {
-    public abstract class RelationMetricVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
+    public abstract class RelationVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
         IRelationMetric, ICSharpClassVisitor
     {
         public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
 
         protected readonly IRelationMetricHolder MetricHolder;
 
-        protected RelationMetricVisitor(IRelationMetricHolder metricHolder)
+        protected RelationVisitor(IRelationMetricHolder metricHolder)
         {
             MetricHolder = metricHolder;
         }
