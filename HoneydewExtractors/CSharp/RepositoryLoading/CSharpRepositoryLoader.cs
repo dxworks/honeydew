@@ -105,10 +105,15 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                 _progressLogger.Log($"Found {solutionPaths.Count} Solutions");
                 _progressLogger.Log();
 
+                var totalSolutions = solutionPaths.Count;
+                var currentSolutionIndex = 1;
+
                 // _progressLogger.CreateProgressBars(solutionPaths);
 
                 foreach (var solutionPath in solutionPaths)
                 {
+                    _progressLogger.Log();
+                    _progressLogger.Log($"Solution {currentSolutionIndex}/{totalSolutions} - {solutionPath}");
                     var solutionLoader =
                         new SolutionFileLoader(_logger, _extractorCreator, _solutionProvider,
                             _solutionLoadingStrategy);
@@ -121,6 +126,8 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                     {
                         _progressLogger.StopProgressBar(solutionPath);
                     }
+
+                    currentSolutionIndex++;
                 }
 
                 _logger.Log(

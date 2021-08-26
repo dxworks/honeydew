@@ -50,7 +50,7 @@ namespace Honeydew
         {
             if (_progressBars.TryGetValue(name, out var progressBar))
             {
-                progressBar.Refresh(progressBar.Max, $"Done {name}");
+                progressBar.Refresh(progressBar.Max, $"Done");
             }
         }
     }

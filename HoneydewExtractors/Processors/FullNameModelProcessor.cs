@@ -43,13 +43,19 @@ namespace HoneydewExtractors.Processors
                 select classModel).Count();
 
             _logger.Log("Resolving Class Names");
+            _progressLogger.Log();
+            _progressLogger.Log("Resolving Class Names");
             SetFullNameForClassModels(repositoryModel);
 
             _logger.Log("Resolving Using Statements for Each Class");
+            _progressLogger.Log();
+            _progressLogger.Log("Resolving Using Statements for Each Class");
             SetFullNameForUsings(repositoryModel);
 
             _logger.Log("Resolving Class Elements (Fields, Methods, Properties,...)");
             _logger.Log();
+            _progressLogger.Log();
+            _progressLogger.Log("Resolving Class Elements (Fields, Methods, Properties,...)");
             SetFullNameForClassModelComponents(repositoryModel);
 
             foreach (var (ambiguousName, possibilities) in _ambiguousNames)
@@ -325,7 +331,8 @@ namespace HoneydewExtractors.Processors
                                 {
                                     AddAmbiguousNames(() =>
                                     {
-                                        methodModel.ReturnValue.Type.Name = FindClassFullName(methodModel.ReturnValue.Type.Name,
+                                        methodModel.ReturnValue.Type.Name = FindClassFullName(
+                                            methodModel.ReturnValue.Type.Name,
                                             namespaceModel, projectModel, solutionModel, repositoryModel,
                                             classModel.Imports, classModel.FilePath);
                                     });
