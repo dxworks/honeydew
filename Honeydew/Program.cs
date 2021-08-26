@@ -136,7 +136,7 @@ namespace Honeydew
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
-        private static ICompositeVisitor LoadVisitors(IRelationMetricHolder relationMetricHolder)
+        private static ICompositeVisitor LoadVisitors(IRelationMetricHolder relationMetricHolder, ILogger logger)
         {
             var linesOfCodeVisitor = new LinesOfCodeVisitor();
 
@@ -251,6 +251,9 @@ namespace Honeydew
                 compositeVisitor.Add(compilationUnitVisitor);
             }
 
+            compositeVisitor.Accept(new LoggerSetterVisitor(logger));
+
+
             return compositeVisitor;
         }
 
@@ -278,7 +281,7 @@ namespace Honeydew
 
             var repositoryLoader = new CSharpRepositoryLoader(solutionProvider, projectProvider, projectLoadingStrategy,
                 solutionLoadingStrategy, logger, progressLogger,
-                new FactExtractorCreator(LoadVisitors(relationMetricHolder)));
+                new FactExtractorCreator(LoadVisitors(relationMetricHolder, logger)));
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;

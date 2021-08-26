@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.Common;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
@@ -11,6 +12,7 @@ using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics
@@ -18,6 +20,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
     public class CSharpClassFactExtractorLinesOfCodeTests
     {
         private readonly CSharpFactExtractor _sut;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpClassFactExtractorLinesOfCodeTests()
         {
@@ -34,15 +37,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                 new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
                 {
                     linesOfCodeVisitor,
-                    new LocalFunctionsSetterClassVisitor(
-                        new List<ICSharpLocalFunctionVisitor>
+                    new LocalFunctionsSetterClassVisitor(new List<ICSharpLocalFunctionVisitor>
+                    {
+                        linesOfCodeVisitor,
+                        new LocalFunctionInfoVisitor(new List<ILocalFunctionVisitor>
                         {
-                            linesOfCodeVisitor,
-                            new LocalFunctionInfoVisitor(new List<ILocalFunctionVisitor>
-                            {
-                                linesOfCodeVisitor
-                            }),
-                        })
+                            linesOfCodeVisitor
+                        }),
+                    })
                 }),
                 new PropertySetterClassVisitor(new List<ICSharpPropertyVisitor>
                 {
@@ -51,6 +53,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             }));
 
             compositeVisitor.Add(linesOfCodeVisitor);
+            
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
             _sut = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
                 new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);

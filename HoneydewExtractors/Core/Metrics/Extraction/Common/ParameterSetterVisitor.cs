@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
@@ -16,10 +18,10 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
     public class ParameterSetterVisitor : CompositeVisitor, ICSharpDelegateVisitor, ICSharpMethodVisitor,
         ICSharpConstructorVisitor, ICSharpLocalFunctionVisitor
     {
-        public ParameterSetterVisitor(IEnumerable<IParameterVisitor> visitors): base(visitors)
+        public ParameterSetterVisitor(IEnumerable<IParameterVisitor> visitors) : base(visitors)
         {
         }
-        
+
         public IDelegateType Visit(DelegateDeclarationSyntax syntaxNode, IDelegateType modelType)
         {
             ExtractParameterInfo(syntaxNode, modelType);
@@ -59,9 +61,16 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 
                     foreach (var visitor in GetContainedVisitors())
                     {
-                        if (visitor is ICSharpParameterVisitor extractionVisitor)
+                        try
                         {
-                            parameterModel = extractionVisitor.Visit(parameterSyntax, parameterModel);
+                            if (visitor is ICSharpParameterVisitor extractionVisitor)
+                            {
+                                parameterModel = extractionVisitor.Visit(parameterSyntax, parameterModel);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Log($"Could not extract from Parameter Visitor because {e}", LogLevels.Warning);
                         }
                     }
 

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -42,9 +44,16 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 
                     foreach (var visitor in GetContainedVisitors())
                     {
-                        if (visitor is ICSharpAttributeVisitor extractionVisitor)
+                        try
                         {
-                            attributeModel = extractionVisitor.Visit(attributeSyntax, attributeModel);
+                            if (visitor is ICSharpAttributeVisitor extractionVisitor)
+                            {
+                                attributeModel = extractionVisitor.Visit(attributeSyntax, attributeModel);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Log($"Could not extract from Attribute Visitor because {e}", LogLevels.Warning);
                         }
                     }
 
@@ -110,9 +119,16 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 
                     foreach (var visitor in GetContainedVisitors())
                     {
-                        if (visitor is ICSharpAttributeVisitor extractionVisitor)
+                        try
                         {
-                            attributeModel = extractionVisitor.Visit(attributeSyntax, attributeModel);
+                            if (visitor is ICSharpAttributeVisitor extractionVisitor)
+                            {
+                                attributeModel = extractionVisitor.Visit(attributeSyntax, attributeModel);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Log($"Could not extract from Attribute Visitor because {e}", LogLevels.Warning);
                         }
                     }
 

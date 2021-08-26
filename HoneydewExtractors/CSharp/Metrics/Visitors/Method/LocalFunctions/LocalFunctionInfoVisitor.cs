@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.CSharp.Metrics.Extraction;
@@ -47,9 +49,16 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions
                 IMethodTypeWithLocalFunctions localFunction = new MethodModel();
                 foreach (var visitor in GetContainedVisitors())
                 {
-                    if (visitor is ICSharpLocalFunctionVisitor extractionVisitor)
+                    try
                     {
-                        localFunction = extractionVisitor.Visit(localFunctionStatementSyntax, localFunction);
+                        if (visitor is ICSharpLocalFunctionVisitor extractionVisitor)
+                        {
+                            localFunction = extractionVisitor.Visit(localFunctionStatementSyntax, localFunction);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log($"Could not extract from Local Function Info Visitor because {e}", LogLevels.Warning);
                     }
                 }
 

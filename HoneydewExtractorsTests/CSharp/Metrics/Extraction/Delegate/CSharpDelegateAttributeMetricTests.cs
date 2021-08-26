@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Extraction.Attribute;
 using HoneydewExtractors.Core.Metrics.Extraction.Common;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
@@ -7,6 +8,7 @@ using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.CSharp.Metrics;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Delegate
@@ -14,6 +16,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Delegate
     public class CSharpDelegateAttributeMetricTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpDelegateAttributeMetricTests()
         {
@@ -27,6 +30,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Delegate
                     new AttributeInfoVisitor()
                 })
             }));
+
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
                 new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
@@ -62,7 +67,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Delegate
         [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/Delegate/Attributes/DelegateWithMultipleAttributesWithMultipleParams.txt")]
-        [FileData("TestData/CSharp/Metrics/Extraction/Delegate/Attributes/DelegateWithMultipleAttributesWithMultipleParamsInDifferentSections.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Delegate/Attributes/DelegateWithMultipleAttributesWithMultipleParamsInDifferentSections.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithMultipleAttributesWitMultipleParams(
             string fileContent)
         {
