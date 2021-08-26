@@ -233,7 +233,10 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
         {
             if (expressionSyntax == null)
             {
-                return "";
+                return new EntityTypeModel
+                {
+                    Name = ""
+                };
             }
 
             var symbolInfo = _semanticModel.GetSymbolInfo(expressionSyntax);
@@ -563,7 +566,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 _ => nameof(EAliasType.Class)
             };
         }
-        
+
         public ParameterModel ExtractInfoAboutParameter(BaseParameterSyntax baseParameterSyntax)
         {
             var parameterType = GetFullName(baseParameterSyntax.Type);

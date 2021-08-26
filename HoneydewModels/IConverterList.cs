@@ -22,7 +22,7 @@ namespace HoneydewModels
                 new ModelJsonConverter<IConstructorType, ConstructorModel>(),
                 new ModelJsonConverter<IMethodType, MethodModel>(),
                 new ModelJsonConverter<IPropertyMembersClassType, ClassModel>(),
-                new ModelJsonConverter<IMembersClassType, ClassModel>(),
+                new ModelJsonConverter<IMembersClassType, ClassModel>(), 
                 new ModelJsonConverter<IDelegateType, DelegateModel>(),
                 new ModelJsonConverter<IFieldType, FieldModel>(),
                 new ModelJsonConverter<IPropertyType, PropertyModel>(),
@@ -31,7 +31,7 @@ namespace HoneydewModels
                 new ModelJsonConverter<IMethodSignatureType, MethodCallModel>(),
                 new ModelJsonConverter<IMethodTypeWithLocalFunctions, MethodModel>(),
                 new ModelJsonConverter<IAttributeType, AttributeModel>(),
-                new ModelJsonConverter<IClassType, ClassModel>(),
+                // new ModelJsonConverter<IClassType, ClassModel>(),
             };
         }
     }

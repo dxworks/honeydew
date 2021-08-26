@@ -6,4 +6,4 @@ namespace HoneydewModels.Types
     {
         public IList<GenericType> ContainedTypes { get; set; }
     }
-}
+}   
