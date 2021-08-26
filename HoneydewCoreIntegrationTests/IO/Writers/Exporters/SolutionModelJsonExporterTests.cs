@@ -13,7 +13,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
 
         public SolutionModelJsonExporterTests()
         {
-            _sut = new JsonSolutionModelExporter(new ConverterList());
+            _sut = new JsonSolutionModelExporter();
         }
 
         [Fact]
@@ -126,7 +126,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""ProjectName"",""FilePath"":""some_path"",""ProjectReferences"":[""HoneydewCore""],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""Name"":""SomeNamespace.FirstClass"",""FilePath"":""SomePath"",""Loc"":{""SourceLines"":0,""CommentedLines"":0,""EmptyLines"":0},""AccessModifier"":""private"",""Modifier"":""static"",""ContainingTypeName"":""SomeNamespace"",""BaseTypes"":[{""Type"":{""Name"":""object"",""ContainedTypes"":[{""Name"":""Other"",""Modifier"":""in"",""ContainedTypes"":[]}]},""Kind"":""class""}],""Imports"":[],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[],""Metrics"":[{""ExtractorName"":""BaseTypeExtractor"",""ValueType"":""System.Collections.Generic.List\u00601[[HoneydewModels.Types.IBaseType, HoneydewModels, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"",""Value"":[{""Type"":{""Name"":""SomeParent"",""ContainedTypes"":[]},""Kind"":""class""},{""Type"":{""Name"":""Interface1"",""ContainedTypes"":[]},""Kind"":""interface""}]}],""Attributes"":[],""Namespace"":""SomeNamespace""}]}]}]}";
+                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""ProjectName"",""FilePath"":""some_path"",""ProjectReferences"":[""HoneydewCore""],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""Name"":""SomeNamespace.FirstClass"",""FilePath"":""SomePath"",""Loc"":{""SourceLines"":0,""CommentedLines"":0,""EmptyLines"":0},""AccessModifier"":""private"",""Modifier"":""static"",""ContainingTypeName"":""SomeNamespace"",""BaseTypes"":[{""Type"":{""Name"":""object"",""ContainedTypes"":[{""Name"":""Other"",""Modifier"":""in"",""ContainedTypes"":[]}]},""Kind"":""class""}],""Imports"":[],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[],""Metrics"":[{""ExtractorName"":""BaseTypeExtractor"",""ValueType"":""System.Collections.Generic.List`1[[HoneydewModels.Types.IBaseType, HoneydewModels, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"",""Value"":[{""Type"":{""Name"":""SomeParent"",""ContainedTypes"":[]},""Kind"":""class""},{""Type"":{""Name"":""Interface1"",""ContainedTypes"":[]},""Kind"":""interface""}]}],""Attributes"":[],""Namespace"":""SomeNamespace""}]}]}]}";
 
             var projectModel = new ProjectModel("ProjectName")
             {
@@ -149,9 +149,9 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
         public void Export_ShouldReturnRawModel_WhenModelHasOneCompilationUnitWithOneClassAndMethodCalls()
         {
             var solutionModel = new SolutionModel { FilePath = "path_to_solution" };
-            var classModels = new List<ClassModel>
+            var classModels = new List<IPropertyMembersClassType>
             {
-                new()
+                new ClassModel
                 {
                     FilePath = "pathToClass",
                     Name = "SomeNamespace.FirstClass",
