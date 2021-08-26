@@ -16,6 +16,10 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
 
         protected readonly IRelationMetricHolder MetricHolder;
 
+        public RelationVisitor()
+        {
+        }
+
         protected RelationVisitor(IRelationMetricHolder metricHolder)
         {
             MetricHolder = metricHolder;

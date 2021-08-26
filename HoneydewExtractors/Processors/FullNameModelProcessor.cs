@@ -684,26 +684,36 @@ namespace HoneydewExtractors.Processors
                 return CSharpConstants.ConvertPrimitiveTypeToSystemType(className);
             }
 
-            if (_repositoryClassSet.Contains(projectModelToStartSearchFrom.FilePath, className))
+            var classFullName = className;
+            var nullableString = "";
+            if (className.EndsWith("?"))
             {
-                return className;
+                nullableString = "?";
+                classFullName = classFullName.Replace("?", "");
             }
 
-            if (IsNameFullyQualified(className))
+            if (_repositoryClassSet.Contains(projectModelToStartSearchFrom.FilePath, classFullName))
             {
-                return className;
+                return classFullName + nullableString;
+            }
+
+            if (IsNameFullyQualified(classFullName))
+            {
+                return classFullName + nullableString;
             }
 
             // try to find class in provided namespace
-            if (namespaceModelToStartSearchFrom.ClassModels.Any(classModel => classModel.Name == className))
+            if (namespaceModelToStartSearchFrom.ClassModels.Any(classModel => classModel.Name == classFullName))
             {
-                return AddClassModelToNamespaceGraph(className, classFilePath, namespaceModelToStartSearchFrom.Name);
+                return AddClassModelToNamespaceGraph(classFullName, classFilePath,
+                    namespaceModelToStartSearchFrom.Name) + nullableString;
             }
 
             if (namespaceModelToStartSearchFrom.ClassModels.Any(classModel =>
-                classModel.Name == $"{namespaceModelToStartSearchFrom.Name}.{className}"))
+                classModel.Name == $"{namespaceModelToStartSearchFrom.Name}.{classFullName}"))
             {
-                return AddClassModelToNamespaceGraph(className, classFilePath, namespaceModelToStartSearchFrom.Name);
+                return AddClassModelToNamespaceGraph(classFullName, classFilePath,
+                    namespaceModelToStartSearchFrom.Name) + nullableString;
             }
 
             // search in all provided usings
@@ -715,15 +725,16 @@ namespace HoneydewExtractors.Processors
                 // if one namespace alias is found, replace the alias with the real name of the namespace
                 foreach (var usingModel in usingModels)
                 {
-                    if (usingModel.AliasType == nameof(EAliasType.Class) && className == usingModel.Alias)
+                    if (usingModel.AliasType == nameof(EAliasType.Class) && classFullName == usingModel.Alias)
                     {
-                        return usingModel.Name;
+                        return usingModel.Name + nullableString;
                     }
 
-                    var tempName = className;
-                    if (usingModel.AliasType == nameof(EAliasType.Namespace) && className.StartsWith(usingModel.Alias))
+                    var tempName = classFullName;
+                    if (usingModel.AliasType == nameof(EAliasType.Namespace) &&
+                        classFullName.StartsWith(usingModel.Alias))
                     {
-                        tempName = className.Replace(usingModel.Alias, usingModel.Name);
+                        tempName = classFullName.Replace(usingModel.Alias, usingModel.Name);
                     }
 
                     foreach (var name in GetPossibilitiesFromNamespace(usingModel.Name, tempName))
@@ -734,11 +745,11 @@ namespace HoneydewExtractors.Processors
                     switch (fullNamePossibilities.Count)
                     {
                         case 1:
-                            return fullNamePossibilities.First();
+                            return fullNamePossibilities.First() + nullableString;
                         case > 1:
                             throw new AmbiguousFullNameException(new AmbiguousName
                             {
-                                Name = className,
+                                Name = classFullName,
                                 Location = classFilePath
                             }, fullNamePossibilities);
                     }
@@ -746,7 +757,7 @@ namespace HoneydewExtractors.Processors
             }
 
             // search in current namespace for classes that used a class located in the parent namespace 
-            foreach (var name in GetPossibilitiesFromNamespace(namespaceModelToStartSearchFrom.Name, className))
+            foreach (var name in GetPossibilitiesFromNamespace(namespaceModelToStartSearchFrom.Name, classFullName))
             {
                 fullNamePossibilities.Add(name);
             }
@@ -754,16 +765,17 @@ namespace HoneydewExtractors.Processors
             switch (fullNamePossibilities.Count)
             {
                 case 1:
-                    return fullNamePossibilities.First();
+                    return fullNamePossibilities.First() + nullableString;
                 case > 1:
                     throw new AmbiguousFullNameException(new AmbiguousName
                     {
-                        Name = className,
+                        Name = classFullName,
                         Location = classFilePath
                     }, fullNamePossibilities);
             }
 
-            foreach (var name in TrySearchingInProjectModel(className, classFilePath, projectModelToStartSearchFrom))
+            foreach (var name in
+                TrySearchingInProjectModel(classFullName, classFilePath, projectModelToStartSearchFrom))
             {
                 fullNamePossibilities.Add(name);
             }
@@ -771,16 +783,17 @@ namespace HoneydewExtractors.Processors
             switch (fullNamePossibilities.Count)
             {
                 case 1:
-                    return fullNamePossibilities.First();
+                    return fullNamePossibilities.First() + nullableString;
                 case > 1:
                     throw new AmbiguousFullNameException(new AmbiguousName
                     {
-                        Name = className,
+                        Name = classFullName,
                         Location = classFilePath
                     }, fullNamePossibilities);
             }
 
-            foreach (var name in TrySearchingInSolutionModel(className, classFilePath, solutionModelToStartSearchFrom,
+            foreach (var name in TrySearchingInSolutionModel(classFullName, classFilePath,
+                solutionModelToStartSearchFrom,
                 projectModelToStartSearchFrom))
             {
                 fullNamePossibilities.Add(name);
@@ -789,11 +802,11 @@ namespace HoneydewExtractors.Processors
             switch (fullNamePossibilities.Count)
             {
                 case 1:
-                    return fullNamePossibilities.First();
+                    return fullNamePossibilities.First() + nullableString;
                 case > 1:
                     throw new AmbiguousFullNameException(new AmbiguousName
                     {
-                        Name = className,
+                        Name = classFullName,
                         Location = classFilePath
                     }, fullNamePossibilities);
             }
@@ -806,7 +819,7 @@ namespace HoneydewExtractors.Processors
                     continue;
                 }
 
-                foreach (var name in TrySearchingInSolutionModel(className, classFilePath, solutionModel,
+                foreach (var name in TrySearchingInSolutionModel(classFullName, classFilePath, solutionModel,
                     projectModelToStartSearchFrom))
                 {
                     fullNamePossibilities.Add(name);
@@ -816,7 +829,7 @@ namespace HoneydewExtractors.Processors
                 {
                     throw new AmbiguousFullNameException(new AmbiguousName
                     {
-                        Name = className,
+                        Name = classFullName,
                         Location = classFilePath
                     }, fullNamePossibilities);
                 }
@@ -825,14 +838,14 @@ namespace HoneydewExtractors.Processors
             switch (fullNamePossibilities.Count)
             {
                 case 1:
-                    return CSharpConstants.ConvertPrimitiveTypeToSystemType(fullNamePossibilities.First());
+                    return fullNamePossibilities.First() + nullableString;
                 case > 1:
                     throw new AmbiguousFullNameException(
-                        new AmbiguousName { Name = className, Location = classFilePath }, fullNamePossibilities);
+                        new AmbiguousName { Name = classFullName, Location = classFilePath }, fullNamePossibilities);
                 default:
                 {
-                    _notFoundClassNames.Add(className);
-                    return className;
+                    _notFoundClassNames.Add(classFullName);
+                    return classFullName + nullableString;
                 }
             }
         }

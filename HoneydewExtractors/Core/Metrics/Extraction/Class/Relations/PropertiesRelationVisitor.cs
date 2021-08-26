@@ -6,6 +6,10 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
 {
     public class PropertiesRelationVisitor : RelationVisitor
     {
+        public PropertiesRelationVisitor()
+        {
+        }
+
         public PropertiesRelationVisitor(IRelationMetricHolder metricHolder) : base(metricHolder)
         {
         }

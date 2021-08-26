@@ -32,6 +32,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
+using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewExtractors.CSharp.RepositoryLoading;
@@ -271,16 +272,16 @@ namespace Honeydew
         {
             var solutionProvider = new MsBuildSolutionProvider();
             var projectProvider = new MsBuildProjectProvider();
-
+            ICompilationMaker compilationMaker = new CSharpCompilationMaker();
             // Create repository model from path
-            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger);
+            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger, compilationMaker);
 
             var solutionLoadingStrategy =
                 new BasicSolutionLoadingStrategy(logger, projectLoadingStrategy, progressLogger);
 
             var repositoryLoader = new CSharpRepositoryLoader(solutionProvider, projectProvider, projectLoadingStrategy,
                 solutionLoadingStrategy, logger, progressLogger,
-                new FactExtractorCreator(LoadVisitors(relationMetricHolder, logger)));
+                new FactExtractorCreator(LoadVisitors(relationMetricHolder, logger), compilationMaker));
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;
@@ -309,7 +310,7 @@ namespace Honeydew
             writer.WriteFile(Path.Combine(outputPath, $"honeydew{nameModifier}.json"),
                 repositoryExporter.Export(repositoryModel));
 
-            var classRelationsRepresentation = GetClassRelationsRepresentation(relationMetricHolder);
+            var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
             var csvModelExporter = GetClassRelationsRepresentationExporter();
             writer.WriteFile(Path.Combine(outputPath, $"honeydew{nameModifier}.csv"),
                 csvModelExporter.Export(classRelationsRepresentation));
@@ -346,11 +347,11 @@ namespace Honeydew
         }
 
         private static ClassRelationsRepresentation GetClassRelationsRepresentation(
-            IRelationMetricHolder relationMetricHolder)
+            RepositoryModel repositoryModel)
         {
             var classRelationsRepresentation =
-                new RelationMetricHolderToClassRelationsProcessor()
-                    .Process(relationMetricHolder);
+                new RepositoryModelToClassRelationsProcessor()
+                    .Process(repositoryModel);
             return classRelationsRepresentation;
         }
 

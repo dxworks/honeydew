@@ -1,4 +1,5 @@
-﻿using HoneydewModels.CSharp;
+﻿using System.Collections.Generic;
+using HoneydewModels.CSharp;
 using Newtonsoft.Json;
 
 namespace HoneydewModels.Importers
@@ -7,7 +8,13 @@ namespace HoneydewModels.Importers
     {
         public RepositoryModel Import(string fileContent)
         {
-            return JsonConvert.DeserializeObject<RepositoryModel>(fileContent);
+            return JsonConvert.DeserializeObject<RepositoryModel>(fileContent, new JsonSerializerSettings
+            {
+                // Converters = new List<JsonConverter>
+                // {
+                //     new ModelJsonConverter()
+                // }
+            });
         }
     }
 }
