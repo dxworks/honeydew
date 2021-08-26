@@ -36,11 +36,6 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions
             modelType.AccessModifier = "";
             modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
 
-            foreach (var parameterType in CSharpHelperMethods.ExtractInfoAboutParameters(syntaxNode.ParameterList))
-            {
-                modelType.ParameterTypes.Add(parameterType);
-            }
-
             if (syntaxNode.Body == null)
             {
                 return modelType;
@@ -62,7 +57,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions
 
                 modelType.LocalFunctions.Add(localFunction);
             }
-            
+
             return modelType;
         }
     }

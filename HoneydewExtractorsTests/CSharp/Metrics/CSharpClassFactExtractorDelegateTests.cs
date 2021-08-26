@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
+using HoneydewExtractors.Core.Metrics.Extraction.Common;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Extraction.Delegate;
+using HoneydewExtractors.Core.Metrics.Extraction.Parameter;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
 using Xunit;
@@ -19,7 +22,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             
             compositeVisitor.Add(new DelegateSetterCompilationUnitVisitor(new List<ICSharpDelegateVisitor>
             {
-                new BaseInfoDelegateVisitor()
+                new BaseInfoDelegateVisitor(),
+                new ParameterSetterVisitor(new List<IParameterVisitor>
+                {
+                    new ParameterInfoVisitor()
+                })
             }));
             
             _sut = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),

@@ -5,11 +5,13 @@ using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Extraction.Constructor;
 using HoneydewExtractors.Core.Metrics.Extraction.Method;
 using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
+using HoneydewExtractors.Core.Metrics.Extraction.Parameter;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
 using Xunit;
@@ -28,18 +30,24 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             {
                 new MethodCallInfoVisitor()
             });
+            var parameterSetterVisitor = new ParameterSetterVisitor(new List<IParameterVisitor>
+            {
+                new ParameterInfoVisitor()
+            });
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {
                 new BaseInfoClassVisitor(),
                 new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
                 {
                     new MethodInfoVisitor(),
-                    calledMethodSetterVisitor
+                    calledMethodSetterVisitor,
+                    parameterSetterVisitor
                 }),
                 new ConstructorSetterClassVisitor(new List<ICSharpConstructorVisitor>
                 {
                     new ConstructorInfoVisitor(),
-                    calledMethodSetterVisitor
+                    calledMethodSetterVisitor,
+                    parameterSetterVisitor
                 })
             }));
             

@@ -557,26 +557,25 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 _ => nameof(EAliasType.Class)
             };
         }
-
-        public IList<IParameterType> ExtractInfoAboutParameters(BaseParameterListSyntax parameterList)
+        
+        public ParameterModel ExtractInfoAboutParameter(BaseParameterSyntax baseParameterSyntax)
         {
-            var parameterTypes = new List<IParameterType>();
+            var parameterType = GetFullName(baseParameterSyntax.Type);
 
-            foreach (var parameter in parameterList.Parameters)
+            string defaultValue = null;
+
+            if (baseParameterSyntax is ParameterSyntax parameterSyntax)
             {
-                var parameterType = GetFullName(parameter.Type);
-
-                parameterTypes.Add(new ParameterModel
-                {
-                    Type = parameterType,
-                    Modifier = parameter.Modifiers.ToString(),
-                    DefaultValue = parameter.Default?.Value.ToString()
-                });
+                defaultValue = parameterSyntax.Default?.Value.ToString();
             }
 
-            return parameterTypes;
+            return new ParameterModel
+            {
+                Type = parameterType,
+                Modifier = baseParameterSyntax.Modifiers.ToString(),
+                DefaultValue = defaultValue
+            };
         }
-
 
         public string GetParentDeclaredType(SyntaxNode syntaxNode)
         {

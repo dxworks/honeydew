@@ -36,10 +36,6 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Delegate
                 Type = returnType,
                 Modifier = returnTypeModifier
             };
-            foreach (var parameterType in CSharpHelperMethods.ExtractInfoAboutParameters(syntaxNode.ParameterList))
-            {
-                modelType.ParameterTypes.Add(parameterType);
-            }
 
             modelType.ClassType = CSharpConstants.DelegateIdentifier;
             modelType.BaseTypes.Add(new BaseTypeModel

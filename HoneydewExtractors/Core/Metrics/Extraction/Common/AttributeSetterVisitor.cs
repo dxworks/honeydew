@@ -6,6 +6,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Fields;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
+using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -15,7 +16,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 {
     public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICSharpDelegateVisitor,
-        ICSharpMethodVisitor, ICSharpConstructorVisitor, ICSharpFieldVisitor, ICSharpPropertyVisitor
+        ICSharpMethodVisitor, ICSharpConstructorVisitor, ICSharpFieldVisitor, ICSharpPropertyVisitor,
+        ICSharpParameterVisitor
     {
         public AttributeSetterVisitor(IEnumerable<IAttributeVisitor> visitors) : base(visitors)
         {
@@ -30,27 +32,30 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 
         public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
         {
-            foreach (var attributeSyntax in syntaxNode.DescendantNodes().OfType<AttributeSyntax>())
+            foreach (var attributeListSyntax in syntaxNode.ChildNodes().OfType<AttributeListSyntax>())
             {
-                IAttributeType attributeModel = new AttributeModel();
-
-                attributeModel.Target = "method";
-
-                foreach (var visitor in GetContainedVisitors())
+                foreach (var attributeSyntax in attributeListSyntax.Attributes)
                 {
-                    if (visitor is ICSharpAttributeVisitor extractionVisitor)
+                    IAttributeType attributeModel = new AttributeModel();
+
+                    attributeModel.Target = "method";
+
+                    foreach (var visitor in GetContainedVisitors())
                     {
-                        attributeModel = extractionVisitor.Visit(attributeSyntax, attributeModel);
+                        if (visitor is ICSharpAttributeVisitor extractionVisitor)
+                        {
+                            attributeModel = extractionVisitor.Visit(attributeSyntax, attributeModel);
+                        }
                     }
-                }
 
-                if (attributeModel.Target == "return")
-                {
-                    modelType.ReturnValue.Attributes.Add(attributeModel);
-                }
-                else
-                {
-                    modelType.Attributes.Add(attributeModel);
+                    if (attributeModel.Target == "return")
+                    {
+                        modelType.ReturnValue.Attributes.Add(attributeModel);
+                    }
+                    else
+                    {
+                        modelType.Attributes.Add(attributeModel);
+                    }
                 }
             }
 
@@ -88,23 +93,33 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
             return modelType;
         }
 
+        public IParameterType Visit(ParameterSyntax syntaxNode, IParameterType modelType)
+        {
+            ExtractAttributes(syntaxNode, modelType, "parameter");
+
+            return modelType;
+        }
+
         private void ExtractAttributes(SyntaxNode syntaxNode, ITypeWithAttributes modelType, string target)
         {
-            foreach (var attributeSyntax in syntaxNode.DescendantNodes().OfType<AttributeSyntax>())
+            foreach (var attributeListSyntax in syntaxNode.ChildNodes().OfType<AttributeListSyntax>())
             {
-                IAttributeType attributeModel = new AttributeModel();
-
-                attributeModel.Target = target;
-
-                foreach (var visitor in GetContainedVisitors())
+                foreach (var attributeSyntax in attributeListSyntax.Attributes)
                 {
-                    if (visitor is ICSharpAttributeVisitor extractionVisitor)
-                    {
-                        attributeModel = extractionVisitor.Visit(attributeSyntax, attributeModel);
-                    }
-                }
+                    IAttributeType attributeModel = new AttributeModel();
 
-                modelType.Attributes.Add(attributeModel);
+                    foreach (var visitor in GetContainedVisitors())
+                    {
+                        if (visitor is ICSharpAttributeVisitor extractionVisitor)
+                        {
+                            attributeModel = extractionVisitor.Visit(attributeSyntax, attributeModel);
+                        }
+                    }
+
+                    attributeModel.Target = target;
+
+                    modelType.Attributes.Add(attributeModel);
+                }
             }
         }
     }

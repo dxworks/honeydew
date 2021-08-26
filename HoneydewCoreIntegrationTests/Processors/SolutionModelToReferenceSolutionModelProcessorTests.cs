@@ -6,10 +6,12 @@ using HoneydewExtractors.Core.Metrics.Extraction.Common;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Extraction.Method;
 using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
+using HoneydewExtractors.Core.Metrics.Extraction.Parameter;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -556,6 +558,10 @@ namespace Project1.Services
                     new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
                     {
                         new MethodCallInfoVisitor()
+                    }),
+                    new ParameterSetterVisitor(new List<IParameterVisitor>
+                    {
+                        new ParameterInfoVisitor()
                     })
                 })
             }));

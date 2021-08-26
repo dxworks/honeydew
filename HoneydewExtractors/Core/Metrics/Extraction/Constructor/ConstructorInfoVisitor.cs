@@ -32,11 +32,6 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Constructor
             modelType.AccessModifier = accessModifier;
             modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
 
-            foreach (var parameterType in CSharpHelperMethods.ExtractInfoAboutParameters(syntaxNode.ParameterList))
-            {
-                modelType.ParameterTypes.Add(parameterType);
-            }
-
             return modelType;
         }
 

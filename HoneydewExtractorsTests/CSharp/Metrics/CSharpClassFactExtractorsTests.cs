@@ -7,6 +7,7 @@ using HoneydewExtractors.Core.Metrics.Extraction.Constructor;
 using HoneydewExtractors.Core.Metrics.Extraction.Field;
 using HoneydewExtractors.Core.Metrics.Extraction.Method;
 using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
+using HoneydewExtractors.Core.Metrics.Extraction.Parameter;
 using HoneydewExtractors.Core.Metrics.Extraction.Property;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -14,6 +15,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Fields;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
@@ -33,18 +35,24 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             {
                 new MethodCallInfoVisitor()
             });
+            var parameterSetterVisitor = new ParameterSetterVisitor(new List<IParameterVisitor>
+            {
+                new ParameterInfoVisitor()
+            });
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {
                 new BaseInfoClassVisitor(),
                 new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
                 {
                     new MethodInfoVisitor(),
-                    calledMethodSetterVisitor
+                    calledMethodSetterVisitor,
+                    parameterSetterVisitor
                 }),
                 new ConstructorSetterClassVisitor(new List<ICSharpConstructorVisitor>
                 {
                     new ConstructorInfoVisitor(),
-                    calledMethodSetterVisitor
+                    calledMethodSetterVisitor,
+                    parameterSetterVisitor
                 }),
                 new FieldSetterClassVisitor(new List<ICSharpFieldVisitor>
                 {
