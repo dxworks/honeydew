@@ -141,22 +141,25 @@ namespace HoneydewExtractors.Processors
                 {
                     foreach (var namespaceModel in projectModel.Namespaces)
                     {
-                        foreach (var classModel in namespaceModel.ClassModels)
+                        foreach (var classType in namespaceModel.ClassModels)
                         {
-                            progressBar.Step($"{classModel.Name} from {classModel.FilePath}");
+                            progressBar.Step($"{classType.Name} from {classType.FilePath}");
 
-                            foreach (var usingModel in classModel.Imports)
+                            foreach (var usingModel in classType.Imports)
                             {
                                 if (usingModel.AliasType == nameof(EAliasType.NotDetermined))
                                 {
-                                    usingModel.AliasType = DetermineUsingType(usingModel, classModel);
+                                    if (classType is ClassModel classModel)
+                                    {
+                                        usingModel.AliasType = DetermineUsingType(usingModel, classModel);
+                                    }
                                 }
 
                                 AddAmbiguousNames(() =>
                                 {
                                     // var beforeName = usingModel.Name;
                                     usingModel.Name = FindNamespaceFullName(usingModel.Name, namespaceModel,
-                                        classModel.Imports);
+                                        classType.Imports);
                                     // if (usingModel.Name == beforeName)
                                     // {
                                     //     usingModel.Name = FindClassFullName(usingModel.Name, namespaceModel,
@@ -284,21 +287,26 @@ namespace HoneydewExtractors.Processors
                 {
                     foreach (var namespaceModel in projectModel.Namespaces)
                     {
-                        foreach (var classModel in namespaceModel.ClassModels)
+                        foreach (var classType in namespaceModel.ClassModels)
                         {
-                            _logger.Log($"Resolving Elements for {classModel.Name} from {classModel.FilePath}");
-                            progressBar.Step($"{classModel.Name} from {classModel.FilePath}");
+                            _logger.Log($"Resolving Elements for {classType.Name} from {classType.FilePath}");
+                            progressBar.Step($"{classType.Name} from {classType.FilePath}");
 
-                            for (var i = 0; i < classModel.BaseTypes.Count; i++)
+                            for (var i = 0; i < classType.BaseTypes.Count; i++)
                             {
                                 var iCopy = i;
                                 AddAmbiguousNames(() =>
                                 {
-                                    classModel.BaseTypes[iCopy].Type.Name = FindClassFullName(
-                                        classModel.BaseTypes[iCopy].Type.Name,
+                                    classType.BaseTypes[iCopy].Type.Name = FindClassFullName(
+                                        classType.BaseTypes[iCopy].Type.Name,
                                         namespaceModel, projectModel, solutionModel, repositoryModel,
-                                        classModel.Imports, classModel.FilePath);
+                                        classType.Imports, classType.FilePath);
                                 });
+                            }
+
+                            if (classType is not ClassModel classModel)
+                            {
+                                continue;
                             }
 
                             foreach (var fieldModel in classModel.Fields)
@@ -461,10 +469,15 @@ namespace HoneydewExtractors.Processors
                     continue;
                 }
 
-                var staticImportedClass =
+                var staticImportedClassType =
                     GetClassModelFullyQualified(importType.Name, projectModel, solutionModel, repositoryModel);
 
-                if (staticImportedClass == null)
+                if (staticImportedClassType == null)
+                {
+                    continue;
+                }
+
+                if (staticImportedClassType is not ClassModel staticImportedClass)
                 {
                     continue;
                 }
@@ -991,7 +1004,7 @@ namespace HoneydewExtractors.Processors
         }
 
 
-        private static ClassModel GetClassModelFullyQualified(string classNameToSearch,
+        private static IClassType GetClassModelFullyQualified(string classNameToSearch,
             ProjectModel projectModelToStartSearchFrom,
             SolutionModel solutionModelToStartSearchFrom, RepositoryModel repositoryModel)
         {
@@ -1042,7 +1055,7 @@ namespace HoneydewExtractors.Processors
 // parts contains the class name split in parts
 // a fully qualified name is generated and compared with the namespaces found in the provided ProjectModel
 
-        private static ClassModel GetClassModelFullyQualified(IReadOnlyList<string> classNameParts,
+        private static IClassType GetClassModelFullyQualified(IReadOnlyList<string> classNameParts,
             ProjectModel projectModel)
         {
             var namespaceName = new StringBuilder();

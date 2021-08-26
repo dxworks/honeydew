@@ -57,7 +57,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     foreach (var classModel in classTypes)
                     {
                         classModel.FilePath = document.FilePath;
-                        projectModel.Add(classModel as ClassModel);
+                        projectModel.Add(classModel);
                     }
                 }
                 catch (Exception e)

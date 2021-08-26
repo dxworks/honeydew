@@ -84,9 +84,9 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "CreateService",
                                         FilePath = "validPathToProject/Project1/Services/CreateService.cs",
@@ -202,7 +202,7 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
             Assert.Equal("Project1.Services", namespaceModel.Name);
             Assert.Equal(1, namespaceModel.ClassModels.Count);
 
-            var classModel = namespaceModel.ClassModels[0];
+            var classModel = (ClassModel)namespaceModel.ClassModels[0];
             Assert.Equal("CreateService", classModel.Name);
             Assert.Equal(2, classModel.BaseTypes.Count);
 

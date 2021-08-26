@@ -131,7 +131,7 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = classModels.Cast<ClassModel>().ToList(),
+                                ClassModels = classModels
                             }
                         }
                     }
@@ -321,7 +321,7 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = classModels.Cast<ClassModel>().ToList(),
+                                ClassModels = classModels,
                             }
                         }
                     }
@@ -472,7 +472,7 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = classModels.Cast<ClassModel>().ToList(),
+                                ClassModels = classModels,
                             }
                         }
                     }
@@ -641,7 +641,7 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.MyNamespace",
-                                ClassModels = classModels.Cast<ClassModel>().ToList(),
+                                ClassModels = classModels,
                             }
                         }
                     }

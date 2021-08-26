@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
@@ -6,7 +7,7 @@ namespace HoneydewModels.CSharp
     {
         public IList<SolutionModel> Solutions { get; set; } = new List<SolutionModel>();
 
-        public IEnumerable<ClassModel> GetEnumerable()
+        public IEnumerable<IClassType> GetEnumerable()
         {
             foreach (var solutionModel in Solutions)
             {

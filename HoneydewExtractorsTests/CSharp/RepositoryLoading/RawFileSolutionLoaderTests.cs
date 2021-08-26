@@ -164,7 +164,7 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
 
             Assert.Equal("SomeNamespace", projectNamespace.Name);
             Assert.Equal(1, projectNamespace.ClassModels.Count);
-            var classModel = projectNamespace.ClassModels[0];
+            var classModel = (ClassModel)projectNamespace.ClassModels[0];
 
             Assert.Equal("SomePath", classModel.FilePath);
             Assert.Equal("SomeNamespace.FirstClass", classModel.Name);

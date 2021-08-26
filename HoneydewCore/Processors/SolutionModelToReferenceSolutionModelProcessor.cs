@@ -100,8 +100,13 @@ namespace HoneydewCore.Processors
         private void PopulateModelWithMethodsAndFields(SolutionModel solutionModel,
             ReferenceSolutionModel referenceSolutionModel)
         {
-            foreach (var classModel in solutionModel.GetEnumerable())
+            foreach (var classType in solutionModel.GetEnumerable())
             {
+                if (classType is not ClassModel classModel)
+                {
+                    continue;
+                }
+                
                 var referenceClassModel =
                     referenceSolutionModel.FindFirstClass(entity => entity.Name == classModel.Name);
 
@@ -174,8 +179,13 @@ namespace HoneydewCore.Processors
         private void PopulateModelWithMethodReferences(SolutionModel solutionModel,
             ReferenceSolutionModel referenceSolutionModel)
         {
-            foreach (var classModel in solutionModel.GetEnumerable())
+            foreach (var classType in solutionModel.GetEnumerable())
             {
+                if (classType is not ClassModel classModel)
+                {
+                    continue;
+                }
+                
                 var referenceClassModel =
                     referenceSolutionModel.FindFirstClass(entity => entity.Name == classModel.Name);
 

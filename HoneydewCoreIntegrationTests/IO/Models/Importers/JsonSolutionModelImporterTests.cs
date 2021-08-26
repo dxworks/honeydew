@@ -52,7 +52,7 @@ namespace HoneydewCoreIntegrationTests.IO.Models.Importers
 
             Assert.Equal("SomeNamespace", projectNamespace.Name);
             Assert.Equal(1, projectNamespace.ClassModels.Count);
-            var classModel = projectNamespace.ClassModels[0];
+            var classModel = (ClassModel)projectNamespace.ClassModels[0];
 
             Assert.Equal("SomePath", classModel.FilePath);
             Assert.Equal("SomeNamespace.FirstClass", classModel.Name);
@@ -67,7 +67,7 @@ namespace HoneydewCoreIntegrationTests.IO.Models.Importers
                 classModel.Metrics[0].ValueType);
 
             Assert.Equal(typeof(JsonElement), classModel.Metrics[0].Value.GetType());
-            var value = (JsonElement) classModel.Metrics[0].Value;
+            var value = (JsonElement)classModel.Metrics[0].Value;
 
             var baseClassName = value.GetProperty("BaseClassName");
             Assert.Equal("SomeParent", baseClassName.GetString());

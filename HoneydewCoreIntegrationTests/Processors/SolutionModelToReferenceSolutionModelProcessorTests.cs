@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using HoneydewCore.Processors;
 using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.Common;
@@ -115,14 +114,14 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Services.CreateService",
                                         FilePath = "validPathToProject/Project1/Services/CreateService.cs"
                                     },
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Services.RetrieveService",
                                         FilePath = "validPathToProject/Project1/Services/RetrieveService.cs",
@@ -141,9 +140,9 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Models",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Models.MyModel",
                                         FilePath = "validPathToProject/Project1/Models/MyModel.cs",
@@ -214,9 +213,9 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Services.CreateService",
                                         FilePath = "validPathToProject/Project1/Services/CreateService.cs",
@@ -382,14 +381,14 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Models",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Models.MyModel",
                                         FilePath = "validPathToProject/Project1/Models/MyModel.cs",
                                     },
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Models.OtherModel",
                                         FilePath = "validPathToProject/Project1/Models/OtherModel.cs",
@@ -583,7 +582,7 @@ namespace Project1.Services
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = classModels.Cast<ClassModel>().ToList(),
+                                ClassModels = classModels,
                             }
                         }
                     }
@@ -722,9 +721,9 @@ namespace Project1.Services
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Services.CreateService",
                                         FilePath = "validPathToProject/Project1/Services/CreateService.cs",
@@ -747,9 +746,9 @@ namespace Project1.Services
                             new NamespaceModel
                             {
                                 Name = "Project1.Models",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Models.MyModel",
                                         FilePath = "validPathToProject/Project1/Models/MyModel.cs",
@@ -789,7 +788,7 @@ namespace Project1.Services
                                             }
                                         }
                                     },
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Models.OtherModel",
                                         FilePath = "validPathToProject/Project1/Models/OtherModel.cs",
