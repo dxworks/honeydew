@@ -10,6 +10,7 @@ using HoneydewCore.Logging;
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
 using HoneydewExtractors.Core;
+using HoneydewExtractors.Core.Metrics.Extraction.Attribute;
 using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.Class.Relations;
 using HoneydewExtractors.Core.Metrics.Extraction.Common;
@@ -19,15 +20,19 @@ using HoneydewExtractors.Core.Metrics.Extraction.Delegate;
 using HoneydewExtractors.Core.Metrics.Extraction.Field;
 using HoneydewExtractors.Core.Metrics.Extraction.Method;
 using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
+using HoneydewExtractors.Core.Metrics.Extraction.Parameter;
 using HoneydewExtractors.Core.Metrics.Extraction.Property;
 using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Fields;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
+using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewExtractors.CSharp.RepositoryLoading;
@@ -35,7 +40,6 @@ using HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead;
 using HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead;
 using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
 using HoneydewExtractors.Processors;
-using HoneydewModels;
 using HoneydewModels.CSharp;
 using HoneydewModels.Exporters;
 using HoneydewModels.Importers;
@@ -132,9 +136,14 @@ namespace Honeydew
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
-        private static ICompositeVisitor LoadVisitors(IRelationMetricHolder relationMetricHolder)
+        private static ICompositeVisitor LoadVisitors(IRelationMetricHolder relationMetricHolder, ILogger logger)
         {
             var linesOfCodeVisitor = new LinesOfCodeVisitor();
+
+            var attributeSetterVisitor = new AttributeSetterVisitor(new List<IAttributeVisitor>
+            {
+                new AttributeInfoVisitor()
+            });
 
             var calledMethodSetterVisitor =
                 new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
@@ -142,15 +151,23 @@ namespace Honeydew
                     new MethodCallInfoVisitor()
                 });
 
+            var parameterSetterVisitor = new ParameterSetterVisitor(new List<IParameterVisitor>
+            {
+                new ParameterInfoVisitor(),
+                attributeSetterVisitor
+            });
+
             var localFunctionsSetterClassVisitor = new LocalFunctionsSetterClassVisitor(new List<ILocalFunctionVisitor>
             {
                 new LocalFunctionInfoVisitor(new List<ILocalFunctionVisitor>
                 {
                     calledMethodSetterVisitor,
                     linesOfCodeVisitor,
+                    parameterSetterVisitor,
                 }),
                 calledMethodSetterVisitor,
                 linesOfCodeVisitor,
+                parameterSetterVisitor,
             });
 
             var methodVisitors = new List<ICSharpMethodVisitor>
@@ -159,6 +176,8 @@ namespace Honeydew
                 linesOfCodeVisitor,
                 calledMethodSetterVisitor,
                 localFunctionsSetterClassVisitor,
+                attributeSetterVisitor,
+                parameterSetterVisitor
             };
 
             var constructorVisitors = new List<ICSharpConstructorVisitor>
@@ -167,12 +186,15 @@ namespace Honeydew
                 linesOfCodeVisitor,
                 calledMethodSetterVisitor,
                 new ConstructorCallsVisitor(),
-                localFunctionsSetterClassVisitor
+                localFunctionsSetterClassVisitor,
+                attributeSetterVisitor,
+                parameterSetterVisitor
             };
 
             var fieldVisitors = new List<ICSharpFieldVisitor>
             {
-                new FieldInfoVisitor()
+                new FieldInfoVisitor(),
+                attributeSetterVisitor,
             };
 
             var propertyVisitors = new List<ICSharpPropertyVisitor>
@@ -180,7 +202,8 @@ namespace Honeydew
                 new PropertyInfoVisitor(),
                 calledMethodSetterVisitor,
                 linesOfCodeVisitor,
-                localFunctionsSetterClassVisitor
+                localFunctionsSetterClassVisitor,
+                attributeSetterVisitor,
             };
 
             var classVisitors = new List<ICSharpClassVisitor>
@@ -193,6 +216,7 @@ namespace Honeydew
                 new PropertySetterClassVisitor(propertyVisitors),
                 new ImportsVisitor(),
                 linesOfCodeVisitor,
+                attributeSetterVisitor,
 
                 // metrics visitor
                 new IsAbstractClassVisitor(),
@@ -209,6 +233,8 @@ namespace Honeydew
             {
                 new BaseInfoDelegateVisitor(),
                 new ImportsVisitor(),
+                attributeSetterVisitor,
+                parameterSetterVisitor
             };
             var compilationUnitVisitors = new List<ICSharpCompilationUnitVisitor>
             {
@@ -224,6 +250,9 @@ namespace Honeydew
             {
                 compositeVisitor.Add(compilationUnitVisitor);
             }
+
+            compositeVisitor.Accept(new LoggerSetterVisitor(logger));
+
 
             return compositeVisitor;
         }
@@ -243,16 +272,16 @@ namespace Honeydew
         {
             var solutionProvider = new MsBuildSolutionProvider();
             var projectProvider = new MsBuildProjectProvider();
-
+            ICompilationMaker compilationMaker = new CSharpCompilationMaker();
             // Create repository model from path
-            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger);
+            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger, compilationMaker);
 
             var solutionLoadingStrategy =
                 new BasicSolutionLoadingStrategy(logger, projectLoadingStrategy, progressLogger);
 
             var repositoryLoader = new CSharpRepositoryLoader(solutionProvider, projectProvider, projectLoadingStrategy,
                 solutionLoadingStrategy, logger, progressLogger,
-                new FactExtractorCreator(LoadVisitors(relationMetricHolder)));
+                new FactExtractorCreator(LoadVisitors(relationMetricHolder, logger), compilationMaker));
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;
@@ -281,7 +310,7 @@ namespace Honeydew
             writer.WriteFile(Path.Combine(outputPath, $"honeydew{nameModifier}.json"),
                 repositoryExporter.Export(repositoryModel));
 
-            var classRelationsRepresentation = GetClassRelationsRepresentation(relationMetricHolder);
+            var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
             var csvModelExporter = GetClassRelationsRepresentationExporter();
             writer.WriteFile(Path.Combine(outputPath, $"honeydew{nameModifier}.csv"),
                 csvModelExporter.Export(classRelationsRepresentation));
@@ -301,7 +330,7 @@ namespace Honeydew
 
         private static IModelExporter<RepositoryModel> GetRepositoryModelExporter()
         {
-            return new JsonRepositoryModelExporter(new ConverterList());
+            return new JsonRepositoryModelExporter();
         }
 
         private static IModelExporter<ClassRelationsRepresentation> GetClassRelationsRepresentationExporter()
@@ -318,11 +347,11 @@ namespace Honeydew
         }
 
         private static ClassRelationsRepresentation GetClassRelationsRepresentation(
-            IRelationMetricHolder relationMetricHolder)
+            RepositoryModel repositoryModel)
         {
             var classRelationsRepresentation =
-                new RelationMetricHolderToClassRelationsProcessor()
-                    .Process(relationMetricHolder);
+                new RepositoryModelToClassRelationsProcessor()
+                    .Process(repositoryModel);
             return classRelationsRepresentation;
         }
 

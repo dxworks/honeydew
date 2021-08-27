@@ -57,7 +57,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("Value", propertyModel.Name);
             Assert.Equal("", propertyModel.Modifier);
             Assert.Equal("public", propertyModel.AccessModifier);
-            Assert.Equal("int", propertyModel.Type);
+            Assert.Equal("int", propertyModel.Type.Name);
             Assert.Equal("TopLevel.Foo", propertyModel.ContainingTypeName);
             Assert.False(propertyModel.IsEvent);
             Assert.Empty(propertyModel.CalledMethods);
@@ -87,7 +87,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(2, propertyTypes.Count);
 
             Assert.Equal("A", propertyTypes[0].Name);
-            Assert.Equal("int", propertyTypes[0].Type);
+            Assert.Equal("int", propertyTypes[0].Type.Name);
             Assert.Equal("static", propertyTypes[0].Modifier);
             Assert.Equal("private", propertyTypes[0].AccessModifier);
             Assert.False(propertyTypes[0].IsEvent);
@@ -95,7 +95,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Empty(propertyTypes[0].CalledMethods);
 
             Assert.Equal("X", propertyTypes[1].Name);
-            Assert.Equal("float", propertyTypes[1].Type);
+            Assert.Equal("float", propertyTypes[1].Type.Name);
             Assert.Equal("", propertyTypes[1].Modifier);
             Assert.Equal("private", propertyTypes[1].AccessModifier);
             Assert.False(propertyTypes[1].IsEvent);
@@ -130,7 +130,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(3, propertyModels.Count);
 
             Assert.Equal("AnimalNest", propertyModels[0].Name);
-            Assert.Equal("int", propertyModels[0].Type);
+            Assert.Equal("int", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal(modifier, propertyModels[0].AccessModifier);
             Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingTypeName);
@@ -138,7 +138,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Empty(propertyModels[0].CalledMethods);
 
             Assert.Equal("X", propertyModels[1].Name);
-            Assert.Equal("float", propertyModels[1].Type);
+            Assert.Equal("float", propertyModels[1].Type.Name);
             Assert.Equal("", propertyModels[1].Modifier);
             Assert.Equal(modifier, propertyModels[1].AccessModifier);
             Assert.Equal("TopLevel.Foo", propertyModels[1].ContainingTypeName);
@@ -146,7 +146,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Empty(propertyModels[1].CalledMethods);
 
             Assert.Equal("extractor", propertyModels[2].Name);
-            Assert.Equal("CSharpMetricExtractor", propertyModels[2].Type);
+            Assert.Equal("CSharpMetricExtractor", propertyModels[2].Type.Name);
             Assert.Equal("", propertyModels[2].Modifier);
             Assert.Equal(modifier, propertyModels[2].AccessModifier);
             Assert.Equal("TopLevel.Foo", propertyModels[2].ContainingTypeName);
@@ -182,21 +182,21 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(3, propertyModels.Count);
 
             Assert.Equal("extractor", propertyModels[0].Name);
-            Assert.Equal("CSharpMetricExtractor", propertyModels[0].Type);
+            Assert.Equal("CSharpMetricExtractor", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal(visibility, propertyModels[0].AccessModifier);
             Assert.True(propertyModels[0].IsEvent);
             Assert.Empty(propertyModels[0].CalledMethods);
 
             Assert.Equal("_some_event", propertyModels[1].Name);
-            Assert.Equal("int", propertyModels[1].Type);
+            Assert.Equal("int", propertyModels[1].Type.Name);
             Assert.Equal("", propertyModels[1].Modifier);
             Assert.Equal(visibility, propertyModels[1].AccessModifier);
             Assert.True(propertyModels[1].IsEvent);
             Assert.Empty(propertyModels[1].CalledMethods);
 
             Assert.Equal("MyAction1", propertyModels[2].Name);
-            Assert.Equal("System.Action", propertyModels[2].Type);
+            Assert.Equal("System.Action", propertyModels[2].Type.Name);
             Assert.Equal("", propertyModels[2].Modifier);
             Assert.Equal(visibility, propertyModels[2].AccessModifier);
             Assert.True(propertyModels[2].IsEvent);
@@ -299,7 +299,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels.Count);
 
             Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("TopLevel.Bar", propertyModels[0].Type);
+            Assert.Equal("TopLevel.Bar", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal("protected", propertyModels[0].AccessModifier);
             Assert.False(propertyModels[0].IsEvent);
@@ -335,7 +335,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels.Count);
 
             Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("int", propertyModels[0].Type);
+            Assert.Equal("int", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal("public", propertyModels[0].AccessModifier);
             Assert.False(propertyModels[0].IsEvent);
@@ -384,7 +384,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels.Count);
 
             Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("int", propertyModels[0].Type);
+            Assert.Equal("int", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal("public", propertyModels[0].AccessModifier);
             Assert.False(propertyModels[0].IsEvent);
@@ -396,7 +396,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels[0].CalledMethods[0].ParameterTypes.Count);
             var parameterModel1 = (ParameterModel)propertyModels[0].CalledMethods[0].ParameterTypes[0];
             Assert.Equal("", parameterModel1.Modifier);
-            Assert.Equal("int", parameterModel1.Name);
+            Assert.Equal("int", parameterModel1.Type.Name);
             Assert.Null(parameterModel1.DefaultValue);
 
             Assert.Equal("Double", propertyModels[0].CalledMethods[1].Name);
@@ -404,7 +404,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels[0].CalledMethods[1].ParameterTypes.Count);
             var parameterModel2 = (ParameterModel)propertyModels[0].CalledMethods[1].ParameterTypes[0];
             Assert.Equal("", parameterModel2.Modifier);
-            Assert.Equal("int", parameterModel2.Name);
+            Assert.Equal("int", parameterModel2.Type.Name);
             Assert.Null(parameterModel2.DefaultValue);
         }
 
@@ -455,7 +455,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels.Count);
 
             Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("int", propertyModels[0].Type);
+            Assert.Equal("int", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal("public", propertyModels[0].AccessModifier);
             Assert.False(propertyModels[0].IsEvent);
@@ -467,7 +467,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels[0].CalledMethods[0].ParameterTypes.Count);
             var parameterModel1 = (ParameterModel)propertyModels[0].CalledMethods[0].ParameterTypes[0];
             Assert.Equal("", parameterModel1.Modifier);
-            Assert.Equal("int", parameterModel1.Name);
+            Assert.Equal("int", parameterModel1.Type.Name);
             Assert.Null(parameterModel1.DefaultValue);
 
             Assert.Equal("Double", propertyModels[0].CalledMethods[1].Name);
@@ -475,7 +475,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels[0].CalledMethods[1].ParameterTypes.Count);
             var parameterModel2 = (ParameterModel)propertyModels[0].CalledMethods[1].ParameterTypes[0];
             Assert.Equal("", parameterModel2.Modifier);
-            Assert.Equal("int", parameterModel2.Name);
+            Assert.Equal("int", parameterModel2.Type.Name);
             Assert.Null(parameterModel2.DefaultValue);
         }
 
@@ -513,7 +513,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels.Count);
 
             Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("int", propertyModels[0].Type);
+            Assert.Equal("int", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal("public", propertyModels[0].AccessModifier);
             Assert.False(propertyModels[0].IsEvent);
@@ -526,7 +526,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels[0].CalledMethods[0].ParameterTypes.Count);
             var parameterModel1 = (ParameterModel)propertyModels[0].CalledMethods[0].ParameterTypes[0];
             Assert.Equal("", parameterModel1.Modifier);
-            Assert.Equal("int", parameterModel1.Name);
+            Assert.Equal("int", parameterModel1.Type.Name);
             Assert.Null(parameterModel1.DefaultValue);
 
             Assert.Equal("Double", propertyModels[0].CalledMethods[1].Name);
@@ -535,7 +535,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels[0].CalledMethods[1].ParameterTypes.Count);
             var parameterModel2 = (ParameterModel)propertyModels[0].CalledMethods[1].ParameterTypes[0];
             Assert.Equal("", parameterModel2.Modifier);
-            Assert.Equal("int", parameterModel2.Name);
+            Assert.Equal("int", parameterModel2.Type.Name);
             Assert.Null(parameterModel2.DefaultValue);
         }
 
@@ -579,7 +579,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels.Count);
 
             Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("System.Func<double>", propertyModels[0].Type);
+            Assert.Equal("System.Func<double>", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal("public", propertyModels[0].AccessModifier);
             Assert.True(propertyModels[0].IsEvent);
@@ -591,7 +591,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels[0].CalledMethods[0].ParameterTypes.Count);
             var parameterModel1 = (ParameterModel)propertyModels[0].CalledMethods[0].ParameterTypes[0];
             Assert.Equal("", parameterModel1.Modifier);
-            Assert.Equal("double", parameterModel1.Name);
+            Assert.Equal("double", parameterModel1.Type.Name);
             Assert.Null(parameterModel1.DefaultValue);
 
             Assert.Equal("Double", propertyModels[0].CalledMethods[1].Name);
@@ -599,7 +599,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels[0].CalledMethods[1].ParameterTypes.Count);
             var parameterModel2 = (ParameterModel)propertyModels[0].CalledMethods[1].ParameterTypes[0];
             Assert.Equal("", parameterModel2.Modifier);
-            Assert.Equal("double", parameterModel2.Name);
+            Assert.Equal("double", parameterModel2.Type.Name);
             Assert.Null(parameterModel2.DefaultValue);
         }
 
@@ -650,7 +650,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels.Count);
 
             Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("System.Func<string>", propertyModels[0].Type);
+            Assert.Equal("System.Func<string>", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal("public", propertyModels[0].AccessModifier);
             Assert.True(propertyModels[0].IsEvent);
@@ -662,7 +662,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels[0].CalledMethods[0].ParameterTypes.Count);
             var parameterModel1 = (ParameterModel)propertyModels[0].CalledMethods[0].ParameterTypes[0];
             Assert.Equal("", parameterModel1.Modifier);
-            Assert.Equal("int", parameterModel1.Name);
+            Assert.Equal("int", parameterModel1.Type.Name);
             Assert.Null(parameterModel1.DefaultValue);
 
             Assert.Equal("Cut", propertyModels[0].CalledMethods[1].Name);
@@ -670,7 +670,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels[0].CalledMethods[1].ParameterTypes.Count);
             var parameterModel2 = (ParameterModel)propertyModels[0].CalledMethods[1].ParameterTypes[0];
             Assert.Equal("", parameterModel2.Modifier);
-            Assert.Equal("System.Func<string>", parameterModel2.Name);
+            Assert.Equal("System.Func<string>", parameterModel2.Type.Name);
             Assert.Null(parameterModel2.DefaultValue);
         }
 
@@ -707,7 +707,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels.Count);
 
             Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("System.Func<int>", propertyModels[0].Type);
+            Assert.Equal("System.Func<int>", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal("public", propertyModels[0].AccessModifier);
             Assert.True(propertyModels[0].IsEvent);
@@ -719,7 +719,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels[0].CalledMethods[0].ParameterTypes.Count);
             var parameterModel1 = (ParameterModel)propertyModels[0].CalledMethods[0].ParameterTypes[0];
             Assert.Equal("", parameterModel1.Modifier);
-            Assert.Equal("int", parameterModel1.Name);
+            Assert.Equal("int", parameterModel1.Type.Name);
             Assert.Null(parameterModel1.DefaultValue);
 
             Assert.Equal("Double", propertyModels[0].CalledMethods[1].Name);
@@ -727,7 +727,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModels[0].CalledMethods[1].ParameterTypes.Count);
             var parameterModel2 = (ParameterModel)propertyModels[0].CalledMethods[1].ParameterTypes[0];
             Assert.Equal("", parameterModel2.Modifier);
-            Assert.Equal("System.Func<int>", parameterModel2.Name);
+            Assert.Equal("System.Func<int>", parameterModel2.Type.Name);
             Assert.Null(parameterModel2.DefaultValue);
         }
 
@@ -779,7 +779,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             var propertyModel = propertyModels[1];
             Assert.Equal("Value", propertyModel.Name);
-            Assert.Equal("System.Func<string>", propertyModel.Type);
+            Assert.Equal("System.Func<string>", propertyModel.Type.Name);
             Assert.Equal("", propertyModel.Modifier);
             Assert.Equal("public", propertyModel.AccessModifier);
             Assert.True(propertyModel.IsEvent);
@@ -791,7 +791,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModel.CalledMethods[0].ParameterTypes.Count);
             var parameterModel1 = (ParameterModel)propertyModel.CalledMethods[0].ParameterTypes[0];
             Assert.Equal("", parameterModel1.Modifier);
-            Assert.Equal("int", parameterModel1.Name);
+            Assert.Equal("int", parameterModel1.Type.Name);
             Assert.Null(parameterModel1.DefaultValue);
 
             Assert.Equal("Cut", propertyModel.CalledMethods[1].Name);
@@ -800,7 +800,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, propertyModel.CalledMethods[1].ParameterTypes.Count);
             var parameterModel2 = (ParameterModel)propertyModel.CalledMethods[1].ParameterTypes[0];
             Assert.Equal("", parameterModel2.Modifier);
-            Assert.Equal("System.Func<string>", parameterModel2.Name);
+            Assert.Equal("System.Func<string>", parameterModel2.Type.Name);
             Assert.Null(parameterModel2.DefaultValue);
         }
     }

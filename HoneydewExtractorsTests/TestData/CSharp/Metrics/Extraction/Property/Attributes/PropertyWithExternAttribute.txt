@@ -1,0 +1,11 @@
+﻿namespace Namespace1
+{    
+    class Class1
+    {
+        [Extern("Hello"), ExternAttribute(), ExternAttribute("World", false), Extern(2), Extern(new string[]{})]
+        protected string Name {get;set;}
+        
+        [Extern("Hello"), ExternAttribute(), ExternAttribute("World", false), Extern(2), Extern(new string[]{})]
+        protected event System.Func<string> F  {add{}remove{}}
+    }
+}

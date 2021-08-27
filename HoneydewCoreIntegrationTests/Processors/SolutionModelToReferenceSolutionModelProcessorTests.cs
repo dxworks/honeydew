@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using HoneydewCore.Processors;
 using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.Common;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Extraction.Method;
 using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
+using HoneydewExtractors.Core.Metrics.Extraction.Parameter;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -113,14 +114,14 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Services.CreateService",
                                         FilePath = "validPathToProject/Project1/Services/CreateService.cs"
                                     },
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Services.RetrieveService",
                                         FilePath = "validPathToProject/Project1/Services/RetrieveService.cs",
@@ -139,9 +140,9 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Models",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Models.MyModel",
                                         FilePath = "validPathToProject/Project1/Models/MyModel.cs",
@@ -212,9 +213,9 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Services.CreateService",
                                         FilePath = "validPathToProject/Project1/Services/CreateService.cs",
@@ -222,8 +223,11 @@ namespace HoneydewCoreIntegrationTests.Processors
                                         {
                                             new BaseTypeModel
                                             {
-                                                Name = "object",
-                                                ClassType = "class"
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "object"
+                                                },
+                                                Kind = "class"
                                             }
                                         },
                                         Methods = new List<IMethodType>
@@ -233,9 +237,12 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                 Name = "Create",
                                                 Modifier = "",
                                                 AccessModifier = "public",
-                                                ReturnType = new ReturnTypeModel
+                                                ReturnValue = new ReturnValueModel
                                                 {
-                                                    Name = "Project1.Models.MyModel"
+                                                    Type = new EntityTypeModel
+                                                    {
+                                                        Name = "Project1.Models.MyModel"
+                                                    }
                                                 },
                                                 ContainingTypeName = "Project1.Services.CreateService",
                                             },
@@ -248,12 +255,18 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                 {
                                                     new ParameterModel
                                                     {
-                                                        Name = "Project1.Models.MyModel"
+                                                        Type = new EntityTypeModel
+                                                        {
+                                                            Name = "Project1.Models.MyModel"
+                                                        }
                                                     }
                                                 },
-                                                ReturnType = new ReturnTypeModel
+                                                ReturnValue = new ReturnValueModel
                                                 {
-                                                    Name = "Project1.Models.MyModel"
+                                                    Type = new EntityTypeModel
+                                                    {
+                                                        Name = "Project1.Models.MyModel"
+                                                    }
                                                 },
                                                 ContainingTypeName = "Project1.Services.CreateService",
                                                 CalledMethods =
@@ -274,12 +287,18 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                 {
                                                     new ParameterModel
                                                     {
-                                                        Name = "Project1.Models.OtherModel"
+                                                        Type = new EntityTypeModel
+                                                        {
+                                                            Name = "Project1.Models.OtherModel"
+                                                        }
                                                     }
                                                 },
-                                                ReturnType = new ReturnTypeModel
+                                                ReturnValue = new ReturnValueModel
                                                 {
-                                                    Name = "Project1.Models.MyModel"
+                                                    Type = new EntityTypeModel
+                                                    {
+                                                        Name = "Project1.Models.MyModel"
+                                                    }
                                                 },
                                                 ContainingTypeName = "Project1.Services.CreateService",
                                                 CalledMethods =
@@ -292,7 +311,10 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                         {
                                                             new ParameterModel
                                                             {
-                                                                Name = "Project1.Models.MyModel"
+                                                                Type = new EntityTypeModel
+                                                                {
+                                                                    Name = "Project1.Models.MyModel"
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -307,16 +329,25 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                 {
                                                     new ParameterModel
                                                     {
-                                                        Name = "Project1.Models.MyModel",
+                                                        Type = new EntityTypeModel
+                                                        {
+                                                            Name = "Project1.Models.MyModel",
+                                                        }
                                                     },
                                                     new ParameterModel
                                                     {
-                                                        Name = "Project1.Models.MyModel"
+                                                        Type = new EntityTypeModel
+                                                        {
+                                                            Name = "Project1.Models.MyModel"
+                                                        }
                                                     }
                                                 },
-                                                ReturnType = new ReturnTypeModel
+                                                ReturnValue = new ReturnValueModel
                                                 {
-                                                    Name = "Project1.Models.MyModel"
+                                                    Type = new EntityTypeModel
+                                                    {
+                                                        Name = "Project1.Models.MyModel"
+                                                    }
                                                 },
                                                 ContainingTypeName = "Project1.Services.CreateService",
                                                 CalledMethods =
@@ -334,7 +365,10 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                         {
                                                             new ParameterModel
                                                             {
-                                                                Name = "Project1.Models.OtherModel"
+                                                                Type = new EntityTypeModel
+                                                                {
+                                                                    Name = "Project1.Models.OtherModel"
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -347,14 +381,14 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Models",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Models.MyModel",
                                         FilePath = "validPathToProject/Project1/Models/MyModel.cs",
                                     },
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Models.OtherModel",
                                         FilePath = "validPathToProject/Project1/Models/OtherModel.cs",
@@ -512,7 +546,7 @@ namespace Project1.Services
     }
 }";
             var compositeVisitor = new CompositeVisitor();
-            
+
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {
                 new BaseInfoClassVisitor(),
@@ -523,13 +557,17 @@ namespace Project1.Services
                     new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
                     {
                         new MethodCallInfoVisitor()
+                    }),
+                    new ParameterSetterVisitor(new List<IParameterVisitor>
+                    {
+                        new ParameterInfoVisitor()
                     })
                 })
             }));
 
             var extractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
                 new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
-            
+
             var classModels = extractor.Extract(fileContent).ClassTypes;
 
             var solutionModel = new SolutionModel
@@ -544,7 +582,7 @@ namespace Project1.Services
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = classModels.Cast<ClassModel>().ToList(),
+                                ClassModels = classModels,
                             }
                         }
                     }
@@ -683,9 +721,9 @@ namespace Project1.Services
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Services.CreateService",
                                         FilePath = "validPathToProject/Project1/Services/CreateService.cs",
@@ -694,7 +732,10 @@ namespace Project1.Services
                                             new FieldModel
                                             {
                                                 Name = "Model",
-                                                Type = "Project1.Models.MyModel",
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "Project1.Models.MyModel",
+                                                },
                                                 AccessModifier = "private",
                                                 IsEvent = false
                                             }
@@ -705,9 +746,9 @@ namespace Project1.Services
                             new NamespaceModel
                             {
                                 Name = "Project1.Models",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Models.MyModel",
                                         FilePath = "validPathToProject/Project1/Models/MyModel.cs",
@@ -715,8 +756,11 @@ namespace Project1.Services
                                         {
                                             new BaseTypeModel
                                             {
-                                                Name = "object",
-                                                ClassType = "class"
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "object"
+                                                },
+                                                Kind = "class"
                                             }
                                         },
                                         Fields = new List<IFieldType>
@@ -724,21 +768,27 @@ namespace Project1.Services
                                             new FieldModel
                                             {
                                                 Name = "_value",
-                                                Type = "int",
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "int",
+                                                },
                                                 Modifier = "readonly",
                                                 AccessModifier = "private"
                                             },
                                             new FieldModel
                                             {
                                                 Name = "ValueEvent",
-                                                Type = "int",
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "int",
+                                                },
                                                 Modifier = "",
                                                 AccessModifier = "public",
                                                 IsEvent = true
                                             }
                                         }
                                     },
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "Project1.Models.OtherModel",
                                         FilePath = "validPathToProject/Project1/Models/OtherModel.cs",

@@ -1,0 +1,11 @@
+﻿namespace Namespace1
+{
+    public class Class1
+    {
+        [System.Obsolete("Message")]
+        internal bool B;
+        
+        [System.Obsolete("Message")]
+        internal event System.Func<bool> FB;        
+    }
+}

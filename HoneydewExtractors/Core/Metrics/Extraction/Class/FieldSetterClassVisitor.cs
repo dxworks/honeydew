@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Fields;
@@ -28,9 +30,16 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class
 
                 foreach (var visitor in GetContainedVisitors())
                 {
-                    if (visitor is ICSharpFieldVisitor extractionVisitor)
+                    try
                     {
-                        fieldTypes = extractionVisitor.Visit(baseFieldDeclarationSyntax, fieldTypes);
+                        if (visitor is ICSharpFieldVisitor extractionVisitor)
+                        {
+                            fieldTypes = extractionVisitor.Visit(baseFieldDeclarationSyntax, fieldTypes);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log($"Could not extract from Field Visitor because {e}", LogLevels.Warning);
                     }
                 }
 

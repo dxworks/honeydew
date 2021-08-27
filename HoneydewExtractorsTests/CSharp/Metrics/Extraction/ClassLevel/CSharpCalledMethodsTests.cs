@@ -1,17 +1,21 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.Common;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Extraction.Constructor;
 using HoneydewExtractors.Core.Metrics.Extraction.Method;
 using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
+using HoneydewExtractors.Core.Metrics.Extraction.Parameter;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
@@ -19,6 +23,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
     public class CSharpCalledMethodsTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpCalledMethodsTests()
         {
@@ -28,21 +33,29 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             {
                 new MethodCallInfoVisitor()
             });
+            var parameterSetterVisitor = new ParameterSetterVisitor(new List<IParameterVisitor>
+            {
+                new ParameterInfoVisitor()
+            });
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {
                 new BaseInfoClassVisitor(),
                 new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
                 {
                     new MethodInfoVisitor(),
-                    calledMethodSetterVisitor
+                    calledMethodSetterVisitor,
+                    parameterSetterVisitor
                 }),
                 new ConstructorSetterClassVisitor(new List<ICSharpConstructorVisitor>
                 {
                     new ConstructorInfoVisitor(),
-                    calledMethodSetterVisitor
+                    calledMethodSetterVisitor,
+                    parameterSetterVisitor
                 })
             }));
-            
+
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
                 new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }
@@ -76,10 +89,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             var functionMethod = classModel.Methods[0];
             Assert.Equal("Function", functionMethod.Name);
-            Assert.Equal("void", functionMethod.ReturnType.Name);
+            Assert.Equal("void", functionMethod.ReturnValue.Type.Name);
             Assert.Equal(1, functionMethod.ParameterTypes.Count);
             var functionMethodParameter = (ParameterModel)functionMethod.ParameterTypes[0];
-            Assert.Equal("int", functionMethodParameter.Name);
+            Assert.Equal("int", functionMethodParameter.Type.Name);
             Assert.Equal("", functionMethodParameter.Modifier);
             Assert.Null(functionMethodParameter.DefaultValue);
             Assert.Equal("TopLevel.Foo", functionMethod.ContainingTypeName);
@@ -89,10 +102,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             var computeMethod = classModel.Methods[1];
             Assert.Equal("Compute", computeMethod.Name);
-            Assert.Equal("int", computeMethod.ReturnType.Name);
+            Assert.Equal("int", computeMethod.ReturnValue.Type.Name);
             Assert.Equal(1, computeMethod.ParameterTypes.Count);
             var computeMethodParameter = (ParameterModel)computeMethod.ParameterTypes[0];
-            Assert.Equal("int", computeMethodParameter.Name);
+            Assert.Equal("int", computeMethodParameter.Type.Name);
             Assert.Equal("", computeMethodParameter.Modifier);
             Assert.Null(computeMethodParameter.DefaultValue);
             Assert.Equal("TopLevel.Foo", computeMethod.ContainingTypeName);
@@ -104,7 +117,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("Foo", intArgConstructor.Name);
             Assert.Equal(1, intArgConstructor.ParameterTypes.Count);
             var intArgConstructorParameter = (ParameterModel)intArgConstructor.ParameterTypes[0];
-            Assert.Equal("int", intArgConstructorParameter.Name);
+            Assert.Equal("int", intArgConstructorParameter.Type.Name);
             Assert.Equal("", intArgConstructorParameter.Modifier);
             Assert.Null(intArgConstructorParameter.DefaultValue);
             Assert.Equal("TopLevel.Foo", intArgConstructor.ContainingTypeName);
@@ -116,7 +129,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("TopLevel.Foo", intArgConstructor.CalledMethods[0].ContainingTypeName);
             Assert.Equal(1, intArgConstructor.CalledMethods[0].ParameterTypes.Count);
             var parameterModel1 = (ParameterModel)intArgConstructor.CalledMethods[0].ParameterTypes[0];
-            Assert.Equal("int", parameterModel1.Name);
+            Assert.Equal("int", parameterModel1.Type.Name);
             Assert.Equal("", parameterModel1.Modifier);
             Assert.Null(parameterModel1.DefaultValue);
 
@@ -125,7 +138,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("TopLevel.Foo", methodSignatureType.ContainingTypeName);
             Assert.Equal(1, methodSignatureType.ParameterTypes.Count);
             var parameterModel2 = (ParameterModel)methodSignatureType.ParameterTypes[0];
-            Assert.Equal("int", parameterModel2.Name);
+            Assert.Equal("int", parameterModel2.Type.Name);
             Assert.Equal("", parameterModel2.Modifier);
             Assert.Null(parameterModel2.DefaultValue);
         }
@@ -167,7 +180,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var parameterModel = (ParameterModel)methodModel.CalledMethods[0].ParameterTypes[0];
             Assert.Equal("", parameterModel.Modifier);
             Assert.Null(parameterModel.DefaultValue);
-            Assert.Equal("int", parameterModel.Name);
+            Assert.Equal("int", parameterModel.Type.Name);
         }
 
         [Fact]
@@ -215,7 +228,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var calledMethod2Parameter = (ParameterModel)calledMethod2.ParameterTypes[0];
             Assert.Equal("", calledMethod2Parameter.Modifier);
             Assert.Null(calledMethod2Parameter.DefaultValue);
-            Assert.Equal("int", calledMethod2Parameter.Name);
+            Assert.Equal("int", calledMethod2Parameter.Type.Name);
 
             var calledMethod3 = methodModelM.CalledMethods[2];
             Assert.Equal("Parse", calledMethod3.Name);
@@ -224,7 +237,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var calledMethod3Parameter = (ParameterModel)calledMethod3.ParameterTypes[0];
             Assert.Equal("", calledMethod3Parameter.Modifier);
             Assert.Null(calledMethod3Parameter.DefaultValue);
-            Assert.Equal("string", calledMethod3Parameter.Name);
+            Assert.Equal("string", calledMethod3Parameter.Type.Name);
         }
 
         [Fact]
@@ -255,7 +268,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, calledMethod.ParameterTypes.Count);
             var calledMethodParameter = (ParameterModel)calledMethod.ParameterTypes[0];
             Assert.Equal("", calledMethodParameter.Modifier);
-            Assert.Equal("System.Int32", calledMethodParameter.Name);
+            Assert.Equal("System.Int32", calledMethodParameter.Type.Name);
             Assert.Null(calledMethodParameter.DefaultValue);
         }
 
@@ -302,7 +315,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                 var calledMethodParameter = (ParameterModel)calledMethod.ParameterTypes[0];
                 Assert.Equal("", calledMethodParameter.Modifier);
                 Assert.Null(calledMethodParameter.DefaultValue);
-                Assert.Equal("System.Func<int>", calledMethodParameter.Name);
+                Assert.Equal("System.Func<int>", calledMethodParameter.Type.Name);
             }
         }
 
@@ -352,7 +365,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                 var calledMethodParameter = (ParameterModel)calledMethod.ParameterTypes[0];
                 Assert.Equal("", calledMethodParameter.Modifier);
                 Assert.Null(calledMethodParameter.DefaultValue);
-                Assert.Equal("System.Action<int>", calledMethodParameter.Name);
+                Assert.Equal("System.Action<int>", calledMethodParameter.Type.Name);
             }
         }
 
@@ -398,7 +411,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var calledMethod1Parameter = (ParameterModel)calledMethod1.ParameterTypes[0];
             Assert.Equal("", calledMethod1Parameter.Modifier);
             Assert.Null(calledMethod1Parameter.DefaultValue);
-            Assert.Equal("System.Action<int>", calledMethod1Parameter.Name);
+            Assert.Equal("System.Action<int>", calledMethod1Parameter.Type.Name);
 
             var calledMethod2 = methodModelM.CalledMethods[1];
             Assert.Equal("Calc", calledMethod2.Name);
@@ -407,7 +420,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var calledMethod2Parameter = (ParameterModel)calledMethod2.ParameterTypes[0];
             Assert.Equal("", calledMethod2Parameter.Modifier);
             Assert.Null(calledMethod2Parameter.DefaultValue);
-            Assert.Equal("int", calledMethod2Parameter.Name);
+            Assert.Equal("int", calledMethod2Parameter.Type.Name);
 
             var calledMethod3 = methodModelM.CalledMethods[2];
             Assert.Equal("Other", calledMethod3.Name);
@@ -416,7 +429,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var calledMethod3Parameter = (ParameterModel)calledMethod3.ParameterTypes[0];
             Assert.Equal("", calledMethod3Parameter.Modifier);
             Assert.Null(calledMethod3Parameter.DefaultValue);
-            Assert.Equal("System.Func<int>", calledMethod3Parameter.Name);
+            Assert.Equal("System.Func<int>", calledMethod3Parameter.Type.Name);
 
             var calledMethod4 = methodModelM.CalledMethods[3];
             Assert.Equal("Calc", calledMethod4.Name);
@@ -425,7 +438,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var calledMethod4Parameter = (ParameterModel)calledMethod4.ParameterTypes[0];
             Assert.Equal("", calledMethod4Parameter.Modifier);
             Assert.Null(calledMethod4Parameter.DefaultValue);
-            Assert.Equal("int", calledMethod4Parameter.Name);
+            Assert.Equal("int", calledMethod4Parameter.Type.Name);
         }
 
         [Fact]
@@ -541,7 +554,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, calledMethod1.ParameterTypes.Count);
             var calledMethod1Parameter = (ParameterModel)calledMethod1.ParameterTypes[0];
             Assert.Equal("", calledMethod1Parameter.Modifier);
-            Assert.Equal("System.Func<string, string>", calledMethod1Parameter.Name);
+            Assert.Equal("System.Func<string, string>", calledMethod1Parameter.Type.Name);
             Assert.Null(calledMethod1Parameter.DefaultValue);
 
             var calledMethod2 = methodModelM.CalledMethods[2];
@@ -550,7 +563,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, calledMethod2.ParameterTypes.Count);
             var calledMethod2Parameter = (ParameterModel)calledMethod2.ParameterTypes[0];
             Assert.Equal("", calledMethod2Parameter.Modifier);
-            Assert.Equal("int", calledMethod2Parameter.Name);
+            Assert.Equal("int", calledMethod2Parameter.Type.Name);
             Assert.Null(calledMethod2Parameter.DefaultValue);
 
             var calledMethod3 = methodModelM.CalledMethods[3];
@@ -559,7 +572,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, calledMethod3.ParameterTypes.Count);
             var calledMethod3Parameter = (ParameterModel)calledMethod3.ParameterTypes[0];
             Assert.Equal("", calledMethod3Parameter.Modifier);
-            Assert.Equal("System.Func<string, bool>", calledMethod3Parameter.Name);
+            Assert.Equal("System.Func<string, bool>", calledMethod3Parameter.Type.Name);
             Assert.Null(calledMethod3Parameter.DefaultValue);
 
             var calledMethod4 = methodModelM.CalledMethods[4];
@@ -607,12 +620,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             var calledMethod0Parameter = (ParameterModel)calledMethod0.ParameterTypes[0];
             Assert.Equal("", calledMethod0Parameter.Modifier);
-            Assert.Equal("string", calledMethod0Parameter.Name);
+            Assert.Equal("string", calledMethod0Parameter.Type.Name);
             Assert.Null(calledMethod0Parameter.DefaultValue);
 
             var method0Parameter = (ParameterModel)calledMethod0.ParameterTypes[1];
             Assert.Equal("out", method0Parameter.Modifier);
-            Assert.Equal("string", method0Parameter.Name);
+            Assert.Equal("string", method0Parameter.Type.Name);
             Assert.Null(method0Parameter.DefaultValue);
         }
 
@@ -655,12 +668,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             var calledMethod0Parameter = (ParameterModel)calledMethod0.ParameterTypes[0];
             Assert.Equal("", calledMethod0Parameter.Modifier);
-            Assert.Equal("string", calledMethod0Parameter.Name);
+            Assert.Equal("string", calledMethod0Parameter.Type.Name);
             Assert.Null(calledMethod0Parameter.DefaultValue);
 
             var method0Parameter = (ParameterModel)calledMethod0.ParameterTypes[1];
             Assert.Equal("out", method0Parameter.Modifier);
-            Assert.Equal("string", method0Parameter.Name);
+            Assert.Equal("string", method0Parameter.Type.Name);
             Assert.Null(method0Parameter.DefaultValue);
         }
 
@@ -674,7 +687,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var genericMethodModel = ((ClassModel)classTypes[0]).Methods[0];
             Assert.Equal("Method", genericMethodModel.Name);
             Assert.Equal(1, genericMethodModel.ParameterTypes.Count);
-            Assert.Equal("T", genericMethodModel.ParameterTypes[0].Name);
+            Assert.Equal("T", genericMethodModel.ParameterTypes[0].Type.Name);
             Assert.Equal(0, genericMethodModel.CalledMethods.Count);
 
             var methodCaller = ((ClassModel)classTypes[0]).Methods[1];
@@ -686,19 +699,19 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("Method<int>", calledMethod0.Name);
             Assert.Equal("TopLevel.Bar", calledMethod0.ContainingTypeName);
             Assert.Equal(1, calledMethod0.ParameterTypes.Count);
-            Assert.Equal("int", calledMethod0.ParameterTypes[0].Name);
+            Assert.Equal("int", calledMethod0.ParameterTypes[0].Type.Name);
 
             var calledMethod1 = methodCaller.CalledMethods[1];
             Assert.Equal("Method", calledMethod1.Name);
             Assert.Equal("TopLevel.Bar", calledMethod1.ContainingTypeName);
             Assert.Equal(1, calledMethod1.ParameterTypes.Count);
-            Assert.Equal("int", calledMethod1.ParameterTypes[0].Name);
+            Assert.Equal("int", calledMethod1.ParameterTypes[0].Type.Name);
 
             var calledMethod2 = methodCaller.CalledMethods[2];
             Assert.Equal("Method<double>", calledMethod2.Name);
             Assert.Equal("TopLevel.Bar", calledMethod2.ContainingTypeName);
             Assert.Equal(1, calledMethod2.ParameterTypes.Count);
-            Assert.Equal("double", calledMethod2.ParameterTypes[0].Name);
+            Assert.Equal("double", calledMethod2.ParameterTypes[0].Type.Name);
         }
     }
 }

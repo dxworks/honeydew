@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
@@ -11,7 +13,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class
 {
     public class PropertySetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
     {
-        public PropertySetterClassVisitor(IEnumerable<IPropertyVisitor> visitors): base(visitors)
+        public PropertySetterClassVisitor(IEnumerable<IPropertyVisitor> visitors) : base(visitors)
         {
         }
 
@@ -29,9 +31,16 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class
 
                 foreach (var visitor in GetContainedVisitors())
                 {
-                    if (visitor is ICSharpPropertyVisitor extractionVisitor)
+                    try
                     {
-                        propertyModel = extractionVisitor.Visit(basePropertyDeclarationSyntax, propertyModel);
+                        if (visitor is ICSharpPropertyVisitor extractionVisitor)
+                        {
+                            propertyModel = extractionVisitor.Visit(basePropertyDeclarationSyntax, propertyModel);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log($"Could not extract from Property Visitor because {e}", LogLevels.Warning);
                     }
                 }
 

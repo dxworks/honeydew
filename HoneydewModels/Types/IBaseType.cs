@@ -1,7 +1,9 @@
 ﻿namespace HoneydewModels.Types
 {
-    public interface IBaseType : INamedType
+    public interface IBaseType : IType
     {
-        public string ClassType { get; set; }
+        public IEntityType Type { get; set; }
+        
+        public string Kind { get; set; }
     }
 }

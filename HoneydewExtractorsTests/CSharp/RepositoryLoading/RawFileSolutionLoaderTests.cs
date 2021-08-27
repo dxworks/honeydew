@@ -81,13 +81,19 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
             {
                 new BaseTypeModel
                 {
-                    Name = "SomeParent",
-                    ClassType = "class"
+                    Type = new EntityTypeModel
+                    {
+                        Name = "SomeParent"
+                    },
+                    Kind = "class"
                 },
                 new BaseTypeModel
                 {
-                    Name = "Interface1",
-                    ClassType = "interface"
+                    Type = new EntityTypeModel
+                    {
+                        Name = "Interface1"
+                    },
+                    Kind = "interface"
                 }
             };
 
@@ -118,8 +124,11 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
                                         {
                                             new BaseTypeModel
                                             {
-                                                Name = "object",
-                                                ClassType = "class"
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "object"
+                                                },
+                                                Kind = "class"
                                             }
                                         },
                                         Metrics =
@@ -155,12 +164,12 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
 
             Assert.Equal("SomeNamespace", projectNamespace.Name);
             Assert.Equal(1, projectNamespace.ClassModels.Count);
-            var classModel = projectNamespace.ClassModels[0];
+            var classModel = (ClassModel)projectNamespace.ClassModels[0];
 
             Assert.Equal("SomePath", classModel.FilePath);
             Assert.Equal("SomeNamespace.FirstClass", classModel.Name);
-            Assert.Equal("object", classModel.BaseTypes[0].Name);
-            Assert.Equal("class", classModel.BaseTypes[0].ClassType);
+            Assert.Equal("object", classModel.BaseTypes[0].Type.Name);
+            Assert.Equal("class", classModel.BaseTypes[0].Kind);
             Assert.Empty(classModel.Fields);
             Assert.Empty(classModel.Methods);
             Assert.Equal(1, classModel.Metrics.Count);
@@ -177,14 +186,16 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
             arrayEnumerator.MoveNext();
 
             var baseClass = arrayEnumerator.Current;
-            Assert.Equal("SomeParent", baseClass.GetProperty("Name").GetString());
-            Assert.Equal("class", baseClass.GetProperty("ClassType").GetString());
+            var baseClassElement = baseClass.GetProperty("Type");
+            Assert.Equal("SomeParent", baseClassElement.GetProperty("Name").GetString());
+            Assert.Equal("class", baseClass.GetProperty("Kind").GetString());
 
             arrayEnumerator.MoveNext();
 
             var baseInterface = arrayEnumerator.Current;
-            Assert.Equal("Interface1", baseInterface.GetProperty("Name").GetString());
-            Assert.Equal("interface", baseInterface.GetProperty("ClassType").GetString());
+            var baseInterfaceElement = baseInterface.GetProperty("Type");
+            Assert.Equal("Interface1", baseInterfaceElement.GetProperty("Name").GetString());
+            Assert.Equal("interface", baseInterface.GetProperty("Kind").GetString());
         }
     }
 }

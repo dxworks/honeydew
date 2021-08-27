@@ -84,9 +84,9 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
                                         Name = "CreateService",
                                         FilePath = "validPathToProject/Project1/Services/CreateService.cs",
@@ -94,13 +94,19 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
                                         {
                                             new BaseTypeModel
                                             {
-                                                Name = "object",
-                                                ClassType = "class"
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "object",
+                                                },
+                                                Kind = "class"
                                             },
                                             new BaseTypeModel
                                             {
-                                                Name = "IService",
-                                                ClassType = "interface"
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "IService",
+                                                },
+                                                Kind = "interface"
                                             }
                                         },
                                         Methods = new List<IMethodType>
@@ -114,12 +120,18 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
                                                 {
                                                     new ParameterModel
                                                     {
-                                                        Name = "string"
+                                                        Type = new EntityTypeModel
+                                                        {
+                                                            Name = "string"
+                                                        }
                                                     }
                                                 },
-                                                ReturnType = new ReturnTypeModel
+                                                ReturnValue = new ReturnValueModel
                                                 {
-                                                    Name = "int"
+                                                    Type = new EntityTypeModel
+                                                    {
+                                                        Name = "int"
+                                                    }
                                                 },
                                                 ContainingTypeName = "Project1.Services.CreateService",
                                                 CalledMethods =
@@ -140,12 +152,18 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
                                                 {
                                                     new ParameterModel
                                                     {
-                                                        Name = "string"
+                                                        Type = new EntityTypeModel
+                                                        {
+                                                            Name = "string"
+                                                        }
                                                     }
                                                 },
-                                                ReturnType = new ReturnTypeModel
+                                                ReturnValue = new ReturnValueModel
                                                 {
-                                                    Name = "int"
+                                                    Type = new EntityTypeModel
+                                                    {
+                                                        Name = "int"
+                                                    }
                                                 },
                                                 ContainingTypeName = "Project1.Services.CreateService",
                                                 CalledMethods =
@@ -184,14 +202,14 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
             Assert.Equal("Project1.Services", namespaceModel.Name);
             Assert.Equal(1, namespaceModel.ClassModels.Count);
 
-            var classModel = namespaceModel.ClassModels[0];
+            var classModel = (ClassModel)namespaceModel.ClassModels[0];
             Assert.Equal("CreateService", classModel.Name);
             Assert.Equal(2, classModel.BaseTypes.Count);
 
-            Assert.Equal("object", classModel.BaseTypes[0].Name);
-            Assert.Equal("class", classModel.BaseTypes[0].ClassType);
-            Assert.Equal("IService", classModel.BaseTypes[1].Name);
-            Assert.Equal("interface", classModel.BaseTypes[1].ClassType);
+            Assert.Equal("object", classModel.BaseTypes[0].Type.Name);
+            Assert.Equal("class", classModel.BaseTypes[0].Kind);
+            Assert.Equal("IService", classModel.BaseTypes[1].Type.Name);
+            Assert.Equal("interface", classModel.BaseTypes[1].Kind);
             Assert.Equal("validPathToProject/Project1/Services/CreateService.cs", classModel.FilePath);
             Assert.Empty(classModel.Fields);
             Assert.Empty(classModel.Metrics);
@@ -203,10 +221,10 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
             Assert.Equal("public", methodA.AccessModifier);
             Assert.Equal(1, methodA.ParameterTypes.Count);
             var methodAParameter = (ParameterModel)methodA.ParameterTypes[0];
-            Assert.Equal("string", methodAParameter.Name);
+            Assert.Equal("string", methodAParameter.Type.Name);
             Assert.Equal("", methodAParameter.Modifier);
             Assert.Null(methodAParameter.DefaultValue);
-            Assert.Equal("int", methodA.ReturnType.Name);
+            Assert.Equal("int", methodA.ReturnValue.Type.Name);
             Assert.Equal("Project1.Services.CreateService", methodA.ContainingTypeName);
             Assert.Equal(1, methodA.CalledMethods.Count);
             Assert.Equal("Project1.Services.CreateService", methodA.CalledMethods[0].ContainingTypeName);
@@ -218,10 +236,10 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
             Assert.Equal("public", methodConvert.AccessModifier);
             Assert.Equal(1, methodConvert.ParameterTypes.Count);
             var methodConvertParameter = (ParameterModel)methodConvert.ParameterTypes[0];
-            Assert.Equal("string", methodConvertParameter.Name);
+            Assert.Equal("string", methodConvertParameter.Type.Name);
             Assert.Equal("", methodConvertParameter.Modifier);
             Assert.Null(methodConvertParameter.DefaultValue);
-            Assert.Equal("int", methodConvert.ReturnType.Name);
+            Assert.Equal("int", methodConvert.ReturnValue.Type.Name);
             Assert.Equal("Project1.Services.CreateService", methodConvert.ContainingTypeName);
             Assert.Equal(1, methodConvert.CalledMethods.Count);
             Assert.Equal("int", methodConvert.CalledMethods[0].ContainingTypeName);

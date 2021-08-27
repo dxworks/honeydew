@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
@@ -7,7 +8,7 @@ namespace HoneydewModels.CSharp
         public string FilePath { get; set; }
         public IList<ProjectModel> Projects { get; set; } = new List<ProjectModel>();
 
-        public IEnumerable<ClassModel> GetEnumerable()
+        public IEnumerable<IClassType> GetEnumerable()
         {
             foreach (var projectModel in Projects)
             {

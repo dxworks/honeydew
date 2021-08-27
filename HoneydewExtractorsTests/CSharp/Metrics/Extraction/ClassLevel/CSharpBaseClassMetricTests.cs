@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.CSharp.Metrics;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
@@ -11,6 +13,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
     public class CSharpBaseClassMetricTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpBaseClassMetricTests()
         {
@@ -21,6 +24,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                 new BaseInfoClassVisitor(),
                 new BaseTypesClassVisitor()
             }));
+
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
                 new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
@@ -48,8 +53,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             Assert.Equal("App.MyClass", classType.Name);
             Assert.Equal(1, classType.BaseTypes.Count);
-            Assert.Equal("object", classType.BaseTypes[0].Name);
-            Assert.Equal("class", classType.BaseTypes[0].ClassType);
+            Assert.Equal("object", classType.BaseTypes[0].Type.Name);
+            Assert.Equal("class", classType.BaseTypes[0].Kind);
         }
 
         [Fact]
@@ -80,8 +85,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             Assert.Equal(1, baseTypes.Count);
             // IMetric instead of object because the Semantic model doesn't know that IMetric is an interface
-            Assert.Equal("IMetric", baseTypes[0].Name);
-            Assert.Equal("class", baseTypes[0].ClassType);
+            Assert.Equal("IMetric", baseTypes[0].Type.Name);
+            Assert.Equal("class", baseTypes[0].Kind);
         }
 
         [Fact]
@@ -109,16 +114,16 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             Assert.Equal("App.Parent", baseClassType.Name);
             Assert.Equal(1, baseClassBaseTypes.Count);
-            Assert.Equal("object", baseClassBaseTypes[0].Name);
-            Assert.Equal("class", baseClassBaseTypes[0].ClassType);
+            Assert.Equal("object", baseClassBaseTypes[0].Type.Name);
+            Assert.Equal("class", baseClassBaseTypes[0].Kind);
 
             var classType = classTypes[1];
             var baseTypes = classType.BaseTypes;
 
             Assert.Equal("App.ChildClass", classType.Name);
             Assert.Equal(1, baseTypes.Count);
-            Assert.Equal("App.Parent", baseTypes[0].Name);
-            Assert.Equal("class", baseTypes[0].ClassType);
+            Assert.Equal("App.Parent", baseTypes[0].Type.Name);
+            Assert.Equal("class", baseTypes[0].Kind);
         }
 
         [Fact]
@@ -150,22 +155,22 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             Assert.Equal("App.Parent", baseClassType.Name);
             Assert.Equal(1, baseClassBaseTypes.Count);
-            Assert.Equal("object", baseClassBaseTypes[0].Name);
-            Assert.Equal("class", baseClassBaseTypes[0].ClassType);
+            Assert.Equal("object", baseClassBaseTypes[0].Type.Name);
+            Assert.Equal("class", baseClassBaseTypes[0].Kind);
 
             var classType = classTypes[1];
             var baseTypes = classType.BaseTypes;
 
             Assert.Equal("App.ChildClass", classType.Name);
             Assert.Equal(3, baseTypes.Count);
-            Assert.Equal("App.Parent", baseTypes[0].Name);
-            Assert.Equal("class", baseTypes[0].ClassType);
+            Assert.Equal("App.Parent", baseTypes[0].Type.Name);
+            Assert.Equal("class", baseTypes[0].Kind);
 
-            Assert.Equal("IMetric", baseTypes[1].Name);
-            Assert.Equal("interface", baseTypes[1].ClassType);
+            Assert.Equal("IMetric", baseTypes[1].Type.Name);
+            Assert.Equal("interface", baseTypes[1].Kind);
 
-            Assert.Equal("IMetricExtractor", baseTypes[2].Name);
-            Assert.Equal("interface", baseTypes[2].ClassType);
+            Assert.Equal("IMetricExtractor", baseTypes[2].Type.Name);
+            Assert.Equal("interface", baseTypes[2].Kind);
         }
     }
 }

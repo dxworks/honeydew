@@ -1,0 +1,33 @@
+site_name: Honeydew Docs
+repo_url: https://github.com/dxworks/honeydew
+
+theme:
+  name: material
+  palette:
+    primary: amber
+    accent: pink
+  features:
+    - navigation.expand
+    - navigation.indexes
+    - navigation.instant
+
+plugins:
+  - search
+  - mermaid2
+
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid
+      
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Commands:
+      - Extract: commands/extract.md
+      - Load: commands/load.md
+  - Model:
+      - Types: model/types.md
+      - Extractor: model/extractor.md

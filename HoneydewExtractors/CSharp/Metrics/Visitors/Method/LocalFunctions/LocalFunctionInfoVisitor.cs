@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.CSharp.Metrics.Extraction;
@@ -25,9 +27,9 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions
             var returnTypeModifier = CSharpHelperMethods.SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
 
             modelType.Name = syntaxNode.Identifier.ToString();
-            modelType.ReturnType = new ReturnTypeModel
+            modelType.ReturnValue = new ReturnValueModel
             {
-                Name = returnType,
+                Type = returnType,
                 Modifier = returnTypeModifier
             };
             modelType.ContainingTypeName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);
@@ -35,11 +37,6 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions
 
             modelType.AccessModifier = "";
             modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
-
-            foreach (var parameterType in CSharpHelperMethods.ExtractInfoAboutParameters(syntaxNode.ParameterList))
-            {
-                modelType.ParameterTypes.Add(parameterType);
-            }
 
             if (syntaxNode.Body == null)
             {
@@ -52,9 +49,16 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions
                 IMethodTypeWithLocalFunctions localFunction = new MethodModel();
                 foreach (var visitor in GetContainedVisitors())
                 {
-                    if (visitor is ICSharpLocalFunctionVisitor extractionVisitor)
+                    try
                     {
-                        localFunction = extractionVisitor.Visit(localFunctionStatementSyntax, localFunction);
+                        if (visitor is ICSharpLocalFunctionVisitor extractionVisitor)
+                        {
+                            localFunction = extractionVisitor.Visit(localFunctionStatementSyntax, localFunction);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log($"Could not extract from Local Function Info Visitor because {e}", LogLevels.Warning);
                     }
                 }
 
@@ -62,7 +66,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions
 
                 modelType.LocalFunctions.Add(localFunction);
             }
-            
+
             return modelType;
         }
     }

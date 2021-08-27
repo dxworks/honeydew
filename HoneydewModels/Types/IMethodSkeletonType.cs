@@ -1,7 +1,7 @@
 ﻿namespace HoneydewModels.Types
 {
-    public interface IMethodSkeletonType : IModifierType, IMethodSignatureType, ICallingMethodsType,
-        ICyclomaticComplexityType, ITypeWithAttributes, ITypeWithMetrics, ITypeWithLinesOfCode
+    public interface IMethodSkeletonType : IMethodSignatureType, ITypeWithModifiers, ICallingMethodsType,
+        ITypeWithCyclomaticComplexity, ITypeWithAttributes, ITypeWithMetrics, ITypeWithLinesOfCode
     {
     }
 }

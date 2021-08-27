@@ -8,12 +8,14 @@ using HoneydewExtractors.Core.Metrics.Extraction.Constructor;
 using HoneydewExtractors.Core.Metrics.Extraction.Field;
 using HoneydewExtractors.Core.Metrics.Extraction.Method;
 using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
+using HoneydewExtractors.Core.Metrics.Extraction.Parameter;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Fields;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
 using Xunit;
@@ -29,12 +31,16 @@ namespace HoneydewCoreIntegrationTests.Processors
         public SolutionModelToReferenceSolutionModelProcessorTestsWithMissingReferencesHandler()
         {
             _sut = new SolutionModelToReferenceSolutionModelProcessor();
-            
+
             var compositeVisitor = new CompositeVisitor();
-            
+
             var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
             {
                 new MethodCallInfoVisitor()
+            });
+            var parameterSetterVisitor = new ParameterSetterVisitor(new List<IParameterVisitor>
+            {
+                new ParameterInfoVisitor()
             });
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {
@@ -43,12 +49,14 @@ namespace HoneydewCoreIntegrationTests.Processors
                 new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
                 {
                     new MethodInfoVisitor(),
-                    calledMethodSetterVisitor
+                    calledMethodSetterVisitor,
+                    parameterSetterVisitor
                 }),
                 new ConstructorSetterClassVisitor(new List<ICSharpConstructorVisitor>
                 {
                     new ConstructorInfoVisitor(),
-                    calledMethodSetterVisitor
+                    calledMethodSetterVisitor,
+                    parameterSetterVisitor
                 }),
                 new FieldSetterClassVisitor(new List<ICSharpFieldVisitor>(
                     new List<ICSharpFieldVisitor>
@@ -123,7 +131,7 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = classModels.Cast<ClassModel>().ToList(),
+                                ClassModels = classModels
                             }
                         }
                     }
@@ -313,7 +321,7 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = classModels.Cast<ClassModel>().ToList(),
+                                ClassModels = classModels,
                             }
                         }
                     }
@@ -464,7 +472,7 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = classModels.Cast<ClassModel>().ToList(),
+                                ClassModels = classModels,
                             }
                         }
                     }
@@ -633,7 +641,7 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.MyNamespace",
-                                ClassModels = classModels.Cast<ClassModel>().ToList(),
+                                ClassModels = classModels,
                             }
                         }
                     }

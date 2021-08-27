@@ -17,7 +17,7 @@ namespace Honeydew
 
         public void Start()
         {
-            var text = $"Start {_initialText}";
+            var text = $"{_initialText}";
             _maxLength = text.Length;
             _progressBar.Refresh(0, text);
         }
@@ -34,7 +34,7 @@ namespace Honeydew
 
         public void Stop()
         {
-            _progressBar.Refresh(_progressBar.Max, $"Done {_initialText}".PadRight(_maxLength));
+            _progressBar.Refresh(_progressBar.Max, $"Done".PadRight(_maxLength));
         }
     }
 }

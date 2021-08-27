@@ -31,21 +31,20 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Delegate
             modelType.Name = CSharpHelperMethods.GetFullName(syntaxNode);
             modelType.AccessModifier = accessModifier;
             modelType.Modifier = modifier;
-            modelType.ReturnType = new ReturnTypeModel
+            modelType.ReturnValue = new ReturnValueModel
             {
-                Name = returnType,
+                Type = returnType,
                 Modifier = returnTypeModifier
             };
-            foreach (var parameterType in CSharpHelperMethods.ExtractInfoAboutParameters(syntaxNode.ParameterList))
-            {
-                modelType.ParameterTypes.Add(parameterType);
-            }
 
             modelType.ClassType = CSharpConstants.DelegateIdentifier;
             modelType.BaseTypes.Add(new BaseTypeModel
             {
-                ClassType = CSharpConstants.ClassIdentifier,
-                Name = CSharpConstants.SystemDelegate
+                Kind = CSharpConstants.ClassIdentifier,
+                Type = new EntityTypeModel
+                {
+                    Name = CSharpConstants.SystemDelegate
+                }
             });
             modelType.ContainingTypeName = CSharpHelperMethods.GetFullName(syntaxNode)
                 .Replace(syntaxNode.Identifier.ToString(), "").Trim('.');

@@ -5,11 +5,11 @@ namespace HoneydewModels.CSharp
 {
     public record ParameterModel : IModelEntity, IParameterType
     {
-        public string Name { get; set; }
+        public IEntityType Type { get; set; }
 
-        public string Modifier { get; init; } = "";
+        public string Modifier { get; set; } = "";
 
-        public string DefaultValue { get; init; }
+        public string DefaultValue { get; set; }
 
         public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
     }

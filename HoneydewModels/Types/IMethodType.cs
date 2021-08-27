@@ -2,6 +2,6 @@
 {
     public interface IMethodType : IMethodSkeletonType
     {
-        public IReturnType ReturnType { get; set; }
+        public IReturnValueType ReturnValue { get; set; }
     }
 }

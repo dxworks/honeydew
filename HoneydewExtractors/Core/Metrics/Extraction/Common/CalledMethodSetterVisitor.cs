@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
@@ -56,9 +58,17 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 
                 foreach (var visitor in GetContainedVisitors())
                 {
-                    if (visitor is ICSharpMethodSignatureVisitor extractionVisitor)
+                    try
                     {
-                        methodModel = extractionVisitor.Visit(invocationExpressionSyntax, methodModel);
+                        if (visitor is ICSharpMethodSignatureVisitor extractionVisitor)
+                        {
+                            methodModel = extractionVisitor.Visit(invocationExpressionSyntax, methodModel);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log($"Could not extract from Local Function Called Method Visitor because {e}",
+                            LogLevels.Warning);
                     }
                 }
 
@@ -82,9 +92,16 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 
                 foreach (var visitor in GetContainedVisitors())
                 {
-                    if (visitor is ICSharpMethodSignatureVisitor extractionVisitor)
+                    try
                     {
-                        methodModel = extractionVisitor.Visit(invocationExpressionSyntax, methodModel);
+                        if (visitor is ICSharpMethodSignatureVisitor extractionVisitor)
+                        {
+                            methodModel = extractionVisitor.Visit(invocationExpressionSyntax, methodModel);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log($"Could not extract from Called Method Visitor because {e}", LogLevels.Warning);
                     }
                 }
 

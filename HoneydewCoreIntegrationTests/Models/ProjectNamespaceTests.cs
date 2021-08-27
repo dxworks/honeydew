@@ -126,8 +126,11 @@ namespace HoneydewCoreIntegrationTests.Models
                 {
                     new BaseTypeModel
                     {
-                        Name = "Object",
-                        ClassType = "class"
+                        Type = new EntityTypeModel
+                        {
+                            Name = "Object"
+                        },
+                        Kind = "class"
                     }
                 },
                 ExtractorName = "BaseTypesExtractor",
@@ -152,13 +155,19 @@ namespace HoneydewCoreIntegrationTests.Models
                 {
                     new BaseTypeModel
                     {
-                        Name = "BaseService",
-                        ClassType = "class"
+                        Type = new EntityTypeModel
+                        {
+                            Name = "BaseService"
+                        },
+                        Kind = "class"
                     },
                     new BaseTypeModel
                     {
-                        Name = "IService",
-                        ClassType = "interface"
+                        Type = new EntityTypeModel
+                        {
+                            Name = "IService"
+                        },
+                        Kind = "interface"
                     }
                 },
                 ExtractorName = "BaseTypesExtractor",
@@ -183,8 +192,8 @@ namespace HoneydewCoreIntegrationTests.Models
             Assert.Equal(typeof(List<IBaseType>), _sut.ClassModels[1].Metrics[0].Value.GetType());
             var baseTypes = (List<IBaseType>)_sut.ClassModels[1].Metrics[0].Value;
             Assert.Single(baseTypes);
-            Assert.Equal("Object", baseTypes[0].Name);
-            Assert.Equal("class", baseTypes[0].ClassType);
+            Assert.Equal("Object", baseTypes[0].Type.Name);
+            Assert.Equal("class", baseTypes[0].Kind);
 
 
             Assert.Equal("Items.IItemService", _sut.ClassModels[2].Name);
@@ -200,11 +209,11 @@ namespace HoneydewCoreIntegrationTests.Models
             Assert.Equal(typeof(List<IBaseType>), _sut.ClassModels[2].Metrics[1].Value.GetType());
             var baseTypes2 = (List<IBaseType>)_sut.ClassModels[2].Metrics[1].Value;
             Assert.Equal(2, baseTypes2.Count);
-            Assert.Equal("BaseService", baseTypes2[0].Name);
-            Assert.Equal("class", baseTypes2[0].ClassType);
+            Assert.Equal("BaseService", baseTypes2[0].Type.Name);
+            Assert.Equal("class", baseTypes2[0].Kind);
 
-            Assert.Equal("IService", baseTypes2[1].Name);
-            Assert.Equal("interface", baseTypes2[1].ClassType);
+            Assert.Equal("IService", baseTypes2[1].Type.Name);
+            Assert.Equal("interface", baseTypes2[1].Kind);
         }
     }
 }

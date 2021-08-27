@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Extraction.Field;
@@ -7,6 +8,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Fields;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
@@ -14,6 +16,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
     public class CSharpFieldsInfoMetricTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpFieldsInfoMetricTests()
         {
@@ -27,6 +30,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                     new FieldInfoVisitor()
                 })
             }));
+
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
                 new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }
@@ -79,21 +85,21 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(3, fieldTypes.Count);
 
             Assert.Equal("A", fieldTypes[0].Name);
-            Assert.Equal("int", fieldTypes[0].Type);
+            Assert.Equal("int", fieldTypes[0].Type.Name);
             Assert.Equal("readonly", fieldTypes[0].Modifier);
             Assert.Equal("private", fieldTypes[0].AccessModifier);
             Assert.Equal("TopLevel.Foo", fieldTypes[0].ContainingTypeName);
             Assert.False(fieldTypes[0].IsEvent);
 
             Assert.Equal("X", fieldTypes[1].Name);
-            Assert.Equal("float", fieldTypes[1].Type);
+            Assert.Equal("float", fieldTypes[1].Type.Name);
             Assert.Equal("volatile", fieldTypes[1].Modifier);
             Assert.Equal("private", fieldTypes[1].AccessModifier);
             Assert.Equal("TopLevel.Foo", fieldTypes[1].ContainingTypeName);
             Assert.False(fieldTypes[1].IsEvent);
 
             Assert.Equal("Y", fieldTypes[2].Name);
-            Assert.Equal("string", fieldTypes[2].Type);
+            Assert.Equal("string", fieldTypes[2].Type.Name);
             Assert.Equal("static", fieldTypes[2].Modifier);
             Assert.Equal("private", fieldTypes[2].AccessModifier);
             Assert.Equal("TopLevel.Foo", fieldTypes[2].ContainingTypeName);
@@ -127,31 +133,31 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(5, fieldTypes.Count);
 
             Assert.Equal("AnimalNest", fieldTypes[0].Name);
-            Assert.Equal("int", fieldTypes[0].Type);
+            Assert.Equal("int", fieldTypes[0].Type.Name);
             Assert.Equal("", fieldTypes[0].Modifier);
             Assert.Equal(modifier, fieldTypes[0].AccessModifier);
             Assert.False(fieldTypes[0].IsEvent);
 
             Assert.Equal("X", fieldTypes[1].Name);
-            Assert.Equal("float", fieldTypes[1].Type);
+            Assert.Equal("float", fieldTypes[1].Type.Name);
             Assert.Equal("", fieldTypes[1].Modifier);
             Assert.Equal(modifier, fieldTypes[1].AccessModifier);
             Assert.False(fieldTypes[1].IsEvent);
 
             Assert.Equal("Yaz_fafa", fieldTypes[2].Name);
-            Assert.Equal("float", fieldTypes[2].Type);
+            Assert.Equal("float", fieldTypes[2].Type.Name);
             Assert.Equal("", fieldTypes[2].Modifier);
             Assert.Equal(modifier, fieldTypes[2].AccessModifier);
             Assert.False(fieldTypes[2].IsEvent);
 
             Assert.Equal("_zxy", fieldTypes[3].Name);
-            Assert.Equal("string", fieldTypes[3].Type);
+            Assert.Equal("string", fieldTypes[3].Type.Name);
             Assert.Equal("", fieldTypes[3].Modifier);
             Assert.Equal(modifier, fieldTypes[3].AccessModifier);
             Assert.False(fieldTypes[3].IsEvent);
 
             Assert.Equal("extractor", fieldTypes[4].Name);
-            Assert.Equal("CSharpMetricExtractor", fieldTypes[4].Type);
+            Assert.Equal("CSharpMetricExtractor", fieldTypes[4].Type.Name);
             Assert.Equal("", fieldTypes[4].Modifier);
             Assert.Equal(modifier, fieldTypes[4].AccessModifier);
             Assert.False(fieldTypes[4].IsEvent);
@@ -184,25 +190,25 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(4, fieldTypes.Count);
 
             Assert.Equal("extractor", fieldTypes[0].Name);
-            Assert.Equal("CSharpMetricExtractor", fieldTypes[0].Type);
+            Assert.Equal("CSharpMetricExtractor", fieldTypes[0].Type.Name);
             Assert.Equal("", fieldTypes[0].Modifier);
             Assert.Equal(visibility, fieldTypes[0].AccessModifier);
             Assert.True(fieldTypes[0].IsEvent);
 
             Assert.Equal("_some_event", fieldTypes[1].Name);
-            Assert.Equal("int", fieldTypes[1].Type);
+            Assert.Equal("int", fieldTypes[1].Type.Name);
             Assert.Equal("", fieldTypes[1].Modifier);
             Assert.Equal(visibility, fieldTypes[1].AccessModifier);
             Assert.True(fieldTypes[1].IsEvent);
 
             Assert.Equal("MyAction1", fieldTypes[2].Name);
-            Assert.Equal("System.Action", fieldTypes[2].Type);
+            Assert.Equal("System.Action", fieldTypes[2].Type.Name);
             Assert.Equal("", fieldTypes[2].Modifier);
             Assert.Equal(visibility, fieldTypes[2].AccessModifier);
             Assert.True(fieldTypes[2].IsEvent);
 
             Assert.Equal("MyAction2", fieldTypes[3].Name);
-            Assert.Equal("System.Action", fieldTypes[3].Type);
+            Assert.Equal("System.Action", fieldTypes[3].Type.Name);
             Assert.Equal("", fieldTypes[3].Modifier);
             Assert.Equal(visibility, fieldTypes[3].AccessModifier);
             Assert.True(fieldTypes[3].IsEvent);
@@ -234,31 +240,31 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(5, fieldTypes.Count);
 
             Assert.Equal("AnimalNest", fieldTypes[0].Name);
-            Assert.Equal("int", fieldTypes[0].Type);
+            Assert.Equal("int", fieldTypes[0].Type.Name);
             Assert.Equal(modifier, fieldTypes[0].Modifier);
             Assert.Equal("public", fieldTypes[0].AccessModifier);
             Assert.False(fieldTypes[0].IsEvent);
 
             Assert.Equal("X", fieldTypes[1].Name);
-            Assert.Equal("float", fieldTypes[1].Type);
+            Assert.Equal("float", fieldTypes[1].Type.Name);
             Assert.Equal(modifier, fieldTypes[1].Modifier);
             Assert.Equal("protected", fieldTypes[1].AccessModifier);
             Assert.False(fieldTypes[1].IsEvent);
 
             Assert.Equal("Yaz_fafa", fieldTypes[2].Name);
-            Assert.Equal("float", fieldTypes[2].Type);
+            Assert.Equal("float", fieldTypes[2].Type.Name);
             Assert.Equal(modifier, fieldTypes[2].Modifier);
             Assert.Equal("protected", fieldTypes[2].AccessModifier);
             Assert.False(fieldTypes[2].IsEvent);
 
             Assert.Equal("_zxy", fieldTypes[3].Name);
-            Assert.Equal("string", fieldTypes[3].Type);
+            Assert.Equal("string", fieldTypes[3].Type.Name);
             Assert.Equal(modifier, fieldTypes[3].Modifier);
             Assert.Equal("private", fieldTypes[3].AccessModifier);
             Assert.False(fieldTypes[3].IsEvent);
 
             Assert.Equal("extractor", fieldTypes[4].Name);
-            Assert.Equal("CSharpMetricExtractor", fieldTypes[4].Type);
+            Assert.Equal("CSharpMetricExtractor", fieldTypes[4].Type.Name);
             Assert.Equal(modifier, fieldTypes[4].Modifier);
             Assert.Equal("private", fieldTypes[4].AccessModifier);
             Assert.False(fieldTypes[4].IsEvent);

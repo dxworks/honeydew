@@ -42,20 +42,15 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Method
 
 
             modelType.Name = syntaxNode.Identifier.ToString();
-            modelType.ReturnType = new ReturnTypeModel
+            modelType.ReturnValue = new ReturnValueModel
             {
-                Name = returnType,
+                Type = returnType,
                 Modifier = returnTypeModifier
             };
             modelType.ContainingTypeName = containingClassName;
             modelType.Modifier = modifier;
             modelType.AccessModifier = accessModifier;
             modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
-
-            foreach (var parameterType in CSharpHelperMethods.ExtractInfoAboutParameters(syntaxNode.ParameterList))
-            {
-                modelType.ParameterTypes.Add(parameterType);
-            }
 
             return modelType;
         }

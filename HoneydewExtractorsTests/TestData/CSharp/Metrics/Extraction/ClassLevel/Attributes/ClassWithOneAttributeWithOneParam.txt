@@ -1,0 +1,8 @@
+﻿namespace Namespace1
+{
+    [System.Obsolete("Message")]
+    public class Class1
+    {
+        
+    }
+}

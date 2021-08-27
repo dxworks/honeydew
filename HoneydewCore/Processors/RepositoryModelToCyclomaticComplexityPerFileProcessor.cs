@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 
 namespace HoneydewCore.Processors
 {
@@ -56,7 +57,7 @@ namespace HoneydewCore.Processors
             return representation;
         }
 
-        private static void CalculateCycloComponents(List<ClassModel> classModels, out int maxCyclo, out int minCyclo,
+        private static void CalculateCycloComponents(List<IClassType> classModels, out int maxCyclo, out int minCyclo,
             out int avgCyclo, out int sumCyclo)
         {
             var maxCyclomatic = 1;
@@ -76,8 +77,13 @@ namespace HoneydewCore.Processors
                 return;
             }
 
-            foreach (var classModel in classModels)
+            foreach (var classType in classModels)
             {
+                if (classType is not ClassModel classModel)
+                {
+                    continue;
+                }
+
                 foreach (var methodModel in classModel.Methods)
                 {
                     UpdateVariables(methodModel.CyclomaticComplexity);
@@ -124,9 +130,9 @@ namespace HoneydewCore.Processors
             }
         }
 
-        private static Dictionary<string, List<ClassModel>> GroupClassesByFilePath(RepositoryModel repositoryModel)
+        private static Dictionary<string, List<IClassType>> GroupClassesByFilePath(RepositoryModel repositoryModel)
         {
-            var classModelDictionary = new Dictionary<string, List<ClassModel>>();
+            var classModelDictionary = new Dictionary<string, List<IClassType>>();
 
             foreach (var classModel in repositoryModel.GetEnumerable())
             {
@@ -136,7 +142,7 @@ namespace HoneydewCore.Processors
                 }
                 else
                 {
-                    classModelDictionary.Add(classModel.FilePath, new List<ClassModel>
+                    classModelDictionary.Add(classModel.FilePath, new List<IClassType>
                     {
                         classModel
                     });

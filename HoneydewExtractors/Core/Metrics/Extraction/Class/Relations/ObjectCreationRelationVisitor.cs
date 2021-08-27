@@ -4,8 +4,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
 {
-    public class ObjectCreationRelationVisitor : RelationMetricVisitor
+    public class ObjectCreationRelationVisitor : RelationVisitor
     {
+        public ObjectCreationRelationVisitor()
+        {
+        }
+
         public ObjectCreationRelationVisitor(IRelationMetricHolder metricHolder) : base(metricHolder)
         {
         }
@@ -21,35 +25,35 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
                 .OfType<ObjectCreationExpressionSyntax>())
             {
                 MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(objectCreationExpressionSyntax.Type), this);
+                    CSharpHelperMethods.GetFullName(objectCreationExpressionSyntax.Type).Name, this);
             }
 
             foreach (var implicitObjectCreationExpressionSyntax in syntaxNode.DescendantNodes()
                 .OfType<ImplicitObjectCreationExpressionSyntax>())
             {
                 MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(implicitObjectCreationExpressionSyntax), this);
+                    CSharpHelperMethods.GetFullName(implicitObjectCreationExpressionSyntax).Name, this);
             }
 
             foreach (var arrayCreationExpressionSyntax in syntaxNode.DescendantNodes()
                 .OfType<ArrayCreationExpressionSyntax>())
             {
                 MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(arrayCreationExpressionSyntax.Type), this);
+                    CSharpHelperMethods.GetFullName(arrayCreationExpressionSyntax.Type).Name, this);
             }
 
             foreach (var implicitArrayCreationExpressionSyntax in syntaxNode.DescendantNodes()
                 .OfType<ImplicitArrayCreationExpressionSyntax>())
             {
                 MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(implicitArrayCreationExpressionSyntax), this);
+                    CSharpHelperMethods.GetFullName(implicitArrayCreationExpressionSyntax).Name, this);
             }
 
             foreach (var expressionSyntax in syntaxNode.DescendantNodes().OfType<InitializerExpressionSyntax>()
                 .Where(syntax => syntax.Parent is EqualsValueClauseSyntax)
                 .Select(syntax => syntax.Parent))
             {
-                MetricHolder.Add(className, CSharpHelperMethods.GetContainingType(expressionSyntax), this);
+                MetricHolder.Add(className, CSharpHelperMethods.GetContainingType(expressionSyntax).Name, this);
             }
         }
     }

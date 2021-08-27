@@ -1,6 +1,6 @@
 ﻿namespace HoneydewModels.Types
 {
-    public interface ICyclomaticComplexityType : INamedType
+    public interface ITypeWithCyclomaticComplexity : IType
     {
         public int CyclomaticComplexity { get; set; }
     }

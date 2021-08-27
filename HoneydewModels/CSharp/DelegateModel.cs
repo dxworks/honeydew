@@ -25,7 +25,7 @@ namespace HoneydewModels.CSharp
 
         public IList<IParameterType> ParameterTypes { get; set; } = new List<IParameterType>();
 
-        public IReturnType ReturnType { get; set; }
+        public IReturnValueType ReturnValue { get; set; }
 
         public IList<MetricModel> Metrics { get; init; } = new List<MetricModel>();
     }

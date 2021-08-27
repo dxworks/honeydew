@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
@@ -11,7 +13,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class
 {
     public class MethodSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
     {
-        public MethodSetterClassVisitor(IEnumerable<IMethodVisitor> visitors): base(visitors)
+        public MethodSetterClassVisitor(IEnumerable<IMethodVisitor> visitors) : base(visitors)
         {
         }
 
@@ -28,9 +30,16 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class
 
                 foreach (var visitor in GetContainedVisitors())
                 {
-                    if (visitor is ICSharpMethodVisitor extractionVisitor)
+                    try
                     {
-                        methodModel = extractionVisitor.Visit(methodDeclarationSyntax, methodModel);
+                        if (visitor is ICSharpMethodVisitor extractionVisitor)
+                        {
+                            methodModel = extractionVisitor.Visit(methodDeclarationSyntax, methodModel);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log($"Could not extract from Method Visitor because {e}", LogLevels.Warning);
                     }
                 }
 

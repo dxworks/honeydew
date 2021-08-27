@@ -1,0 +1,22 @@
+﻿using System;
+
+namespace MyNamespace
+{
+    class MyClass
+    {
+        public MyClass(
+            [param: ExternAttribute("Hello"), ExternAttribute(), ExternAttribute("World"), ExternAttribute]
+            int a,
+            [param: ExternAttribute("Hello"), ExternAttribute(), ExternAttribute("World"), ExternAttribute]
+            int b)
+        {
+        }
+        
+        [Obsolete]
+        public MyClass(
+            [ExternAttribute("Hello")] [ExternAttribute()] [param: ExternAttribute("World", 7)] [param: ExternAttribute]
+            int a)
+        {
+        }
+    }
+}

@@ -7,7 +7,7 @@ namespace HoneydewModels.CSharp
     {
         public string Name { get; set; }
 
-        public string Type { get; set; }
+        public IEntityType Type { get; set; }
 
         public string Modifier { get; set; } = "";
 

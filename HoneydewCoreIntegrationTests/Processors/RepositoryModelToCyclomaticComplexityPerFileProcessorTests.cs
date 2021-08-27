@@ -45,7 +45,10 @@ namespace HoneydewCoreIntegrationTests.Processors
                     {
                         Name = "MyField",
                         Modifier = "static",
-                        Type = "System.Int32",
+                        Type = new EntityTypeModel
+                        {
+                            Name = "System.Int32"
+                        },
                         AccessModifier = "public",
                     }
                 }

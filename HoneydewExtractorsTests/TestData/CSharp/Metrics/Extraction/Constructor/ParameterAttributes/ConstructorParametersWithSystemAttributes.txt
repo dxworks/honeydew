@@ -1,0 +1,15 @@
+﻿namespace MyNamespace
+{
+    using System.Diagnostics.CodeAnalysis;
+
+    class MyClass
+    {
+        public MyClass(
+            [param: NotNull, SuppressMessage("cc", "aa")]
+            int a,
+            [NotNull, SuppressMessage("cc", "aa")]
+            int b)
+        {
+        }
+    }
+}

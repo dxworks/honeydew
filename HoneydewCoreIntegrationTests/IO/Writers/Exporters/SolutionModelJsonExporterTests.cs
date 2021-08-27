@@ -13,7 +13,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
 
         public SolutionModelJsonExporterTests()
         {
-            _sut = new JsonSolutionModelExporter(new ConverterList());
+            _sut = new JsonSolutionModelExporter();
         }
 
         [Fact]
@@ -78,8 +78,19 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
                 {
                     new BaseTypeModel
                     {
-                        Name = "object",
-                        ClassType = "class"
+                        Type = new EntityTypeModel
+                        {
+                            Name = "object",
+                            ContainedTypes = new List<GenericType>
+                            {
+                                new()
+                                {
+                                    Modifier = "in",
+                                    Name = "Other",
+                                }
+                            }
+                        },
+                        Kind = "class"
                     }
                 }
             };
@@ -92,13 +103,19 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
                 {
                     new BaseTypeModel
                     {
-                        Name = "SomeParent",
-                        ClassType = "class"
+                        Type = new EntityTypeModel
+                        {
+                            Name = "SomeParent",
+                        },
+                        Kind = "class"
                     },
                     new BaseTypeModel
                     {
-                        Name = "Interface1",
-                        ClassType = "interface"
+                        Type = new EntityTypeModel
+                        {
+                            Name = "Interface1"
+                        },
+                        Kind = "interface"
                     }
                 }
             });
@@ -109,7 +126,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""ProjectName"",""FilePath"":""some_path"",""ProjectReferences"":[""HoneydewCore""],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""Name"":""SomeNamespace.FirstClass"",""FilePath"":""SomePath"",""Loc"":{""SourceLines"":0,""CommentedLines"":0,""EmptyLines"":0},""AccessModifier"":""private"",""Modifier"":""static"",""ContainingTypeName"":""SomeNamespace"",""BaseTypes"":[{""Name"":""object"",""ClassType"":""class""}],""Imports"":[],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[],""Metrics"":[{""ExtractorName"":""BaseTypeExtractor"",""ValueType"":""System.Collections.Generic.List\u00601[[HoneydewModels.Types.IBaseType, HoneydewModels, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"",""Value"":[{""Name"":""SomeParent"",""ClassType"":""class""},{""Name"":""Interface1"",""ClassType"":""interface""}]}],""Attributes"":[],""Namespace"":""SomeNamespace""}]}]}]}";
+                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""ProjectName"",""FilePath"":""some_path"",""ProjectReferences"":[""HoneydewCore""],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""Name"":""SomeNamespace.FirstClass"",""FilePath"":""SomePath"",""Loc"":{""SourceLines"":0,""CommentedLines"":0,""EmptyLines"":0},""AccessModifier"":""private"",""Modifier"":""static"",""ContainingTypeName"":""SomeNamespace"",""BaseTypes"":[{""Type"":{""Name"":""object"",""ContainedTypes"":[{""Name"":""Other"",""Modifier"":""in"",""ContainedTypes"":[]}]},""Kind"":""class""}],""Imports"":[],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[],""Metrics"":[{""ExtractorName"":""BaseTypeExtractor"",""ValueType"":""System.Collections.Generic.List`1[[HoneydewModels.Types.IBaseType, HoneydewModels, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"",""Value"":[{""Type"":{""Name"":""SomeParent"",""ContainedTypes"":[]},""Kind"":""class""},{""Type"":{""Name"":""Interface1"",""ContainedTypes"":[]},""Kind"":""interface""}]}],""Attributes"":[],""Namespace"":""SomeNamespace""}]}]}]}";
 
             var projectModel = new ProjectModel("ProjectName")
             {
@@ -132,9 +149,9 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
         public void Export_ShouldReturnRawModel_WhenModelHasOneCompilationUnitWithOneClassAndMethodCalls()
         {
             var solutionModel = new SolutionModel { FilePath = "path_to_solution" };
-            var classModels = new List<ClassModel>
+            var classModels = new List<IPropertyMembersClassType>
             {
-                new()
+                new ClassModel
                 {
                     FilePath = "pathToClass",
                     Name = "SomeNamespace.FirstClass",
@@ -165,9 +182,12 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
                         new MethodModel
                         {
                             Name = "Method1",
-                            ReturnType = new ReturnTypeModel
+                            ReturnValue = new ReturnValueModel
                             {
-                                Name = "int",
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "int"
+                                },
                                 Modifier = "ref"
                             },
                             Modifier = "static",
@@ -190,7 +210,10 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
                                     {
                                         new ParameterModel
                                         {
-                                            Name = "string"
+                                            Type = new EntityTypeModel
+                                            {
+                                                Name = "string"
+                                            }
                                         }
                                     },
                                 }
@@ -199,7 +222,10 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
                             {
                                 new ParameterModel
                                 {
-                                    Name = "string"
+                                    Type = new EntityTypeModel
+                                    {
+                                        Name = "string"
+                                    }
                                 }
                             }
                         }
@@ -208,7 +234,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""A Project"",""FilePath"":""some_path"",""ProjectReferences"":[],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""Name"":""SomeNamespace.FirstClass"",""FilePath"":""pathToClass"",""Loc"":{""SourceLines"":20,""CommentedLines"":5,""EmptyLines"":30},""AccessModifier"":""protected"",""Modifier"":"""",""ContainingTypeName"":""SomeNamespace"",""BaseTypes"":[],""Imports"":[{""Name"":""System"",""IsStatic"":false,""Alias"":""Sys"",""AliasType"":""Namespace""},{""Name"":""System.Collections"",""IsStatic"":true,""Alias"":"""",""AliasType"":""None""}],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[{""Name"":""Method1"",""ContainingTypeName"":""SomeNamespace.FirstClass"",""Modifier"":""static"",""AccessModifier"":""public"",""ReturnType"":{""Name"":""int"",""Modifier"":""ref"",""Attributes"":[]},""ParameterTypes"":[{""Name"":""string"",""Modifier"":"""",""DefaultValue"":null,""Attributes"":[]}],""CalledMethods"":[{""Name"":""Parse"",""ContainingTypeName"":""int"",""ParameterTypes"":[{""Name"":""string"",""Modifier"":"""",""DefaultValue"":null,""Attributes"":[]}]}],""Attributes"":[],""LocalFunctions"":[],""Loc"":{""SourceLines"":6,""CommentedLines"":0,""EmptyLines"":4},""CyclomaticComplexity"":7,""Metrics"":[]}],""Metrics"":[],""Attributes"":[],""Namespace"":""SomeNamespace""}]}]}]}";
+                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""A Project"",""FilePath"":""some_path"",""ProjectReferences"":[],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""Name"":""SomeNamespace.FirstClass"",""FilePath"":""pathToClass"",""Loc"":{""SourceLines"":20,""CommentedLines"":5,""EmptyLines"":30},""AccessModifier"":""protected"",""Modifier"":"""",""ContainingTypeName"":""SomeNamespace"",""BaseTypes"":[],""Imports"":[{""Name"":""System"",""IsStatic"":false,""Alias"":""Sys"",""AliasType"":""Namespace""},{""Name"":""System.Collections"",""IsStatic"":true,""Alias"":"""",""AliasType"":""None""}],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[{""Name"":""Method1"",""ContainingTypeName"":""SomeNamespace.FirstClass"",""Modifier"":""static"",""AccessModifier"":""public"",""ReturnValue"":{""Type"":{""Name"":""int"",""ContainedTypes"":[]},""Modifier"":""ref"",""Attributes"":[]},""ParameterTypes"":[{""Type"":{""Name"":""string"",""ContainedTypes"":[]},""Modifier"":"""",""DefaultValue"":null,""Attributes"":[]}],""CalledMethods"":[{""Name"":""Parse"",""ContainingTypeName"":""int"",""ParameterTypes"":[{""Type"":{""Name"":""string"",""ContainedTypes"":[]},""Modifier"":"""",""DefaultValue"":null,""Attributes"":[]}]}],""Attributes"":[],""LocalFunctions"":[],""Loc"":{""SourceLines"":6,""CommentedLines"":0,""EmptyLines"":4},""CyclomaticComplexity"":7,""Metrics"":[]}],""Metrics"":[],""Attributes"":[],""Namespace"":""SomeNamespace""}]}]}]}";
 
             var projectModel = new ProjectModel("A Project")
             {

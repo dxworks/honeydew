@@ -5,8 +5,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
 {
-    public class LocalVariablesRelationVisitor : RelationMetricVisitor
+    public class LocalVariablesRelationVisitor : RelationVisitor
     {
+        public LocalVariablesRelationVisitor()
+        {
+        }
+
         public LocalVariablesRelationVisitor(IRelationMetricHolder metricHolder) : base(metricHolder)
         {
         }
@@ -22,7 +26,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
                 .SelectMany(syntax => syntax.DescendantNodes().OfType<VariableDeclarationSyntax>())
             )
             {
-                var fullName = CSharpHelperMethods.GetFullName(variableDeclarationSyntax.Type);
+                var fullName = CSharpHelperMethods.GetFullName(variableDeclarationSyntax.Type).Name;
 
                 if (fullName != CSharpConstants.VarIdentifier)
                 {
@@ -30,7 +34,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
                 }
                 else
                 {
-                    fullName = CSharpHelperMethods.GetFullName(variableDeclarationSyntax);
+                    fullName = CSharpHelperMethods.GetFullName(variableDeclarationSyntax).Name;
                     if (fullName != CSharpConstants.VarIdentifier)
                     {
                         MetricHolder.Add(className, fullName, this);
@@ -46,7 +50,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
                             })
                             {
                                 MetricHolder.Add(className,
-                                    CSharpHelperMethods.GetFullName(objectCreationExpressionSyntax.Type), this);
+                                    CSharpHelperMethods.GetFullName(objectCreationExpressionSyntax.Type).Name, this);
                             }
                         }
                     }

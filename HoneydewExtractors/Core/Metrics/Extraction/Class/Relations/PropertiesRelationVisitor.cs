@@ -4,8 +4,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
 {
-    public class PropertiesRelationVisitor : RelationMetricVisitor
+    public class PropertiesRelationVisitor : RelationVisitor
     {
+        public PropertiesRelationVisitor()
+        {
+        }
+
         public PropertiesRelationVisitor(IRelationMetricHolder metricHolder) : base(metricHolder)
         {
         }
@@ -20,14 +24,14 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
             foreach (var propertyDeclarationSyntax in syntaxNode.DescendantNodes().OfType<PropertyDeclarationSyntax>())
             {
                 MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(propertyDeclarationSyntax.Type), this);
+                    CSharpHelperMethods.GetFullName(propertyDeclarationSyntax.Type).Name, this);
             }
 
             foreach (var eventDeclarationSyntax in syntaxNode.DescendantNodes()
                 .OfType<EventDeclarationSyntax>())
             {
                 MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(eventDeclarationSyntax.Type), this);
+                    CSharpHelperMethods.GetFullName(eventDeclarationSyntax.Type).Name, this);
             }
         }
     }

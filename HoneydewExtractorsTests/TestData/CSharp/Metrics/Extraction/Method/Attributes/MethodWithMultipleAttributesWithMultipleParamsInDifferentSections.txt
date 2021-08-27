@@ -1,0 +1,22 @@
+﻿using System;
+
+namespace Namespace1
+{
+    public class Class1
+    {
+        [System.Obsolete("Message", false)]
+        [System.Serializable]
+        [System.AttributeUsage(AttributeTargets.Class)]
+        public void Method(double a, float b)
+        {
+        }
+        
+        [System.Obsolete("Message", false)]
+        [System.Serializable]
+        [System.AttributeUsage(AttributeTargets.Class)]
+        public double Method(double a, float b, double c)
+        {
+            return a+b+c;
+        }
+    }
+}

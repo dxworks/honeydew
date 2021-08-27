@@ -3,10 +3,9 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public record ReturnTypeModel : IModelEntity, IReturnType
+    public record ReturnValueModel : IModelEntity, IReturnValueType
     {
-        public string Name { get; set; }
-
+        public IEntityType Type { get; set; }
         public string Modifier { get; set; } = "";
 
         public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();

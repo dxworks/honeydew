@@ -4,8 +4,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
 {
-    public class ReturnValueRelationVisitor : RelationMetricVisitor
+    public class ReturnValueRelationVisitor : RelationVisitor
     {
+        public ReturnValueRelationVisitor()
+        {
+        }
+
         public ReturnValueRelationVisitor(IRelationMetricHolder metricHolder) : base(metricHolder)
         {
         }
@@ -20,7 +24,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class.Relations
             foreach (var methodDeclarationSyntax in syntaxNode.DescendantNodes().OfType<MethodDeclarationSyntax>())
             {
                 MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(methodDeclarationSyntax.ReturnType), this);
+                    CSharpHelperMethods.GetFullName(methodDeclarationSyntax.ReturnType).Name, this);
             }
         }
     }

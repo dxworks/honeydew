@@ -1,0 +1,17 @@
+﻿namespace Namespace1
+{
+    class Class1
+    {    
+        [Extern("Hello"), ExternAttribute(), ExternAttribute("World", false), Extern(2), Extern(new string[]{})]    
+        public int Method()
+        {
+            return 2;
+        }
+        
+        [Extern("Hello"), ExternAttribute(), ExternAttribute("World", false), Extern(2), Extern(new string[]{})]    
+        public int Sum(int a, int b)
+        {
+            return a+b;
+        }
+    }
+}
