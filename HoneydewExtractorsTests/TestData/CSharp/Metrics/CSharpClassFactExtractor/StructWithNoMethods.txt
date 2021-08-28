@@ -1,0 +1,11 @@
+﻿using System;
+
+namespace TopLevel
+{
+    public struct Foo 
+    { 
+        int A = 12;
+        float X;
+        string Y = "";                                                                                                     
+    }
+}

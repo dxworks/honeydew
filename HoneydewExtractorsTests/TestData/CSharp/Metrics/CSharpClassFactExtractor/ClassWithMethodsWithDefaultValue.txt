@@ -1,0 +1,12 @@
+﻿namespace Models.Main.Items
+{
+    public class MainItem
+    {
+        public void Method() {}
+        public void Method1(object a=null) {}
+        public void Method2(int a=15) {}
+        public void Method3(int a, int b) {}
+        public void Method4(int a,in int b=15, string c="") {}
+        public void Method5(string c="null") {}
+    }
+}
