@@ -7,7 +7,7 @@ Honeydew is a tool that extracts facts from a C# Solution or C# Project
 For extracting information about a solution or project use the following command:
 
 ```
-.\Honeydew extract <input_path>
+.\Honeydew extract <input_path> [--disable-progress-bars]
 ```
 
 If `input_path` is a path to a solution file (.sln), Honeydew will extract facts from that solution file
@@ -19,13 +19,27 @@ from those
 
 The output files will be placed in a folder named `results`
 
+### Options
+
+- `--disable-progress-bars`
+
+  If present, then all the messages will be printed in the console. Otherwise, output will contain progress bars for a
+  better visualisation of the progress
+
 ## Load Model from file
 
 For loading a model from a json file
 
 ```
-.\Honeydew load <path_to_json_model> 
+.\Honeydew load <path_to_json_model> [--disable-progress-bars]
 ```
+
+### Options
+
+- `--disable-progress-bars`
+
+  If present, then all the messages will be printed in the console. Otherwise, output will contain progress bars for a
+  better visualisation of the progress
 
 ## Build Project
 
