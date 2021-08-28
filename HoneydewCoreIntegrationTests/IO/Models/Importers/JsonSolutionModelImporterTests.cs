@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
+using HoneydewModels;
 using HoneydewModels.CSharp;
 using HoneydewModels.Importers;
-using Newtonsoft.Json;
 using Xunit;
 
 namespace HoneydewCoreIntegrationTests.IO.Models.Importers
@@ -12,18 +12,7 @@ namespace HoneydewCoreIntegrationTests.IO.Models.Importers
 
         public JsonSolutionModelImporterTests()
         {
-            _sut = new JsonSolutionModelImporter();
-        }
-
-        [Theory(Skip = "Fix Later")]
-        [InlineData(@"""Value"":4}")]
-        [InlineData("")]
-        [InlineData(" ")]
-        [InlineData(@"{Projects"":1")]
-        [InlineData(@"{""Value"":1")]
-        public void Import_ShouldThrowJsonException_WhenProvidedWithInvalidJsonFile(string content)
-        {
-            Assert.Throws<JsonSerializationException>(() => _sut.Import(content));
+            _sut = new JsonSolutionModelImporter(new ConverterList());
         }
 
         [Fact]
@@ -36,7 +25,7 @@ namespace HoneydewCoreIntegrationTests.IO.Models.Importers
             Assert.Empty(loadModelFromFile.Projects);
         }
 
-        [Fact(Skip = "Fix Later")]
+        [Fact]
         public void Import_ShouldReturnModel_WhenProvidedCorrectContent()
         {
             const string fileContent =
@@ -79,6 +68,27 @@ namespace HoneydewCoreIntegrationTests.IO.Models.Importers
             {
                 Assert.Equal("Interface1", element.GetString());
             }
+        }
+
+        [Fact]
+        public void Import_ShouldReturnModel_WhenProvidedDelegateAndClassModel()
+        {
+            const string fileContent =
+                @"{""Projects"":[{""Name"":""ProjectName"",""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""Name"":""Class1"",""FilePath"":""path/Class1.cs"",""Loc"":{""SourceLines"":28,""CommentedLines"":0,""EmptyLines"":5},""AccessModifier"":""public"",""Modifier"":"""",""ContainingTypeName"":""Namespace1"",""BaseTypes"":[{""Type"":{""Name"":""object"",""ContainedTypes"":[]},""Kind"":""class""}],""Imports"":[],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[]},{""ClassType"":""delegate"",""FilePath"":""path/Delegate1.cs"",""Name"":""Delegate1"",""BaseTypes"":[{""Type"":{""Name"":""System.Delegate"",""ContainedTypes"":[]},""Kind"":""class""}],""Imports"":[],""ContainingTypeName"":""Namespace1"",""AccessModifier"":""public"",""Modifier"":"""",""Attributes"":[],""ParameterTypes"":[],""ReturnValue"":{""Type"":{""Name"":""void"",""ContainedTypes"":[]},""Modifier"":"""",""Attributes"":[]},""Metrics"":[]}]}]}]}";
+
+            var loadModelFromFile = _sut.Import(fileContent);
+
+            Assert.NotNull(loadModelFromFile);
+            Assert.Equal(1, loadModelFromFile.Projects.Count);
+            Assert.Equal("ProjectName", loadModelFromFile.Projects[0].Name);
+
+            Assert.Equal(1, loadModelFromFile.Projects[0].Namespaces.Count);
+            var projectNamespace = loadModelFromFile.Projects[0].Namespaces[0];
+
+            Assert.Equal("SomeNamespace", projectNamespace.Name);
+            Assert.Equal(2, projectNamespace.ClassModels.Count);
+            Assert.Equal(typeof(ClassModel), projectNamespace.ClassModels[0].GetType());
+            Assert.Equal(typeof(DelegateModel), projectNamespace.ClassModels[1].GetType());
         }
     }
 }

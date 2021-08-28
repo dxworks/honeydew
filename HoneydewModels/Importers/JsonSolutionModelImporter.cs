@@ -1,20 +1,26 @@
-﻿using System.Collections.Generic;
+﻿using System.Text.Json;
 using HoneydewModels.CSharp;
-using Newtonsoft.Json;
 
 namespace HoneydewModels.Importers
 {
     public class JsonSolutionModelImporter : IModelImporter<SolutionModel>
     {
+        private readonly IConverterList _converterList;
+
+        public JsonSolutionModelImporter(IConverterList converterList)
+        {
+            _converterList = converterList;
+        }
+        
         public SolutionModel Import(string fileContent)
         {
-            return JsonConvert.DeserializeObject<SolutionModel>(fileContent, new JsonSerializerSettings
+            var jsonSerializerOptions = new JsonSerializerOptions();
+            foreach (var converter in _converterList.GetConverters())
             {
-                // Converters = new List<JsonConverter>()
-                // {
-                //     new ModelJsonConverter(),
-                // }
-            });
+                jsonSerializerOptions.Converters.Add(converter);
+            }
+
+            return JsonSerializer.Deserialize<SolutionModel>(fileContent, jsonSerializerOptions);
         }
     }
 }

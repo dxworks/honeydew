@@ -1,66 +1,26 @@
 ﻿using System;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using HoneydewModels.Types;
 
 namespace HoneydewModels
 {
-    internal class ModelJsonConverter : JsonConverter
+    internal class ModelJsonConverter<TInterfaceModel, TModel> : JsonConverter<TInterfaceModel>
+        where TModel : TInterfaceModel
     {
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override TInterfaceModel Read(ref Utf8JsonReader reader, Type typeToConvert,
+            JsonSerializerOptions options)
         {
-            serializer.Serialize(writer, value);
-        }
-
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
-            JsonSerializer serializer)
-        {
-            JContainer lJContainer = default(JContainer);
-
-            if (reader.TokenType == JsonToken.StartObject)
+            if (typeToConvert == typeof(IClassType))
             {
-                lJContainer = JObject.Load(reader);
-                existingValue = Activator.CreateInstance(objectType);
-
-                serializer.Populate(lJContainer.CreateReader(), existingValue);
             }
 
-            return existingValue;
-            
-            // if (reader.TokenType == JsonToken.Null)
-            // {
-            //     return "";
-            // }
-            //
-            // if (reader.TokenType == JsonToken.String)
-            // {
-            //     return serializer.Deserialize(reader, objectType);
-            // }
-            //
-            // try
-            // {
-            //     var obj = JToken.Load(reader);
-            //     if (obj["ClassType"] != null)
-            //     {
-            //         var classType = obj["ClassType"].ToString();
-            //         if (classType == "delegate")
-            //         {
-            //             return serializer.Deserialize<DelegateModel>(reader);
-            //         }
-            //
-            //         return serializer.Deserialize<ClassModel>(reader);
-            //     }
-            // }
-            // catch (Exception)
-            // {
-            //     return serializer.Deserialize(reader, objectType);
-            // }
-            //
-            // return serializer.Deserialize(reader, objectType);
+            return JsonSerializer.Deserialize<TModel>(ref reader, options);
         }
 
-        public override bool CanConvert(Type objectType)
+        public override void Write(Utf8JsonWriter writer, TInterfaceModel value, JsonSerializerOptions options)
         {
-            return true;
+            JsonSerializer.Serialize(writer, (TModel)value, options);
         }
     }
 }
