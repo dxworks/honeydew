@@ -1,0 +1,33 @@
+﻿namespace Namespace1
+{
+    using System;
+    
+    public class Class1
+    {
+        private int _value;
+
+        public int Property1 { [return:My("Value")] [return:Obsolete] [return:ExternAttribute] get; [return:My("V")] [return:Obsolete] [return:ExternAttribute] set; }
+        public int Property2 { [return:My("V5")] [return:Obsolete] [return:ExternAttribute] get; [return:My("V2")] [return:Obsolete] [return:ExternAttribute] init; }
+        public int Property3 { [return:My("8")] [return:Obsolete] [return:ExternAttribute] get; }
+
+        public int Property4
+        {
+            [return:My("8")] [return:Obsolete] [return:ExternAttribute] get => 0;
+            [return:My("val")] [return:Obsolete] [return:ExternAttribute] set => _value = value;
+        }
+
+        public int Property5
+        {
+            [return:My("7")] [return:Obsolete] [return:ExternAttribute] get => 0;
+            [return:My("33")] [return:Obsolete] [return:ExternAttribute] init => _value = value;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.ReturnValue, AllowMultiple = true)]
+    class MyAttribute : Attribute
+    {
+        public MyAttribute(string str)
+        {
+        }
+    }
+}

@@ -830,6 +830,18 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
         public string GetAttributeContainingType(AttributeSyntax syntaxNode)
         {
+            var accessorDeclarationSyntax = GetParentDeclarationSyntax<AccessorDeclarationSyntax>(syntaxNode);
+            if (accessorDeclarationSyntax != null)
+            {
+                return GetFullName(accessorDeclarationSyntax);
+            }
+
+            var propertyDeclarationSyntax = GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>(syntaxNode);
+            if (propertyDeclarationSyntax != null)
+            {
+                return GetFullName(propertyDeclarationSyntax);
+            }
+
             var baseMethodDeclarationSyntax = GetParentDeclarationSyntax<BaseMethodDeclarationSyntax>(syntaxNode);
             if (baseMethodDeclarationSyntax != null)
             {
@@ -849,6 +861,18 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             }
 
             return syntaxNode.ToString();
+        }
+
+        private string GetFullName(AccessorDeclarationSyntax accessorDeclarationSyntax)
+        {
+            var basePropertyDeclarationSyntax =
+                GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>(accessorDeclarationSyntax);
+            if (basePropertyDeclarationSyntax == null)
+            {
+                return accessorDeclarationSyntax.Keyword.ToString();
+            }
+
+            return $"{GetFullName(basePropertyDeclarationSyntax)}.{accessorDeclarationSyntax.Keyword.ToString()}";
         }
 
         public IEnumerable<IParameterType> GetParameters(AttributeSyntax attributeSyntax)

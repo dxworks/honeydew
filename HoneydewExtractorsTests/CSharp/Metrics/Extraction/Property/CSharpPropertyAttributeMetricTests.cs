@@ -3,10 +3,12 @@ using HoneydewExtractors.Core.Metrics.Extraction.Attribute;
 using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.Common;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.Method;
 using HoneydewExtractors.Core.Metrics.Extraction.Property;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
@@ -22,15 +24,21 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         {
             var compositeVisitor = new CompositeVisitor();
 
+            var attributeSetterVisitor = new AttributeSetterVisitor(new List<IAttributeVisitor>
+            {
+                new AttributeInfoVisitor()
+            });
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {
                 new BaseInfoClassVisitor(),
                 new PropertySetterClassVisitor(new List<ICSharpPropertyVisitor>
                 {
                     new PropertyInfoVisitor(),
-                    new AttributeSetterVisitor(new List<IAttributeVisitor>
+                    attributeSetterVisitor,
+                    new MethodAccessorSetterPropertyVisitor(new List<IMethodVisitor>
                     {
-                        new AttributeInfoVisitor()
+                        new MethodInfoVisitor(),
+                        attributeSetterVisitor,
                     })
                 })
             }));
@@ -72,7 +80,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                 {
                     Assert.Equal("property", attributeType.Target);
                     Assert.Equal("System.ObsoleteAttribute", attributeType.Name);
-                    Assert.Equal("Namespace1.Class1", attributeType.ContainingTypeName);
+                    Assert.Equal($"Namespace1.Class1.{propertyType.Name}", attributeType.ContainingTypeName);
                     Assert.Equal(1, attributeType.ParameterTypes.Count);
                     Assert.Equal("string?", attributeType.ParameterTypes[0].Type.Name);
                 }
@@ -98,7 +106,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                 {
                     Assert.Equal("property", attributeType.Target);
                     Assert.Equal("System.SerializableAttribute", attributeType.Name);
-                    Assert.Equal("Namespace1.Class1", attributeType.ContainingTypeName);
+                    Assert.Equal("Namespace1.Class1.C", attributeType.ContainingTypeName);
                     Assert.Empty(attributeType.ParameterTypes);
                 }
             }
@@ -123,11 +131,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                 {
                     Assert.Equal("property", attributeType.Target);
                     Assert.Equal("System.ObsoleteAttribute", attributeType.Name);
-                    Assert.Equal("Namespace1.Class1", attributeType.ContainingTypeName);
                     Assert.Equal(1, attributeType.ParameterTypes.Count);
                     Assert.Equal("string?", attributeType.ParameterTypes[0].Type.Name);
                 }
             }
+
+            Assert.Equal("Namespace1.Class1.B", classModel.Properties[0].Attributes[0].ContainingTypeName);
+            Assert.Equal("Namespace1.Class1.FB", classModel.Properties[1].Attributes[0].ContainingTypeName);
         }
 
         [Theory]
@@ -151,7 +161,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                 foreach (var attribute in attributeTypes)
                 {
                     Assert.Equal("property", attribute.Target);
-                    Assert.Equal("Namespace1.Class1", attribute.ContainingTypeName);
+                    Assert.Equal($"Namespace1.Class1.{propertyType.Name}", attribute.ContainingTypeName);
                 }
 
                 var attribute1 = attributeTypes[0];
@@ -191,7 +201,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                 foreach (var attribute in fieldAttributes)
                 {
                     Assert.Equal("property", attribute.Target);
-                    Assert.Equal("MyNamespace.MyClass", attribute.ContainingTypeName);
+                    Assert.Equal($"MyNamespace.MyClass.{propertyType.Name}", attribute.ContainingTypeName);
                     Assert.Equal("MyNamespace.MyAttribute", attribute.Name);
                 }
 
@@ -229,7 +239,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                 foreach (var attribute in propertyType.Attributes)
                 {
                     Assert.Equal("property", attribute.Target);
-                    Assert.Equal("Namespace1.Class1", attribute.ContainingTypeName);
+                    Assert.Equal($"Namespace1.Class1.{propertyType.Name}", attribute.ContainingTypeName);
                 }
 
                 var attribute1 = propertyType.Attributes[0];
@@ -256,6 +266,95 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                 Assert.Equal("Extern", attribute5.Name);
                 Assert.Equal(1, attribute5.ParameterTypes.Count);
                 Assert.Equal("System.Object", attribute5.ParameterTypes[0].Type.Name);
+            }
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Property/Attributes/PropertyWithAccessorsWithAttributes.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Property/Attributes/EventPropertyWithAccessorsWithAttributes.txt")]
+        public void Extract_ShouldExtractAttribute_WhenProvidedWithPropertyAccessors(
+            string fileContent)
+        {
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var classType = (ClassModel)classTypes[0];
+
+            Assert.Equal(5, classType.Properties.Count);
+            foreach (var propertyType in classType.Properties)
+            {
+                Assert.Empty(propertyType.Attributes);
+
+                foreach (var accessor in propertyType.Accessors)
+                {
+                    Assert.Equal(3, accessor.Attributes.Count);
+
+                    foreach (var accessorAttribute in accessor.Attributes)
+                    {
+                        Assert.Equal("method", accessorAttribute.Target);
+                        Assert.Equal($"{propertyType.ContainingTypeName}.{propertyType.Name}.{accessor.Name}",
+                            accessorAttribute.ContainingTypeName);
+                    }
+
+                    var attribute1 = accessor.Attributes[0];
+                    Assert.Equal("Namespace1.MyAttribute", attribute1.Name);
+                    Assert.Equal(1, attribute1.ParameterTypes.Count);
+                    Assert.Equal("string", attribute1.ParameterTypes[0].Type.Name);
+
+                    var attribute2 = accessor.Attributes[1];
+                    Assert.Equal("System.ObsoleteAttribute", attribute2.Name);
+                    Assert.Empty(attribute2.ParameterTypes);
+
+                    var attribute3 = accessor.Attributes[2];
+                    Assert.Equal("ExternAttribute", attribute3.Name);
+                    Assert.Empty(attribute3.ParameterTypes);
+                }
+            }
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Property/Attributes/PropertyWithAccessorsWithReturnValueAttributes.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Property/Attributes/EventPropertyWithAccessorsWithReturnValueAttributes.txt")]
+        public void Extract_ShouldExtractAttribute_WhenProvidedWithPropertyAccessorsForReturnValue(
+            string fileContent)
+        {
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var classType = (ClassModel)classTypes[0];
+
+            Assert.Equal(5, classType.Properties.Count);
+            foreach (var propertyType in classType.Properties)
+            {
+                Assert.Empty(propertyType.Attributes);
+
+                foreach (var accessor in propertyType.Accessors)
+                {
+                    Assert.Equal(0, accessor.Attributes.Count);
+                    Assert.Equal(3, accessor.ReturnValue.Attributes.Count);
+
+                    foreach (var accessorAttribute in accessor.ReturnValue.Attributes)
+                    {
+                        Assert.Equal("return", accessorAttribute.Target);
+                        Assert.Equal($"{propertyType.ContainingTypeName}.{propertyType.Name}.{accessor.Name}",
+                            accessorAttribute.ContainingTypeName);
+                    }
+
+                    var attribute1 = accessor.ReturnValue.Attributes[0];
+                    Assert.Equal("Namespace1.MyAttribute", attribute1.Name);
+                    Assert.Equal(1, attribute1.ParameterTypes.Count);
+                    Assert.Equal("string", attribute1.ParameterTypes[0].Type.Name);
+
+                    var attribute2 = accessor.ReturnValue.Attributes[1];
+                    Assert.Equal("System.ObsoleteAttribute", attribute2.Name);
+                    Assert.Empty(attribute2.ParameterTypes);
+
+                    var attribute3 = accessor.ReturnValue.Attributes[2];
+                    Assert.Equal("ExternAttribute", attribute3.Name);
+                    Assert.Empty(attribute3.ParameterTypes);
+                }
             }
         }
     }

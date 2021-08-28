@@ -19,7 +19,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 {
     public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICSharpDelegateVisitor,
         ICSharpMethodVisitor, ICSharpConstructorVisitor, ICSharpFieldVisitor, ICSharpPropertyVisitor,
-        ICSharpParameterVisitor
+        ICSharpParameterVisitor, ICSharpMethodAccessorVisitor
     {
         public AttributeSetterVisitor(IEnumerable<IAttributeVisitor> visitors) : base(visitors)
         {
@@ -34,41 +34,12 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 
         public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
         {
-            foreach (var attributeListSyntax in syntaxNode.ChildNodes().OfType<AttributeListSyntax>())
-            {
-                foreach (var attributeSyntax in attributeListSyntax.Attributes)
-                {
-                    IAttributeType attributeModel = new AttributeModel();
+            return ExtractAttributesFromMethod(syntaxNode, modelType);
+        }
 
-                    attributeModel.Target = "method";
-
-                    foreach (var visitor in GetContainedVisitors())
-                    {
-                        try
-                        {
-                            if (visitor is ICSharpAttributeVisitor extractionVisitor)
-                            {
-                                attributeModel = extractionVisitor.Visit(attributeSyntax, attributeModel);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Log($"Could not extract from Attribute Visitor because {e}", LogLevels.Warning);
-                        }
-                    }
-
-                    if (attributeModel.Target == "return")
-                    {
-                        modelType.ReturnValue.Attributes.Add(attributeModel);
-                    }
-                    else
-                    {
-                        modelType.Attributes.Add(attributeModel);
-                    }
-                }
-            }
-
-            return modelType;
+        public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, IMethodType modelType)
+        {
+            return ExtractAttributesFromMethod(syntaxNode, modelType);
         }
 
         public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, IConstructorType modelType)
@@ -137,6 +108,45 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
                     modelType.Attributes.Add(attributeModel);
                 }
             }
+        }
+        
+        private IMethodType ExtractAttributesFromMethod(SyntaxNode syntaxNode, IMethodType modelType)
+        {
+            foreach (var attributeListSyntax in syntaxNode.ChildNodes().OfType<AttributeListSyntax>())
+            {
+                foreach (var attributeSyntax in attributeListSyntax.Attributes)
+                {
+                    IAttributeType attributeModel = new AttributeModel();
+
+                    attributeModel.Target = "method";
+
+                    foreach (var visitor in GetContainedVisitors())
+                    {
+                        try
+                        {
+                            if (visitor is ICSharpAttributeVisitor extractionVisitor)
+                            {
+                                attributeModel = extractionVisitor.Visit(attributeSyntax, attributeModel);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Log($"Could not extract from Attribute Visitor because {e}", LogLevels.Warning);
+                        }
+                    }
+
+                    if (attributeModel.Target == "return")
+                    {
+                        modelType.ReturnValue.Attributes.Add(attributeModel);
+                    }
+                    else
+                    {
+                        modelType.Attributes.Add(attributeModel);
+                    }
+                }
+            }
+
+            return modelType;
         }
     }
 }

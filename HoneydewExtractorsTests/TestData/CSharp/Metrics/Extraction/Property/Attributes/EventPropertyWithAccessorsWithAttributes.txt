@@ -1,0 +1,33 @@
+﻿namespace Namespace1
+{
+    using System;
+    
+    public class Class1
+    {
+        private event Func<int> _value;
+
+        public event Func<int> Property1 { [My("Value")] [Obsolete] [ExternAttribute] add {} [My("V")] [Obsolete] [ExternAttribute] remove {} }
+        public event Func<int> Property2 { [My("V5")] [Obsolete] [ExternAttribute] add {} [My("V2")] [Obsolete] [ExternAttribute] remove {} }
+        public event Func<int> Property3 { [method:My("8")] [method:Obsolete] [method:ExternAttribute] add {} }
+
+        public event Func<int> Property4
+        {
+            [My("8")] [Obsolete] [ExternAttribute] get => 0;
+            [My("val")] [Obsolete] [ExternAttribute] set => _value = value;
+        }
+
+        public event Func<int> Property5
+        {
+            [My("7")] [Obsolete] [ExternAttribute] get => 0;
+            [My("33")] [Obsolete] [ExternAttribute] init => _value = value;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    class MyAttribute : Attribute
+    {
+        public MyAttribute(string str)
+        {
+        }
+    }
+}
