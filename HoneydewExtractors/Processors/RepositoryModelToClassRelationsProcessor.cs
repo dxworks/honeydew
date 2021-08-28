@@ -27,7 +27,13 @@ namespace HoneydewExtractors.Processors
                 {
                     try
                     {
-                        var instance = Activator.CreateInstance(Type.GetType(metricModel.ExtractorName));
+                        var type = Type.GetType(metricModel.ExtractorName);
+                        if (type == null)
+                        {
+                            continue;
+                        }
+
+                        var instance = Activator.CreateInstance(type);
                         if (instance is RelationVisitor relationVisitor)
                         {
                             var dictionary = (Dictionary<string, int>)metricModel.Value;
@@ -44,7 +50,7 @@ namespace HoneydewExtractors.Processors
                             }
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         // 
                     }

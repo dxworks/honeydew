@@ -40,6 +40,7 @@ using HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead;
 using HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead;
 using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
 using HoneydewExtractors.Processors;
+using HoneydewModels;
 using HoneydewModels.CSharp;
 using HoneydewModels.Exporters;
 using HoneydewModels.Importers;
@@ -103,7 +104,7 @@ namespace Honeydew
                 progressLogger.Log();
                 progressLogger.Log("Exporting Intermediate Results");
 
-                WriteRepresentationsToFile(repositoryModel, relationMetricHolder, "_intermediate",
+                WriteRepresentationsToFile(repositoryModel, "_intermediate",
                     DefaultPathForAllRepresentations);
 
 
@@ -118,7 +119,7 @@ namespace Honeydew
                 repositoryModel = fullNameModelProcessor.Process(repositoryModel);
 
 
-                WriteAllRepresentations(repositoryModel, relationMetricHolder,
+                WriteAllRepresentations(repositoryModel,
                     fullNameModelProcessor.NamespacesDictionary,
                     DefaultPathForAllRepresentations);
 
@@ -261,7 +262,7 @@ namespace Honeydew
         {
             // Load repository model from path
             IRepositoryLoader<RepositoryModel> repositoryLoader =
-                new RawCSharpFileRepositoryLoader(logger, new FileReader(), new JsonRepositoryModelImporter());
+                new RawCSharpFileRepositoryLoader(logger, new FileReader(), new JsonRepositoryModelImporter(new ConverterList()));
             var repositoryModel = await repositoryLoader.Load(inputPath);
             return repositoryModel;
         }
@@ -288,20 +289,18 @@ namespace Honeydew
         }
 
         private static void WriteAllRepresentations(RepositoryModel repositoryModel,
-            IRelationMetricHolder relationMetricHolder,
             IDictionary<string, NamespaceTree> fullNameNamespaces, string outputPath)
         {
             var writer = new FileWriter();
 
-            WriteRepresentationsToFile(repositoryModel, relationMetricHolder, "", outputPath);
+            WriteRepresentationsToFile(repositoryModel, "", outputPath);
 
             var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
             writer.WriteFile(Path.Combine(outputPath, "honeydew_namespaces.json"),
                 fullNameNamespacesExporter.Export(fullNameNamespaces));
         }
 
-        private static void WriteRepresentationsToFile(RepositoryModel repositoryModel,
-            IRelationMetricHolder relationMetricHolder, string nameModifier,
+        private static void WriteRepresentationsToFile(RepositoryModel repositoryModel, string nameModifier,
             string outputPath)
         {
             var writer = new FileWriter();
