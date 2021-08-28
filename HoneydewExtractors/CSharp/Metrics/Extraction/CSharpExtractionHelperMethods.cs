@@ -337,7 +337,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             return GetFullName(expression);
         }
 
-        private static T GetParentDeclarationSyntax<T>(SyntaxNode node) where T : SyntaxNode
+        public T GetParentDeclarationSyntax<T>(SyntaxNode node) where T : SyntaxNode
         {
             var rootNode = node;
             while (true)
@@ -605,6 +605,16 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 declarationSyntax = GetParentDeclarationSyntax<EventDeclarationSyntax>(syntaxNode);
             }
 
+            if (declarationSyntax == null)
+            {
+                declarationSyntax = GetParentDeclarationSyntax<DelegateDeclarationSyntax>(syntaxNode);
+            }
+
+            if (declarationSyntax == null)
+            {
+                declarationSyntax = GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>(syntaxNode);
+            }
+
             if (declarationSyntax != null)
             {
                 var declaredSymbol = _semanticModel.GetDeclaredSymbol(declarationSyntax);
@@ -713,6 +723,16 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             }
 
             return modifier;
+        }
+
+        public int CalculateCyclomaticComplexity(ArrowExpressionClauseSyntax syntax)
+        {
+            return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
+        }
+
+        public int CalculateCyclomaticComplexity(AccessorDeclarationSyntax syntax)
+        {
+            return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
         }
 
         public int CalculateCyclomaticComplexity(MemberDeclarationSyntax syntax)

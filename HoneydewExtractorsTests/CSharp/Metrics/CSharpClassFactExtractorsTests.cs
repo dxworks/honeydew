@@ -42,12 +42,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             {
                 new ParameterInfoVisitor()
             });
+            var methodInfoVisitor = new MethodInfoVisitor();
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {
                 new BaseInfoClassVisitor(),
                 new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
                 {
-                    new MethodInfoVisitor(),
+                    methodInfoVisitor,
                     calledMethodSetterVisitor,
                     parameterSetterVisitor
                 }),
@@ -63,7 +64,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                 }),
                 new PropertySetterClassVisitor(new List<ICSharpPropertyVisitor>
                 {
-                    new PropertyInfoVisitor()
+                    new PropertyInfoVisitor(),
+                    new MethodAccessorSetterPropertyVisitor(new List<IMethodVisitor>
+                    {
+                        methodInfoVisitor,
+                        calledMethodSetterVisitor
+                    })
                 })
             }));
 
@@ -334,7 +340,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             }
         }
 
-        
+
         [Theory]
         [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/ClassWithOneMethodWithParams.txt")]
         [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/InterfaceWithMethods.txt")]
@@ -764,19 +770,39 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             Assert.Equal("X", classModel.Properties[0].Name);
             Assert.Equal("", classModel.Properties[0].Modifier);
+
             Assert.Equal(2, classModel.Properties[0].Accessors.Count);
-            Assert.Equal("readonly get", classModel.Properties[0].Accessors[0]);
-            Assert.Equal("set", classModel.Properties[0].Accessors[1]);
+            Assert.Equal("get", classModel.Properties[0].Accessors[0].Name);
+            Assert.Equal("readonly", classModel.Properties[0].Accessors[0].Modifier);
+            Assert.Equal("public", classModel.Properties[0].Accessors[0].AccessModifier);
+            Assert.Equal("double", classModel.Properties[0].Accessors[0].ReturnValue.Type.Name);
+
+            Assert.Equal("set", classModel.Properties[0].Accessors[1].Name);
+            Assert.Equal("", classModel.Properties[0].Accessors[1].Modifier);
+            Assert.Equal("public", classModel.Properties[0].Accessors[1].AccessModifier);
+            Assert.Equal("void", classModel.Properties[0].Accessors[1].ReturnValue.Type.Name);
 
             Assert.Equal("Y", classModel.Properties[1].Name);
             Assert.Equal("", classModel.Properties[1].Modifier);
             Assert.Equal(2, classModel.Properties[1].Accessors.Count);
-            Assert.Equal("readonly get", classModel.Properties[1].Accessors[0]);
-            Assert.Equal("set", classModel.Properties[1].Accessors[1]);
+            Assert.Equal("get", classModel.Properties[1].Accessors[0].Name);
+            Assert.Equal("readonly", classModel.Properties[1].Accessors[0].Modifier);
+            Assert.Equal("public", classModel.Properties[1].Accessors[0].AccessModifier);
+            Assert.Equal("double", classModel.Properties[1].Accessors[0].ReturnValue.Type.Name);
+
+            Assert.Equal("set", classModel.Properties[1].Accessors[1].Name);
+            Assert.Equal("", classModel.Properties[1].Accessors[1].Modifier);
+            Assert.Equal("public", classModel.Properties[1].Accessors[1].AccessModifier);
+            Assert.Equal("void", classModel.Properties[1].Accessors[1].ReturnValue.Type.Name);
 
             Assert.Equal("Distance", classModel.Properties[2].Name);
             Assert.Equal("readonly", classModel.Properties[2].Modifier);
-            Assert.Empty(classModel.Properties[2].Accessors);
+            Assert.Equal(1, classModel.Properties[2].Accessors.Count);
+
+            Assert.Equal("get", classModel.Properties[2].Accessors[0].Name);
+            Assert.Equal("", classModel.Properties[2].Accessors[0].Modifier);
+            Assert.Equal("public", classModel.Properties[2].Accessors[0].AccessModifier);
+            Assert.Equal("double", classModel.Properties[2].Accessors[0].ReturnValue.Type.Name);
         }
 
         [Theory]
@@ -801,7 +827,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             {
                 Assert.Equal("Geometry.Point", propertyModel.Type.Name);
                 Assert.Equal("public", propertyModel.AccessModifier);
-                Assert.Empty(propertyModel.Accessors);
+                Assert.Equal(1, propertyModel.Accessors.Count);
+                Assert.Equal("get", propertyModel.Accessors[0].Name);
+                Assert.Equal("Geometry.Point", propertyModel.Accessors[0].ReturnValue.Type.Name);
             }
 
             Assert.Equal("Origin", classModel.Properties[0].Name);
@@ -846,7 +874,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                 Assert.Equal("public", propertyModel.AccessModifier);
                 Assert.Equal("", propertyModel.Modifier);
                 Assert.Equal(1, propertyModel.Accessors.Count);
-                Assert.Equal("get", propertyModel.Accessors[0]);
+                Assert.Equal("get", propertyModel.Accessors[0].Name);
             }
 
             Assert.Equal("Rate", classModel2.Properties[0].Name);

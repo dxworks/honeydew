@@ -1,0 +1,19 @@
+﻿using System;
+                                                                         
+namespace TopLevel
+{
+    public class Foo
+    {
+        private ExternClass _class=new();
+        private int _value;
+
+        public event Func<int> Value
+        {
+            add
+            {
+                _class.Triple(_value);
+            }
+            remove => _value = ExternClass.Double(value);
+        }
+    }
+}

@@ -1,0 +1,28 @@
+﻿using System;
+
+namespace TopLevel
+{
+    public class Foo 
+    { 
+        private int _value;
+        public int Value
+        {
+            get => Triple(_value);
+            set
+            {
+                _value = value;
+                _value = Double(_value);
+            }
+        }
+        
+        protected int Triple(int a)
+        {
+            return a * 3;
+        }
+        
+        private static int Double(int a)
+        {
+            return a * 2;
+        }
+    }                                        
+}

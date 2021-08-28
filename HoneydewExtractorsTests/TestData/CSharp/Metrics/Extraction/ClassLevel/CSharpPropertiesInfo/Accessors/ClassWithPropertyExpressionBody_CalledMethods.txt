@@ -1,0 +1,25 @@
+﻿using System;
+
+namespace Namespace1
+{
+    public class Class1
+    {
+        private Class2 c2;
+        private ExternClass ec;
+        
+        public int GetExpressionBody => ec.Method(c2.Method2(MyMethod()));
+        
+        public int MyMethod()
+        {
+            return 5;
+        }
+    }
+    
+    public class Class2
+    {
+        public int Method2(int a)
+        {
+            return a;
+        }
+    } 
+}
