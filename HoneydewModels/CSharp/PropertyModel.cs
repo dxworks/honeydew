@@ -22,7 +22,7 @@ namespace HoneydewModels.CSharp
 
         public IList<IMethodSignatureType> CalledMethods { get; set; } = new List<IMethodSignatureType>();
 
-        public IList<string> Accessors { get; set; } = new List<string>();
+        public IList<IMethodType> Accessors { get; set; } = new List<IMethodType>();
 
         public IList<IMethodTypeWithLocalFunctions> LocalFunctions { get; set; } =
             new List<IMethodTypeWithLocalFunctions>();
