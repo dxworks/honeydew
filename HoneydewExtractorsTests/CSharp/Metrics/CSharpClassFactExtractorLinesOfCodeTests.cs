@@ -3,6 +3,7 @@ using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Extraction.Class;
 using HoneydewExtractors.Core.Metrics.Extraction.Common;
 using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.Property;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
@@ -48,12 +49,16 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                 }),
                 new PropertySetterClassVisitor(new List<ICSharpPropertyVisitor>
                 {
-                    linesOfCodeVisitor
+                    linesOfCodeVisitor,
+                    new MethodAccessorSetterPropertyVisitor(new List<IMethodVisitor>
+                    {
+                        linesOfCodeVisitor
+                    })
                 })
             }));
 
             compositeVisitor.Add(linesOfCodeVisitor);
-            
+
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
             _sut = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
@@ -125,6 +130,41 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal(4, localFunction.Loc.SourceLines);
             Assert.Equal(1, localFunction.Loc.CommentedLines);
             Assert.Equal(1, localFunction.Loc.EmptyLines);
+        }
+
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/ClassWithCommentsWithPropertyAndMethod.txt")]
+        public void Extract_ShouldHaveLinesOfCode_WhenGivenPropertyWithGetAccessor(string fileContent)
+        {
+            var compilationUnit = _sut.Extract(fileContent);
+
+            var classTypes = compilationUnit.ClassTypes;
+
+            var accessor = ((ClassModel)classTypes[0]).Properties[0].Accessors[0];
+
+            Assert.Equal(4, accessor.Loc.SourceLines);
+            Assert.Equal(1, accessor.Loc.CommentedLines);
+            Assert.Equal(1, accessor.Loc.EmptyLines);
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/ClassWithEventPropertyThatCallsMethodFromExternClass.txt")]
+        public void Extract_ShouldHaveLinesOfCode_WhenGivenEventPropertyWithGetAccessor(string fileContent)
+        {
+            var compilationUnit = _sut.Extract(fileContent);
+
+            var classTypes = compilationUnit.ClassTypes;
+
+            var addAccessor = ((ClassModel)classTypes[0]).Properties[0].Accessors[0];
+            Assert.Equal(4, addAccessor.Loc.SourceLines);
+            Assert.Equal(0, addAccessor.Loc.CommentedLines);
+            Assert.Equal(0, addAccessor.Loc.EmptyLines);
+            
+            var removeAccessor = ((ClassModel)classTypes[0]).Properties[0].Accessors[1];
+            Assert.Equal(1, removeAccessor.Loc.SourceLines);
+            Assert.Equal(0, removeAccessor.Loc.CommentedLines);
+            Assert.Equal(0, removeAccessor.Loc.EmptyLines);
         }
     }
 }

@@ -1,0 +1,18 @@
+﻿using System;
+
+namespace Namespace1
+{
+    public class Class1
+    {
+        private int _value;
+        
+        public int JustGet {get;}
+           
+        public int JustGetBody
+        {
+            get { return _value; }
+        }    
+        
+        public int GetExpressionBody => _value;      
+    }
+}

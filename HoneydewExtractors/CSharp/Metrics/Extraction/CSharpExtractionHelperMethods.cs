@@ -337,7 +337,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             return GetFullName(expression);
         }
 
-        private static T GetParentDeclarationSyntax<T>(SyntaxNode node) where T : SyntaxNode
+        public T GetParentDeclarationSyntax<T>(SyntaxNode node) where T : SyntaxNode
         {
             var rootNode = node;
             while (true)
@@ -605,6 +605,16 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 declarationSyntax = GetParentDeclarationSyntax<EventDeclarationSyntax>(syntaxNode);
             }
 
+            if (declarationSyntax == null)
+            {
+                declarationSyntax = GetParentDeclarationSyntax<DelegateDeclarationSyntax>(syntaxNode);
+            }
+
+            if (declarationSyntax == null)
+            {
+                declarationSyntax = GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>(syntaxNode);
+            }
+
             if (declarationSyntax != null)
             {
                 var declaredSymbol = _semanticModel.GetDeclaredSymbol(declarationSyntax);
@@ -715,9 +725,30 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             return modifier;
         }
 
-        public int CalculateCyclomaticComplexity(MemberDeclarationSyntax syntax)
+        public int CalculateCyclomaticComplexity(ArrowExpressionClauseSyntax syntax)
         {
             return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
+        }
+
+        public int CalculateCyclomaticComplexity(AccessorDeclarationSyntax syntax)
+        {
+            return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
+        }
+
+        public int CalculateCyclomaticComplexity(MemberDeclarationSyntax syntax)
+        {
+            if (syntax is not BasePropertyDeclarationSyntax basePropertyDeclarationSyntax)
+            {
+                return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
+            }
+
+            var accessorCount = 0;
+            if (basePropertyDeclarationSyntax.AccessorList != null)
+            {
+                accessorCount = basePropertyDeclarationSyntax.AccessorList.Accessors.Count;
+            }
+
+            return CalculateCyclomaticComplexityForSyntaxNode(syntax) + accessorCount;
         }
 
         public int CalculateCyclomaticComplexity(LocalFunctionStatementSyntax syntax)
@@ -810,6 +841,18 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
         public string GetAttributeContainingType(AttributeSyntax syntaxNode)
         {
+            var accessorDeclarationSyntax = GetParentDeclarationSyntax<AccessorDeclarationSyntax>(syntaxNode);
+            if (accessorDeclarationSyntax != null)
+            {
+                return GetFullName(accessorDeclarationSyntax);
+            }
+
+            var propertyDeclarationSyntax = GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>(syntaxNode);
+            if (propertyDeclarationSyntax != null)
+            {
+                return GetFullName(propertyDeclarationSyntax);
+            }
+
             var baseMethodDeclarationSyntax = GetParentDeclarationSyntax<BaseMethodDeclarationSyntax>(syntaxNode);
             if (baseMethodDeclarationSyntax != null)
             {
@@ -829,6 +872,18 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             }
 
             return syntaxNode.ToString();
+        }
+
+        private string GetFullName(AccessorDeclarationSyntax accessorDeclarationSyntax)
+        {
+            var basePropertyDeclarationSyntax =
+                GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>(accessorDeclarationSyntax);
+            if (basePropertyDeclarationSyntax == null)
+            {
+                return accessorDeclarationSyntax.Keyword.ToString();
+            }
+
+            return $"{GetFullName(basePropertyDeclarationSyntax)}.{accessorDeclarationSyntax.Keyword.ToString()}";
         }
 
         public IEnumerable<IParameterType> GetParameters(AttributeSyntax attributeSyntax)

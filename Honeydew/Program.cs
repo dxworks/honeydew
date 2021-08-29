@@ -59,7 +59,8 @@ namespace Honeydew
             {
                 var logFilePath = $"{DefaultPathForAllRepresentations}/logs.txt";
                 var logger = new SerilogLogger(logFilePath);
-                var progressLogger = new ProgressLogger();
+                IProgressLogger progressLogger =
+                    options.DisableProgressBars ? new NoBarsProgressLogger() : new ProgressLogger();
 
                 logger.Log($"Log will be stored at {logFilePath}");
                 logger.Log();
@@ -171,9 +172,11 @@ namespace Honeydew
                 parameterSetterVisitor,
             });
 
+            var methodInfoVisitor = new MethodInfoVisitor();
+
             var methodVisitors = new List<ICSharpMethodVisitor>
             {
-                new MethodInfoVisitor(),
+                methodInfoVisitor,
                 linesOfCodeVisitor,
                 calledMethodSetterVisitor,
                 localFunctionsSetterClassVisitor,
@@ -201,9 +204,15 @@ namespace Honeydew
             var propertyVisitors = new List<ICSharpPropertyVisitor>
             {
                 new PropertyInfoVisitor(),
-                calledMethodSetterVisitor,
+                new MethodAccessorSetterPropertyVisitor(new List<IMethodVisitor>
+                {
+                    methodInfoVisitor,
+                    calledMethodSetterVisitor,
+                    attributeSetterVisitor,
+                    linesOfCodeVisitor,
+                    localFunctionsSetterClassVisitor,
+                }),
                 linesOfCodeVisitor,
-                localFunctionsSetterClassVisitor,
                 attributeSetterVisitor,
             };
 
@@ -262,7 +271,8 @@ namespace Honeydew
         {
             // Load repository model from path
             IRepositoryLoader<RepositoryModel> repositoryLoader =
-                new RawCSharpFileRepositoryLoader(logger, new FileReader(), new JsonRepositoryModelImporter(new ConverterList()));
+                new RawCSharpFileRepositoryLoader(logger, new FileReader(),
+                    new JsonRepositoryModelImporter(new ConverterList()));
             var repositoryModel = await repositoryLoader.Load(inputPath);
             return repositoryModel;
         }

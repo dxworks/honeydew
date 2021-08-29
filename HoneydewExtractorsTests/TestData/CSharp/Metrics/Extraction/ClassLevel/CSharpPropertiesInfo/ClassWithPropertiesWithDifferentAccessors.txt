@@ -1,0 +1,27 @@
+﻿using System;
+
+namespace TopLevel
+{
+    public class Foo
+    {
+        private int _value;
+        private bool _b;
+        
+        protected int Value
+        {
+            get => _value;
+            private set { _value = value; }
+        }
+    
+        public string Name { get; protected init; }
+    
+        public string FullName { get; }
+    
+        public bool IsHere
+        {
+            set { _b = value; }
+        }
+    
+        public event Func<int> IntEvent { add{} remove{} }
+    }                                    
+}

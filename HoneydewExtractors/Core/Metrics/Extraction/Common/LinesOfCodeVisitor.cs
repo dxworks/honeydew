@@ -13,7 +13,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 {
     public class LinesOfCodeVisitor : ICSharpPropertyVisitor, ICSharpMethodVisitor, ICSharpConstructorVisitor,
-        ICSharpClassVisitor, ICSharpCompilationUnitVisitor, ICSharpLocalFunctionVisitor
+        ICSharpClassVisitor, ICSharpCompilationUnitVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor
     {
         private readonly CSharpLinesOfCodeCounter _linesOfCodeCounter = new();
         private bool _visited;
@@ -25,6 +25,12 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
         }
 
         public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
+        {
+            modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
+            return modelType;
+        }
+
+        public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, IMethodType modelType)
         {
             modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
             return modelType;

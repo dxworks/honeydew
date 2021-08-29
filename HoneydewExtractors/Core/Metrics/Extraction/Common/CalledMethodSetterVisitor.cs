@@ -6,7 +6,6 @@ using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
-using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -15,18 +14,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction.Common
 {
-    public class CalledMethodSetterVisitor : CompositeVisitor, ICSharpPropertyVisitor, ICSharpMethodVisitor,
-        ICSharpConstructorVisitor, ICSharpLocalFunctionVisitor
+    public class CalledMethodSetterVisitor : CompositeVisitor, ICSharpMethodVisitor,
+        ICSharpConstructorVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor,
+        ICSharpArrowExpressionMethodVisitor
     {
         public CalledMethodSetterVisitor(IEnumerable<IMethodSignatureVisitor> visitors) : base(visitors)
         {
-        }
-
-        public IPropertyType Visit(BasePropertyDeclarationSyntax syntaxNode, IPropertyType modelType)
-        {
-            SetMethodCalls(syntaxNode, modelType);
-
-            return modelType;
         }
 
         public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
@@ -37,6 +30,20 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Common
         }
 
         public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, IConstructorType modelType)
+        {
+            SetMethodCalls(syntaxNode, modelType);
+
+            return modelType;
+        }
+
+        public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, IMethodType modelType)
+        {
+            SetMethodCalls(syntaxNode, modelType);
+
+            return modelType;
+        }
+
+        public IMethodType Visit(ArrowExpressionClauseSyntax syntaxNode, IMethodType modelType)
         {
             SetMethodCalls(syntaxNode, modelType);
 

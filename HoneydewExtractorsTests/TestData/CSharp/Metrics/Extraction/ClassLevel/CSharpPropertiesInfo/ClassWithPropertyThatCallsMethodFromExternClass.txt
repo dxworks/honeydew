@@ -1,0 +1,19 @@
+﻿using System;                                                                         
+namespace TopLevel
+{
+    public class Foo
+    {
+        private ExternClass _class=new();
+        private int _value;
+
+        public int Value
+        {
+            get
+            {
+                var temp = _value;
+                return _class.Triple(temp);
+            }
+            set => _value = ExternClass.Double(value);
+        }
+    }
+}

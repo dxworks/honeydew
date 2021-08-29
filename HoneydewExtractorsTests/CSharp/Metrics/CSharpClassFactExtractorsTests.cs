@@ -42,12 +42,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             {
                 new ParameterInfoVisitor()
             });
+            var methodInfoVisitor = new MethodInfoVisitor();
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {
                 new BaseInfoClassVisitor(),
                 new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
                 {
-                    new MethodInfoVisitor(),
+                    methodInfoVisitor,
                     calledMethodSetterVisitor,
                     parameterSetterVisitor
                 }),
@@ -63,7 +64,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                 }),
                 new PropertySetterClassVisitor(new List<ICSharpPropertyVisitor>
                 {
-                    new PropertyInfoVisitor()
+                    new PropertyInfoVisitor(),
+                    new MethodAccessorSetterPropertyVisitor(new List<IMethodVisitor>
+                    {
+                        methodInfoVisitor,
+                        calledMethodSetterVisitor
+                    })
                 })
             }));
 
@@ -220,18 +226,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             }
         }
 
-        [Fact]
-        public void Extract_ShouldSetParameters_WhenParsingTextWithOneClassWithExtensionMethod()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/ClassWithOneExtensionMethod.txt")]
+        public void Extract_ShouldSetParameters_WhenParsingTextWithOneClassWithExtensionMethod(string fileContent)
         {
-            const string fileContent = @"        
-                                     namespace Models.Main.Items
-                                     {
-                                       public class MainItem
-                                       {
-                                             public void Method(this int a) {}
-                                       }
-                                     }
-                                     ";
             var classTypes = _sut.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
@@ -250,20 +248,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             }
         }
 
-        [Fact]
-        public void Extract_ShouldSetParameters_WhenParsingTextWithOneClassWithMethodWithParameterWithParamsModifiers()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/ClassWithOneMethodWithParams.txt")]
+        public void Extract_ShouldSetParameters_WhenParsingTextWithOneClassWithMethodWithParameterWithParamsModifiers(
+            string fileContent)
         {
-            var fileContent = @"        
-                                     namespace Models.Main.Items
-                                     {
-                                       public class MainItem
-                                       {
-                                             public void Method(params int[] a) {}
-
-                                             public MainItem(params int[] a) {}
-                                       }
-                                     }
-                                     ";
             var classTypes = _sut.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
@@ -290,23 +279,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             }
         }
 
-        [Fact]
-        public void Extract_ShouldSetParameters_WhenParsingTextWithOneClassWithMethodWithParameterWithDefaultValues()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/ClassWithMethodsWithDefaultValue.txt")]
+        public void Extract_ShouldSetParameters_WhenParsingTextWithOneClassWithMethodWithParameterWithDefaultValues(
+            string fileContent)
         {
-            var fileContent = @"        
-                                     namespace Models.Main.Items
-                                     {
-                                       public class MainItem
-                                       {
-                                             public void Method() {}
-                                             public void Method1(object a=null) {}
-                                             public void Method2(int a=15) {}
-                                             public void Method3(int a, int b) {}
-                                             public void Method4(int a,in int b=15, string c="""") {}
-                                             public void Method5(string c=""null"") {}
-                                       }
-                                     }
-                                     ";
             var classTypes = _sut.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
@@ -363,20 +340,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             }
         }
 
-        [Fact]
-        public void Extract_ShouldNotHaveMetrics_WhenGivenAnEmptyListOfMetrics_ForOneClass()
-        {
-            const string fileContent = @"    
 
-                                     using System;
-                                     using System.Collections.Generic;    
-                                     namespace Models
-                                     {
-                                       public class Item
-                                       {
-                                       }
-                                     }
-                                     ";
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/ClassWithOneMethodWithParams.txt")]
+        [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/InterfaceWithMethods.txt")]
+        public void Extract_ShouldNotHaveMetrics_WhenGivenAnEmptyListOfMetrics_ForOneClass(string fileContent)
+        {
             var classTypes = _sut.Extract(fileContent).ClassTypes;
 
             foreach (var classType in classTypes)
@@ -388,21 +357,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             }
         }
 
-        [Fact]
-        public void Extract_ShouldSetClassNameAndInterfaceAndNamespace_WhenParsingTextWithOneClassAndOneInterface()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/NamespaceWithClassAndInterface.txt")]
+        public void Extract_ShouldSetClassNameAndInterfaceAndNamespace_WhenParsingTextWithOneClassAndOneInterface(
+            string fileContent)
         {
-            const string fileContent = @"        
-                                     namespace Models.Main.Items
-                                     {
-                                       public class MainItem
-                                       {
-                                       }
-                                       public interface IInterface
-                                       {
-                                          void f ();
-                                       }
-                                     }
-                                     ";
             var classTypes = _sut.Extract(fileContent).ClassTypes;
 
             Assert.Equal(2, classTypes.Count);
@@ -420,41 +379,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal("Models.Main.Items.IInterface", classTypes[1].Name);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveNoFields_WhenGivenClassWithMethodsOnly()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/NamespaceWithMultipleClassesWithNoFields.txt")]
+        [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/NamespaceWithMultipleInterfaces.txt")]
+        public void Extract_ShouldHaveNoFields_WhenGivenAnInterface(string fileContent)
         {
-            const string fileContent = @"using System;
-     
-                                      namespace TopLevel
-                                      {
-                                          public class Foo { public void f() {} }                                        
-                                      }";
-
-
             var classTypes = _sut.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classTypes.Count);
-
-            Assert.Empty(((ClassModel)classTypes[0]).Fields);
-        }
-
-
-        [Fact]
-        public void Extract_ShouldHaveNoFields_WhenGivenAnInterface()
-        {
-            const string fileContent = @"using System;
-     
-                                      namespace TopLevel
-                                      {
-                                          public interface Foo { public void f(); string g(int a); }
-
-                                          public interface Bar { public void f(int a); string g(int a, float b); }                                        
-                                      }";
-
-
-            var classTypes = _sut.Extract(fileContent).ClassTypes;
-
-            Assert.Equal(2, classTypes.Count);
+            Assert.Equal(3, classTypes.Count);
 
             foreach (var classType in classTypes)
             {
@@ -463,20 +395,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             }
         }
 
-        [Fact]
-        public void Extract_ShouldHavePrivateFieldsWithModifiers_WhenGivenClassWithFieldsAndModifiersWithDefaultAccess()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/ClassWithFieldsWithNoAccessModifier.txt")]
+        public void Extract_ShouldHavePrivateFieldsWithModifiers_WhenGivenClassWithFieldsAndModifiersWithDefaultAccess(
+            string fileContent)
         {
-            const string fileContent = @"using System;
-                                      using HoneydewCore.Extractors;
-                                      namespace TopLevel
-                                      {
-                                          public class Foo { readonly int A = 12; volatile float X; static string Y = """";
-                                                           void f() {}
-                                                           public string g(int a) {return ""Value"";}                                            
-                                                           }                                        
-                                      }";
-
-
             var classTypes = _sut.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
@@ -668,52 +591,21 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.False(fieldInfos[4].IsEvent);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveNoMethods_WhenGivenARecordsWithNoMethods()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/StructWithNoMethods.txt")]
+        [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/RecordWithNoMethods.txt")]
+        public void Extract_ShouldHaveNoMethods_WhenGivenClassTypeWithNoMethods(string fileContent)
         {
-            const string fileContent = @"using System;
-                                      using HoneydewCore.Extractors;
-                                      namespace TopLevel
-                                      {
-                                          public record Foo { readonly int A = 12; volatile float X; static string Y = """";                                                                                                     
-                                                           }                                        
-                                      }";
             var classTypes = _sut.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
             Assert.Empty(((ClassModel)classTypes[0]).Methods);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveNoMethods_WhenGivenAStructWithNoMethods()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/InterfaceWithMethods.txt")]
+        public void Extract_ShouldHaveMethods_WhenGivenAnInterfaceWithMethods(string fileContent)
         {
-            const string fileContent = @"using System;
-                                      using HoneydewCore.Extractors;
-                                      namespace TopLevel
-                                      {
-                                          public struct Foo {  int A = 12;  float X;  string Y = """";                                                                                                     
-                                                           }                                        
-                                      }";
-            var classTypes = _sut.Extract(fileContent).ClassTypes;
-
-            Assert.Equal(1, classTypes.Count);
-            Assert.Empty(((ClassModel)classTypes[0]).Methods);
-        }
-
-
-        [Fact]
-        public void Extract_ShouldHaveMethods_WhenGivenAnInterfaceWithMethods()
-        {
-            const string fileContent = @"using System;
-                                      using HoneydewCore.Extractors;
-                                      namespace TopLevel
-                                      {
-                                          public interface Foo { 
-                                                            CSharpExtractor f(int a);
-                                                             int g(CSharpExtractor a);
-                                                             string h(float a,  CSharpExtractor b);                                                                                                    
-                                                           }                                        
-                                      }";
             var classTypes = _sut.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
@@ -767,19 +659,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Empty(methodH.CalledMethods);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveMethods_WhenGivenAClassWithMethods()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpClassFactExtractor/ClassWithMethods.txt")]
+        public void Extract_ShouldHaveMethods_WhenGivenAClassWithMethods(string fileContent)
         {
-            const string fileContent = @"using System;
-                                      using HoneydewCore.Extractors;
-                                      namespace TopLevel
-                                      {
-                                          public class Foo { readonly int A = 12;
-                                                            public static void f(int a) {}
-                                                             private int g(CSharpExtractor a) { f(0); return 0; }
-                                                             protected string h(float a,  CSharpExtractor b) { g(b); f(4); return ""A"";}                                                                                                    
-                                                           }                                        
-                                      }";
             var classTypes = _sut.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
@@ -887,19 +770,39 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             Assert.Equal("X", classModel.Properties[0].Name);
             Assert.Equal("", classModel.Properties[0].Modifier);
+
             Assert.Equal(2, classModel.Properties[0].Accessors.Count);
-            Assert.Equal("readonly get", classModel.Properties[0].Accessors[0]);
-            Assert.Equal("set", classModel.Properties[0].Accessors[1]);
+            Assert.Equal("get", classModel.Properties[0].Accessors[0].Name);
+            Assert.Equal("readonly", classModel.Properties[0].Accessors[0].Modifier);
+            Assert.Equal("public", classModel.Properties[0].Accessors[0].AccessModifier);
+            Assert.Equal("double", classModel.Properties[0].Accessors[0].ReturnValue.Type.Name);
+
+            Assert.Equal("set", classModel.Properties[0].Accessors[1].Name);
+            Assert.Equal("", classModel.Properties[0].Accessors[1].Modifier);
+            Assert.Equal("public", classModel.Properties[0].Accessors[1].AccessModifier);
+            Assert.Equal("void", classModel.Properties[0].Accessors[1].ReturnValue.Type.Name);
 
             Assert.Equal("Y", classModel.Properties[1].Name);
             Assert.Equal("", classModel.Properties[1].Modifier);
             Assert.Equal(2, classModel.Properties[1].Accessors.Count);
-            Assert.Equal("readonly get", classModel.Properties[1].Accessors[0]);
-            Assert.Equal("set", classModel.Properties[1].Accessors[1]);
+            Assert.Equal("get", classModel.Properties[1].Accessors[0].Name);
+            Assert.Equal("readonly", classModel.Properties[1].Accessors[0].Modifier);
+            Assert.Equal("public", classModel.Properties[1].Accessors[0].AccessModifier);
+            Assert.Equal("double", classModel.Properties[1].Accessors[0].ReturnValue.Type.Name);
+
+            Assert.Equal("set", classModel.Properties[1].Accessors[1].Name);
+            Assert.Equal("", classModel.Properties[1].Accessors[1].Modifier);
+            Assert.Equal("public", classModel.Properties[1].Accessors[1].AccessModifier);
+            Assert.Equal("void", classModel.Properties[1].Accessors[1].ReturnValue.Type.Name);
 
             Assert.Equal("Distance", classModel.Properties[2].Name);
             Assert.Equal("readonly", classModel.Properties[2].Modifier);
-            Assert.Empty(classModel.Properties[2].Accessors);
+            Assert.Equal(1, classModel.Properties[2].Accessors.Count);
+
+            Assert.Equal("get", classModel.Properties[2].Accessors[0].Name);
+            Assert.Equal("", classModel.Properties[2].Accessors[0].Modifier);
+            Assert.Equal("public", classModel.Properties[2].Accessors[0].AccessModifier);
+            Assert.Equal("double", classModel.Properties[2].Accessors[0].ReturnValue.Type.Name);
         }
 
         [Theory]
@@ -924,7 +827,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             {
                 Assert.Equal("Geometry.Point", propertyModel.Type.Name);
                 Assert.Equal("public", propertyModel.AccessModifier);
-                Assert.Empty(propertyModel.Accessors);
+                Assert.Equal(1, propertyModel.Accessors.Count);
+                Assert.Equal("get", propertyModel.Accessors[0].Name);
+                Assert.Equal("Geometry.Point", propertyModel.Accessors[0].ReturnValue.Type.Name);
             }
 
             Assert.Equal("Origin", classModel.Properties[0].Name);
@@ -969,7 +874,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                 Assert.Equal("public", propertyModel.AccessModifier);
                 Assert.Equal("", propertyModel.Modifier);
                 Assert.Equal(1, propertyModel.Accessors.Count);
-                Assert.Equal("get", propertyModel.Accessors[0]);
+                Assert.Equal("get", propertyModel.Accessors[0].Name);
             }
 
             Assert.Equal("Rate", classModel2.Properties[0].Name);

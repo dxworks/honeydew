@@ -1,0 +1,11 @@
+﻿using System;
+
+namespace TopLevel
+{
+    public record Foo 
+    { 
+        readonly int A = 12; 
+        volatile float X; 
+        static string Y = "";                                                                                                     
+    }
+}

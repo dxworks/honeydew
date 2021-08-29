@@ -1,0 +1,16 @@
+﻿using System;
+
+namespace TopLevel
+{
+    class Bar {}
+
+    public class Foo 
+    {
+        private Bar _bar; 
+        protected Bar Value
+        {
+            get => _bar;
+            set { _bar = value; }
+        }
+    }                                 
+}

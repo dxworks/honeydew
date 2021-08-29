@@ -1,0 +1,17 @@
+﻿using System;
+
+namespace Namespace1
+{
+    public class Class1
+    {
+        private int _value;
+    
+        public int GetSet{get;set;}
+  
+        public int GetSetExpressionBody
+        {
+            get => _value;
+            set => _value = value;
+        }
+    }
+}

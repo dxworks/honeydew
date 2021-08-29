@@ -1,0 +1,11 @@
+﻿namespace Models.Main.Items
+{
+    public class MainItem
+    {
+    }
+    
+    public interface IInterface
+    {
+        void f ();
+    }
+}

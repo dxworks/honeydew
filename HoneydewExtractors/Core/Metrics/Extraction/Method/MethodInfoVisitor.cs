@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace HoneydewExtractors.Core.Metrics.Extraction.Method
 {
     public class MethodInfoVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
-        ICSharpMethodVisitor
+        ICSharpMethodVisitor, ICSharpMethodAccessorVisitor, ICSharpArrowExpressionMethodVisitor
     {
         public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
 
@@ -19,22 +19,18 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Method
 
         public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
         {
-            var isInterface = false;
-            var containingClassName = "";
-            if (syntaxNode.Parent != null)
-            {
-                if (syntaxNode.Parent is InterfaceDeclarationSyntax)
-                {
-                    isInterface = true;
-                }
+            var containingClassName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);
 
-                if (syntaxNode.Parent is BaseTypeDeclarationSyntax baseTypeDeclarationSyntax)
-                {
-                    containingClassName = CSharpHelperMethods.GetFullName(baseTypeDeclarationSyntax);
-                }
-            }
+            var isInterface = CSharpHelperMethods.GetParentDeclarationSyntax<InterfaceDeclarationSyntax>(syntaxNode) !=
+                              null;
+            var accessModifier = isInterface
+                ? CSharpConstants.DefaultInterfaceMethodAccessModifier
+                : CSharpConstants.DefaultClassMethodAccessModifier;
+            var modifier = isInterface
+                ? CSharpConstants.DefaultInterfaceMethodModifier
+                : syntaxNode.Modifiers.ToString();
 
-            GetModifiersForNode(syntaxNode, out var accessModifier, out var modifier, isInterface);
+            CSharpConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier, ref modifier);
 
             var returnType = CSharpHelperMethods.GetFullName(syntaxNode.ReturnType);
 
@@ -55,17 +51,64 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Method
             return modelType;
         }
 
-        private void GetModifiersForNode(MemberDeclarationSyntax node, out string accessModifier, out string modifier,
-            bool isInterface)
+        public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, IMethodType modelType)
         {
-            var allModifiers = node.Modifiers.ToString();
+            var accessModifier = "public";
+            var modifier = syntaxNode.Modifiers.ToString();
 
-            accessModifier = isInterface
-                ? CSharpConstants.DefaultInterfaceMethodAccessModifier
-                : CSharpConstants.DefaultClassMethodAccessModifier;
-            modifier = isInterface ? CSharpConstants.DefaultInterfaceMethodModifier : allModifiers;
+            CSharpConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier, ref modifier);
+            var keyword = syntaxNode.Keyword.ToString();
 
-            CSharpConstants.SetModifiers(allModifiers, ref accessModifier, ref modifier);
+            IEntityType returnType = new EntityTypeModel
+            {
+                Name = "void"
+            };
+            if (keyword == "get")
+            {
+                var basePropertyDeclarationSyntax =
+                    CSharpHelperMethods.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>(syntaxNode);
+                if (basePropertyDeclarationSyntax != null)
+                {
+                    returnType = CSharpHelperMethods.GetFullName(basePropertyDeclarationSyntax.Type);
+                }
+            }
+
+            modelType.Name = keyword;
+            modelType.ReturnValue = new ReturnValueModel
+            {
+                Type = returnType
+            };
+            modelType.ContainingTypeName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);
+            modelType.Modifier = modifier;
+            modelType.AccessModifier = accessModifier;
+            modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
+
+            return modelType;
+        }
+
+        public IMethodType Visit(ArrowExpressionClauseSyntax syntaxNode, IMethodType modelType)
+        {
+            IEntityType returnType = new EntityTypeModel
+            {
+                Name = "void"
+            };
+            var basePropertyDeclarationSyntax =
+                CSharpHelperMethods.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>(syntaxNode);
+            if (basePropertyDeclarationSyntax != null)
+            {
+                returnType = CSharpHelperMethods.GetFullName(basePropertyDeclarationSyntax.Type);
+            }
+
+            modelType.Name = "get";
+            modelType.AccessModifier = "public";
+            modelType.ContainingTypeName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);
+            modelType.ReturnValue = new ReturnValueModel
+            {
+                Type = returnType
+            };
+            modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
+
+            return modelType;
         }
     }
 }

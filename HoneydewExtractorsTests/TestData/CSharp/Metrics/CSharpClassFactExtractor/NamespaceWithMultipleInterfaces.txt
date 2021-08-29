@@ -1,0 +1,21 @@
+﻿using System;
+     
+namespace TopLevel
+{
+    public interface Foo 
+    { 
+        public void f();
+        string g(int a); 
+    }
+   
+    public interface Bar 
+    {
+        public void f(int a);
+        string g(int a, float b); 
+    }
+    
+    public interface Bar2 
+    {
+        public void f(); 
+    }
+}

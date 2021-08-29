@@ -1,0 +1,32 @@
+﻿using System;                                                                         
+namespace TopLevel
+{
+    class Bar
+    {
+        public int Triple(int a)
+        {
+            return a * 3;
+        }
+
+        public static int Double(int a)
+        {
+            return a * 2;
+        }
+    }
+
+    public class Foo
+    {
+        private Bar _bar=new();
+        private int _value;
+
+        public int Value
+        {
+            get
+            {
+                var temp = _value;
+                return _bar.Triple(temp);
+            }
+            set => _value = Bar.Double(value);
+        }
+    }
+}

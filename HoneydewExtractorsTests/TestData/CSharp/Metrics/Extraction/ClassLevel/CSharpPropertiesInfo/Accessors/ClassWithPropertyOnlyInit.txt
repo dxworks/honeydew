@@ -1,0 +1,19 @@
+﻿using System;
+
+namespace Namespace1
+{
+    public class Class1
+    {
+        private int _value;
+   
+        public int JustInit
+        {
+            init { _value = value; }
+        }
+        
+        public int InitExpressionBody
+        {
+            init => _value = value;
+        }
+    }
+}

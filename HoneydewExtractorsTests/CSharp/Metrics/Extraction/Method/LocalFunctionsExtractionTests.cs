@@ -67,7 +67,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 new PropertySetterClassVisitor(new List<ICSharpPropertyVisitor>
                 {
                     new PropertyInfoVisitor(),
-                    localFunctionsSetterClassVisitor
+                    new MethodAccessorSetterPropertyVisitor(new List<IMethodVisitor>
+                    {
+                        localFunctionsSetterClassVisitor
+                    })
                 })
             }));
 
@@ -188,9 +191,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             {
                 method.LocalFunctions[0],
                 constructor.LocalFunctions[0],
-                property.LocalFunctions[0],
-                eventProperty.LocalFunctions[0],
-                eventProperty.LocalFunctions[1],
+                ((MethodModel)property.Accessors[0]).LocalFunctions[0],
+                ((MethodModel)eventProperty.Accessors[0]).LocalFunctions[0],
+                ((MethodModel)eventProperty.Accessors[1]).LocalFunctions[0],
             };
 
             foreach (var localFunction in localFunctions)
@@ -204,9 +207,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
 
             Assert.Equal("Namespace1.Class1.Method(int)", method.LocalFunctions[0].ContainingTypeName);
             Assert.Equal("Namespace1.Class1.Class1(int)", constructor.LocalFunctions[0].ContainingTypeName);
-            Assert.Equal("Namespace1.Class1.Value", property.LocalFunctions[0].ContainingTypeName);
-            Assert.Equal("Namespace1.Class1.EventValue", eventProperty.LocalFunctions[0].ContainingTypeName);
-            Assert.Equal("Namespace1.Class1.EventValue", eventProperty.LocalFunctions[1].ContainingTypeName);
+            Assert.Equal("Namespace1.Class1.Value",
+                ((MethodModel)property.Accessors[0]).LocalFunctions[0].ContainingTypeName);
+            Assert.Equal("Namespace1.Class1.EventValue",
+                ((MethodModel)eventProperty.Accessors[0]).LocalFunctions[0].ContainingTypeName);
+            Assert.Equal("Namespace1.Class1.EventValue",
+                ((MethodModel)eventProperty.Accessors[1]).LocalFunctions[0].ContainingTypeName);
         }
 
         [Theory]
@@ -453,9 +459,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             var property = (PropertyModel)((ClassModel)classTypes[0]).Properties[0];
 
             Assert.Equal("Value", property.Name);
-            Assert.Equal(1, property.LocalFunctions.Count);
+            Assert.Equal(1, ((MethodModel)property.Accessors[0]).LocalFunctions.Count);
 
-            var stringSumFunction = (MethodModel)property.LocalFunctions[0];
+            var stringSumFunction = ((MethodModel)property.Accessors[0]).LocalFunctions[0];
             Assert.Equal("Namespace1.Class1.Value", stringSumFunction.ContainingTypeName);
             Assert.Equal("StringSum", stringSumFunction.Name);
             Assert.Equal("string", stringSumFunction.ReturnValue.Type.Name);
@@ -527,9 +533,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             var property = (PropertyModel)((ClassModel)classTypes[0]).Properties[0];
 
             Assert.Equal("Value", property.Name);
-            Assert.Equal(1, property.LocalFunctions.Count);
+            Assert.Equal(1, ((MethodModel)property.Accessors[0]).LocalFunctions.Count);
 
-            var stringSumFunction = (MethodModel)property.LocalFunctions[0];
+            var stringSumFunction = ((MethodModel)property.Accessors[0]).LocalFunctions[0];
             Assert.Equal("StringSum", stringSumFunction.Name);
             Assert.Equal(2, stringSumFunction.LocalFunctions.Count);
             Assert.Equal(1, stringSumFunction.CalledMethods.Count);

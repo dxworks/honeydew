@@ -191,9 +191,12 @@ namespace HoneydewExtractors.Processors
                     return nameof(EAliasType.Namespace);
                 }
 
-                if (IsAliasNamespaceSearchInCalledMethods(propertyModel.CalledMethods))
+                foreach (var accessor in propertyModel.Accessors)
                 {
-                    return nameof(EAliasType.Namespace);
+                    if (IsAliasNamespaceSearchInCalledMethods(accessor.CalledMethods))
+                    {
+                        return nameof(EAliasType.Namespace);
+                    }
                 }
             }
 
@@ -328,9 +331,11 @@ namespace HoneydewExtractors.Processors
                                         classModel.Imports, classModel.FilePath);
                                 });
 
-                                SetContainingClassAndCalledMethodsFullNameProperty(classModel.FilePath, propertyModel,
-                                    namespaceModel,
-                                    projectModel, solutionModel, classModel.Imports);
+                                foreach (var accessor in propertyModel.Accessors)
+                                {
+                                    SetContainingClassAndCalledMethodsFullNameProperty(classModel.FilePath, accessor,
+                                        namespaceModel, projectModel, solutionModel, classModel.Imports);
+                                }
                             }
 
                             foreach (var methodModel in classModel.Methods)

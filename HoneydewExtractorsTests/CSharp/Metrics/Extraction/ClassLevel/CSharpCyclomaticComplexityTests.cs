@@ -67,7 +67,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(1, classModel.Constructors[0].CyclomaticComplexity);
             Assert.Equal(1, classModel.Methods[0].CyclomaticComplexity);
-            Assert.Equal(1, classModel.Properties[0].CyclomaticComplexity);
+            Assert.Equal(2, classModel.Properties[0].CyclomaticComplexity);
         }
 
         [Theory]
@@ -84,7 +84,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(2, classModel.Constructors[0].CyclomaticComplexity);
             Assert.Equal(4, classModel.Methods[0].CyclomaticComplexity);
-            Assert.Equal(3, classModel.Properties[0].CyclomaticComplexity);
+            Assert.Equal(4, classModel.Properties[0].CyclomaticComplexity);
         }
 
         [Theory]
@@ -100,7 +100,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(3, classModel.Constructors[0].CyclomaticComplexity);
             Assert.Equal(4, classModel.Methods[0].CyclomaticComplexity);
-            Assert.Equal(3, classModel.Properties[0].CyclomaticComplexity);
+            Assert.Equal(4, classModel.Properties[0].CyclomaticComplexity);
         }
 
         [Theory]

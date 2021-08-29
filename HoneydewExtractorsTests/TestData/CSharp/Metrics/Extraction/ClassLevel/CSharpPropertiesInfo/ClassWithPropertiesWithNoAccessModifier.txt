@@ -1,0 +1,11 @@
+﻿using System;
+
+namespace TopLevel
+{
+    public class Foo 
+    { 
+        static int A {get;set;} = 12;
+         
+        float X {get;set;}                                      
+   }                                        
+}

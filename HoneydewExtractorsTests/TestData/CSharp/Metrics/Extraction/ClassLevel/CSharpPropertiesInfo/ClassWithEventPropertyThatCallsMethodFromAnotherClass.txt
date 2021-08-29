@@ -1,0 +1,33 @@
+﻿using System;
+                                                                  
+namespace TopLevel
+{
+     public class Bar
+    {
+        public string Convert(int a)
+        {
+            return a.ToString();
+        }
+
+        public static string Cut(Func<string> s)
+        {
+            return s.ToString();
+        }
+    }
+
+    public class Foo
+    {
+        private Bar _bar=new();
+        private string _value;
+
+        public event Func<string> Value
+        {
+            add
+            {
+                var temp = _value;
+                _bar.Convert(temp.Length);
+            }
+            remove => _value = Bar.Cut(value);
+        }
+    }
+}

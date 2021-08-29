@@ -1,0 +1,15 @@
+﻿using System;
+using HoneydewCore.Extractors;
+namespace TopLevel
+{
+    public class Foo
+    {
+        readonly int A = 12;
+        
+        public static void f(int a) {}
+        
+        private int g(CSharpExtractor a) { f(0); return 0; }
+        
+        protected string h(float a,  CSharpExtractor b) { g(b); f(4); return "A";}                                                                                                    
+   }
+}
