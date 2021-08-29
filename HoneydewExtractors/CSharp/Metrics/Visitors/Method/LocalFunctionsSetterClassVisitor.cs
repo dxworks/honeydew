@@ -5,7 +5,6 @@ using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
-using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
@@ -14,7 +13,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method
 {
     public class LocalFunctionsSetterClassVisitor : CompositeVisitor, ICSharpMethodVisitor,
-        ICSharpConstructorVisitor, ICSharpPropertyVisitor, ICSharpLocalFunctionVisitor
+        ICSharpConstructorVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor
     {
         public LocalFunctionsSetterClassVisitor(IEnumerable<ILocalFunctionVisitor> visitors) : base(visitors)
         {
@@ -54,29 +53,21 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method
             return constructorModel;
         }
 
-        public IPropertyType Visit(BasePropertyDeclarationSyntax syntaxNode, IPropertyType modelType)
+        public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, IMethodType modelType)
         {
-            if (modelType is not PropertyModel propertyModel)
+            if (modelType is not MethodModel methodModel)
             {
                 return modelType;
             }
 
-            if (syntaxNode.AccessorList == null)
+            if (syntaxNode.Body == null)
             {
-                return propertyModel;
+                return methodModel;
             }
 
-            foreach (var accessor in syntaxNode.AccessorList.Accessors)
-            {
-                if (accessor.Body == null)
-                {
-                    continue;
-                }
+            SetLocalFunctionInfo(syntaxNode.Body, methodModel);
 
-                SetLocalFunctionInfo(accessor.Body, propertyModel);
-            }
-
-            return propertyModel;
+            return methodModel;
         }
 
         public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode,

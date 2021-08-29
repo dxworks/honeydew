@@ -299,7 +299,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                 accessor.ContainingTypeName);
 
             Assert.Equal(3, accessor.CalledMethods.Count);
-            
+
             Assert.Equal("Method", accessor.CalledMethods[0].Name);
             Assert.Equal("ExternClass", accessor.CalledMethods[0].ContainingTypeName);
             Assert.Equal(1, accessor.CalledMethods[0].ParameterTypes.Count);
@@ -309,10 +309,34 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             Assert.Equal("Namespace1.Class2", accessor.CalledMethods[1].ContainingTypeName);
             Assert.Equal(1, accessor.CalledMethods[1].ParameterTypes.Count);
             Assert.Equal("int", accessor.CalledMethods[1].ParameterTypes[0].Type.Name);
-            
+
             Assert.Equal("MyMethod", accessor.CalledMethods[2].Name);
             Assert.Equal("Namespace1.Class1", accessor.CalledMethods[2].ContainingTypeName);
             Assert.Empty(accessor.CalledMethods[2].ParameterTypes);
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/Accessors/ClassWithPropertiesWithStatementBody.txt")]
+        public void Extract_ShouldHaveCyclomaticComplexity_WhenGivenClassWithProperties(string fileContent)
+        {
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
+
+            Assert.Equal(1, classTypes.Count);
+
+            var classModel = (ClassModel)classTypes[0];
+
+            Assert.Equal(2, classModel.Properties.Count);
+
+            foreach (var property in classModel.Properties)
+            {
+                Assert.Equal(12, property.CyclomaticComplexity);
+
+                foreach (var accessor in property.Accessors)
+                {
+                    Assert.Equal(6, accessor.CyclomaticComplexity);
+                }
+            }
         }
     }
 }

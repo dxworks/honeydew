@@ -737,7 +737,18 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
         public int CalculateCyclomaticComplexity(MemberDeclarationSyntax syntax)
         {
-            return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
+            if (syntax is not BasePropertyDeclarationSyntax basePropertyDeclarationSyntax)
+            {
+                return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
+            }
+
+            var accessorCount = 0;
+            if (basePropertyDeclarationSyntax.AccessorList != null)
+            {
+                accessorCount = basePropertyDeclarationSyntax.AccessorList.Accessors.Count;
+            }
+
+            return CalculateCyclomaticComplexityForSyntaxNode(syntax) + accessorCount;
         }
 
         public int CalculateCyclomaticComplexity(LocalFunctionStatementSyntax syntax)

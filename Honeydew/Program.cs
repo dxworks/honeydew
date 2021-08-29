@@ -172,9 +172,11 @@ namespace Honeydew
                 parameterSetterVisitor,
             });
 
+            var methodInfoVisitor = new MethodInfoVisitor();
+
             var methodVisitors = new List<ICSharpMethodVisitor>
             {
-                new MethodInfoVisitor(),
+                methodInfoVisitor,
                 linesOfCodeVisitor,
                 calledMethodSetterVisitor,
                 localFunctionsSetterClassVisitor,
@@ -202,9 +204,15 @@ namespace Honeydew
             var propertyVisitors = new List<ICSharpPropertyVisitor>
             {
                 new PropertyInfoVisitor(),
-                calledMethodSetterVisitor,
+                new MethodAccessorSetterPropertyVisitor(new List<IMethodVisitor>
+                {
+                    methodInfoVisitor,
+                    calledMethodSetterVisitor,
+                    attributeSetterVisitor,
+                    linesOfCodeVisitor,
+                    localFunctionsSetterClassVisitor,
+                }),
                 linesOfCodeVisitor,
-                localFunctionsSetterClassVisitor,
                 attributeSetterVisitor,
             };
 

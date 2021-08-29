@@ -1,0 +1,112 @@
+﻿namespace Namespace1
+{
+    using System;
+
+    public class Class1
+    {
+        private int _value;
+
+        public int Value
+        {
+            get
+            {
+                if (_value > 0)
+                {
+                    while (_value > 5)
+                    {
+                        _value--;
+                    }
+                }
+                else if (_value == 0)
+                {
+                    do
+                    {
+                        _value++;
+                    } while (_value == 1);
+                }
+
+                if (_value == 2)
+                {
+                    _value = 5;
+                }
+
+                return _value;
+            }
+            set
+            {
+                _value = value;
+
+                if (_value > 0)
+                {
+                    while (_value > 5)
+                    {
+                        _value--;
+                    }
+                }
+                else if (_value == 0)
+                {
+                    do
+                    {
+                        _value++;
+                    } while (_value == 1);
+                }
+
+                if (_value == 2)
+                {
+                    _value = 5;
+                }
+            }
+        }
+        
+        public event Func<int> EValue
+        {
+            add
+            {
+                
+                if (_value > 0)
+                {
+                    while (_value > 5)
+                    {
+                        _value--;
+                    }
+                }
+                else if (_value == 0)
+                {
+                    do
+                    {
+                        _value++;
+                    } while (_value == 1);
+                }
+
+                if (_value == 2)
+                {
+                    _value = 5;
+                }
+
+            }
+            remove
+            {
+
+                if (_value > 0)
+                {
+                    while (_value > 5)
+                    {
+                        _value--;
+                    }
+                }
+                else if (_value == 0)
+                {
+                    do
+                    {
+                        _value++;
+                    } while (_value == 1);
+                }
+
+                if (_value == 2)
+                {
+                    _value = 5;
+                }
+            }
+        }
+    }
+}
