@@ -151,15 +151,11 @@ jobs:
       - name: Zip Voyager Release
         run: zip -rl honeydew.zip honeydew
 
-      - name: Print Release Notes
-        run: |
-          echo release notes at ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
-          cat ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          name: Honeydew ${{ github.ref }}
+          name: Honeydew ${{ steps.semver_parser.outputs.semver }} (Voyager)
           body_path: ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
           prerelease: false
           draft: false
