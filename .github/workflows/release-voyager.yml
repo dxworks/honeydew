@@ -155,6 +155,12 @@ jobs:
         run: |
           echo release notes at ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
           cat ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
+          ls -R -al ${{ github.workspace }}
+          echo *****************
+          echo *****************
+          echo *****************
+          echo *****************
+          ls -R -al
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
