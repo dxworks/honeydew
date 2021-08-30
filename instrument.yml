@@ -9,5 +9,5 @@ commands:
     unix: ./bin/linux/Honeydew extract ${repo} ${options}
 
 parameters:
-  options: ""
+  options: "--disable-progress-bars"
 
