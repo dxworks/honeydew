@@ -1,6 +1,6 @@
-﻿using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
-using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel;
+﻿using System.Collections.Generic;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewCoreIntegrationTests.Models
@@ -17,59 +17,59 @@ namespace HoneydewCoreIntegrationTests.Models
         [Fact]
         public void Add_ShouldAddNewClass_WhenClassIsFromDefaultNamespace()
         {
-            _sut.Add(new ClassModel {FullName = "GlobalClass"});
+            _sut.Add(new ClassModel { Name = "GlobalClass" });
 
             Assert.Equal("", _sut.Name);
             Assert.Equal(1, _sut.ClassModels.Count);
-            Assert.Equal("GlobalClass", _sut.ClassModels[0].FullName);
+            Assert.Equal("GlobalClass", _sut.ClassModels[0].Name);
         }
 
         [Fact]
         public void Add_ShouldAddNewClass_WhenANewClassModelIsAdded()
         {
-            _sut.Add(new ClassModel {FullName = "Models.Class1"});
+            _sut.Add(new ClassModel { Name = "Models.Class1" });
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(1, _sut.ClassModels.Count);
-            Assert.Equal("Models.Class1", _sut.ClassModels[0].FullName);
+            Assert.Equal("Models.Class1", _sut.ClassModels[0].Name);
         }
 
         [Fact]
         public void Add_ShouldAddNewClasses_WhenMultipleClassModelsAreAdded()
         {
-            _sut.Add(new ClassModel {FullName = "Models.Class1"});
-            _sut.Add(new ClassModel {FullName = "Models.Class2"});
-            _sut.Add(new ClassModel {FullName = "Models.Class3"});
+            _sut.Add(new ClassModel { Name = "Models.Class1" });
+            _sut.Add(new ClassModel { Name = "Models.Class2" });
+            _sut.Add(new ClassModel { Name = "Models.Class3" });
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(3, _sut.ClassModels.Count);
-            Assert.Equal("Models.Class1", _sut.ClassModels[0].FullName);
-            Assert.Equal("Models.Class2", _sut.ClassModels[1].FullName);
-            Assert.Equal("Models.Class3", _sut.ClassModels[2].FullName);
+            Assert.Equal("Models.Class1", _sut.ClassModels[0].Name);
+            Assert.Equal("Models.Class2", _sut.ClassModels[1].Name);
+            Assert.Equal("Models.Class3", _sut.ClassModels[2].Name);
         }
 
         [Fact]
         public void Add_ShouldAddNewClassOnce_WhenTheSameClassModelsAdded()
         {
-            _sut.Add(new ClassModel {FullName = "Models.Class1"});
-            _sut.Add(new ClassModel {FullName = "Models.Class2"});
-            _sut.Add(new ClassModel {FullName = "Models.Class1"});
+            _sut.Add(new ClassModel { Name = "Models.Class1" });
+            _sut.Add(new ClassModel { Name = "Models.Class2" });
+            _sut.Add(new ClassModel { Name = "Models.Class1" });
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(2, _sut.ClassModels.Count);
-            Assert.Equal("Models.Class1", _sut.ClassModels[0].FullName);
-            Assert.Equal("Models.Class2", _sut.ClassModels[1].FullName);
+            Assert.Equal("Models.Class1", _sut.ClassModels[0].Name);
+            Assert.Equal("Models.Class2", _sut.ClassModels[1].Name);
         }
 
         [Fact]
         public void Add_ShouldNotAddClassOnce_WhenNamespaceIsDifferentInClass()
         {
-            _sut.Add(new ClassModel {FullName = "Models.Class1"});
-            _sut.Add(new ClassModel {FullName = "Models.Items.Class2"});
+            _sut.Add(new ClassModel { Name = "Models.Class1" });
+            _sut.Add(new ClassModel { Name = "Models.Items.Class2" });
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(1, _sut.ClassModels.Count);
-            Assert.Equal("Models.Class1", _sut.ClassModels[0].FullName);
+            Assert.Equal("Models.Class1", _sut.ClassModels[0].Name);
         }
 
         [Fact]
@@ -77,12 +77,12 @@ namespace HoneydewCoreIntegrationTests.Models
         {
             var classModel = new ClassModel
             {
-                FullName = "Items.Pencil"
+                Name = "Items.Pencil"
             };
-            classModel.Metrics.Add(new ClassMetric
+            classModel.Metrics.Add(new MetricModel
             {
                 Value = 0,
-                ExtractorName = typeof(CSharpUsingsCountMetric).FullName,
+                ExtractorName = "MetricExtractor",
                 ValueType = typeof(int).FullName
             });
 
@@ -91,14 +91,13 @@ namespace HoneydewCoreIntegrationTests.Models
             Assert.Equal(1, _sut.ClassModels.Count);
             var sutClassModel = _sut.ClassModels[0];
 
-            Assert.Equal("Items.Pencil", sutClassModel.FullName);
+            Assert.Equal("Items.Pencil", sutClassModel.Name);
 
             Assert.Equal(1, sutClassModel.Metrics.Count);
 
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel.CSharpUsingsCountMetric",
-                sutClassModel.Metrics[0].ExtractorName);
+            Assert.Equal("MetricExtractor", sutClassModel.Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", sutClassModel.Metrics[0].ValueType);
-            Assert.Equal(0, (int) sutClassModel.Metrics[0].Value);
+            Assert.Equal(0, (int)sutClassModel.Metrics[0].Value);
         }
 
         [Fact]
@@ -106,12 +105,12 @@ namespace HoneydewCoreIntegrationTests.Models
         {
             var classModel1 = new ClassModel
             {
-                FullName = "Items.Pencil"
+                Name = "Items.Pencil"
             };
-            classModel1.Metrics.Add(new ClassMetric
+            classModel1.Metrics.Add(new MetricModel
             {
                 Value = 0,
-                ExtractorName = typeof(CSharpUsingsCountMetric).FullName,
+                ExtractorName = "MetricExtractor",
                 ValueType = typeof(int).FullName
             });
 
@@ -119,39 +118,60 @@ namespace HoneydewCoreIntegrationTests.Models
 
             var classModel2 = new ClassModel
             {
-                FullName = "Items.Notebook"
+                Name = "Items.Notebook"
             };
-            classModel2.Metrics.Add(new ClassMetric
+            classModel2.Metrics.Add(new MetricModel
             {
-                Value = new CSharpInheritanceMetric
+                Value = new List<IBaseType>
                 {
-                    BaseClassName = "Object"
+                    new BaseTypeModel
+                    {
+                        Type = new EntityTypeModel
+                        {
+                            Name = "Object"
+                        },
+                        Kind = "class"
+                    }
                 },
-                ExtractorName = typeof(CSharpBaseClassMetric).FullName,
-                ValueType = typeof(CSharpInheritanceMetric).FullName
+                ExtractorName = "BaseTypesExtractor",
+                ValueType = typeof(List<IBaseType>).FullName
             });
 
             _sut.Add(classModel2);
 
             var classModel3 = new ClassModel
             {
-                FullName = "Items.IItemService"
+                Name = "Items.IItemService"
             };
-            classModel3.Metrics.Add(new ClassMetric
+            classModel3.Metrics.Add(new MetricModel
             {
                 Value = 0,
-                ExtractorName = typeof(CSharpUsingsCountMetric).FullName,
+                ExtractorName = "MetricExtractor",
                 ValueType = typeof(int).FullName
             });
-            classModel3.Metrics.Add(new ClassMetric
+            classModel3.Metrics.Add(new MetricModel
             {
-                Value = new CSharpInheritanceMetric
+                Value = new List<IBaseType>
                 {
-                    BaseClassName = "BaseService",
-                    Interfaces = {"IService"}
+                    new BaseTypeModel
+                    {
+                        Type = new EntityTypeModel
+                        {
+                            Name = "BaseService"
+                        },
+                        Kind = "class"
+                    },
+                    new BaseTypeModel
+                    {
+                        Type = new EntityTypeModel
+                        {
+                            Name = "IService"
+                        },
+                        Kind = "interface"
+                    }
                 },
-                ExtractorName = typeof(CSharpBaseClassMetric).FullName,
-                ValueType = typeof(CSharpInheritanceMetric).FullName
+                ExtractorName = "BaseTypesExtractor",
+                ValueType = typeof(List<IBaseType>).FullName
             });
 
 
@@ -159,43 +179,41 @@ namespace HoneydewCoreIntegrationTests.Models
 
             Assert.Equal(3, _sut.ClassModels.Count);
 
-            Assert.Equal("Items.Pencil", _sut.ClassModels[0].FullName);
+            Assert.Equal("Items.Pencil", _sut.ClassModels[0].Name);
             Assert.Equal(1, _sut.ClassModels[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel.CSharpUsingsCountMetric",
-                _sut.ClassModels[0].Metrics[0].ExtractorName);
+            Assert.Equal("MetricExtractor", _sut.ClassModels[0].Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", _sut.ClassModels[0].Metrics[0].ValueType);
-            Assert.Equal(0, (int) _sut.ClassModels[0].Metrics[0].Value);
+            Assert.Equal(0, (int)_sut.ClassModels[0].Metrics[0].Value);
 
-            Assert.Equal("Items.Notebook", _sut.ClassModels[1].FullName);
+            Assert.Equal("Items.Notebook", _sut.ClassModels[1].Name);
             Assert.Equal(1, _sut.ClassModels[1].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpBaseClassMetric",
-                _sut.ClassModels[1].Metrics[0].ExtractorName);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpInheritanceMetric",
-                _sut.ClassModels[1].Metrics[0].ValueType);
-            Assert.Equal(typeof(CSharpInheritanceMetric), _sut.ClassModels[1].Metrics[0].Value.GetType());
-            var inheritanceMetric1 = (CSharpInheritanceMetric) _sut.ClassModels[1].Metrics[0].Value;
-            Assert.Equal(0, inheritanceMetric1.Interfaces.Count);
-            Assert.Equal("Object", inheritanceMetric1.BaseClassName);
+            Assert.Equal("BaseTypesExtractor", _sut.ClassModels[1].Metrics[0].ExtractorName);
+            Assert.Equal(typeof(List<IBaseType>).FullName, _sut.ClassModels[1].Metrics[0].ValueType);
+            Assert.Equal(typeof(List<IBaseType>), _sut.ClassModels[1].Metrics[0].Value.GetType());
+            var baseTypes = (List<IBaseType>)_sut.ClassModels[1].Metrics[0].Value;
+            Assert.Single(baseTypes);
+            Assert.Equal("Object", baseTypes[0].Type.Name);
+            Assert.Equal("class", baseTypes[0].Kind);
 
 
-            Assert.Equal("Items.IItemService", _sut.ClassModels[2].FullName);
+            Assert.Equal("Items.IItemService", _sut.ClassModels[2].Name);
             Assert.Equal(2, _sut.ClassModels[2].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnitLevel.CSharpUsingsCountMetric",
-                _sut.ClassModels[2].Metrics[0].ExtractorName);
+            Assert.Equal("MetricExtractor", _sut.ClassModels[2].Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", _sut.ClassModels[2].Metrics[0].ValueType);
-            Assert.Equal(0, (int) _sut.ClassModels[2].Metrics[0].Value);
+            Assert.Equal(0, (int)_sut.ClassModels[2].Metrics[0].Value);
 
 
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpBaseClassMetric",
-                _sut.ClassModels[2].Metrics[1].ExtractorName);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.CSharpInheritanceMetric",
+            Assert.Equal("BaseTypesExtractor", _sut.ClassModels[2].Metrics[1].ExtractorName);
+            Assert.Equal(typeof(List<IBaseType>).FullName,
                 _sut.ClassModels[2].Metrics[1].ValueType);
-            Assert.Equal(typeof(CSharpInheritanceMetric), _sut.ClassModels[2].Metrics[1].Value.GetType());
-            var inheritanceMetric2 = (CSharpInheritanceMetric) _sut.ClassModels[2].Metrics[1].Value;
-            Assert.Equal("BaseService", inheritanceMetric2.BaseClassName);
+            Assert.Equal(typeof(List<IBaseType>), _sut.ClassModels[2].Metrics[1].Value.GetType());
+            var baseTypes2 = (List<IBaseType>)_sut.ClassModels[2].Metrics[1].Value;
+            Assert.Equal(2, baseTypes2.Count);
+            Assert.Equal("BaseService", baseTypes2[0].Type.Name);
+            Assert.Equal("class", baseTypes2[0].Kind);
 
-            Assert.Equal(1, inheritanceMetric2.Interfaces.Count);
-            Assert.Equal("IService", inheritanceMetric2.Interfaces[0]);
+            Assert.Equal("IService", baseTypes2[1].Type.Name);
+            Assert.Equal("interface", baseTypes2[1].Kind);
         }
     }
 }

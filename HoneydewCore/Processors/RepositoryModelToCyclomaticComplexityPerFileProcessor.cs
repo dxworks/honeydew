@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 
 namespace HoneydewCore.Processors
 {
@@ -21,7 +22,8 @@ namespace HoneydewCore.Processors
 
             foreach (var (filePath, classModels) in classesGroupedByFilePath)
             {
-                CalculateMaxCyclo(classModels, out var maxCyclo, out var minCyclo, out var avgCyclo, out var sumCyclo);
+                CalculateCycloComponents(classModels, out var maxCyclo, out var minCyclo, out var avgCyclo,
+                    out var sumCyclo);
 
                 representation.AddConcern(new Concern
                 {
@@ -55,7 +57,7 @@ namespace HoneydewCore.Processors
             return representation;
         }
 
-        private static void CalculateMaxCyclo(List<ClassModel> classModels, out int maxCyclo, out int minCyclo,
+        private static void CalculateCycloComponents(List<IClassType> classModels, out int maxCyclo, out int minCyclo,
             out int avgCyclo, out int sumCyclo)
         {
             var maxCyclomatic = 1;
@@ -75,8 +77,13 @@ namespace HoneydewCore.Processors
                 return;
             }
 
-            foreach (var classModel in classModels)
+            foreach (var classType in classModels)
             {
+                if (classType is not ClassModel classModel)
+                {
+                    continue;
+                }
+
                 foreach (var methodModel in classModel.Methods)
                 {
                     UpdateVariables(methodModel.CyclomaticComplexity);
@@ -117,11 +124,15 @@ namespace HoneydewCore.Processors
             {
                 avgCyclo = sumCyclomatic / count;
             }
+            else
+            {
+                maxCyclo = minCyclo = sumCyclo = avgCyclo = 0;
+            }
         }
 
-        private static Dictionary<string, List<ClassModel>> GroupClassesByFilePath(RepositoryModel repositoryModel)
+        private static Dictionary<string, List<IClassType>> GroupClassesByFilePath(RepositoryModel repositoryModel)
         {
-            var classModelDictionary = new Dictionary<string, List<ClassModel>>();
+            var classModelDictionary = new Dictionary<string, List<IClassType>>();
 
             foreach (var classModel in repositoryModel.GetEnumerable())
             {
@@ -131,7 +142,7 @@ namespace HoneydewCore.Processors
                 }
                 else
                 {
-                    classModelDictionary.Add(classModel.FilePath, new List<ClassModel>
+                    classModelDictionary.Add(classModel.FilePath, new List<IClassType>
                     {
                         classModel
                     });

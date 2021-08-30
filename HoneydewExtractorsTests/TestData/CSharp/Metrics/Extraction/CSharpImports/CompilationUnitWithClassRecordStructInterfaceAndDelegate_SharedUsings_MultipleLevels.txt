@@ -1,0 +1,39 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace TopLevel
+{
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+
+    namespace Analyzers
+    {
+        using System.Linq;
+        using Microsoft.CodeAnalysis;
+
+        public interface Interface1 {}
+
+        namespace MyDelegates
+        {
+            using Microsoft.CodeAnalysis.CSharp;
+        
+            public delegate void Foo();
+        
+            namespace Structs
+            {
+                using System.Text;
+                using MyLib;
+
+                public struct Struct1{}   
+            }
+        }
+
+        namespace My.Records
+        {
+            using MyLib.Records;
+            public class Class1 {
+            public record Record1{}}
+        }
+    }
+}

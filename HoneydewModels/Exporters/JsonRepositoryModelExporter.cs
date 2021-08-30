@@ -1,5 +1,5 @@
-﻿using System.Text.Json;
-using HoneydewModels.CSharp;
+﻿using HoneydewModels.CSharp;
+using Newtonsoft.Json;
 
 namespace HoneydewModels.Exporters
 {
@@ -7,7 +7,7 @@ namespace HoneydewModels.Exporters
     {
         public string Export(RepositoryModel model)
         {
-            return JsonSerializer.Serialize(model);
+            return JsonConvert.SerializeObject(model);
         }
     }
 }

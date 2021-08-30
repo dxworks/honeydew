@@ -1,0 +1,6 @@
+﻿using System;
+     
+namespace TopLevel
+{
+    public interface Foo { public int Value {get;set;} }                                       
+}

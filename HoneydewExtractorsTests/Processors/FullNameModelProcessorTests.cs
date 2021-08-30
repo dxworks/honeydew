@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
 using HoneydewExtractors.Processors;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Moq;
 using Xunit;
 
@@ -11,11 +11,13 @@ namespace HoneydewExtractorsTests.Processors
     public class FullNameModelProcessorTests
     {
         private readonly FullNameModelProcessor _sut;
-        private readonly Mock<ILogger> _progressLoggerMock = new();
+        private readonly Mock<ILogger> _loggerMock = new();
+        private readonly Mock<IProgressLogger> _progressLoggerMock = new();
+        private readonly Mock<IProgressLoggerBar> _progressLoggerBarMock = new();
 
         public FullNameModelProcessorTests()
         {
-            _sut = new FullNameModelProcessor(_progressLoggerMock.Object);
+            _sut = new FullNameModelProcessor(_loggerMock.Object, _progressLoggerMock.Object);
         }
 
         [Fact]
@@ -32,7 +34,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Class1"
+                        Name = "Class1"
                     }
                 }
             });
@@ -44,7 +46,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Class2"
+                        Name = "Class2"
                     }
                 }
             });
@@ -56,11 +58,11 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Controllers.Class3"
+                        Name = "Controllers.Class3"
                     },
                     new ClassModel
                     {
-                        FullName = "Class4"
+                        Name = "Class4"
                     }
                 }
             });
@@ -76,7 +78,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Class5"
+                        Name = "Class5"
                     }
                 }
             });
@@ -85,18 +87,28 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(5, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(5, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(5, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.Class1",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FullName);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].Name);
             Assert.Equal("Services.Class2",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].FullName);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].Name);
             Assert.Equal("Controllers.Class3",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].FullName);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Name);
             Assert.Equal("Controllers.Class4",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[1].FullName);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[1].Name);
             Assert.Equal("Domain.Data.Class5",
-                actualRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].FullName);
+                actualRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].Name);
         }
 
         [Fact]
@@ -113,15 +125,15 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Class1"
+                        Name = "Class1"
                     },
                     new ClassModel
                     {
-                        FullName = "Class1.InnerClass1"
+                        Name = "Class1.InnerClass1"
                     },
                     new ClassModel
                     {
-                        FullName = "Class1.InnerClass1.InnerClass2"
+                        Name = "Class1.InnerClass1.InnerClass2"
                     }
                 }
             });
@@ -130,12 +142,22 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var namespaceModel = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
-            Assert.Equal("Project1.Models.Class1", namespaceModel.ClassModels[0].FullName);
-            Assert.Equal("Project1.Models.Class1.InnerClass1", namespaceModel.ClassModels[1].FullName);
-            Assert.Equal("Project1.Models.Class1.InnerClass1.InnerClass2", namespaceModel.ClassModels[2].FullName);
+            Assert.Equal("Project1.Models.Class1", namespaceModel.ClassModels[0].Name);
+            Assert.Equal("Project1.Models.Class1.InnerClass1", namespaceModel.ClassModels[1].Name);
+            Assert.Equal("Project1.Models.Class1.InnerClass1.InnerClass2", namespaceModel.ClassModels[2].Name);
         }
 
         [Fact]
@@ -152,20 +174,23 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Class1"
+                        Name = "Class1"
                     },
                     new ClassModel
                     {
-                        FullName = "Class2",
+                        Name = "Class2",
                         Constructors =
                         {
-                            new MethodModel
+                            new ConstructorModel
                             {
                                 ParameterTypes =
                                 {
                                     new ParameterModel
                                     {
-                                        Type = "Class1",
+                                        Type = new EntityTypeModel
+                                        {
+                                            Name = "Class1"
+                                        },
                                         Modifier = "",
                                         DefaultValue = ""
                                     }
@@ -180,7 +205,10 @@ namespace HoneydewExtractorsTests.Processors
                                 {
                                     new ParameterModel
                                     {
-                                        Type = "Class1",
+                                        Type = new EntityTypeModel
+                                        {
+                                            Name = "Class1",
+                                        },
                                         Modifier = "",
                                         DefaultValue = ""
                                     }
@@ -195,12 +223,24 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(2, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(2, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(2, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var namespaceModel = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
+            var classModel = (ClassModel)namespaceModel.ClassModels[1];
             Assert.Equal("Project1.Models.Class1",
-                namespaceModel.ClassModels[1].Constructors[0].ParameterTypes[0].Type);
-            Assert.Equal("Project1.Models.Class1", namespaceModel.ClassModels[1].Methods[0].ParameterTypes[0].Type);
+                classModel.Constructors[0].ParameterTypes[0].Type.Name);
+            Assert.Equal("Project1.Models.Class1",
+                classModel.Methods[0].ParameterTypes[0].Type.Name);
         }
 
         [Fact]
@@ -217,23 +257,63 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Models.Class1",
-                        BaseClassFullName = "object"
+                        Name = "Models.Class1",
+                        BaseTypes = new List<IBaseType>
+                        {
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "object"
+                                },
+                                Kind = "class"
+                            }
+                        }
                     },
                     new ClassModel
                     {
-                        FullName = "Models.Class2",
-                        BaseClassFullName = "Class1"
+                        Name = "Models.Class2",
+                        BaseTypes = new List<IBaseType>
+                        {
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "Class1"
+                                },
+                                Kind = "class"
+                            }
+                        }
                     },
                     new ClassModel
                     {
-                        FullName = "Models.Class3",
-                        BaseClassFullName = "Class1"
+                        Name = "Models.Class3",
+                        BaseTypes = new List<IBaseType>
+                        {
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "Class1"
+                                },
+                                Kind = "class"
+                            }
+                        }
                     },
                     new ClassModel
                     {
-                        FullName = "Models.TheClass",
-                        BaseClassFullName = "Class3"
+                        Name = "Models.TheClass",
+                        BaseTypes = new List<IBaseType>
+                        {
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "Class3"
+                                },
+                                Kind = "class"
+                            }
+                        }
                     }
                 }
             });
@@ -245,23 +325,63 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Models.Other.Class1",
-                        BaseClassFullName = "Class2"
+                        Name = "Models.Other.Class1",
+                        BaseTypes = new List<IBaseType>
+                        {
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "Class2"
+                                },
+                                Kind = "class"
+                            }
+                        }
                     },
                     new ClassModel
                     {
-                        FullName = "Models.Other.Class2",
-                        BaseClassFullName = "Models.Class1"
+                        Name = "Models.Other.Class2",
+                        BaseTypes = new List<IBaseType>
+                        {
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "Models.Class1"
+                                },
+                                Kind = "class"
+                            }
+                        }
                     },
                     new ClassModel
                     {
-                        FullName = "Models.Other.Class3",
-                        BaseClassFullName = "TheClass"
+                        Name = "Models.Other.Class3",
+                        BaseTypes = new List<IBaseType>
+                        {
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "TheClass"
+                                },
+                                Kind = "class"
+                            }
+                        }
                     },
                     new ClassModel
                     {
-                        FullName = "Models.Other.SuperClass",
-                        BaseClassFullName = "Class3"
+                        Name = "Models.Other.SuperClass",
+                        BaseTypes = new List<IBaseType>
+                        {
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "Class3"
+                                },
+                                Kind = "class"
+                            }
+                        }
                     }
                 }
             });
@@ -277,32 +397,65 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Models.AClass",
-                        BaseClassFullName = "SuperClass"
+                        Name = "Models.AClass",
+                        BaseTypes = new List<IBaseType>
+                        {
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "SuperClass"
+                                },
+                                Kind = "class"
+                            }
+                        }
                     }
                 }
             });
 
+            projectModel1.FilePath = "path1";
+            projectModel2.ProjectReferences = new List<string> { "path1" };
+
             solutionModel.Projects.Add(projectModel2);
             repositoryModel.Solutions.Add(solutionModel);
+
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(9, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(9, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(9, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var modelsNamespace = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
-            Assert.Equal("System.Object", modelsNamespace.ClassModels[0].BaseClassFullName);
-            Assert.Equal("Models.Class1", modelsNamespace.ClassModels[1].BaseClassFullName);
-            Assert.Equal("Models.Class1", modelsNamespace.ClassModels[2].BaseClassFullName);
-            Assert.Equal("Models.Class3", modelsNamespace.ClassModels[3].BaseClassFullName);
+            foreach (var classModel in modelsNamespace.ClassModels)
+            {
+                Assert.Equal("class", classModel.BaseTypes[0].Kind);
+            }
+
+            Assert.Equal("System.Object", modelsNamespace.ClassModels[0].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Class1", modelsNamespace.ClassModels[1].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Class1", modelsNamespace.ClassModels[2].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Class3", modelsNamespace.ClassModels[3].BaseTypes[0].Type.Name);
+
 
             var otherModelsNamespace = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1];
-            Assert.Equal("Models.Other.Class2", otherModelsNamespace.ClassModels[0].BaseClassFullName);
-            Assert.Equal("Models.Class1", otherModelsNamespace.ClassModels[1].BaseClassFullName);
-            Assert.Equal("Models.TheClass", otherModelsNamespace.ClassModels[2].BaseClassFullName);
-            Assert.Equal("Models.Other.Class3", otherModelsNamespace.ClassModels[3].BaseClassFullName);
+            foreach (var classModel in otherModelsNamespace.ClassModels)
+            {
+                Assert.Equal("class", classModel.BaseTypes[0].Kind);
+            }
+
+            Assert.Equal("Models.Other.Class2", otherModelsNamespace.ClassModels[0].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Class1", otherModelsNamespace.ClassModels[1].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.TheClass", otherModelsNamespace.ClassModels[2].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Other.Class3", otherModelsNamespace.ClassModels[3].BaseTypes[0].Type.Name);
 
             Assert.Equal("Models.Other.SuperClass",
                 actualRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0]
-                    .BaseClassFullName);
+                    .BaseTypes[0].Type.Name);
         }
 
         [Fact]
@@ -320,17 +473,45 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "IInterface1"
+                        Name = "IInterface1"
                     },
                     new ClassModel
                     {
-                        FullName = "Models.Interfaces.IInterface2",
-                        BaseInterfaces = {"IInterface1"}
+                        Name = "Models.Interfaces.IInterface2",
+                        BaseTypes = new List<IBaseType>
+                        {
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "IInterface1"
+                                },
+                                Kind = "interface"
+                            }
+                        }
                     },
                     new ClassModel
                     {
-                        FullName = "Models.Interfaces.IInterface3",
-                        BaseInterfaces = {"Models.Interfaces.IInterface1", "IInterface2"}
+                        Name = "Models.Interfaces.IInterface3",
+                        BaseTypes = new List<IBaseType>
+                        {
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "Models.Interfaces.IInterface1"
+                                },
+                                Kind = "interface"
+                            },
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "IInterface2"
+                                },
+                                Kind = "interface"
+                            }
+                        }
                     }
                 }
             });
@@ -342,23 +523,87 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Models.Class1",
-                        BaseInterfaces = {"IInterface3"}
+                        Name = "Models.Class1",
+                        BaseTypes = new List<IBaseType>
+                        {
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "IInterface3"
+                                },
+                                Kind = "interface"
+                            }
+                        }
                     },
                     new ClassModel
                     {
-                        FullName = "Class2",
-                        BaseInterfaces = {"IInterface1"}
+                        Name = "Class2",
+                        BaseTypes = new List<IBaseType>
+                        {
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "IInterface1"
+                                },
+                                Kind = "interface"
+                            }
+                        }
                     },
                     new ClassModel
                     {
-                        FullName = "Models.Class3",
-                        BaseInterfaces = {"IInterface1", "IInterface2", "Models.Interfaces.IInterface3"}
+                        Name = "Models.Class3",
+                        BaseTypes = new List<IBaseType>
+                        {
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "IInterface1"
+                                },
+                                Kind = "interface"
+                            },
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "IInterface2"
+                                },
+                                Kind = "interface"
+                            },
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "Models.Interfaces.IInterface3"
+                                },
+                                Kind = "interface"
+                            }
+                        }
                     },
                     new ClassModel
                     {
-                        FullName = "Models.TheClass",
-                        BaseInterfaces = {"Models.Interfaces.IInterface1", "AInterface"}
+                        Name = "Models.TheClass",
+                        BaseTypes = new List<IBaseType>
+                        {
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "Models.Interfaces.IInterface1"
+                                },
+                                Kind = "interface"
+                            },
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "AInterface"
+                                },
+                                Kind = "interface"
+                            }
+                        }
                     }
                 }
             });
@@ -374,34 +619,67 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "AInterface",
+                        Name = "AInterface",
                     }
                 }
             });
+
+            projectModel2.FilePath = "path2";
+            projectModel1.ProjectReferences = new List<string> { "path2" };
 
             solutionModel.Projects.Add(projectModel2);
 
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(8, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(8, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(8, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var modelInterfacesNamespace = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
-            Assert.Empty(modelInterfacesNamespace.ClassModels[0].BaseInterfaces);
-            Assert.Equal("Models.Interfaces.IInterface1", modelInterfacesNamespace.ClassModels[1].BaseInterfaces[0]);
-            Assert.Equal("Models.Interfaces.IInterface1", modelInterfacesNamespace.ClassModels[2].BaseInterfaces[0]);
-            Assert.Equal("Models.Interfaces.IInterface2", modelInterfacesNamespace.ClassModels[2].BaseInterfaces[1]);
+            Assert.Empty(modelInterfacesNamespace.ClassModels[0].BaseTypes);
+
+            foreach (var classModel in modelInterfacesNamespace.ClassModels)
+            {
+                foreach (var baseType in classModel.BaseTypes)
+                {
+                    Assert.Equal("interface", baseType.Kind);
+                }
+            }
+
+            Assert.Equal("Models.Interfaces.IInterface1",
+                modelInterfacesNamespace.ClassModels[1].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Interfaces.IInterface1",
+                modelInterfacesNamespace.ClassModels[2].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Interfaces.IInterface2",
+                modelInterfacesNamespace.ClassModels[2].BaseTypes[1].Type.Name);
 
             var modelsNamespace = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1];
-            Assert.Equal("Models.Interfaces.IInterface3", modelsNamespace.ClassModels[0].BaseInterfaces[0]);
-            Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[1].BaseInterfaces[0]);
-            Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[2].BaseInterfaces[0]);
-            Assert.Equal("Models.Interfaces.IInterface2", modelsNamespace.ClassModels[2].BaseInterfaces[1]);
-            Assert.Equal("Models.Interfaces.IInterface3", modelsNamespace.ClassModels[2].BaseInterfaces[2]);
-            Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[3].BaseInterfaces[0]);
-            Assert.Equal("MyNamespace.AInterface", modelsNamespace.ClassModels[3].BaseInterfaces[1]);
 
-            Assert.Empty(actualRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0]
-                .BaseInterfaces);
+            foreach (var classModel in modelsNamespace.ClassModels)
+            {
+                foreach (var baseType in classModel.BaseTypes)
+                {
+                    Assert.Equal("interface", baseType.Kind);
+                }
+            }
+
+            Assert.Equal("Models.Interfaces.IInterface3", modelsNamespace.ClassModels[0].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[1].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[2].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Interfaces.IInterface2", modelsNamespace.ClassModels[2].BaseTypes[1].Type.Name);
+            Assert.Equal("Models.Interfaces.IInterface3", modelsNamespace.ClassModels[2].BaseTypes[2].Type.Name);
+            Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[3].BaseTypes[0].Type.Name);
+            Assert.Equal("MyNamespace.AInterface", modelsNamespace.ClassModels[3].BaseTypes[1].Type.Name);
+
+            Assert.Empty(actualRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].BaseTypes);
         }
 
         [Fact]
@@ -419,49 +697,49 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Class1",
+                        Name = "Class1",
                         Methods =
                         {
                             new MethodModel
                             {
-                                ContainingClassName = "Class1"
+                                ContainingTypeName = "Class1"
                             },
                             new MethodModel
                             {
-                                ContainingClassName = "Project1.Models.Classes.Class1"
+                                ContainingTypeName = "Project1.Models.Classes.Class1"
                             }
                         }
                     },
                     new ClassModel
                     {
-                        FullName = "Project1.Models.Classes.Class2",
+                        Name = "Project1.Models.Classes.Class2",
                         Methods =
                         {
                             new MethodModel
                             {
-                                ContainingClassName = "Class2",
+                                ContainingTypeName = "Class2",
                             }
                         },
                         Constructors =
                         {
-                            new MethodModel
+                            new ConstructorModel
                             {
-                                ContainingClassName = "Class2"
+                                ContainingTypeName = "Class2"
                             },
-                            new MethodModel
+                            new ConstructorModel
                             {
-                                ContainingClassName = "Project1.Models.Classes.Class2"
+                                ContainingTypeName = "Project1.Models.Classes.Class2"
                             }
                         }
                     },
                     new ClassModel
                     {
-                        FullName = "Project1.Models.Classes.Class3",
+                        Name = "Project1.Models.Classes.Class3",
                         Constructors =
                         {
-                            new MethodModel
+                            new ConstructorModel
                             {
-                                ContainingClassName = "Class3",
+                                ContainingTypeName = "Class3",
                             }
                         }
                     }
@@ -471,31 +749,44 @@ namespace HoneydewExtractorsTests.Processors
             solutionModel.Projects.Add(projectModel1);
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var modelInterfacesNamespace =
                 actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
 
-            Assert.Empty(modelInterfacesNamespace.ClassModels[0].Constructors);
-            Assert.Equal(2, modelInterfacesNamespace.ClassModels[0].Methods.Count);
+            var classModel1 = (ClassModel)modelInterfacesNamespace.ClassModels[0];
+            Assert.Empty(classModel1.Constructors);
+            Assert.Equal(2, classModel1.Methods.Count);
             Assert.Equal("Project1.Models.Classes.Class1",
-                modelInterfacesNamespace.ClassModels[0].Methods[0].ContainingClassName);
+                classModel1.Methods[0].ContainingTypeName);
             Assert.Equal("Project1.Models.Classes.Class1",
-                modelInterfacesNamespace.ClassModels[0].Methods[1].ContainingClassName);
+                classModel1.Methods[1].ContainingTypeName);
 
-            Assert.Equal(1, modelInterfacesNamespace.ClassModels[1].Methods.Count);
+            var classModel2 = (ClassModel)modelInterfacesNamespace.ClassModels[1];
+            Assert.Equal(1, classModel2.Methods.Count);
             Assert.Equal("Project1.Models.Classes.Class2",
-                modelInterfacesNamespace.ClassModels[1].Methods[0].ContainingClassName);
-            Assert.Equal(2, modelInterfacesNamespace.ClassModels[1].Constructors.Count);
+                classModel2.Methods[0].ContainingTypeName);
+            Assert.Equal(2, classModel2.Constructors.Count);
             Assert.Equal("Project1.Models.Classes.Class2",
-                modelInterfacesNamespace.ClassModels[1].Constructors[0].ContainingClassName);
+                classModel2.Constructors[0].ContainingTypeName);
             Assert.Equal("Project1.Models.Classes.Class2",
-                modelInterfacesNamespace.ClassModels[1].Constructors[1].ContainingClassName);
+                classModel2.Constructors[1].ContainingTypeName);
 
-            Assert.Empty(modelInterfacesNamespace.ClassModels[2].Methods);
-            Assert.Equal(1, modelInterfacesNamespace.ClassModels[2].Constructors.Count);
+            var classModel3 = (ClassModel)modelInterfacesNamespace.ClassModels[2];
+            Assert.Empty(classModel3.Methods);
+            Assert.Equal(1, classModel3.Constructors.Count);
             Assert.Equal("Project1.Models.Classes.Class3",
-                modelInterfacesNamespace.ClassModels[2].Constructors[0].ContainingClassName);
+                classModel3.Constructors[0].ContainingTypeName);
         }
 
         [Fact]
@@ -513,7 +804,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "SomeModel"
+                        Name = "SomeModel"
                     }
                 }
             });
@@ -528,26 +819,41 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Service",
+                        Name = "Service",
                         Fields =
                         {
                             new FieldModel
                             {
-                                Type = "SomeModel"
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "SomeModel"
+                                }
                             }
                         }
                     }
                 }
             });
 
+            projectModel1.FilePath = "path1";
+            projectModel2.ProjectReferences = new List<string> { "path1" };
 
             solutionModel.Projects.Add(projectModel2);
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(2, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(2, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(2, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.SomeModel",
-                actualRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].Fields[0].Type);
+                ((ClassModel)actualRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0]).Fields[0].Type
+                .Name);
         }
 
         [Fact]
@@ -565,7 +871,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "SomeModel"
+                        Name = "SomeModel"
                     }
                 }
             });
@@ -580,7 +886,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Service",
+                        Name = "Service",
                     }
                 }
             });
@@ -597,38 +903,59 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Controller",
+                        Name = "Controller",
                         Fields =
                         {
                             new FieldModel
                             {
-                                Type = "SomeModel"
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "SomeModel"
+                                }
                             },
                         },
                         Methods =
                         {
                             new MethodModel
                             {
-                                ReturnType = "Service"
+                                ReturnValue = new ReturnValueModel
+                                {
+                                    Type = new EntityTypeModel
+                                    {
+                                        Name = "Service"
+                                    },
+                                    Modifier = "ref"
+                                }
                             }
                         }
                     }
                 }
             });
 
+            projectModel1.FilePath = "path1";
+            projectModel2.FilePath = "path2";
+            projectModel3.ProjectReferences = new List<string> { "path1", "path2" };
+
             solutionModel2.Projects.Add(projectModel3);
 
             repositoryModel.Solutions.Add(solutionModel1);
             repositoryModel.Solutions.Add(solutionModel2);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
-            Assert.Equal("Models.SomeModel",
-                actualRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0]
-                    .Fields[0].Type);
-            Assert.Equal("Services.Service",
-                actualRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0]
-                    .Methods[0].ReturnType);
+            var classModel = (ClassModel)actualRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0];
+            Assert.Equal("Models.SomeModel", classModel.Fields[0].Type.Name);
+            Assert.Equal("Services.Service", classModel.Methods[0].ReturnValue.Type.Name);
+            Assert.Equal("ref", ((ReturnValueModel)classModel.Methods[0].ReturnValue).Modifier);
         }
 
         [Fact]
@@ -646,7 +973,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "AmbiguousClass"
+                        Name = "AmbiguousClass"
                     }
                 }
             });
@@ -658,7 +985,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "AmbiguousClass"
+                        Name = "AmbiguousClass"
                     }
                 }
             });
@@ -670,7 +997,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "AmbiguousClass"
+                        Name = "AmbiguousClass"
                     }
                 }
             });
@@ -683,28 +1010,48 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         FilePath = "SomePath/SomeClass.cs",
-                        FullName = "SomeClass",
-                        BaseClassFullName = "AmbiguousClass",
-                        BaseInterfaces =
+                        Name = "SomeClass",
+                        BaseTypes = new List<IBaseType>
                         {
-                            "AmbiguousClass"
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "AmbiguousClass"
+                                },
+                                Kind = "class"
+                            },
+                            new BaseTypeModel
+                            {
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "AmbiguousClass"
+                                },
+                                Kind = "interface"
+                            }
                         },
                         Fields =
                         {
                             new FieldModel
                             {
-                                Type = "AmbiguousClass"
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "AmbiguousClass"
+                                }
                             }
                         },
                         Constructors =
                         {
-                            new MethodModel
+                            new ConstructorModel
                             {
                                 ParameterTypes =
                                 {
                                     new ParameterModel
                                     {
-                                        Type = "AmbiguousClass"
+                                        Type = new EntityTypeModel
+                                        {
+                                            Name = "AmbiguousClass"
+                                        }
                                     }
                                 }
                             }
@@ -717,19 +1064,25 @@ namespace HoneydewExtractorsTests.Processors
                                 {
                                     new ParameterModel
                                     {
-                                        Type = "AmbiguousClass"
+                                        Type = new EntityTypeModel
+                                        {
+                                            Name = "AmbiguousClass"
+                                        }
                                     }
                                 },
                                 CalledMethods =
                                 {
                                     new MethodCallModel
                                     {
-                                        ContainingClassName = "AmbiguousClass",
+                                        ContainingTypeName = "AmbiguousClass",
                                         ParameterTypes =
                                         {
                                             new ParameterModel
                                             {
-                                                Type = "AmbiguousClass"
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "AmbiguousClass"
+                                                }
                                             }
                                         },
                                     }
@@ -738,13 +1091,13 @@ namespace HoneydewExtractorsTests.Processors
                         },
                         Metrics =
                         {
-                            new ClassMetric
+                            new MetricModel
                             {
-                                ExtractorName = typeof(CSharpParameterRelationMetric).FullName,
+                                ExtractorName = "ParametersExtractor",
                                 ValueType = typeof(Dictionary<string, int>).FullName,
                                 Value = new Dictionary<string, int>()
                                 {
-                                    {"AmbiguousClass", 2}
+                                    { "AmbiguousClass", 2 }
                                 },
                             }
                         }
@@ -756,36 +1109,52 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(4, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(4, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(4, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.AmbiguousClass",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FullName);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].Name);
             Assert.Equal("Services.AmbiguousClass",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].FullName);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].Name);
             Assert.Equal("Controllers.AmbiguousClass",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].FullName);
+                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Name);
 
             var someClassModel =
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[3].ClassModels[0];
+                (ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[3].ClassModels[0];
             Assert.Equal("SomeNamespace.SomeClass",
-                someClassModel.FullName);
+                someClassModel.Name);
 
-            Assert.Equal("AmbiguousClass", someClassModel.BaseClassFullName);
-            Assert.Equal("AmbiguousClass", someClassModel.BaseInterfaces[0]);
-            Assert.Equal("AmbiguousClass", someClassModel.Constructors[0].ParameterTypes[0].Type);
-            Assert.Equal("AmbiguousClass", someClassModel.Methods[0].ParameterTypes[0].Type);
-            Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].ContainingClassName);
-            Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].ParameterTypes[0].Type);
-            Assert.Equal("AmbiguousClass", someClassModel.Fields[0].Type);
-            var metricDependencies = ((Dictionary<string, int>) someClassModel.Metrics[0].Value);
+            Assert.Equal(2, someClassModel.BaseTypes.Count);
+            foreach (var baseType in someClassModel.BaseTypes)
+            {
+                Assert.Equal("AmbiguousClass", baseType.Type.Name);
+            }
+
+            Assert.Equal("class", someClassModel.BaseTypes[0].Kind);
+            Assert.Equal("interface", someClassModel.BaseTypes[1].Kind);
+            Assert.Equal("AmbiguousClass", someClassModel.Constructors[0].ParameterTypes[0].Type.Name);
+            Assert.Equal("AmbiguousClass", someClassModel.Methods[0].ParameterTypes[0].Type.Name);
+            Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].ContainingTypeName);
+            Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].ParameterTypes[0].Type.Name);
+            Assert.Equal("AmbiguousClass", someClassModel.Fields[0].Type.Name);
+            var metricDependencies = ((Dictionary<string, int>)someClassModel.Metrics[0].Value);
             Assert.Single(metricDependencies);
             Assert.True(metricDependencies.ContainsKey("AmbiguousClass"));
 
-            _progressLoggerMock.Verify(
-                logger => logger.Log("Multiple full names found for AmbiguousClass in SomePath/SomeClass.cs :", LogLevels.Warning),
+            _loggerMock.Verify(
+                logger => logger.Log("Multiple full names found for AmbiguousClass in SomePath/SomeClass.cs :",
+                    LogLevels.Warning),
                 Times.Once);
-            _progressLoggerMock.Verify(logger => logger.Log("Models.AmbiguousClass", LogLevels.Information));
-            _progressLoggerMock.Verify(logger => logger.Log("Services.AmbiguousClass", LogLevels.Information));
+            _loggerMock.Verify(logger => logger.Log("Models.AmbiguousClass", LogLevels.Information));
+            _loggerMock.Verify(logger => logger.Log("Services.AmbiguousClass", LogLevels.Information));
         }
 
         [Fact]
@@ -803,7 +1172,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "MyService"
+                        Name = "MyService"
                     }
                 }
             });
@@ -816,7 +1185,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "MyService"
+                        Name = "MyService"
                     }
                 }
             });
@@ -829,13 +1198,16 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "MyController",
+                        Name = "MyController",
                         FilePath = "SomePath/MyController.cs",
                         Fields =
                         {
                             new FieldModel
                             {
-                                Type = "MyService"
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "MyService"
+                                }
                             }
                         }
                     }
@@ -846,18 +1218,33 @@ namespace HoneydewExtractorsTests.Processors
             solutionModel.Projects.Add(projectModel2);
             solutionModel.Projects.Add(projectModel3);
 
+            projectModel1.FilePath = "path1";
+            projectModel2.FilePath = "path2";
+            projectModel3.ProjectReferences = new List<string> { "path1", "path2" };
+
             repositoryModel.Solutions.Add(solutionModel);
+
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("MyService",
-                actualRepositoryModel.Solutions[0].Projects[2].Namespaces[0].ClassModels[0].Fields[0].Type);
+                ((ClassModel)actualRepositoryModel.Solutions[0].Projects[2].Namespaces[0].ClassModels[0]).Fields[0].Type
+                .Name);
 
-            _progressLoggerMock.Verify(
-                logger => logger.Log("Multiple full names found for MyService in SomePath/MyController.cs :", LogLevels.Warning),
+            _loggerMock.Verify(
+                logger => logger.Log("Multiple full names found for MyService in SomePath/MyController.cs :",
+                    LogLevels.Warning),
                 Times.Once);
-            _progressLoggerMock.Verify(logger => logger.Log("Project1.Services.MyService", LogLevels.Information));
-            _progressLoggerMock.Verify(logger => logger.Log("Project2.Services.MyService", LogLevels.Information));
+            _loggerMock.Verify(logger => logger.Log("Project1.Services.MyService", LogLevels.Information));
+            _loggerMock.Verify(logger => logger.Log("Project2.Services.MyService", LogLevels.Information));
         }
 
         [Fact]
@@ -876,7 +1263,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "MyService"
+                        Name = "MyService"
                     }
                 }
             });
@@ -892,7 +1279,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "MyService"
+                        Name = "MyService"
                     }
                 }
             });
@@ -909,13 +1296,16 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "MyController",
+                        Name = "MyController",
                         FilePath = "SomePath/MyController.cs",
                         Fields =
                         {
                             new FieldModel
                             {
-                                Type = "MyService"
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "MyService"
+                                }
                             }
                         }
                     }
@@ -923,21 +1313,35 @@ namespace HoneydewExtractorsTests.Processors
             });
             solutionModel3.Projects.Add(projectModel3);
 
+            projectModel1.FilePath = "path1";
+            projectModel2.FilePath = "path2";
+            projectModel3.ProjectReferences = new List<string> { "path1", "path2" };
+
             repositoryModel.Solutions.Add(solutionModel1);
             repositoryModel.Solutions.Add(solutionModel2);
             repositoryModel.Solutions.Add(solutionModel3);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("MyService",
-                actualRepositoryModel.Solutions[2].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
+                ((ClassModel)actualRepositoryModel.Solutions[2].Projects[0].Namespaces[0].ClassModels[0]).Fields[0].Type
+                .Name);
 
-            _progressLoggerMock.Verify(
-                logger => logger.Log("Multiple full names found for MyService in SomePath/MyController.cs :", LogLevels.Warning),
+            _loggerMock.Verify(
+                logger => logger.Log("Multiple full names found for MyService in SomePath/MyController.cs :",
+                    LogLevels.Warning),
                 Times.Once);
-            _progressLoggerMock.Verify(logger => logger.Log("Project1.Services.MyService", LogLevels.Information));
-            _progressLoggerMock.Verify(logger => logger.Log("Project2.Services.MyService", LogLevels.Information));
+            _loggerMock.Verify(logger => logger.Log("Project1.Services.MyService", LogLevels.Information));
+            _loggerMock.Verify(logger => logger.Log("Project2.Services.MyService", LogLevels.Information));
         }
 
         [Fact]
@@ -955,7 +1359,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "MyService"
+                        Name = "MyService"
                     }
                 }
             });
@@ -968,7 +1372,7 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "MyService"
+                        Name = "MyService"
                     }
                 }
             });
@@ -981,12 +1385,15 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "MyController",
+                        Name = "MyController",
                         Fields =
                         {
                             new FieldModel
                             {
-                                Type = "OutOfRepositoryClass"
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "OutOfRepositoryClass"
+                                }
                             }
                         }
                     }
@@ -1002,12 +1409,23 @@ namespace HoneydewExtractorsTests.Processors
             repositoryModel.Solutions.Add(solutionModel1);
             repositoryModel.Solutions.Add(solutionModel2);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("OutOfRepositoryClass",
-                actualRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0].Fields[0].Type);
+                ((ClassModel)actualRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0]).Fields[0].Type
+                .Name);
 
-            _progressLoggerMock.Verify(logger => logger.Log("Multiple full names found for MyService: ",LogLevels.Warning),
+            _loggerMock.Verify(
+                logger => logger.Log("Multiple full names found for MyService: ", LogLevels.Warning),
                 Times.Never);
         }
 
@@ -1025,12 +1443,15 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Class1",
+                        Name = "Class1",
                         Properties =
                         {
                             new PropertyModel
                             {
-                                Type = "int"
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "int"
+                                }
                             }
                         }
                     }
@@ -1044,12 +1465,15 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Class2",
+                        Name = "Class2",
                         Properties =
                         {
                             new PropertyModel
                             {
-                                Type = "Class1"
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "Class1"
+                                }
                             }
                         }
                     }
@@ -1063,20 +1487,29 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        FullName = "Class4",
+                        Name = "Class4",
                         Properties =
                         {
                             new PropertyModel
                             {
-                                Type = "Class2"
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "Class2"
+                                }
                             },
                             new PropertyModel
                             {
-                                Type = "string"
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "string"
+                                }
                             },
                             new PropertyModel
                             {
-                                Type = "Namespace.RandomClassClass"
+                                Type = new EntityTypeModel
+                                {
+                                    Name = "Namespace.RandomClassClass"
+                                }
                             }
                         }
                     }
@@ -1087,18 +1520,32 @@ namespace HoneydewExtractorsTests.Processors
 
             repositoryModel.Solutions.Add(solutionModel);
 
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("System.Int32",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].Properties[0].Type);
+                ((ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0]).Properties[0]
+                .Type.Name);
             Assert.Equal("Models.Class1",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].Properties[0].Type);
+                ((ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0]).Properties[0]
+                .Type.Name);
             Assert.Equal("Services.Class2",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Properties[0].Type);
+                ((ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0]).Properties[0]
+                .Type.Name);
             Assert.Equal("System.String",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Properties[1].Type);
+                ((ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0]).Properties[1]
+                .Type.Name);
             Assert.Equal("Namespace.RandomClassClass",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Properties[2].Type);
+                ((ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0]).Properties[2]
+                .Type.Name);
         }
     }
 }

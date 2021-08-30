@@ -1,0 +1,13 @@
+﻿namespace Namespace1
+{
+    using System;
+    
+    public class Class1
+    {
+        [Serializable]
+        internal char C {get;set;}
+        
+        [Serializable]
+        internal event Action<char> C  {add{}remove{}}
+    }
+}

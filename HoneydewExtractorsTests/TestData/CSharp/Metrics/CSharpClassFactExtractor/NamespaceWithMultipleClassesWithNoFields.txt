@@ -1,0 +1,18 @@
+﻿using System;
+     
+namespace TopLevel
+{
+    public class Foo { public void f() {} }   
+                                         
+    public class Foo2 
+    {
+        public int F() { return 0; }
+    }
+    
+    public class Foo3 
+    {
+        public void F(int a) {}
+    
+        public double F(double a) { return a; }
+    }
+}

@@ -1,0 +1,66 @@
+﻿namespace Namespace1
+{
+    using System;
+    
+    public class Class1
+    {
+        private string _value;
+        private int _intValue;
+        
+        public int Value
+        {
+            set
+            {
+                _intValue = value;
+                _value = Function(value);
+
+                static string Function(int x)
+                {
+                    return x.ToString();
+                }
+            }
+        }
+
+        public event Func<int> EventValue
+        {
+            add
+            {
+                _value = Function(value.Invoke());
+                
+                static string Function(int x)
+                {
+                    return x.ToString();
+                }
+            }
+            remove
+            {
+                _value = Function(value.Invoke());
+                
+                static string Function(int x)
+                {
+                    return x.ToString();
+                }
+            }
+        }
+
+        public Class1(int a)
+        {
+            _value = Function(a);
+
+            static string Function(int x)
+            {
+                return x.ToString();
+            }
+        }
+
+        public void Method(int a)
+        {
+            _value = Function(a);
+
+            static string Function(int x)
+            {
+                return x.ToString();
+            }
+        }
+    }
+}

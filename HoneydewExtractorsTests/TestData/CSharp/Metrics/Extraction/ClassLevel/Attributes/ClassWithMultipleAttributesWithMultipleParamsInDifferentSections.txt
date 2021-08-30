@@ -1,0 +1,12 @@
+﻿using System;
+
+namespace Namespace1
+{
+    [System.Obsolete("Message", false)]
+    [System.Serializable]
+    [System.AttributeUsage(AttributeTargets.Class)]
+    public class Class1
+    {
+        
+    }
+}

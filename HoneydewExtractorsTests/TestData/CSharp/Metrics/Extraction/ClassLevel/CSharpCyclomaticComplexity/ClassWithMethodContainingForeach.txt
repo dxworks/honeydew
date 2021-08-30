@@ -1,0 +1,17 @@
+﻿using System.Collections.Generic;
+
+namespace CyclomaticComplexity
+{
+    class MyClass
+    {    
+       public void Function(IList<string> values)
+        {
+            var count = 0;
+
+            foreach (var value in values)
+            {
+                count += value.Length;
+            }
+        }
+    }
+}

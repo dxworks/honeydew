@@ -1,4 +1,19 @@
-﻿using HoneydewExtractors.CSharp.Metrics;
+﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
+using HoneydewExtractors.Core.Metrics.Extraction.Class;
+using HoneydewExtractors.Core.Metrics.Extraction.Common;
+using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.Property;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
+using HoneydewExtractors.Core.Metrics.Visitors.Properties;
+using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
+using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
+using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics
@@ -6,110 +21,63 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
     public class CSharpClassFactExtractorLinesOfCodeTests
     {
         private readonly CSharpFactExtractor _sut;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpClassFactExtractorLinesOfCodeTests()
         {
-            _sut = new CSharpFactExtractor();
+            var linesOfCodeVisitor = new LinesOfCodeVisitor();
+            var compositeVisitor = new CompositeVisitor();
+
+            compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
+            {
+                linesOfCodeVisitor,
+                new ConstructorSetterClassVisitor(new List<ICSharpConstructorVisitor>
+                {
+                    linesOfCodeVisitor
+                }),
+                new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
+                {
+                    linesOfCodeVisitor,
+                    new LocalFunctionsSetterClassVisitor(new List<ICSharpLocalFunctionVisitor>
+                    {
+                        linesOfCodeVisitor,
+                        new LocalFunctionInfoVisitor(new List<ILocalFunctionVisitor>
+                        {
+                            linesOfCodeVisitor
+                        }),
+                    })
+                }),
+                new PropertySetterClassVisitor(new List<ICSharpPropertyVisitor>
+                {
+                    linesOfCodeVisitor,
+                    new MethodAccessorSetterPropertyVisitor(new List<IMethodVisitor>
+                    {
+                        linesOfCodeVisitor
+                    })
+                })
+            }));
+
+            compositeVisitor.Add(linesOfCodeVisitor);
+
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
+            _sut = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithClassWithMethodsAndProperties()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/ClassWithCommentsWithPropertyAndMethod.txt")]
+        public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithClassWithMethodsAndProperties(string fileContent)
         {
-            const string fileContent = @"// comment
-using System;
-using HoneydewCore.Extractors;
+            var compilationUnit = _sut.Extract(fileContent);
 
-// here is the namespace
-namespace TopLevel
-{
-    // some code
-    public class Foo
-    {
-        // this is a field
-        private int _f;
+            var classModels = compilationUnit.ClassTypes;
 
-        public int Field
-         {
-            get
-            {
-                // should return calculated
+            Assert.Equal(21, compilationUnit.Loc.SourceLines);
+            Assert.Equal(10, compilationUnit.Loc.EmptyLines);
+            Assert.Equal(8, compilationUnit.Loc.CommentedLines);
 
-                return Calc(_f);
-            }
-         }
-
-
-        // this method calculates
-        public int Calc(int a)
-        {
- 
-            // calculate double
-
-            var d = a*2;
-            return d;
-           // return a*2;
-        }        
-    }                                    
-}";
-            var classModels = _sut.Extract(fileContent);
-
-            var classModel = classModels[0];
-            Assert.Equal(21, classModel.Loc.SourceLines);
-            Assert.Equal(7, classModel.Loc.EmptyLines);
-            Assert.Equal(8, classModel.Loc.CommentedLines);
-
-            Assert.Equal(5, classModel.Methods[0].Loc.SourceLines);
-            Assert.Equal(2, classModel.Methods[0].Loc.CommentedLines);
-            Assert.Equal(2, classModel.Methods[0].Loc.EmptyLines);
-
-            Assert.Equal(7, classModel.Properties[0].Loc.SourceLines);
-            Assert.Equal(1, classModel.Properties[0].Loc.CommentedLines);
-            Assert.Equal(1, classModel.Properties[0].Loc.EmptyLines);
-        }
-
-        [Fact]
-        public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithClassAndDelegate()
-        {
-            const string fileContent = @"using System;
-using HoneydewCore.Extractors;
-
-// here is the namespace
-namespace TopLevel
-{
-    // some code
-    public class Foo
-    {
-        // this is a field
-        private int _f;
-
-        public int Field
-         {
-            get
-            {
-                // should return calculated
-
-                return Calc(_f);
-            }
-         }
-
-
-        // this method calculates
-        public int Calc(int a)
-        {
- 
-            // calculate double
-
-            var d = a*2;
-            return d;
-           // return a*2;
-        }        
-    }
-
-    public delegate void A();                                        
-}";
-            var classModels = _sut.Extract(fileContent);
-
-            var classModel = classModels[0];
+            var classModel = (ClassModel)classModels[0];
             Assert.Equal(16, classModel.Loc.SourceLines);
             Assert.Equal(6, classModel.Loc.EmptyLines);
             Assert.Equal(5, classModel.Loc.CommentedLines);
@@ -121,11 +89,82 @@ namespace TopLevel
             Assert.Equal(7, classModel.Properties[0].Loc.SourceLines);
             Assert.Equal(1, classModel.Properties[0].Loc.CommentedLines);
             Assert.Equal(1, classModel.Properties[0].Loc.EmptyLines);
+        }
 
-            var delegateModel = classModels[1];
-            Assert.Equal(1, delegateModel.Loc.SourceLines);
-            Assert.Equal(0, delegateModel.Loc.EmptyLines);
-            Assert.Equal(0, delegateModel.Loc.CommentedLines);
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/ClassWithPropertyAndMethodAndDelegateWithComments.txt")]
+        public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithClassAndDelegate(string fileContent)
+        {
+            var compilationUnit = _sut.Extract(fileContent);
+
+            var classModels = compilationUnit.ClassTypes;
+
+            Assert.Equal(22, compilationUnit.Loc.SourceLines);
+            Assert.Equal(9, compilationUnit.Loc.EmptyLines);
+            Assert.Equal(8, compilationUnit.Loc.CommentedLines);
+
+            var classModel = (ClassModel)classModels[0];
+            Assert.Equal(16, classModel.Loc.SourceLines);
+            Assert.Equal(6, classModel.Loc.EmptyLines);
+            Assert.Equal(5, classModel.Loc.CommentedLines);
+
+            Assert.Equal(5, classModel.Methods[0].Loc.SourceLines);
+            Assert.Equal(2, classModel.Methods[0].Loc.CommentedLines);
+            Assert.Equal(2, classModel.Methods[0].Loc.EmptyLines);
+
+            Assert.Equal(7, classModel.Properties[0].Loc.SourceLines);
+            Assert.Equal(1, classModel.Properties[0].Loc.CommentedLines);
+            Assert.Equal(1, classModel.Properties[0].Loc.EmptyLines);
+        }
+
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/LocalFunctionWithComments.txt")]
+        public void Extract_ShouldHaveLinesOfCode_WhenMethodWithLocalFunction(string fileContent)
+        {
+            var compilationUnit = _sut.Extract(fileContent);
+
+            var classTypes = compilationUnit.ClassTypes;
+
+            var localFunction = ((MethodModel)((ClassModel)classTypes[0]).Methods[0]).LocalFunctions[0];
+
+            Assert.Equal(4, localFunction.Loc.SourceLines);
+            Assert.Equal(1, localFunction.Loc.CommentedLines);
+            Assert.Equal(1, localFunction.Loc.EmptyLines);
+        }
+
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/ClassWithCommentsWithPropertyAndMethod.txt")]
+        public void Extract_ShouldHaveLinesOfCode_WhenGivenPropertyWithGetAccessor(string fileContent)
+        {
+            var compilationUnit = _sut.Extract(fileContent);
+
+            var classTypes = compilationUnit.ClassTypes;
+
+            var accessor = ((ClassModel)classTypes[0]).Properties[0].Accessors[0];
+
+            Assert.Equal(4, accessor.Loc.SourceLines);
+            Assert.Equal(1, accessor.Loc.CommentedLines);
+            Assert.Equal(1, accessor.Loc.EmptyLines);
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/ClassWithEventPropertyThatCallsMethodFromExternClass.txt")]
+        public void Extract_ShouldHaveLinesOfCode_WhenGivenEventPropertyWithGetAccessor(string fileContent)
+        {
+            var compilationUnit = _sut.Extract(fileContent);
+
+            var classTypes = compilationUnit.ClassTypes;
+
+            var addAccessor = ((ClassModel)classTypes[0]).Properties[0].Accessors[0];
+            Assert.Equal(4, addAccessor.Loc.SourceLines);
+            Assert.Equal(0, addAccessor.Loc.CommentedLines);
+            Assert.Equal(0, addAccessor.Loc.EmptyLines);
+            
+            var removeAccessor = ((ClassModel)classTypes[0]).Properties[0].Accessors[1];
+            Assert.Equal(1, removeAccessor.Loc.SourceLines);
+            Assert.Equal(0, removeAccessor.Loc.CommentedLines);
+            Assert.Equal(0, removeAccessor.Loc.EmptyLines);
         }
     }
 }

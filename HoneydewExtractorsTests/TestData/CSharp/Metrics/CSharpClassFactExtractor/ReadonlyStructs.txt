@@ -1,0 +1,28 @@
+namespace Points 
+{
+    readonly public struct ReadonlyPoint3D
+    {
+        public ReadonlyPoint3D(double x, double y, double z)
+        {
+            this.X = x;
+            this.Y = y;
+            this.Z = z;
+        }
+    
+        public double X { get; }
+        public double Y { get; }
+        public double Z { get; }
+    }
+    
+    public readonly struct ReadonlyPoint2D
+    {
+        public ReadonlyPoint3D(double x, double y)
+        {
+            this.X = x;
+            this.Y = y;
+        }
+    
+        public double X { get; }
+        public double Y { get; }
+    }
+}

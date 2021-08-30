@@ -1,0 +1,50 @@
+﻿class MyClass
+{
+    delegate void A();
+
+    public int Value
+    {
+        get
+        {
+            int x = 0;
+            while (x < 51)
+            {
+                x++;
+            }
+
+            return x;
+        }
+        set
+        {
+            int z = 10;
+            while (true)
+            {
+                z++;
+                break;
+            }
+            z = value;
+        }
+    }
+
+    public MyClass(int a)
+    {
+        while (true)
+        {
+            break;
+        }
+    }
+
+    public void Function()
+    {
+        int i = 0;
+        while (i < 5)
+        {
+            i++;
+        }
+
+        while (i % 2 == 0 && i < 10)
+        {
+            i--;
+        }
+    }
+}

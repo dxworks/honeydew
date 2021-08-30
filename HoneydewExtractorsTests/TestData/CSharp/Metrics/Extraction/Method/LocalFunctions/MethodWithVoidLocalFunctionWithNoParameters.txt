@@ -1,0 +1,17 @@
+﻿namespace Namespace1 
+{
+    public class Class1
+    {
+        public void Method()
+        {
+            LocalFunction();
+            
+            void LocalFunction()
+            {
+                var a = 1;
+                var b = 56;
+                var c = a + b;
+            }
+        }
+    }
+}

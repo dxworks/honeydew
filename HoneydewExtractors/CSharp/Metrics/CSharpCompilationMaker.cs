@@ -10,23 +10,41 @@ namespace HoneydewExtractors.CSharp.Metrics
 {
     public class CSharpCompilationMaker : ICompilationMaker
     {
-        private IEnumerable<PortableExecutableReference> _references;
+        private List<PortableExecutableReference> _references;
 
         public Compilation GetCompilation()
         {
             _references ??= FindReferences();
 
             var compilation = CSharpCompilation.Create("Compilation");
-
-            return _references
-                .Aggregate(compilation, (current, reference) => current.AddReferences(reference));
+            return compilation.AddReferences(_references);
+            //
+            // return _references
+            //     .Aggregate(compilation, (current, reference) => current.AddReferences(reference));
         }
 
-        private static IEnumerable<PortableExecutableReference> FindReferences()
+        public void AddReference(string path)
+        {
+            if (File.Exists(path))
+            {
+                try
+                {
+                    _references ??= FindReferences();
+
+                    _references.Add(MetadataReference.CreateFromFile(path));
+                }
+                catch (Exception)
+                {
+                    //
+                }
+            }
+        }
+
+        private static List<PortableExecutableReference> FindReferences()
         {
             var references = new List<PortableExecutableReference>();
 
-            var value = (string) AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES");
+            var value = (string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES");
             if (value != null)
             {
                 var pathToDlls = value.Split(Path.PathSeparator);

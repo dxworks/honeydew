@@ -1,0 +1,7 @@
+﻿namespace Models.Main.Items
+{
+    public class MainItem
+    {
+        public void Method(this int a) {}
+    }
+}

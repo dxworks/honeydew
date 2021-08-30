@@ -1,28 +1,29 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public record NamespaceModel
+    public record NamespaceModel : IModelEntity
     {
         public string Name { get; set; }
-        public IList<ClassModel> ClassModels { get; set; } = new List<ClassModel>();
+        public IList<IClassType> ClassModels { get; set; } = new List<IClassType>();
 
-        public void Add(ClassModel classModel)
+        public void Add(IClassType classType)
         {
-            if (!string.IsNullOrEmpty(Name) && classModel.Namespace != Name)
+            if (!string.IsNullOrEmpty(Name) && classType.ContainingTypeName != Name)
             {
                 return;
             }
 
-            if (ClassModels.Any(model => model.FullName == classModel.FullName))
+            if (ClassModels.Any(model => model.Name == classType.Name))
             {
                 return;
             }
 
-            Name = classModel.Namespace;
+            Name = classType.ContainingTypeName;
 
-            ClassModels.Add(classModel);
+            ClassModels.Add(classType);
         }
     }
 }

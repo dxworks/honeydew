@@ -1,0 +1,28 @@
+﻿using System;
+
+namespace TopLevel
+{
+    public class Foo 
+    { 
+        private double _value;
+        
+        public event Func<double> Value
+        {
+            add => Triple(_value);
+            remove 
+            {            
+                _value = Double(_value);
+            }
+        }
+        
+        protected double Triple(double a)
+        {
+            return a * 3;
+        }
+        
+        private static double Double(double a)
+        {
+            return a * 2;
+        }
+    }                                        
+}

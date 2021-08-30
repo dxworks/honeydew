@@ -1,8 +1,14 @@
 ﻿using System.Collections.Generic;
-using HoneydewExtractors.Core.Metrics.Extraction;
+using HoneydewCore.Logging;
+using HoneydewExtractors.Core.Metrics.Extraction.Class;
+using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.Field;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Fields;
 using HoneydewExtractors.CSharp.Metrics;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
@@ -10,23 +16,25 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
     public class CSharpFieldsInfoMetricTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpFieldsInfoMetricTests()
         {
-            _factExtractor = new CSharpFactExtractor();
-            _factExtractor.AddMetric<CSharpFieldsInfoMetric>();
-        }
+            var compositeVisitor = new CompositeVisitor();
 
-        [Fact]
-        public void GetMetricType_ShouldReturnClassLevel()
-        {
-            Assert.Equal(ExtractionMetricType.ClassLevel, new CSharpFieldsInfoMetric().GetMetricType());
-        }
+            compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
+            {
+                new BaseInfoClassVisitor(),
+                new FieldSetterClassVisitor(new List<ICSharpFieldVisitor>
+                {
+                    new FieldInfoVisitor()
+                })
+            }));
 
-        [Fact]
-        public void PrettyPrint_ShouldReturnFieldsInfo()
-        {
-            Assert.Equal("Fields Info", new CSharpFieldsInfoMetric().PrettyPrint());
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
+            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }
 
         [Fact]
@@ -42,18 +50,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                       }";
 
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(2, classModels.Count);
+            Assert.Equal(2, classTypes.Count);
 
-            foreach (var classModel in classModels)
+            foreach (var classType in classTypes)
             {
-                var optional = classModel.GetMetricValue<CSharpFieldsInfoMetric>();
-                Assert.True(optional.HasValue);
-
-                var fieldInfos = (IList<FieldModel>) optional.Value;
-
-                Assert.Empty(fieldInfos);
+                var classModel = (ClassModel)classType;
+                Assert.Empty(classModel.Fields);
             }
         }
 
@@ -71,37 +75,35 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                       }";
 
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var optional = classModels[0].GetMetricValue<CSharpFieldsInfoMetric>();
-            Assert.True(optional.HasValue);
 
-            var fieldInfos = (IList<FieldModel>) optional.Value;
+            var fieldTypes = ((ClassModel)classTypes[0]).Fields;
 
-            Assert.Equal(3, fieldInfos.Count);
+            Assert.Equal(3, fieldTypes.Count);
 
-            Assert.Equal("A", fieldInfos[0].Name);
-            Assert.Equal("int", fieldInfos[0].Type);
-            Assert.Equal("readonly", fieldInfos[0].Modifier);
-            Assert.Equal("private", fieldInfos[0].AccessModifier);
-            Assert.Equal("TopLevel.Foo", fieldInfos[0].ContainingClassName);
-            Assert.False(fieldInfos[0].IsEvent);
+            Assert.Equal("A", fieldTypes[0].Name);
+            Assert.Equal("int", fieldTypes[0].Type.Name);
+            Assert.Equal("readonly", fieldTypes[0].Modifier);
+            Assert.Equal("private", fieldTypes[0].AccessModifier);
+            Assert.Equal("TopLevel.Foo", fieldTypes[0].ContainingTypeName);
+            Assert.False(fieldTypes[0].IsEvent);
 
-            Assert.Equal("X", fieldInfos[1].Name);
-            Assert.Equal("float", fieldInfos[1].Type);
-            Assert.Equal("volatile", fieldInfos[1].Modifier);
-            Assert.Equal("private", fieldInfos[1].AccessModifier);
-            Assert.Equal("TopLevel.Foo", fieldInfos[1].ContainingClassName);
-            Assert.False(fieldInfos[1].IsEvent);
+            Assert.Equal("X", fieldTypes[1].Name);
+            Assert.Equal("float", fieldTypes[1].Type.Name);
+            Assert.Equal("volatile", fieldTypes[1].Modifier);
+            Assert.Equal("private", fieldTypes[1].AccessModifier);
+            Assert.Equal("TopLevel.Foo", fieldTypes[1].ContainingTypeName);
+            Assert.False(fieldTypes[1].IsEvent);
 
-            Assert.Equal("Y", fieldInfos[2].Name);
-            Assert.Equal("string", fieldInfos[2].Type);
-            Assert.Equal("static", fieldInfos[2].Modifier);
-            Assert.Equal("private", fieldInfos[2].AccessModifier);
-            Assert.Equal("TopLevel.Foo", fieldInfos[2].ContainingClassName);
-            Assert.False(fieldInfos[2].IsEvent);
+            Assert.Equal("Y", fieldTypes[2].Name);
+            Assert.Equal("string", fieldTypes[2].Type.Name);
+            Assert.Equal("static", fieldTypes[2].Modifier);
+            Assert.Equal("private", fieldTypes[2].AccessModifier);
+            Assert.Equal("TopLevel.Foo", fieldTypes[2].ContainingTypeName);
+            Assert.False(fieldTypes[2].IsEvent);
         }
 
         [Theory]
@@ -122,46 +124,43 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                       }}";
 
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var optional = classModels[0].GetMetricValue<CSharpFieldsInfoMetric>();
-            Assert.True(optional.HasValue);
+            var fieldTypes = ((ClassModel)classTypes[0]).Fields;
 
-            var fieldInfos = (IList<FieldModel>) optional.Value;
+            Assert.Equal(5, fieldTypes.Count);
 
-            Assert.Equal(5, fieldInfos.Count);
+            Assert.Equal("AnimalNest", fieldTypes[0].Name);
+            Assert.Equal("int", fieldTypes[0].Type.Name);
+            Assert.Equal("", fieldTypes[0].Modifier);
+            Assert.Equal(modifier, fieldTypes[0].AccessModifier);
+            Assert.False(fieldTypes[0].IsEvent);
 
-            Assert.Equal("AnimalNest", fieldInfos[0].Name);
-            Assert.Equal("int", fieldInfos[0].Type);
-            Assert.Equal("", fieldInfos[0].Modifier);
-            Assert.Equal(modifier, fieldInfos[0].AccessModifier);
-            Assert.False(fieldInfos[0].IsEvent);
+            Assert.Equal("X", fieldTypes[1].Name);
+            Assert.Equal("float", fieldTypes[1].Type.Name);
+            Assert.Equal("", fieldTypes[1].Modifier);
+            Assert.Equal(modifier, fieldTypes[1].AccessModifier);
+            Assert.False(fieldTypes[1].IsEvent);
 
-            Assert.Equal("X", fieldInfos[1].Name);
-            Assert.Equal("float", fieldInfos[1].Type);
-            Assert.Equal("", fieldInfos[1].Modifier);
-            Assert.Equal(modifier, fieldInfos[1].AccessModifier);
-            Assert.False(fieldInfos[1].IsEvent);
+            Assert.Equal("Yaz_fafa", fieldTypes[2].Name);
+            Assert.Equal("float", fieldTypes[2].Type.Name);
+            Assert.Equal("", fieldTypes[2].Modifier);
+            Assert.Equal(modifier, fieldTypes[2].AccessModifier);
+            Assert.False(fieldTypes[2].IsEvent);
 
-            Assert.Equal("Yaz_fafa", fieldInfos[2].Name);
-            Assert.Equal("float", fieldInfos[2].Type);
-            Assert.Equal("", fieldInfos[2].Modifier);
-            Assert.Equal(modifier, fieldInfos[2].AccessModifier);
-            Assert.False(fieldInfos[2].IsEvent);
+            Assert.Equal("_zxy", fieldTypes[3].Name);
+            Assert.Equal("string", fieldTypes[3].Type.Name);
+            Assert.Equal("", fieldTypes[3].Modifier);
+            Assert.Equal(modifier, fieldTypes[3].AccessModifier);
+            Assert.False(fieldTypes[3].IsEvent);
 
-            Assert.Equal("_zxy", fieldInfos[3].Name);
-            Assert.Equal("string", fieldInfos[3].Type);
-            Assert.Equal("", fieldInfos[3].Modifier);
-            Assert.Equal(modifier, fieldInfos[3].AccessModifier);
-            Assert.False(fieldInfos[3].IsEvent);
-
-            Assert.Equal("extractor", fieldInfos[4].Name);
-            Assert.Equal("CSharpMetricExtractor", fieldInfos[4].Type);
-            Assert.Equal("", fieldInfos[4].Modifier);
-            Assert.Equal(modifier, fieldInfos[4].AccessModifier);
-            Assert.False(fieldInfos[4].IsEvent);
+            Assert.Equal("extractor", fieldTypes[4].Name);
+            Assert.Equal("CSharpMetricExtractor", fieldTypes[4].Type.Name);
+            Assert.Equal("", fieldTypes[4].Modifier);
+            Assert.Equal(modifier, fieldTypes[4].AccessModifier);
+            Assert.False(fieldTypes[4].IsEvent);
         }
 
         [Theory]
@@ -182,40 +181,37 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                       }}";
 
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var optional = classModels[0].GetMetricValue<CSharpFieldsInfoMetric>();
-            Assert.True(optional.HasValue);
+            var fieldTypes = ((ClassModel)classTypes[0]).Fields;
 
-            var fieldInfos = (IList<FieldModel>) optional.Value;
+            Assert.Equal(4, fieldTypes.Count);
 
-            Assert.Equal(4, fieldInfos.Count);
+            Assert.Equal("extractor", fieldTypes[0].Name);
+            Assert.Equal("CSharpMetricExtractor", fieldTypes[0].Type.Name);
+            Assert.Equal("", fieldTypes[0].Modifier);
+            Assert.Equal(visibility, fieldTypes[0].AccessModifier);
+            Assert.True(fieldTypes[0].IsEvent);
 
-            Assert.Equal("extractor", fieldInfos[0].Name);
-            Assert.Equal("CSharpMetricExtractor", fieldInfos[0].Type);
-            Assert.Equal("", fieldInfos[0].Modifier);
-            Assert.Equal(visibility, fieldInfos[0].AccessModifier);
-            Assert.True(fieldInfos[0].IsEvent);
+            Assert.Equal("_some_event", fieldTypes[1].Name);
+            Assert.Equal("int", fieldTypes[1].Type.Name);
+            Assert.Equal("", fieldTypes[1].Modifier);
+            Assert.Equal(visibility, fieldTypes[1].AccessModifier);
+            Assert.True(fieldTypes[1].IsEvent);
 
-            Assert.Equal("_some_event", fieldInfos[1].Name);
-            Assert.Equal("int", fieldInfos[1].Type);
-            Assert.Equal("", fieldInfos[1].Modifier);
-            Assert.Equal(visibility, fieldInfos[1].AccessModifier);
-            Assert.True(fieldInfos[1].IsEvent);
+            Assert.Equal("MyAction1", fieldTypes[2].Name);
+            Assert.Equal("System.Action", fieldTypes[2].Type.Name);
+            Assert.Equal("", fieldTypes[2].Modifier);
+            Assert.Equal(visibility, fieldTypes[2].AccessModifier);
+            Assert.True(fieldTypes[2].IsEvent);
 
-            Assert.Equal("MyAction1", fieldInfos[2].Name);
-            Assert.Equal("System.Action", fieldInfos[2].Type);
-            Assert.Equal("", fieldInfos[2].Modifier);
-            Assert.Equal(visibility, fieldInfos[2].AccessModifier);
-            Assert.True(fieldInfos[2].IsEvent);
-
-            Assert.Equal("MyAction2", fieldInfos[3].Name);
-            Assert.Equal("System.Action", fieldInfos[3].Type);
-            Assert.Equal("", fieldInfos[3].Modifier);
-            Assert.Equal(visibility, fieldInfos[3].AccessModifier);
-            Assert.True(fieldInfos[3].IsEvent);
+            Assert.Equal("MyAction2", fieldTypes[3].Name);
+            Assert.Equal("System.Action", fieldTypes[3].Type.Name);
+            Assert.Equal("", fieldTypes[3].Modifier);
+            Assert.Equal(visibility, fieldTypes[3].AccessModifier);
+            Assert.True(fieldTypes[3].IsEvent);
         }
 
         [Theory]
@@ -235,46 +231,43 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                       }}";
 
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var optional = classModels[0].GetMetricValue<CSharpFieldsInfoMetric>();
-            Assert.True(optional.HasValue);
+            var fieldTypes = ((ClassModel)classTypes[0]).Fields;
 
-            var fieldInfos = (IList<FieldModel>) optional.Value;
+            Assert.Equal(5, fieldTypes.Count);
 
-            Assert.Equal(5, fieldInfos.Count);
+            Assert.Equal("AnimalNest", fieldTypes[0].Name);
+            Assert.Equal("int", fieldTypes[0].Type.Name);
+            Assert.Equal(modifier, fieldTypes[0].Modifier);
+            Assert.Equal("public", fieldTypes[0].AccessModifier);
+            Assert.False(fieldTypes[0].IsEvent);
 
-            Assert.Equal("AnimalNest", fieldInfos[0].Name);
-            Assert.Equal("int", fieldInfos[0].Type);
-            Assert.Equal(modifier, fieldInfos[0].Modifier);
-            Assert.Equal("public", fieldInfos[0].AccessModifier);
-            Assert.False(fieldInfos[0].IsEvent);
+            Assert.Equal("X", fieldTypes[1].Name);
+            Assert.Equal("float", fieldTypes[1].Type.Name);
+            Assert.Equal(modifier, fieldTypes[1].Modifier);
+            Assert.Equal("protected", fieldTypes[1].AccessModifier);
+            Assert.False(fieldTypes[1].IsEvent);
 
-            Assert.Equal("X", fieldInfos[1].Name);
-            Assert.Equal("float", fieldInfos[1].Type);
-            Assert.Equal(modifier, fieldInfos[1].Modifier);
-            Assert.Equal("protected", fieldInfos[1].AccessModifier);
-            Assert.False(fieldInfos[1].IsEvent);
+            Assert.Equal("Yaz_fafa", fieldTypes[2].Name);
+            Assert.Equal("float", fieldTypes[2].Type.Name);
+            Assert.Equal(modifier, fieldTypes[2].Modifier);
+            Assert.Equal("protected", fieldTypes[2].AccessModifier);
+            Assert.False(fieldTypes[2].IsEvent);
 
-            Assert.Equal("Yaz_fafa", fieldInfos[2].Name);
-            Assert.Equal("float", fieldInfos[2].Type);
-            Assert.Equal(modifier, fieldInfos[2].Modifier);
-            Assert.Equal("protected", fieldInfos[2].AccessModifier);
-            Assert.False(fieldInfos[2].IsEvent);
+            Assert.Equal("_zxy", fieldTypes[3].Name);
+            Assert.Equal("string", fieldTypes[3].Type.Name);
+            Assert.Equal(modifier, fieldTypes[3].Modifier);
+            Assert.Equal("private", fieldTypes[3].AccessModifier);
+            Assert.False(fieldTypes[3].IsEvent);
 
-            Assert.Equal("_zxy", fieldInfos[3].Name);
-            Assert.Equal("string", fieldInfos[3].Type);
-            Assert.Equal(modifier, fieldInfos[3].Modifier);
-            Assert.Equal("private", fieldInfos[3].AccessModifier);
-            Assert.False(fieldInfos[3].IsEvent);
-
-            Assert.Equal("extractor", fieldInfos[4].Name);
-            Assert.Equal("CSharpMetricExtractor", fieldInfos[4].Type);
-            Assert.Equal(modifier, fieldInfos[4].Modifier);
-            Assert.Equal("private", fieldInfos[4].AccessModifier);
-            Assert.False(fieldInfos[4].IsEvent);
+            Assert.Equal("extractor", fieldTypes[4].Name);
+            Assert.Equal("CSharpMetricExtractor", fieldTypes[4].Type.Name);
+            Assert.Equal(modifier, fieldTypes[4].Modifier);
+            Assert.Equal("private", fieldTypes[4].AccessModifier);
+            Assert.False(fieldTypes[4].IsEvent);
         }
     }
 }

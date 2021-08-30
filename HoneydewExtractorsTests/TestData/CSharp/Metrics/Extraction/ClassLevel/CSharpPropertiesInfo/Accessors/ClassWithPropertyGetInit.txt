@@ -1,0 +1,17 @@
+﻿using System;
+
+namespace Namespace1
+{
+    public class Class1
+    {
+        private int _value;
+    
+        public int GetInit{get;init;}
+        
+        public int GetInitExpressionBody
+        {
+            get => _value;
+            init => _value = value;
+        }
+    }
+}

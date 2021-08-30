@@ -1,0 +1,39 @@
+﻿using System.Threading.Tasks;
+
+namespace Namespace1
+{
+    class Class1
+    {
+        public void Method(int a, int b, int c)
+        {
+            var s = Sum(a, b);
+            var s2 = Sum(s, c);
+
+            int Sum(int x, int y)
+            {
+                return x+y;
+            }
+            
+            string CString()
+            {
+                return "c";
+            }
+            
+            var cstr = CString(); 
+            
+            string Stringify(int x)
+            {
+                return "";
+            }
+            
+            void Print(string x)
+            {
+            }
+            
+            Print("Numbers: ");
+            Print(Stringify(s));
+            var str = Stringify(s2);
+            Print(str);
+        }
+    }
+}

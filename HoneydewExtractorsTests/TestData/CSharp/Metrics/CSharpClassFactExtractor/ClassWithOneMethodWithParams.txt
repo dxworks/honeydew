@@ -1,0 +1,9 @@
+﻿namespace Models.Main.Items
+{
+    public class MainItem
+    {
+        public void Method(params int[] a) {}
+
+        public MainItem(params int[] a) {}
+    }
+}

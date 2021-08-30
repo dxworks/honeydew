@@ -1,0 +1,20 @@
+﻿using System;
+namespace PC
+{
+    using Project = PC.MyCompany.Project;
+    class A
+    {
+        void M()
+        {
+            var mc = new Project.MyClass();
+        }
+    }
+    namespace MyCompany
+    {
+        namespace Project
+        {
+            using Company = MyCompany;
+            public class MyClass { }
+        }
+    }
+}

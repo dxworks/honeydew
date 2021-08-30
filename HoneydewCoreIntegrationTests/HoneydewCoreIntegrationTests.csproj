@@ -25,4 +25,8 @@
       <ProjectReference Include="..\HoneydewExtractors\HoneydewExtractors.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Processors\RelationMetricHolderToClassRelationsProcessorTests.cs" />
+    </ItemGroup>
+
 </Project>

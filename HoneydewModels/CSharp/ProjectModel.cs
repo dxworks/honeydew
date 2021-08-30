@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public record ProjectModel
+    public record ProjectModel : IModelEntity
     {
         public string Name { get; set; }
 
@@ -22,9 +23,9 @@ namespace HoneydewModels.CSharp
             Name = name;
         }
 
-        public void Add(ClassModel classModel)
+        public void Add(IClassType classModel)
         {
-            var namespaceModel = Namespaces.FirstOrDefault(model => model.Name == classModel.Namespace);
+            var namespaceModel = Namespaces.FirstOrDefault(model => model.Name == classModel.ContainingTypeName);
 
             if (namespaceModel == null)
             {

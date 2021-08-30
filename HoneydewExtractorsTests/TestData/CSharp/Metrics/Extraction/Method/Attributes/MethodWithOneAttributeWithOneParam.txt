@@ -1,0 +1,15 @@
+﻿namespace Namespace1
+{
+    public class Class1
+    {
+        [System.Obsolete("Message")]
+        public void Method(int a)
+        {
+        }
+        
+        [System.Obsolete("Message")]
+        public void Method(string a)
+        {
+        }
+    }
+}

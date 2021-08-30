@@ -1,0 +1,7 @@
+﻿namespace Namespace1
+{
+    [Extern("Hello"), ExternAttribute(), ExternAttribute("World", false), Extern(2), Extern(new string[]{})]
+    class Class1
+    {
+    }
+}

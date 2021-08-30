@@ -1,0 +1,10 @@
+﻿class MyClass
+{    
+    public void Function(int a)
+    {
+        do
+        {
+            a-- ;
+        }while(a > 0);
+    }
+}

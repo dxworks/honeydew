@@ -1,0 +1,28 @@
+﻿namespace MyNamespace
+{
+    using System;
+
+    class MyClass
+    {
+        [return: ExternAttribute("Hello"), ExternAttribute(), ExternAttribute("World"), ExternAttribute]
+        public void Method1(int a, int b)
+        {
+        }
+
+        [return: ExternAttribute(2)]
+        public string Method2()
+        {
+            return "";
+        }
+
+        [return: ExternAttribute("Hello")]
+        [return: ExternAttribute()]
+        [ExternAttribute]
+        [return: ExternAttribute("World", 7)]
+        [return: ExternAttribute]
+        public int Method3(int a)
+        {
+            return a;
+        }
+    }
+}

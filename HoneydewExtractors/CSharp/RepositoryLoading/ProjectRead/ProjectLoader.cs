@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using HoneydewCore.Logging;
-using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.Core;
 using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
 using HoneydewModels.CSharp;
 
@@ -9,15 +9,15 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead
 {
     public class ProjectLoader : IProjectLoader
     {
-        private readonly CSharpFactExtractor _extractor;
+        private readonly IFactExtractorCreator _extractorCreator;
         private readonly ILogger _logger;
         private readonly IProjectProvider _projectProvider;
         private readonly IProjectLoadingStrategy _projectLoadingStrategy;
 
-        public ProjectLoader(CSharpFactExtractor extractor, IProjectProvider projectProvider,
+        public ProjectLoader(IFactExtractorCreator extractorCreator, IProjectProvider projectProvider,
             IProjectLoadingStrategy projectLoadingStrategy, ILogger logger)
         {
-            _extractor = extractor;
+            _extractorCreator = extractorCreator;
             _projectProvider = projectProvider;
             _projectLoadingStrategy = projectLoadingStrategy;
             _logger = logger;
@@ -29,7 +29,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead
             {
                 var solution = await _projectProvider.GetProject(path);
 
-                var projectModel = await _projectLoadingStrategy.Load(solution, _extractor);
+                var projectModel = await _projectLoadingStrategy.Load(solution, _extractorCreator);
 
                 return projectModel;
             }

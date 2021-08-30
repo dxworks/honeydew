@@ -2,12 +2,14 @@
 using System.Text.Json;
 using System.Threading.Tasks;
 using HoneydewCore.IO.Readers;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead;
 using HoneydewModels.CSharp;
 using HoneydewModels.Importers;
+using HoneydewModels.Types;
 using Moq;
+using Newtonsoft.Json;
 using Xunit;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
 {
@@ -29,7 +31,7 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
             const string pathToModel = "pathToModel";
             _fileReaderMock.Setup(reader => reader.ReadFile(pathToModel)).Returns("");
 
-            _solutionModelImporterMock.Setup(importer => importer.Import("")).Returns((SolutionModel) null);
+            _solutionModelImporterMock.Setup(importer => importer.Import("")).Returns((SolutionModel)null);
 
             var loadModelFromFile = _sut.LoadSolution(pathToModel);
 
@@ -44,7 +46,7 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
             const string fileContent = @"{Projects"":1";
             _fileReaderMock.Setup(reader => reader.ReadFile(pathToModel)).Returns(fileContent);
 
-            _solutionModelImporterMock.Setup(importer => importer.Import(fileContent)).Returns((SolutionModel) null);
+            _solutionModelImporterMock.Setup(importer => importer.Import(fileContent)).Returns((SolutionModel)null);
 
             var loadModelFromFile = _sut.LoadSolution(pathToModel);
 
@@ -75,17 +77,29 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
                 @"{""Projects"":[{""Name"":""ProjectName"",""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""FilePath"":""SomePath"",""FullName"":""SomeNamespace.FirstClass"",""BaseClassFullName"":""object"",""Fields"":[],""Metrics"":[{""ExtractorName"":""HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpBaseClassMetric"",""ValueType"":""HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpInheritanceMetric"",""Value"":{""Interfaces"":[""Interface1""],""BaseClassName"":""SomeParent""}}]}]}]}]}";
 
 
-            var cSharpInheritanceMetric = new CSharpInheritanceMetric
+            var baseTypesList = new List<IBaseType>
             {
-                BaseClassName = "SomeParent",
-                Interfaces = new List<string>
+                new BaseTypeModel
                 {
-                    "Interface1"
+                    Type = new EntityTypeModel
+                    {
+                        Name = "SomeParent"
+                    },
+                    Kind = "class"
+                },
+                new BaseTypeModel
+                {
+                    Type = new EntityTypeModel
+                    {
+                        Name = "Interface1"
+                    },
+                    Kind = "interface"
                 }
             };
 
 
-            var jsonElement = JsonSerializer.Deserialize<object>(JsonSerializer.Serialize(cSharpInheritanceMetric));
+            var jsonElement =
+                JsonSerializer.Deserialize<object>(JsonConvert.SerializeObject(baseTypesList, Formatting.None));
 
 
             var solutionModel = new SolutionModel
@@ -105,16 +119,25 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
                                     new ClassModel
                                     {
                                         FilePath = "SomePath",
-                                        FullName = "SomeNamespace.FirstClass",
-                                        BaseClassFullName = "object",
+                                        Name = "SomeNamespace.FirstClass",
+                                        BaseTypes = new List<IBaseType>
+                                        {
+                                            new BaseTypeModel
+                                            {
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "object"
+                                                },
+                                                Kind = "class"
+                                            }
+                                        },
                                         Metrics =
                                         {
-                                            new ClassMetric
+                                            new MetricModel
                                             {
                                                 ExtractorName =
                                                     "HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpBaseClassMetric",
-                                                ValueType =
-                                                    "HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpInheritanceMetric",
+                                                ValueType = typeof(List<IBaseType>).FullName,
                                                 Value = jsonElement
                                             }
                                         }
@@ -141,31 +164,38 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
 
             Assert.Equal("SomeNamespace", projectNamespace.Name);
             Assert.Equal(1, projectNamespace.ClassModels.Count);
-            var classModel = projectNamespace.ClassModels[0];
+            var classModel = (ClassModel)projectNamespace.ClassModels[0];
 
             Assert.Equal("SomePath", classModel.FilePath);
-            Assert.Equal("SomeNamespace.FirstClass", classModel.FullName);
-            Assert.Equal("object", classModel.BaseClassFullName);
+            Assert.Equal("SomeNamespace.FirstClass", classModel.Name);
+            Assert.Equal("object", classModel.BaseTypes[0].Type.Name);
+            Assert.Equal("class", classModel.BaseTypes[0].Kind);
             Assert.Empty(classModel.Fields);
             Assert.Empty(classModel.Methods);
             Assert.Equal(1, classModel.Metrics.Count);
             Assert.Equal("HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpBaseClassMetric",
                 classModel.Metrics[0].ExtractorName);
-            Assert.Equal("HoneydewExtractors.Metrics.Extraction.ClassLevel.CSharp.CSharpInheritanceMetric",
-                classModel.Metrics[0].ValueType);
+            Assert.Equal(typeof(List<IBaseType>).FullName, classModel.Metrics[0].ValueType);
 
             Assert.Equal(typeof(JsonElement), classModel.Metrics[0].Value.GetType());
-            var value = (JsonElement) classModel.Metrics[0].Value;
+            var baseTypes = (JsonElement)classModel.Metrics[0].Value;
 
-            var baseClassName = value.GetProperty("BaseClassName");
-            Assert.Equal("SomeParent", baseClassName.GetString());
+            Assert.Equal(2, baseTypes.GetArrayLength());
+            var arrayEnumerator = baseTypes.EnumerateArray();
 
-            var interfacesJsonElement = value.GetProperty("Interfaces");
-            Assert.Equal(1, interfacesJsonElement.GetArrayLength());
-            foreach (var element in interfacesJsonElement.EnumerateArray())
-            {
-                Assert.Equal("Interface1", element.GetString());
-            }
+            arrayEnumerator.MoveNext();
+
+            var baseClass = arrayEnumerator.Current;
+            var baseClassElement = baseClass.GetProperty("Type");
+            Assert.Equal("SomeParent", baseClassElement.GetProperty("Name").GetString());
+            Assert.Equal("class", baseClass.GetProperty("Kind").GetString());
+
+            arrayEnumerator.MoveNext();
+
+            var baseInterface = arrayEnumerator.Current;
+            var baseInterfaceElement = baseInterface.GetProperty("Type");
+            Assert.Equal("Interface1", baseInterfaceElement.GetProperty("Name").GetString());
+            Assert.Equal("interface", baseInterface.GetProperty("Kind").GetString());
         }
     }
 }

@@ -1,0 +1,17 @@
+﻿using System;
+
+namespace Namespace1
+{
+    public class Class1
+    {
+        [System.Obsolete("Message", false)]
+        [System.Serializable]
+        [System.AttributeUsage(AttributeTargets.Class)]
+        private short S {get;set;}
+        
+        [System.Obsolete("Message", false)]
+        [System.Serializable]
+        [System.AttributeUsage(AttributeTargets.Class)]
+        private event Action<short> AS  {add{}remove{}}
+    }
+}

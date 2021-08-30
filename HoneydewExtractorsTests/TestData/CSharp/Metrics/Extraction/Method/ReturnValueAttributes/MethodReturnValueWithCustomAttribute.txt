@@ -1,0 +1,49 @@
+﻿
+namespace MyNamespace
+{
+    using System;
+
+    [AttributeUsage(AttributeTargets.ReturnValue, AllowMultiple = true)]
+    class MyAttribute : Attribute
+    {
+        public MyAttribute()
+        {
+        }
+
+        public MyAttribute(string str)
+        {
+        }
+
+        public MyAttribute(string str, int a)
+        {
+        }
+
+        public MyAttribute(int a)
+        {
+        }
+    }
+
+    class MyClass
+    {
+        [return: My("Hello"), MyAttribute(), MyAttribute("World"), My]
+        public void Method1(int a, int b)
+        {
+        }
+
+        [return: My(2)]
+        public string Method2()
+        {
+            return "";
+        }
+
+        [return: My("Hello")]
+        [return: MyAttribute()]
+        [System.Obsolete]
+        [return: MyAttribute("World", 7)]
+        [return: My]
+        public int Method3(int a)
+        {
+            return a;
+        }
+    }
+}

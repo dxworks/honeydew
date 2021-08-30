@@ -1,0 +1,12 @@
+﻿using System;
+using HoneydewCore.Extractors;
+
+namespace TopLevel
+{
+    public interface Foo 
+    { 
+        CSharpExtractor f(int a);
+        int g(CSharpExtractor a);
+        string h(float a,  CSharpExtractor b);                                                                                                    
+   }
+}

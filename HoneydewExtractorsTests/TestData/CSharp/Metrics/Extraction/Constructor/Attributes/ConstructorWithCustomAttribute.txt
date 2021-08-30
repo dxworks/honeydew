@@ -1,0 +1,24 @@
+﻿namespace MyNamespace
+{
+    using System;
+
+    [AttributeUsage(AttributeTargets.Constructor, AllowMultiple = true)]
+    class MyAttribute : Attribute
+    {
+        public MyAttribute()
+        {
+        }
+
+        public MyAttribute(string str)
+        {
+        }
+    }
+
+    class MyClass
+    {
+        [My("Hello"), MyAttribute(), MyAttribute("World"), My]
+        public MyClass(int a, int b)
+        {
+        }
+    }
+}

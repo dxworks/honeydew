@@ -1,0 +1,7 @@
+﻿namespace Namespace1
+{
+    using System;
+    
+    [Serializable]
+    public delegate int Delegate1(string str);
+}

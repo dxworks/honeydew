@@ -1,0 +1,48 @@
+﻿using System;
+
+namespace MyNamespace
+{
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = true)]
+    class MyAttribute : Attribute
+    {
+        public MyAttribute()
+        {
+        }
+
+        public MyAttribute(string str)
+        {
+        }
+
+        public MyAttribute(string str, int a)
+        {
+        }
+
+        public MyAttribute(int a)
+        {
+        }
+    }
+
+    class MyClass
+    {
+        public void Method1(
+            [param: My("Hello"), MyAttribute(), MyAttribute("World"), My]
+            int a,
+            [param: My("Hello"), MyAttribute(), MyAttribute("World"), My]
+            int b)
+        {
+        }
+
+        public string Method2([My(2)] int a)
+        {
+            return "";
+        }
+        
+        [Obsolete]
+        public int Method3(
+            [My("Hello")] [MyAttribute()] [param: MyAttribute("World", 7)] [param: My]
+            int a)
+        {
+            return a;
+        }
+    }
+}

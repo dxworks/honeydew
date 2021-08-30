@@ -6,11 +6,10 @@ namespace HoneydewModels.CSharp
     public class NamespaceTree
     {
         public string Name { get; init; }
-        
+
         public string FilePath { get; set; }
 
-        [JsonIgnore]
-        public NamespaceTree Parent { get; init; }
+        [JsonIgnore] public NamespaceTree Parent { get; init; }
 
         public Dictionary<string, NamespaceTree> Children { get; set; } = new();
 

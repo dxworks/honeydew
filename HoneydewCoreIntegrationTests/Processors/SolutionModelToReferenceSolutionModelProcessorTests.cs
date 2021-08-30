@@ -1,7 +1,19 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Processors;
+using HoneydewExtractors.Core.Metrics.Extraction.Class;
+using HoneydewExtractors.Core.Metrics.Extraction.Common;
+using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.Method;
+using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
+using HoneydewExtractors.Core.Metrics.Extraction.Parameter;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
+using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewCoreIntegrationTests.Processors
@@ -65,7 +77,7 @@ namespace HoneydewCoreIntegrationTests.Processors
                     }
                 }
             };
-            
+
             var referenceSolutionModel = _sut.Process(solutionModel);
 
             Assert.Equal(2, referenceSolutionModel.Projects.Count);
@@ -102,18 +114,18 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
-                                        FullName = "Project1.Services.CreateService",
+                                        Name = "Project1.Services.CreateService",
                                         FilePath = "validPathToProject/Project1/Services/CreateService.cs"
                                     },
-                                    new()
+                                    new ClassModel()
                                     {
-                                        FullName = "Project1.Services.RetrieveService",
+                                        Name = "Project1.Services.RetrieveService",
                                         FilePath = "validPathToProject/Project1/Services/RetrieveService.cs",
-                                        Metrics = new List<ClassMetric>
+                                        Metrics = new List<MetricModel>
                                         {
                                             new()
                                             {
@@ -128,11 +140,11 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Models",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
-                                        FullName = "Project1.Models.MyModel",
+                                        Name = "Project1.Models.MyModel",
                                         FilePath = "validPathToProject/Project1/Models/MyModel.cs",
                                     }
                                 }
@@ -201,23 +213,40 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
-                                        FullName = "Project1.Services.CreateService",
+                                        Name = "Project1.Services.CreateService",
                                         FilePath = "validPathToProject/Project1/Services/CreateService.cs",
-                                        Methods = new List<MethodModel>
+                                        BaseTypes = new List<IBaseType>
                                         {
-                                            new()
+                                            new BaseTypeModel
+                                            {
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "object"
+                                                },
+                                                Kind = "class"
+                                            }
+                                        },
+                                        Methods = new List<IMethodType>
+                                        {
+                                            new MethodModel
                                             {
                                                 Name = "Create",
                                                 Modifier = "",
                                                 AccessModifier = "public",
-                                                ReturnType = "Project1.Models.MyModel",
-                                                ContainingClassName = "Project1.Services.CreateService",
+                                                ReturnValue = new ReturnValueModel
+                                                {
+                                                    Type = new EntityTypeModel
+                                                    {
+                                                        Name = "Project1.Models.MyModel"
+                                                    }
+                                                },
+                                                ContainingTypeName = "Project1.Services.CreateService",
                                             },
-                                            new()
+                                            new MethodModel
                                             {
                                                 Name = "Convert",
                                                 Modifier = "",
@@ -226,21 +255,30 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                 {
                                                     new ParameterModel
                                                     {
-                                                        Type = "Project1.Models.MyModel"
+                                                        Type = new EntityTypeModel
+                                                        {
+                                                            Name = "Project1.Models.MyModel"
+                                                        }
                                                     }
                                                 },
-                                                ReturnType = "Project1.Models.MyModel",
-                                                ContainingClassName = "Project1.Services.CreateService",
+                                                ReturnValue = new ReturnValueModel
+                                                {
+                                                    Type = new EntityTypeModel
+                                                    {
+                                                        Name = "Project1.Models.MyModel"
+                                                    }
+                                                },
+                                                ContainingTypeName = "Project1.Services.CreateService",
                                                 CalledMethods =
                                                 {
                                                     new MethodCallModel
                                                     {
-                                                        ContainingClassName = "Project1.Services.CreateService",
-                                                        MethodName = "Create"
+                                                        ContainingTypeName = "Project1.Services.CreateService",
+                                                        Name = "Create"
                                                     }
                                                 }
                                             },
-                                            new()
+                                            new MethodModel
                                             {
                                                 Name = "Convert",
                                                 Modifier = "",
@@ -249,28 +287,40 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                 {
                                                     new ParameterModel
                                                     {
-                                                        Type = "Project1.Models.OtherModel"
+                                                        Type = new EntityTypeModel
+                                                        {
+                                                            Name = "Project1.Models.OtherModel"
+                                                        }
                                                     }
                                                 },
-                                                ReturnType = "Project1.Models.MyModel",
-                                                ContainingClassName = "Project1.Services.CreateService",
+                                                ReturnValue = new ReturnValueModel
+                                                {
+                                                    Type = new EntityTypeModel
+                                                    {
+                                                        Name = "Project1.Models.MyModel"
+                                                    }
+                                                },
+                                                ContainingTypeName = "Project1.Services.CreateService",
                                                 CalledMethods =
                                                 {
                                                     new MethodCallModel
                                                     {
-                                                        ContainingClassName = "Project1.Services.CreateService",
-                                                        MethodName = "Convert",
+                                                        ContainingTypeName = "Project1.Services.CreateService",
+                                                        Name = "Convert",
                                                         ParameterTypes =
                                                         {
                                                             new ParameterModel
                                                             {
-                                                                Type = "Project1.Models.MyModel"
+                                                                Type = new EntityTypeModel
+                                                                {
+                                                                    Name = "Project1.Models.MyModel"
+                                                                }
                                                             }
                                                         }
                                                     }
                                                 }
                                             },
-                                            new()
+                                            new MethodModel
                                             {
                                                 Name = "Process",
                                                 Modifier = "",
@@ -279,31 +329,46 @@ namespace HoneydewCoreIntegrationTests.Processors
                                                 {
                                                     new ParameterModel
                                                     {
-                                                        Type = "Project1.Models.MyModel",
+                                                        Type = new EntityTypeModel
+                                                        {
+                                                            Name = "Project1.Models.MyModel",
+                                                        }
                                                     },
                                                     new ParameterModel
                                                     {
-                                                        Type = "Project1.Models.MyModel"
+                                                        Type = new EntityTypeModel
+                                                        {
+                                                            Name = "Project1.Models.MyModel"
+                                                        }
                                                     }
                                                 },
-                                                ReturnType = "Project1.Models.MyModel",
-                                                ContainingClassName = "Project1.Services.CreateService",
+                                                ReturnValue = new ReturnValueModel
+                                                {
+                                                    Type = new EntityTypeModel
+                                                    {
+                                                        Name = "Project1.Models.MyModel"
+                                                    }
+                                                },
+                                                ContainingTypeName = "Project1.Services.CreateService",
                                                 CalledMethods =
                                                 {
                                                     new MethodCallModel
                                                     {
-                                                        ContainingClassName = "Project1.Services.CreateService",
-                                                        MethodName = "Create"
+                                                        ContainingTypeName = "Project1.Services.CreateService",
+                                                        Name = "Create"
                                                     },
                                                     new MethodCallModel
                                                     {
-                                                        ContainingClassName = "Project1.Services.CreateService",
-                                                        MethodName = "Convert",
+                                                        ContainingTypeName = "Project1.Services.CreateService",
+                                                        Name = "Convert",
                                                         ParameterTypes =
                                                         {
                                                             new ParameterModel
                                                             {
-                                                                Type = "Project1.Models.OtherModel"
+                                                                Type = new EntityTypeModel
+                                                                {
+                                                                    Name = "Project1.Models.OtherModel"
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -316,16 +381,16 @@ namespace HoneydewCoreIntegrationTests.Processors
                             new NamespaceModel
                             {
                                 Name = "Project1.Models",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
-                                        FullName = "Project1.Models.MyModel",
+                                        Name = "Project1.Models.MyModel",
                                         FilePath = "validPathToProject/Project1/Models/MyModel.cs",
                                     },
-                                    new()
+                                    new ClassModel()
                                     {
-                                        FullName = "Project1.Models.OtherModel",
+                                        Name = "Project1.Models.OtherModel",
                                         FilePath = "validPathToProject/Project1/Models/OtherModel.cs",
                                     }
                                 }
@@ -380,17 +445,17 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("public", referenceCreateMethodModel.AccessModifier);
             Assert.Equal(referenceClassMyModel, referenceCreateMethodModel.ReturnTypeReferenceClassModel);
             Assert.Empty(referenceCreateMethodModel.CalledMethods);
-            Assert.Empty(referenceCreateMethodModel.ParameterTypes);
+            Assert.Empty(referenceCreateMethodModel.Parameters);
 
             Assert.Equal("Convert", referenceConvertMethodModel1.Name);
             Assert.Equal(referenceClassCreateService, referenceConvertMethodModel1.ContainingClass);
             Assert.Equal("", referenceConvertMethodModel1.Modifier);
             Assert.Equal("public", referenceConvertMethodModel1.AccessModifier);
             Assert.Equal(referenceClassMyModel, referenceConvertMethodModel1.ReturnTypeReferenceClassModel);
-            Assert.Equal(1, referenceConvertMethodModel1.ParameterTypes.Count);
-            Assert.Equal(referenceClassMyModel, referenceConvertMethodModel1.ParameterTypes[0].Type);
-            Assert.Equal("", referenceConvertMethodModel1.ParameterTypes[0].Modifier);
-            Assert.Null(referenceConvertMethodModel1.ParameterTypes[0].DefaultValue);
+            Assert.Equal(1, referenceConvertMethodModel1.Parameters.Count);
+            Assert.Equal(referenceClassMyModel, referenceConvertMethodModel1.Parameters[0].Type);
+            Assert.Equal("", referenceConvertMethodModel1.Parameters[0].Modifier);
+            Assert.Null(referenceConvertMethodModel1.Parameters[0].DefaultValue);
             Assert.Equal(1, referenceConvertMethodModel1.CalledMethods.Count);
             Assert.Equal(referenceCreateMethodModel, referenceConvertMethodModel1.CalledMethods[0]);
 
@@ -399,10 +464,10 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("", referenceConvertMethodModel2.Modifier);
             Assert.Equal("public", referenceConvertMethodModel2.AccessModifier);
             Assert.Equal(referenceClassMyModel, referenceConvertMethodModel2.ReturnTypeReferenceClassModel);
-            Assert.Equal(1, referenceConvertMethodModel2.ParameterTypes.Count);
-            Assert.Equal(referenceClassOtherModel, referenceConvertMethodModel2.ParameterTypes[0].Type);
-            Assert.Equal("", referenceConvertMethodModel2.ParameterTypes[0].Modifier);
-            Assert.Null(referenceConvertMethodModel2.ParameterTypes[0].DefaultValue);
+            Assert.Equal(1, referenceConvertMethodModel2.Parameters.Count);
+            Assert.Equal(referenceClassOtherModel, referenceConvertMethodModel2.Parameters[0].Type);
+            Assert.Equal("", referenceConvertMethodModel2.Parameters[0].Modifier);
+            Assert.Null(referenceConvertMethodModel2.Parameters[0].DefaultValue);
             Assert.Equal(1, referenceConvertMethodModel2.CalledMethods.Count);
             Assert.Equal(referenceConvertMethodModel1, referenceConvertMethodModel2.CalledMethods[0]);
 
@@ -411,10 +476,10 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("", referenceProcessMethodModel.Modifier);
             Assert.Equal("public", referenceProcessMethodModel.AccessModifier);
             Assert.Equal(referenceClassMyModel, referenceProcessMethodModel.ReturnTypeReferenceClassModel);
-            Assert.Equal(2, referenceProcessMethodModel.ParameterTypes.Count);
-            Assert.Equal(referenceClassMyModel, referenceProcessMethodModel.ParameterTypes[0].Type);
-            Assert.Equal("", referenceProcessMethodModel.ParameterTypes[0].Modifier);
-            Assert.Null(referenceProcessMethodModel.ParameterTypes[0].DefaultValue);
+            Assert.Equal(2, referenceProcessMethodModel.Parameters.Count);
+            Assert.Equal(referenceClassMyModel, referenceProcessMethodModel.Parameters[0].Type);
+            Assert.Equal("", referenceProcessMethodModel.Parameters[0].Modifier);
+            Assert.Null(referenceProcessMethodModel.Parameters[0].DefaultValue);
             Assert.Equal(2, referenceProcessMethodModel.CalledMethods.Count);
             Assert.Equal(referenceCreateMethodModel, referenceProcessMethodModel.CalledMethods[0]);
             Assert.Equal(referenceConvertMethodModel2, referenceProcessMethodModel.CalledMethods[1]);
@@ -480,8 +545,30 @@ namespace Project1.Services
         }
     }
 }";
-            var extractor = new CSharpFactExtractor();
-            var classModels = extractor.Extract(fileContent);
+            var compositeVisitor = new CompositeVisitor();
+
+            compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
+            {
+                new BaseInfoClassVisitor(),
+                new BaseTypesClassVisitor(),
+                new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
+                {
+                    new MethodInfoVisitor(),
+                    new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
+                    {
+                        new MethodCallInfoVisitor()
+                    }),
+                    new ParameterSetterVisitor(new List<IParameterVisitor>
+                    {
+                        new ParameterInfoVisitor()
+                    })
+                })
+            }));
+
+            var extractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+
+            var classModels = extractor.Extract(fileContent).ClassTypes;
 
             var solutionModel = new SolutionModel
             {
@@ -525,13 +612,13 @@ namespace Project1.Services
             var intToStringReferenceMethod = intClassModel.Methods[1];
 
             Assert.Equal("ToString", intToStringReferenceMethod.Name);
-            Assert.Empty(intToStringReferenceMethod.ParameterTypes);
+            Assert.Empty(intToStringReferenceMethod.Parameters);
 
             Assert.Equal("Parse", intParseMethodReference.Name);
-            Assert.Equal(1, intParseMethodReference.ParameterTypes.Count);
-            Assert.Equal(stringClassModel, intParseMethodReference.ParameterTypes[0].Type);
-            Assert.Equal("", intParseMethodReference.ParameterTypes[0].Modifier);
-            Assert.Null(intParseMethodReference.ParameterTypes[0].DefaultValue);
+            Assert.Equal(1, intParseMethodReference.Parameters.Count);
+            Assert.Equal(stringClassModel, intParseMethodReference.Parameters[0].Type);
+            Assert.Equal("", intParseMethodReference.Parameters[0].Modifier);
+            Assert.Null(intParseMethodReference.Parameters[0].DefaultValue);
 
             var projectModel1 = referenceSolutionModel.Projects[0];
 
@@ -556,13 +643,13 @@ namespace Project1.Services
             Assert.Equal("", methodFunction1.Modifier);
             Assert.Equal("public", methodFunction1.AccessModifier);
             Assert.Equal(floatClassModel, methodFunction1.ReturnTypeReferenceClassModel);
-            Assert.Equal(2, methodFunction1.ParameterTypes.Count);
-            Assert.Equal(intClassModel, methodFunction1.ParameterTypes[0].Type);
-            Assert.Equal("", methodFunction1.ParameterTypes[0].Modifier);
-            Assert.Null(methodFunction1.ParameterTypes[0].DefaultValue);
-            Assert.Equal(intClassModel, methodFunction1.ParameterTypes[1].Type);
-            Assert.Equal("", methodFunction1.ParameterTypes[1].Modifier);
-            Assert.Null(methodFunction1.ParameterTypes[1].DefaultValue);
+            Assert.Equal(2, methodFunction1.Parameters.Count);
+            Assert.Equal(intClassModel, methodFunction1.Parameters[0].Type);
+            Assert.Equal("", methodFunction1.Parameters[0].Modifier);
+            Assert.Null(methodFunction1.Parameters[0].DefaultValue);
+            Assert.Equal(intClassModel, methodFunction1.Parameters[1].Type);
+            Assert.Equal("", methodFunction1.Parameters[1].Modifier);
+            Assert.Null(methodFunction1.Parameters[1].DefaultValue);
             Assert.Equal(5, methodFunction1.CalledMethods.Count);
             Assert.Equal(methodFunction3, methodFunction1.CalledMethods[0]);
             Assert.Equal(methodFunction3, methodFunction1.CalledMethods[1]);
@@ -575,10 +662,10 @@ namespace Project1.Services
             Assert.Equal("", methodFunction2.Modifier);
             Assert.Equal("public", methodFunction2.AccessModifier);
             Assert.Equal(intClassModel, methodFunction2.ReturnTypeReferenceClassModel);
-            Assert.Equal(1, methodFunction2.ParameterTypes.Count);
-            Assert.Equal(stringClassModel, methodFunction2.ParameterTypes[0].Type);
-            Assert.Equal("", methodFunction2.ParameterTypes[0].Modifier);
-            Assert.Null(methodFunction2.ParameterTypes[0].DefaultValue);
+            Assert.Equal(1, methodFunction2.Parameters.Count);
+            Assert.Equal(stringClassModel, methodFunction2.Parameters[0].Type);
+            Assert.Equal("", methodFunction2.Parameters[0].Modifier);
+            Assert.Null(methodFunction2.Parameters[0].DefaultValue);
             Assert.Equal(1, methodFunction2.CalledMethods.Count);
             Assert.Equal(intParseMethodReference, methodFunction2.CalledMethods[0]);
 
@@ -587,10 +674,10 @@ namespace Project1.Services
             Assert.Equal("", methodFunction3.Modifier);
             Assert.Equal("public", methodFunction3.AccessModifier);
             Assert.Equal(stringClassModel, methodFunction3.ReturnTypeReferenceClassModel);
-            Assert.Equal(1, methodFunction3.ParameterTypes.Count);
-            Assert.Equal(intClassModel, methodFunction3.ParameterTypes[0].Type);
-            Assert.Equal("", methodFunction3.ParameterTypes[0].Modifier);
-            Assert.Null(methodFunction3.ParameterTypes[0].DefaultValue);
+            Assert.Equal(1, methodFunction3.Parameters.Count);
+            Assert.Equal(intClassModel, methodFunction3.Parameters[0].Type);
+            Assert.Equal("", methodFunction3.Parameters[0].Modifier);
+            Assert.Null(methodFunction3.Parameters[0].DefaultValue);
             Assert.Equal(1, methodFunction3.CalledMethods.Count);
             Assert.Equal(intToStringReferenceMethod, methodFunction3.CalledMethods[0]);
 
@@ -599,10 +686,10 @@ namespace Project1.Services
             Assert.Equal("static", methodPrint1.Modifier);
             Assert.Equal("private", methodPrint1.AccessModifier);
             Assert.Equal(voidClassModel, methodPrint1.ReturnTypeReferenceClassModel);
-            Assert.Equal(1, methodPrint1.ParameterTypes.Count);
-            Assert.Equal(floatClassModel, methodPrint1.ParameterTypes[0].Type);
-            Assert.Equal("", methodPrint1.ParameterTypes[0].Modifier);
-            Assert.Null(methodPrint1.ParameterTypes[0].DefaultValue);
+            Assert.Equal(1, methodPrint1.Parameters.Count);
+            Assert.Equal(floatClassModel, methodPrint1.Parameters[0].Type);
+            Assert.Equal("", methodPrint1.Parameters[0].Modifier);
+            Assert.Null(methodPrint1.Parameters[0].DefaultValue);
             Assert.Empty(methodPrint1.CalledMethods);
 
             Assert.Equal("Print", methodPrint2.Name);
@@ -610,10 +697,10 @@ namespace Project1.Services
             Assert.Equal("", methodPrint2.Modifier);
             Assert.Equal("private", methodPrint2.AccessModifier);
             Assert.Equal(voidClassModel, methodPrint2.ReturnTypeReferenceClassModel);
-            Assert.Equal(1, methodPrint2.ParameterTypes.Count);
-            Assert.Equal(intClassModel, methodPrint2.ParameterTypes[0].Type);
-            Assert.Equal("", methodPrint2.ParameterTypes[0].Modifier);
-            Assert.Null(methodPrint2.ParameterTypes[0].DefaultValue);
+            Assert.Equal(1, methodPrint2.Parameters.Count);
+            Assert.Equal(intClassModel, methodPrint2.Parameters[0].Type);
+            Assert.Equal("", methodPrint2.Parameters[0].Modifier);
+            Assert.Null(methodPrint2.Parameters[0].DefaultValue);
             Assert.Equal(1, methodPrint2.CalledMethods.Count);
             Assert.Equal(methodPrint2, methodPrint2.CalledMethods[0]);
         }
@@ -634,18 +721,21 @@ namespace Project1.Services
                             new NamespaceModel
                             {
                                 Name = "Project1.Services",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
-                                        FullName = "Project1.Services.CreateService",
+                                        Name = "Project1.Services.CreateService",
                                         FilePath = "validPathToProject/Project1/Services/CreateService.cs",
-                                        Fields = new List<FieldModel>
+                                        Fields = new List<IFieldType>
                                         {
-                                            new()
+                                            new FieldModel
                                             {
                                                 Name = "Model",
-                                                Type = "Project1.Models.MyModel",
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "Project1.Models.MyModel",
+                                                },
                                                 AccessModifier = "private",
                                                 IsEvent = false
                                             }
@@ -656,34 +746,51 @@ namespace Project1.Services
                             new NamespaceModel
                             {
                                 Name = "Project1.Models",
-                                ClassModels = new List<ClassModel>
+                                ClassModels = new List<IClassType>
                                 {
-                                    new()
+                                    new ClassModel()
                                     {
-                                        FullName = "Project1.Models.MyModel",
+                                        Name = "Project1.Models.MyModel",
                                         FilePath = "validPathToProject/Project1/Models/MyModel.cs",
-                                        Fields = new List<FieldModel>
+                                        BaseTypes = new List<IBaseType>
                                         {
-                                            new()
+                                            new BaseTypeModel
+                                            {
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "object"
+                                                },
+                                                Kind = "class"
+                                            }
+                                        },
+                                        Fields = new List<IFieldType>
+                                        {
+                                            new FieldModel
                                             {
                                                 Name = "_value",
-                                                Type = "int",
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "int",
+                                                },
                                                 Modifier = "readonly",
                                                 AccessModifier = "private"
                                             },
-                                            new()
+                                            new FieldModel
                                             {
                                                 Name = "ValueEvent",
-                                                Type = "int",
+                                                Type = new EntityTypeModel
+                                                {
+                                                    Name = "int",
+                                                },
                                                 Modifier = "",
                                                 AccessModifier = "public",
                                                 IsEvent = true
                                             }
                                         }
                                     },
-                                    new()
+                                    new ClassModel()
                                     {
-                                        FullName = "Project1.Models.OtherModel",
+                                        Name = "Project1.Models.OtherModel",
                                         FilePath = "validPathToProject/Project1/Models/OtherModel.cs",
                                     }
                                 }

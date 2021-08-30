@@ -2,6 +2,7 @@
 using System.Linq;
 using HoneydewModels.CSharp;
 using HoneydewModels.CSharp.ReferenceModel;
+using HoneydewModels.Types;
 
 namespace HoneydewCore.Processors
 {
@@ -50,7 +51,7 @@ namespace HoneydewCore.Processors
                         var referenceClassModel = new ReferenceClassModel
                         {
                             ClassType = classModel.ClassType,
-                            Name = classModel.FullName,
+                            Name = classModel.Name,
                             FilePath = classModel.FilePath,
                             AccessModifier = classModel.AccessModifier,
                             Modifier = classModel.Modifier,
@@ -74,17 +75,24 @@ namespace HoneydewCore.Processors
             foreach (var classModel in solutionModel.GetEnumerable())
             {
                 var referenceClassModel =
-                    referenceSolutionModel.FindFirstClass(entity => entity.Name == classModel.FullName);
+                    referenceSolutionModel.FindFirstClass(entity => entity.Name == classModel.Name);
 
                 if (referenceClassModel == null) continue;
 
-                referenceClassModel.BaseClass =
-                    GetClassReferenceByName(referenceSolutionModel, classModel.BaseClassFullName);
-
-                foreach (var interfaceName in classModel.BaseInterfaces)
+                var firstOrDefault = classModel.BaseTypes.FirstOrDefault(baseType => baseType.Kind == "class");
+                if (firstOrDefault != null)
                 {
-                    referenceClassModel.BaseInterfaces.Add(GetClassReferenceByName(referenceSolutionModel,
-                        interfaceName));
+                    referenceClassModel.BaseClass =
+                        GetClassReferenceByName(referenceSolutionModel, firstOrDefault.Type.Name);
+                }
+
+                foreach (var baseType in classModel.BaseTypes)
+                {
+                    if (baseType.Kind == "interface")
+                    {
+                        referenceClassModel.BaseInterfaces.Add(GetClassReferenceByName(referenceSolutionModel,
+                            baseType.Type.Name));
+                    }
                 }
             }
         }
@@ -92,14 +100,20 @@ namespace HoneydewCore.Processors
         private void PopulateModelWithMethodsAndFields(SolutionModel solutionModel,
             ReferenceSolutionModel referenceSolutionModel)
         {
-            foreach (var classModel in solutionModel.GetEnumerable())
+            foreach (var classType in solutionModel.GetEnumerable())
             {
+                if (classType is not ClassModel classModel)
+                {
+                    continue;
+                }
+                
                 var referenceClassModel =
-                    referenceSolutionModel.FindFirstClass(entity => entity.Name == classModel.FullName);
+                    referenceSolutionModel.FindFirstClass(entity => entity.Name == classModel.Name);
 
-                PopulateWithMethodModels(classModel.Methods, referenceClassModel, referenceClassModel.Methods);
+                PopulateWithMethodModels(classModel.Methods, referenceClassModel,
+                    referenceClassModel.Methods);
 
-                PopulateWithMethodModels(classModel.Constructors, referenceClassModel,
+                PopulateWithConstructorModels(classModel.Constructors, referenceClassModel,
                     referenceClassModel.Constructors);
 
                 foreach (var fieldModel in classModel.Fields)
@@ -111,29 +125,50 @@ namespace HoneydewCore.Processors
                         AccessModifier = fieldModel.AccessModifier,
                         IsEvent = fieldModel.IsEvent,
                         ContainingClass = referenceClassModel,
-                        Type = GetClassReferenceByName(referenceSolutionModel, fieldModel.Type)
+                        Type = GetClassReferenceByName(referenceSolutionModel, fieldModel.Type.Name)
                     });
                 }
             }
 
-            void PopulateWithMethodModels(IEnumerable<MethodModel> methodModels,
+            void PopulateWithMethodModels(IEnumerable<IMethodType> methodModels,
                 ReferenceClassModel referenceClassModel, ICollection<ReferenceMethodModel> outputList)
             {
-                foreach (var constructorModel in methodModels)
+                foreach (var methodModel in methodModels)
                 {
                     IList<ReferenceParameterModel> referenceClassModels =
-                        ExtractParameterModels(referenceSolutionModel, constructorModel.ParameterTypes);
+                        ExtractParameterModels(referenceSolutionModel, methodModel.ParameterTypes);
 
                     var referenceMethodModel = new ReferenceMethodModel
                     {
-                        Modifier = constructorModel.Modifier,
-                        Name = constructorModel.Name,
-                        IsConstructor = constructorModel.IsConstructor,
-                        AccessModifier = constructorModel.AccessModifier,
+                        Modifier = methodModel.Modifier,
+                        Name = methodModel.Name,
+                        AccessModifier = methodModel.AccessModifier,
                         ContainingClass = referenceClassModel,
-                        ReturnTypeReferenceClassModel =
-                            GetClassReferenceByName(referenceSolutionModel, constructorModel.ReturnType),
-                        ParameterTypes = referenceClassModels
+                        ReturnTypeReferenceClassModel = methodModel.ReturnValue != null
+                            ? GetClassReferenceByName(referenceSolutionModel, methodModel.ReturnValue.Type.Name)
+                            : null,
+                        Parameters = referenceClassModels
+                    };
+
+                    outputList.Add(referenceMethodModel);
+                }
+            }
+
+            void PopulateWithConstructorModels(IEnumerable<IConstructorType> constructorTypes,
+                ReferenceClassModel referenceClassModel, ICollection<ReferenceMethodModel> outputList)
+            {
+                foreach (var constructorType in constructorTypes)
+                {
+                    IList<ReferenceParameterModel> referenceClassModels =
+                        ExtractParameterModels(referenceSolutionModel, constructorType.ParameterTypes);
+
+                    var referenceMethodModel = new ReferenceMethodModel
+                    {
+                        Modifier = constructorType.Modifier,
+                        Name = constructorType.Name,
+                        AccessModifier = constructorType.AccessModifier,
+                        ContainingClass = referenceClassModel,
+                        Parameters = referenceClassModels
                     };
 
                     outputList.Add(referenceMethodModel);
@@ -144,10 +179,15 @@ namespace HoneydewCore.Processors
         private void PopulateModelWithMethodReferences(SolutionModel solutionModel,
             ReferenceSolutionModel referenceSolutionModel)
         {
-            foreach (var classModel in solutionModel.GetEnumerable())
+            foreach (var classType in solutionModel.GetEnumerable())
             {
+                if (classType is not ClassModel classModel)
+                {
+                    continue;
+                }
+                
                 var referenceClassModel =
-                    referenceSolutionModel.FindFirstClass(entity => entity.Name == classModel.FullName);
+                    referenceSolutionModel.FindFirstClass(entity => entity.Name == classModel.Name);
 
                 foreach (var methodModel in classModel.Methods)
                 {
@@ -158,10 +198,10 @@ namespace HoneydewCore.Processors
                     foreach (var calledMethod in methodModel.CalledMethods)
                     {
                         var calledMethodClass = GetClassReferenceByName(referenceSolutionModel,
-                            calledMethod.ContainingClassName);
+                            calledMethod.ContainingTypeName);
                         var calledReferenceMethodModel = GetMethodReference(referenceSolutionModel,
                             calledMethodClass,
-                            calledMethod.MethodName, calledMethod.ParameterTypes);
+                            calledMethod.Name, calledMethod.ParameterTypes);
 
                         referenceMethodModel.CalledMethods.Add(calledReferenceMethodModel);
                     }
@@ -170,16 +210,16 @@ namespace HoneydewCore.Processors
         }
 
         private ReferenceMethodModel GetMethodReference(ReferenceSolutionModel referenceSolutionModel,
-            ReferenceClassModel referenceClassModel, string methodName, IList<ParameterModel> parameterTypes)
+            ReferenceClassModel referenceClassModel, string methodName, IList<IParameterType> parameters)
         {
             var methodReference = referenceClassModel.Methods.FirstOrDefault(method =>
             {
                 if (method.Name != methodName ||
-                    method.ParameterTypes.Count != parameterTypes.Count) return false;
+                    method.Parameters.Count != parameters.Count) return false;
 
-                for (var i = 0; i < method.ParameterTypes.Count; i++)
+                for (var i = 0; i < method.Parameters.Count; i++)
                 {
-                    if (method.ParameterTypes[i].Type.Name != parameterTypes[i].Type)
+                    if (method.Parameters[i].Type.Name != parameters[i].Type.Name)
                     {
                         return false;
                     }
@@ -199,7 +239,7 @@ namespace HoneydewCore.Processors
             {
                 ContainingClass = referenceClassModel,
                 Name = methodName,
-                ParameterTypes = ExtractParameterModels(referenceSolutionModel, parameterTypes)
+                Parameters = ExtractParameterModels(referenceSolutionModel, parameters)
             };
             referenceClassModel.Methods.Add(newlyAddReferenceMethodModel);
 
@@ -207,13 +247,14 @@ namespace HoneydewCore.Processors
         }
 
         private List<ReferenceParameterModel> ExtractParameterModels(ReferenceSolutionModel referenceSolutionModel,
-            IEnumerable<ParameterModel> parameterModels)
+            IEnumerable<IParameterType> parameterModels)
         {
             return parameterModels
-                .Select(parameterModel =>
+                .Select(parameterType =>
                 {
+                    var parameterModel = (ParameterModel)parameterType;
                     var classReferenceByName =
-                        GetClassReferenceByName(referenceSolutionModel, parameterModel.Type);
+                        GetClassReferenceByName(referenceSolutionModel, parameterModel.Type.Name);
                     return new ReferenceParameterModel
                     {
                         Type = classReferenceByName,

@@ -14,7 +14,7 @@ namespace HoneydewModels.CSharp.ReferenceModel
 
         public ReferenceClassModel ReturnTypeReferenceClassModel { get; set; }
 
-        public IList<ReferenceParameterModel> ParameterTypes { get; init; } = new List<ReferenceParameterModel>();
+        public IList<ReferenceParameterModel> Parameters { get; init; } = new List<ReferenceParameterModel>();
 
         public IList<ReferenceMethodModel> CalledMethods { get; } = new List<ReferenceMethodModel>();
     }

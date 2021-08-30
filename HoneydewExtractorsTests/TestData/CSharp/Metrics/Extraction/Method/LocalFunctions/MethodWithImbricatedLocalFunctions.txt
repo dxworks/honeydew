@@ -1,0 +1,40 @@
+﻿namespace Namespace1
+{
+    public class Class1
+    {
+        public void Method(int a, int b)
+        {
+            var c = StringSum(a,b);
+        
+            string StringSum(int x, int y)
+            {                                
+                int Sum(int m, int n)
+                {
+                    int Doubled(int f)
+                    {
+                        return f*2;
+                    }   
+                                        
+                    return Doubled(m) + Doubled(n);    
+                }
+                
+                string Stringify(int p, int r)
+                {
+                    int Calculate(int j, int k)
+                    {
+                        return Sum(j, k);
+                    }
+                    
+                    string StringifyNumber(int number)
+                    {
+                        return number.ToString();
+                    }
+                    
+                    return StringifyNumber(Calculate(p,r));
+                }
+            
+                return Stringify(x, y);
+            }
+        }
+    }
+}

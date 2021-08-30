@@ -1,0 +1,49 @@
+﻿class MyClass
+{    
+    public int Value
+    {
+        get
+        {
+            int x = 0;
+            if (x < 51)
+            {
+                x++;
+            }
+
+            return x;
+        }
+        set
+        {
+            int z = 10;
+            if (true)
+            {
+                z++;
+                break;
+            }
+            z = value;
+        }
+    }
+
+    public MyClass(int a)
+    {
+        if (a > 0)
+        {
+            Function();
+        }
+        else if (a >5)    Function();
+    }
+
+    public void Function()
+    {
+        int i = 0;
+        if (i < 5)
+        {
+            i++;
+        }
+
+        if (i % 2 == 0 && i < 10)
+        {
+            i--;
+        }
+    }
+}

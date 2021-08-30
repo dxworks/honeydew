@@ -1,0 +1,19 @@
+﻿namespace MyNamespace
+{
+    using System;
+
+    [AttributeUsage(AttributeTargets.Delegate, AllowMultiple = true)]
+    public class MyAttribute : Attribute
+    {
+        public MyAttribute()
+        {
+        }
+
+        public MyAttribute(string str)
+        {
+        }
+    }
+
+    [My("Hello"), MyAttribute(), MyAttribute("World"), My]
+    public delegate void MyDelegate(int a);    
+}

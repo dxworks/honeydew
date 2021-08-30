@@ -1,7 +1,16 @@
 ﻿using System.Collections.Generic;
-using HoneydewExtractors.Core.Metrics.Extraction;
+using HoneydewExtractors.Core.Metrics.Extraction.Class;
+using HoneydewExtractors.Core.Metrics.Extraction.Common;
+using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.Core.Metrics.Extraction.Method;
+using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
+using HoneydewExtractors.Core.Metrics.Extraction.Property;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
+using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
-using HoneydewExtractors.CSharp.Metrics.Extraction.ClassLevel;
 using HoneydewModels.CSharp;
 using Xunit;
 
@@ -13,89 +22,85 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
         public CSharpPropertiesInfoMetricTests()
         {
-            _factExtractor = new CSharpFactExtractor();
-            _factExtractor.AddMetric<CSharpPropertiesInfoMetric>();
+            var compositeVisitor = new CompositeVisitor();
+
+            compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
+            {
+                new BaseInfoClassVisitor(),
+                new PropertySetterClassVisitor(new List<ICSharpPropertyVisitor>
+                {
+                    new PropertyInfoVisitor(),
+                    new MethodAccessorSetterPropertyVisitor(new List<IMethodVisitor>
+                    {
+                        new MethodInfoVisitor(),
+                        new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
+                        {
+                            new MethodCallInfoVisitor()
+                        })
+                    })
+                })
+            }));
+            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }
 
-        [Fact]
-        public void GetMetricType_ShouldReturnClassLevel()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/InterfaceWithProperty.txt")]
+        public void Extract_ShouldHaveProperties_WhenGivenAnInterface(string fileContent)
         {
-            Assert.Equal(ExtractionMetricType.ClassLevel, new CSharpPropertiesInfoMetric().GetMetricType());
-        }
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-        [Fact]
-        public void PrettyPrint_ShouldReturnPropertiesInfo()
-        {
-            Assert.Equal("Properties Info", new CSharpPropertiesInfoMetric().PrettyPrint());
-        }
+            Assert.Equal(1, classTypes.Count);
 
-
-        [Fact]
-        public void Extract_ShouldHaveProperties_WhenGivenAnInterface()
-        {
-            const string fileContent = @"using System;
-     
-                                      namespace TopLevel
-                                      {
-                                          public interface Foo { public int Value {get;set;} }                                       
-                                      }";
-
-
-            var classModels = _factExtractor.Extract(fileContent);
-
-            Assert.Equal(1, classModels.Count);
-
-            var propertyModel = classModels[0].Properties[0];
+            var propertyModel = ((ClassModel)classTypes[0]).Properties[0];
             Assert.Equal("Value", propertyModel.Name);
-            Assert.Equal("", propertyModel.Modifier);
+            Assert.Equal("abstract", propertyModel.Modifier);
             Assert.Equal("public", propertyModel.AccessModifier);
-            Assert.Equal("int", propertyModel.Type);
-            Assert.Equal("TopLevel.Foo", propertyModel.ContainingClassName);
+            Assert.Equal("int", propertyModel.Type.Name);
+            Assert.Equal("TopLevel.Foo", propertyModel.ContainingTypeName);
             Assert.False(propertyModel.IsEvent);
-            Assert.Empty(propertyModel.CalledMethods);
+            foreach (var accessor in propertyModel.Accessors)
+            {
+                Assert.Empty(accessor.CalledMethods);
+            }
         }
 
-        [Fact]
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/ClassWithPropertiesWithNoAccessModifier.txt")]
         public void
-            Extract_ShouldHavePrivatePropertiesWithModifiers_WhenGivenClassWithPropertiesAndModifiersWithDefaultAccess()
+            Extract_ShouldHavePrivatePropertiesWithModifiers_WhenGivenClassWithPropertiesAndModifiersWithDefaultAccess(
+                string fileContent)
         {
-            const string fileContent = @"using System;
-                                      using HoneydewCore.Extractors;
-                                      namespace TopLevel
-                                      {
-                                          public class Foo { static int A {get;set;} = 12; private float X {get;set;}
-                                                           void f() {}
-                                                           public string g(int a) {return ""Value"";}                              
-                                                           }                                        
-                                      }";
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
+            Assert.Equal(1, classTypes.Count);
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var propertyTypes = ((ClassModel)classTypes[0]).Properties;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(2, propertyTypes.Count);
 
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
+            Assert.Equal("A", propertyTypes[0].Name);
+            Assert.Equal("int", propertyTypes[0].Type.Name);
+            Assert.Equal("static", propertyTypes[0].Modifier);
+            Assert.Equal("private", propertyTypes[0].AccessModifier);
+            Assert.False(propertyTypes[0].IsEvent);
+            Assert.Equal("TopLevel.Foo", propertyTypes[0].ContainingTypeName);
+            foreach (var accessor in propertyTypes[0].Accessors)
+            {
+                Assert.Empty(accessor.CalledMethods);
+            }
 
-            var propertyModels = (IList<PropertyModel>) optional.Value;
-
-            Assert.Equal(2, propertyModels.Count);
-
-            Assert.Equal("A", propertyModels[0].Name);
-            Assert.Equal("int", propertyModels[0].Type);
-            Assert.Equal("static", propertyModels[0].Modifier);
-            Assert.Equal("private", propertyModels[0].AccessModifier);
-            Assert.False(propertyModels[0].IsEvent);
-            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingClassName);
-            Assert.Empty(propertyModels[0].CalledMethods);
-
-            Assert.Equal("X", propertyModels[1].Name);
-            Assert.Equal("float", propertyModels[1].Type);
-            Assert.Equal("", propertyModels[1].Modifier);
-            Assert.Equal("private", propertyModels[1].AccessModifier);
-            Assert.False(propertyModels[1].IsEvent);
-            Assert.Equal("TopLevel.Foo", propertyModels[1].ContainingClassName);
-            Assert.Empty(propertyModels[1].CalledMethods);
+            Assert.Equal("X", propertyTypes[1].Name);
+            Assert.Equal("float", propertyTypes[1].Type.Name);
+            Assert.Equal("", propertyTypes[1].Modifier);
+            Assert.Equal("private", propertyTypes[1].AccessModifier);
+            Assert.False(propertyTypes[1].IsEvent);
+            Assert.Equal("TopLevel.Foo", propertyTypes[1].ContainingTypeName);
+            foreach (var accessor in propertyTypes[1].Accessors)
+            {
+                Assert.Empty(accessor.CalledMethods);
+            }
         }
 
         [Theory]
@@ -116,40 +121,49 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                       }}";
 
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<PropertyModel>) optional.Value;
+            var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(3, propertyModels.Count);
 
+            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingTypeName);
             Assert.Equal("AnimalNest", propertyModels[0].Name);
-            Assert.Equal("int", propertyModels[0].Type);
+            Assert.Equal("int", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal(modifier, propertyModels[0].AccessModifier);
-            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingClassName);
+            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingTypeName);
             Assert.False(propertyModels[0].IsEvent);
-            Assert.Empty(propertyModels[0].CalledMethods);
+            foreach (var accessor in propertyModels[0].Accessors)
+            {
+                Assert.Empty(accessor.CalledMethods);
+            }
 
+            Assert.Equal("TopLevel.Foo", propertyModels[1].ContainingTypeName);
             Assert.Equal("X", propertyModels[1].Name);
-            Assert.Equal("float", propertyModels[1].Type);
+            Assert.Equal("float", propertyModels[1].Type.Name);
             Assert.Equal("", propertyModels[1].Modifier);
             Assert.Equal(modifier, propertyModels[1].AccessModifier);
-            Assert.Equal("TopLevel.Foo", propertyModels[1].ContainingClassName);
+            Assert.Equal("TopLevel.Foo", propertyModels[1].ContainingTypeName);
             Assert.False(propertyModels[1].IsEvent);
-            Assert.Empty(propertyModels[1].CalledMethods);
+            foreach (var accessor in propertyModels[1].Accessors)
+            {
+                Assert.Empty(accessor.CalledMethods);
+            }
 
+            Assert.Equal("TopLevel.Foo", propertyModels[2].ContainingTypeName);
             Assert.Equal("extractor", propertyModels[2].Name);
-            Assert.Equal("CSharpMetricExtractor", propertyModels[2].Type);
+            Assert.Equal("CSharpMetricExtractor", propertyModels[2].Type.Name);
             Assert.Equal("", propertyModels[2].Modifier);
             Assert.Equal(modifier, propertyModels[2].AccessModifier);
-            Assert.Equal("TopLevel.Foo", propertyModels[2].ContainingClassName);
+            Assert.Equal("TopLevel.Foo", propertyModels[2].ContainingTypeName);
             Assert.False(propertyModels[2].IsEvent);
-            Assert.Empty(propertyModels[2].CalledMethods);
+            foreach (var accessor in propertyModels[2].Accessors)
+            {
+                Assert.Empty(accessor.CalledMethods);
+            }
         }
 
         [Theory]
@@ -171,74 +185,56 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                       }}";
 
 
-            var classModels = _factExtractor.Extract(fileContent);
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-            Assert.Equal(1, classModels.Count);
+            Assert.Equal(1, classTypes.Count);
 
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<PropertyModel>) optional.Value;
+            var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(3, propertyModels.Count);
 
             Assert.Equal("extractor", propertyModels[0].Name);
-            Assert.Equal("CSharpMetricExtractor", propertyModels[0].Type);
+            Assert.Equal("CSharpMetricExtractor", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal(visibility, propertyModels[0].AccessModifier);
             Assert.True(propertyModels[0].IsEvent);
-            Assert.Empty(propertyModels[0].CalledMethods);
+            foreach (var accessor in propertyModels[0].Accessors)
+            {
+                Assert.Empty(accessor.CalledMethods);
+            }
 
             Assert.Equal("_some_event", propertyModels[1].Name);
-            Assert.Equal("int", propertyModels[1].Type);
+            Assert.Equal("int", propertyModels[1].Type.Name);
             Assert.Equal("", propertyModels[1].Modifier);
             Assert.Equal(visibility, propertyModels[1].AccessModifier);
             Assert.True(propertyModels[1].IsEvent);
-            Assert.Empty(propertyModels[1].CalledMethods);
+            foreach (var accessor in propertyModels[1].Accessors)
+            {
+                Assert.Empty(accessor.CalledMethods);
+            }
 
             Assert.Equal("MyAction1", propertyModels[2].Name);
-            Assert.Equal("System.Action", propertyModels[2].Type);
+            Assert.Equal("System.Action", propertyModels[2].Type.Name);
             Assert.Equal("", propertyModels[2].Modifier);
             Assert.Equal(visibility, propertyModels[2].AccessModifier);
             Assert.True(propertyModels[2].IsEvent);
-            Assert.Empty(propertyModels[1].CalledMethods);
+            foreach (var accessor in propertyModels[2].Accessors)
+            {
+                Assert.Empty(accessor.CalledMethods);
+            }
         }
 
-        [Fact]
-        public void Extract_ShouldHavePropertiesWithAccessors_WhenGivenClassWithPropertiesWithDifferentAccessors()
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/ClassWithPropertiesWithDifferentAccessors.txt")]
+        public void Extract_ShouldHavePropertiesWithAccessors_WhenGivenClassWithPropertiesWithDifferentAccessors(
+            string fileContent)
         {
-            const string fileContent = @"using System;
-                                      namespace TopLevel
-                                      {
-                                        public class Foo
-                                        {
-                                            protected int Value
-                                            {
-                                                get => throw new System.NotImplementedException();
-                                                private set => throw new System.NotImplementedException();
-                                            }
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-                                            public string Name { get; protected init; }
+            Assert.Equal(1, classTypes.Count);
 
-                                            public string FullName { get; }
-
-                                            public bool IsHere
-                                            {
-                                                set { throw new System.NotImplementedException(); }
-                                            }
-
-                                            public event Func<int> IntEvent { add{} remove{} }
-                                        }                                    
-                                      }";
-
-            var classModels = _factExtractor.Extract(fileContent);
-
-            Assert.Equal(1, classModels.Count);
-
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<PropertyModel>) optional.Value;
+            var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(5, propertyModels.Count);
 
@@ -246,580 +242,394 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("Value", propertyModel0.Name);
             Assert.False(propertyModel0.IsEvent);
             Assert.Equal(2, propertyModel0.Accessors.Count);
-            Assert.Equal("get", propertyModel0.Accessors[0]);
-            Assert.Equal("private set", propertyModel0.Accessors[1]);
+            Assert.Equal("get", propertyModel0.Accessors[0].Name);
+            Assert.Equal("public", propertyModel0.Accessors[0].AccessModifier);
+            Assert.Equal("", propertyModel0.Accessors[0].Modifier);
+
+            Assert.Equal("set", propertyModel0.Accessors[1].Name);
+            Assert.Equal("private", propertyModel0.Accessors[1].AccessModifier);
+            Assert.Equal("", propertyModel0.Accessors[1].Modifier);
 
             var propertyModel1 = propertyModels[1];
             Assert.Equal("Name", propertyModel1.Name);
             Assert.False(propertyModel1.IsEvent);
             Assert.Equal(2, propertyModel1.Accessors.Count);
-            Assert.Equal("get", propertyModel1.Accessors[0]);
-            Assert.Equal("protected init", propertyModel1.Accessors[1]);
+            Assert.Equal("get", propertyModel1.Accessors[0].Name);
+            Assert.Equal("public", propertyModel1.Accessors[0].AccessModifier);
+            Assert.Equal("", propertyModel1.Accessors[0].Modifier);
+
+            Assert.Equal("init", propertyModel1.Accessors[1].Name);
+            Assert.Equal("protected", propertyModel1.Accessors[1].AccessModifier);
+            Assert.Equal("", propertyModel1.Accessors[1].Modifier);
 
             var propertyModel2 = propertyModels[2];
             Assert.Equal("FullName", propertyModel2.Name);
             Assert.False(propertyModel2.IsEvent);
             Assert.Equal(1, propertyModel2.Accessors.Count);
-            Assert.Equal("get", propertyModel2.Accessors[0]);
+            Assert.Equal("get", propertyModel2.Accessors[0].Name);
+            Assert.Equal("public", propertyModel2.Accessors[0].AccessModifier);
+            Assert.Equal("", propertyModel2.Accessors[0].Modifier);
 
             var propertyModel3 = propertyModels[3];
             Assert.Equal("IsHere", propertyModel3.Name);
             Assert.False(propertyModel3.IsEvent);
             Assert.Equal(1, propertyModel3.Accessors.Count);
-            Assert.Equal("set", propertyModel3.Accessors[0]);
+            Assert.Equal("set", propertyModel3.Accessors[0].Name);
+            Assert.Equal("public", propertyModel3.Accessors[0].AccessModifier);
+            Assert.Equal("", propertyModel3.Accessors[0].Modifier);
 
             var propertyModel4 = propertyModels[4];
             Assert.Equal("IntEvent", propertyModel4.Name);
             Assert.True(propertyModel4.IsEvent);
             Assert.Equal(2, propertyModel4.Accessors.Count);
-            Assert.Equal("add", propertyModel4.Accessors[0]);
-            Assert.Equal("remove", propertyModel4.Accessors[1]);
+            Assert.Equal("add", propertyModel4.Accessors[0].Name);
+            Assert.Equal("public", propertyModel4.Accessors[0].AccessModifier);
+            Assert.Equal("", propertyModel4.Accessors[0].Modifier);
+
+            Assert.Equal("remove", propertyModel4.Accessors[1].Name);
+            Assert.Equal("public", propertyModel4.Accessors[1].AccessModifier);
+            Assert.Equal("", propertyModel4.Accessors[1].Modifier);
         }
 
-        [Fact]
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/ClassWithComputedProperty.txt")]
         public void
-            Extract_ShouldHaveProperties_WhenGivenClassWithComputedEmptyProperties()
+            Extract_ShouldHaveProperties_WhenGivenClassWithComputedEmptyProperties(string fileContent)
         {
-            const string fileContent = @"using System;
-                                      namespace TopLevel
-                                      {
-                                        class Bar {}
-                                        public class Foo 
-                                        { 
-                                            protected Bar Value
-                                            {
-                                                get => throw new System.NotImplementedException();
-                                                set => throw new System.NotImplementedException();
-                                            }
-                                        }                                        
-                                      }";
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
+            Assert.Equal(2, classTypes.Count);
 
-            var classModels = _factExtractor.Extract(fileContent);
-
-            Assert.Equal(2, classModels.Count);
-
-            var optional = classModels[1].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<PropertyModel>) optional.Value;
+            var propertyModels = ((ClassModel)classTypes[1]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
 
             Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("TopLevel.Bar", propertyModels[0].Type);
+            Assert.Equal("TopLevel.Bar", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal("protected", propertyModels[0].AccessModifier);
             Assert.False(propertyModels[0].IsEvent);
-            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingClassName);
-            Assert.Empty(propertyModels[0].CalledMethods);
+            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingTypeName);
+            foreach (var accessor in propertyModels[0].Accessors)
+            {
+                Assert.Empty(accessor.CalledMethods);
+            }
         }
 
-        [Fact]
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/ClassWithPropertyThatCallsInnerMethods.txt")]
         public void
-            Extract_ShouldHaveProperties_WhenGivenClassWithPropertiesAndBackingFields()
+            Extract_ShouldHaveProperties_WhenGivenClassWithComputedPropertyThatCallsInnerMethods(string fileContent)
         {
-            const string fileContent = @"using System;
-                                      namespace TopLevel
-                                      {
-                                        public class Foo 
-                                        { 
-                                            private int _value;
-                                            public int Value
-                                            {
-                                                set => _value = value;
-                                                get => _value;
-                                            }
-                                        }                                        
-                                      }";
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
+            Assert.Equal(1, classTypes.Count);
 
-            var classModels = _factExtractor.Extract(fileContent);
-
-            Assert.Equal(1, classModels.Count);
-
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<PropertyModel>) optional.Value;
+            var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
 
             Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("int", propertyModels[0].Type);
+            Assert.Equal("int", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal("public", propertyModels[0].AccessModifier);
             Assert.False(propertyModels[0].IsEvent);
-            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingClassName);
-            Assert.Empty(propertyModels[0].CalledMethods);
+            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingTypeName);
+
+            var getAccessor = propertyModels[0].Accessors[0];
+            Assert.Equal("get", getAccessor.Name);
+            Assert.Equal(1, getAccessor.CalledMethods.Count);
+            Assert.Equal("Triple", getAccessor.CalledMethods[0].Name);
+            Assert.Equal("TopLevel.Foo", getAccessor.CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, getAccessor.CalledMethods[0].ParameterTypes.Count);
+            var parameterModel1 = (ParameterModel)getAccessor.CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel1.Modifier);
+            Assert.Equal("int", parameterModel1.Type.Name);
+            Assert.Null(parameterModel1.DefaultValue);
+
+            var setAccessor = propertyModels[0].Accessors[1];
+            Assert.Equal("set", setAccessor.Name);
+            Assert.Equal(1, setAccessor.CalledMethods.Count);
+            Assert.Equal("Double", setAccessor.CalledMethods[0].Name);
+            Assert.Equal("TopLevel.Foo", setAccessor.CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, setAccessor.CalledMethods[0].ParameterTypes.Count);
+            var parameterModel2 = (ParameterModel)setAccessor.CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel2.Modifier);
+            Assert.Equal("int", parameterModel2.Type.Name);
+            Assert.Null(parameterModel2.DefaultValue);
         }
 
-        [Fact]
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/ClassWithPropertyThatCallsMethodFromAnotherClass.txt")]
         public void
-            Extract_ShouldHaveProperties_WhenGivenClassWithComputedPropertyThatCallsInnerMethods()
+            Extract_ShouldHaveProperties_WhenGivenClassWithComputedPropertyThatCallsMethodsFromOtherClassFromTheSameNamespace(
+                string fileContent)
         {
-            const string fileContent = @"using System;
-                                      namespace TopLevel
-                                      {
-                                        public class Foo 
-                                        { 
-                                            private int _value;
-                                            public int Value
-                                            {
-                                                get => Triple(_value);
-                                                set
-                                                {
-                                                    _value = value;
-                                                    _value = Double(_value);
-                                                }
-                                            }
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-                                            protected int Triple(int a)
-                                            {
-                                                return a * 3;
-                                            }
+            Assert.Equal(2, classTypes.Count);
 
-                                            private static int Double(int a)
-                                            {
-                                                return a * 2;
-                                            }
-                                        }                                        
-                                      }";
-
-            var classModels = _factExtractor.Extract(fileContent);
-
-            Assert.Equal(1, classModels.Count);
-
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<PropertyModel>) optional.Value;
+            var propertyModels = ((ClassModel)classTypes[1]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
 
             Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("int", propertyModels[0].Type);
+            Assert.Equal("int", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal("public", propertyModels[0].AccessModifier);
             Assert.False(propertyModels[0].IsEvent);
-            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingClassName);
-            Assert.Equal(2, propertyModels[0].CalledMethods.Count);
+            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingTypeName);
 
-            Assert.Equal("Triple", propertyModels[0].CalledMethods[0].MethodName);
-            Assert.Equal("TopLevel.Foo", propertyModels[0].CalledMethods[0].ContainingClassName);
-            Assert.Equal(1, propertyModels[0].CalledMethods[0].ParameterTypes.Count);
-            Assert.Equal("", propertyModels[0].CalledMethods[0].ParameterTypes[0].Modifier);
-            Assert.Equal("int", propertyModels[0].CalledMethods[0].ParameterTypes[0].Type);
-            Assert.Null(propertyModels[0].CalledMethods[0].ParameterTypes[0].DefaultValue);
+            var getAccessor = propertyModels[0].Accessors[0];
+            Assert.Equal("get", getAccessor.Name);
+            Assert.Equal(1, getAccessor.CalledMethods.Count);
+            Assert.Equal("Triple", getAccessor.CalledMethods[0].Name);
+            Assert.Equal("TopLevel.Bar", getAccessor.CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, getAccessor.CalledMethods[0].ParameterTypes.Count);
+            var parameterModel1 = (ParameterModel)getAccessor.CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel1.Modifier);
+            Assert.Equal("int", parameterModel1.Type.Name);
+            Assert.Null(parameterModel1.DefaultValue);
 
-            Assert.Equal("Double", propertyModels[0].CalledMethods[1].MethodName);
-            Assert.Equal("TopLevel.Foo", propertyModels[0].CalledMethods[1].ContainingClassName);
-            Assert.Equal(1, propertyModels[0].CalledMethods[1].ParameterTypes.Count);
-            Assert.Equal("", propertyModels[0].CalledMethods[1].ParameterTypes[0].Modifier);
-            Assert.Equal("int", propertyModels[0].CalledMethods[1].ParameterTypes[0].Type);
-            Assert.Null(propertyModels[0].CalledMethods[1].ParameterTypes[0].DefaultValue);
+            var setAccessor = propertyModels[0].Accessors[1];
+            Assert.Equal("set", setAccessor.Name);
+            Assert.Equal(1, setAccessor.CalledMethods.Count);
+            Assert.Equal("Double", setAccessor.CalledMethods[0].Name);
+            Assert.Equal("TopLevel.Bar", setAccessor.CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, setAccessor.CalledMethods[0].ParameterTypes.Count);
+            var parameterModel2 = (ParameterModel)setAccessor.CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel2.Modifier);
+            Assert.Equal("int", parameterModel2.Type.Name);
+            Assert.Null(parameterModel2.DefaultValue);
         }
 
-        [Fact]
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/ClassWithPropertyThatCallsMethodFromExternClass.txt")]
         public void
-            Extract_ShouldHaveProperties_WhenGivenClassWithComputedPropertyThatCallsMethodsFromOtherClassFromTheSameNamespace()
+            Extract_ShouldHaveProperties_WhenGivenClassWithComputedPropertyThatCallsStaticMethodsFromUnknownClass(
+                string fileContent)
         {
-            const string fileContent =
-                @"using System;                                                                         
-                                    namespace TopLevel
-                                    {
-                                        class Bar
-                                        {
-                                            public int Triple(int a)
-                                            {
-                                                return a * 3;
-                                            }
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-                                            public static int Double(int a)
-                                            {
-                                                return a * 2;
-                                            }
-                                        }
+            Assert.Equal(1, classTypes.Count);
 
-                                        public class Foo
-                                        {
-                                            private Bar _bar=new();
-                                            private int _value;
-
-                                            public int Value
-                                            {
-                                                get
-                                                {
-                                                    var temp = _value;
-                                                    return _bar.Triple(temp);
-                                                }
-                                                set => _value = Bar.Double(value);
-                                            }
-                                        }
-                                    }";
-
-            var classModels = _factExtractor.Extract(fileContent);
-
-            Assert.Equal(2, classModels.Count);
-
-            var optional = classModels[1].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<PropertyModel>) optional.Value;
+            var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
 
             Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("int", propertyModels[0].Type);
+            Assert.Equal("int", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal("public", propertyModels[0].AccessModifier);
             Assert.False(propertyModels[0].IsEvent);
-            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingClassName);
-            Assert.Equal(2, propertyModels[0].CalledMethods.Count);
+            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingTypeName);
 
-            Assert.Equal("Triple", propertyModels[0].CalledMethods[0].MethodName);
-            Assert.Equal("TopLevel.Bar", propertyModels[0].CalledMethods[0].ContainingClassName);
-            Assert.Equal(1, propertyModels[0].CalledMethods[0].ParameterTypes.Count);
-            Assert.Equal("", propertyModels[0].CalledMethods[0].ParameterTypes[0].Modifier);
-            Assert.Equal("int", propertyModels[0].CalledMethods[0].ParameterTypes[0].Type);
-            Assert.Null(propertyModels[0].CalledMethods[0].ParameterTypes[0].DefaultValue);
+            var getAccessor = propertyModels[0].Accessors[0];
+            Assert.Equal("get", getAccessor.Name);
+            Assert.Equal(1, getAccessor.CalledMethods.Count);
+            Assert.Equal("Triple", getAccessor.CalledMethods[0].Name);
+            Assert.Equal("ExternClass", getAccessor.CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, getAccessor.CalledMethods[0].ParameterTypes.Count);
+            var parameterModel1 = (ParameterModel)getAccessor.CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel1.Modifier);
+            Assert.Equal("int", parameterModel1.Type.Name);
+            Assert.Null(parameterModel1.DefaultValue);
 
-            Assert.Equal("Double", propertyModels[0].CalledMethods[1].MethodName);
-            Assert.Equal("TopLevel.Bar", propertyModels[0].CalledMethods[1].ContainingClassName);
-            Assert.Equal(1, propertyModels[0].CalledMethods[1].ParameterTypes.Count);
-            Assert.Equal("", propertyModels[0].CalledMethods[1].ParameterTypes[0].Modifier);
-            Assert.Equal("int", propertyModels[0].CalledMethods[1].ParameterTypes[0].Type);
-            Assert.Null(propertyModels[0].CalledMethods[1].ParameterTypes[0].DefaultValue);
+            var setAccessor = propertyModels[0].Accessors[1];
+            Assert.Equal("set", setAccessor.Name);
+            Assert.Equal(1, setAccessor.CalledMethods.Count);
+            Assert.Equal("Double", setAccessor.CalledMethods[0].Name);
+            Assert.Equal("ExternClass", setAccessor.CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, setAccessor.CalledMethods[0].ParameterTypes.Count);
+            var parameterModel2 = (ParameterModel)setAccessor.CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel2.Modifier);
+            Assert.Equal("int", parameterModel2.Type.Name);
+            Assert.Null(parameterModel2.DefaultValue);
         }
 
-        [Fact]
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/ClassWithEventPropertyThatCallsInnerMethods.txt")]
         public void
-            Extract_ShouldHaveProperties_WhenGivenClassWithComputedPropertyThatCallsStaticMethodsFromUnknownClass()
+            Extract_ShouldHaveEventProperties_WhenGivenClassWithComputedPropertyThatCallsInnerMethods(
+                string fileContent)
         {
-            const string fileContent =
-                @"using System;                                                                         
-                                    namespace TopLevel
-                                    {
-                                        public class Foo
-                                        {
-                                            private ExternClass _class=new();
-                                            private int _value;
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-                                            public int Value
-                                            {
-                                                get
-                                                {
-                                                    var temp = _value;
-                                                    return _class.Triple(temp);
-                                                }
-                                                set => _value = ExternClass.Double(value);
-                                            }
-                                        }
-                                    }";
+            Assert.Equal(1, classTypes.Count);
 
-            var classModels = _factExtractor.Extract(fileContent);
-
-            Assert.Equal(1, classModels.Count);
-
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<PropertyModel>) optional.Value;
+            var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
 
             Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("int", propertyModels[0].Type);
-            Assert.Equal("", propertyModels[0].Modifier);
-            Assert.Equal("public", propertyModels[0].AccessModifier);
-            Assert.False(propertyModels[0].IsEvent);
-            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingClassName);
-            Assert.Equal(2, propertyModels[0].CalledMethods.Count);
-
-            Assert.Equal("Triple", propertyModels[0].CalledMethods[0].MethodName);
-            Assert.Equal("ExternClass", propertyModels[0].CalledMethods[0].ContainingClassName);
-            
-            Assert.Equal(1,propertyModels[0].CalledMethods[0].ParameterTypes.Count);
-            Assert.Equal("",propertyModels[0].CalledMethods[0].ParameterTypes[0].Modifier);
-            Assert.Equal("int",propertyModels[0].CalledMethods[0].ParameterTypes[0].Type);
-            Assert.Null(propertyModels[0].CalledMethods[0].ParameterTypes[0].DefaultValue);
-
-            Assert.Equal("Double", propertyModels[0].CalledMethods[1].MethodName);
-            Assert.Equal("ExternClass", propertyModels[0].CalledMethods[1].ContainingClassName);
-            
-            Assert.Equal(1,propertyModels[0].CalledMethods[1].ParameterTypes.Count);
-            Assert.Equal("",propertyModels[0].CalledMethods[1].ParameterTypes[0].Modifier);
-            Assert.Equal("int",propertyModels[0].CalledMethods[1].ParameterTypes[0].Type);
-            Assert.Null(propertyModels[0].CalledMethods[1].ParameterTypes[0].DefaultValue);
-        }
-
-        [Fact]
-        public void
-            Extract_ShouldHaveEventProperties_WhenGivenClassWithComputedPropertyThatCallsInnerMethods()
-        {
-            const string fileContent = @"using System;
-                                      namespace TopLevel
-                                      {
-                                        public class Foo 
-                                        { 
-                                            private double _value;
-                                            public event Func<double> Value
-                                            {
-                                                add => Triple(_value);
-                                                remove {
-                                                    
-                                                    _value = Double(_value);
-                                                }
-                                            }
-
-                                            protected double Triple(double a)
-                                            {
-                                                return a * 3;
-                                            }
-
-                                            private static double Double(double a)
-                                            {
-                                                return a * 2;
-                                            }
-                                        }                                        
-                                      }";
-
-            var classModels = _factExtractor.Extract(fileContent);
-
-            Assert.Equal(1, classModels.Count);
-
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<PropertyModel>) optional.Value;
-
-            Assert.Equal(1, propertyModels.Count);
-
-            Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("System.Func<double>", propertyModels[0].Type);
+            Assert.Equal("System.Func<double>", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal("public", propertyModels[0].AccessModifier);
             Assert.True(propertyModels[0].IsEvent);
-            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingClassName);
-            Assert.Equal(2, propertyModels[0].CalledMethods.Count);
+            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingTypeName);
 
-            Assert.Equal("Triple", propertyModels[0].CalledMethods[0].MethodName);
-            Assert.Equal("TopLevel.Foo", propertyModels[0].CalledMethods[0].ContainingClassName);
-            Assert.Equal(1, propertyModels[0].CalledMethods[0].ParameterTypes.Count);
-            Assert.Equal("", propertyModels[0].CalledMethods[0].ParameterTypes[0].Modifier);
-            Assert.Equal("double", propertyModels[0].CalledMethods[0].ParameterTypes[0].Type);
-            Assert.Null(propertyModels[0].CalledMethods[0].ParameterTypes[0].DefaultValue);
+            var addAccessor = propertyModels[0].Accessors[0];
+            Assert.Equal("add", addAccessor.Name);
+            Assert.Equal(1, addAccessor.CalledMethods.Count);
+            Assert.Equal("Triple", addAccessor.CalledMethods[0].Name);
+            Assert.Equal("TopLevel.Foo", addAccessor.CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, addAccessor.CalledMethods[0].ParameterTypes.Count);
+            var parameterModel1 = (ParameterModel)addAccessor.CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel1.Modifier);
+            Assert.Equal("double", parameterModel1.Type.Name);
+            Assert.Null(parameterModel1.DefaultValue);
 
-            Assert.Equal("Double", propertyModels[0].CalledMethods[1].MethodName);
-            Assert.Equal("TopLevel.Foo", propertyModels[0].CalledMethods[1].ContainingClassName);
-            Assert.Equal(1, propertyModels[0].CalledMethods[1].ParameterTypes.Count);
-            Assert.Equal("", propertyModels[0].CalledMethods[1].ParameterTypes[0].Modifier);
-            Assert.Equal("double", propertyModels[0].CalledMethods[1].ParameterTypes[0].Type);
-            Assert.Null(propertyModels[0].CalledMethods[1].ParameterTypes[0].DefaultValue);
+            var removeAccessor = propertyModels[0].Accessors[1];
+            Assert.Equal("remove", removeAccessor.Name);
+            Assert.Equal(1, removeAccessor.CalledMethods.Count);
+            Assert.Equal("Double", removeAccessor.CalledMethods[0].Name);
+            Assert.Equal("TopLevel.Foo", removeAccessor.CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, removeAccessor.CalledMethods[0].ParameterTypes.Count);
+            var parameterModel2 = (ParameterModel)removeAccessor.CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel2.Modifier);
+            Assert.Equal("double", parameterModel2.Type.Name);
+            Assert.Null(parameterModel2.DefaultValue);
         }
-       
-        [Fact]
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/ClassWithEventPropertyThatCallsMethodFromAnotherClass.txt")]
         public void
-            Extract_ShouldHaveEventProperties_WhenGivenClassWithComputedPropertyThatCallsMethodsFromOtherClassFromTheSameNamespace()
+            Extract_ShouldHaveEventProperties_WhenGivenClassWithComputedPropertyThatCallsMethodsFromOtherClassFromTheSameNamespace(
+                string fileContent)
         {
-            const string fileContent =
-                @"using System;                                                                         
-                                    namespace TopLevel
-                                    {
-                                         public class Bar
-                                        {
-                                            public string Convert(int a)
-                                            {
-                                                return a.ToString();
-                                            }
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-                                            public static string Cut(Func<string> s)
-                                            {
-                                                return s.ToString();
-                                            }
-                                        }
+            Assert.Equal(2, classTypes.Count);
 
-                                        public class Foo
-                                        {
-                                            private Bar _bar=new();
-                                            private string _value;
-
-                                            public event Func<string> Value
-                                            {
-                                                add
-                                                {
-                                                    var temp = _value;
-                                                    _bar.Convert(temp.Length);
-                                                }
-                                                remove => _value = Bar.Cut(value);
-                                            }
-                                        }
-                                    }";
-
-            var classModels = _factExtractor.Extract(fileContent);
-
-            Assert.Equal(2, classModels.Count);
-
-            var optional = classModels[1].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<PropertyModel>) optional.Value;
+            var propertyModels = ((ClassModel)classTypes[1]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
 
             Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("System.Func<string>", propertyModels[0].Type);
+            Assert.Equal("System.Func<string>", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal("public", propertyModels[0].AccessModifier);
             Assert.True(propertyModels[0].IsEvent);
-            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingClassName);
-            Assert.Equal(2, propertyModels[0].CalledMethods.Count);
+            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingTypeName);
 
-            Assert.Equal("Convert", propertyModels[0].CalledMethods[0].MethodName);
-            Assert.Equal("TopLevel.Bar", propertyModels[0].CalledMethods[0].ContainingClassName);
-            Assert.Equal(1, propertyModels[0].CalledMethods[0].ParameterTypes.Count);
-            Assert.Equal("", propertyModels[0].CalledMethods[0].ParameterTypes[0].Modifier);
-            Assert.Equal("int", propertyModels[0].CalledMethods[0].ParameterTypes[0].Type);
-            Assert.Null(propertyModels[0].CalledMethods[0].ParameterTypes[0].DefaultValue);
+            var addAccessor = propertyModels[0].Accessors[0];
+            Assert.Equal("add", addAccessor.Name);
+            Assert.Equal(1, addAccessor.CalledMethods.Count);
+            Assert.Equal("Convert", addAccessor.CalledMethods[0].Name);
+            Assert.Equal("TopLevel.Bar", addAccessor.CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, addAccessor.CalledMethods[0].ParameterTypes.Count);
+            var parameterModel1 = (ParameterModel)addAccessor.CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel1.Modifier);
+            Assert.Equal("int", parameterModel1.Type.Name);
+            Assert.Null(parameterModel1.DefaultValue);
 
-            Assert.Equal("Cut", propertyModels[0].CalledMethods[1].MethodName);
-            Assert.Equal("TopLevel.Bar", propertyModels[0].CalledMethods[1].ContainingClassName);
-            Assert.Equal(1,propertyModels[0].CalledMethods[1].ParameterTypes.Count);
-            Assert.Equal("",propertyModels[0].CalledMethods[1].ParameterTypes[0].Modifier);
-            Assert.Equal("System.Func<string>",propertyModels[0].CalledMethods[1].ParameterTypes[0].Type);
-            Assert.Null(propertyModels[0].CalledMethods[1].ParameterTypes[0].DefaultValue);
+            var removeAccessor = propertyModels[0].Accessors[1];
+            Assert.Equal("remove", removeAccessor.Name);
+            Assert.Equal(1, removeAccessor.CalledMethods.Count);
+            Assert.Equal("Cut", removeAccessor.CalledMethods[0].Name);
+            Assert.Equal("TopLevel.Bar", removeAccessor.CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, removeAccessor.CalledMethods[0].ParameterTypes.Count);
+            var parameterModel2 = (ParameterModel)removeAccessor.CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel2.Modifier);
+            Assert.Equal("System.Func<string>", parameterModel2.Type.Name);
+            Assert.Null(parameterModel2.DefaultValue);
         }
 
-        [Fact]
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/ClassWithEventPropertyThatCallsMethodFromExternClass.txt")]
         public void
-            Extract_ShouldHaveEventProperties_WhenGivenClassWithComputedPropertyThatCallsStaticMethodsFromUnknownClass()
+            Extract_ShouldHaveEventProperties_WhenGivenClassWithComputedPropertyThatCallsStaticMethodsFromUnknownClass(
+                string fileContent)
         {
-            const string fileContent =
-                @"using System;                                                                         
-                                    namespace TopLevel
-                                    {
-                                        public class Foo
-                                        {
-                                            private ExternClass _class=new();
-                                            private int _value;
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-                                            public event Func<int> Value
-                                            {
-                                                add
-                                                {
-                                                    _class.Triple(_value);
-                                                }
-                                                remove => _value = ExternClass.Double(value);
-                                            }
-                                        }
-                                    }";
+            Assert.Equal(1, classTypes.Count);
 
-            var classModels = _factExtractor.Extract(fileContent);
-
-            Assert.Equal(1, classModels.Count);
-
-            var optional = classModels[0].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<PropertyModel>) optional.Value;
+            var propertyModels = ((ClassModel)classTypes[0]).Properties;
 
             Assert.Equal(1, propertyModels.Count);
 
             Assert.Equal("Value", propertyModels[0].Name);
-            Assert.Equal("System.Func<int>", propertyModels[0].Type);
+            Assert.Equal("System.Func<int>", propertyModels[0].Type.Name);
             Assert.Equal("", propertyModels[0].Modifier);
             Assert.Equal("public", propertyModels[0].AccessModifier);
             Assert.True(propertyModels[0].IsEvent);
-            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingClassName);
-            Assert.Equal(2, propertyModels[0].CalledMethods.Count);
+            Assert.Equal("TopLevel.Foo", propertyModels[0].ContainingTypeName);
 
-            Assert.Equal("Triple", propertyModels[0].CalledMethods[0].MethodName);
-            Assert.Equal("ExternClass", propertyModels[0].CalledMethods[0].ContainingClassName);
-            Assert.Equal(1,propertyModels[0].CalledMethods[0].ParameterTypes.Count);
-            Assert.Equal("",propertyModels[0].CalledMethods[0].ParameterTypes[0].Modifier);
-            Assert.Equal("int",propertyModels[0].CalledMethods[0].ParameterTypes[0].Type);
-            Assert.Null(propertyModels[0].CalledMethods[0].ParameterTypes[0].DefaultValue);
+            var addAccessor = propertyModels[0].Accessors[0];
+            Assert.Equal("add", addAccessor.Name);
+            Assert.Equal(1, addAccessor.CalledMethods.Count);
+            Assert.Equal("Triple", addAccessor.CalledMethods[0].Name);
+            Assert.Equal("ExternClass", addAccessor.CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, addAccessor.CalledMethods[0].ParameterTypes.Count);
+            var parameterModel1 = (ParameterModel)addAccessor.CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel1.Modifier);
+            Assert.Equal("int", parameterModel1.Type.Name);
+            Assert.Null(parameterModel1.DefaultValue);
 
-            Assert.Equal("Double", propertyModels[0].CalledMethods[1].MethodName);
-            Assert.Equal("ExternClass", propertyModels[0].CalledMethods[1].ContainingClassName);
-            Assert.Equal(1,propertyModels[0].CalledMethods[1].ParameterTypes.Count);
-            Assert.Equal("",propertyModels[0].CalledMethods[1].ParameterTypes[0].Modifier);
-            Assert.Equal("System.Func<int>",propertyModels[0].CalledMethods[1].ParameterTypes[0].Type);
-            Assert.Null(propertyModels[0].CalledMethods[1].ParameterTypes[0].DefaultValue);
+            var removeAccessor = propertyModels[0].Accessors[1];
+            Assert.Equal("remove", removeAccessor.Name);
+            Assert.Equal(1, removeAccessor.CalledMethods.Count);
+            Assert.Equal("Double", removeAccessor.CalledMethods[0].Name);
+            Assert.Equal("ExternClass", removeAccessor.CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, removeAccessor.CalledMethods[0].ParameterTypes.Count);
+            var parameterModel2 = (ParameterModel)removeAccessor.CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel2.Modifier);
+            Assert.Equal("System.Func<int>", parameterModel2.Type.Name);
+            Assert.Null(parameterModel2.DefaultValue);
         }
-        
-        [Fact]
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/ClassWithEventPropertyThatCallsMethodFromAnotherClassAsProperty.txt")]
         public void
-            Extract_ShouldHaveEventProperties_WhenGivenClassWithComputedPropertyThatCallsMethodsFromOtherClassFromTheSameNamespaceAsProperty()
+            Extract_ShouldHaveEventProperties_WhenGivenClassWithComputedPropertyThatCallsMethodsFromOtherClassFromTheSameNamespaceAsProperty(
+                string fileContent)
         {
-            const string fileContent =
-                @"using System;                                                                         
-                                    namespace TopLevel
-                                    {
-                                        public class Bar
-                                        {
-                                            public string Convert(int a)
-                                            {
-                                                return a.ToString();
-                                            }
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-                                            public static string Cut(string s)
-                                            {
-                                                return s.Trim();
-                                            }
-                                        }
+            Assert.Equal(2, classTypes.Count);
 
-                                        public class Foo
-                                        {
-                                            private Bar _bar {get;set;}
-                                            private string _value;
-
-                                            public event Func<string> Value
-                                            {
-                                                add
-                                                {
-                                                    var temp = _value;
-                                                    _bar.Convert(temp.Length);
-                                                }
-                                                remove => _value = Bar.Cut(value);
-                                            }
-                                        }
-                                    }";
-
-            var classModels = _factExtractor.Extract(fileContent);
-
-            Assert.Equal(2, classModels.Count);
-
-            var optional = classModels[1].GetMetricValue<CSharpPropertiesInfoMetric>();
-            Assert.True(optional.HasValue);
-
-            var propertyModels = (IList<PropertyModel>) optional.Value;
+            var propertyModels = ((ClassModel)classTypes[1]).Properties;
 
             Assert.Equal(2, propertyModels.Count);
 
             var propertyModel = propertyModels[1];
             Assert.Equal("Value", propertyModel.Name);
-            Assert.Equal("System.Func<string>", propertyModel.Type);
+            Assert.Equal("System.Func<string>", propertyModel.Type.Name);
             Assert.Equal("", propertyModel.Modifier);
             Assert.Equal("public", propertyModel.AccessModifier);
             Assert.True(propertyModel.IsEvent);
-            Assert.Equal("TopLevel.Foo", propertyModel.ContainingClassName);
-            Assert.Equal(2, propertyModel.CalledMethods.Count);
+            Assert.Equal("TopLevel.Foo", propertyModel.ContainingTypeName);
 
-            Assert.Equal("Convert", propertyModel.CalledMethods[0].MethodName);
-            Assert.Equal("TopLevel.Bar", propertyModel.CalledMethods[0].ContainingClassName);
-            Assert.Equal(1, propertyModel.CalledMethods[0].ParameterTypes.Count);
-            Assert.Equal("", propertyModel.CalledMethods[0].ParameterTypes[0].Modifier);
-            Assert.Equal("int", propertyModel.CalledMethods[0].ParameterTypes[0].Type);
-            Assert.Null(propertyModel.CalledMethods[0].ParameterTypes[0].DefaultValue);
+            var addAccessor = propertyModels[1].Accessors[0];
+            Assert.Equal("add", addAccessor.Name);
+            Assert.Equal(1, addAccessor.CalledMethods.Count);
+            Assert.Equal("Convert", addAccessor.CalledMethods[0].Name);
+            Assert.Equal("TopLevel.Bar", addAccessor.CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, addAccessor.CalledMethods[0].ParameterTypes.Count);
+            var parameterModel1 = (ParameterModel)addAccessor.CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel1.Modifier);
+            Assert.Equal("int", parameterModel1.Type.Name);
+            Assert.Null(parameterModel1.DefaultValue);
 
-            Assert.Equal("Cut", propertyModel.CalledMethods[1].MethodName);
-            Assert.Equal("TopLevel.Bar", propertyModel.CalledMethods[1].ContainingClassName);
-
-            Assert.Equal(1,propertyModel.CalledMethods[1].ParameterTypes.Count);
-            Assert.Equal("",propertyModel.CalledMethods[1].ParameterTypes[0].Modifier);
-            Assert.Equal("System.Func<string>",propertyModel.CalledMethods[1].ParameterTypes[0].Type);
-            Assert.Null(propertyModel.CalledMethods[1].ParameterTypes[0].DefaultValue);
+            var removeAccessor = propertyModels[1].Accessors[1];
+            Assert.Equal("remove", removeAccessor.Name);
+            Assert.Equal(1, removeAccessor.CalledMethods.Count);
+            Assert.Equal("Cut", removeAccessor.CalledMethods[0].Name);
+            Assert.Equal("TopLevel.Bar", removeAccessor.CalledMethods[0].ContainingTypeName);
+            Assert.Equal(1, removeAccessor.CalledMethods[0].ParameterTypes.Count);
+            var parameterModel2 = (ParameterModel)removeAccessor.CalledMethods[0].ParameterTypes[0];
+            Assert.Equal("", parameterModel2.Modifier);
+            Assert.Equal("System.Func<string>", parameterModel2.Type.Name);
+            Assert.Null(parameterModel2.DefaultValue);
         }
     }
 }
