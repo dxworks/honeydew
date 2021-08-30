@@ -151,6 +151,9 @@ jobs:
       - name: Zip Voyager Release
         run: zip -rl honeydew.zip honeydew
 
+      - name: Prepare Release Notes
+        run: touch ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
+
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
