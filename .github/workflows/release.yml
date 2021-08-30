@@ -130,49 +130,25 @@ jobs:
         env:
           TAG: ${{ github.ref }}
 
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+
+      - name: List all downloads
+        run: |
+          echo "Running in directory $PWD"
+          ls -R -al
+
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
           name: Honeydew ${{ steps.semver_parser.outputs.semver }}
           body_path: ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
+          body: ""
           prerelease: false
           draft: false
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v2
-
-      - name: List all downloads
-        run: |
-            echo "Running in directory $PWD"
-            ls -R -al
-
-      - name: Upload Windows Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./honeydew-win.zip/honeydew-win.zip
-          asset_name: honeydew-win.zip
-          asset_content_type: application/zip
-
-      - name: Upload Linux Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./honeydew-linux.zip/honeydew-linux.zip
-          asset_name: honeydew-linux.zip
-          asset_content_type: application/zip
-
-      - name: Upload MacOS Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./honeydew-osx.zip/honeydew-osx.zip
-          asset_name: honeydew-osx.zip
-          asset_content_type: application/zip
+          fail_on_unmatched_files: true
+          files: |
+            ./honeydew-win.zip/honeydew-win.zip
+            ./honeydew-linux.zip/honeydew-linux.zip
+            ./honeydew-osx.zip/honeydew-osx.zip

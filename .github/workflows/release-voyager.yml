@@ -157,6 +157,7 @@ jobs:
         with:
           name: Honeydew ${{ steps.semver_parser.outputs.semver }} (Voyager)
           body_path: ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
+          body: ""
           prerelease: false
           draft: false
           files: honeydew.zip
