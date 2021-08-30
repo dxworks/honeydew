@@ -127,10 +127,6 @@ jobs:
         env:
           TAG: ${{ github.ref }}
 
-      - name: Print Release Notes
-        run: |
-          echo release notes at ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
-          cat ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
