@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using CommandLine;
 using HoneydewCore.IO.Readers;
@@ -62,11 +63,37 @@ namespace Honeydew
                 IProgressLogger progressLogger =
                     options.DisableProgressBars ? new NoBarsProgressLogger() : new ProgressLogger();
 
+                try
+                {
+                    var version = Assembly.GetExecutingAssembly().GetName().Version;
+
+                    logger.Log($"Honeydew {version} starting");
+                    logger.Log();
+                    
+                    
+                    progressLogger.Log($"Honeydew {version} starting");
+                    progressLogger.Log();
+                }
+                catch (Exception)
+                {
+                    logger.Log("Could not get Application version", LogLevels.Error);
+                    logger.Log();
+                }
+
                 logger.Log($"Log will be stored at {logFilePath}");
                 logger.Log();
 
                 progressLogger.Log($"Log will be stored at {logFilePath}");
                 progressLogger.Log();
+
+                if (options.DisableProgressBars)
+                {
+                    logger.Log("Progress bars are disabled");
+                    logger.Log();
+
+                    progressLogger.Log("Progress bars are disabled");
+                    progressLogger.Log();
+                }
 
                 var inputPath = options.InputFilePath;
 
