@@ -120,6 +120,16 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v2
 
+      - name: Extract Semver
+        id: semver_parser
+        run: |
+          semver=${TAG#"refs/tags/v"}
+          semver=${semver%"-voyager"}
+
+          echo ::set-output name=semver::$semver
+        env:
+          TAG: ${{ github.ref }}
+
       - name: Prepare Assets
         run: |
           mkdir -p honeydew/results
