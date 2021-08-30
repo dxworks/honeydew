@@ -34,7 +34,14 @@ namespace Honeydew
             if (_progressBars.TryGetValue(name, out var progressBar))
             {
                 progressBar.Max = totalCount;
-                return new ProgressLoggerBar(progressBar, name);
+                try
+                {
+                    return new ProgressLoggerBar(progressBar, name);
+                }
+                catch (Exception)
+                {
+                    return new EmptyProgressLoggerBar(name);
+                }
             }
 
             var createdProgressBar = new ProgressBar(PbStyle.DoubleLine, totalCount)
@@ -43,7 +50,14 @@ namespace Honeydew
             };
             createdProgressBar.Refresh(0, name);
             _progressBars.Add(name, createdProgressBar);
-            return new ProgressLoggerBar(createdProgressBar, name);
+            try
+            {
+                return new ProgressLoggerBar(createdProgressBar, name);
+            }
+            catch (Exception)
+            {
+                return new EmptyProgressLoggerBar(name);
+            }
         }
 
         public void StopProgressBar(string name)
