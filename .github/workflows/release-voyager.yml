@@ -141,23 +141,16 @@ jobs:
       - name: Zip Voyager Release
         run: zip -rl honeydew.zip honeydew
 
+      - name: Print Release Notes
+        run: |
+          echo release notes at ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
+          cat ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Honeydew ${{ github.ref }}
-          draft: false
+          name: Honeydew ${{ github.ref }}
+          body_path: ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
           prerelease: false
-
-      - name: Upload Windows Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./honeydew.zip
-          asset_name: honeydew.zip
-          asset_content_type: application/zip
+          draft: false
+          files: honeydew.zip
