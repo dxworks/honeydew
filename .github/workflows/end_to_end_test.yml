@@ -9,47 +9,63 @@ jobs:
   build:
     strategy:
       fail-fast: true
-      matrix: 
-        os: [windows-latest, ubuntu-latest, macos-latest]
-        
+      matrix:
+        os: [ windows-latest, ubuntu-latest, macos-latest ]
+
     runs-on: ${{matrix.os}}
-   
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.x
-     
-    - if: matrix.os == 'windows-latest'
-      name: Release for OS
-      run: |
-        mkdir bin
-        dotnet publish -r win-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - if: matrix.os == 'ubuntu-latest'
-      name: Release for OS
-      run: |
-        mkdir bin
-        dotnet publish -r linux-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
 
-    - if: matrix.os == 'macos-latest'
-      name: Release for OS
-      run: |
-        mkdir bin
-        dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
+      - if: matrix.os == 'windows-latest'
+        name: Release for OS
+        run: |
+          mkdir bin
+          dotnet publish -r win-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
+
+      - if: matrix.os == 'ubuntu-latest'
+        name: Release for OS
+        run: |
+          mkdir bin
+          dotnet publish -r linux-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
+
+      - if: matrix.os == 'macos-latest'
+        name: Release for OS
+        run: |
+          mkdir bin
+          dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
 
 
-    - name: Checkout Test Project
-      uses: actions/checkout@v2
-      with: 
-        repository: dxworks/HoneydewTestProject
-        path: test_folder
-        
-    - name: Run Honeydew
-      run: ./bin/Honeydew extract test_folder
-      
-    - name: Compare results
-      run: sh e2e_scripts/compare.sh e2e_results ./results
+      - name: Checkout Test Project
+        uses: actions/checkout@v2
+        with:
+          repository: dxworks/HoneydewTestProject
+          path: test_folder
+
+      - name: Run Honeydew
+        run: ./bin/Honeydew extract test_folder
+
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '15'
+          java-package: 'jdk'
+
+      - name: Download comparer
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: "andrei2699/FileComparer"
+          version: "tags/v1.0"
+          file: "filecomparer.jar"
+          target: "./filecomparer.jar"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compare results
+        run: sh e2e_scripts/compare.sh e2e_results ./results

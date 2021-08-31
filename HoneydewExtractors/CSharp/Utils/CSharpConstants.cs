@@ -43,7 +43,7 @@
                 or "int" or "long" or "sbyte" or "float" or "ushort" or "uint" or "ulong" or "void";
         }
 
-        public static string ConvertSystemTypeToPrimitiveType(string type)
+        private static string ConvertSystemTypeToPrimitiveType(string type)
         {
             return type switch
             {

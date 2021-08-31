@@ -154,7 +154,6 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             foreach (var expression in declarationSyntax.Initializer.Expressions)
             {
                 var fullName = GetExpressionType(expression).Name;
-                fullName = CSharpConstants.ConvertPrimitiveTypeToSystemType(fullName);
                 elementTypesSet.Add(fullName);
             }
 

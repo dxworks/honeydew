@@ -3,13 +3,10 @@ then
 	echo "Usage $0 <source_folder> <destination_folder>"; exit 1
 fi
 
-for file in `ls $1`
-do
-	if ! test -f $1/$file
-		then continue
-	fi	
-	
-	if ! cmp -s "$1/$file" "$2/$file"
-	then echo "Not Equal $1/$file $2/$file"; echo `cat $1/$file`; echo `cat $2/$file`;exit 2
-	fi
-done
+java -jar ./filecomparer.jar csv "$1/honeydew.csv" "$2/honeydew.csv"
+java -jar ./filecomparer.jar csv "$1/honeydew_intermediate.csv" "$2/honeydew_intermediate.csv"
+java -jar ./filecomparer.jar json "$1/honeydew.json" "$2/honeydew.json"
+java -jar ./filecomparer.jar json "$1/honeydew_intermediate.json" "$2/honeydew_intermediate.json"
+java -jar ./filecomparer.jar json "$1/honeydew_cyclomatic.json" "$2/honeydew_cyclomatic.json"
+java -jar ./filecomparer.jar json "$1/honeydew_cyclomatic_intermediate.json" "$2/honeydew_cyclomatic_intermediate.json"
+java -jar ./filecomparer.jar json "$1/honeydew_namespaces.json" "$2/honeydew_namespaces.json"
