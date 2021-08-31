@@ -24,19 +24,19 @@ jobs:
           dotnet-version: 5.0.x
 
       - if: matrix.os == 'windows-latest'
-        name: Release for OS
+        name: Release for Windows
         run: |
           mkdir bin
           dotnet publish -r win-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
 
       - if: matrix.os == 'ubuntu-latest'
-        name: Release for OS
+        name: Release for Ubuntu
         run: |
           mkdir bin
           dotnet publish -r linux-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
 
       - if: matrix.os == 'macos-latest'
-        name: Release for OS
+        name: Release for MacOS
         run: |
           mkdir bin
           dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
@@ -58,7 +58,12 @@ jobs:
           java-version: '15'
           java-package: 'jdk'
 
-      - name: Download comparer
+      - if: matrix.os == 'windows-latest'
+        name: Download comparer
+        run: Invoke-WebRequest -Uri ${{ secrets.FILE_COMPARER_PATH }} -OutFile "./filecomparer.jar"
+
+      - if: matrix.os != 'windows-latest'
+        name: Download comparer
         run: wget ${{ secrets.FILE_COMPARER_PATH }} -O "./filecomparer.jar"
         
       - name: Compare results
