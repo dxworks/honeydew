@@ -491,7 +491,7 @@ namespace HoneydewExtractors.Processors
                 {
                     if (fieldModel.Name == containingClassName)
                     {
-                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(fieldModel.Type.Name);
+                        return fieldModel.Type.Name;
                     }
                 }
 
@@ -499,7 +499,7 @@ namespace HoneydewExtractors.Processors
                 {
                     if (propertyModel.Name == containingClassName)
                     {
-                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(propertyModel.Type.Name);
+                        return propertyModel.Type.Name;
                     }
                 }
 
@@ -510,7 +510,7 @@ namespace HoneydewExtractors.Processors
                         methodName, methodParameters);
                     if (hasTheSameSignature)
                     {
-                        return CSharpConstants.ConvertPrimitiveTypeToSystemType(staticImportedClass.Name);
+                        return staticImportedClass.Name;
                     }
                 }
             }
@@ -686,7 +686,7 @@ namespace HoneydewExtractors.Processors
 
             if (CSharpConstants.IsPrimitive(className))
             {
-                return CSharpConstants.ConvertPrimitiveTypeToSystemType(className);
+                return className;
             }
 
             var classFullName = className;

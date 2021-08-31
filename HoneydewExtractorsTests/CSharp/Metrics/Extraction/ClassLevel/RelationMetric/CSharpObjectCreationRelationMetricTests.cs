@@ -375,10 +375,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
 
             Assert.Equal(4, dependencies.Count);
-            Assert.Equal(1, dependencies["System.String[]"]);
-            Assert.Equal(1, dependencies["System.Double[]"]);
-            Assert.Equal(1, dependencies["System.Int32[]"]);
-            Assert.Equal(1, dependencies["System.Boolean[]"]);
+            Assert.Equal(1, dependencies["string[]"]);
+            Assert.Equal(1, dependencies["double[]"]);
+            Assert.Equal(1, dependencies["int[]"]);
+            Assert.Equal(1, dependencies["bool[]"]);
         }
 
         [Fact]
