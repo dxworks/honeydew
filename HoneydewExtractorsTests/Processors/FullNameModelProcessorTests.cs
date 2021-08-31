@@ -436,7 +436,7 @@ namespace HoneydewExtractorsTests.Processors
                 Assert.Equal("class", classModel.BaseTypes[0].Kind);
             }
 
-            Assert.Equal("System.Object", modelsNamespace.ClassModels[0].BaseTypes[0].Type.Name);
+            Assert.Equal("object", modelsNamespace.ClassModels[0].BaseTypes[0].Type.Name);
             Assert.Equal("Models.Class1", modelsNamespace.ClassModels[1].BaseTypes[0].Type.Name);
             Assert.Equal("Models.Class1", modelsNamespace.ClassModels[2].BaseTypes[0].Type.Name);
             Assert.Equal("Models.Class3", modelsNamespace.ClassModels[3].BaseTypes[0].Type.Name);
@@ -1531,7 +1531,7 @@ namespace HoneydewExtractorsTests.Processors
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
-            Assert.Equal("System.Int32",
+            Assert.Equal("int",
                 ((ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0]).Properties[0]
                 .Type.Name);
             Assert.Equal("Models.Class1",
@@ -1540,7 +1540,7 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Equal("Services.Class2",
                 ((ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0]).Properties[0]
                 .Type.Name);
-            Assert.Equal("System.String",
+            Assert.Equal("string",
                 ((ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0]).Properties[1]
                 .Type.Name);
             Assert.Equal("Namespace.RandomClassClass",
