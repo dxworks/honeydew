@@ -49,7 +49,7 @@ jobs:
           path: test_folder
 
       - name: Run Honeydew
-        run: ./bin/Honeydew extract test_folder --disable-progress-bars
+        run: ./bin/Honeydew extract test_folder
 
       - name: Setup Java
         uses: actions/setup-java@v2
