@@ -5,6 +5,9 @@ results:
 
 commands:
   - name: run honeydew
-    win: .\bin\win\Honeydew.exe extract ${repo}
-    unix: ./bin/linux/Honeydew extract ${repo}
+    win: .\bin\win\Honeydew.exe extract ${repo} ${options}
+    unix: ./bin/linux/Honeydew extract ${repo} ${options}
+
+parameters:
+  options: "--disable-progress-bars"
 

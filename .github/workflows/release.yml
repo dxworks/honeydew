@@ -117,51 +117,41 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-publish
     steps:
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Extract Semver
+        id: semver_parser
+        run: |
+          semver=${TAG#"refs/tags/v"}
+          semver=${semver%"-voyager"}
+
+          echo ::set-output name=semver::$semver
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Honeydew ${{ github.ref }}
-          draft: false
-          prerelease: false
+          TAG: ${{ github.ref }}
 
       - name: Download all artifacts
         uses: actions/download-artifact@v2
 
       - name: List all downloads
         run: |
-            echo "Running in directory $PWD"
-            ls -R -al
+          echo "Running in directory $PWD"
+          ls -R -al
 
-      - name: Upload Windows Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./honeydew-win.zip/honeydew-win.zip
-          asset_name: honeydew-win.zip
-          asset_content_type: application/zip
+      - name: Prepare Release Notes
+        run: touch ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
 
-      - name: Upload Linux Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./honeydew-linux.zip/honeydew-linux.zip
-          asset_name: honeydew-linux.zip
-          asset_content_type: application/zip
-
-      - name: Upload MacOS Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./honeydew-osx.zip/honeydew-osx.zip
-          asset_name: honeydew-osx.zip
-          asset_content_type: application/zip
+          name: Honeydew ${{ steps.semver_parser.outputs.semver }}
+          body_path: ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
+          body: ""
+          prerelease: false
+          draft: false
+          fail_on_unmatched_files: true
+          files: |
+            ./honeydew-win.zip/honeydew-win.zip
+            ./honeydew-linux.zip/honeydew-linux.zip
+            ./honeydew-osx.zip/honeydew-osx.zip
