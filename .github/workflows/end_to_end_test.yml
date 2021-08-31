@@ -59,13 +59,7 @@ jobs:
           java-package: 'jdk'
 
       - name: Download comparer
-        uses: dsaltares/fetch-gh-release-asset@master
-        with:
-          repo: "andrei2699/FileComparer"
-          version: "tags/v1.0"
-          file: "filecomparer.jar"
-          target: "./filecomparer.jar"
-          token: ${{ secrets.GITHUB_TOKEN }}
-
+        run: wget ${{ secrets.FILE_COMPARER_PATH }} -O "./filecomparer.jar"
+        
       - name: Compare results
         run: sh e2e_scripts/compare.sh e2e_results ./results
