@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using HoneydewModels.Types;
-using Microsoft.CodeAnalysis;
 
 namespace HoneydewModels.CSharp
 {
@@ -20,9 +18,27 @@ namespace HoneydewModels.CSharp
 
         public string Modifier { get; set; } = "";
 
+
+        private string _namespace = "";
+
         public string ContainingTypeName
         {
-            get => Namespace;
+            get
+            {
+                if (!string.IsNullOrEmpty(_namespace) || string.IsNullOrEmpty(Name))
+                {
+                    return _namespace;
+                }
+
+                var lastIndexOf = Name.LastIndexOf(".", StringComparison.Ordinal);
+                if (lastIndexOf < 0)
+                {
+                    return "";
+                }
+
+                _namespace = Name[..lastIndexOf];
+                return _namespace;
+            }
             set => _namespace = value;
         }
 
@@ -41,40 +57,5 @@ namespace HoneydewModels.CSharp
         public IList<MetricModel> Metrics { get; init; } = new List<MetricModel>();
 
         public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
-
-        public string Namespace
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(_namespace) || string.IsNullOrEmpty(Name)) return _namespace;
-
-                var lastIndexOf = Name.LastIndexOf(".", StringComparison.Ordinal);
-                if (lastIndexOf < 0)
-                {
-                    return "";
-                }
-
-                _namespace = Name[..lastIndexOf];
-                return _namespace;
-            }
-        }
-
-        private string _namespace = "";
-
-        public void AddMetricValue(string extractorName, IMetricValue metricValue)
-        {
-            Metrics.Add(new MetricModel
-            {
-                ExtractorName = extractorName,
-                ValueType = metricValue.GetValueType(),
-                Value = metricValue.GetValue()
-            });
-        }
-
-        public Optional<object> GetMetricValue<T>()
-        {
-            var firstOrDefault = Metrics.FirstOrDefault(metric => metric.ExtractorName == typeof(T).FullName);
-            return firstOrDefault == default ? default(Optional<object>) : firstOrDefault.Value;
-        }
     }
 }

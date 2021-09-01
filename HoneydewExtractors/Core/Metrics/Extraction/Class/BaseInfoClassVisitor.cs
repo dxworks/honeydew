@@ -27,6 +27,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Class
             modelType.AccessModifier = accessModifier;
             modelType.Modifier = modifier;
             modelType.ClassType = syntaxNode.Kind().ToString().Replace("Declaration", "").ToLower();
+            modelType.ContainingTypeName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);
 
             return modelType;
         }

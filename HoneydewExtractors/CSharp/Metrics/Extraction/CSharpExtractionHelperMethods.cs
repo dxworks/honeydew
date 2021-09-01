@@ -613,6 +613,11 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             {
                 declarationSyntax = GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>(syntaxNode);
             }
+            
+            if (declarationSyntax == null)
+            {
+                declarationSyntax = GetParentDeclarationSyntax<NamespaceDeclarationSyntax>(syntaxNode);
+            }
 
             if (declarationSyntax != null)
             {
