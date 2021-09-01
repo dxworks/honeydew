@@ -1,6 +1,7 @@
 ﻿using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
 using HoneydewExtractors.CSharp.Utils;
+using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -15,7 +16,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables
         {
         }
 
-        public IEntityType Visit(VariableDeclaratorSyntax syntaxNode, IEntityType modelType)
+        public ILocalVariableType Visit(VariableDeclaratorSyntax syntaxNode, ILocalVariableType modelType)
         {
             var variableDeclarationSyntax =
                 CSharpHelperMethods.GetParentDeclarationSyntax<VariableDeclarationSyntax>(syntaxNode);
@@ -26,16 +27,18 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables
 
             var fullName = CSharpHelperMethods.GetFullName(variableDeclarationSyntax.Type).Name;
 
-            if (fullName != CSharpConstants.VarIdentifier)
+            IEntityType localVariableType = new EntityTypeModel
             {
-                modelType.Name = fullName;
-            }
-            else
+                Name = fullName
+            };
+
+
+            if (fullName == CSharpConstants.VarIdentifier)
             {
                 fullName = CSharpHelperMethods.GetFullName(variableDeclarationSyntax).Name;
                 if (fullName != CSharpConstants.VarIdentifier)
                 {
-                    modelType.Name = fullName;
+                    localVariableType.Name = fullName;
                 }
                 else
                 {
@@ -47,15 +50,38 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables
                             objectCreationExpressionSyntax
                         })
                         {
-                            modelType.Name = CSharpHelperMethods.GetFullName(objectCreationExpressionSyntax.Type).Name;
+                            localVariableType = CSharpHelperMethods.GetFullName(objectCreationExpressionSyntax.Type);
                         }
                         else if (declarationVariable.Initializer != null)
                         {
-                            modelType.Name = CSharpHelperMethods.GetFullName(declarationVariable.Initializer.Value)
-                                .Name;
+                            localVariableType = CSharpHelperMethods.GetFullName(declarationVariable.Initializer.Value);
                         }
                     }
                 }
+            }
+
+            modelType.Type = localVariableType;
+
+            return modelType;
+        }
+
+        public ILocalVariableType Visit(DeclarationPatternSyntax syntaxNode, ILocalVariableType modelType)
+        {
+            modelType.Type = CSharpHelperMethods.GetFullName(syntaxNode.Type);
+            return modelType;
+        }
+
+        public ILocalVariableType Visit(ForEachStatementSyntax syntaxNode, ILocalVariableType modelType)
+        {
+            modelType.Type = CSharpHelperMethods.GetFullName(syntaxNode.Type);
+
+            if (modelType.Type.Name == CSharpConstants.VarIdentifier)
+            {
+                // CSharpHelperMethods.GetFullName(syntaxNode.Expression)
+                // modelType.Type = new EntityTypeModel
+                // {
+                //     Name = modelType.Type.ContainedTypes[0].Name,
+                // };
             }
 
             return modelType;

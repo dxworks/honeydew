@@ -22,7 +22,7 @@ namespace HoneydewModels.CSharp
         public IList<IMethodTypeWithLocalFunctions> LocalFunctions { get; set; } =
             new List<IMethodTypeWithLocalFunctions>();
 
-        public IList<IEntityType> LocalVariableTypes { get; set; } = new List<IEntityType>();
+        public IList<ILocalVariableType> LocalVariableTypes { get; set; } = new List<ILocalVariableType>();
 
         public LinesOfCode Loc { get; set; }
 

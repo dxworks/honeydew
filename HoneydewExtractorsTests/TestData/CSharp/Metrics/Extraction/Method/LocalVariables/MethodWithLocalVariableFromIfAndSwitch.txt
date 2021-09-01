@@ -1,0 +1,38 @@
+﻿namespace Namespace1
+{
+    public class Class1
+    {
+        public void Method(Parent p)
+        {
+            if (p is Class2 class2)
+            {
+            }
+            else if (p is Class3 class3)
+            {
+            }
+        }
+
+        public void Method2(Parent p)
+        {
+            switch (p)
+            {
+                case Class2 class2:
+                    break;
+                case Class3 class3:
+                    break;
+            }
+        }
+    }
+    
+    public class Parent
+    {
+    }
+
+    public class Class2 : Parent
+    {
+    }
+
+    public class Class3 : Parent
+    {
+    }
+}

@@ -52,10 +52,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             foreach (var constructorType in classModel.Constructors)
             {
                 Assert.Equal(4, constructorType.LocalVariableTypes.Count);
-                Assert.Equal("int", constructorType.LocalVariableTypes[0].Name);
-                Assert.Equal("int", constructorType.LocalVariableTypes[1].Name);
-                Assert.Equal("int", constructorType.LocalVariableTypes[2].Name);
-                Assert.Equal("string", constructorType.LocalVariableTypes[3].Name);
+                Assert.Equal("int", constructorType.LocalVariableTypes[0].Type.Name);
+                Assert.Equal("int", constructorType.LocalVariableTypes[1].Type.Name);
+                Assert.Equal("int", constructorType.LocalVariableTypes[2].Type.Name);
+                Assert.Equal("string", constructorType.LocalVariableTypes[3].Type.Name);
             }
         }
 
@@ -72,16 +72,16 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             foreach (var constructorType in classModel.Constructors)
             {
                 Assert.Equal(5, constructorType.LocalVariableTypes.Count);
-                Assert.Equal("Namespace1.Parent", constructorType.LocalVariableTypes[0].Name);
-                Assert.Equal("Namespace1.Class2", constructorType.LocalVariableTypes[3].Name);
-                Assert.Equal("Namespace1.Class3", constructorType.LocalVariableTypes[4].Name);
+                Assert.Equal("Namespace1.Parent", constructorType.LocalVariableTypes[0].Type.Name);
+                Assert.Equal("Namespace1.Class2", constructorType.LocalVariableTypes[3].Type.Name);
+                Assert.Equal("Namespace1.Class3", constructorType.LocalVariableTypes[4].Type.Name);
             }
 
-            Assert.Equal("Namespace1.Parent", classModel.Constructors[0].LocalVariableTypes[1].Name);
-            Assert.Equal("Namespace1.Parent", classModel.Constructors[0].LocalVariableTypes[2].Name);
+            Assert.Equal("Namespace1.Parent", classModel.Constructors[0].LocalVariableTypes[1].Type.Name);
+            Assert.Equal("Namespace1.Parent", classModel.Constructors[0].LocalVariableTypes[2].Type.Name);
 
-            Assert.Equal("Namespace1.Class2", classModel.Constructors[1].LocalVariableTypes[1].Name);
-            Assert.Equal("Namespace1.Class3", classModel.Constructors[1].LocalVariableTypes[2].Name);
+            Assert.Equal("Namespace1.Class2", classModel.Constructors[1].LocalVariableTypes[1].Type.Name);
+            Assert.Equal("Namespace1.Class3", classModel.Constructors[1].LocalVariableTypes[2].Type.Name);
         }
 
         [Theory]
@@ -99,7 +99,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
                 Assert.Equal(3, constructorType.LocalVariableTypes.Count);
                 foreach (var localVariableType in constructorType.LocalVariableTypes)
                 {
-                    Assert.Equal("ExternClass", localVariableType.Name);
+                    Assert.Equal("ExternClass", localVariableType.Type.Name);
                 }
             }
         }
@@ -117,9 +117,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             foreach (var constructorType in classModel.Constructors)
             {
                 Assert.Equal(3, constructorType.LocalVariableTypes.Count);
-                Assert.Equal("int[]", constructorType.LocalVariableTypes[0].Name);
-                Assert.Equal("Namespace1.Class2[]", constructorType.LocalVariableTypes[1].Name);
-                Assert.Equal("ExternClass[]", constructorType.LocalVariableTypes[2].Name);
+                Assert.Equal("int[]", constructorType.LocalVariableTypes[0].Type.Name);
+                Assert.Equal("Namespace1.Class2[]", constructorType.LocalVariableTypes[1].Type.Name);
+                Assert.Equal("ExternClass[]", constructorType.LocalVariableTypes[2].Type.Name);
             }
         }
     }

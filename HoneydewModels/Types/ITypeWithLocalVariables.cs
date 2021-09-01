@@ -4,6 +4,6 @@ namespace HoneydewModels.Types
 {
     public interface ITypeWithLocalVariables : IType
     {
-        public IList<IEntityType> LocalVariableTypes { get; set; }
+        public IList<ILocalVariableType> LocalVariableTypes { get; set; }
     }
 }

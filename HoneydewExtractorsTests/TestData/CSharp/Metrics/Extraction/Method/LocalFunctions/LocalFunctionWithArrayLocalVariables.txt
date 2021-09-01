@@ -1,0 +1,30 @@
+﻿namespace Namespace1
+{
+    public class Class1
+    {
+        public void Method(int a, int b)
+        {
+            int[] sum = new int[a+b];
+            Class2[] c2 = new Class2[a];
+            ExternClass[] e = new ExternClass[b]; 
+            
+            void LocalFunction1()
+            {
+                var s = sum;
+                var cl2 = new Class2[a];
+                var e2 = new ExternClass[b];
+                
+                void LocalFunction2()
+                {
+                    var s2 = s;
+                    var cll2 = cl2;
+                    var el2 = e2;
+                }
+            }
+        }             
+    }
+    
+    public class Class2
+    {
+    }    
+}
