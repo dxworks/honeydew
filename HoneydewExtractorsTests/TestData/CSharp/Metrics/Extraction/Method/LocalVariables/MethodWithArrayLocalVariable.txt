@@ -1,0 +1,23 @@
+﻿namespace Namespace1
+{
+    public class Class1
+    {
+        public void Method(int a)
+        {
+            int[] array = new int[a];
+            Class2[] array2 = new Class2[a];
+            ExternClass[] array3 = new ExternClass[a];
+        }
+        
+        public void MethodWithVar(int a, int b)
+        {
+            var array = new int[a];
+            var array2 = new Class2[a];
+            var array3 = new ExternClass[a];
+        }
+    }
+    
+    public class Class2
+    {
+    }
+}

@@ -1,0 +1,65 @@
+namespace Namespace1
+{
+    using System;
+    
+    public class Class1
+    {
+        private int a;
+    
+        public int Value1 
+        {
+            get 
+            {
+                int[] array = new int[a];
+                Class2[] array2 = new Class2[a];
+                ExternClass[] array3 = new ExternClass[a];
+                
+                return 0;
+            }
+            set
+            {
+                var array = new int[a];
+                var array2 = new Class2[a];
+                var array3 = new ExternClass[a];
+            }
+        }
+        
+        public int Value2 
+        {
+            get 
+            {
+                var array = new int[a];
+                var array2 = new Class2[a];
+                var array3 = new ExternClass[a];
+                
+                return 0;
+            }
+            init
+            {
+                int[] array = new int[a];
+                Class2[] array2 = new Class2[a];
+                ExternClass[] array3 = new ExternClass[a];        
+            }
+        }
+        
+        public event Func<int> Value3 
+        {
+            add
+            {
+               int[] array = new int[a];
+               Class2[] array2 = new Class2[a];
+               ExternClass[] array3 = new ExternClass[a];
+            }
+            remove
+            {
+               var array = new int[a];
+               var array2 = new Class2[a];
+               var array3 = new ExternClass[a];
+            }
+        }
+    }
+
+    public class Class2
+    {
+    }
+}

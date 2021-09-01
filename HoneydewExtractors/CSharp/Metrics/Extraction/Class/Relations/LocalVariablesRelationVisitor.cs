@@ -52,6 +52,11 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
                                 MetricHolder.Add(className,
                                     CSharpHelperMethods.GetFullName(objectCreationExpressionSyntax.Type).Name, this);
                             }
+                            else if (declarationVariable.Initializer != null)
+                            {
+                                MetricHolder.Add(className,
+                                    CSharpHelperMethods.GetFullName(declarationVariable.Initializer.Value).Name, this);
+                            }
                         }
                     }
                 }
