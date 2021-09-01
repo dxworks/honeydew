@@ -19,8 +19,6 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Method
 
         public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
         {
-            var containingClassName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);
-
             var isInterface = CSharpHelperMethods.GetParentDeclarationSyntax<InterfaceDeclarationSyntax>(syntaxNode) !=
                               null;
             var accessModifier = isInterface
@@ -43,7 +41,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction.Method
                 Type = returnType,
                 Modifier = returnTypeModifier
             };
-            modelType.ContainingTypeName = containingClassName;
+            modelType.ContainingTypeName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);
             modelType.Modifier = modifier;
             modelType.AccessModifier = accessModifier;
             modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
