@@ -1,5 +1,5 @@
 ﻿using HoneydewCore.ModelRepresentations;
-using HoneydewExtractors.Core.Metrics.Extraction.Class.Relations;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
 using Moq;
 using Xunit;
 

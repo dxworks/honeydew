@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
-using HoneydewExtractors.Core.Metrics.Extraction.Class.Relations;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 
