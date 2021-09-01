@@ -19,7 +19,10 @@ namespace HoneydewModels.CSharp
 
         public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
 
-        public IList<IMethodTypeWithLocalFunctions> LocalFunctions { get; set; } = new List<IMethodTypeWithLocalFunctions>();
+        public IList<IMethodTypeWithLocalFunctions> LocalFunctions { get; set; } =
+            new List<IMethodTypeWithLocalFunctions>();
+
+        public IList<IEntityType> LocalVariableTypes { get; set; } = new List<IEntityType>();
 
         public LinesOfCode Loc { get; set; }
 
