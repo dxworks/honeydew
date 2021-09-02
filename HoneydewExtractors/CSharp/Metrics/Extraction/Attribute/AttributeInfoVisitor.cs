@@ -15,8 +15,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Attribute
 
         public IAttributeType Visit(AttributeSyntax syntaxNode, IAttributeType modelType)
         {
-            modelType.Name = CSharpHelperMethods.GetFullName(syntaxNode);
-            modelType.ContainingTypeName = CSharpHelperMethods.GetAttributeContainingType(syntaxNode);
+            modelType.Name = CSharpHelperMethods.GetFullName(syntaxNode).Name;
+            modelType.ContainingTypeName = CSharpHelperMethods.GetAttributeContainingType(syntaxNode).Name;
             var attributeTarget = CSharpHelperMethods.GetAttributeTarget(syntaxNode);
             if (!string.IsNullOrEmpty(attributeTarget))
             {

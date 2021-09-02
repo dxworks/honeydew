@@ -20,7 +20,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Constructor
             var containingClassName = "";
             if (syntaxNode.Parent is BaseTypeDeclarationSyntax baseTypeDeclarationSyntax)
             {
-                containingClassName = CSharpHelperMethods.GetFullName(baseTypeDeclarationSyntax);
+                containingClassName = CSharpHelperMethods.GetFullName(baseTypeDeclarationSyntax).Name;
             }
 
             GetModifiersForNode(syntaxNode, out var accessModifier, out var modifier);

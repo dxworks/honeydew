@@ -24,7 +24,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Property
             var classDeclarationSyntax = syntaxNode.Parent as BaseTypeDeclarationSyntax;
             if (classDeclarationSyntax != null)
             {
-                containingClass = CSharpHelperMethods.GetFullName(classDeclarationSyntax);
+                containingClass = CSharpHelperMethods.GetFullName(classDeclarationSyntax).Name;
             }
 
             CSharpConstants.SetModifiers(allModifiers, ref accessModifier, ref modifier);

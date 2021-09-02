@@ -27,7 +27,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Delegate
 
             var returnTypeModifier = CSharpHelperMethods.SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
 
-            modelType.Name = CSharpHelperMethods.GetFullName(syntaxNode);
+            modelType.Name = CSharpHelperMethods.GetFullName(syntaxNode).Name;
             modelType.AccessModifier = accessModifier;
             modelType.Modifier = modifier;
             modelType.ReturnValue = new ReturnValueModel
@@ -45,7 +45,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Delegate
                     Name = CSharpConstants.SystemDelegate
                 }
             });
-            modelType.ContainingTypeName = CSharpHelperMethods.GetFullName(syntaxNode)
+            modelType.ContainingTypeName = CSharpHelperMethods.GetFullName(syntaxNode).Name
                 .Replace(syntaxNode.Identifier.ToString(), "").Trim('.');
 
             return modelType;

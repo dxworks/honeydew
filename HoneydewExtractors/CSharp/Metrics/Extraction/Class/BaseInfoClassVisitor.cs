@@ -22,7 +22,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class
             CSharpConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier,
                 ref modifier);
 
-            modelType.Name = CSharpHelperMethods.GetFullName(syntaxNode);
+            modelType.Name = CSharpHelperMethods.GetFullName(syntaxNode).Name;
             modelType.AccessModifier = accessModifier;
             modelType.Modifier = modifier;
             modelType.ClassType = syntaxNode.Kind().ToString().Replace("Declaration", "").ToLower();

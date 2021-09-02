@@ -18,8 +18,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables
 
         public ILocalVariableType Visit(VariableDeclaratorSyntax syntaxNode, ILocalVariableType modelType)
         {
-            var variableDeclarationSyntax =
-                CSharpHelperMethods.GetParentDeclarationSyntax<VariableDeclarationSyntax>(syntaxNode);
+            var variableDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<VariableDeclarationSyntax>();
             if (variableDeclarationSyntax == null)
             {
                 return modelType;

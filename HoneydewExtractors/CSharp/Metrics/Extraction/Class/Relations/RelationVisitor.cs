@@ -41,7 +41,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
 
         public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
         {
-            var className = CSharpHelperMethods.GetFullName(syntaxNode);
+            var className = CSharpHelperMethods.GetFullName(syntaxNode).Name;
 
             AddDependencies(className, syntaxNode);
 

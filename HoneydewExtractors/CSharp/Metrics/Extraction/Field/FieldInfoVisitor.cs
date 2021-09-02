@@ -26,7 +26,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Field
             var containingClass = "";
             if (syntaxNode.Parent is BaseTypeDeclarationSyntax classDeclarationSyntax)
             {
-                containingClass = CSharpHelperMethods.GetFullName(classDeclarationSyntax);
+                containingClass = CSharpHelperMethods.GetFullName(classDeclarationSyntax).Name;
             }
 
             CSharpConstants.SetModifiers(allModifiers, ref accessModifier, ref modifier);

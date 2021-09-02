@@ -21,17 +21,10 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
 
         protected override void AddDependencies(string className, BaseTypeDeclarationSyntax syntaxNode)
         {
-            foreach (var propertyDeclarationSyntax in syntaxNode.DescendantNodes().OfType<PropertyDeclarationSyntax>())
+            foreach (var propertyDeclarationSyntax in syntaxNode.DescendantNodes().OfType<BasePropertyDeclarationSyntax>())
             {
                 MetricHolder.Add(className,
                     CSharpHelperMethods.GetFullName(propertyDeclarationSyntax.Type).Name, this);
-            }
-
-            foreach (var eventDeclarationSyntax in syntaxNode.DescendantNodes()
-                .OfType<EventDeclarationSyntax>())
-            {
-                MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(eventDeclarationSyntax.Type).Name, this);
             }
         }
     }

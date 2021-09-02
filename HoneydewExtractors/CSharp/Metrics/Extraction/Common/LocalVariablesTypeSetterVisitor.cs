@@ -88,8 +88,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                 .OfType<DeclarationPatternSyntax>())
             {
                 var parentDeclarationSyntax =
-                    CSharpHelperMethods.GetParentDeclarationSyntax<LocalFunctionStatementSyntax>(
-                        declarationPatternSyntax);
+                    declarationPatternSyntax.GetParentDeclarationSyntax<LocalFunctionStatementSyntax>();
                 if (parentDeclarationSyntax != syntaxNode)
                 {
                     continue;

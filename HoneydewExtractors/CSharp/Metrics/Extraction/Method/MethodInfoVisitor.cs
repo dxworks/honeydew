@@ -18,8 +18,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Method
 
         public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
         {
-            var isInterface = CSharpHelperMethods.GetParentDeclarationSyntax<InterfaceDeclarationSyntax>(syntaxNode) !=
-                              null;
+            var isInterface = syntaxNode.GetParentDeclarationSyntax<InterfaceDeclarationSyntax>() != null;
             var accessModifier = isInterface
                 ? CSharpConstants.DefaultInterfaceMethodAccessModifier
                 : CSharpConstants.DefaultClassMethodAccessModifier;
@@ -63,7 +62,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Method
             if (keyword == "get")
             {
                 var basePropertyDeclarationSyntax =
-                    CSharpHelperMethods.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>(syntaxNode);
+                    syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
                 if (basePropertyDeclarationSyntax != null)
                 {
                     returnType = CSharpHelperMethods.GetFullName(basePropertyDeclarationSyntax.Type);
@@ -89,8 +88,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Method
             {
                 Name = "void"
             };
-            var basePropertyDeclarationSyntax =
-                CSharpHelperMethods.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>(syntaxNode);
+            var basePropertyDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
             if (basePropertyDeclarationSyntax != null)
             {
                 returnType = CSharpHelperMethods.GetFullName(basePropertyDeclarationSyntax.Type);
