@@ -1,7 +1,6 @@
 ﻿using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
 using HoneydewExtractors.CSharp.Utils;
-using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -24,13 +23,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables
                 return modelType;
             }
 
-            var fullName = CSharpHelperMethods.GetFullName(variableDeclarationSyntax.Type).Name;
-
-            IEntityType localVariableType = new EntityTypeModel
-            {
-                Name = fullName
-            };
-
+            IEntityType localVariableType = CSharpHelperMethods.GetFullName(variableDeclarationSyntax.Type);
+            var fullName = localVariableType.Name;
 
             if (fullName == CSharpConstants.VarIdentifier)
             {

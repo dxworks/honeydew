@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -19,10 +20,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
         public IEntityType GetFullName(SyntaxNode syntaxNode)
         {
-            var entityTypeModel = new EntityTypeModel
-            {
-                Name = syntaxNode.ToString()
-            };
+            var name = syntaxNode.ToString();
 
             switch (syntaxNode)
             {
@@ -34,7 +32,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                     var declaredSymbol = _semanticModel.GetDeclaredSymbol(syntaxNode);
                     if (declaredSymbol != null)
                     {
-                        entityTypeModel.Name = declaredSymbol.ToDisplayString();
+                        name = declaredSymbol.ToDisplayString();
                     }
                 }
                     break;
@@ -53,13 +51,13 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                             return GetFullName(refTypeSyntax.Type);
                         case ArrayTypeSyntax arrayTypeSyntax:
                         {
-                            entityTypeModel.Name =
+                            name =
                                 $"{GetFullName(arrayTypeSyntax.ElementType).Name}{arrayTypeSyntax.RankSpecifiers.ToString()}";
                         }
                             break;
                         default:
                         {
-                            entityTypeModel.Name = typeSyntax.ToString();
+                            name = typeSyntax.ToString();
                         }
                             break;
                     }
@@ -69,7 +67,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 case AttributeSyntax attributeSyntax:
                 {
                     var symbolInfo = _semanticModel.GetSymbolInfo(attributeSyntax);
-                    entityTypeModel.Name = symbolInfo.Symbol != null
+                    name = symbolInfo.Symbol != null
                         ? symbolInfo.Symbol.ContainingType.ToString()
                         : attributeSyntax.Name.ToString();
                 }
@@ -104,7 +102,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 {
                     var basePropertyDeclarationSyntax = accessorDeclarationSyntax
                         .GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
-                    entityTypeModel.Name = basePropertyDeclarationSyntax == null
+                    name = basePropertyDeclarationSyntax == null
                         ? accessorDeclarationSyntax.Keyword.ToString()
                         : $"{GetFullName(basePropertyDeclarationSyntax).Name}.{accessorDeclarationSyntax.Keyword.ToString()}";
                 }
@@ -118,7 +116,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 }
             }
 
-            return entityTypeModel;
+            return CreateEntityTypeModel(name);
         }
 
         private IEntityType GetFullName(ISymbol symbolInfo)
@@ -131,59 +129,129 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 };
             }
 
+            var name = symbolInfo.ToString();
+
             switch (symbolInfo)
             {
                 case IPropertySymbol propertySymbol:
                 {
-                    return new EntityTypeModel
-                    {
-                        Name = propertySymbol.Type.ToDisplayString()
-                    };
+                    name = propertySymbol.Type.ToDisplayString();
                 }
+                    break;
                 case ILocalSymbol localSymbol:
                 {
-                    return new EntityTypeModel
-                    {
-                        Name = localSymbol.Type.ToDisplayString()
-                    };
+                    name = localSymbol.Type.ToDisplayString();
                 }
+                    break;
                 case IFieldSymbol fieldSymbol:
                 {
-                    return new EntityTypeModel
-                    {
-                        Name = fieldSymbol.Type.ToDisplayString()
-                    };
+                    name = fieldSymbol.Type.ToDisplayString();
                 }
+                    break;
                 case IMethodSymbol methodSymbol:
+                {
                     if (methodSymbol.MethodKind == MethodKind.Constructor && methodSymbol.ReceiverType != null)
                     {
-                        return new EntityTypeModel
-                        {
-                            Name = methodSymbol.ReceiverType.ToDisplayString()
-                        };
+                        name = methodSymbol.ReceiverType.ToDisplayString();
                     }
-
-                    return new EntityTypeModel
+                    else
                     {
-                        Name = methodSymbol.ReturnType.ToDisplayString()
-                    };
+                        name = methodSymbol.ReturnType.ToDisplayString();
+                    }
+                }
+                    break;
+
                 case IParameterSymbol parameterSymbol:
                 {
-                    return new EntityTypeModel
-                    {
-                        Name = parameterSymbol.Type.ToDisplayString()
-                    };
+                    name = parameterSymbol.Type.ToDisplayString();
                 }
-                default:
-                {
-                    return new EntityTypeModel
-                    {
-                        Name = symbolInfo.ToString()
-                    };
-                }
+                    break;
             }
+
+            return CreateEntityTypeModel(name);
         }
 
+        private EntityTypeModel CreateEntityTypeModel(string name)
+        {
+            return new EntityTypeModel
+            {
+                Name = name,
+                ContainedTypes = GetContainedTypes(name)
+            };
+        }
+
+        private List<GenericType> GetContainedTypes(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return new List<GenericType>();
+            }
+
+            ReadOnlySpan<char> span = name;
+            return new List<GenericType>
+            {
+                GetContainedTypes(span)
+            };
+        }
+
+        private GenericType GetContainedTypes(ReadOnlySpan<char> name)
+        {
+            if (!name.Contains('<'))
+            {
+                return new GenericType
+                {
+                    Name = name.ToString().Trim()
+                };
+            }
+
+            var genericType = new GenericType();
+
+            var genericStart = name.IndexOf('<');
+            var genericEnd = name.LastIndexOf('>');
+
+            genericType.Name = name[..genericStart].ToString().Trim();
+
+            ReadOnlySpan<char> span = name;
+
+            var commaIndices = new List<int>
+            {
+                genericStart
+            };
+
+            var angleBracketCount = 0;
+
+            for (var i = genericStart + 1; i < genericEnd; i++)
+            {
+                switch (span[i])
+                {
+                    case '<':
+                        angleBracketCount++;
+                        break;
+                    case '>':
+                        angleBracketCount--;
+                        break;
+                    case ',':
+                    {
+                        if (angleBracketCount == 0)
+                        {
+                            commaIndices.Add(i);
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            commaIndices.Add(genericEnd);
+
+            for (var i = 0; i < commaIndices.Count - 1; i++)
+            {
+                var part = span.Slice(commaIndices[i] + 1, commaIndices[i + 1] - commaIndices[i] - 1);
+                genericType.ContainedTypes.Add(GetContainedTypes(part));
+            }
+
+            return genericType;
+        }
 
         private IEntityType GetFullName(BaseObjectCreationExpressionSyntax declarationSyntax)
         {

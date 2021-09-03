@@ -9,5 +9,7 @@ namespace HoneydewModels.Types
         public string Modifier { get; set; }
 
         public IList<GenericType> ContainedTypes { get; set; } = new List<GenericType>();
+
+        public IList<GenericType> Constrains { get; set; } = new List<GenericType>();
     }
 }
