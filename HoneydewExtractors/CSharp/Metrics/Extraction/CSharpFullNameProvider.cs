@@ -176,22 +176,22 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             return new EntityTypeModel
             {
                 Name = name,
-                ContainedTypes = GetContainedTypes(name)
+                FullType = GetContainedTypes(name)
             };
         }
 
-        private List<GenericType> GetContainedTypes(string name)
+        private GenericType GetContainedTypes(string name)
         {
             if (string.IsNullOrEmpty(name))
             {
-                return new List<GenericType>();
+                return new GenericType
+                {
+                    Name = name
+                };
             }
 
             ReadOnlySpan<char> span = name;
-            return new List<GenericType>
-            {
-                GetContainedTypes(span)
-            };
+            return GetContainedTypes(span);
         }
 
         private GenericType GetContainedTypes(ReadOnlySpan<char> name)

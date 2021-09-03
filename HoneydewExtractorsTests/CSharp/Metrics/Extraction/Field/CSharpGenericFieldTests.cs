@@ -58,23 +58,23 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Field
 
             var field1 = classModel.Fields[0];
             Assert.Equal("Namespace1.GenericClass<string>", field1.Type.Name);
-            Assert.Equal(1, field1.Type.ContainedTypes.Count);
-            Assert.Equal("Namespace1.GenericClass", field1.Type.ContainedTypes[0].Name);
-            Assert.Empty(field1.Type.ContainedTypes[0].Constrains);
-            Assert.Equal(1, field1.Type.ContainedTypes[0].ContainedTypes.Count);
-            Assert.Equal("string", field1.Type.ContainedTypes[0].ContainedTypes[0].Name);
-            Assert.Empty(field1.Type.ContainedTypes[0].ContainedTypes[0].Constrains);
-            Assert.Empty(field1.Type.ContainedTypes[0].ContainedTypes[0].ContainedTypes);
+            Assert.Equal(1, field1.Type.FullType.ContainedTypes.Count);
+            Assert.Equal("Namespace1.GenericClass", field1.Type.FullType.Name);
+            Assert.Empty(field1.Type.FullType.Constrains);
+            Assert.Equal(1, field1.Type.FullType.ContainedTypes.Count);
+            Assert.Equal("string", field1.Type.FullType.ContainedTypes[0].Name);
+            Assert.Empty(field1.Type.FullType.ContainedTypes[0].Constrains);
+            Assert.Empty(field1.Type.FullType.ContainedTypes[0].ContainedTypes);
 
             var field2 = classModel.Fields[1];
             Assert.Equal("System.Func<int>", field2.Type.Name);
-            Assert.Equal(1, field2.Type.ContainedTypes.Count);
-            Assert.Equal("System.Func", field2.Type.ContainedTypes[0].Name);
-            Assert.Empty(field2.Type.ContainedTypes[0].Constrains);
-            Assert.Equal(1, field2.Type.ContainedTypes[0].ContainedTypes.Count);
-            Assert.Equal("int", field2.Type.ContainedTypes[0].ContainedTypes[0].Name);
-            Assert.Empty(field2.Type.ContainedTypes[0].ContainedTypes[0].Constrains);
-            Assert.Empty(field2.Type.ContainedTypes[0].ContainedTypes[0].ContainedTypes);
+            Assert.Equal(1, field2.Type.FullType.ContainedTypes.Count);
+            Assert.Equal("System.Func", field2.Type.FullType.Name);
+            Assert.Empty(field2.Type.FullType.Constrains);
+            Assert.Equal(1, field2.Type.FullType.ContainedTypes.Count);
+            Assert.Equal("int", field2.Type.FullType.ContainedTypes[0].Name);
+            Assert.Empty(field2.Type.FullType.ContainedTypes[0].Constrains);
+            Assert.Empty(field2.Type.FullType.ContainedTypes[0].ContainedTypes);
         }
 
 
@@ -105,21 +105,20 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Field
 
             var field1 = classModel.Fields[0];
             Assert.Equal("Namespace1.GenericClass<string, int, double>", field1.Type.Name);
-            Assert.Equal(1, field1.Type.ContainedTypes.Count);
-            Assert.Equal("Namespace1.GenericClass", field1.Type.ContainedTypes[0].Name);
-            Assert.Empty(field1.Type.ContainedTypes[0].Constrains);
-            Assert.Equal(3, field1.Type.ContainedTypes[0].ContainedTypes.Count);
-            var containedType1 = field1.Type.ContainedTypes[0].ContainedTypes[0];
+            Assert.Equal("Namespace1.GenericClass", field1.Type.FullType.Name);
+            Assert.Empty(field1.Type.FullType.Constrains);
+            Assert.Equal(3, field1.Type.FullType.ContainedTypes.Count);
+            var containedType1 = field1.Type.FullType.ContainedTypes[0];
             Assert.Equal("string", containedType1.Name);
             Assert.Empty(containedType1.Constrains);
             Assert.Empty(containedType1.ContainedTypes);
 
-            var containedType2 = field1.Type.ContainedTypes[0].ContainedTypes[1];
+            var containedType2 = field1.Type.FullType.ContainedTypes[1];
             Assert.Equal("int", containedType2.Name);
             Assert.Empty(containedType2.Constrains);
             Assert.Empty(containedType2.ContainedTypes);
 
-            var containedType3 = field1.Type.ContainedTypes[0].ContainedTypes[2];
+            var containedType3 = field1.Type.FullType.ContainedTypes[2];
             Assert.Equal("double", containedType3.Name);
             Assert.Empty(containedType3.Constrains);
             Assert.Empty(containedType3.ContainedTypes);
@@ -128,11 +127,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Field
             Assert.Equal(
                 "Namespace1.GenericClass<Namespace1.GenericClass<int, string, double>, char, Namespace1.GenericClass<long, string, float>>",
                 field2.Type.Name);
-            Assert.Equal(1, field2.Type.ContainedTypes.Count);
-            Assert.Equal("Namespace1.GenericClass", field2.Type.ContainedTypes[0].Name);
-            Assert.Empty(field2.Type.ContainedTypes[0].Constrains);
-            Assert.Equal(3, field2.Type.ContainedTypes[0].ContainedTypes.Count);
-            var containedType4 = field2.Type.ContainedTypes[0].ContainedTypes[0];
+            Assert.Equal("Namespace1.GenericClass", field2.Type.FullType.Name);
+            Assert.Empty(field2.Type.FullType.Constrains);
+            Assert.Equal(3, field2.Type.FullType.ContainedTypes.Count);
+            var containedType4 = field2.Type.FullType.ContainedTypes[0];
             Assert.Equal("Namespace1.GenericClass", containedType4.Name);
             Assert.Empty(containedType4.Constrains);
             Assert.Equal(3, containedType4.ContainedTypes.Count);
@@ -153,13 +151,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Field
             Assert.Empty(containedType9.ContainedTypes);
 
 
-            var containedType5 = field2.Type.ContainedTypes[0].ContainedTypes[1];
+            var containedType5 = field2.Type.FullType.ContainedTypes[1];
             Assert.Equal("char", containedType5.Name);
             Assert.Empty(containedType5.Constrains);
             Assert.Empty(containedType5.ContainedTypes);
 
 
-            var containedType6 = field2.Type.ContainedTypes[0].ContainedTypes[2];
+            var containedType6 = field2.Type.FullType.ContainedTypes[2];
             Assert.Equal("Namespace1.GenericClass", containedType6.Name);
             Assert.Empty(containedType6.Constrains);
             Assert.Equal(3, containedType6.ContainedTypes.Count);
