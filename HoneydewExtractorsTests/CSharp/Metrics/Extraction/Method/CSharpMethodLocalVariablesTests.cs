@@ -242,7 +242,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             }
         }
 
-        [Theory(Skip = "Complete when Generic Extraction is Done")]
+        [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithLocalVariableFromForeach.txt")]
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithLocalVariablesFromForeach(
@@ -268,7 +268,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("ExternClass", classModel.Methods[2].LocalVariableTypes[1].Type.Name);
         }
 
-        [Theory(Skip = "Complete when Generic Extraction is Done")]
+        [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/Method/LocalFunctions/LocalFunctionWithLocalVariableFromForeach.txt")]
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithLocalFunctionsWithLocalVariablesFromForeach(

@@ -359,8 +359,6 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             return GetParameters(methodSymbol);
         }
 
-
-        // syntactic
         public string SetTypeModifier(string typeString, string modifier)
         {
             if (typeString.StartsWith(CSharpConstants.RefReadonlyIdentifier))

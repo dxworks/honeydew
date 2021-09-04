@@ -70,11 +70,13 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables
 
             if (modelType.Type.Name == CSharpConstants.VarIdentifier)
             {
-                // CSharpHelperMethods.GetFullName(syntaxNode.Expression)
-                // modelType.Type = new EntityTypeModel
-                // {
-                //     Name = modelType.Type.ContainedTypes[0].Name,
-                // };
+                var entityType = CSharpHelperMethods.GetFullName(syntaxNode.Expression);
+                if (entityType.FullType.ContainedTypes.Count > 0)
+                {
+                    var genericType = entityType.FullType.ContainedTypes[0];
+                    modelType.Type.Name = genericType.Name;
+                    modelType.Type.FullType = genericType;
+                }
             }
 
             return modelType;
