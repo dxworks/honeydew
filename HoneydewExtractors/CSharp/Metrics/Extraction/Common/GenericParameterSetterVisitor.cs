@@ -45,6 +45,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
         public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode,
             IMethodTypeWithLocalFunctions modelType)
         {
+            ExtractParameterInfo(syntaxNode, modelType);
+
             return modelType;
         }
 

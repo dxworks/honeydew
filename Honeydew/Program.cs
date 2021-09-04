@@ -71,8 +71,8 @@ namespace Honeydew
 
                     logger.Log($"Honeydew {version} starting");
                     logger.Log();
-                    
-                    
+
+
                     progressLogger.Log($"Honeydew {version} starting");
                     progressLogger.Log();
                 }
@@ -176,17 +176,22 @@ namespace Honeydew
                 new AttributeInfoVisitor()
             });
 
-            var calledMethodSetterVisitor =
-                new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
-                {
-                    new MethodCallInfoVisitor()
-                });
+            var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
+            {
+                new MethodCallInfoVisitor()
+            });
 
             var parameterSetterVisitor = new ParameterSetterVisitor(new List<IParameterVisitor>
             {
                 new ParameterInfoVisitor(),
                 attributeSetterVisitor
             });
+
+            var genericParameterSetterVisitor = new GenericParameterSetterVisitor(new List<IGenericParameterVisitor>
+            {
+                new GenericParameterInfoVisitor()
+            });
+
             var localVariablesTypeSetterVisitor = new LocalVariablesTypeSetterVisitor(new List<ILocalVariablesVisitor>
             {
                 new LocalVariableInfoVisitor()
@@ -200,11 +205,13 @@ namespace Honeydew
                     linesOfCodeVisitor,
                     parameterSetterVisitor,
                     localVariablesTypeSetterVisitor,
+                    genericParameterSetterVisitor,
                 }),
                 calledMethodSetterVisitor,
                 linesOfCodeVisitor,
                 parameterSetterVisitor,
                 localVariablesTypeSetterVisitor,
+                genericParameterSetterVisitor,
             });
 
             var methodInfoVisitor = new MethodInfoVisitor();
@@ -218,6 +225,7 @@ namespace Honeydew
                 attributeSetterVisitor,
                 parameterSetterVisitor,
                 localVariablesTypeSetterVisitor,
+                genericParameterSetterVisitor,
             };
 
             var constructorVisitors = new List<ICSharpConstructorVisitor>
@@ -265,6 +273,7 @@ namespace Honeydew
                 new ImportsVisitor(),
                 linesOfCodeVisitor,
                 attributeSetterVisitor,
+                genericParameterSetterVisitor,
 
                 // metrics visitor
                 new IsAbstractClassVisitor(),
@@ -282,7 +291,8 @@ namespace Honeydew
                 new BaseInfoDelegateVisitor(),
                 new ImportsVisitor(),
                 attributeSetterVisitor,
-                parameterSetterVisitor
+                parameterSetterVisitor,
+                genericParameterSetterVisitor,
             };
             var compilationUnitVisitors = new List<ICSharpCompilationUnitVisitor>
             {

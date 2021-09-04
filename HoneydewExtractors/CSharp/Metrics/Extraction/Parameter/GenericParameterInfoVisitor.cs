@@ -34,6 +34,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Parameter
             ExtractConstraintsFromParent<DelegateDeclarationSyntax>();
             ExtractConstraintsFromParent<BaseTypeDeclarationSyntax>();
             ExtractConstraintsFromParent<BaseMethodDeclarationSyntax>();
+            ExtractConstraintsFromParent<LocalFunctionStatementSyntax>();
 
             foreach (var constrainsSyntax in constraintsSyntaxes)
             {

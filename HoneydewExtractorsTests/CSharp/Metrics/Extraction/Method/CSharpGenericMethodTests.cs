@@ -9,6 +9,8 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Common;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
+using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
+using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.CSharp;
 using Xunit;
 
@@ -22,17 +24,26 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         {
             var compositeVisitor = new CompositeVisitor();
 
+            var genericParameterSetterVisitor = new GenericParameterSetterVisitor(new List<IGenericParameterVisitor>
+            {
+                new GenericParameterInfoVisitor()
+            });
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {
                 new BaseInfoClassVisitor(),
                 new MethodSetterClassVisitor(new List<IMethodVisitor>
                 {
                     new MethodInfoVisitor(),
-                    new GenericParameterSetterVisitor(new List<IGenericParameterVisitor>
+                    genericParameterSetterVisitor,
+                    new LocalFunctionsSetterClassVisitor(new List<ILocalFunctionVisitor>
                     {
-                        new GenericParameterInfoVisitor()
+                        new LocalFunctionInfoVisitor(new List<ILocalFunctionVisitor>
+                        {
+                            genericParameterSetterVisitor
+                        }),
+                        genericParameterSetterVisitor
                     })
-                })
+                }),
             }));
 
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
@@ -142,7 +153,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
 
             var classModel = (ClassModel)classTypes[0];
             var methodModel = classModel.Methods[0];
-            
+
             Assert.Equal("Method", methodModel.Name);
             Assert.Equal(3, methodModel.GenericParameters.Count);
             Assert.Equal("T", methodModel.GenericParameters[0].Name);
@@ -153,6 +164,102 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal(2, methodModel.GenericParameters[0].Constraints[1].FullType.ContainedTypes.Count);
             Assert.Equal("TK", methodModel.GenericParameters[0].Constraints[1].FullType.ContainedTypes[0].Name);
             Assert.Equal("TR", methodModel.GenericParameters[0].Constraints[1].FullType.ContainedTypes[1].Name);
+        }
+
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/GenericExtraction/GenericLocalFunctionWithPredefinedConstrains.txt")]
+        public void Extract_ShouldHaveLocalFunctionGenericMethodWithConstraints_WhenProvidedWithClass(
+            string fileContent)
+        {
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+            var methodModel = (MethodModel)classModel.Methods[0];
+
+            var localFunctions = new[]
+            {
+                methodModel.LocalFunctions[0],
+                methodModel.LocalFunctions[0].LocalFunctions[0]
+            };
+
+            Assert.Equal("LocalFunction", localFunctions[0].Name);
+            Assert.Equal("LocalFunction2", localFunctions[1].Name);
+
+            for (var i = 0; i < localFunctions.Length; i++)
+            {
+                var localFunction = localFunctions[i];
+                Assert.Equal(4, localFunction.GenericParameters.Count);
+                Assert.Equal("T" + (i + 1), localFunction.GenericParameters[0].Name);
+                Assert.Equal(1, localFunction.GenericParameters[0].Constraints.Count);
+                Assert.Equal("struct", localFunction.GenericParameters[0].Constraints[0].Name);
+
+                Assert.Equal("TK" + (i + 1), localFunction.GenericParameters[1].Name);
+                Assert.Equal(1, localFunction.GenericParameters[1].Constraints.Count);
+                Assert.Equal("class?", localFunction.GenericParameters[1].Constraints[0].Name);
+
+                Assert.Equal("TR" + (i + 1), localFunction.GenericParameters[2].Name);
+                Assert.Equal(1, localFunction.GenericParameters[2].Constraints.Count);
+                Assert.Equal("notnull", localFunction.GenericParameters[2].Constraints[0].Name);
+
+                Assert.Equal("TP" + (i + 1), localFunction.GenericParameters[3].Name);
+                Assert.Equal(1, localFunction.GenericParameters[3].Constraints.Count);
+                Assert.Equal($"Namespace1.IInterface2<T{i + 1}, Namespace1.IInterface2<T{i + 1}, TK{i + 1}>>",
+                    localFunction.GenericParameters[3].Constraints[0].Name);
+                Assert.Equal("Namespace1.IInterface2", localFunction.GenericParameters[3].Constraints[0].FullType.Name);
+                Assert.Equal(2, localFunction.GenericParameters[3].Constraints[0].FullType.ContainedTypes.Count);
+                Assert.Equal("T" + (i + 1),
+                    localFunction.GenericParameters[3].Constraints[0].FullType.ContainedTypes[0].Name);
+                Assert.Equal("Namespace1.IInterface2",
+                    localFunction.GenericParameters[3].Constraints[0].FullType.ContainedTypes[1].Name);
+                Assert.Equal(2,
+                    localFunction.GenericParameters[3].Constraints[0].FullType.ContainedTypes[1].ContainedTypes.Count);
+                Assert.Equal("T" + (i + 1),
+                    localFunction.GenericParameters[3].Constraints[0].FullType.ContainedTypes[1].ContainedTypes[0]
+                        .Name);
+                Assert.Equal("TK" + (i + 1),
+                    localFunction.GenericParameters[3].Constraints[0].FullType.ContainedTypes[1].ContainedTypes[1]
+                        .Name);
+            }
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/GenericExtraction/GenericLocalFunctionWithMultipleConstrains.txt")]
+        public void Extract_ShouldHaveGenericLocalMethodWithMultipleConstrains_WhenProvidedWithClass(string fileContent)
+        {
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+            var methodModel = (MethodModel)classModel.Methods[0];
+
+            var localFunctions = new[]
+            {
+                methodModel.LocalFunctions[0],
+                methodModel.LocalFunctions[0].LocalFunctions[0]
+            };
+
+            Assert.Equal("LocalFunction", localFunctions[0].Name);
+            Assert.Equal("LocalFunction2", localFunctions[1].Name);
+
+
+            for (var i = 0; i < localFunctions.Length; i++)
+            {
+                var localFunction = localFunctions[i];
+                Assert.Equal(3, localFunction.GenericParameters.Count);
+                Assert.Equal("T" + (i + 1), localFunction.GenericParameters[0].Name);
+                Assert.Equal(2, localFunction.GenericParameters[0].Constraints.Count);
+                Assert.Equal("Namespace1.IInterface", localFunction.GenericParameters[0].Constraints[0].Name);
+                Assert.Equal($"Namespace1.IInterface2<TK{i + 1}, TR{i + 1}>",
+                    localFunction.GenericParameters[0].Constraints[1].Name);
+                Assert.Equal("Namespace1.IInterface2", localFunction.GenericParameters[0].Constraints[1].FullType.Name);
+                Assert.Equal(2, localFunction.GenericParameters[0].Constraints[1].FullType.ContainedTypes.Count);
+                Assert.Equal("TK" + (i + 1),
+                    localFunction.GenericParameters[0].Constraints[1].FullType.ContainedTypes[0].Name);
+                Assert.Equal("TR" + (i + 1),
+                    localFunction.GenericParameters[0].Constraints[1].FullType.ContainedTypes[1].Name);
+            }
         }
     }
 }
