@@ -34,6 +34,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                     {
                         name = declaredSymbol.ToDisplayString();
                     }
+
+                    var typeParameterListSyntax =
+                        syntaxNode.ChildNodes().OfType<TypeParameterListSyntax>().FirstOrDefault();
+                    if (typeParameterListSyntax != null)
+                    {
+                        var indexOf = name.IndexOf('<');
+                        name = $"{name[..indexOf]}{typeParameterListSyntax.ToString()}";
+                    }
                 }
                     break;
 
@@ -76,6 +84,11 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 case VariableDeclarationSyntax variableDeclarationSyntax:
                 {
                     return GetFullName(variableDeclarationSyntax.Type);
+                }
+
+                case TypeConstraintSyntax typeConstraintSyntax:
+                {
+                    return GetFullName(typeConstraintSyntax.Type);
                 }
 
                 case ExpressionSyntax expressionSyntax:
@@ -171,7 +184,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             return CreateEntityTypeModel(name);
         }
 
-        private EntityTypeModel CreateEntityTypeModel(string name)
+        public EntityTypeModel CreateEntityTypeModel(string name)
         {
             return new EntityTypeModel
             {

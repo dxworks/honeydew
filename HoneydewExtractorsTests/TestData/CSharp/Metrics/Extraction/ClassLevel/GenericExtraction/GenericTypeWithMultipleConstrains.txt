@@ -1,0 +1,15 @@
+﻿namespace Namespace1
+{
+    public class Class1<T, TK, TR>
+        where T : IInterface, IInterface2<TK,TR>        
+    {
+    }
+
+    public interface IInterface
+    {
+    }
+
+    public interface IInterface2<T,TK>
+    {
+    }
+}

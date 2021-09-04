@@ -36,7 +36,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         [InlineData("class")]
         [InlineData("record")]
         [InlineData("struct")]
-        public void Extract_ShouldHaveFieldOfGenericType_WhenProvidedDifferentClassType(string classType)
+        public void Extract_ShouldHavePropertyOfGenericType_WhenProvidedDifferentClassType(string classType)
         {
             var fileContent = $@"namespace Namespace1
 {{
@@ -60,20 +60,16 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             Assert.Equal("Namespace1.GenericClass<string>", property1.Type.Name);
             Assert.Equal(1, property1.Type.FullType.ContainedTypes.Count);
             Assert.Equal("Namespace1.GenericClass", property1.Type.FullType.Name);
-            Assert.Empty(property1.Type.FullType.Constrains);
             Assert.Equal(1, property1.Type.FullType.ContainedTypes.Count);
             Assert.Equal("string", property1.Type.FullType.ContainedTypes[0].Name);
-            Assert.Empty(property1.Type.FullType.ContainedTypes[0].Constrains);
             Assert.Empty(property1.Type.FullType.ContainedTypes[0].ContainedTypes);
 
             var property2 = classModel.Properties[1];
             Assert.Equal("System.Func<int>", property2.Type.Name);
             Assert.Equal(1, property2.Type.FullType.ContainedTypes.Count);
             Assert.Equal("System.Func", property2.Type.FullType.Name);
-            Assert.Empty(property2.Type.FullType.Constrains);
             Assert.Equal(1, property2.Type.FullType.ContainedTypes.Count);
             Assert.Equal("int", property2.Type.FullType.ContainedTypes[0].Name);
-            Assert.Empty(property2.Type.FullType.ContainedTypes[0].Constrains);
             Assert.Empty(property2.Type.FullType.ContainedTypes[0].ContainedTypes);
         }
 
@@ -82,7 +78,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         [InlineData("class")]
         [InlineData("record")]
         [InlineData("struct")]
-        public void Extract_ShouldHaveFieldOfGenericTypeWithMultipleContainedTypes_WhenProvidedDifferentClassType(
+        public void Extract_ShouldHavePropertyOfGenericTypeWithMultipleContainedTypes_WhenProvidedDifferentClassType(
             string classType)
         {
             var fileContent = $@"namespace Namespace1
@@ -106,21 +102,17 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             var property1 = classModel.Properties[0];
             Assert.Equal("Namespace1.GenericClass<string, int, double>", property1.Type.Name);
             Assert.Equal("Namespace1.GenericClass", property1.Type.FullType.Name);
-            Assert.Empty(property1.Type.FullType.Constrains);
             Assert.Equal(3, property1.Type.FullType.ContainedTypes.Count);
             var containedType1 = property1.Type.FullType.ContainedTypes[0];
             Assert.Equal("string", containedType1.Name);
-            Assert.Empty(containedType1.Constrains);
             Assert.Empty(containedType1.ContainedTypes);
 
             var containedType2 = property1.Type.FullType.ContainedTypes[1];
             Assert.Equal("int", containedType2.Name);
-            Assert.Empty(containedType2.Constrains);
             Assert.Empty(containedType2.ContainedTypes);
 
             var containedType3 = property1.Type.FullType.ContainedTypes[2];
             Assert.Equal("double", containedType3.Name);
-            Assert.Empty(containedType3.Constrains);
             Assert.Empty(containedType3.ContainedTypes);
 
             var property2 = classModel.Properties[1];
@@ -128,53 +120,43 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                 "Namespace1.GenericClass<Namespace1.GenericClass<int, string, double>, char, Namespace1.GenericClass<long, string, float>>",
                 property2.Type.Name);
             Assert.Equal("Namespace1.GenericClass", property2.Type.FullType.Name);
-            Assert.Empty(property2.Type.FullType.Constrains);
             Assert.Equal(3, property2.Type.FullType.ContainedTypes.Count);
             var containedType4 = property2.Type.FullType.ContainedTypes[0];
             Assert.Equal("Namespace1.GenericClass", containedType4.Name);
-            Assert.Empty(containedType4.Constrains);
             Assert.Equal(3, containedType4.ContainedTypes.Count);
 
             var containedType7 = containedType4.ContainedTypes[0];
             Assert.Equal("int", containedType7.Name);
-            Assert.Empty(containedType7.Constrains);
             Assert.Empty(containedType7.ContainedTypes);
 
             var containedType8 = containedType4.ContainedTypes[1];
             Assert.Equal("string", containedType8.Name);
-            Assert.Empty(containedType8.Constrains);
             Assert.Empty(containedType8.ContainedTypes);
 
             var containedType9 = containedType4.ContainedTypes[2];
             Assert.Equal("double", containedType9.Name);
-            Assert.Empty(containedType9.Constrains);
             Assert.Empty(containedType9.ContainedTypes);
 
 
             var containedType5 = property2.Type.FullType.ContainedTypes[1];
             Assert.Equal("char", containedType5.Name);
-            Assert.Empty(containedType5.Constrains);
             Assert.Empty(containedType5.ContainedTypes);
 
 
             var containedType6 = property2.Type.FullType.ContainedTypes[2];
             Assert.Equal("Namespace1.GenericClass", containedType6.Name);
-            Assert.Empty(containedType6.Constrains);
             Assert.Equal(3, containedType6.ContainedTypes.Count);
 
             var containedType10 = containedType6.ContainedTypes[0];
             Assert.Equal("long", containedType10.Name);
-            Assert.Empty(containedType10.Constrains);
             Assert.Empty(containedType10.ContainedTypes);
 
             var containedType11 = containedType6.ContainedTypes[1];
             Assert.Equal("string", containedType11.Name);
-            Assert.Empty(containedType11.Constrains);
             Assert.Empty(containedType11.ContainedTypes);
 
             var containedType12 = containedType6.ContainedTypes[2];
             Assert.Equal("float", containedType12.Name);
-            Assert.Empty(containedType12.Constrains);
             Assert.Empty(containedType12.ContainedTypes);
         }
     }

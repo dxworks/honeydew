@@ -1,0 +1,9 @@
+﻿namespace Namespace1
+{
+    public interface IInterface<out T, in TK>
+    {
+        public T Get();
+
+        public void Set(TK k);
+    }
+}

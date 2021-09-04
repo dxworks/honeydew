@@ -10,11 +10,11 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class
         ICSharpClassVisitor
     {
         public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
-        
+
         public void Accept(IVisitor visitor)
         {
         }
-        
+
         public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
         {
             switch (syntaxNode)
@@ -32,15 +32,15 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class
                 }
                     break;
 
-                case ClassDeclarationSyntax classDeclarationSyntax:
+                default:
                 {
                     modelType.BaseTypes.Add(new BaseTypeModel
                     {
-                        Type = CSharpHelperMethods.GetBaseClassName(classDeclarationSyntax),
+                        Type = CSharpHelperMethods.GetBaseClassName(syntaxNode),
                         Kind = "class"
                     });
 
-                    foreach (var baseInterface in CSharpHelperMethods.GetBaseInterfaces(classDeclarationSyntax))
+                    foreach (var baseInterface in CSharpHelperMethods.GetBaseInterfaces(syntaxNode))
                     {
                         modelType.BaseTypes.Add(new BaseTypeModel
                         {

@@ -66,7 +66,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                      {                                       
 
                                          namespace Domain{
-                                         class MyClass : IMetric
+                                         class MyClass : IMetric, IMetric2
                                          {                                           
                                              public void Foo() { }
                                              public void Bar() { }
@@ -83,10 +83,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             var baseTypes = classType.BaseTypes;
 
-            Assert.Equal(1, baseTypes.Count);
-            // IMetric instead of object because the Semantic model doesn't know that IMetric is an interface
+            Assert.Equal(2, baseTypes.Count);
             Assert.Equal("IMetric", baseTypes[0].Type.Name);
             Assert.Equal("class", baseTypes[0].Kind);
+            
+            Assert.Equal("IMetric2", baseTypes[1].Type.Name);
+            Assert.Equal("interface", baseTypes[1].Kind);
         }
 
         [Fact]

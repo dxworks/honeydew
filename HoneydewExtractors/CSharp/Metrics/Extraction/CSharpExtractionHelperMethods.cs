@@ -26,9 +26,9 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             return _fullNameProvider.GetFullName(syntaxNode);
         }
 
-        public IList<IEntityType> GetBaseInterfaces(TypeDeclarationSyntax node)
+        public IList<IEntityType> GetBaseInterfaces(BaseTypeDeclarationSyntax node)
         {
-            var declaredSymbol = ModelExtensions.GetDeclaredSymbol(_semanticModel, node);
+            var declaredSymbol = _semanticModel.GetDeclaredSymbol(node);
 
             IList<IEntityType> interfaces = new List<IEntityType>();
 
@@ -39,10 +39,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
             foreach (var interfaceSymbol in typeSymbol.Interfaces)
             {
-                interfaces.Add(new EntityTypeModel
-                {
-                    Name = interfaceSymbol.ToString()
-                });
+                interfaces.Add(_fullNameProvider.CreateEntityTypeModel(interfaceSymbol.ToString()));
             }
 
             return interfaces;
@@ -54,24 +51,15 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
             if (declaredSymbol is not ITypeSymbol typeSymbol)
             {
-                return new EntityTypeModel
-                {
-                    Name = CSharpConstants.ObjectIdentifier
-                };
+                return _fullNameProvider.CreateEntityTypeModel(CSharpConstants.ObjectIdentifier);
             }
 
             if (typeSymbol.BaseType == null)
             {
-                return new EntityTypeModel
-                {
-                    Name = CSharpConstants.ObjectIdentifier
-                };
+                return _fullNameProvider.CreateEntityTypeModel(CSharpConstants.ObjectIdentifier);
             }
 
-            return new EntityTypeModel
-            {
-                Name = typeSymbol.BaseType.ToString()
-            };
+            return _fullNameProvider.CreateEntityTypeModel(typeSymbol.BaseType.ToString());
         }
 
         public IEntityType GetBaseClassName(BaseTypeDeclarationSyntax baseTypeDeclarationSyntax)
@@ -81,10 +69,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 return GetBaseClassName(typeDeclarationSyntax);
             }
 
-            return new EntityTypeModel
-            {
-                Name = CSharpConstants.ObjectIdentifier
-            };
+            return _fullNameProvider.CreateEntityTypeModel(CSharpConstants.ObjectIdentifier);
         }
 
         public IMethodSymbol GetMethodSymbol(CSharpSyntaxNode expressionSyntax)
@@ -214,10 +199,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
                 parameters.Add(new ParameterModel
                 {
-                    Type = new EntityTypeModel
-                    {
-                        Name = parameter.Type.ToString()
-                    },
+                    Type = _fullNameProvider.CreateEntityTypeModel(parameter.Type.ToString()),
                     Modifier = modifier,
                     DefaultValue = defaultValue
                 });
@@ -328,10 +310,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 return GetFullName(propertyDeclarationSyntax.Type);
             }
 
-            return new EntityTypeModel
-            {
-                Name = syntaxNode.ToString()
-            };
+            return _fullNameProvider.CreateEntityTypeModel(syntaxNode.ToString());
         }
 
         private IList<IParameterType> GetParameters(InvocationExpressionSyntax invocationSyntax)
@@ -369,10 +348,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
                     parameterList.Add(new ParameterModel
                     {
-                        Type = new EntityTypeModel
-                        {
-                            Name = literalExpressionSyntax.Token.Value.GetType().FullName
-                        }
+                        Type = _fullNameProvider.CreateEntityTypeModel(literalExpressionSyntax.Token.Value.GetType()
+                            .FullName),
                     });
                 }
 
@@ -535,10 +512,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 return _fullNameProvider.GetFullName(parentDeclarationSyntax);
             }
 
-            return new EntityTypeModel
-            {
-                Name = syntaxNode.ToString()
-            };
+            return _fullNameProvider.CreateEntityTypeModel(syntaxNode.ToString());
         }
 
         public IEnumerable<IParameterType> GetParameters(AttributeSyntax attributeSyntax)
@@ -577,10 +551,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
                     parameterTypes.Add(new ParameterModel
                     {
-                        Type = new EntityTypeModel
-                        {
-                            Name = parameterType
-                        }
+                        Type = _fullNameProvider.CreateEntityTypeModel(parameterType)
                     });
                 }
 
