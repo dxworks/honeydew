@@ -19,7 +19,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
 {
     public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICSharpDelegateVisitor,
         ICSharpMethodVisitor, ICSharpConstructorVisitor, ICSharpFieldVisitor, ICSharpPropertyVisitor,
-        ICSharpParameterVisitor, ICSharpMethodAccessorVisitor
+        ICSharpParameterVisitor, ICSharpMethodAccessorVisitor, ICSharpGenericParameterVisitor
     {
         public AttributeSetterVisitor(IEnumerable<IAttributeVisitor> visitors) : base(visitors)
         {
@@ -80,6 +80,13 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
             return modelType;
         }
 
+        public IGenericParameterType Visit(TypeParameterSyntax syntaxNode, IGenericParameterType modelType)
+        {
+            ExtractAttributes(syntaxNode, modelType, "parameter");
+
+            return modelType;
+        }
+
         private void ExtractAttributes(SyntaxNode syntaxNode, ITypeWithAttributes modelType, string target)
         {
             foreach (var attributeListSyntax in syntaxNode.ChildNodes().OfType<AttributeListSyntax>())
@@ -109,7 +116,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                 }
             }
         }
-        
+
         private IMethodType ExtractAttributesFromMethod(SyntaxNode syntaxNode, IMethodType modelType)
         {
             foreach (var attributeListSyntax in syntaxNode.ChildNodes().OfType<AttributeListSyntax>())

@@ -189,7 +189,8 @@ namespace Honeydew
 
             var genericParameterSetterVisitor = new GenericParameterSetterVisitor(new List<IGenericParameterVisitor>
             {
-                new GenericParameterInfoVisitor()
+                new GenericParameterInfoVisitor(),
+                attributeSetterVisitor
             });
 
             var localVariablesTypeSetterVisitor = new LocalVariablesTypeSetterVisitor(new List<ILocalVariablesVisitor>
