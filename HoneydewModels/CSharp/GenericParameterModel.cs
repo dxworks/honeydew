@@ -9,6 +9,6 @@ namespace HoneydewModels.CSharp
 
         public string Modifier { get; set; }
 
-        public IList<IEntityType> Constrains { get; set; } = new List<IEntityType>();
+        public IList<IEntityType> Constraints { get; set; } = new List<IEntityType>();
     }
 }

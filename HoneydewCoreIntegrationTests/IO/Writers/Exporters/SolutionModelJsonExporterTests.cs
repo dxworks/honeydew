@@ -44,7 +44,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""A Project"",""FilePath"":""some_other_path"",""ProjectReferences"":[],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""Name"":""SomeNamespace.FirstClass"",""FilePath"":""pathToClass"",""Loc"":{""SourceLines"":0,""CommentedLines"":0,""EmptyLines"":0},""AccessModifier"":""public"",""Modifier"":""sealed"",""ContainingTypeName"":""SomeNamespace"",""BaseTypes"":[],""Imports"":[],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[],""Metrics"":[],""Attributes"":[]}]}]}]}";
+                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""A Project"",""FilePath"":""some_other_path"",""ProjectReferences"":[],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""Name"":""SomeNamespace.FirstClass"",""GenericParameters"":[],""FilePath"":""pathToClass"",""Loc"":{""SourceLines"":0,""CommentedLines"":0,""EmptyLines"":0},""AccessModifier"":""public"",""Modifier"":""sealed"",""ContainingTypeName"":""SomeNamespace"",""BaseTypes"":[],""Imports"":[],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[],""Metrics"":[],""Attributes"":[]}]}]}]}";
 
             var projectModel = new ProjectModel("A Project")
             {
@@ -71,6 +71,14 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
             {
                 FilePath = "SomePath",
                 Name = "SomeNamespace.FirstClass",
+                GenericParameters = new List<IGenericParameterType>
+                {
+                    new GenericParameterModel
+                    {
+                        Name = "T",
+                        Modifier = "in"
+                    }  
+                },
                 ClassType = "class",
                 AccessModifier = "private",
                 Modifier = "static",
@@ -80,18 +88,10 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
                     {
                         Type = new EntityTypeModel
                         {
-                            Name = "Other<in object>",
+                            Name = "object",
                             FullType = new GenericType
                             {
-                                Name = "Other",
-                                ContainedTypes = new List<GenericType>
-                                {
-                                    new()
-                                    {
-                                        Modifier = "in",
-                                        Name = "object"
-                                    }
-                                }
+                                Name = "object",
                             }
                         },
                         Kind = "class"
@@ -138,7 +138,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""ProjectName"",""FilePath"":""some_path"",""ProjectReferences"":[""HoneydewCore""],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""Name"":""SomeNamespace.FirstClass"",""FilePath"":""SomePath"",""Loc"":{""SourceLines"":0,""CommentedLines"":0,""EmptyLines"":0},""AccessModifier"":""private"",""Modifier"":""static"",""ContainingTypeName"":""SomeNamespace"",""BaseTypes"":[{""Type"":{""Name"":""Other<in object>"",""FullType"":{""Name"":""Other"",""Modifier"":"""",""ContainedTypes"":[{""Name"":""object"",""Modifier"":""in"",""ContainedTypes"":[],""Constrains"":[]}],""Constrains"":[]}},""Kind"":""class""}],""Imports"":[],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[],""Metrics"":[{""ExtractorName"":""BaseTypeExtractor"",""ValueType"":""System.Collections.Generic.List`1[[HoneydewModels.Types.IBaseType, HoneydewModels, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"",""Value"":[{""Type"":{""Name"":""SomeParent"",""FullType"":{""Name"":""SomeParent"",""Modifier"":"""",""ContainedTypes"":[],""Constrains"":[]}},""Kind"":""class""},{""Type"":{""Name"":""Interface1"",""FullType"":{""Name"":""Interface1"",""Modifier"":"""",""ContainedTypes"":[],""Constrains"":[]}},""Kind"":""interface""}]}],""Attributes"":[]}]}]}]}";
+                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""ProjectName"",""FilePath"":""some_path"",""ProjectReferences"":[""HoneydewCore""],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""Name"":""SomeNamespace.FirstClass"",""GenericParameters"":[{""Name"":""T"",""Modifier"":""in"",""Constraints"":[]}],""FilePath"":""SomePath"",""Loc"":{""SourceLines"":0,""CommentedLines"":0,""EmptyLines"":0},""AccessModifier"":""private"",""Modifier"":""static"",""ContainingTypeName"":""SomeNamespace"",""BaseTypes"":[{""Type"":{""Name"":""object"",""FullType"":{""Name"":""object"",""ContainedTypes"":[]}},""Kind"":""class""}],""Imports"":[],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[],""Metrics"":[{""ExtractorName"":""BaseTypeExtractor"",""ValueType"":""System.Collections.Generic.List`1[[HoneydewModels.Types.IBaseType, HoneydewModels, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"",""Value"":[{""Type"":{""Name"":""SomeParent"",""FullType"":{""Name"":""SomeParent"",""ContainedTypes"":[]}},""Kind"":""class""},{""Type"":{""Name"":""Interface1"",""FullType"":{""Name"":""Interface1"",""ContainedTypes"":[]}},""Kind"":""interface""}]}],""Attributes"":[]}]}]}]}";
 
             var projectModel = new ProjectModel("ProjectName")
             {
@@ -232,7 +232,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
                                                 FullType = new GenericType
                                                 {
                                                     Name = "string"
-                                                } 
+                                                }
                                             }
                                         }
                                     },
@@ -258,7 +258,7 @@ namespace HoneydewCoreIntegrationTests.IO.Writers.Exporters
             };
 
             const string expectedString =
-                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""A Project"",""FilePath"":""some_path"",""ProjectReferences"":[],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""Name"":""SomeNamespace.FirstClass"",""FilePath"":""pathToClass"",""Loc"":{""SourceLines"":20,""CommentedLines"":5,""EmptyLines"":30},""AccessModifier"":""protected"",""Modifier"":"""",""ContainingTypeName"":""SomeNamespace"",""BaseTypes"":[],""Imports"":[{""Name"":""System"",""IsStatic"":false,""Alias"":""Sys"",""AliasType"":""Namespace""},{""Name"":""System.Collections"",""IsStatic"":true,""Alias"":"""",""AliasType"":""None""}],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[{""Name"":""Method1"",""ContainingTypeName"":""SomeNamespace.FirstClass"",""Modifier"":""static"",""AccessModifier"":""public"",""ReturnValue"":{""Type"":{""Name"":""int"",""FullType"":{""Name"":""int"",""Modifier"":"""",""ContainedTypes"":[],""Constrains"":[]}},""Modifier"":""ref"",""Attributes"":[]},""ParameterTypes"":[{""Type"":{""Name"":""string"",""FullType"":{""Name"":""string"",""Modifier"":"""",""ContainedTypes"":[],""Constrains"":[]}},""Modifier"":"""",""DefaultValue"":null,""Attributes"":[]}],""CalledMethods"":[{""Name"":""Parse"",""ContainingTypeName"":""int"",""ParameterTypes"":[{""Type"":{""Name"":""string"",""FullType"":{""Name"":""string"",""Modifier"":"""",""ContainedTypes"":[],""Constrains"":[]}},""Modifier"":"""",""DefaultValue"":null,""Attributes"":[]}]}],""Attributes"":[],""LocalFunctions"":[],""LocalVariableTypes"":[],""Loc"":{""SourceLines"":6,""CommentedLines"":0,""EmptyLines"":4},""CyclomaticComplexity"":7,""Metrics"":[]}],""Metrics"":[],""Attributes"":[]}]}]}]}";
+                @"{""FilePath"":""path_to_solution"",""Projects"":[{""Name"":""A Project"",""FilePath"":""some_path"",""ProjectReferences"":[],""Namespaces"":[{""Name"":""SomeNamespace"",""ClassModels"":[{""ClassType"":""class"",""Name"":""SomeNamespace.FirstClass"",""GenericParameters"":[],""FilePath"":""pathToClass"",""Loc"":{""SourceLines"":20,""CommentedLines"":5,""EmptyLines"":30},""AccessModifier"":""protected"",""Modifier"":"""",""ContainingTypeName"":""SomeNamespace"",""BaseTypes"":[],""Imports"":[{""Name"":""System"",""IsStatic"":false,""Alias"":""Sys"",""AliasType"":""Namespace""},{""Name"":""System.Collections"",""IsStatic"":true,""Alias"":"""",""AliasType"":""None""}],""Fields"":[],""Properties"":[],""Constructors"":[],""Methods"":[{""Name"":""Method1"",""ContainingTypeName"":""SomeNamespace.FirstClass"",""Modifier"":""static"",""AccessModifier"":""public"",""ReturnValue"":{""Type"":{""Name"":""int"",""FullType"":{""Name"":""int"",""ContainedTypes"":[]}},""Modifier"":""ref"",""Attributes"":[]},""ParameterTypes"":[{""Type"":{""Name"":""string"",""FullType"":{""Name"":""string"",""ContainedTypes"":[]}},""Modifier"":"""",""DefaultValue"":null,""Attributes"":[]}],""CalledMethods"":[{""Name"":""Parse"",""ContainingTypeName"":""int"",""ParameterTypes"":[{""Type"":{""Name"":""string"",""FullType"":{""Name"":""string"",""ContainedTypes"":[]}},""Modifier"":"""",""DefaultValue"":null,""Attributes"":[]}]}],""Attributes"":[],""LocalFunctions"":[],""LocalVariableTypes"":[],""Loc"":{""SourceLines"":6,""CommentedLines"":0,""EmptyLines"":4},""CyclomaticComplexity"":7,""Metrics"":[]}],""Metrics"":[],""Attributes"":[]}]}]}]}";
 
             var projectModel = new ProjectModel("A Project")
             {

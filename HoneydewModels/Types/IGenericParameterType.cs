@@ -6,6 +6,6 @@ namespace HoneydewModels.Types
     {
         public string Modifier { get; set; }
         
-        public IList<IEntityType> Constrains { get; set; }
+        public IList<IEntityType> Constraints { get; set; }
     }
 }
