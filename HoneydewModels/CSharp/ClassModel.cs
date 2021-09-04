@@ -10,6 +10,8 @@ namespace HoneydewModels.CSharp
 
         public string Name { get; set; }
 
+        public IList<IGenericParameterType> GenericParameters { get; set; } = new List<IGenericParameterType>();
+
         public string FilePath { get; set; }
 
         public LinesOfCode Loc { get; set; }

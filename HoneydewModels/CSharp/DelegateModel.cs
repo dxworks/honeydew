@@ -3,13 +3,15 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public class DelegateModel : IDelegateType, IModelEntity
+    public record DelegateModel : IDelegateType, IModelEntity
     {
         public string ClassType { get; set; }
 
         public string FilePath { get; set; }
 
         public string Name { get; set; }
+
+        public IList<IGenericParameterType> GenericParameters { get; set; } = new List<IGenericParameterType>();
 
         public IList<IBaseType> BaseTypes { get; set; } = new List<IBaseType>();
 
