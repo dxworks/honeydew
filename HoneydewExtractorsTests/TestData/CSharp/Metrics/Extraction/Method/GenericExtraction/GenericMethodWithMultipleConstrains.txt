@@ -1,0 +1,16 @@
+﻿namespace Namespace1
+{
+    public interface MyInterface
+    {
+        public T Method<T, TR, TK>(TR r, TK tk, TK tk2)
+            where T : IInterface, IInterface2<TK, TR>;
+    }
+
+    public interface IInterface
+    {
+    }
+
+    public interface IInterface2<T, TK>
+    {
+    }
+}

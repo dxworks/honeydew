@@ -1,0 +1,18 @@
+﻿namespace Namespace1
+{
+    public class Class1
+    {
+        public T Method<T, TK, TR, TP>(TK t, TR tr, TP tp)
+            where T : struct
+            where TK : class?
+            where TR : notnull
+            where TP : IInterface2<T, IInterface2<T, TK>>
+        {
+            return default;
+        }
+    }
+
+    public interface IInterface2<T, TK>
+    {
+    }
+}

@@ -37,6 +37,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
 
         public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
         {
+            ExtractParameterInfo(syntaxNode, modelType);
+
             return modelType;
         }
 
