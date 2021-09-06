@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace HoneydewModels.CSharp
@@ -67,7 +68,7 @@ namespace HoneydewModels.CSharp
             return AddNamespaceChild(className.Split('.'), targetNamespace.Split('.'));
         }
 
-        public IEnumerable<string> GetPossibleChildren(string childNameToBeSearched)
+        public IEnumerable<string> GetPossibleChildren(string childNameToBeSearched, int genericParametersCount)
         {
             IList<string> childNames = new List<string>();
 
@@ -77,9 +78,29 @@ namespace HoneydewModels.CSharp
             foreach (var child in leafChildren)
             {
                 var childName = child.GetFullName();
-                if (childName.EndsWith(name))
+                if (genericParametersCount == 0)
                 {
-                    childNames.Add(childName);
+                    if (childName.EndsWith(name))
+                    {
+                        childNames.Add(childName);
+                    }
+                }
+                else
+                {
+                    var startBracketIndex = childName.IndexOf('<');
+                    if (startBracketIndex >= 0)
+                    {
+                        var trimmedChildName = childName[..startBracketIndex];
+                        if (trimmedChildName.EndsWith(name))
+                        {
+                            var commaCount = childName.Count(c => c == ',');
+
+                            if (commaCount + 1 == genericParametersCount)
+                            {
+                                childNames.Add(trimmedChildName);
+                            }
+                        }
+                    }
                 }
             }
 

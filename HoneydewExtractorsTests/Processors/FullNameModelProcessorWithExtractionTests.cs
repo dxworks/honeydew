@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Fields;
@@ -9,6 +10,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Attribute;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Common;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
@@ -43,34 +45,44 @@ namespace HoneydewExtractorsTests.Processors
             {
                 new MethodCallInfoVisitor()
             });
+            var attributeSetterVisitor = new AttributeSetterVisitor(new List<IAttributeVisitor>
+            {
+                new AttributeInfoVisitor()
+            });
             var parameterSetterVisitor = new ParameterSetterVisitor(new List<IParameterVisitor>
             {
-                new ParameterInfoVisitor()
+                new ParameterInfoVisitor(),
+                attributeSetterVisitor,
             });
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<IClassVisitor>
             {
                 new BaseInfoClassVisitor(),
                 new BaseTypesClassVisitor(),
                 new ImportsVisitor(),
+                attributeSetterVisitor,
                 new MethodSetterClassVisitor(new List<IMethodVisitor>
                 {
                     new MethodInfoVisitor(),
                     calledMethodSetterVisitor,
                     parameterSetterVisitor,
+                    attributeSetterVisitor,
                 }),
                 new ConstructorSetterClassVisitor(new List<IConstructorVisitor>
                 {
                     new ConstructorInfoVisitor(),
                     calledMethodSetterVisitor,
                     parameterSetterVisitor,
+                    attributeSetterVisitor,
                 }),
                 new PropertySetterClassVisitor(new List<IPropertyVisitor>
                 {
-                    new PropertyInfoVisitor()
+                    new PropertyInfoVisitor(),
+                    attributeSetterVisitor,
                 }),
                 new FieldSetterClassVisitor(new List<IFieldVisitor>
                 {
-                    new FieldInfoVisitor()
+                    new FieldInfoVisitor(),
+                    attributeSetterVisitor,
                 })
             }));
 
@@ -1053,6 +1065,84 @@ namespace NameSpace1.N1.OtherChild
             var mainClass = (ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0];
             Assert.Equal("NameSpace1.N1.MyClass", mainClass.BaseTypes[0].Type.Name);
             Assert.Equal("NameSpace1.N1.MyClass", mainClass.Methods[0].ReturnValue.Type.Name);
+        }
+
+        [Fact]
+        public void
+            Process_ShouldReturnAttributeFullName_WhenProvidedWithCustomAttribute()
+        {
+            const string fileContent1 = @"
+namespace AttributeNamespace
+{
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
+    class MyAttribute : Attribute
+    {
+        public MyAttribute()
+        {
+        }
+    }
+}";
+
+            const string fileContent2 = @"
+using AttributeNamespace;
+
+namespace NameSpace1
+{
+    [My]
+    public class MyClass 
+    {
+        [return: My]
+        [method: MyAttribute]
+        public void Method([My] int value)
+        {
+        }
+    }
+}";
+            var classModels1 = _extractor.Extract(fileContent1).ClassTypes;
+            var classModels2 = _extractor.Extract(fileContent2).ClassTypes;
+
+            var repositoryModel = new RepositoryModel();
+            var solutionModel = new SolutionModel();
+            var projectModel = new ProjectModel();
+
+            foreach (var classModel in classModels1)
+            {
+                projectModel.Add(classModel);
+            }
+
+            foreach (var classModel in classModels2)
+            {
+                projectModel.Add(classModel);
+            }
+
+            solutionModel.Projects.Add(projectModel);
+            repositoryModel.Solutions.Add(solutionModel);
+
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(2, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(2, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(2, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
+            var actualRepositoryModel = _sut.Process(repositoryModel);
+
+            var mainClass = (ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0];
+
+            var attributes = new[]
+            {
+                mainClass.Attributes[0],
+                mainClass.Methods[0].Attributes[0],
+                mainClass.Methods[0].ReturnValue.Attributes[0],
+                mainClass.Methods[0].ParameterTypes[0].Attributes[0],
+            };
+
+            foreach (var attributeType in attributes)
+            {
+                Assert.Equal("AttributeNamespace.MyAttribute", attributeType.Name);
+            }
         }
     }
 }
