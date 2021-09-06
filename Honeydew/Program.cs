@@ -129,29 +129,35 @@ namespace Honeydew
 
                 repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
 
-                logger.Log();
-                logger.Log("Exporting Intermediate Results");
-                progressLogger.Log();
-                progressLogger.Log("Exporting Intermediate Results");
+                if (options.DeactivateBindingProcessing)
+                {
+                    WriteAllRepresentations(repositoryModel,
+                        null,
+                        DefaultPathForAllRepresentations);
+                }
+                else
+                {
+                    logger.Log();
+                    logger.Log("Exporting Intermediate Results");
+                    progressLogger.Log();
+                    progressLogger.Log("Exporting Intermediate Results");
 
-                WriteRepresentationsToFile(repositoryModel, "_intermediate",
-                    DefaultPathForAllRepresentations);
+                    WriteRepresentationsToFile(repositoryModel, "_intermediate",
+                        DefaultPathForAllRepresentations);
 
+                    logger.Log();
+                    logger.Log("Resolving Full Name Dependencies");
+                    progressLogger.Log();
+                    progressLogger.Log("Resolving Full Name Dependencies");
+                    progressLogger.Log();
 
-                logger.Log();
-                logger.Log("Resolving Full Name Dependencies");
-                progressLogger.Log();
-                progressLogger.Log("Resolving Full Name Dependencies");
-                progressLogger.Log();
+                    var fullNameModelProcessor = new FullNameModelProcessor(logger, progressLogger);
+                    repositoryModel = fullNameModelProcessor.Process(repositoryModel);
 
-                // Post Extraction Repository model processing
-                var fullNameModelProcessor = new FullNameModelProcessor(logger, progressLogger);
-                repositoryModel = fullNameModelProcessor.Process(repositoryModel);
-
-
-                WriteAllRepresentations(repositoryModel,
-                    fullNameModelProcessor.NamespacesDictionary,
-                    DefaultPathForAllRepresentations);
+                    WriteAllRepresentations(repositoryModel,
+                        fullNameModelProcessor.NamespacesDictionary,
+                        DefaultPathForAllRepresentations);
+                }
 
                 logger.Log();
                 logger.Log("Extraction Complete!");
@@ -354,9 +360,12 @@ namespace Honeydew
 
             WriteRepresentationsToFile(repositoryModel, "", outputPath);
 
-            var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
-            writer.WriteFile(Path.Combine(outputPath, "honeydew_namespaces.json"),
-                fullNameNamespacesExporter.Export(fullNameNamespaces));
+            if (fullNameNamespaces != null)
+            {
+                var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
+                writer.WriteFile(Path.Combine(outputPath, "honeydew_namespaces.json"),
+                    fullNameNamespacesExporter.Export(fullNameNamespaces));
+            }
         }
 
         private static void WriteRepresentationsToFile(RepositoryModel repositoryModel, string nameModifier,

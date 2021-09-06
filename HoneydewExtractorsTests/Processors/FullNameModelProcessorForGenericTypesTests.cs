@@ -163,7 +163,7 @@ namespace NameSpace1
                 classType.Methods[0].LocalVariableTypes[0].Type.Name);
             Assert.Equal("OtherNamespace.Generic<float>", classType.Methods[0].LocalVariableTypes[1].Type.Name);
         }
-        
+
         [Fact]
         public void Process_ShouldReturnTheFullClassNames_WhenGivenClassModelsWithGenericTypesWithMultipleParameters()
         {
@@ -240,7 +240,73 @@ namespace NameSpace1
                 classType.Methods[0].ParameterTypes[0].Type.Name);
             Assert.Equal("OtherNamespace.Generic<OtherNamespace.Generic<string>>",
                 classType.Methods[0].LocalVariableTypes[0].Type.Name);
-            Assert.Equal("OtherMyNamespace.Generic<float,double>", classType.Methods[0].LocalVariableTypes[1].Type.Name);
+            Assert.Equal("OtherMyNamespace.Generic<float,double>",
+                classType.Methods[0].LocalVariableTypes[1].Type.Name);
+        }
+
+        [Fact]
+        public void Process_ShouldReturnTheFullClassNames_WhenGivenClassModelsWithGenericTypesWithSystemTypes()
+        {
+            const string fileContent1 = @"
+namespace OtherNamespace
+{
+    public class Class1 { }
+}";
+
+            const string fileContent3 = @"
+using OtherNamespace;
+using System.Collections.Generic;
+    
+namespace NameSpace1
+{
+    public class MyClass
+    {
+        public void Method(List<Class1> l)
+        {
+            List<Class1> a = new();
+            var f = new List<Class1>();
+        }
+    }
+}";
+
+            var classModels1 = _extractor.Extract(fileContent1).ClassTypes;
+            var classModels3 = _extractor.Extract(fileContent3).ClassTypes;
+
+            var repositoryModel = new RepositoryModel();
+            var solutionModel = new SolutionModel();
+            var projectModel = new ProjectModel();
+
+            foreach (var classModel in classModels1)
+            {
+                projectModel.Add(classModel);
+            }
+
+            foreach (var classModel in classModels3)
+            {
+                projectModel.Add(classModel);
+            }
+
+            solutionModel.Projects.Add(projectModel);
+            repositoryModel.Solutions.Add(solutionModel);
+
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(2, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(2, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(2, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
+            var actualRepositoryModel = _sut.Process(repositoryModel);
+
+            var classType = (ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0];
+            Assert.Equal("System.Collections.Generic.List<OtherNamespace.Class1>",
+                classType.Methods[0].ParameterTypes[0].Type.Name);
+            Assert.Equal("System.Collections.Generic.List<OtherNamespace.Class1>",
+                classType.Methods[0].LocalVariableTypes[0].Type.Name);
+            Assert.Equal("System.Collections.Generic.List<OtherNamespace.Class1>",
+                classType.Methods[0].LocalVariableTypes[1].Type.Name);
         }
     }
 }

@@ -107,6 +107,9 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                             return GetFullName(baseObjectCreationExpressionSyntax);
                         case ImplicitArrayCreationExpressionSyntax implicitArrayCreationExpressionSyntax:
                             return GetFullName(implicitArrayCreationExpressionSyntax);
+                        // local variable type
+                        // case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
+                        //     return GetFullName(memberAccessExpressionSyntax.Name);
                     }
                 }
                     break;

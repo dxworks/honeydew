@@ -14,5 +14,9 @@ namespace Honeydew
 
         [Option("disable-progress-bars", Required = false, Default = false, HelpText = "Disable Progress bars")]
         public bool DisableProgressBars { get; set; }
+
+        [Option("no-bindings", Required = false, Default = false,
+            HelpText = "Deactivate Binding Processing")]
+        public bool DeactivateBindingProcessing { get; set; }
     }
 }
