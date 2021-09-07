@@ -1,0 +1,6 @@
+using System;
+
+namespace App
+{                                       
+    public record MyClass(string A);
+}

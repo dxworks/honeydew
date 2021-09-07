@@ -1,0 +1,14 @@
+using System;
+using HoneydewCore.Extractors.Metrics;
+
+namespace App
+{
+    namespace Domain
+    {
+        class MyClass : IMetric, IMetric2
+        {                                           
+            public void Foo() { }
+            public void Bar() { }
+        }
+    }
+}

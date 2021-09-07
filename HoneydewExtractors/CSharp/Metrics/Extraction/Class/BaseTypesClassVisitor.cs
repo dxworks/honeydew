@@ -32,6 +32,22 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class
                 }
                     break;
 
+                case EnumDeclarationSyntax:
+                {
+                    modelType.BaseTypes.Add(new BaseTypeModel
+                    {
+                        Type = new EntityTypeModel
+                        {
+                            Name = "System.Enum",
+                            FullType = new GenericType
+                            {
+                                Name = "System.Enum"
+                            }
+                        },
+                        Kind = "class"
+                    });
+                }
+                    break;
                 default:
                 {
                     modelType.BaseTypes.Add(new BaseTypeModel
