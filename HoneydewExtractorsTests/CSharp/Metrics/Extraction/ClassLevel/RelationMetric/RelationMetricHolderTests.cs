@@ -25,8 +25,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         [Fact]
         public void GetRelations_ShouldHaveNoRelations_WhenDependenciesAreOnlyPrimitiveTypes()
         {
-            var relationMetricMock1 = new Mock<IRelationMetric>();
-            var relationMetricMock2 = new Mock<IRelationMetric>();
+            var relationMetricMock1 = new Mock<IRelationVisitor>();
+            var relationMetricMock2 = new Mock<IRelationVisitor>();
 
             _sut.Add("Class1", "int", relationMetricMock1.Object);
             _sut.Add("Class1", "int", relationMetricMock1.Object);
@@ -48,8 +48,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         [Fact]
         public void GetRelations_Extract_ShouldHaveRelations_WhenThereAreNonPrimitiveDependencies()
         {
-            var relationMetricMock1 = new Mock<IRelationMetric>();
-            var relationMetricMock2 = new Mock<IRelationMetric>();
+            var relationMetricMock1 = new Mock<IRelationVisitor>();
+            var relationMetricMock2 = new Mock<IRelationVisitor>();
 
             relationMetricMock1.Setup(metric => metric.PrettyPrint()).Returns("Relation 1");
             relationMetricMock2.Setup(metric => metric.PrettyPrint()).Returns("Relation 2");

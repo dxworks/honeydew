@@ -7,14 +7,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
 {
     public class RelationMetricHolder : IRelationMetricHolder
     {
-        private readonly Dictionary<string, Dictionary<IRelationMetric, IDictionary<string, int>>>
+        private readonly Dictionary<string, Dictionary<IRelationVisitor, IDictionary<string, int>>>
             _dependencies = new();
 
-        public void Add(string className, string dependencyName, IRelationMetric relationMetric)
+        public void Add(string className, string dependencyName, IRelationVisitor relationVisitor)
         {
             if (_dependencies.TryGetValue(className, out var relationMetricDictionary))
             {
-                if (relationMetricDictionary.TryGetValue(relationMetric, out var dependenciesDictionary))
+                if (relationMetricDictionary.TryGetValue(relationVisitor, out var dependenciesDictionary))
                 {
                     if (dependenciesDictionary.ContainsKey(dependencyName))
                     {
@@ -27,7 +27,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
                 }
                 else
                 {
-                    relationMetricDictionary.Add(relationMetric, new Dictionary<string, int>
+                    relationMetricDictionary.Add(relationVisitor, new Dictionary<string, int>
                     {
                         { dependencyName, 1 }
                     });
@@ -35,10 +35,10 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
             }
             else
             {
-                var dictionary = new Dictionary<IRelationMetric, IDictionary<string, int>>
+                var dictionary = new Dictionary<IRelationVisitor, IDictionary<string, int>>
                 {
                     {
-                        relationMetric, new Dictionary<string, int>
+                        relationVisitor, new Dictionary<string, int>
                         {
                             { dependencyName, 1 }
                         }

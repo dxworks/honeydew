@@ -189,11 +189,25 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
         public EntityTypeModel CreateEntityTypeModel(string name)
         {
-            return new EntityTypeModel
+            try
             {
-                Name = name,
-                FullType = GetContainedTypes(name)
-            };
+                return new EntityTypeModel
+                {
+                    Name = name,
+                    FullType = GetContainedTypes(name)
+                };
+            }
+            catch (Exception)
+            {
+                return new EntityTypeModel
+                {
+                    Name = name,
+                    FullType = new GenericType
+                    {
+                        Name = name
+                    }
+                };
+            }
         }
 
         private GenericType GetContainedTypes(string name)

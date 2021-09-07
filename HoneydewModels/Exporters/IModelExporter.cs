@@ -2,6 +2,6 @@
 {
     public interface IModelExporter<in TModel>
     {
-        string Export(TModel model);
+        void Export(string filePath, TModel model);
     }
 }

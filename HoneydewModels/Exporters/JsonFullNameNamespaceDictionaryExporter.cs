@@ -1,14 +1,16 @@
 ﻿using System.Collections.Generic;
-using System.Text.Json;
+using System.IO;
 using HoneydewModels.CSharp;
+using Newtonsoft.Json;
 
 namespace HoneydewModels.Exporters
 {
     public class JsonFullNameNamespaceDictionaryExporter : IModelExporter<IDictionary<string, NamespaceTree>>
     {
-        public string Export(IDictionary<string, NamespaceTree> model)
+        public void Export(string filePath, IDictionary<string, NamespaceTree> model)
         {
-            return JsonSerializer.Serialize(model);
+            var jsonSerializer = JsonSerializer.Create();
+            jsonSerializer.Serialize(new StreamWriter(filePath), model);
         }
     }
 }

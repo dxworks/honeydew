@@ -740,7 +740,7 @@ namespace HoneydewExtractors.Processors
             NamespaceModel namespaceModel, ProjectModel projectModel, SolutionModel solutionModel)
         {
             var parameterDependenciesMetrics = classModel.Metrics.Where(metric =>
-                typeof(IRelationMetric).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
+                typeof(IRelationVisitor).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
 
             foreach (var metric in parameterDependenciesMetrics)
             {
