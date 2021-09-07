@@ -1,0 +1,37 @@
+namespace Namespace1
+{
+    public class Class1
+    {
+        public Class1(Parent p, int a)
+        {
+            Parent parent = p;
+
+            Parent class1 = new Class2();
+            Parent class2 = new Class3();
+            Class2 class3 = new Class2();
+            Class3 class4 = new Class3();
+        }
+
+        public Class1(Parent p)
+        {
+            var parent = p;
+
+            var class1 = new Class2();
+            var class2 = new Class3();
+            var class3 = class1;
+            var class4 = class2;
+        }
+    }
+
+    public class Parent
+    {
+    }
+
+    public class Class2 : Parent
+    {
+    }
+
+    public class Class3 : Parent
+    {
+    }
+}

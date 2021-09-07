@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
-using HoneydewExtractors.Core.Metrics.Extraction.Class.Relations;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 
@@ -34,7 +33,7 @@ namespace HoneydewExtractors.Processors
                         }
 
                         var instance = Activator.CreateInstance(type);
-                        if (instance is RelationVisitor relationVisitor)
+                        if (instance is IRelationVisitor relationVisitor)
                         {
                             var dictionary = (Dictionary<string, int>)metricModel.Value;
                             foreach (var (targetName, count) in dictionary)

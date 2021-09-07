@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using HoneydewExtractors.Core.Metrics.Extraction.Class;
-using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
+using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
@@ -42,7 +42,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, classTypes[0].Metrics.Count);
             var metricModel = classTypes[0].Metrics[0];
             Assert.Equal("System.Boolean", metricModel.ValueType);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.IsAbstractClassVisitor",
+            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.IsAbstractClassVisitor",
                 metricModel.ExtractorName);
             Assert.False((bool)metricModel.Value);
         }
@@ -62,7 +62,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, classTypes[0].Metrics.Count);
             var metricModel = classTypes[0].Metrics[0];
             Assert.Equal("System.Boolean", metricModel.ValueType);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.IsAbstractClassVisitor",
+            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.IsAbstractClassVisitor",
                 metricModel.ExtractorName);
             Assert.False((bool)metricModel.Value);
         }
@@ -82,7 +82,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, classTypes[0].Metrics.Count);
             var metricModel = classTypes[0].Metrics[0];
             Assert.Equal("System.Boolean", metricModel.ValueType);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.IsAbstractClassVisitor",
+            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.IsAbstractClassVisitor",
                 metricModel.ExtractorName);
             Assert.True((bool)metricModel.Value);
         }
@@ -102,7 +102,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(1, classTypes[0].Metrics.Count);
             var metricModel = classTypes[0].Metrics[0];
             Assert.Equal("System.Boolean", metricModel.ValueType);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.Class.IsAbstractClassVisitor",
+            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.IsAbstractClassVisitor",
                 metricModel.ExtractorName);
             Assert.True((bool)metricModel.Value);
         }

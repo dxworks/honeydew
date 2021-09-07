@@ -1,0 +1,30 @@
+﻿namespace Namespace1
+{
+    public class Class1
+    {
+        public void Method(int a, int b)
+        {
+            int sum = a + b;
+            int min, max;
+         
+            a = 2;
+            min = 6;
+            max = b + 2;
+            
+            string s = sum.ToString();
+        }
+        
+        public void MethodWithVar(int a, int b)
+        {
+            var sum = a + b;
+            var min=56;
+            var max=a;
+
+            a = 2;
+            min = 6;
+            max = b + 2;
+            
+            var s = sum.ToString();
+        }
+    }
+}

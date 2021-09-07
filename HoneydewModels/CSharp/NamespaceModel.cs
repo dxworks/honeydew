@@ -6,7 +6,7 @@ namespace HoneydewModels.CSharp
 {
     public record NamespaceModel : IModelEntity
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
         public IList<IClassType> ClassModels { get; set; } = new List<IClassType>();
 
         public void Add(IClassType classType)

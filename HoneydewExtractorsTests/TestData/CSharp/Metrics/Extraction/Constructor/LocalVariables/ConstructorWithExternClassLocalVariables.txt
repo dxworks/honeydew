@@ -1,0 +1,21 @@
+namespace Namespace1
+{
+    public class Class1
+    {
+        public Class1(ExternClass p, int a)
+        {
+            ExternClass c = p;
+
+            ExternClass c2;
+            ExternClass c3 = new ExternClass();
+        }
+
+        public Class1(ExternClass p)
+        {
+            var c = p;
+
+            var class1 = new ExternClass();
+            var class2 = class1;            
+        }
+    }
+}

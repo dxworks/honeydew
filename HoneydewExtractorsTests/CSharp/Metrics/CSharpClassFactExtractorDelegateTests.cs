@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
-using HoneydewExtractors.Core.Metrics.Extraction.Common;
-using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
-using HoneydewExtractors.Core.Metrics.Extraction.Delegate;
-using HoneydewExtractors.Core.Metrics.Extraction.Parameter;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Common;
+using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Delegate;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
 using HoneydewModels.CSharp;
 using Moq;
 using Xunit;

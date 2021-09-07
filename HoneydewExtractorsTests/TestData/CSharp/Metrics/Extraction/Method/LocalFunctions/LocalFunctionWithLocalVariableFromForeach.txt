@@ -1,0 +1,84 @@
+﻿namespace Namespace1
+{
+    public class Class1
+    {
+        public void Method(List<Class2> list)
+        {                     
+            void LocalFunction1()
+            {
+                foreach(Class2 c in list)
+                {
+                }
+                
+                foreach(var c in list)
+                {
+                }
+                
+                void LocalFunction2()
+                {
+                   foreach(Class2 c in list)
+                   {
+                   }
+                   
+                   foreach(var c in list)
+                   {
+                   }
+                }
+            }
+        }             
+        
+        public void Method(List<int> list)
+        {
+            void LocalFunction1()
+            {
+                foreach(int c in list)
+                {
+                }
+                
+                foreach(var c in list)
+                {
+                }
+                
+                void LocalFunction2()
+                {
+                   foreach(int c in list)
+                   {
+                   }
+                   
+                   foreach(var c in list)
+                   {
+                   }
+                }
+            }
+        }
+        
+        public void Method(List<ExternClass> list)
+        {
+            void LocalFunction1()
+            {
+                foreach(ExternClass c in list)
+                {
+                }
+                
+                foreach(var c in list)
+                {
+                }
+                
+                void LocalFunction2()
+                {
+                   foreach(ExternClass c in list)
+                   {
+                   }
+                   
+                   foreach(var c in list)
+                   {
+                   }
+                }
+            }
+        }
+    }
+    
+    public class Class2
+    {
+    }    
+}

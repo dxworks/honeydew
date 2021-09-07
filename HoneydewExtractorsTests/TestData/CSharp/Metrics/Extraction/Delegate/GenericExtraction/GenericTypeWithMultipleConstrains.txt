@@ -1,0 +1,13 @@
+﻿namespace Namespace1
+{
+    public delegate T Delegate1<out T, in TR, in TK>(TR r, TK tk, TK tk2)
+        where T : IInterface, IInterface2<TK, TR>;
+
+    public interface IInterface
+    {
+    }
+
+    public interface IInterface2<T,TK>
+    {
+    }
+}

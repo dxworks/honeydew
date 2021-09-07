@@ -1,6 +1,6 @@
-﻿using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
-using HoneydewExtractors.Core.Metrics.Visitors;
+﻿using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
@@ -37,7 +37,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
             var compilationUnit = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, compilationUnit.Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit.ImportCountCompilationUnitVisitor",
+            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit.ImportCountCompilationUnitVisitor",
                 compilationUnit.Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", compilationUnit.Metrics[0].ValueType);
             Assert.Equal(6, compilationUnit.Metrics[0].Value);
@@ -78,7 +78,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
             var compilationUnit = _factExtractor.Extract(fileContent);
 
             Assert.Equal(1, compilationUnit.Metrics.Count);
-            Assert.Equal("HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit.ImportCountCompilationUnitVisitor",
+            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit.ImportCountCompilationUnitVisitor",
                 compilationUnit.Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", compilationUnit.Metrics[0].ValueType);
             Assert.Equal(12, compilationUnit.Metrics[0].Value);

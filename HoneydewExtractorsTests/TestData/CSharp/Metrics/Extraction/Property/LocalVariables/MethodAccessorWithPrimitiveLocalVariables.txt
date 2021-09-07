@@ -1,0 +1,93 @@
+﻿namespace Namespace1
+{
+    using System;
+
+    public class Class1
+    {
+        private int a,b;
+    
+        public int Value1 
+        {
+            get 
+            {
+                int sum = a + b;
+                int min, max;
+             
+                a = 2;
+                min = 6;
+                max = b + 2;
+                
+                string s = sum.ToString();
+                return 0;
+            }
+            set
+            {
+                var sum = a + b;
+                var min=56;
+                var max=a;
+    
+                a = 2;
+                min = 6;
+                max = b + 2;
+                
+                var s = sum.ToString();
+            }
+        }
+        
+        public int Value2 
+        {
+            get 
+            {
+                var sum = a + b;
+                var min=56;
+                var max=a;
+    
+                a = 2;
+                min = 6;
+                max = b + 2;
+                
+                var s = sum.ToString();
+                
+                return 0;
+            }
+            init
+            {
+                int sum = a + b;
+                int min, max;
+             
+                a = 2;
+                min = 6;
+                max = b + 2;
+                
+                string s = sum.ToString();              
+            }
+        }
+        
+        public event Func<int> Value3 
+        {
+            add
+            {
+                int sum = a + b;
+                int min, max;
+             
+                a = 2;
+                min = 6;
+                max = b + 2;
+                
+                string s = sum.ToString();
+            }
+            remove
+            {
+                var sum = a + b;
+                var min=56;
+                var max=a;
+    
+                a = 2;
+                min = 6;
+                max = b + 2;
+                
+                var s = sum.ToString();
+            }
+        }
+    }
+}

@@ -1,0 +1,64 @@
+﻿namespace Namespace1
+{
+    public class Class1
+    {
+        public void Method(Parent p)
+        {
+            void LocalFunction()
+            {
+                if (p is Class2 class2)
+                {
+                }
+                else if (p is Class3 class3)
+                {
+                }
+                
+                void LocalFunction2()
+                {
+                    if (p is Class2 class2)
+                    {
+                    }
+                    else if (p is Class3 class3)
+                    {
+                    }
+                }
+            }
+        }
+
+        public void Method2(Parent p)
+        {
+            void LocalFunction() 
+            {
+                switch (p)
+                {
+                    case Class2 class2:
+                        break;
+                    case Class3 class3:
+                        break;
+                }
+                void LocalFunction2()
+                {
+                    switch (p)
+                    {
+                        case Class2 class2:
+                            break;
+                        case Class3 class3:
+                            break;
+                    }
+                }
+            }
+        }
+    }
+    
+    public class Parent
+    {
+    }
+
+    public class Class2 : Parent
+    {
+    }
+
+    public class Class3 : Parent
+    {
+    }
+}

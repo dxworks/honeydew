@@ -5,35 +5,36 @@ using System.Reflection;
 using System.Threading.Tasks;
 using CommandLine;
 using HoneydewCore.IO.Readers;
-using HoneydewCore.IO.Writers;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Logging;
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
 using HoneydewExtractors.Core;
-using HoneydewExtractors.Core.Metrics.Extraction.Attribute;
-using HoneydewExtractors.Core.Metrics.Extraction.Class;
-using HoneydewExtractors.Core.Metrics.Extraction.Class.Relations;
-using HoneydewExtractors.Core.Metrics.Extraction.Common;
-using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
-using HoneydewExtractors.Core.Metrics.Extraction.Constructor;
-using HoneydewExtractors.Core.Metrics.Extraction.Delegate;
-using HoneydewExtractors.Core.Metrics.Extraction.Field;
-using HoneydewExtractors.Core.Metrics.Extraction.Method;
-using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
-using HoneydewExtractors.Core.Metrics.Extraction.Parameter;
-using HoneydewExtractors.Core.Metrics.Extraction.Property;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Fields;
+using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Attribute;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Common;
+using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Constructor;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Delegate;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Field;
+using HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
+using HoneydewExtractors.CSharp.Metrics.Extraction.MethodCall;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewExtractors.CSharp.RepositoryLoading;
@@ -63,14 +64,19 @@ namespace Honeydew
                 IProgressLogger progressLogger =
                     options.DisableProgressBars ? new NoBarsProgressLogger() : new ProgressLogger();
 
+                var honeydewVersion = "";
                 try
                 {
                     var version = Assembly.GetExecutingAssembly().GetName().Version;
+                    if (version != null)
+                    {
+                        honeydewVersion = version.ToString();
+                    }
 
-                    logger.Log($"Honeydew {version} starting");
+                    logger.Log($"Honeydew {honeydewVersion} starting");
                     logger.Log();
-                    
-                    
+
+
                     progressLogger.Log($"Honeydew {version} starting");
                     progressLogger.Log();
                 }
@@ -79,6 +85,10 @@ namespace Honeydew
                     logger.Log("Could not get Application version", LogLevels.Error);
                     logger.Log();
                 }
+
+
+                logger.Log($"Input Path {options.InputFilePath}");
+                logger.Log();
 
                 logger.Log($"Log will be stored at {logFilePath}");
                 logger.Log();
@@ -120,36 +130,47 @@ namespace Honeydew
                     }
                 }
 
-                logger.Log();
-                logger.Log("Trimming File Paths");
-                progressLogger.Log();
-                progressLogger.Log("Trimming File Paths");
+                repositoryModel.Version = honeydewVersion;
+                
+                if (!options.DisablePathTrimming)
+                {
+                    logger.Log();
+                    logger.Log("Trimming File Paths");
+                    progressLogger.Log();
+                    progressLogger.Log("Trimming File Paths");
 
-                repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
+                    repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
+                }
 
-                logger.Log();
-                logger.Log("Exporting Intermediate Results");
-                progressLogger.Log();
-                progressLogger.Log("Exporting Intermediate Results");
+                if (options.DeactivateBindingProcessing)
+                {
+                    WriteAllRepresentations(repositoryModel,
+                        null,
+                        DefaultPathForAllRepresentations);
+                }
+                else
+                {
+                    logger.Log();
+                    logger.Log("Exporting Intermediate Results");
+                    progressLogger.Log();
+                    progressLogger.Log("Exporting Intermediate Results");
 
-                WriteRepresentationsToFile(repositoryModel, "_intermediate",
-                    DefaultPathForAllRepresentations);
+                    WriteRepresentationsToFile(repositoryModel, "_intermediate",
+                        DefaultPathForAllRepresentations);
 
+                    logger.Log();
+                    logger.Log("Resolving Full Name Dependencies");
+                    progressLogger.Log();
+                    progressLogger.Log("Resolving Full Name Dependencies");
+                    progressLogger.Log();
 
-                logger.Log();
-                logger.Log("Resolving Full Name Dependencies");
-                progressLogger.Log();
-                progressLogger.Log("Resolving Full Name Dependencies");
-                progressLogger.Log();
+                    var fullNameModelProcessor = new FullNameModelProcessor(logger, progressLogger);
+                    repositoryModel = fullNameModelProcessor.Process(repositoryModel);
 
-                // Post Extraction Repository model processing
-                var fullNameModelProcessor = new FullNameModelProcessor(logger, progressLogger);
-                repositoryModel = fullNameModelProcessor.Process(repositoryModel);
-
-
-                WriteAllRepresentations(repositoryModel,
-                    fullNameModelProcessor.NamespacesDictionary,
-                    DefaultPathForAllRepresentations);
+                    WriteAllRepresentations(repositoryModel,
+                        fullNameModelProcessor.NamespacesDictionary,
+                        DefaultPathForAllRepresentations);
+                }
 
                 logger.Log();
                 logger.Log("Extraction Complete!");
@@ -174,16 +195,26 @@ namespace Honeydew
                 new AttributeInfoVisitor()
             });
 
-            var calledMethodSetterVisitor =
-                new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
-                {
-                    new MethodCallInfoVisitor()
-                });
+            var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
+            {
+                new MethodCallInfoVisitor()
+            });
 
             var parameterSetterVisitor = new ParameterSetterVisitor(new List<IParameterVisitor>
             {
                 new ParameterInfoVisitor(),
                 attributeSetterVisitor
+            });
+
+            var genericParameterSetterVisitor = new GenericParameterSetterVisitor(new List<IGenericParameterVisitor>
+            {
+                new GenericParameterInfoVisitor(),
+                attributeSetterVisitor
+            });
+
+            var localVariablesTypeSetterVisitor = new LocalVariablesTypeSetterVisitor(new List<ILocalVariablesVisitor>
+            {
+                new LocalVariableInfoVisitor()
             });
 
             var localFunctionsSetterClassVisitor = new LocalFunctionsSetterClassVisitor(new List<ILocalFunctionVisitor>
@@ -193,10 +224,14 @@ namespace Honeydew
                     calledMethodSetterVisitor,
                     linesOfCodeVisitor,
                     parameterSetterVisitor,
+                    localVariablesTypeSetterVisitor,
+                    genericParameterSetterVisitor,
                 }),
                 calledMethodSetterVisitor,
                 linesOfCodeVisitor,
                 parameterSetterVisitor,
+                localVariablesTypeSetterVisitor,
+                genericParameterSetterVisitor,
             });
 
             var methodInfoVisitor = new MethodInfoVisitor();
@@ -208,7 +243,9 @@ namespace Honeydew
                 calledMethodSetterVisitor,
                 localFunctionsSetterClassVisitor,
                 attributeSetterVisitor,
-                parameterSetterVisitor
+                parameterSetterVisitor,
+                localVariablesTypeSetterVisitor,
+                genericParameterSetterVisitor,
             };
 
             var constructorVisitors = new List<ICSharpConstructorVisitor>
@@ -219,7 +256,8 @@ namespace Honeydew
                 new ConstructorCallsVisitor(),
                 localFunctionsSetterClassVisitor,
                 attributeSetterVisitor,
-                parameterSetterVisitor
+                parameterSetterVisitor,
+                localVariablesTypeSetterVisitor,
             };
 
             var fieldVisitors = new List<ICSharpFieldVisitor>
@@ -238,6 +276,7 @@ namespace Honeydew
                     attributeSetterVisitor,
                     linesOfCodeVisitor,
                     localFunctionsSetterClassVisitor,
+                    localVariablesTypeSetterVisitor,
                 }),
                 linesOfCodeVisitor,
                 attributeSetterVisitor,
@@ -254,6 +293,7 @@ namespace Honeydew
                 new ImportsVisitor(),
                 linesOfCodeVisitor,
                 attributeSetterVisitor,
+                genericParameterSetterVisitor,
 
                 // metrics visitor
                 new IsAbstractClassVisitor(),
@@ -271,7 +311,8 @@ namespace Honeydew
                 new BaseInfoDelegateVisitor(),
                 new ImportsVisitor(),
                 attributeSetterVisitor,
-                parameterSetterVisitor
+                parameterSetterVisitor,
+                genericParameterSetterVisitor,
             };
             var compilationUnitVisitors = new List<ICSharpCompilationUnitVisitor>
             {
@@ -328,48 +369,36 @@ namespace Honeydew
         private static void WriteAllRepresentations(RepositoryModel repositoryModel,
             IDictionary<string, NamespaceTree> fullNameNamespaces, string outputPath)
         {
-            var writer = new FileWriter();
-
             WriteRepresentationsToFile(repositoryModel, "", outputPath);
 
-            var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
-            writer.WriteFile(Path.Combine(outputPath, "honeydew_namespaces.json"),
-                fullNameNamespacesExporter.Export(fullNameNamespaces));
+            if (fullNameNamespaces != null)
+            {
+                var fullNameNamespacesExporter = new JsonModelExporter();
+                fullNameNamespacesExporter.Export(Path.Combine(outputPath, "honeydew_namespaces.json"),
+                    fullNameNamespaces);
+            }
         }
 
         private static void WriteRepresentationsToFile(RepositoryModel repositoryModel, string nameModifier,
             string outputPath)
         {
-            var writer = new FileWriter();
-
-            var repositoryExporter = GetRepositoryModelExporter();
-            writer.WriteFile(Path.Combine(outputPath, $"honeydew{nameModifier}.json"),
-                repositoryExporter.Export(repositoryModel));
+            var repositoryExporter = new JsonModelExporter();
+            repositoryExporter.Export(Path.Combine(outputPath, $"honeydew{nameModifier}.json"), repositoryModel);
 
             var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
             var csvModelExporter = GetClassRelationsRepresentationExporter();
-            writer.WriteFile(Path.Combine(outputPath, $"honeydew{nameModifier}.csv"),
-                csvModelExporter.Export(classRelationsRepresentation));
+            csvModelExporter.Export(Path.Combine(outputPath, $"honeydew{nameModifier}.csv"),
+                classRelationsRepresentation);
 
             var cyclomaticComplexityPerFileRepresentation =
                 GetCyclomaticComplexityPerFileRepresentation(repositoryModel);
-            var cyclomaticComplexityPerFileExporter = GetCyclomaticComplexityPerFileExporter();
-            writer.WriteFile(Path.Combine(outputPath, $"honeydew_cyclomatic{nameModifier}.json"),
-                cyclomaticComplexityPerFileExporter.Export(cyclomaticComplexityPerFileRepresentation));
+            var cyclomaticComplexityPerFileExporter = new JsonModelExporter();
+            cyclomaticComplexityPerFileExporter.Export(
+                Path.Combine(outputPath, $"honeydew_cyclomatic{nameModifier}.json"),
+                cyclomaticComplexityPerFileRepresentation);
         }
 
-        private static IModelExporter<CyclomaticComplexityPerFileRepresentation>
-            GetCyclomaticComplexityPerFileExporter()
-        {
-            return new JsonCyclomaticComplexityPerFileRepresentationExporter();
-        }
-
-        private static IModelExporter<RepositoryModel> GetRepositoryModelExporter()
-        {
-            return new JsonRepositoryModelExporter();
-        }
-
-        private static IModelExporter<ClassRelationsRepresentation> GetClassRelationsRepresentationExporter()
+        private static CsvClassRelationsRepresentationExporter GetClassRelationsRepresentationExporter()
         {
             var csvModelExporter = new CsvClassRelationsRepresentationExporter
             {

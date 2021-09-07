@@ -13,351 +13,22 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
     public class CSharpExtractionHelperMethods : IExtractionHelperMethods
     {
         private readonly SemanticModel _semanticModel;
+        private readonly CSharpFullNameProvider _fullNameProvider;
 
         public CSharpExtractionHelperMethods(CSharpSemanticModel semanticModel)
         {
             _semanticModel = semanticModel.Model;
+            _fullNameProvider = new CSharpFullNameProvider(_semanticModel);
         }
 
-        public string GetFullName(MemberDeclarationSyntax declarationSyntax)
+        public IEntityType GetFullName(SyntaxNode syntaxNode)
         {
-            var declaredSymbol = _semanticModel.GetDeclaredSymbol(declarationSyntax);
-            if (declaredSymbol != null)
-            {
-                return declaredSymbol.ToDisplayString();
-            }
-
-            return declarationSyntax switch
-            {
-                DelegateDeclarationSyntax delegateDeclaration => delegateDeclaration.Identifier.ToString(),
-                BaseTypeDeclarationSyntax baseTypeDeclarationSyntax => baseTypeDeclarationSyntax.Identifier.ToString(),
-                _ => declarationSyntax.ToString()
-            };
+            return _fullNameProvider.GetFullName(syntaxNode);
         }
 
-        public IEntityType GetFullName(VariableDeclarationSyntax declarationSyntax)
+        public IList<IEntityType> GetBaseInterfaces(BaseTypeDeclarationSyntax node)
         {
-            var typeName = declarationSyntax.Type.ToString();
-            var nodeSymbol = ModelExtensions.GetSymbolInfo(_semanticModel, declarationSyntax.Type).Symbol;
-            if (nodeSymbol != null)
-            {
-                typeName = nodeSymbol.ToString();
-            }
-
-            return new EntityTypeModel
-            {
-                Name = typeName
-            };
-        }
-
-        public IEntityType GetFullName(PropertyDeclarationSyntax declarationSyntax)
-        {
-            var typeName = declarationSyntax.Type.ToString();
-            var nodeSymbol = ModelExtensions.GetSymbolInfo(_semanticModel, declarationSyntax.Type).Symbol;
-            if (nodeSymbol != null)
-            {
-                typeName = nodeSymbol.ToString();
-            }
-
-            return new EntityTypeModel
-            {
-                Name = typeName
-            };
-        }
-
-        public IEntityType GetFullName(TypeSyntax typeSyntax)
-        {
-            var symbolInfo = _semanticModel.GetSymbolInfo(typeSyntax);
-            if (symbolInfo.Symbol != null)
-            {
-                return new EntityTypeModel
-                {
-                    Name = symbolInfo.Symbol.ToString()
-                };
-            }
-
-            if (typeSyntax is RefTypeSyntax refTypeSyntax)
-            {
-                return GetFullName(refTypeSyntax.Type);
-            }
-
-            if (typeSyntax is ArrayTypeSyntax arrayTypeSyntax)
-            {
-                return new EntityTypeModel
-                {
-                    Name = $"{GetFullName(arrayTypeSyntax.ElementType).Name}{arrayTypeSyntax.RankSpecifiers.ToString()}"
-                };
-            }
-
-            return new EntityTypeModel
-            {
-                Name = typeSyntax.ToString()
-            };
-        }
-
-        public IEntityType GetFullName(BaseObjectCreationExpressionSyntax declarationSyntax)
-        {
-            var symbolInfo = ModelExtensions.GetSymbolInfo(_semanticModel, declarationSyntax);
-
-            if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
-            {
-                return new EntityTypeModel
-                {
-                    Name = methodSymbol.ContainingType.ToDisplayString()
-                };
-            }
-
-            var variableDeclarationSyntax = GetParentDeclarationSyntax<VariableDeclarationSyntax>(declarationSyntax);
-            if (variableDeclarationSyntax != null)
-            {
-                return GetFullName(variableDeclarationSyntax);
-            }
-
-            var propertyDeclarationSyntax = GetParentDeclarationSyntax<PropertyDeclarationSyntax>(declarationSyntax);
-            if (propertyDeclarationSyntax != null)
-            {
-                return new EntityTypeModel
-                {
-                    Name = propertyDeclarationSyntax.Type.ToString()
-                };
-            }
-
-            if (declarationSyntax is ObjectCreationExpressionSyntax objectCreationExpressionSyntax)
-            {
-                return GetFullName(objectCreationExpressionSyntax.Type);
-            }
-
-            return new EntityTypeModel
-            {
-                Name = declarationSyntax.ToString()
-            };
-        }
-
-
-        public IEntityType GetFullName(ImplicitArrayCreationExpressionSyntax declarationSyntax)
-        {
-            var propertyDeclarationSyntax = GetParentDeclarationSyntax<PropertyDeclarationSyntax>(declarationSyntax);
-            if (propertyDeclarationSyntax != null)
-            {
-                return GetFullName(propertyDeclarationSyntax.Type);
-            }
-
-            var variableDeclarationSyntax = GetParentDeclarationSyntax<VariableDeclarationSyntax>(declarationSyntax);
-            if (variableDeclarationSyntax != null)
-            {
-                return GetFullName(variableDeclarationSyntax);
-            }
-
-            // try to infer type from elements
-            var elementTypesSet = new HashSet<string>();
-
-            foreach (var expression in declarationSyntax.Initializer.Expressions)
-            {
-                var fullName = GetExpressionType(expression).Name;
-                elementTypesSet.Add(fullName);
-            }
-
-            switch (elementTypesSet.Count)
-            {
-                case 0:
-                {
-                    return new EntityTypeModel
-                    {
-                        Name = declarationSyntax.ToString()
-                    };
-                }
-                case 1:
-                {
-                    return new EntityTypeModel
-                    {
-                        Name = $"{elementTypesSet.First()}[]"
-                    };
-                }
-                case 2:
-                {
-                    if (elementTypesSet.Contains("System.Int32") && elementTypesSet.Contains("System.Single"))
-                    {
-                        return new EntityTypeModel
-                        {
-                            Name = "System.Single[]"
-                        };
-                    }
-
-                    if (elementTypesSet.Contains("System.Int32") && elementTypesSet.Contains("System.Double"))
-                    {
-                        return new EntityTypeModel
-                        {
-                            Name = "System.Double[]"
-                        };
-                    }
-
-                    if (elementTypesSet.Contains("System.Single") && elementTypesSet.Contains("System.Double"))
-                    {
-                        return new EntityTypeModel
-                        {
-                            Name = "System.Double[]"
-                        };
-                    }
-
-                    return new EntityTypeModel
-                    {
-                        Name = "System.Object[]"
-                    };
-                }
-                case 3:
-                {
-                    if (elementTypesSet.Contains("System.Int32") && elementTypesSet.Contains("System.Single") &&
-                        elementTypesSet.Contains("System.Double"))
-                    {
-                        return new EntityTypeModel
-                        {
-                            Name = "System.Double[]"
-                        };
-                    }
-
-                    return new EntityTypeModel
-                    {
-                        Name = "System.Object[]"
-                    };
-                }
-                default:
-                    return new EntityTypeModel
-                    {
-                        Name = "System.Object[]"
-                    };
-            }
-        }
-
-        public IEntityType GetFullName(ExpressionSyntax expressionSyntax)
-        {
-            if (expressionSyntax == null)
-            {
-                return new EntityTypeModel
-                {
-                    Name = ""
-                };
-            }
-
-            var symbolInfo = _semanticModel.GetSymbolInfo(expressionSyntax);
-
-            switch (symbolInfo.Symbol)
-            {
-                case IPropertySymbol propertySymbol:
-                {
-                    return new EntityTypeModel
-                    {
-                        Name = propertySymbol.Type.ToDisplayString()
-                    };
-                }
-                case ILocalSymbol localSymbol:
-                {
-                    return new EntityTypeModel
-                    {
-                        Name = localSymbol.Type.ToDisplayString()
-                    };
-                }
-                case IFieldSymbol fieldSymbol:
-                {
-                    return new EntityTypeModel
-                    {
-                        Name = fieldSymbol.Type.ToDisplayString()
-                    };
-                }
-                case IMethodSymbol methodSymbol:
-                    if (expressionSyntax is ObjectCreationExpressionSyntax && methodSymbol.ReceiverType != null)
-                    {
-                        return new EntityTypeModel
-                        {
-                            Name = methodSymbol.ReceiverType.ToDisplayString()
-                        };
-                    }
-
-                    return new EntityTypeModel
-                    {
-                        Name = methodSymbol.ReturnType.ToDisplayString()
-                    };
-                default:
-                {
-                    if (symbolInfo.Symbol == null)
-                    {
-                        return expressionSyntax switch
-                        {
-                            ObjectCreationExpressionSyntax objectCreationExpressionSyntax => GetFullName(
-                                objectCreationExpressionSyntax),
-                            _ => new EntityTypeModel
-                            {
-                                Name = expressionSyntax.ToString()
-                            }
-                        };
-                    }
-
-                    return new EntityTypeModel
-                    {
-                        Name = symbolInfo.Symbol.ToString()
-                    };
-                }
-            }
-        }
-
-        public IEntityType GetFullName(ThrowStatementSyntax declarationSyntax)
-        {
-            var parentDeclarationSyntax = GetParentDeclarationSyntax<CatchClauseSyntax>(declarationSyntax);
-            var catchDeclarationSyntax = parentDeclarationSyntax.Declaration;
-            if (catchDeclarationSyntax != null)
-            {
-                return GetFullName(catchDeclarationSyntax.Type);
-            }
-
-            return GetFullName(declarationSyntax.Expression);
-        }
-
-        private IEntityType GetExpressionType(ExpressionSyntax expression)
-        {
-            switch (expression)
-            {
-                case LiteralExpressionSyntax literalExpressionSyntax:
-                {
-                    if (literalExpressionSyntax.Token.Value != null)
-                    {
-                        return new EntityTypeModel
-                        {
-                            Name = literalExpressionSyntax.Token.Value.GetType().FullName
-                        };
-                    }
-                }
-                    break;
-
-                case ObjectCreationExpressionSyntax objectCreationExpressionSyntax:
-                {
-                    return GetFullName(objectCreationExpressionSyntax);
-                }
-            }
-
-            return GetFullName(expression);
-        }
-
-        public T GetParentDeclarationSyntax<T>(SyntaxNode node) where T : SyntaxNode
-        {
-            var rootNode = node;
-            while (true)
-            {
-                if (node is T syntax && node != rootNode)
-                {
-                    return syntax;
-                }
-
-                if (node.Parent == null)
-                {
-                    return null;
-                }
-
-                node = node.Parent;
-            }
-        }
-
-        public IList<IEntityType> GetBaseInterfaces(TypeDeclarationSyntax node)
-        {
-            var declaredSymbol = ModelExtensions.GetDeclaredSymbol(_semanticModel, node);
+            var declaredSymbol = _semanticModel.GetDeclaredSymbol(node);
 
             IList<IEntityType> interfaces = new List<IEntityType>();
 
@@ -368,10 +39,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
             foreach (var interfaceSymbol in typeSymbol.Interfaces)
             {
-                interfaces.Add(new EntityTypeModel
-                {
-                    Name = interfaceSymbol.ToString()
-                });
+                interfaces.Add(_fullNameProvider.CreateEntityTypeModel(interfaceSymbol.ToString()));
             }
 
             return interfaces;
@@ -383,24 +51,15 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
             if (declaredSymbol is not ITypeSymbol typeSymbol)
             {
-                return new EntityTypeModel
-                {
-                    Name = CSharpConstants.ObjectIdentifier
-                };
+                return _fullNameProvider.CreateEntityTypeModel(CSharpConstants.ObjectIdentifier);
             }
 
             if (typeSymbol.BaseType == null)
             {
-                return new EntityTypeModel
-                {
-                    Name = CSharpConstants.ObjectIdentifier
-                };
+                return _fullNameProvider.CreateEntityTypeModel(CSharpConstants.ObjectIdentifier);
             }
 
-            return new EntityTypeModel
-            {
-                Name = typeSymbol.BaseType.ToString()
-            };
+            return _fullNameProvider.CreateEntityTypeModel(typeSymbol.BaseType.ToString());
         }
 
         public IEntityType GetBaseClassName(BaseTypeDeclarationSyntax baseTypeDeclarationSyntax)
@@ -410,10 +69,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 return GetBaseClassName(typeDeclarationSyntax);
             }
 
-            return new EntityTypeModel
-            {
-                Name = CSharpConstants.ObjectIdentifier
-            };
+            return _fullNameProvider.CreateEntityTypeModel(CSharpConstants.ObjectIdentifier);
         }
 
         public IMethodSymbol GetMethodSymbol(CSharpSyntaxNode expressionSyntax)
@@ -432,14 +88,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
         {
             var calledMethodName = invocationExpressionSyntax.Expression.ToString();
 
-            string containingClassName = null;
+            string containingClassName = "";
 
             var parentLocalFunctionSyntax =
-                GetParentDeclarationSyntax<LocalFunctionStatementSyntax>(invocationExpressionSyntax);
+                invocationExpressionSyntax.GetParentDeclarationSyntax<LocalFunctionStatementSyntax>();
 
             if (parentLocalFunctionSyntax == null)
             {
-                var symbolInfo = ModelExtensions.GetSymbolInfo(_semanticModel, invocationExpressionSyntax);
+                var symbolInfo = _semanticModel.GetSymbolInfo(invocationExpressionSyntax);
                 if (symbolInfo.Symbol != null)
                 {
                     containingClassName = symbolInfo.Symbol.ContainingType.ToString();
@@ -461,8 +117,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                         }
                     }
 
-                    parentLocalFunctionSyntax =
-                        GetParentDeclarationSyntax<LocalFunctionStatementSyntax>(parentLocalFunctionSyntax.Parent);
+                    parentLocalFunctionSyntax = parentLocalFunctionSyntax.Parent
+                        .GetParentDeclarationSyntax<LocalFunctionStatementSyntax>();
                 }
 
                 if (parentLocalFunctionSyntax != null)
@@ -543,10 +199,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
                 parameters.Add(new ParameterModel
                 {
-                    Type = new EntityTypeModel
-                    {
-                        Name = parameter.Type.ToString()
-                    },
+                    Type = _fullNameProvider.CreateEntityTypeModel(parameter.Type.ToString()),
                     Modifier = modifier,
                     DefaultValue = defaultValue
                 });
@@ -587,31 +240,36 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
         public string GetParentDeclaredType(SyntaxNode syntaxNode)
         {
-            CSharpSyntaxNode declarationSyntax = GetParentDeclarationSyntax<LocalFunctionStatementSyntax>(syntaxNode);
+            CSharpSyntaxNode declarationSyntax = syntaxNode.GetParentDeclarationSyntax<LocalFunctionStatementSyntax>();
 
             if (declarationSyntax == null)
             {
-                declarationSyntax = GetParentDeclarationSyntax<BaseMethodDeclarationSyntax>(syntaxNode);
+                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseMethodDeclarationSyntax>();
             }
 
             if (declarationSyntax == null)
             {
-                declarationSyntax = GetParentDeclarationSyntax<PropertyDeclarationSyntax>(syntaxNode);
+                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
             }
 
             if (declarationSyntax == null)
             {
-                declarationSyntax = GetParentDeclarationSyntax<EventDeclarationSyntax>(syntaxNode);
+                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<EventDeclarationSyntax>();
             }
 
             if (declarationSyntax == null)
             {
-                declarationSyntax = GetParentDeclarationSyntax<DelegateDeclarationSyntax>(syntaxNode);
+                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<DelegateDeclarationSyntax>();
             }
 
             if (declarationSyntax == null)
             {
-                declarationSyntax = GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>(syntaxNode);
+                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>();
+            }
+
+            if (declarationSyntax == null)
+            {
+                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<NamespaceDeclarationSyntax>();
             }
 
             if (declarationSyntax != null)
@@ -636,7 +294,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
         public IEntityType GetContainingType(SyntaxNode syntaxNode)
         {
-            var variableDeclarationSyntax = GetParentDeclarationSyntax<VariableDeclarationSyntax>(syntaxNode);
+            var variableDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<VariableDeclarationSyntax>();
             if (variableDeclarationSyntax != null)
             {
                 var fullName = GetFullName(variableDeclarationSyntax);
@@ -646,16 +304,13 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 }
             }
 
-            var propertyDeclarationSyntax = GetParentDeclarationSyntax<PropertyDeclarationSyntax>(syntaxNode);
+            var propertyDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
             if (propertyDeclarationSyntax != null)
             {
-                return GetFullName(propertyDeclarationSyntax);
+                return GetFullName(propertyDeclarationSyntax.Type);
             }
 
-            return new EntityTypeModel
-            {
-                Name = syntaxNode.ToString()
-            };
+            return _fullNameProvider.CreateEntityTypeModel(syntaxNode.ToString());
         }
 
         private IList<IParameterType> GetParameters(InvocationExpressionSyntax invocationSyntax)
@@ -693,10 +348,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
                     parameterList.Add(new ParameterModel
                     {
-                        Type = new EntityTypeModel
-                        {
-                            Name = literalExpressionSyntax.Token.Value.GetType().FullName
-                        }
+                        Type = _fullNameProvider.CreateEntityTypeModel(literalExpressionSyntax.Token.Value.GetType()
+                            .FullName),
                     });
                 }
 
@@ -706,8 +359,6 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             return GetParameters(methodSymbol);
         }
 
-
-        // syntactic
         public string SetTypeModifier(string typeString, string modifier)
         {
             if (typeString.StartsWith(CSharpConstants.RefReadonlyIdentifier))
@@ -827,62 +478,39 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             return count;
         }
 
-        public string GetFullName(AttributeSyntax attributeSyntax)
+        public IEntityType GetAttributeContainingType(AttributeSyntax syntaxNode)
         {
-            var symbolInfo = _semanticModel.GetSymbolInfo(attributeSyntax);
-            if (symbolInfo.Symbol != null)
-            {
-                return symbolInfo.Symbol.ContainingType.ToString();
-            }
-
-            return attributeSyntax.Name.ToString();
-        }
-
-        public string GetAttributeContainingType(AttributeSyntax syntaxNode)
-        {
-            var accessorDeclarationSyntax = GetParentDeclarationSyntax<AccessorDeclarationSyntax>(syntaxNode);
+            var accessorDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<AccessorDeclarationSyntax>();
             if (accessorDeclarationSyntax != null)
             {
-                return GetFullName(accessorDeclarationSyntax);
+                return _fullNameProvider.GetFullName(accessorDeclarationSyntax);
             }
 
-            var propertyDeclarationSyntax = GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>(syntaxNode);
+            var propertyDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
             if (propertyDeclarationSyntax != null)
             {
-                return GetFullName(propertyDeclarationSyntax);
+                return _fullNameProvider.GetFullName(propertyDeclarationSyntax);
             }
 
-            var baseMethodDeclarationSyntax = GetParentDeclarationSyntax<BaseMethodDeclarationSyntax>(syntaxNode);
+            var baseMethodDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseMethodDeclarationSyntax>();
             if (baseMethodDeclarationSyntax != null)
             {
-                return GetFullName(baseMethodDeclarationSyntax);
+                return _fullNameProvider.GetFullName(baseMethodDeclarationSyntax);
             }
 
-            var delegateDeclarationSyntax = GetParentDeclarationSyntax<DelegateDeclarationSyntax>(syntaxNode);
+            var delegateDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<DelegateDeclarationSyntax>();
             if (delegateDeclarationSyntax != null)
             {
-                return GetFullName(delegateDeclarationSyntax);
+                return _fullNameProvider.GetFullName(delegateDeclarationSyntax);
             }
 
-            var parentDeclarationSyntax = GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>(syntaxNode);
+            var parentDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>();
             if (parentDeclarationSyntax != null)
             {
-                return GetFullName(parentDeclarationSyntax);
+                return _fullNameProvider.GetFullName(parentDeclarationSyntax);
             }
 
-            return syntaxNode.ToString();
-        }
-
-        private string GetFullName(AccessorDeclarationSyntax accessorDeclarationSyntax)
-        {
-            var basePropertyDeclarationSyntax =
-                GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>(accessorDeclarationSyntax);
-            if (basePropertyDeclarationSyntax == null)
-            {
-                return accessorDeclarationSyntax.Keyword.ToString();
-            }
-
-            return $"{GetFullName(basePropertyDeclarationSyntax)}.{accessorDeclarationSyntax.Keyword.ToString()}";
+            return _fullNameProvider.CreateEntityTypeModel(syntaxNode.ToString());
         }
 
         public IEnumerable<IParameterType> GetParameters(AttributeSyntax attributeSyntax)
@@ -921,10 +549,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
                     parameterTypes.Add(new ParameterModel
                     {
-                        Type = new EntityTypeModel
-                        {
-                            Name = parameterType
-                        }
+                        Type = _fullNameProvider.CreateEntityTypeModel(parameterType)
                     });
                 }
 
@@ -941,7 +566,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
         public string GetAttributeTarget(AttributeSyntax syntaxNode)
         {
-            var attributeListSyntax = GetParentDeclarationSyntax<AttributeListSyntax>(syntaxNode);
+            var attributeListSyntax = syntaxNode.GetParentDeclarationSyntax<AttributeListSyntax>();
 
             if (attributeListSyntax?.Target == null)
             {

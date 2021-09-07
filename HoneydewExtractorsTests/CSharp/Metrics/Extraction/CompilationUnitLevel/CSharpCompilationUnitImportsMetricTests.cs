@@ -1,7 +1,7 @@
 ﻿using System.Linq;
-using HoneydewExtractors.Core.Metrics.Extraction.Common;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Common;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Xunit;

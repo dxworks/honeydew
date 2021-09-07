@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using HoneydewModels.Types;
+﻿using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
@@ -7,6 +6,6 @@ namespace HoneydewModels.CSharp
     {
         public string Name { get; set; }
 
-        public IList<GenericType> ContainedTypes { get; set; } = new List<GenericType>();
+        public GenericType FullType { get; set; }
     }
 }

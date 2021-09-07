@@ -1,0 +1,30 @@
+﻿namespace Namespace1
+{
+    public class Class1
+    {
+        public void Method()
+        {
+            T1 LocalFunction<T1, TK1, TR1, TP1>(TK1 t, TR1 tr, TP1 tp)
+                where T1 : struct
+                where TK1 : class?
+                where TR1 : notnull
+                where TP1 : IInterface2<T1, IInterface2<T1, TK1>>
+            {
+                T2 LocalFunction2<T2, TK2, TR2, TP2>(TK2 t2, TR2 tr2, TP2 tp2)
+                    where T2 : struct
+                    where TK2 : class?
+                    where TR2 : notnull
+                    where TP2 : IInterface2<T2, IInterface2<T2, TK2>>
+                {
+                    return default;
+                }
+                
+                return default;
+            }
+        }
+    }
+
+    public interface IInterface2<T, TK>
+    {
+    }
+}

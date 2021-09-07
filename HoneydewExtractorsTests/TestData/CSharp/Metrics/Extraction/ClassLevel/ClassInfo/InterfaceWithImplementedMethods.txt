@@ -1,0 +1,14 @@
+namespace Namespace1
+{
+    public interface IInterface
+    {
+        public void Method1(int a)
+        {
+        }
+
+        public int Method2(string b, string c)
+        {
+            return b.Length + c.Length;
+        }
+    }
+}

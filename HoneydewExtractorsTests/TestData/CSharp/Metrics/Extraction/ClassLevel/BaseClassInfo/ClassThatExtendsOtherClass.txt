@@ -1,0 +1,10 @@
+using System;
+
+namespace App
+{                                       
+    class Parent {}    
+
+    class ChildClass : Parent
+    {    
+    }
+}

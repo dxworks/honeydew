@@ -1,0 +1,17 @@
+﻿namespace Namespace1
+{
+    public delegate T Delegate1<out T, in TK, in TR, in TP> (TK t, TR tr, TP tp)
+        where T : struct
+        where TK : class?
+        where TR : notnull
+        where TP : IInterface2<T, IInterface2<T, TK>>;
+    
+    public interface IInterface<T, TK>
+        where T : new()
+    {
+    }
+
+    public interface IInterface2<T, TK>
+    {
+    }
+}

@@ -216,14 +216,15 @@ namespace HoneydewExtractors.Processors
             {
                 foreach (var methodModel in methodTypes)
                 {
-                    if (!string.IsNullOrEmpty(methodModel.ReturnValue.Type.Name) &&
+                    if (methodModel.ReturnValue.Type != null &&
+                        !string.IsNullOrEmpty(methodModel.ReturnValue.Type.Name) &&
                         methodModel.ReturnValue.Type.Name.StartsWith(namespaceAccess))
                     {
                         return true;
                     }
 
                     if (methodModel.ParameterTypes.Any(parameterModel =>
-                        parameterModel.Type.Name.StartsWith(namespaceAccess)))
+                        parameterModel.Type != null && parameterModel.Type.Name.StartsWith(namespaceAccess)))
                     {
                         return true;
                     }
@@ -300,14 +301,19 @@ namespace HoneydewExtractors.Processors
                                 var iCopy = i;
                                 AddAmbiguousNames(() =>
                                 {
-                                    classType.BaseTypes[iCopy].Type.Name = FindClassFullName(
-                                        classType.BaseTypes[iCopy].Type.Name,
-                                        namespaceModel, projectModel, solutionModel, repositoryModel,
-                                        classType.Imports, classType.FilePath);
+                                    SetEntityTypeFullName(repositoryModel, namespaceModel, projectModel,
+                                        solutionModel, classType.Imports, classType.FilePath,
+                                        classType.BaseTypes[iCopy].Type);
                                 });
                             }
 
-                            if (classType is not ClassModel classModel)
+                            SetEntityAttributesFullName(repositoryModel, classType, namespaceModel, projectModel,
+                                solutionModel, classType.Imports, classType.FilePath);
+
+                            SetGenericParametersFullName(repositoryModel, classType, namespaceModel, projectModel,
+                                solutionModel, classType.Imports, classType.FilePath);
+
+                            if (classType is not IPropertyMembersClassType classModel)
                             {
                                 continue;
                             }
@@ -316,25 +322,32 @@ namespace HoneydewExtractors.Processors
                             {
                                 AddAmbiguousNames(() =>
                                 {
-                                    fieldModel.Type.Name = FindClassFullName(fieldModel.Type.Name,
-                                        namespaceModel, projectModel, solutionModel, repositoryModel,
-                                        classModel.Imports, classModel.FilePath);
+                                    SetEntityTypeFullName(repositoryModel, namespaceModel, projectModel,
+                                        solutionModel, classModel.Imports, classModel.FilePath,
+                                        fieldModel.Type);
                                 });
+
+                                SetEntityAttributesFullName(repositoryModel, fieldModel, namespaceModel, projectModel,
+                                    solutionModel, classType.Imports, classType.FilePath);
                             }
 
                             foreach (var propertyModel in classModel.Properties)
                             {
                                 AddAmbiguousNames(() =>
                                 {
-                                    propertyModel.Type.Name = FindClassFullName(propertyModel.Type.Name,
-                                        namespaceModel, projectModel, solutionModel, repositoryModel,
-                                        classModel.Imports, classModel.FilePath);
+                                    SetEntityTypeFullName(repositoryModel, namespaceModel, projectModel,
+                                        solutionModel, classModel.Imports, classModel.FilePath,
+                                        propertyModel.Type);
                                 });
+
+                                SetEntityAttributesFullName(repositoryModel, propertyModel, namespaceModel,
+                                    projectModel,
+                                    solutionModel, classType.Imports, classType.FilePath);
 
                                 foreach (var accessor in propertyModel.Accessors)
                                 {
-                                    SetContainingClassAndCalledMethodsFullNameProperty(classModel.FilePath, accessor,
-                                        namespaceModel, projectModel, solutionModel, classModel.Imports);
+                                    SetMethodSkeletonFullName(classModel.FilePath, accessor, namespaceModel,
+                                        projectModel, solutionModel, repositoryModel, classModel.Imports);
                                 }
                             }
 
@@ -344,23 +357,24 @@ namespace HoneydewExtractors.Processors
                                 {
                                     AddAmbiguousNames(() =>
                                     {
-                                        methodModel.ReturnValue.Type.Name = FindClassFullName(
-                                            methodModel.ReturnValue.Type.Name,
-                                            namespaceModel, projectModel, solutionModel, repositoryModel,
-                                            classModel.Imports, classModel.FilePath);
+                                        SetEntityTypeFullName(repositoryModel, namespaceModel, projectModel,
+                                            solutionModel, classModel.Imports, classModel.FilePath,
+                                            methodModel.ReturnValue.Type);
                                     });
+
+                                    SetEntityAttributesFullName(repositoryModel, methodModel.ReturnValue,
+                                        namespaceModel, projectModel,
+                                        solutionModel, classType.Imports, classType.FilePath);
                                 }
 
-                                SetContainingClassAndCalledMethodsFullName(classModel.FilePath, methodModel,
-                                    namespaceModel,
-                                    projectModel, solutionModel, classModel.Imports);
+                                SetMethodSkeletonFullName(classModel.FilePath, methodModel, namespaceModel,
+                                    projectModel, solutionModel, repositoryModel, classModel.Imports);
                             }
 
                             foreach (var constructorType in classModel.Constructors)
                             {
-                                SetContainingClassAndCalledMethodsFullName(classModel.FilePath, constructorType,
-                                    namespaceModel,
-                                    projectModel, solutionModel, classModel.Imports);
+                                SetMethodSkeletonFullName(classModel.FilePath, constructorType, namespaceModel,
+                                    projectModel, solutionModel, repositoryModel, classModel.Imports);
                             }
 
                             ChangeDependencyMetricFullName(repositoryModel, classModel, namespaceModel,
@@ -373,67 +387,229 @@ namespace HoneydewExtractors.Processors
 
                 progressBar.Stop();
             }
+        }
 
-            void SetContainingClassAndCalledMethodsFullNameProperty(string classFilePath,
-                ICallingMethodsType propertyModel,
-                NamespaceModel namespaceModel,
-                ProjectModel projectModel, SolutionModel solutionModel, IList<IImportType> usings)
+        private void SetMethodSkeletonFullName(string classFilePath, IMethodSkeletonType methodSkeletonType,
+            NamespaceModel namespaceModel, ProjectModel projectModel, SolutionModel solutionModel,
+            RepositoryModel repositoryModel, IList<IImportType> importTypes)
+        {
+            AddAmbiguousNames(() =>
             {
-                AddAmbiguousNames(() =>
-                {
-                    propertyModel.ContainingTypeName = FindClassFullName(propertyModel.ContainingTypeName,
-                        namespaceModel, projectModel, solutionModel, repositoryModel, usings, classFilePath);
-                });
+                methodSkeletonType.ContainingTypeName = FindClassFullName(methodSkeletonType.ContainingTypeName,
+                    namespaceModel, projectModel, solutionModel, repositoryModel, importTypes, classFilePath);
+            });
 
-                SetFullNameForCalledMethods(classFilePath, propertyModel.CalledMethods, namespaceModel,
-                    projectModel, solutionModel, repositoryModel, usings);
+            foreach (var parameterModel in methodSkeletonType.ParameterTypes)
+            {
+                SetParameterFullName(repositoryModel, namespaceModel, projectModel, solutionModel, importTypes,
+                    classFilePath, parameterModel);
             }
 
-            void SetContainingClassAndCalledMethodsFullName(string classFilePath, IMethodSkeletonType methodModel,
-                NamespaceModel namespaceModel,
-                ProjectModel projectModel, SolutionModel solutionModel, IList<IImportType> usings)
-            {
-                AddAmbiguousNames(() =>
-                {
-                    methodModel.ContainingTypeName = FindClassFullName(methodModel.ContainingTypeName,
-                        namespaceModel, projectModel, solutionModel, repositoryModel, usings, classFilePath);
-                });
+            SetEntityAttributesFullName(repositoryModel, methodSkeletonType, namespaceModel, projectModel,
+                solutionModel, importTypes, classFilePath);
 
-                foreach (var parameterModel in methodModel.ParameterTypes)
+            SetFullNameForCalledMethods(classFilePath, methodSkeletonType.CalledMethods, namespaceModel,
+                projectModel, solutionModel, repositoryModel, importTypes);
+
+            SetLocalVariablesFullName(repositoryModel, namespaceModel, projectModel, solutionModel, importTypes,
+                classFilePath, methodSkeletonType);
+        }
+
+        private void SetGenericParametersFullName(RepositoryModel repositoryModel, IClassType classType,
+            NamespaceModel namespaceModel,
+            ProjectModel projectModel, SolutionModel solutionModel, IList<IImportType> importTypes, string filePath)
+        {
+            foreach (var genericParameter in classType.GenericParameters)
+            {
+                SetEntityAttributesFullName(repositoryModel, genericParameter, namespaceModel, projectModel,
+                    solutionModel, importTypes, filePath);
+
+                foreach (var constraint in genericParameter.Constraints)
+                {
+                    SetEntityTypeFullName(repositoryModel, namespaceModel, projectModel, solutionModel, importTypes,
+                        filePath, constraint);
+                }
+            }
+        }
+
+
+        private void SetEntityAttributesFullName(RepositoryModel repositoryModel, ITypeWithAttributes classType,
+            NamespaceModel namespaceModel,
+            ProjectModel projectModel, SolutionModel solutionModel, IList<IImportType> importTypes, string filePath)
+        {
+            foreach (var attributeType in classType.Attributes)
+            {
+                SetAttributeFullName(repositoryModel, namespaceModel, projectModel, solutionModel, importTypes,
+                    filePath, attributeType);
+            }
+        }
+
+        private void SetAttributeFullName(RepositoryModel repositoryModel, NamespaceModel namespaceModel,
+            ProjectModel projectModel, SolutionModel solutionModel, IList<IImportType> importTypes, string filePath,
+            IMethodSignatureType attributeType)
+        {
+            AddAmbiguousNames(() =>
+            {
+                var suffix = "";
+                if (!attributeType.Name.EndsWith("Attribute"))
+                {
+                    suffix = "Attribute";
+                }
+
+                attributeType.Name = FindClassFullName(attributeType.Name + suffix,
+                    namespaceModel, projectModel, solutionModel, repositoryModel,
+                    importTypes, filePath);
+            });
+
+            AddAmbiguousNames(() =>
+            {
+                attributeType.ContainingTypeName = FindClassFullName(attributeType.ContainingTypeName,
+                    namespaceModel, projectModel, solutionModel, repositoryModel,
+                    importTypes, filePath);
+            });
+
+            foreach (var parameterType in attributeType.ParameterTypes)
+            {
+                SetParameterFullName(repositoryModel, namespaceModel, projectModel, solutionModel,
+                    importTypes, filePath, parameterType);
+            }
+        }
+
+        private void SetParameterFullName(RepositoryModel repositoryModel, NamespaceModel namespaceModel,
+            ProjectModel projectModel, SolutionModel solutionModel, IList<IImportType> importTypes, string filePath,
+            IParameterType parameterType)
+        {
+            AddAmbiguousNames(() =>
+            {
+                SetEntityTypeFullName(repositoryModel, namespaceModel, projectModel, solutionModel, importTypes,
+                    filePath, parameterType.Type);
+            });
+
+            foreach (var attributeType in parameterType.Attributes)
+            {
+                SetAttributeFullName(repositoryModel, namespaceModel, projectModel, solutionModel,
+                    importTypes, filePath, attributeType);
+            }
+        }
+
+        private void SetEntityTypeFullName(RepositoryModel repositoryModel, NamespaceModel namespaceModel,
+            ProjectModel projectModel, SolutionModel solutionModel, IList<IImportType> importTypes, string filePath,
+            IEntityType entityType)
+        {
+            AddAmbiguousNames(() =>
+            {
+                SetGenericTypeFullName(repositoryModel, namespaceModel, projectModel, solutionModel, importTypes,
+                    filePath, entityType.FullType);
+
+                if (entityType.FullType != null)
+                {
+                    entityType.Name = ReconstructFullName(entityType.FullType);
+                }
+                else
                 {
                     AddAmbiguousNames(() =>
                     {
-                        parameterModel.Type.Name = FindClassFullName(parameterModel.Type.Name, namespaceModel,
-                            projectModel, solutionModel, repositoryModel, usings, classFilePath);
+                        entityType.Name = FindClassFullName(entityType.Name,
+                            namespaceModel, projectModel, solutionModel, repositoryModel,
+                            importTypes, filePath);
                     });
                 }
+            });
 
-                SetFullNameForCalledMethods(classFilePath, methodModel.CalledMethods, namespaceModel,
-                    projectModel, solutionModel, repositoryModel, usings);
+            string ReconstructFullName(GenericType genericType)
+            {
+                if (genericType == null)
+                {
+                    return "";
+                }
+
+                var stringBuilder = new StringBuilder();
+                var name = genericType.Name;
+
+
+                AddAmbiguousNames(() =>
+                {
+                    name = FindClassFullName(name,
+                        namespaceModel, projectModel, solutionModel, repositoryModel,
+                        importTypes, filePath, genericType.ContainedTypes.Count);
+                });
+
+
+                stringBuilder.Append(name);
+
+                if (genericType.ContainedTypes.Count <= 0)
+                {
+                    return stringBuilder.ToString();
+                }
+
+                stringBuilder.Append('<');
+                for (var i = 0; i < genericType.ContainedTypes.Count; i++)
+                {
+                    var containedType = genericType.ContainedTypes[i];
+                    stringBuilder.Append(ReconstructFullName(containedType));
+                    if (i != genericType.ContainedTypes.Count - 1)
+                    {
+                        stringBuilder.Append(',');
+                    }
+                }
+
+                stringBuilder.Append('>');
+
+                return stringBuilder.ToString();
+            }
+        }
+
+        private void SetGenericTypeFullName(RepositoryModel repositoryModel, NamespaceModel namespaceModel,
+            ProjectModel projectModel, SolutionModel solutionModel, IList<IImportType> importTypes, string filePath,
+            GenericType genericType)
+        {
+            if (genericType == null || string.IsNullOrEmpty(genericType.Name))
+            {
+                return;
+            }
+
+            AddAmbiguousNames(() =>
+            {
+                genericType.Name = FindClassFullName(genericType.Name, namespaceModel, projectModel,
+                    solutionModel, repositoryModel, importTypes, filePath, genericType.ContainedTypes.Count);
+
+                foreach (var type in genericType.ContainedTypes)
+                {
+                    SetGenericTypeFullName(repositoryModel, namespaceModel, projectModel, solutionModel, importTypes,
+                        filePath, type);
+                }
+            });
+        }
+
+        private void SetLocalVariablesFullName(RepositoryModel repositoryModel, NamespaceModel namespaceModel,
+            ProjectModel projectModel, SolutionModel solutionModel, IList<IImportType> importTypes, string filePath,
+            ITypeWithLocalVariables typeWithLocalVariables)
+        {
+            foreach (var localVariableType in typeWithLocalVariables.LocalVariableTypes)
+            {
+                SetEntityTypeFullName(repositoryModel, namespaceModel, projectModel, solutionModel, importTypes,
+                    filePath, localVariableType.Type);
             }
         }
 
         private void SetFullNameForCalledMethods(string classFilePath,
             IEnumerable<IMethodSignatureType> methodModelCalledMethods,
             NamespaceModel namespaceModel, ProjectModel projectModel, SolutionModel solutionModel,
-            RepositoryModel repositoryModel, IList<IImportType> usings)
+            RepositoryModel repositoryModel, IList<IImportType> importTypes)
         {
             foreach (var calledMethod in methodModelCalledMethods)
             {
                 foreach (var parameterModel in calledMethod.ParameterTypes)
                 {
-                    AddAmbiguousNames(() =>
-                    {
-                        parameterModel.Type.Name = FindClassFullName(parameterModel.Type.Name, namespaceModel,
-                            projectModel, solutionModel, repositoryModel, usings, classFilePath);
-                    });
+                    SetParameterFullName(repositoryModel, namespaceModel, projectModel, solutionModel, importTypes,
+                        classFilePath, parameterModel);
                 }
 
                 AddAmbiguousNames(() =>
                 {
                     calledMethod.ContainingTypeName = FindClassFullName(
                         calledMethod.ContainingTypeName, namespaceModel, projectModel, solutionModel,
-                        repositoryModel, usings, classFilePath);
+                        repositoryModel, importTypes, classFilePath);
 
                     var classModel = GetClassModelFullyQualified(calledMethod.ContainingTypeName, projectModel,
                         solutionModel,
@@ -446,7 +622,7 @@ namespace HoneydewExtractors.Processors
                             calledMethod.ContainingTypeName, calledMethod.Name, calledMethod.ParameterTypes,
                             projectModel,
                             solutionModel,
-                            repositoryModel, usings);
+                            repositoryModel, importTypes);
                     }
                 });
             }
@@ -560,11 +736,12 @@ namespace HoneydewExtractors.Processors
             return true;
         }
 
-        private void ChangeDependencyMetricFullName(RepositoryModel repositoryModel, ClassModel classModel,
+        private void ChangeDependencyMetricFullName(RepositoryModel repositoryModel,
+            IPropertyMembersClassType classModel,
             NamespaceModel namespaceModel, ProjectModel projectModel, SolutionModel solutionModel)
         {
             var parameterDependenciesMetrics = classModel.Metrics.Where(metric =>
-                typeof(IRelationMetric).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
+                typeof(IRelationVisitor).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
 
             foreach (var metric in parameterDependenciesMetrics)
             {
@@ -658,7 +835,7 @@ namespace HoneydewExtractors.Processors
                         tempName = namespaceName.Replace(usingModel.Alias, usingModel.Name);
                     }
 
-                    var fullNamePossibilities = GetPossibilitiesFromNamespace(usingModel.Name, tempName);
+                    var fullNamePossibilities = GetPossibilitiesFromNamespace(usingModel.Name, tempName, 0);
                     var firstOrDefault = fullNamePossibilities.FirstOrDefault();
                     if (firstOrDefault != null)
                     {
@@ -672,7 +849,8 @@ namespace HoneydewExtractors.Processors
 
         private string FindClassFullName(string className, NamespaceModel namespaceModelToStartSearchFrom,
             ProjectModel projectModelToStartSearchFrom, SolutionModel solutionModelToStartSearchFrom,
-            RepositoryModel repositoryModel, IList<IImportType> usingModels, string classFilePath = "")
+            RepositoryModel repositoryModel, IList<IImportType> usingModels, string classFilePath = "",
+            int genericParameterCount = 0)
         {
             if (string.IsNullOrEmpty(className))
             {
@@ -742,7 +920,8 @@ namespace HoneydewExtractors.Processors
                         tempName = classFullName.Replace(usingModel.Alias, usingModel.Name);
                     }
 
-                    foreach (var name in GetPossibilitiesFromNamespace(usingModel.Name, tempName))
+                    foreach (var name in
+                        GetPossibilitiesFromNamespace(usingModel.Name, tempName, genericParameterCount))
                     {
                         fullNamePossibilities.Add(name);
                     }
@@ -762,7 +941,8 @@ namespace HoneydewExtractors.Processors
             }
 
             // search in current namespace for classes that used a class located in the parent namespace 
-            foreach (var name in GetPossibilitiesFromNamespace(namespaceModelToStartSearchFrom.Name, classFullName))
+            foreach (var name in GetPossibilitiesFromNamespace(namespaceModelToStartSearchFrom.Name, classFullName,
+                genericParameterCount))
             {
                 fullNamePossibilities.Add(name);
             }
@@ -780,7 +960,8 @@ namespace HoneydewExtractors.Processors
             }
 
             foreach (var name in
-                TrySearchingInProjectModel(classFullName, classFilePath, projectModelToStartSearchFrom))
+                TrySearchingInProjectModel(classFullName, classFilePath, projectModelToStartSearchFrom,
+                    genericParameterCount))
             {
                 fullNamePossibilities.Add(name);
             }
@@ -798,8 +979,7 @@ namespace HoneydewExtractors.Processors
             }
 
             foreach (var name in TrySearchingInSolutionModel(classFullName, classFilePath,
-                solutionModelToStartSearchFrom,
-                projectModelToStartSearchFrom))
+                solutionModelToStartSearchFrom, projectModelToStartSearchFrom, genericParameterCount))
             {
                 fullNamePossibilities.Add(name);
             }
@@ -825,7 +1005,7 @@ namespace HoneydewExtractors.Processors
                 }
 
                 foreach (var name in TrySearchingInSolutionModel(classFullName, classFilePath, solutionModel,
-                    projectModelToStartSearchFrom))
+                    projectModelToStartSearchFrom, genericParameterCount))
                 {
                     fullNamePossibilities.Add(name);
                 }
@@ -856,7 +1036,7 @@ namespace HoneydewExtractors.Processors
         }
 
         private IEnumerable<string> TrySearchingInSolutionModel(string className, string classFilePath,
-            SolutionModel solutionModel, ProjectModel projectModelToBeIgnored)
+            SolutionModel solutionModel, ProjectModel projectModelToBeIgnored, int genericParameterCount)
         {
             var fullNamePossibilities = new HashSet<string>();
             foreach (var projectModel in solutionModel.Projects)
@@ -872,7 +1052,8 @@ namespace HoneydewExtractors.Processors
                 }
 
 
-                foreach (var name in TrySearchingInProjectModel(className, classFilePath, projectModel))
+                foreach (var name in TrySearchingInProjectModel(className, classFilePath, projectModel,
+                    genericParameterCount))
                 {
                     fullNamePossibilities.Add(name);
                 }
@@ -891,12 +1072,13 @@ namespace HoneydewExtractors.Processors
         }
 
         private IEnumerable<string> TrySearchingInProjectModel(string className, string classFilePath,
-            ProjectModel projectModel)
+            ProjectModel projectModel, int genericParameterCount)
         {
             var fullNamePossibilities = new HashSet<string>();
             foreach (var namespaceModel in projectModel.Namespaces)
             {
-                foreach (var name in GetPossibilitiesFromNamespace(namespaceModel.Name, className))
+                foreach (var name in GetPossibilitiesFromNamespace(namespaceModel.Name, className,
+                    genericParameterCount))
                 {
                     fullNamePossibilities.Add(name);
                 }
@@ -914,7 +1096,8 @@ namespace HoneydewExtractors.Processors
             return fullNamePossibilities;
         }
 
-        private IEnumerable<string> GetPossibilitiesFromNamespace(string namespaceName, string className)
+        private IEnumerable<string> GetPossibilitiesFromNamespace(string namespaceName, string className,
+            int genericParametersCount)
         {
             var nameParts = namespaceName.Split('.');
             if (!NamespacesDictionary.TryGetValue(nameParts[0], out var fullNameNamespace))
@@ -950,7 +1133,7 @@ namespace HoneydewExtractors.Processors
                 }
             }
 
-            return childNamespace.GetPossibleChildren(className);
+            return childNamespace.GetPossibleChildren(className, genericParametersCount);
         }
 
         private NamespaceTree GetClassInNamespaceAmongChildrenNamespaces(NamespaceTree namespaceTree, string className)

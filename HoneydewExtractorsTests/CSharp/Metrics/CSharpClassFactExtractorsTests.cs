@@ -1,15 +1,6 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
 using HoneydewExtractors.Core;
-using HoneydewExtractors.Core.Metrics.Extraction.Class;
-using HoneydewExtractors.Core.Metrics.Extraction.Common;
-using HoneydewExtractors.Core.Metrics.Extraction.CompilationUnit;
-using HoneydewExtractors.Core.Metrics.Extraction.Constructor;
-using HoneydewExtractors.Core.Metrics.Extraction.Field;
-using HoneydewExtractors.Core.Metrics.Extraction.Method;
-using HoneydewExtractors.Core.Metrics.Extraction.MethodCall;
-using HoneydewExtractors.Core.Metrics.Extraction.Parameter;
-using HoneydewExtractors.Core.Metrics.Extraction.Property;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
@@ -19,6 +10,15 @@ using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Common;
+using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Constructor;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Field;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
+using HoneydewExtractors.CSharp.Metrics.Extraction.MethodCall;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
 using HoneydewModels.CSharp;
 using Moq;
 using Xunit;
@@ -145,7 +145,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             {
                 var classModel = (ClassModel)classType;
                 Assert.Equal(entityType, classModel.ClassType);
-                Assert.Equal("Models.Main.Items", classModel.Namespace);
+                Assert.Equal("Models.Main.Items", classModel.ContainingTypeName);
                 Assert.Equal("Models.Main.Items.MainItem", classModel.Name);
             }
         }
@@ -175,7 +175,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             {
                 var classModel = (ClassModel)classType;
                 Assert.Equal("Models.Main.Items", classModel.ContainingTypeName);
-                Assert.Equal("Models.Main.Items", classModel.Namespace);
+                Assert.Equal("Models.Main.Items", classModel.ContainingTypeName);
                 Assert.Equal("Models.Main.Items.MainItem", classModel.Name);
                 Assert.Equal(accessModifier, classModel.AccessModifier);
                 Assert.Equal(modifier, classModel.Modifier);
@@ -207,7 +207,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             foreach (var classType in classTypes)
             {
                 var classModel = (ClassModel)classType;
-                Assert.Equal("Models.Main.Items", classModel.Namespace);
+                Assert.Equal("Models.Main.Items", classModel.ContainingTypeName);
                 Assert.Equal("Models.Main.Items.MainItem", classModel.Name);
 
                 Assert.Equal(1, classModel.Methods.Count);
@@ -237,7 +237,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             foreach (var classType in classTypes)
             {
                 var classModel = (ClassModel)classType;
-                Assert.Equal("Models.Main.Items", classModel.Namespace);
+                Assert.Equal("Models.Main.Items", classModel.ContainingTypeName);
                 Assert.Equal("Models.Main.Items.MainItem", classModel.Name);
                 Assert.Equal(1, classModel.Methods.Count);
                 Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
@@ -260,7 +260,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             foreach (var classType in classTypes)
             {
                 var classModel = (ClassModel)classType;
-                Assert.Equal("Models.Main.Items", classModel.Namespace);
+                Assert.Equal("Models.Main.Items", classModel.ContainingTypeName);
                 Assert.Equal("Models.Main.Items.MainItem", classModel.Name);
 
                 Assert.Equal(1, classModel.Methods.Count);
@@ -372,10 +372,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                 Assert.Equal(typeof(ClassModel), classModel.GetType());
             }
 
-            Assert.Equal("Models.Main.Items", ((ClassModel)classTypes[0]).Namespace);
+            Assert.Equal("Models.Main.Items", ((ClassModel)classTypes[0]).ContainingTypeName);
             Assert.Equal("Models.Main.Items.MainItem", classTypes[0].Name);
 
-            Assert.Equal("Models.Main.Items", ((ClassModel)classTypes[1]).Namespace);
+            Assert.Equal("Models.Main.Items", ((ClassModel)classTypes[1]).ContainingTypeName);
             Assert.Equal("Models.Main.Items.IInterface", classTypes[1].Name);
         }
 

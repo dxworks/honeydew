@@ -20,6 +20,8 @@ namespace HoneydewModels.CSharp
 
         public IList<IMethodTypeWithLocalFunctions> LocalFunctions { get; set; } = new List<IMethodTypeWithLocalFunctions>();
 
+        public IList<ILocalVariableType> LocalVariableTypes { get; set; } = new List<ILocalVariableType>();
+
         public LinesOfCode Loc { get; set; }
 
         public int CyclomaticComplexity { get; set; }

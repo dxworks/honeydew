@@ -1,0 +1,28 @@
+﻿namespace Namespace1
+{
+    public interface MyInterface
+    {
+        public void Method()
+        {
+            T1 LocalFunction<T1, TR1, TK1>(TR1 r, TK1 tk, TK1 tk1)
+                where T1 : IInterface, IInterface2<TK1, TR1>
+            {
+                T2 LocalFunction2<T2, TR2, TK2>(TR2 r2, TK2 tk2, TK2 tk3)
+                    where T2 : IInterface, IInterface2<TK2, TR2>
+                {
+                    return default;
+                }
+
+                return default;
+            }
+        }
+    }
+
+    public interface IInterface
+    {
+    }
+
+    public interface IInterface2<T, TK>
+    {
+    }
+}

@@ -1,0 +1,66 @@
+namespace Namespace1
+{
+    using System;
+
+    public class Class1
+    {
+        private ExternClass p;
+    
+        public int Value1 
+        {
+            get 
+            {
+                ExternClass c = p;
+                
+                ExternClass c2;
+                ExternClass c3 = new ExternClass();
+                return 0;
+            }
+            set
+            {
+                var c = p;
+                
+                var class1 = new ExternClass();
+                var class2 = class1;         
+            }
+        }
+        
+        public int Value2 
+        {
+            get 
+            {
+                var c = p;
+                
+                var class1 = new ExternClass();
+                var class2 = class1;         
+                
+                return 0;
+            }
+            init
+            {
+                ExternClass c = p;
+                
+                ExternClass c2;
+                ExternClass c3 = new ExternClass();         
+            }
+        }
+        
+        public event Func<int> Value3 
+        {
+            add
+            {
+               ExternClass c = p;
+               
+               ExternClass c2;
+               ExternClass c3 = new ExternClass();
+            }
+            remove
+            {
+               var c = p;
+               
+               var class1 = new ExternClass();
+               var class2 = class1;         
+            }
+        }
+    }
+}

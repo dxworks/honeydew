@@ -1,0 +1,44 @@
+﻿namespace Namespace1
+{
+    using System.Collections.Generic;
+    
+    public class Class1
+    {
+        public void Method(List<Class2> list)
+        {
+            foreach(Class2 c in list)
+            {
+            }
+            
+            foreach(var c in list)
+            {
+            }
+        }
+
+        public void Method(List<int> list)
+        {
+            foreach(int c in list)
+            {
+            }
+            
+            foreach(var c in list)
+            {
+            }
+        }
+        
+        public void Method(List<ExternClass> list)
+        {
+            foreach(ExternClass c in list)
+            {
+            }
+            
+            foreach(var c in list)
+            {
+            }
+        }
+    }
+    
+    public class Class2
+    {
+    }
+}

@@ -1,0 +1,90 @@
+namespace Namespace1
+{
+    using System;
+    
+    public class Class1
+    {
+        private Parent p;
+    
+        public int Value1 
+        {
+            get 
+            {
+                Parent parent = p;
+               
+                Parent class1 = new Class2();
+                Parent class2 = new Class3();
+                Class2 class3 = new Class2();
+                Class3 class4 = new Class3();
+                return 0;
+            }
+            set
+            {
+                var parent = p;
+    
+                var class1 = new Class2();
+                var class2 = new Class3();
+                var class3 = class1;
+                var class4 = class2;
+            }
+        }
+        
+        public int Value2 
+        {
+            get 
+            {
+                var parent = p;
+                
+                var class1 = new Class2();
+                var class2 = new Class3();
+                var class3 = class1;
+                var class4 = class2;
+                
+                return 0;
+            }
+            init
+            {
+                Parent parent = p;
+                
+                Parent class1 = new Class2();
+                Parent class2 = new Class3();
+                Class2 class3 = new Class2();
+                Class3 class4 = new Class3();          
+            }
+        }
+        
+        public event Func<int> Value3 
+        {
+            add
+            {
+               Parent parent = p;
+               
+               Parent class1 = new Class2();
+               Parent class2 = new Class3();
+               Class2 class3 = new Class2();
+               Class3 class4 = new Class3();
+            }
+            remove
+            {
+                var parent = p;
+                
+                var class1 = new Class2();
+                var class2 = new Class3();
+                var class3 = class1;
+                var class4 = class2;
+            }
+        }
+    }
+
+    public class Parent
+    {
+    }
+
+    public class Class2 : Parent
+    {
+    }
+
+    public class Class3 : Parent
+    {
+    }
+}
