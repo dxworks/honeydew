@@ -357,12 +357,12 @@ namespace Honeydew
         {
             WriteRepresentationsToFile(repositoryModel, "", outputPath);
 
-            // if (fullNameNamespaces != null)
-            // {
-            //     var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
-            //     fullNameNamespacesExporter.Export(Path.Combine(outputPath, "honeydew_namespaces.json"),
-            //         fullNameNamespaces);
-            // }
+            if (fullNameNamespaces != null)
+            {
+                var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
+                fullNameNamespacesExporter.Export(Path.Combine(outputPath, "honeydew_namespaces.json"),
+                    fullNameNamespaces);
+            }
         }
 
         private static void WriteRepresentationsToFile(RepositoryModel repositoryModel, string nameModifier,

@@ -1,7 +1,5 @@
-﻿using System.IO;
-using HoneydewCore.ModelRepresentations;
+﻿using HoneydewCore.ModelRepresentations;
 using HoneydewModels.Exporters;
-using Newtonsoft.Json;
 
 namespace HoneydewCore.IO.Writers.Exporters
 {
@@ -11,8 +9,7 @@ namespace HoneydewCore.IO.Writers.Exporters
     {
         public void Export(string filePath, CyclomaticComplexityPerFileRepresentation model)
         {
-            var jsonSerializer = JsonSerializer.Create();
-            jsonSerializer.Serialize(new StreamWriter(filePath), model);
+            new JsonStreamWriter().Write(filePath, model);
         }
     }
 }

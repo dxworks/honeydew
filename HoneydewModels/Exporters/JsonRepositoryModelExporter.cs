@@ -1,6 +1,4 @@
-﻿using System.IO;
-using HoneydewModels.CSharp;
-using Newtonsoft.Json;
+﻿using HoneydewModels.CSharp;
 
 namespace HoneydewModels.Exporters
 {
@@ -8,8 +6,7 @@ namespace HoneydewModels.Exporters
     {
         public void Export(string filePath, RepositoryModel model)
         {
-            var jsonSerializer = JsonSerializer.Create();
-            jsonSerializer.Serialize(new StreamWriter(filePath), model);
+            new JsonStreamWriter().Write(filePath, model);
         }
     }
 }
