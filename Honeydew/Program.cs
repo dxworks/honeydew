@@ -64,11 +64,16 @@ namespace Honeydew
                 IProgressLogger progressLogger =
                     options.DisableProgressBars ? new NoBarsProgressLogger() : new ProgressLogger();
 
+                var honeydewVersion = "";
                 try
                 {
                     var version = Assembly.GetExecutingAssembly().GetName().Version;
+                    if (version != null)
+                    {
+                        honeydewVersion = version.ToString();
+                    }
 
-                    logger.Log($"Honeydew {version} starting");
+                    logger.Log($"Honeydew {honeydewVersion} starting");
                     logger.Log();
 
 
@@ -80,8 +85,8 @@ namespace Honeydew
                     logger.Log("Could not get Application version", LogLevels.Error);
                     logger.Log();
                 }
-                
-                
+
+
                 logger.Log($"Input Path {options.InputFilePath}");
                 logger.Log();
 
@@ -125,6 +130,8 @@ namespace Honeydew
                     }
                 }
 
+                repositoryModel.Version = honeydewVersion;
+                
                 if (!options.DisablePathTrimming)
                 {
                     logger.Log();
@@ -366,7 +373,7 @@ namespace Honeydew
 
             if (fullNameNamespaces != null)
             {
-                var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
+                var fullNameNamespacesExporter = new JsonModelExporter();
                 fullNameNamespacesExporter.Export(Path.Combine(outputPath, "honeydew_namespaces.json"),
                     fullNameNamespaces);
             }
@@ -375,7 +382,7 @@ namespace Honeydew
         private static void WriteRepresentationsToFile(RepositoryModel repositoryModel, string nameModifier,
             string outputPath)
         {
-            var repositoryExporter = GetRepositoryModelExporter();
+            var repositoryExporter = new JsonModelExporter();
             repositoryExporter.Export(Path.Combine(outputPath, $"honeydew{nameModifier}.json"), repositoryModel);
 
             var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
@@ -385,24 +392,13 @@ namespace Honeydew
 
             var cyclomaticComplexityPerFileRepresentation =
                 GetCyclomaticComplexityPerFileRepresentation(repositoryModel);
-            var cyclomaticComplexityPerFileExporter = GetCyclomaticComplexityPerFileExporter();
+            var cyclomaticComplexityPerFileExporter = new JsonModelExporter();
             cyclomaticComplexityPerFileExporter.Export(
                 Path.Combine(outputPath, $"honeydew_cyclomatic{nameModifier}.json"),
                 cyclomaticComplexityPerFileRepresentation);
         }
 
-        private static IModelExporter<CyclomaticComplexityPerFileRepresentation>
-            GetCyclomaticComplexityPerFileExporter()
-        {
-            return new JsonCyclomaticComplexityPerFileRepresentationExporter();
-        }
-
-        private static IModelExporter<RepositoryModel> GetRepositoryModelExporter()
-        {
-            return new JsonRepositoryModelExporter();
-        }
-
-        private static IModelExporter<ClassRelationsRepresentation> GetClassRelationsRepresentationExporter()
+        private static CsvClassRelationsRepresentationExporter GetClassRelationsRepresentationExporter()
         {
             var csvModelExporter = new CsvClassRelationsRepresentationExporter
             {
