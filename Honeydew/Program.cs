@@ -80,6 +80,10 @@ namespace Honeydew
                     logger.Log("Could not get Application version", LogLevels.Error);
                     logger.Log();
                 }
+                
+                
+                logger.Log($"Input Path {options.InputFilePath}");
+                logger.Log();
 
                 logger.Log($"Log will be stored at {logFilePath}");
                 logger.Log();
@@ -121,12 +125,15 @@ namespace Honeydew
                     }
                 }
 
-                logger.Log();
-                logger.Log("Trimming File Paths");
-                progressLogger.Log();
-                progressLogger.Log("Trimming File Paths");
+                if (!options.DisablePathTrimming)
+                {
+                    logger.Log();
+                    logger.Log("Trimming File Paths");
+                    progressLogger.Log();
+                    progressLogger.Log("Trimming File Paths");
 
-                repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
+                    repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
+                }
 
                 if (options.DeactivateBindingProcessing)
                 {
