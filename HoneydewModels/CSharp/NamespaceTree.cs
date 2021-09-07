@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace HoneydewModels.CSharp
 {
@@ -10,7 +10,9 @@ namespace HoneydewModels.CSharp
 
         public string FilePath { get; set; }
 
-        [JsonIgnore] public NamespaceTree Parent { get; init; }
+        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        public NamespaceTree Parent { get; init; }
 
         public Dictionary<string, NamespaceTree> Children { get; set; } = new();
 

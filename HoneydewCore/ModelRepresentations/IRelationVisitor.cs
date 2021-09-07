@@ -2,11 +2,11 @@
 
 namespace HoneydewCore.ModelRepresentations
 {
-    public interface IRelationMetric
+    public interface IRelationVisitor
     {
         string PrettyPrint();
         
         IList<FileRelation> GetRelations(
-            IDictionary<string, IDictionary<IRelationMetric, IDictionary<string, int>>> dependencies);
+            IDictionary<string, IDictionary<IRelationVisitor, IDictionary<string, int>>> dependencies);
     }
 }

@@ -25,6 +25,11 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Constructor
 
             GetModifiersForNode(syntaxNode, out var accessModifier, out var modifier);
 
+            if (modifier == "static")
+            {
+                accessModifier = "";
+            }
+            
             modelType.Name = syntaxNode.Identifier.ToString();
             modelType.ContainingTypeName = containingClassName;
             modelType.Modifier = modifier;

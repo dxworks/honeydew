@@ -5,6 +5,8 @@ namespace HoneydewModels.CSharp
 {
     public class RepositoryModel : IRepositoryModel
     {
+        public string Version { get; set; }
+
         public IList<SolutionModel> Solutions { get; set; } = new List<SolutionModel>();
 
         public IEnumerable<IClassType> GetEnumerable()

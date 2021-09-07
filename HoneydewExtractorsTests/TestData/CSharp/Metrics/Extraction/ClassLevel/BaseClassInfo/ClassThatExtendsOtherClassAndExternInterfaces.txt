@@ -1,0 +1,25 @@
+using System;
+using HoneydewCore.Extractors.Metrics;
+
+namespace App
+{                                       
+    class Parent {}    
+
+     class ChildClass : Parent, IMetric, IMetricExtractor
+     {                                           
+        public MetricType GetMetricType() 
+        {
+            return null;
+        }
+    
+        public string GetName()
+        {
+            return null;
+        }
+    
+        public IMetric GetMetric()
+        {
+            return null;
+        }
+     }
+}

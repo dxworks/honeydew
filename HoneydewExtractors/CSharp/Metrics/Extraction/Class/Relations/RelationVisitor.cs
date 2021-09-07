@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
 {
     public abstract class RelationVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
-        IRelationMetric, ICSharpClassVisitor
+        IRelationVisitor, ICSharpClassVisitor
     {
         public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
 
@@ -34,7 +34,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
         }
 
         public IList<FileRelation> GetRelations(
-            IDictionary<string, IDictionary<IRelationMetric, IDictionary<string, int>>> dependencies)
+            IDictionary<string, IDictionary<IRelationVisitor, IDictionary<string, int>>> dependencies)
         {
             return MetricHolder.GetRelations();
         }

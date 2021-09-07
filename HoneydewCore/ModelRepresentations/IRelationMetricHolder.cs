@@ -4,7 +4,7 @@ namespace HoneydewCore.ModelRepresentations
 {
     public interface IRelationMetricHolder
     {
-        void Add(string className, string dependencyName, IRelationMetric relationMetric);
+        void Add(string className, string dependencyName, IRelationVisitor relationMetric);
 
         IDictionary<string, IDictionary<string, int>> GetDependencies(string className);
 

@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using HoneydewCore.IO.Writers.CSV;
 using HoneydewCore.ModelRepresentations;
-using HoneydewModels.Exporters;
 
 namespace HoneydewCore.IO.Writers.Exporters
 {
-    public class CsvClassRelationsRepresentationExporter : IModelExporter<ClassRelationsRepresentation>
+    public class CsvClassRelationsRepresentationExporter
     {
         public IList<Tuple<string, Func<string, string>>> ColumnFunctionForEachRow =
             new List<Tuple<string, Func<string, string>>>();
-        
-        public string Export(ClassRelationsRepresentation classRelationsRepresentation)
+
+        public void Export(string filePath, ClassRelationsRepresentation classRelationsRepresentation)
         {
             var csvBuilder = new CsvBuilder();
             var headers = new List<string>
@@ -47,7 +47,10 @@ namespace HoneydewCore.IO.Writers.Exporters
                 csvBuilder.AddColumnWithFormulaForEachRow(header, func);
             }
 
-            return csvBuilder.CreateCsv();
+            using (var writer = new StreamWriter(filePath))
+            {
+                writer.Write(csvBuilder.CreateCsv());
+            }
         }
     }
 }

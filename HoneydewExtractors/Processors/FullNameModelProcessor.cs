@@ -216,14 +216,15 @@ namespace HoneydewExtractors.Processors
             {
                 foreach (var methodModel in methodTypes)
                 {
-                    if (!string.IsNullOrEmpty(methodModel.ReturnValue.Type.Name) &&
+                    if (methodModel.ReturnValue.Type != null &&
+                        !string.IsNullOrEmpty(methodModel.ReturnValue.Type.Name) &&
                         methodModel.ReturnValue.Type.Name.StartsWith(namespaceAccess))
                     {
                         return true;
                     }
 
                     if (methodModel.ParameterTypes.Any(parameterModel =>
-                        parameterModel.Type.Name.StartsWith(namespaceAccess)))
+                        parameterModel.Type != null && parameterModel.Type.Name.StartsWith(namespaceAccess)))
                     {
                         return true;
                     }
@@ -740,7 +741,7 @@ namespace HoneydewExtractors.Processors
             NamespaceModel namespaceModel, ProjectModel projectModel, SolutionModel solutionModel)
         {
             var parameterDependenciesMetrics = classModel.Metrics.Where(metric =>
-                typeof(IRelationMetric).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
+                typeof(IRelationVisitor).IsAssignableFrom(Type.GetType(metric.ExtractorName)));
 
             foreach (var metric in parameterDependenciesMetrics)
             {

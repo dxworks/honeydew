@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using CommandLine;
 using HoneydewCore.IO.Readers;
-using HoneydewCore.IO.Writers;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Logging;
 using HoneydewCore.ModelRepresentations;
@@ -65,11 +64,16 @@ namespace Honeydew
                 IProgressLogger progressLogger =
                     options.DisableProgressBars ? new NoBarsProgressLogger() : new ProgressLogger();
 
+                var honeydewVersion = "";
                 try
                 {
                     var version = Assembly.GetExecutingAssembly().GetName().Version;
+                    if (version != null)
+                    {
+                        honeydewVersion = version.ToString();
+                    }
 
-                    logger.Log($"Honeydew {version} starting");
+                    logger.Log($"Honeydew {honeydewVersion} starting");
                     logger.Log();
 
 
@@ -81,6 +85,10 @@ namespace Honeydew
                     logger.Log("Could not get Application version", LogLevels.Error);
                     logger.Log();
                 }
+
+
+                logger.Log($"Input Path {options.InputFilePath}");
+                logger.Log();
 
                 logger.Log($"Log will be stored at {logFilePath}");
                 logger.Log();
@@ -122,12 +130,17 @@ namespace Honeydew
                     }
                 }
 
-                logger.Log();
-                logger.Log("Trimming File Paths");
-                progressLogger.Log();
-                progressLogger.Log("Trimming File Paths");
+                repositoryModel.Version = honeydewVersion;
+                
+                if (!options.DisablePathTrimming)
+                {
+                    logger.Log();
+                    logger.Log("Trimming File Paths");
+                    progressLogger.Log();
+                    progressLogger.Log("Trimming File Paths");
 
-                repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
+                    repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
+                }
 
                 if (options.DeactivateBindingProcessing)
                 {
@@ -356,51 +369,36 @@ namespace Honeydew
         private static void WriteAllRepresentations(RepositoryModel repositoryModel,
             IDictionary<string, NamespaceTree> fullNameNamespaces, string outputPath)
         {
-            var writer = new FileWriter();
-
             WriteRepresentationsToFile(repositoryModel, "", outputPath);
 
             if (fullNameNamespaces != null)
             {
-                var fullNameNamespacesExporter = new JsonFullNameNamespaceDictionaryExporter();
-                writer.WriteFile(Path.Combine(outputPath, "honeydew_namespaces.json"),
-                    fullNameNamespacesExporter.Export(fullNameNamespaces));
+                var fullNameNamespacesExporter = new JsonModelExporter();
+                fullNameNamespacesExporter.Export(Path.Combine(outputPath, "honeydew_namespaces.json"),
+                    fullNameNamespaces);
             }
         }
 
         private static void WriteRepresentationsToFile(RepositoryModel repositoryModel, string nameModifier,
             string outputPath)
         {
-            var writer = new FileWriter();
-
-            var repositoryExporter = GetRepositoryModelExporter();
-            writer.WriteFile(Path.Combine(outputPath, $"honeydew{nameModifier}.json"),
-                repositoryExporter.Export(repositoryModel));
+            var repositoryExporter = new JsonModelExporter();
+            repositoryExporter.Export(Path.Combine(outputPath, $"honeydew{nameModifier}.json"), repositoryModel);
 
             var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
             var csvModelExporter = GetClassRelationsRepresentationExporter();
-            writer.WriteFile(Path.Combine(outputPath, $"honeydew{nameModifier}.csv"),
-                csvModelExporter.Export(classRelationsRepresentation));
+            csvModelExporter.Export(Path.Combine(outputPath, $"honeydew{nameModifier}.csv"),
+                classRelationsRepresentation);
 
             var cyclomaticComplexityPerFileRepresentation =
                 GetCyclomaticComplexityPerFileRepresentation(repositoryModel);
-            var cyclomaticComplexityPerFileExporter = GetCyclomaticComplexityPerFileExporter();
-            writer.WriteFile(Path.Combine(outputPath, $"honeydew_cyclomatic{nameModifier}.json"),
-                cyclomaticComplexityPerFileExporter.Export(cyclomaticComplexityPerFileRepresentation));
+            var cyclomaticComplexityPerFileExporter = new JsonModelExporter();
+            cyclomaticComplexityPerFileExporter.Export(
+                Path.Combine(outputPath, $"honeydew_cyclomatic{nameModifier}.json"),
+                cyclomaticComplexityPerFileRepresentation);
         }
 
-        private static IModelExporter<CyclomaticComplexityPerFileRepresentation>
-            GetCyclomaticComplexityPerFileExporter()
-        {
-            return new JsonCyclomaticComplexityPerFileRepresentationExporter();
-        }
-
-        private static IModelExporter<RepositoryModel> GetRepositoryModelExporter()
-        {
-            return new JsonRepositoryModelExporter();
-        }
-
-        private static IModelExporter<ClassRelationsRepresentation> GetClassRelationsRepresentationExporter()
+        private static CsvClassRelationsRepresentationExporter GetClassRelationsRepresentationExporter()
         {
             var csvModelExporter = new CsvClassRelationsRepresentationExporter
             {

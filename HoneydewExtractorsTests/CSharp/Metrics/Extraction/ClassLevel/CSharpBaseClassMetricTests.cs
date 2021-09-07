@@ -31,48 +31,91 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                 new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveBaseClassObject_WhenClassDoesNotExtendsAnyClass()
+        [Theory]
+        [InlineData("class", "object")]
+        [InlineData("struct", "System.ValueType")]
+        public void Extract_ShouldHaveBaseClassObject_WhenClassDoesNotExtendsAnyClass(string classType, string baseType)
         {
-            const string fileContent = @"using System;
+            var fileContent = $@"using System;
 
                                     namespace App
-                                    {                                       
+                                    {{                                       
 
-                                        class MyClass
-                                        {                                           
-                                            public void Foo() { }
-                                        }
-                                    }";
+                                        {classType} MyClass
+                                        {{                                           
+                                            public void Foo() {{ }}
+                                        }}
+                                    }}";
 
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
-            var classType = classTypes[0];
+            var classModel = classTypes[0];
 
-            Assert.Equal("App.MyClass", classType.Name);
-            Assert.Equal(1, classType.BaseTypes.Count);
-            Assert.Equal("object", classType.BaseTypes[0].Type.Name);
-            Assert.Equal("class", classType.BaseTypes[0].Kind);
+            Assert.Equal("App.MyClass", classModel.Name);
+            Assert.Equal(1, classModel.BaseTypes.Count);
+
+            Assert.Equal(baseType, classModel.BaseTypes[0].Type.Name);
+            Assert.Equal("class", classModel.BaseTypes[0].Kind);
+        }
+        
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/SimpleRecord.txt")]
+        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/SimpleRecord2.txt")]
+        public void Extract_ShouldHaveBaseClass_WhenProvidedWithRecord(string fileContent)
+        {
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            Assert.Equal(1, classTypes.Count);
+
+            var classModel = classTypes[0];
+
+            Assert.Equal(2, classModel.BaseTypes.Count);
+            
+            Assert.Equal("App.MyClass", classModel.Name);
+            Assert.Equal("object", classModel.BaseTypes[0].Type.Name);
+            Assert.Equal("class", classModel.BaseTypes[0].Kind);
+            
+            Assert.Equal("System.IEquatable<App.MyClass>", classModel.BaseTypes[1].Type.Name);
+            Assert.Equal("interface", classModel.BaseTypes[1].Kind);
+        }
+        
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/SimpleInterface.txt")]
+        public void Extract_ShouldHaveNoBaseClass_WhenProvidedWithInterface(string fileContent)
+        {
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            Assert.Equal(1, classTypes.Count);
+
+            var classModel = classTypes[0];
+
+            Assert.Equal("App.MyClass", classModel.Name);
+            Assert.Equal("App.MyClass", classModel.Name);
+            Assert.Empty(classModel.BaseTypes);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveBaseClassIMetric_WhenClassExtendsIMetricInterface()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/SimpleEnum.txt")]
+        public void Extract_ShouldHaveEnumBaseClass_WhenProvidedWithEnum(string fileContent)
         {
-            const string fileContent = @"using System;
-                                     using HoneydewCore.Extractors.Metrics;
-                                     namespace App
-                                     {                                       
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
-                                         namespace Domain{
-                                         class MyClass : IMetric, IMetric2
-                                         {                                           
-                                             public void Foo() { }
-                                             public void Bar() { }
-                                         }}
-                                     }";
+            Assert.Equal(1, classTypes.Count);
 
+            var classModel = classTypes[0];
+
+            Assert.Equal("App.MyClass", classModel.Name);
+            Assert.Equal(1, classModel.BaseTypes.Count);
+            Assert.Equal("System.Enum", classModel.BaseTypes[0].Type.Name);
+            Assert.Equal("class", classModel.BaseTypes[0].Kind);
+        }
+
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/ClassThatExtendsExternClasses.txt")]
+        public void Extract_ShouldHaveBaseClassIMetric_WhenClassExtendsIMetricInterface(string fileContent)
+        {
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
@@ -86,27 +129,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(2, baseTypes.Count);
             Assert.Equal("IMetric", baseTypes[0].Type.Name);
             Assert.Equal("class", baseTypes[0].Kind);
-            
+
             Assert.Equal("IMetric2", baseTypes[1].Type.Name);
             Assert.Equal("interface", baseTypes[1].Kind);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveBaseObjectAndNoInterfaces_WhenClassOnlyExtendsOtherClass()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/ClassThatExtendsOtherClass.txt")]
+        public void Extract_ShouldHaveBaseObjectAndNoInterfaces_WhenClassOnlyExtendsOtherClass(string fileContent)
         {
-            const string fileContent = @"using System;
-                                     using HoneydewCore.Extractors.Metrics;
-                                     namespace App
-                                     {                                       
-                                         class Parent {}    
-
-                                         class ChildClass : Parent
-                                         {                                           
-                                            
-                                         }
-                                     }";
-
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(2, classTypes.Count);
@@ -128,26 +159,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("class", baseTypes[0].Kind);
         }
 
-        [Fact]
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/ClassThatExtendsOtherClassAndExternInterfaces.txt")]
         public void
-            Extract_ShouldHaveBaseObjectAndInterfaces_WhenClassExtendsOtherClassAndImplementsMultipleInterfaces()
+            Extract_ShouldHaveBaseObjectAndInterfaces_WhenClassExtendsOtherClassAndImplementsMultipleInterfaces(string fileContent)
         {
-            const string fileContent = @"using System;
-                                     using HoneydewCore.Extractors.Metrics;
-                                     namespace App
-                                     {                                       
-                                         class Parent {}    
-
-                                         class ChildClass : Parent, IMetric, IMetricExtractor
-                                         {                                           
-                                             public MetricType GetMetricType() {return null;}
-
-                                             public string GetName(){return null;}
-
-                                             public IMetric GetMetric(){return null;}
-                                         }
-                                     }";
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
             Assert.Equal(2, classTypes.Count);

@@ -30,7 +30,9 @@ namespace HoneydewModels
                 new ModelJsonConverter<IMethodSignatureType, MethodCallModel>(),
                 new ModelJsonConverter<IMethodTypeWithLocalFunctions, MethodModel>(),
                 new ModelJsonConverter<IAttributeType, AttributeModel>(),
-                
+                new ModelJsonConverter<ILocalVariableType, LocalVariableModel>(),
+                new ModelJsonConverter<IGenericParameterType, GenericParameterModel>(),
+
                 new ClassTypeConverter(new CSharpClassTypeConverter())
             };
         }
