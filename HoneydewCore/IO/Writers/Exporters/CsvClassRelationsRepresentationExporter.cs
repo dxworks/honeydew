@@ -4,11 +4,10 @@ using System.IO;
 using System.Linq;
 using HoneydewCore.IO.Writers.CSV;
 using HoneydewCore.ModelRepresentations;
-using HoneydewModels.Exporters;
 
 namespace HoneydewCore.IO.Writers.Exporters
 {
-    public class CsvClassRelationsRepresentationExporter : IModelExporter<ClassRelationsRepresentation>
+    public class CsvClassRelationsRepresentationExporter
     {
         public IList<Tuple<string, Func<string, string>>> ColumnFunctionForEachRow =
             new List<Tuple<string, Func<string, string>>>();
