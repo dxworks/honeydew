@@ -1,29 +1,25 @@
-﻿using System;
-using HoneydewModels.CSharp;
+﻿using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 
 namespace HoneydewModels.Converters
 {
     public class CSharpClassTypeConverter : ITypeConverter<IClassType>
     {
-        public Type Convert(string type)
+        IClassType ITypeConverter<IClassType>.Convert(string type)
         {
-            return type == "delegate" ? typeof(DelegateModel) : typeof(ClassModel);
+            return type == "delegate" ? new DelegateModel() : new ClassModel();
         }
 
-        public Type DefaultType()
+        public IClassType Convert(object value)
         {
-            return typeof(ClassModel);
-        }
-
-        public object Convert(IClassType type)
-        {
-            if (type is DelegateModel delegateModel)
             {
-                return delegateModel;
-            }
+                if (value is DelegateModel delegateModel)
+                {
+                    return delegateModel;
+                }
 
-            return (ClassModel)type;
+                return (ClassModel)value;
+            }
         }
     }
 }

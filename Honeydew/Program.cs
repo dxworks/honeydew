@@ -131,7 +131,7 @@ namespace Honeydew
                 }
 
                 repositoryModel.Version = honeydewVersion;
-                
+
                 if (!options.DisablePathTrimming)
                 {
                     logger.Log();
@@ -339,8 +339,7 @@ namespace Honeydew
         {
             // Load repository model from path
             IRepositoryLoader<RepositoryModel> repositoryLoader =
-                new RawCSharpFileRepositoryLoader(logger, new FileReader(),
-                    new JsonRepositoryModelImporter(new ConverterList()));
+                new RawCSharpFileRepositoryLoader(logger, new JsonModelImporter<RepositoryModel>(new ConverterList()));
             var repositoryModel = await repositoryLoader.Load(inputPath);
             return repositoryModel;
         }

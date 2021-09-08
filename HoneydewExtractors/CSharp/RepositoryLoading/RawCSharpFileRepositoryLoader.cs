@@ -10,26 +10,21 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
     public class RawCSharpFileRepositoryLoader : IRepositoryLoader<RepositoryModel>
     {
         private readonly ILogger _logger;
-        private readonly IFileReader _fileReader;
-        private readonly IModelImporter<RepositoryModel> _modelImporter;
+        private readonly JsonModelImporter<RepositoryModel> _jsonModelImporter;
 
-        public RawCSharpFileRepositoryLoader(ILogger logger, IFileReader fileReader,
-            IModelImporter<RepositoryModel> modelImporter)
+        public RawCSharpFileRepositoryLoader(ILogger logger, JsonModelImporter<RepositoryModel> jsonModelImporter)
         {
             _logger = logger;
-            _fileReader = fileReader;
-            _modelImporter = modelImporter;
+            _jsonModelImporter = jsonModelImporter;
         }
 
         public Task<RepositoryModel> Load(string path)
         {
             _logger.Log($"Opening File at {path}");
 
-            var fileContent = _fileReader.ReadFile(path);
-
             try
             {
-                var repositoryModel = _modelImporter.Import(fileContent);
+                var repositoryModel = _jsonModelImporter.Import(path);
 
                 if (repositoryModel == null)
                 {

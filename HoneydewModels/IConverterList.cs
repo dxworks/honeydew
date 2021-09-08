@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
 using HoneydewModels.Converters;
 using HoneydewModels.Converters.JSON;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
+using Newtonsoft.Json;
 
 namespace HoneydewModels
 {
@@ -18,6 +18,7 @@ namespace HoneydewModels
         {
             return new List<JsonConverter>
             {
+                new ModelJsonConverter<IRepositoryModel, RepositoryModel>(),
                 new ModelJsonConverter<IEntityType, EntityTypeModel>(),
                 new ModelJsonConverter<IParameterType, ParameterModel>(),
                 new ModelJsonConverter<IBaseType, BaseTypeModel>(),
