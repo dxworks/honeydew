@@ -1,0 +1,7 @@
+namespace App
+{                                       
+    class MyClass
+    {                                           
+        public MyClass() { }
+    }
+}
