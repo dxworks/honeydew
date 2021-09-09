@@ -1,0 +1,16 @@
+using System;
+using HoneydewCore.Extractors;
+using HoneydewCore.Extractors.Metrics;
+using HoneydewCore.Extractors.Metrics.SemanticMetrics;
+
+namespace App
+{                                       
+    public interface IInterface
+    {                                           
+         public CSharpMetricExtractor Foo(int a, CSharpMetricExtractor extractor);
+        
+         public CSharpMetricExtractor Foo(int a);
+        
+         public IFactExtractor Bar(CSharpMetricExtractor extractor);
+    }
+}
