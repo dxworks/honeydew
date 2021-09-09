@@ -1,38 +1,45 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
 {
-    public class FieldsRelationVisitor : RelationVisitor
+    public class FieldsRelationVisitor : IModelVisitor<IClassType>, IRelationVisitor
     {
-        public FieldsRelationVisitor()
-        {
-        }
-
-        public FieldsRelationVisitor(IRelationMetricHolder metricHolder) : base(metricHolder)
-        {
-        }
-
-        public override string PrettyPrint()
+        public string PrettyPrint()
         {
             return "Fields Dependency";
         }
 
-        protected override void AddDependencies(string className, BaseTypeDeclarationSyntax syntaxNode)
+        public void Visit(IClassType modelType)
         {
-            foreach (var fieldDeclarationSyntax in syntaxNode.DescendantNodes().OfType<FieldDeclarationSyntax>())
+            if (modelType is not IMembersClassType membersClassType)
             {
-                MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(fieldDeclarationSyntax.Declaration.Type).Name, this);
+                return;
             }
 
-            foreach (var eventFieldDeclarationSyntax in syntaxNode.DescendantNodes()
-                .OfType<EventFieldDeclarationSyntax>())
+            var dependencies = new Dictionary<string, int>();
+
+            foreach (var fieldType in membersClassType.Fields)
             {
-                MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(eventFieldDeclarationSyntax.Declaration.Type).Name, this);
+                if (dependencies.ContainsKey(fieldType.Type.Name))
+                {
+                    dependencies[fieldType.Type.Name]++;
+                }
+                else
+                {
+                    dependencies.Add(fieldType.Type.Name, 1);
+                }
             }
+
+            membersClassType.Metrics.Add(new MetricModel
+            {
+                ExtractorName = GetType().ToString(),
+                Value = dependencies,
+                ValueType = dependencies.GetType().ToString()
+            });
         }
     }
 }

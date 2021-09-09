@@ -10,6 +10,7 @@ using HoneydewCore.Logging;
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
 using HoneydewExtractors.Core;
+using HoneydewExtractors.Core.Metrics.Iterators;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -35,6 +36,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Extraction.MethodCall;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
+using HoneydewExtractors.CSharp.Metrics.Iterators;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewExtractors.CSharp.RepositoryLoading;
@@ -46,6 +48,7 @@ using HoneydewModels;
 using HoneydewModels.CSharp;
 using HoneydewModels.Exporters;
 using HoneydewModels.Importers;
+using HoneydewModels.Types;
 
 namespace Honeydew
 {
@@ -144,6 +147,13 @@ namespace Honeydew
 
                 if (options.DeactivateBindingProcessing)
                 {
+                    logger.Log();
+                    logger.Log("Applying Post Extraction Metrics");
+                    progressLogger.Log();
+                    progressLogger.Log("Applying Post Extraction Metrics");
+                    
+                    ApplyPostExtractionVisitors(repositoryModel);
+
                     WriteAllRepresentations(repositoryModel,
                         null,
                         DefaultPathForAllRepresentations);
@@ -167,6 +177,13 @@ namespace Honeydew
                     var fullNameModelProcessor = new FullNameModelProcessor(logger, progressLogger);
                     repositoryModel = fullNameModelProcessor.Process(repositoryModel);
 
+                    logger.Log();
+                    logger.Log("Applying Post Extraction Metrics");
+                    progressLogger.Log();
+                    progressLogger.Log("Applying Post Extraction Metrics");
+                    
+                    ApplyPostExtractionVisitors(repositoryModel);
+
                     WriteAllRepresentations(repositoryModel,
                         fullNameModelProcessor.NamespacesDictionary,
                         DefaultPathForAllRepresentations);
@@ -184,6 +201,32 @@ namespace Honeydew
 
                 logger.CloseAndFlush();
             }, _ => Task.FromResult("Some Error Occurred"));
+        }
+
+        private static void ApplyPostExtractionVisitors(RepositoryModel repositoryModel)
+        {
+            var repositoryModelIterator = new RepositoryModelIterator(new List<ModelIterator<SolutionModel>>
+            {
+                new SolutionModelIterator(new List<ModelIterator<ProjectModel>>
+                {
+                    new ProjectModelIterator(new List<ModelIterator<NamespaceModel>>
+                    {
+                        new NamespaceModelIterator(new List<ModelIterator<IClassType>>
+                        {
+                            new ClassTypePropertyIterator(new List<IModelVisitor<IClassType>>
+                            {
+                                new PropertiesRelationVisitor(),
+                                new FieldsRelationVisitor(),
+                                new ParameterRelationVisitor(),
+                                new ReturnValueRelationVisitor(),
+                                new LocalVariablesRelationVisitor(),
+                            })
+                        })
+                    })
+                })
+            });
+            
+            repositoryModelIterator.Iterate(repositoryModel);
         }
 
         private static ICompositeVisitor LoadVisitors(IRelationMetricHolder relationMetricHolder, ILogger logger)
@@ -297,13 +340,8 @@ namespace Honeydew
 
                 // metrics visitor
                 new IsAbstractClassVisitor(),
-                new FieldsRelationVisitor(relationMetricHolder),
-                new PropertiesRelationVisitor(relationMetricHolder),
-                new ParameterRelationVisitor(relationMetricHolder),
-                new ReturnValueRelationVisitor(relationMetricHolder),
                 new ExceptionsThrownRelationVisitor(relationMetricHolder),
                 new ObjectCreationRelationVisitor(relationMetricHolder),
-                new LocalVariablesRelationVisitor(relationMetricHolder)
             };
 
             var delegateVisitors = new List<ICSharpDelegateVisitor>
