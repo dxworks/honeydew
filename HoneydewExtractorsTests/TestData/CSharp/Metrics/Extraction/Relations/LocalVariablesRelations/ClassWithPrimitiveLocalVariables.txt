@@ -1,0 +1,15 @@
+using System;
+
+namespace App
+{                                       
+    class MyClass
+    {                                           
+        public int Foo(int a, float b, string c) { int x=5;int k=a*x;}
+        
+        public float Bar(float a, int b) { float k=a*b; return k;}
+        
+        public int Zoo(int a) {int b = a*124; return b; }
+        
+        public string Goo() { var f ="Hello"; return f; }
+    }
+}

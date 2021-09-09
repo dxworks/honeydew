@@ -1,0 +1,50 @@
+using System;
+using HoneydewCore.Extractors;
+
+namespace App
+{                                       
+    public class Class1
+    {                                           
+        public CSharpMetricExtractor Foo(int a, string name) 
+        {
+            for (var i=0;i<a;i++) 
+            { 
+                if (name == "AA") 
+                {
+                    var b = new CSharpMetricExtractor();
+                    return b;
+                }
+            }
+            return null;
+        }
+    }
+    
+    public class Class2
+    {                                       
+        int _a; string b;
+               
+        public Class2(int a, string name) 
+        {
+            _a=a; 
+            var c = new CSharpMetricExtractor(); 
+            var x = a+2;
+            b=name+x;
+        }
+        
+        public Class2() 
+        { 
+            var i=0; 
+            var c=2; 
+            _a=i+c;  
+            var x = _a+2; 
+            b="name"+x;
+        }
+        
+        double f() 
+        { 
+            int a=2; 
+            var c=6.0; 
+            return a+c;
+        }
+    }
+}
