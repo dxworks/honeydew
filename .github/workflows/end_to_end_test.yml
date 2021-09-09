@@ -65,6 +65,15 @@ jobs:
       - if: matrix.os != 'windows-latest'
         name: Download comparer
         run: wget ${{ secrets.FILE_COMPARER_PATH }} -O "./filecomparer.jar"
-        
+
       - name: Compare results
         run: sh e2e_scripts/compare.sh e2e_results ./results
+
+      - name: Prepare Results zip
+        run: zip -r results.zip results
+
+      - name: Upload results artifact
+        uses: actions\upload-artifact@v2
+        with:
+          name: results-${{matrix.os}}.zip
+          path: results.zip
