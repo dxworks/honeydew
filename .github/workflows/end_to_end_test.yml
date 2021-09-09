@@ -69,11 +69,11 @@ jobs:
       - name: Compare results
         run: sh e2e_scripts/compare.sh e2e_results ./results
 
-      - if: matrix.os != 'windows-latest'
+      - if: matrix.os == 'windows-latest'
         name: Prepare Results zip
         run: powershell Compress-Archive results results.zip
 
-      - if: matrix.os == 'windows-latest'
+      - if: matrix.os != 'windows-latest'
         name: Prepare Results zip
         run: zip -r results.zip results
 
