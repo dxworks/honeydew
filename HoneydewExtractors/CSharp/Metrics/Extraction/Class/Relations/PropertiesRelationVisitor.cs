@@ -1,31 +1,45 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
 {
-    public class PropertiesRelationVisitor : RelationVisitor
+    public class PropertiesRelationVisitor : IModelVisitor<IClassType>, IRelationVisitor
     {
-        public PropertiesRelationVisitor()
-        {
-        }
-
-        public PropertiesRelationVisitor(IRelationMetricHolder metricHolder) : base(metricHolder)
-        {
-        }
-
-        public override string PrettyPrint()
+        public string PrettyPrint()
         {
             return "Properties Dependency";
         }
 
-        protected override void AddDependencies(string className, BaseTypeDeclarationSyntax syntaxNode)
+        public void Visit(IClassType modelType)
         {
-            foreach (var propertyDeclarationSyntax in syntaxNode.DescendantNodes().OfType<BasePropertyDeclarationSyntax>())
+            if (modelType is not IPropertyMembersClassType classTypeWithProperties)
             {
-                MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(propertyDeclarationSyntax.Type).Name, this);
+                return;
             }
+
+            var dependencies = new Dictionary<string, int>();
+
+            foreach (var propertyType in classTypeWithProperties.Properties)
+            {
+                if (dependencies.ContainsKey(propertyType.Type.Name))
+                {
+                    dependencies[propertyType.Type.Name]++;
+                }
+                else
+                {
+                    dependencies.Add(propertyType.Type.Name, 1);
+                }
+            }
+
+            classTypeWithProperties.Metrics.Add(new MetricModel
+            {
+                ExtractorName = GetType().ToString(),
+                Value = dependencies,
+                ValueType = dependencies.GetType().ToString()
+            });
         }
     }
 }

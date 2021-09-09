@@ -1,64 +1,118 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
-using HoneydewExtractors.CSharp.Utils;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
 {
-    public class LocalVariablesRelationVisitor : RelationVisitor
+    public class LocalVariablesRelationVisitor : IModelVisitor<IClassType>, IRelationVisitor
     {
-        public LocalVariablesRelationVisitor()
-        {
-        }
-
-        public LocalVariablesRelationVisitor(IRelationMetricHolder metricHolder) : base(metricHolder)
-        {
-        }
-
-        public override string PrettyPrint()
+        public string PrettyPrint()
         {
             return "Local Variables Dependency";
         }
 
-        protected override void AddDependencies(string className, BaseTypeDeclarationSyntax syntaxNode)
+        public void Visit(IClassType modelType)
         {
-            foreach (var variableDeclarationSyntax in syntaxNode.DescendantNodes().OfType<BaseMethodDeclarationSyntax>()
-                .SelectMany(syntax => syntax.DescendantNodes().OfType<VariableDeclarationSyntax>())
-            )
+            if (modelType is not IPropertyMembersClassType classTypeWithProperties)
             {
-                var fullName = CSharpHelperMethods.GetFullName(variableDeclarationSyntax.Type).Name;
+                return;
+            }
 
-                if (fullName != CSharpConstants.VarIdentifier)
+            var dependencies = new Dictionary<string, int>();
+
+            foreach (var propertyType in classTypeWithProperties.Properties)
+            {
+                foreach (var accessor in propertyType.Accessors)
                 {
-                    MetricHolder.Add(className, fullName, this);
-                }
-                else
-                {
-                    fullName = CSharpHelperMethods.GetFullName(variableDeclarationSyntax).Name;
-                    if (fullName != CSharpConstants.VarIdentifier)
+                    foreach (var localVariableType in accessor.LocalVariableTypes)
                     {
-                        MetricHolder.Add(className, fullName, this);
+                        if (dependencies.ContainsKey(localVariableType.Type.Name))
+                        {
+                            dependencies[localVariableType.Type.Name]++;
+                        }
+                        else
+                        {
+                            dependencies.Add(localVariableType.Type.Name, 1);
+                        }
+                    }
+
+                    if (accessor is ITypeWithLocalFunctions typeWithLocalFunctions)
+                    {
+                        ExtractLocalVariablesFromLocalFunctions(typeWithLocalFunctions, dependencies);
+                    }
+                }
+            }
+
+            foreach (var methodType in classTypeWithProperties.Methods)
+            {
+                foreach (var localVariableType in methodType.LocalVariableTypes)
+                {
+                    if (dependencies.ContainsKey(localVariableType.Type.Name))
+                    {
+                        dependencies[localVariableType.Type.Name]++;
                     }
                     else
                     {
-                        foreach (var declarationVariable in variableDeclarationSyntax.Variables)
-                        {
-                            if (declarationVariable.Initializer is
-                            {
-                                Value: ObjectCreationExpressionSyntax
-                                objectCreationExpressionSyntax
-                            })
-                            {
-                                MetricHolder.Add(className,
-                                    CSharpHelperMethods.GetFullName(objectCreationExpressionSyntax.Type).Name, this);
-                            }
-                            else if (declarationVariable.Initializer != null)
-                            {
-                                MetricHolder.Add(className,
-                                    CSharpHelperMethods.GetFullName(declarationVariable.Initializer.Value).Name, this);
-                            }
-                        }
+                        dependencies.Add(localVariableType.Type.Name, 1);
                     }
+                }
+                
+                if (methodType is ITypeWithLocalFunctions typeWithLocalFunctions)
+                {
+                    ExtractLocalVariablesFromLocalFunctions(typeWithLocalFunctions, dependencies);
+                }
+            }
+
+            foreach (var constructorType in classTypeWithProperties.Constructors)
+            {
+                foreach (var localVariableType in constructorType.LocalVariableTypes)
+                {
+                    if (dependencies.ContainsKey(localVariableType.Type.Name))
+                    {
+                        dependencies[localVariableType.Type.Name]++;
+                    }
+                    else
+                    {
+                        dependencies.Add(localVariableType.Type.Name, 1);
+                    }
+                }
+                
+                if (constructorType is ITypeWithLocalFunctions typeWithLocalFunctions)
+                {
+                    ExtractLocalVariablesFromLocalFunctions(typeWithLocalFunctions, dependencies);
+                }
+            }
+
+            classTypeWithProperties.Metrics.Add(new MetricModel
+            {
+                ExtractorName = GetType().ToString(),
+                Value = dependencies,
+                ValueType = dependencies.GetType().ToString()
+            });
+        }
+
+        private static void ExtractLocalVariablesFromLocalFunctions(ITypeWithLocalFunctions typeWithLocalFunctions,
+            IDictionary<string, int> dependencies)
+        {
+            foreach (var localFunction in typeWithLocalFunctions.LocalFunctions)
+            {
+                foreach (var localVariableType in localFunction.LocalVariableTypes)
+                {
+                    if (dependencies.ContainsKey(localVariableType.Type.Name))
+                    {
+                        dependencies[localVariableType.Type.Name]++;
+                    }
+                    else
+                    {
+                        dependencies.Add(localVariableType.Type.Name, 1);
+                    }
+                }
+
+                foreach (var innerLocalFunction in localFunction.LocalFunctions)
+                {
+                    ExtractLocalVariablesFromLocalFunctions(innerLocalFunction, dependencies);
                 }
             }
         }

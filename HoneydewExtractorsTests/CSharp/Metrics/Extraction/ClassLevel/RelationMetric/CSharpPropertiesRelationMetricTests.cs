@@ -1,10 +1,14 @@
 ﻿using System.Collections.Generic;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
+using HoneydewExtractors.CSharp.Metrics.Iterators;
+using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
@@ -13,21 +17,30 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
     {
         private readonly PropertiesRelationVisitor _sut;
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly ClassTypePropertyIterator _classTypePropertyIterator;
 
         public CSharpPropertiesRelationMetricTests()
         {
-            _sut = new PropertiesRelationVisitor(new RelationMetricHolder());
+            _sut = new PropertiesRelationVisitor();
 
             var compositeVisitor = new CompositeVisitor();
 
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {
                 new BaseInfoClassVisitor(),
-                _sut
+                new PropertySetterClassVisitor(new List<IPropertyVisitor>
+                {
+                    new PropertyInfoVisitor()
+                })
             }));
 
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
                 new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+
+            _classTypePropertyIterator = new ClassTypePropertyIterator(new List<IModelVisitor<IClassType>>
+            {
+                _sut
+            });
         }
 
         [Fact]
@@ -60,6 +73,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                                      }}";
 
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.PropertiesRelationVisitor",
@@ -94,6 +112,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                                      }}";
 
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.PropertiesRelationVisitor",
@@ -133,6 +156,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
 
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
+
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.PropertiesRelationVisitor",
                 classTypes[0].Metrics[0].ExtractorName);
@@ -169,6 +197,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                                      }}";
 
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.PropertiesRelationVisitor",

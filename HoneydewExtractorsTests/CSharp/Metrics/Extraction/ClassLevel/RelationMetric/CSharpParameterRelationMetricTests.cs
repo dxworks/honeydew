@@ -1,10 +1,19 @@
 ﻿using System.Collections.Generic;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
+using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Common;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Constructor;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
+using HoneydewExtractors.CSharp.Metrics.Iterators;
+using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
@@ -13,20 +22,39 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
     {
         private readonly ParameterRelationVisitor _sut;
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly ClassTypePropertyIterator _classTypePropertyIterator;
 
         public CSharpParameterRelationMetricTests()
         {
-            _sut = new ParameterRelationVisitor(new RelationMetricHolder());
+            _sut = new ParameterRelationVisitor();
 
             var compositeVisitor = new CompositeVisitor();
 
+            var parameterSetterVisitor = new ParameterSetterVisitor(new List<IParameterVisitor>
+            {
+                new ParameterInfoVisitor()
+            });
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {
                 new BaseInfoClassVisitor(),
-                _sut
+                new MethodSetterClassVisitor(new List<IMethodVisitor>
+                {
+                    new MethodInfoVisitor(),
+                    parameterSetterVisitor
+                }),
+                new ConstructorSetterClassVisitor(new List<IConstructorVisitor>
+                {
+                    new ConstructorInfoVisitor(),
+                    parameterSetterVisitor
+                })
             }));
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
                 new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+
+            _classTypePropertyIterator = new ClassTypePropertyIterator(new List<IModelVisitor<IClassType>>
+            {
+                _sut
+            });
         }
 
         [Fact]
@@ -35,22 +63,16 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal("Parameter Dependency", _sut.PrettyPrint());
         }
 
-        [Fact]
-        public void Extract_ShouldHaveNoParameters_WhenClassHasMethodsWithNoParameters()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/Relations/ClassWithTwoFunctions.txt")]
+        public void Extract_ShouldHaveNoParameters_WhenClassHasMethodsWithNoParameters(string fileContent)
         {
-            const string fileContent = @"
-                                     namespace App
-                                     {                                       
-
-                                         class MyClass
-                                         {                                           
-                                             public void Foo() { }
-
-                                             public void Foo() { }
-                                         }
-                                     }";
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ParameterRelationVisitor",
@@ -62,19 +84,16 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Empty(dictionary);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveNoParameters_WhenClassHasConstructorWithNoParameters()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/Relations/ParameterRelations/ClassWithNoArgConstructor.txt")]
+        public void Extract_ShouldHaveNoParameters_WhenClassHasConstructorWithNoParameters(string fileContent)
         {
-            const string fileContent = @"
-                                     namespace App
-                                     {                                       
-                                         class MyClass
-                                         {                                           
-                                             public MyClass() { }
-                                         }
-                                     }";
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ParameterRelationVisitor",
@@ -86,27 +105,17 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Empty(dictionary);
         }
 
-        [Fact]
-        public void Extract_ShouldHavePrimitiveParameters_WhenClassHasMethodsWithPrimitiveParameters()
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Relations/ParameterRelations/ClassWithMethodsWithPrimitiveParams.txt")]
+        public void Extract_ShouldHavePrimitiveParameters_WhenClassHasMethodsWithPrimitiveParameters(string fileContent)
         {
-            const string fileContent = @"using System;
-
-                                     namespace App
-                                     {                                       
-                                         class MyClass
-                                         {                                           
-                                             public void Foo(int a, float b, string c) { }
-
-                                             public void Bar(float a, int b) { }
-
-                                             public void Zoo(int a) { }
-
-                                             public void Goo() { }
-                                         }
-                                     }";
-
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ParameterRelationVisitor",
@@ -122,26 +131,18 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, dependencies["string"]);
         }
 
-        [Fact]
-        public void Extract_ShouldHavePrimitiveParameters_WhenInterfaceHasMethodsWithPrimitiveParameters()
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Relations/ParameterRelations/InterfaceWithMethodsWithPrimitiveParams.txt")]
+        public void Extract_ShouldHavePrimitiveParameters_WhenInterfaceHasMethodsWithPrimitiveParameters(
+            string fileContent)
         {
-            const string fileContent = @"using System;
-
-                                     namespace App
-                                     {                                       
-                                         public interface IInterface
-                                         {                                           
-                                             public void Foo(int a, float b, string c);
-
-                                             public void Bar(float a, int b);
-
-                                             public string Zoo(int a);
-
-                                             public int Goo();
-                                         }
-                                     }";
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ParameterRelationVisitor",
@@ -157,23 +158,18 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, dependencies["string"]);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveDependenciesParameters_WhenInterfaceHasMethodsWithDependenciesParameters()
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Relations/ParameterRelations/InterfaceWithMethodsWithNonPrimitiveParams.txt")]
+        public void Extract_ShouldHaveDependenciesParameters_WhenInterfaceHasMethodsWithDependenciesParameters(
+            string fileContent)
         {
-            const string fileContent = @"using System;
-                                     using HoneydewCore.Extractors;
-                                     using HoneydewCore.Extractors.Metrics;
-                                     using HoneydewCore.Extractors.Metrics.SemanticMetrics;
-                                     namespace App
-                                     {                                       
-                                         public interface IInterface
-                                         {                                           
-                                             public void Foo(int a, CSharpMetricExtractor extractor) ;
-
-                                             public void Bar(IFactExtractor factExtractor,  CSharpMetricExtractor extractor) ;
-                                         }
-                                     }";
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ParameterRelationVisitor",
@@ -189,23 +185,18 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, dependencies["int"]);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveDependenciesParameters_WhenClassHasMethodsWithDependenciesParameters()
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Relations/ParameterRelations/ClassWithMethodsWithNonPrimitiveParams.txt")]
+        public void Extract_ShouldHaveDependenciesParameters_WhenClassHasMethodsWithDependenciesParameters(
+            string fileContent)
         {
-            const string fileContent = @"using System;
-                                     using HoneydewCore.Extractors;
-                                     using HoneydewCore.Extractors.Metrics;
-                                     namespace App
-                                     {                                       
-                                         public class Class1
-                                         {                                           
-                                             public void Foo(int a, CSharpMetricExtractor extractor, string name) { }
-
-                                             public void Bar(IFactExtractor factExtractor,  CSharpMetricExtractor extractor, int b) { }
-                                         }
-                                     }";
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ParameterRelationVisitor",
@@ -222,23 +213,18 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, dependencies["string"]);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveDependenciesParameters_WhenClassHasConstructorWithDependenciesParameters()
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Relations/ParameterRelations/ClassWithConstructorsWithNonPrimitiveParams.txt")]
+        public void Extract_ShouldHaveDependenciesParameters_WhenClassHasConstructorWithDependenciesParameters(
+            string fileContent)
         {
-            const string fileContent = @"using System;
-                                     using HoneydewCore.Extractors;
-                                     using HoneydewCore.Extractors.Metrics;
-                                     namespace App
-                                     {                                       
-                                         public class Class1
-                                         {                                           
-                                             public Class1(int a, CSharpMetricExtractor extractor, string name) { }
-
-                                             public Class1(IFactExtractor factExtractor,  CSharpMetricExtractor extractor, int b) { }
-                                         }
-                                     }";
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ParameterRelationVisitor",

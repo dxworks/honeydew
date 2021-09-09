@@ -1,13 +1,7 @@
-﻿using HoneydewModels.Types;
-
-namespace HoneydewExtractors.Core.Metrics.Visitors
+﻿namespace HoneydewExtractors.Core.Metrics.Visitors
 {
-    public interface IModelVisitor<TType> : ITypeVisitor
+    public interface IModelVisitor<in TType>
     {
-        TType Visit(TType modelType);
-    }
-
-    public interface IModelVisitor : IModelVisitor<IType>
-    {
+        void Visit(TType modelType);
     }
 }

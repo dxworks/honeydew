@@ -1,0 +1,15 @@
+using System;
+using HoneydewCore.Extractors;
+using HoneydewCore.Extractors.Metrics;
+
+namespace App
+{                                       
+    public class IInterface
+    {                                           
+        public CSharpMetricExtractor Foo(int a, string name) { return null; }
+        
+        public IFactExtractor Bar(CSharpMetricExtractor extractor, int b) { return null; }
+        
+        public IFactExtractor Goo(CSharpMetricExtractor extractor) { return null; }
+    }
+}

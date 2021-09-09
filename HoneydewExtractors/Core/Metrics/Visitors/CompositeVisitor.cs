@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
-using HoneydewModels.Types;
 
 namespace HoneydewExtractors.Core.Metrics.Visitors
 {
-    public class CompositeVisitor : ICompositeVisitor, IModelVisitor, IRequireLoggingVisitor
+    public class CompositeVisitor : ICompositeVisitor, IRequireLoggingVisitor
     {
         public ILogger Logger { get; set; }
 
@@ -45,17 +44,17 @@ namespace HoneydewExtractors.Core.Metrics.Visitors
             }
         }
 
-        public IType Visit(IType modelType)
-        {
-            foreach (var visitor in _visitors)
-            {
-                if (visitor is IModelVisitor modelVisitor)
-                {
-                    modelType = modelVisitor.Visit(modelType);
-                }
-            }
-
-            return modelType;
-        }
+        // public IType Visit(IType modelType)
+        // {
+        //     foreach (var visitor in _visitors)
+        //     {
+        //         if (visitor is IModelVisitor modelVisitor)
+        //         {
+        //             modelType = modelVisitor.Visit(modelType);
+        //         }
+        //     }
+        //
+        //     return modelType;
+        // }
     }
 }

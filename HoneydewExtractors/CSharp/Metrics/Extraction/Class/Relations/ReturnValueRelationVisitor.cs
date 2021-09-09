@@ -1,31 +1,45 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
 {
-    public class ReturnValueRelationVisitor : RelationVisitor
+    public class ReturnValueRelationVisitor : IModelVisitor<IClassType>, IRelationVisitor
     {
-        public ReturnValueRelationVisitor()
-        {
-        }
-
-        public ReturnValueRelationVisitor(IRelationMetricHolder metricHolder) : base(metricHolder)
-        {
-        }
-
-        public override string PrettyPrint()
+        public string PrettyPrint()
         {
             return "Return Value Dependency";
         }
 
-        protected override void AddDependencies(string className, BaseTypeDeclarationSyntax syntaxNode)
+        public void Visit(IClassType modelType)
         {
-            foreach (var methodDeclarationSyntax in syntaxNode.DescendantNodes().OfType<MethodDeclarationSyntax>())
+            if (modelType is not IMembersClassType membersClassType)
             {
-                MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(methodDeclarationSyntax.ReturnType).Name, this);
+                return;
             }
+
+            var dependencies = new Dictionary<string, int>();
+
+            foreach (var methodType in membersClassType.Methods)
+            {
+                if (dependencies.ContainsKey(methodType.ReturnValue.Type.Name))
+                {
+                    dependencies[methodType.ReturnValue.Type.Name]++;
+                }
+                else
+                {
+                    dependencies.Add(methodType.ReturnValue.Type.Name, 1);
+                }
+            }
+
+            membersClassType.Metrics.Add(new MetricModel
+            {
+                ExtractorName = GetType().ToString(),
+                Value = dependencies,
+                ValueType = dependencies.GetType().ToString()
+            });
         }
     }
 }

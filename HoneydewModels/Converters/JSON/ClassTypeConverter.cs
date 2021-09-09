@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using HoneydewModels.Types;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace HoneydewModels.Converters.JSON
 {
-    internal class ClassTypeConverter : JsonConverter<IClassType>
+    internal class ClassTypeConverter : JsonConverter
     {
         private readonly ITypeConverter<IClassType> _typeConverter;
 
@@ -14,30 +14,25 @@ namespace HoneydewModels.Converters.JSON
             _typeConverter = typeConverter;
         }
 
-        public override IClassType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var readerCopy = reader;
-
-            if (readerCopy.Read())
-            {
-                if (readerCopy.TokenType == JsonTokenType.PropertyName)
-                {
-                    if (readerCopy.Read())
-                    {
-                        var convert = _typeConverter.Convert(readerCopy.GetString());
-                        return (IClassType)JsonSerializer.Deserialize(ref reader, convert, options);
-                    }
-                }
-            }
-
-            return (IClassType)JsonSerializer.Deserialize(ref reader, _typeConverter.DefaultType(), options);
+            serializer.Serialize(writer, _typeConverter.Convert(value));
         }
 
-
-        public override void Write(Utf8JsonWriter writer, IClassType value, JsonSerializerOptions options)
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
+            JsonSerializer serializer)
         {
-            var convertedValue = _typeConverter.Convert(value);
-            JsonSerializer.Serialize(writer, convertedValue, options);
+            var obj = JObject.Load(reader);
+
+            var classType = _typeConverter.Convert(obj.GetValue("ClassType").ToString());
+
+            serializer.Populate(obj.CreateReader(), classType);
+            return classType;
+        }
+
+        public override bool CanConvert(Type objectType)
+        {
+            return objectType == typeof(IClassType);
         }
     }
 }

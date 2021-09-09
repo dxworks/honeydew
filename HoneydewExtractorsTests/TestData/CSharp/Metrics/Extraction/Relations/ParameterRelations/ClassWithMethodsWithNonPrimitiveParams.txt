@@ -1,0 +1,13 @@
+using System;
+using HoneydewCore.Extractors;
+using HoneydewCore.Extractors.Metrics;
+
+namespace App
+{                                       
+    public class Class1
+    {                                           
+        public void Foo(int a, CSharpMetricExtractor extractor, string name) { }
+        
+        public void Bar(IFactExtractor factExtractor,  CSharpMetricExtractor extractor, int b) { }
+    }
+}

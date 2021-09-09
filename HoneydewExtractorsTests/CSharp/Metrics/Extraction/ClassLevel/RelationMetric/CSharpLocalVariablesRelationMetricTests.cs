@@ -1,10 +1,23 @@
 ﻿using System.Collections.Generic;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
+using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
+using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Common;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Constructor;
+using HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
+using HoneydewExtractors.CSharp.Metrics.Iterators;
+using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
+using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
+using HoneydewModels.Types;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
@@ -13,20 +26,60 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
     {
         private readonly LocalVariablesRelationVisitor _sut;
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly ClassTypePropertyIterator _classTypePropertyIterator;
 
         public CSharpLocalVariablesRelationVisitorTests()
         {
-            _sut = new LocalVariablesRelationVisitor(new RelationMetricHolder());
+            _sut = new LocalVariablesRelationVisitor();
 
             var compositeVisitor = new CompositeVisitor();
-
+            var localVariablesTypeSetterVisitor = new LocalVariablesTypeSetterVisitor(new List<ILocalVariablesVisitor>
+            {
+                new LocalVariableInfoVisitor()
+            });
+            var localFunctionsSetterClassVisitor = new LocalFunctionsSetterClassVisitor(new List<ILocalFunctionVisitor>
+            {
+                new LocalFunctionInfoVisitor(new List<ILocalFunctionVisitor>
+                {
+                    localVariablesTypeSetterVisitor
+                }),
+                localVariablesTypeSetterVisitor
+            });
+            var methodInfoVisitor = new MethodInfoVisitor();
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {
                 new BaseInfoClassVisitor(),
-                _sut
+                new MethodSetterClassVisitor(new List<IMethodVisitor>
+                {
+                    methodInfoVisitor,
+                    localFunctionsSetterClassVisitor,
+                    localVariablesTypeSetterVisitor
+                }),
+                new ConstructorSetterClassVisitor(new List<IConstructorVisitor>
+                {
+                    new ConstructorInfoVisitor(),
+                    localFunctionsSetterClassVisitor,
+                    localVariablesTypeSetterVisitor
+                }),
+                new PropertySetterClassVisitor(new List<IPropertyVisitor>
+                {
+                    new PropertyInfoVisitor(),
+                    new MethodAccessorSetterPropertyVisitor(new List<IMethodVisitor>
+                    {
+                        methodInfoVisitor,
+                        localFunctionsSetterClassVisitor,
+                        localVariablesTypeSetterVisitor
+                    })
+                })
             }));
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
                 new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+
+
+            _classTypePropertyIterator = new ClassTypePropertyIterator(new List<IModelVisitor<IClassType>>
+            {
+                _sut
+            });
         }
 
         [Fact]
@@ -35,22 +88,16 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal("Local Variables Dependency", _sut.PrettyPrint());
         }
 
-        [Fact]
-        public void Extract_ShouldHaveNoLocalVariables_WhenClassHasMethodsThatDontUseLocalVariables()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/Relations/ClassWithTwoFunctions.txt")]
+        public void Extract_ShouldHaveNoLocalVariables_WhenClassHasMethodsThatDontUseLocalVariables(string fileContent)
         {
-            const string fileContent = @"
-                                     namespace App
-                                     {                                       
-
-                                         class MyClass
-                                         {                                           
-                                             public void Foo() { }
-
-                                             public void Bar() { }
-                                         }
-                                     }";
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
@@ -62,26 +109,17 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Empty(dictionary);
         }
 
-        [Fact]
-        public void Extract_ShouldHavePrimitiveLocalValues_WhenClassHasMethodsThatHaveLocalVariables()
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Relations/LocalVariablesRelations/ClassWithPrimitiveLocalVariables.txt")]
+        public void Extract_ShouldHavePrimitiveLocalValues_WhenClassHasMethodsThatHaveLocalVariables(string fileContent)
         {
-            const string fileContent = @"using System;
-
-                                     namespace App
-                                     {                                       
-                                         class MyClass
-                                         {                                           
-                                             public int Foo(int a, float b, string c) { int x=5;int k=a*x;}
-
-                                             public float Bar(float a, int b) { float k=a*b; return k;}
-
-                                             public int Zoo(int a) {int b = a*124; return b; }
-
-                                             public string Goo() { var f =""Hello""; return f; }
-                                         }
-                                     }";
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
@@ -97,26 +135,16 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, dependencies["string"]);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveNoPrimitiveLocalVariables_WhenGivenAnInterface()
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/Relations/LocalVariablesRelations/InterfaceWithMethods.txt")]
+        public void Extract_ShouldHaveNoPrimitiveLocalVariables_WhenGivenAnInterface(string fileContent)
         {
-            const string fileContent = @"using System;
-
-                                     namespace App
-                                     {                                       
-                                         public interface IInterface
-                                         {                                           
-                                             public float Foo(int a, float b, string c);
-
-                                             public void Bar(float a, int b);
-
-                                             public string Zoo(int a);
-
-                                             public int Goo();
-                                         }
-                                     }";
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
@@ -128,26 +156,17 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Empty(dictionary);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveNoDependencies_WhenGivenAnInterface()
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Relations/LocalVariablesRelations/InterfaceWithMethodsWithNonPrimitiveParams.txt")]
+        public void Extract_ShouldHaveNoDependencies_WhenGivenAnInterface(string fileContent)
         {
-            const string fileContent = @"using System;
-                                     using HoneydewCore.Extractors;
-                                     using HoneydewCore.Extractors.Metrics;
-                                     using HoneydewCore.Extractors.Metrics.SemanticMetrics;
-                                     namespace App
-                                     {                                       
-                                         public interface IInterface
-                                         {                                           
-                                             public CSharpMetricExtractor Foo(int a, CSharpMetricExtractor extractor) ;
-
-                                             public CSharpMetricExtractor Foo(int a) ;
-
-                                             public IFactExtractor Bar(CSharpMetricExtractor extractor) ;
-                                         }
-                                     }";
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
@@ -159,25 +178,18 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Empty(dictionary);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveLocalVariablesDependencies_WhenClassHasMethodsWithNonPrimitiveLocalVariables()
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Relations/LocalVariablesRelations/ClassWithNonPrimitiveLocalVariables.txt")]
+        public void Extract_ShouldHaveLocalVariablesDependencies_WhenClassHasMethodsWithNonPrimitiveLocalVariables(
+            string fileContent)
         {
-            const string fileContent = @"using System;
-                                     using HoneydewCore.Extractors;
-                                     using HoneydewCore.Extractors.Metrics;
-                                     namespace App
-                                     {                                       
-                                         public class Class1
-                                         {                                           
-                                             public CSharpMetricExtractor Foo(int a, string name) { var b = new CSharpMetricExtractor(); return b;}
-
-                                             public IFactExtractor Bar(CSharpMetricExtractor extractor, int b) {IFactExtractor a; IFactExtractor b; return null; }
-
-                                             public IFactExtractor Goo(CSharpMetricExtractor extractor) { IFactExtractor a; CSharpMetricExtractor k; return null;}
-                                         }
-                                     }";
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
@@ -192,26 +204,18 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(3, dependencies["IFactExtractor"]);
         }
 
-        [Fact]
-        public void Extract_ShouldHaveLocalVariablesDependencies_WhenClassHasConstructorLocalVariables()
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Relations/LocalVariablesRelations/ClassWithConstructorsWithNonPrimitiveLocalVariables.txt")]
+        public void Extract_ShouldHaveLocalVariablesDependencies_WhenClassHasConstructorLocalVariables(
+            string fileContent)
         {
-            const string fileContent = @"using System;
-                                     using HoneydewCore.Extractors;
-                                     using HoneydewCore.Extractors.Metrics;
-                                     namespace App
-                                     {                                       
-                                         public class Class1
-                                         {                                       
-                                              int _a; string b;    
-                                             public Class1(int a, string name) {_a=a; var c = new CSharpMetricExtractor(); var x = a+2; b=name+x;}
-
-                                             public Class1() { var i=0; var c=2; _a=i+c;  var x = _a+2; b=""name""+x;}
-
-                                             double f() { int a=2; var c=6.0; return a+c; }
-                                         }
-                                     }";
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
@@ -227,27 +231,19 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, dependencies["double"]);
         }
 
-        [Fact]
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Relations/LocalVariablesRelations/ClassWithNonPrimitiveLocalVariablesInAForLoop.txt")]
         public void
-            Extract_ShouldHaveLocalVariablesDependencies_WhenClassHasMethodsWithNonPrimitiveLocalVariablesInAForLoop()
+            Extract_ShouldHaveLocalVariablesDependencies_WhenClassHasMethodsWithNonPrimitiveLocalVariablesInAForLoop(
+                string fileContent)
         {
-            const string fileContent = @"using System;
-                                     using HoneydewCore.Extractors;
-                                     namespace App
-                                     {                                       
-                                         public class Class1
-                                         {                                           
-                                             public CSharpMetricExtractor Foo(int a, string name) {
-                                                 for (var i=0;i<a;i++) { 
-                                                  if (name == ""AA"") {
-                                                 var b = new CSharpMetricExtractor(); return b;}
-                                                 }
-                                             return null;
-                                             }
-                                         }
-                                     }";
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(1, classTypes[0].Metrics.Count);
             Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
@@ -262,38 +258,18 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(1, dependencies["int"]);
         }
 
-
-        [Fact]
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Relations/LocalVariablesRelations/ClassWithNonPrimitiveLocalVariablesOfClassesFromTheSameNamespace.txt")]
         public void
-            Extract_ShouldHaveLocalVariablesDependencies_WhenNamespaceHasMultipleClasses()
+            Extract_ShouldHaveLocalVariablesDependencies_WhenNamespaceHasMultipleClasses(string fileContent)
         {
-            const string fileContent = @"using System;
-                                     using HoneydewCore.Extractors;
-                                     namespace App
-                                     {                                       
-                                         public class Class1
-                                         {                                           
-                                             public CSharpMetricExtractor Foo(int a, string name) {
-                                                 for (var i=0;i<a;i++) { 
-                                                  if (name == ""AA"") {
-                                                 var b = new CSharpMetricExtractor(); return b;}
-                                                 }
-                                             return null;
-                                             }
-                                         }
-
-                                        public class Class2
-                                         {                                       
-                                              int _a; string b;    
-                                             public Class2(int a, string name) {_a=a; var c = new CSharpMetricExtractor(); var x = a+2; b=name+x;}
-
-                                             public Class2() { var i=0; var c=2; _a=i+c;  var x = _a+2; b=""name""+x;}
-
-                                             double f() { int a=2; var c=6.0; return a+c; }
-                                         }
-                                     }";
-
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            foreach (var model in classTypes)
+            {
+                _classTypePropertyIterator.Iterate(model);
+            }
 
             Assert.Equal(2, classTypes.Count);
 

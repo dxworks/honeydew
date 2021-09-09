@@ -1,0 +1,15 @@
+using System;
+
+namespace App
+{                                       
+    public interface IInterface
+    {                                           
+        public float Foo(int a, float b, string c);
+
+        public void Bar(float a, int b);
+
+        public string Zoo(int a);
+
+        public int Goo();
+    }
+}

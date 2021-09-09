@@ -1,0 +1,21 @@
+using System;
+using HoneydewCore.Extractors;
+
+namespace App
+{                                       
+    public class Class1
+    {                                           
+        public CSharpMetricExtractor Foo(int a, string name) 
+        {
+            for (var i=0;i<a;i++) 
+            { 
+                if (name == "AA") 
+                {
+                    var b = new CSharpMetricExtractor(); 
+                    return b;
+                }
+            }
+            return null;
+        }
+    }
+}

@@ -1,12 +1,9 @@
-﻿using System;
-
-namespace HoneydewModels.Converters
+﻿namespace HoneydewModels.Converters
 {
-    public interface ITypeConverter<in TInterfaceType>
+    public interface ITypeConverter<out TInterfaceType>
     {
-        object Convert(TInterfaceType type);
+        TInterfaceType Convert(string type);
 
-        Type Convert(string type);
-        Type DefaultType();
+        TInterfaceType Convert(object value);
     }
 }

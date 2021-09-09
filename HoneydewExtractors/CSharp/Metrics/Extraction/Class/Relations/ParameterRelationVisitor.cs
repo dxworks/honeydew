@@ -1,34 +1,63 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
 {
-    public class ParameterRelationVisitor : RelationVisitor
+    public class ParameterRelationVisitor : IModelVisitor<IClassType>, IRelationVisitor
     {
-        public ParameterRelationVisitor()
-        {
-        }
-
-        public ParameterRelationVisitor(IRelationMetricHolder metricHolder) : base(metricHolder)
-        {
-        }
-
-        public override string PrettyPrint()
+        public string PrettyPrint()
         {
             return "Parameter Dependency";
         }
 
-        protected override void AddDependencies(string className, BaseTypeDeclarationSyntax syntaxNode)
+        public void Visit(IClassType modelType)
         {
-            foreach (var baseMethodDeclarationSyntax in syntaxNode.DescendantNodes()
-                .OfType<BaseMethodDeclarationSyntax>())
+            if (modelType is not IMembersClassType membersClassType)
             {
-                foreach (var parameterSyntax in baseMethodDeclarationSyntax.ParameterList.Parameters)
+                return;
+            }
+
+            var dependencies = new Dictionary<string, int>();
+
+            foreach (var methodType in membersClassType.Methods)
+            {
+                foreach (var parameterType in methodType.ParameterTypes)
                 {
-                    MetricHolder.Add(className, CSharpHelperMethods.GetFullName(parameterSyntax.Type).Name, this);
+                    if (dependencies.ContainsKey(parameterType.Type.Name))
+                    {
+                        dependencies[parameterType.Type.Name]++;
+                    }
+                    else
+                    {
+                        dependencies.Add(parameterType.Type.Name, 1);
+                    }
                 }
             }
+
+            foreach (var constructorType in membersClassType.Constructors)
+            {
+                foreach (var parameterType in constructorType.ParameterTypes)
+                {
+                    if (dependencies.ContainsKey(parameterType.Type.Name))
+                    {
+                        dependencies[parameterType.Type.Name]++;
+                    }
+                    else
+                    {
+                        dependencies.Add(parameterType.Type.Name, 1);
+                    }
+                }
+            }
+
+            membersClassType.Metrics.Add(new MetricModel
+            {
+                ExtractorName = GetType().ToString(),
+                Value = dependencies,
+                ValueType = dependencies.GetType().ToString()
+            });
         }
     }
 }

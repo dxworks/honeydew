@@ -1,0 +1,35 @@
+using System;
+using HoneydewCore.Extractors;
+using HoneydewCore.Extractors.Metrics;
+
+namespace App
+{                                       
+    public class Class1
+    {                                       
+        int _a; string b;
+            
+        public Class1(int a, string name) 
+        { 
+            _a=a; 
+            var c = new CSharpMetricExtractor(); 
+            var x = a+2;
+            b=name+x; 
+        }
+        
+        public Class1() 
+        { 
+            var i=0; 
+            var c=2; 
+            _a=i+c;  
+            var x = _a+2;
+            b="name" + x; 
+        }
+        
+        double f() 
+        {
+            int a=2; 
+            var c=6.0; 
+            return a+c; 
+        }
+    }
+}
