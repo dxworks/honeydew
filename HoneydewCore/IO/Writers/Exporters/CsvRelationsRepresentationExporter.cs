@@ -7,12 +7,12 @@ using HoneydewCore.ModelRepresentations;
 
 namespace HoneydewCore.IO.Writers.Exporters
 {
-    public class CsvClassRelationsRepresentationExporter
+    public class CsvRelationsRepresentationExporter
     {
         public IList<Tuple<string, Func<string, string>>> ColumnFunctionForEachRow =
             new List<Tuple<string, Func<string, string>>>();
 
-        public void Export(string filePath, ClassRelationsRepresentation classRelationsRepresentation)
+        public void Export(string filePath, RelationsRepresentation classRelationsRepresentation)
         {
             var csvBuilder = new CsvBuilder();
             var headers = new List<string>

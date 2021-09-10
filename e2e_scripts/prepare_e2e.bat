@@ -32,6 +32,8 @@ CALL :copy_file honeydew_intermediate.json
 CALL :copy_file honeydew_cyclomatic.json
 CALL :copy_file honeydew_cyclomatic_intermediate.json
 CALL :copy_file honeydew_namespaces.json
+CALL :copy_file honeydew_file_relations.csv
+CALL :copy_file honeydew_file_relations_intermediate.csv
 
 
 EXIT /B 0

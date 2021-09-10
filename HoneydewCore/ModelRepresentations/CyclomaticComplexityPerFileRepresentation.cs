@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace HoneydewCore.ModelRepresentations
 {
     public class CyclomaticComplexityPerFileRepresentation
     {
-        [JsonPropertyName("file")] public FileWrapper File { get; set; } = new();
+        [JsonProperty("file")] public FileWrapper File { get; set; } = new();
 
         public void AddConcern(Concern concern)
         {
@@ -15,13 +15,13 @@ namespace HoneydewCore.ModelRepresentations
 
     public class FileWrapper
     {
-        [JsonPropertyName("concerns")] public List<Concern> Concerns { get; set; } = new();
+        [JsonProperty("concerns")] public List<Concern> Concerns { get; set; } = new();
     }
 
     public class Concern
     {
-        [JsonPropertyName("entity")] public string Entity { get; set; }
-        [JsonPropertyName("tag")] public string Tag { get; set; }
-        [JsonPropertyName("strength")] public string Strength { get; set; }
+        [JsonProperty("entity")] public string Entity { get; set; }
+        [JsonProperty("tag")] public string Tag { get; set; }
+        [JsonProperty("strength")] public string Strength { get; set; }
     }
 }

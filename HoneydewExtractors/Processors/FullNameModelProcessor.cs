@@ -285,6 +285,8 @@ namespace HoneydewExtractors.Processors
                     "Resolving Class Elements (Fields, Methods, Properties,...)");
             progressBar.Start();
 
+            var currentClassCount = 1;
+            
             foreach (var solutionModel in repositoryModel.Solutions)
             {
                 foreach (var projectModel in solutionModel.Projects)
@@ -293,7 +295,8 @@ namespace HoneydewExtractors.Processors
                     {
                         foreach (var classType in namespaceModel.ClassModels)
                         {
-                            _logger.Log($"Resolving Elements for {classType.Name} from {classType.FilePath}");
+                            _logger.Log($"Resolving Elements for {classType.Name} from {classType.FilePath} ({currentClassCount}/{_classCount})");
+                            currentClassCount++;
                             progressBar.Step($"{classType.Name} from {classType.FilePath}");
 
                             for (var i = 0; i < classType.BaseTypes.Count; i++)

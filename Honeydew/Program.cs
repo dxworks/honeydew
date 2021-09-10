@@ -116,6 +116,8 @@ namespace Honeydew
                 {
                     case "load":
                     {
+                        progressLogger.Log($"Loading model from file {inputPath}");
+                        progressLogger.Log();
                         repositoryModel = await LoadModel(logger, inputPath);
                     }
                         break;
@@ -151,7 +153,7 @@ namespace Honeydew
                     logger.Log("Applying Post Extraction Metrics");
                     progressLogger.Log();
                     progressLogger.Log("Applying Post Extraction Metrics");
-                    
+
                     ApplyPostExtractionVisitors(repositoryModel);
 
                     WriteAllRepresentations(repositoryModel,
@@ -181,7 +183,7 @@ namespace Honeydew
                     logger.Log("Applying Post Extraction Metrics");
                     progressLogger.Log();
                     progressLogger.Log("Applying Post Extraction Metrics");
-                    
+
                     ApplyPostExtractionVisitors(repositoryModel);
 
                     WriteAllRepresentations(repositoryModel,
@@ -225,7 +227,7 @@ namespace Honeydew
                     })
                 })
             });
-            
+
             repositoryModelIterator.Iterate(repositoryModel);
         }
 
@@ -422,10 +424,15 @@ namespace Honeydew
             var repositoryExporter = new JsonModelExporter();
             repositoryExporter.Export(Path.Combine(outputPath, $"honeydew{nameModifier}.json"), repositoryModel);
 
+            var csvModelExporter = GetRelationsRepresentationExporter();
+
             var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
-            var csvModelExporter = GetClassRelationsRepresentationExporter();
             csvModelExporter.Export(Path.Combine(outputPath, $"honeydew{nameModifier}.csv"),
                 classRelationsRepresentation);
+
+            var fileRelationsRepresentation = new RepositoryModelToFileRelationsProcessor().Process(repositoryModel);
+            csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations{nameModifier}.csv"),
+                fileRelationsRepresentation);
 
             var cyclomaticComplexityPerFileRepresentation =
                 GetCyclomaticComplexityPerFileRepresentation(repositoryModel);
@@ -435,9 +442,9 @@ namespace Honeydew
                 cyclomaticComplexityPerFileRepresentation);
         }
 
-        private static CsvClassRelationsRepresentationExporter GetClassRelationsRepresentationExporter()
+        private static CsvRelationsRepresentationExporter GetRelationsRepresentationExporter()
         {
-            var csvModelExporter = new CsvClassRelationsRepresentationExporter
+            var csvModelExporter = new CsvRelationsRepresentationExporter
             {
                 ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
                 {
@@ -448,7 +455,7 @@ namespace Honeydew
             return csvModelExporter;
         }
 
-        private static ClassRelationsRepresentation GetClassRelationsRepresentation(
+        private static RelationsRepresentation GetClassRelationsRepresentation(
             RepositoryModel repositoryModel)
         {
             var classRelationsRepresentation =
