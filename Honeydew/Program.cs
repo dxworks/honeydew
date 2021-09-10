@@ -432,15 +432,15 @@ namespace Honeydew
             csvModelExporter.Export(Path.Combine(outputPath, $"honeydew{nameModifier}.csv"),
                 classRelationsRepresentation);
 
-            var allFileRelationsRepresentation =
-                new RepositoryModelToFileRelationsProcessor(new ChooseAllStrategy()).Process(repositoryModel);
-            csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations_all{nameModifier}.csv"),
-                allFileRelationsRepresentation);
+            //var allFileRelationsRepresentation =
+           //     new RepositoryModelToFileRelationsProcessor(new ChooseAllStrategy()).Process(repositoryModel);
+           // csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations_all{nameModifier}.csv"),
+            //    allFileRelationsRepresentation);
 
-            var jafaxFileRelationsRepresentation =
-                new RepositoryModelToFileRelationsProcessor(new JafaxChooseStrategy()).Process(repositoryModel);
-            csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations{nameModifier}.csv"),
-                jafaxFileRelationsRepresentation);
+           // var jafaxFileRelationsRepresentation =
+          //      new RepositoryModelToFileRelationsProcessor(new JafaxChooseStrategy()).Process(repositoryModel);
+          //  csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations{nameModifier}.csv"),
+          //      jafaxFileRelationsRepresentation);
 
             var cyclomaticComplexityPerFileRepresentation =
                 GetCyclomaticComplexityPerFileRepresentation(repositoryModel);
