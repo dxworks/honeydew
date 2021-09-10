@@ -176,7 +176,7 @@ namespace Honeydew
                     progressLogger.Log("Resolving Full Name Dependencies");
                     progressLogger.Log();
 
-                    var fullNameModelProcessor = new FullNameModelProcessor(logger, progressLogger);
+                    var fullNameModelProcessor = new FullNameModelProcessor(logger, progressLogger, options.DisableLocalVariablesBinding);
                     repositoryModel = fullNameModelProcessor.Process(repositoryModel);
 
                     logger.Log();
@@ -222,6 +222,8 @@ namespace Honeydew
                                 new ParameterRelationVisitor(),
                                 new ReturnValueRelationVisitor(),
                                 new LocalVariablesRelationVisitor(),
+                                
+                                new ExternCallsRelationVisitor(),
                             })
                         })
                     })
@@ -430,9 +432,15 @@ namespace Honeydew
             csvModelExporter.Export(Path.Combine(outputPath, $"honeydew{nameModifier}.csv"),
                 classRelationsRepresentation);
 
-            var fileRelationsRepresentation = new RepositoryModelToFileRelationsProcessor().Process(repositoryModel);
+            var allFileRelationsRepresentation =
+                new RepositoryModelToFileRelationsProcessor(new ChooseAllStrategy()).Process(repositoryModel);
+            csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations_all{nameModifier}.csv"),
+                allFileRelationsRepresentation);
+
+            var jafaxFileRelationsRepresentation =
+                new RepositoryModelToFileRelationsProcessor(new JafaxChooseStrategy()).Process(repositoryModel);
             csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations{nameModifier}.csv"),
-                fileRelationsRepresentation);
+                jafaxFileRelationsRepresentation);
 
             var cyclomaticComplexityPerFileRepresentation =
                 GetCyclomaticComplexityPerFileRepresentation(repositoryModel);

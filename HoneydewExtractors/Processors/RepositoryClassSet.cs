@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace HoneydewExtractors.Processors
 {
     internal class RepositoryClassSet
     {
-        private readonly Dictionary<string, ISet<string>> _projectDictionary = new();
+        private readonly ConcurrentDictionary<string, ISet<string>> _projectDictionary = new();
 
         public void Add(string projectName, string classFullName)
         {
@@ -19,7 +20,7 @@ namespace HoneydewExtractors.Processors
                 return;
             }
 
-            _projectDictionary.Add(projectName, new HashSet<string>()
+            _projectDictionary.TryAdd(projectName, new HashSet<string>
             {
                 classFullName
             });

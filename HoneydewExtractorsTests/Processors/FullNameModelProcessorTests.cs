@@ -17,7 +17,7 @@ namespace HoneydewExtractorsTests.Processors
 
         public FullNameModelProcessorTests()
         {
-            _sut = new FullNameModelProcessor(_loggerMock.Object, _progressLoggerMock.Object);
+            _sut = new FullNameModelProcessor(_loggerMock.Object, _progressLoggerMock.Object, false);
         }
 
         [Fact]

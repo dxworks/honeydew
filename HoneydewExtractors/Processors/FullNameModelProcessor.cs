@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using HoneydewCore.Logging;
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
@@ -15,23 +17,23 @@ namespace HoneydewExtractors.Processors
     {
         private readonly ILogger _logger;
         private readonly IProgressLogger _progressLogger;
+        private readonly bool _disableLocalVariablesBinding;
 
-        public readonly IDictionary<string, NamespaceTree> NamespacesDictionary =
-            new Dictionary<string, NamespaceTree>();
+        public readonly ConcurrentDictionary<string, NamespaceTree> NamespacesDictionary = new();
 
-        private readonly IDictionary<AmbiguousName, ISet<string>> _ambiguousNames =
-            new Dictionary<AmbiguousName, ISet<string>>();
+        private readonly ConcurrentDictionary<AmbiguousName, ISet<string>> _ambiguousNames = new();
 
-        private readonly ISet<string> _notFoundClassNames = new HashSet<string>();
+        private readonly ConcurrentDictionary<string, string> _notFoundClassNames = new();
 
         private readonly RepositoryClassSet _repositoryClassSet = new();
 
         private int _classCount;
 
-        public FullNameModelProcessor(ILogger logger, IProgressLogger progressLogger)
+        public FullNameModelProcessor(ILogger logger, IProgressLogger progressLogger, bool disableLocalVariablesBinding)
         {
             _logger = logger;
             _progressLogger = progressLogger;
+            _disableLocalVariablesBinding = disableLocalVariablesBinding;
         }
 
         public RepositoryModel Process(RepositoryModel repositoryModel)
@@ -93,7 +95,7 @@ namespace HoneydewExtractors.Processors
                 }
                 else
                 {
-                    _ambiguousNames.Add(e.AmbiguousName, e.PossibleNames);
+                    _ambiguousNames.TryAdd(e.AmbiguousName, e.PossibleNames);
                 }
             }
         }
@@ -286,16 +288,17 @@ namespace HoneydewExtractors.Processors
             progressBar.Start();
 
             var currentClassCount = 1;
-            
+
             foreach (var solutionModel in repositoryModel.Solutions)
             {
-                foreach (var projectModel in solutionModel.Projects)
+                Parallel.ForEach(solutionModel.Projects, projectModel =>
                 {
                     foreach (var namespaceModel in projectModel.Namespaces)
                     {
-                        foreach (var classType in namespaceModel.ClassModels)
+                        Parallel.ForEach(namespaceModel.ClassModels, classType =>
                         {
-                            _logger.Log($"Resolving Elements for {classType.Name} from {classType.FilePath} ({currentClassCount}/{_classCount})");
+                            _logger.Log(
+                                $"Resolving Elements for {classType.Name} from {classType.FilePath} ({currentClassCount}/{_classCount})");
                             currentClassCount++;
                             progressBar.Step($"{classType.Name} from {classType.FilePath}");
 
@@ -316,77 +319,76 @@ namespace HoneydewExtractors.Processors
                             SetGenericParametersFullName(repositoryModel, classType, namespaceModel, projectModel,
                                 solutionModel, classType.Imports, classType.FilePath);
 
-                            if (classType is not IPropertyMembersClassType classModel)
+                            if (classType is IPropertyMembersClassType classModel)
                             {
-                                continue;
-                            }
-
-                            foreach (var fieldModel in classModel.Fields)
-                            {
-                                AddAmbiguousNames(() =>
-                                {
-                                    SetEntityTypeFullName(repositoryModel, namespaceModel, projectModel,
-                                        solutionModel, classModel.Imports, classModel.FilePath,
-                                        fieldModel.Type);
-                                });
-
-                                SetEntityAttributesFullName(repositoryModel, fieldModel, namespaceModel, projectModel,
-                                    solutionModel, classType.Imports, classType.FilePath);
-                            }
-
-                            foreach (var propertyModel in classModel.Properties)
-                            {
-                                AddAmbiguousNames(() =>
-                                {
-                                    SetEntityTypeFullName(repositoryModel, namespaceModel, projectModel,
-                                        solutionModel, classModel.Imports, classModel.FilePath,
-                                        propertyModel.Type);
-                                });
-
-                                SetEntityAttributesFullName(repositoryModel, propertyModel, namespaceModel,
-                                    projectModel,
-                                    solutionModel, classType.Imports, classType.FilePath);
-
-                                foreach (var accessor in propertyModel.Accessors)
-                                {
-                                    SetMethodSkeletonFullName(classModel.FilePath, accessor, namespaceModel,
-                                        projectModel, solutionModel, repositoryModel, classModel.Imports);
-                                }
-                            }
-
-                            foreach (var methodModel in classModel.Methods)
-                            {
-                                if (methodModel.ReturnValue != null)
+                                foreach (var fieldModel in classModel.Fields)
                                 {
                                     AddAmbiguousNames(() =>
                                     {
                                         SetEntityTypeFullName(repositoryModel, namespaceModel, projectModel,
                                             solutionModel, classModel.Imports, classModel.FilePath,
-                                            methodModel.ReturnValue.Type);
+                                            fieldModel.Type);
                                     });
 
-                                    SetEntityAttributesFullName(repositoryModel, methodModel.ReturnValue,
-                                        namespaceModel, projectModel,
+                                    SetEntityAttributesFullName(repositoryModel, fieldModel, namespaceModel,
+                                        projectModel,
                                         solutionModel, classType.Imports, classType.FilePath);
                                 }
 
-                                SetMethodSkeletonFullName(classModel.FilePath, methodModel, namespaceModel,
-                                    projectModel, solutionModel, repositoryModel, classModel.Imports);
-                            }
+                                foreach (var propertyModel in classModel.Properties)
+                                {
+                                    AddAmbiguousNames(() =>
+                                    {
+                                        SetEntityTypeFullName(repositoryModel, namespaceModel, projectModel,
+                                            solutionModel, classModel.Imports, classModel.FilePath,
+                                            propertyModel.Type);
+                                    });
 
-                            foreach (var constructorType in classModel.Constructors)
-                            {
-                                SetMethodSkeletonFullName(classModel.FilePath, constructorType, namespaceModel,
-                                    projectModel, solutionModel, repositoryModel, classModel.Imports);
-                            }
+                                    SetEntityAttributesFullName(repositoryModel, propertyModel, namespaceModel,
+                                        projectModel,
+                                        solutionModel, classType.Imports, classType.FilePath);
 
-                            ChangeDependencyMetricFullName(repositoryModel, classModel, namespaceModel,
-                                projectModel, solutionModel);
-                        }
+                                    foreach (var accessor in propertyModel.Accessors)
+                                    {
+                                        SetMethodSkeletonFullName(classModel.FilePath, accessor, namespaceModel,
+                                            projectModel, solutionModel, repositoryModel, classModel.Imports);
+                                    }
+                                }
+
+                                foreach (var methodModel in classModel.Methods)
+                                {
+                                    if (methodModel.ReturnValue != null)
+                                    {
+                                        AddAmbiguousNames(() =>
+                                        {
+                                            SetEntityTypeFullName(repositoryModel, namespaceModel, projectModel,
+                                                solutionModel, classModel.Imports, classModel.FilePath,
+                                                methodModel.ReturnValue.Type);
+                                        });
+
+                                        SetEntityAttributesFullName(repositoryModel, methodModel.ReturnValue,
+                                            namespaceModel, projectModel,
+                                            solutionModel, classType.Imports, classType.FilePath);
+                                    }
+
+                                    SetMethodSkeletonFullName(classModel.FilePath, methodModel, namespaceModel,
+                                        projectModel, solutionModel, repositoryModel, classModel.Imports);
+                                }
+
+                                foreach (var constructorType in classModel.Constructors)
+                                {
+                                    SetMethodSkeletonFullName(classModel.FilePath, constructorType, namespaceModel,
+                                        projectModel, solutionModel, repositoryModel, classModel.Imports);
+                                }
+
+                                ChangeDependencyMetricFullName(repositoryModel, classModel, namespaceModel,
+                                    projectModel, solutionModel);
+                            }
+                        });
                     }
 
                     _logger.Log();
-                }
+                });
 
                 progressBar.Stop();
             }
@@ -414,8 +416,11 @@ namespace HoneydewExtractors.Processors
             SetFullNameForCalledMethods(classFilePath, methodSkeletonType.CalledMethods, namespaceModel,
                 projectModel, solutionModel, repositoryModel, importTypes);
 
-            SetLocalVariablesFullName(repositoryModel, namespaceModel, projectModel, solutionModel, importTypes,
-                classFilePath, methodSkeletonType);
+            if (!_disableLocalVariablesBinding)
+            {
+                SetLocalVariablesFullName(repositoryModel, namespaceModel, projectModel, solutionModel, importTypes,
+                    classFilePath, methodSkeletonType);
+            }
         }
 
         private void SetGenericParametersFullName(RepositoryModel repositoryModel, IClassType classType,
@@ -578,7 +583,8 @@ namespace HoneydewExtractors.Processors
 
                 foreach (var type in genericType.ContainedTypes)
                 {
-                    SetGenericTypeFullName(repositoryModel, namespaceModel, projectModel, solutionModel, importTypes,
+                    SetGenericTypeFullName(repositoryModel, namespaceModel, projectModel, solutionModel,
+                        importTypes,
                         filePath, type);
                 }
             });
@@ -789,7 +795,7 @@ namespace HoneydewExtractors.Processors
 
                         if (!_ambiguousNames.ContainsKey(e.AmbiguousName))
                         {
-                            _ambiguousNames.Add(e.AmbiguousName, e.PossibleNames);
+                            _ambiguousNames.TryAdd(e.AmbiguousName, e.PossibleNames);
                         }
                     }
                 }
@@ -860,7 +866,7 @@ namespace HoneydewExtractors.Processors
                 return className;
             }
 
-            if (_notFoundClassNames.Contains(className))
+            if (_notFoundClassNames.ContainsKey(className))
             {
                 return className;
             }
@@ -1029,10 +1035,11 @@ namespace HoneydewExtractors.Processors
                     return fullNamePossibilities.First() + nullableString;
                 case > 1:
                     throw new AmbiguousFullNameException(
-                        new AmbiguousName { Name = classFullName, Location = classFilePath }, fullNamePossibilities);
+                        new AmbiguousName { Name = classFullName, Location = classFilePath },
+                        fullNamePossibilities);
                 default:
                 {
-                    _notFoundClassNames.Add(classFullName);
+                    _notFoundClassNames.TryAdd(classFullName, classFullName);
                     return classFullName + nullableString;
                 }
             }
@@ -1139,7 +1146,8 @@ namespace HoneydewExtractors.Processors
             return childNamespace.GetPossibleChildren(className, genericParametersCount);
         }
 
-        private NamespaceTree GetClassInNamespaceAmongChildrenNamespaces(NamespaceTree namespaceTree, string className)
+        private NamespaceTree GetClassInNamespaceAmongChildrenNamespaces(NamespaceTree namespaceTree,
+            string className)
         {
             foreach (var (childName, childNode) in namespaceTree.Children)
             {
@@ -1170,7 +1178,7 @@ namespace HoneydewExtractors.Processors
                 };
                 rootNamespaceTree = nameNamespace;
 
-                NamespacesDictionary.Add(namespaceNameParts[0], rootNamespaceTree);
+                NamespacesDictionary.TryAdd(namespaceNameParts[0], rootNamespaceTree);
             }
 
             if (namespaceNameParts.Length > 1) // create sub graph if namespaceNames is not trivial
