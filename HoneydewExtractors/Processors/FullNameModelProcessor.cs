@@ -292,10 +292,12 @@ namespace HoneydewExtractors.Processors
             foreach (var solutionModel in repositoryModel.Solutions)
             {
                 Parallel.ForEach(solutionModel.Projects, projectModel =>
+                // foreach (var projectModel in solutionModel.Projects)
                 {
                     foreach (var namespaceModel in projectModel.Namespaces)
                     {
                         Parallel.ForEach(namespaceModel.ClassModels, classType =>
+                        // foreach (var classType in namespaceModel.ClassModels)
                         {
                             _logger.Log(
                                 $"Resolving Elements for {classType.Name} from {classType.FilePath} ({currentClassCount}/{_classCount})");
@@ -384,11 +386,13 @@ namespace HoneydewExtractors.Processors
                                 ChangeDependencyMetricFullName(repositoryModel, classModel, namespaceModel,
                                     projectModel, solutionModel);
                             }
-                        });
+                            });
+                        // }
                     }
 
                     _logger.Log();
-                });
+                    });
+                // }
 
                 progressBar.Stop();
             }
