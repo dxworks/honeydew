@@ -2,7 +2,7 @@
 
 namespace HoneydewCore.ModelRepresentations
 {
-    public class ClassRelationsRepresentation
+    public class RelationsRepresentation
     {
         public ISet<string> DependenciesType { get; } = new HashSet<string>();
 

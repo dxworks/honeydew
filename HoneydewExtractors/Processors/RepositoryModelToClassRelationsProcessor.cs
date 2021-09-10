@@ -7,18 +7,16 @@ using HoneydewModels.CSharp;
 
 namespace HoneydewExtractors.Processors
 {
-    public class
-        RepositoryModelToClassRelationsProcessor : IProcessorFunction<RepositoryModel,
-            ClassRelationsRepresentation>
+    public class RepositoryModelToClassRelationsProcessor : IProcessorFunction<RepositoryModel, RelationsRepresentation>
     {
-        public ClassRelationsRepresentation Process(RepositoryModel repositoryModel)
+        public RelationsRepresentation Process(RepositoryModel repositoryModel)
         {
             if (repositoryModel == null)
             {
-                return new ClassRelationsRepresentation();
+                return new RelationsRepresentation();
             }
 
-            var classRelationsRepresentation = new ClassRelationsRepresentation();
+            var classRelationsRepresentation = new RelationsRepresentation();
 
             foreach (var classType in repositoryModel.GetEnumerable())
             {

@@ -37,7 +37,7 @@ namespace HoneydewExtractorsTests.Processors
 
         public FullNameModelProcessorForGenericTypesTests()
         {
-            _sut = new FullNameModelProcessor(_loggerMock.Object, _progressLoggerMock.Object);
+            _sut = new FullNameModelProcessor(_loggerMock.Object, _progressLoggerMock.Object, false);
 
             var compositeVisitor = new CompositeVisitor();
             var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<IMethodSignatureVisitor>

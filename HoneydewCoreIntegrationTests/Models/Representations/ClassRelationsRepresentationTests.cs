@@ -5,11 +5,11 @@ namespace HoneydewCoreIntegrationTests.Models.Representations
 {
     public class ClassRelationsRepresentationTests
     {
-        private readonly ClassRelationsRepresentation _sut;
+        private readonly RelationsRepresentation _sut;
 
         public ClassRelationsRepresentationTests()
         {
-            _sut = new ClassRelationsRepresentation();
+            _sut = new RelationsRepresentation();
         }
 
         [Theory]
