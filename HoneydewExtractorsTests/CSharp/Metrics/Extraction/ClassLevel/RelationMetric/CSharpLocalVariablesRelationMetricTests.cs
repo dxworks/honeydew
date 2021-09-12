@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
@@ -18,6 +19,7 @@ using HoneydewExtractors.CSharp.Metrics.Iterators;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.Types;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
@@ -27,6 +29,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         private readonly LocalVariablesRelationVisitor _sut;
         private readonly CSharpFactExtractor _factExtractor;
         private readonly ClassTypePropertyIterator _classTypePropertyIterator;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpLocalVariablesRelationVisitorTests()
         {
@@ -72,8 +75,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                     })
                 })
             }));
+
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
 
 
             _classTypePropertyIterator = new ClassTypePropertyIterator(new List<IModelVisitor<IClassType>>
@@ -292,7 +298,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[1].Metrics[0].ValueType);
 
-            var dependencies2 = ((Dictionary<string, int>)classTypes[1].Metrics[0].Value);
+            var dependencies2 = (Dictionary<string, int>)classTypes[1].Metrics[0].Value;
 
             Assert.Equal(3, dependencies2.Count);
             Assert.Equal(1, dependencies2["CSharpMetricExtractor"]);

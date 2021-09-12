@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using HoneydewCore.Logging;
 using HoneydewCore.Processors;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -18,6 +19,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Extraction.MethodCall;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewCoreIntegrationTests.Processors
@@ -27,6 +29,7 @@ namespace HoneydewCoreIntegrationTests.Processors
         private readonly SolutionModelToReferenceSolutionModelProcessor _sut;
 
         private readonly CSharpFactExtractor _extractor;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public SolutionModelToReferenceSolutionModelProcessorTestsWithMissingReferencesHandler()
         {
@@ -65,8 +68,10 @@ namespace HoneydewCoreIntegrationTests.Processors
                     }))
             }));
 
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
             _extractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
         }
 
         [Fact]

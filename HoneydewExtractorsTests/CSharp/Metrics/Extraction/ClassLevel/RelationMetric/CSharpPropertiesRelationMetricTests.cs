@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
@@ -9,6 +10,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
 using HoneydewExtractors.CSharp.Metrics.Iterators;
 using HoneydewModels.Types;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
@@ -18,6 +20,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         private readonly PropertiesRelationVisitor _sut;
         private readonly CSharpFactExtractor _factExtractor;
         private readonly ClassTypePropertyIterator _classTypePropertyIterator;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpPropertiesRelationMetricTests()
         {
@@ -34,8 +37,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                 })
             }));
 
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
 
             _classTypePropertyIterator = new ClassTypePropertyIterator(new List<IModelVisitor<IClassType>>
             {

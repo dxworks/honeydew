@@ -392,7 +392,7 @@ namespace Honeydew
         {
             var solutionProvider = new MsBuildSolutionProvider();
             var projectProvider = new MsBuildProjectProvider();
-            ICompilationMaker compilationMaker = new CSharpCompilationMaker();
+            ICompilationMaker compilationMaker = new CSharpCompilationMaker(logger);
             // Create repository model from path
             var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger, compilationMaker);
 

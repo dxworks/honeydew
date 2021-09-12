@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewCore.Processors;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -14,6 +15,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.MethodCall;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
+using Moq;
 using Xunit;
 
 namespace HoneydewCoreIntegrationTests.Processors
@@ -565,8 +567,12 @@ namespace Project1.Services
                 })
             }));
 
+            Mock<ILogger> loggerMock = new();
+
+            compositeVisitor.Accept(new LoggerSetterVisitor(loggerMock.Object));
+
             var extractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker(loggerMock.Object)), compositeVisitor);
 
             var classModels = extractor.Extract(fileContent).ClassTypes;
 

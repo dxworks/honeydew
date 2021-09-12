@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
@@ -12,6 +13,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
@@ -19,6 +21,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
     public class CSharpPropertyAccessorMethodLocalVariablesTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpPropertyAccessorMethodLocalVariablesTests()
         {
@@ -41,8 +44,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                 })
             }));
 
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
         }
 
         [Theory]

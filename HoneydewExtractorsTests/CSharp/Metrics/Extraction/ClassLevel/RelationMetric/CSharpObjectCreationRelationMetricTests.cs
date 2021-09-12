@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
@@ -13,6 +15,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
     {
         private readonly ObjectCreationRelationVisitor _sut;
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpObjectCreationRelationMetricTests()
         {
@@ -26,8 +29,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                 _sut
             }));
 
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
         }
 
         [Fact]
@@ -325,11 +330,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
 
             Assert.Equal(6, dependencies.Count);
-            Assert.Equal(1, dependencies["System.String[]"]);
-            Assert.Equal(1, dependencies["System.Double[]"]);
-            Assert.Equal(1, dependencies["System.Single[]"]);
-            Assert.Equal(1, dependencies["System.Int32[]"]);
-            Assert.Equal(1, dependencies["System.Boolean[]"]);
+            Assert.Equal(1, dependencies["string[]"]);
+            Assert.Equal(1, dependencies["double[]"]);
+            Assert.Equal(1, dependencies["float[]"]);
+            Assert.Equal(1, dependencies["int[]"]);
+            Assert.Equal(1, dependencies["bool[]"]);
             Assert.Equal(1, dependencies["System.Object[]"]);
         }
 

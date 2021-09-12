@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -10,6 +11,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Common;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Constructor;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
@@ -17,6 +19,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
     public class CSharpConstructorAttributeMetricTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpConstructorAttributeMetricTests()
         {
@@ -35,8 +38,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
                 })
             }));
 
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
         }
 
         [Theory]
@@ -73,7 +78,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
                 Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
                 Assert.Equal("string?", attributeTypes[0].ParameterTypes[0].Type.Name);
             }
-            
+
             Assert.Equal("Namespace1.Class1.Class1()", classModel.Constructors[0].Attributes[0].ContainingTypeName);
             Assert.Equal("Namespace1.Class1.Class1(int)", classModel.Constructors[1].Attributes[0].ContainingTypeName);
         }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
@@ -9,6 +10,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Iterators;
 using HoneydewModels.Types;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
@@ -18,6 +20,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         private readonly ReturnValueRelationVisitor _sut;
         private readonly CSharpFactExtractor _factExtractor;
         private readonly ClassTypePropertyIterator _classTypePropertyIterator;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpReturnValueRelationMetricTests()
         {
@@ -34,8 +37,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                 })
             }));
 
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
 
             _classTypePropertyIterator = new ClassTypePropertyIterator(new List<IModelVisitor<IClassType>>
             {
@@ -156,7 +161,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/Relations/ReturnValueRelations/ClassWithMethodsWithNonPrimitiveReturnValue.txt")]
-        public void Extract_ShouldHaveDependenciesReturnValues_WhenClassHasMethodsWithDependenciesReturnValues(string fileContent)
+        public void Extract_ShouldHaveDependenciesReturnValues_WhenClassHasMethodsWithDependenciesReturnValues(
+            string fileContent)
         {
             var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
 

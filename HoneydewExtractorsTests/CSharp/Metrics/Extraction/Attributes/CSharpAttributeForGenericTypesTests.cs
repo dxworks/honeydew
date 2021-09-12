@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -15,6 +16,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Attributes
@@ -22,6 +24,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Attributes
     public class CSharpAttributeForGenericTypesTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpAttributeForGenericTypesTests()
         {
@@ -59,8 +62,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Attributes
                 genericParameterSetterVisitor
             }));
 
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
         }
 
         [Theory]
@@ -123,7 +128,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Attributes
             foreach (var genericParameter in genericParameters)
             {
                 Assert.Equal(3, genericParameter.Attributes.Count);
-                
+
                 Assert.Equal("parameter", genericParameter.Attributes[0].Target);
                 Assert.Equal("System.ComponentModel.TypeConverterAttribute", genericParameter.Attributes[0].Name);
                 Assert.Equal("Namespace1.MyAttribute", genericParameter.Attributes[1].Name);

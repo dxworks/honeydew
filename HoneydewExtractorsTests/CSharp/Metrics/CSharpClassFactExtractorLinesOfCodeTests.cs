@@ -62,7 +62,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
             _sut = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
         }
 
         [Theory]

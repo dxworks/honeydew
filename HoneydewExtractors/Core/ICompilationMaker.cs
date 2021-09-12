@@ -6,6 +6,6 @@ namespace HoneydewExtractors.Core
     {
         Compilation GetCompilation();
 
-        void AddReference(string path);
+        void AddReference(Compilation compilation, string referencePath);
     }
 }

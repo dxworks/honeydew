@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
@@ -10,6 +11,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Constructor;
 using HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
@@ -17,6 +19,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
     public class CSharpConstructorLocalVariablesTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpConstructorLocalVariablesTests()
         {
@@ -35,8 +38,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
                 })
             }));
 
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
         }
 
         [Theory]
@@ -103,7 +108,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
                 }
             }
         }
-        
+
         [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/Constructor/LocalVariables/ConstructorWithArrayLocalVariable.txt")]

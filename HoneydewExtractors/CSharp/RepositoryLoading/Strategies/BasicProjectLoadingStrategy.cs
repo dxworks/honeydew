@@ -28,7 +28,8 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     .Select(reference => ExtractPathFromProjectId(reference.ProjectId.ToString())).ToList()
             };
 
-            _compilationMaker.AddReference(project.CompilationOutputInfo.AssemblyPath);
+            var compilation = await project.GetCompilationAsync();
+            _compilationMaker.AddReference(compilation, project.CompilationOutputInfo.AssemblyPath);
 
             var extractor = extractorCreator.Create(project.Language);
 

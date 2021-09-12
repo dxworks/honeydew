@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
@@ -13,6 +15,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
     {
         private readonly CSharpFactExtractor _factExtractor;
         private readonly ExceptionsThrownRelationVisitor _sut;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpExceptionsThrownRelationMetricTests()
         {
@@ -26,8 +29,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                 _sut
             }));
 
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
         }
 
         [Fact]
