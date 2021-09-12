@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
@@ -88,83 +89,22 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
         {
             var calledMethodName = invocationExpressionSyntax.Expression.ToString();
 
-            string containingClassName = "";
+            var containingClassName = GetContainingType(invocationExpressionSyntax).Name;
 
-            var parentLocalFunctionSyntax =
-                invocationExpressionSyntax.GetParentDeclarationSyntax<LocalFunctionStatementSyntax>();
-
-            if (parentLocalFunctionSyntax == null)
+            return invocationExpressionSyntax.Expression switch
             {
-                var symbolInfo = _semanticModel.GetSymbolInfo(invocationExpressionSyntax);
-                if (symbolInfo.Symbol != null)
+                MemberAccessExpressionSyntax memberAccessExpressionSyntax => new MethodCallModel
                 {
-                    containingClassName = symbolInfo.Symbol.ContainingType.ToString();
-                }
-            }
-            else
-            {
-                while (parentLocalFunctionSyntax != null)
+                    Name = memberAccessExpressionSyntax.Name.ToString(),
+                    ContainingTypeName = containingClassName,
+                    ParameterTypes = GetParameters(invocationExpressionSyntax)
+                },
+                _ => new MethodCallModel
                 {
-                    if (parentLocalFunctionSyntax.Body != null)
-                    {
-                        var localFunctionStatementSyntax = parentLocalFunctionSyntax.Body.ChildNodes()
-                            .OfType<LocalFunctionStatementSyntax>()
-                            .SingleOrDefault(childNode => childNode.Identifier.ToString() == calledMethodName);
-                        if (localFunctionStatementSyntax != null)
-                        {
-                            parentLocalFunctionSyntax = localFunctionStatementSyntax;
-                            break;
-                        }
-                    }
-
-                    parentLocalFunctionSyntax = parentLocalFunctionSyntax.Parent
-                        .GetParentDeclarationSyntax<LocalFunctionStatementSyntax>();
+                    Name = calledMethodName,
+                    ContainingTypeName = containingClassName,
+                    ParameterTypes = GetParameters(invocationExpressionSyntax)
                 }
-
-                if (parentLocalFunctionSyntax != null)
-                {
-                    containingClassName = GetParentDeclaredType(parentLocalFunctionSyntax);
-                }
-                else
-                {
-                    containingClassName = GetParentDeclaredType(invocationExpressionSyntax);
-                }
-            }
-
-            switch (invocationExpressionSyntax.Expression)
-            {
-                case IdentifierNameSyntax:
-                    return new MethodCallModel
-                    {
-                        Name = calledMethodName,
-                        ContainingTypeName = containingClassName,
-                        ParameterTypes = GetParameters(invocationExpressionSyntax)
-                    };
-
-                case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
-                {
-                    var className = containingClassName;
-
-                    if (memberAccessExpressionSyntax.Expression.ToFullString() != CSharpConstants.BaseClassIdentifier)
-                    {
-                        className = GetFullName(memberAccessExpressionSyntax.Expression).Name ??
-                                    containingClassName;
-                    }
-
-                    return new MethodCallModel
-                    {
-                        Name = memberAccessExpressionSyntax.Name.ToString(),
-                        ContainingTypeName = className,
-                        ParameterTypes = GetParameters(invocationExpressionSyntax)
-                    };
-                }
-            }
-
-            return new MethodCallModel
-            {
-                Name = calledMethodName,
-                ContainingTypeName = containingClassName,
-                ParameterTypes = GetParameters(invocationExpressionSyntax)
             };
         }
 
@@ -194,7 +134,13 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 string defaultValue = null;
                 if (parameter.HasExplicitDefaultValue)
                 {
-                    defaultValue = parameter.ExplicitDefaultValue?.ToString();
+                    defaultValue = parameter.ExplicitDefaultValue == null
+                        ? "null"
+                        : parameter.ExplicitDefaultValue.ToString();
+                    if (defaultValue is "False" or "True")
+                    {
+                        defaultValue = defaultValue.ToLower();
+                    }
                 }
 
                 parameters.Add(new ParameterModel
@@ -294,6 +240,64 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
         public IEntityType GetContainingType(SyntaxNode syntaxNode)
         {
+            if (syntaxNode is InvocationExpressionSyntax invocationExpressionSyntax)
+            {
+                switch (invocationExpressionSyntax.Expression)
+                {
+                    case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
+                    {
+                        var entityType = GetFullName(memberAccessExpressionSyntax.Expression);
+                        if (string.IsNullOrEmpty(entityType.Name))
+                        {
+                            entityType = GetFullName(memberAccessExpressionSyntax.Name);
+                        }
+
+                        return entityType;
+                    }
+
+                    default:
+                    {
+                        var symbolInfo = _semanticModel.GetSymbolInfo(syntaxNode);
+                        if (symbolInfo.Symbol != null)
+                        {
+                            var containingSymbol = symbolInfo.Symbol.ContainingSymbol;
+                            var stringBuilder = new StringBuilder(containingSymbol.ToDisplayString());
+                            while (containingSymbol.Kind == SymbolKind.Method)
+                            {
+                                containingSymbol = containingSymbol.ContainingSymbol;
+                                if (containingSymbol.Kind == SymbolKind.Method)
+                                {
+                                    stringBuilder = new StringBuilder(containingSymbol.ToDisplayString())
+                                        .Append('.')
+                                        .Append(stringBuilder);
+                                }
+                            }
+
+                            return _fullNameProvider.CreateEntityTypeModel(stringBuilder.ToString());
+                        }
+
+                        var typeInfo = _semanticModel.GetTypeInfo(syntaxNode);
+                        if (typeInfo.Type != null)
+                        {
+                            return _fullNameProvider.CreateEntityTypeModel(typeInfo.Type.ToDisplayString());
+                        }
+                    }
+                        break;
+                }
+            }
+
+            var baseFieldDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseFieldDeclarationSyntax>();
+            if (baseFieldDeclarationSyntax != null)
+            {
+                return GetFullName(baseFieldDeclarationSyntax.Declaration.Type);
+            }
+
+            var basePropertyDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
+            if (basePropertyDeclarationSyntax != null)
+            {
+                return GetFullName(basePropertyDeclarationSyntax.Type);
+            }
+
             var variableDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<VariableDeclarationSyntax>();
             if (variableDeclarationSyntax != null)
             {
@@ -302,12 +306,6 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 {
                     return fullName;
                 }
-            }
-
-            var propertyDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
-            if (propertyDeclarationSyntax != null)
-            {
-                return GetFullName(propertyDeclarationSyntax.Type);
             }
 
             return _fullNameProvider.CreateEntityTypeModel(syntaxNode.ToString());
@@ -483,31 +481,31 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             var accessorDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<AccessorDeclarationSyntax>();
             if (accessorDeclarationSyntax != null)
             {
-                return _fullNameProvider.GetFullName(accessorDeclarationSyntax);
+                return GetFullName(accessorDeclarationSyntax);
             }
 
             var propertyDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
             if (propertyDeclarationSyntax != null)
             {
-                return _fullNameProvider.GetFullName(propertyDeclarationSyntax);
+                return GetFullName(propertyDeclarationSyntax);
             }
 
             var baseMethodDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseMethodDeclarationSyntax>();
             if (baseMethodDeclarationSyntax != null)
             {
-                return _fullNameProvider.GetFullName(baseMethodDeclarationSyntax);
+                return GetFullName(baseMethodDeclarationSyntax);
             }
 
             var delegateDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<DelegateDeclarationSyntax>();
             if (delegateDeclarationSyntax != null)
             {
-                return _fullNameProvider.GetFullName(delegateDeclarationSyntax);
+                return GetFullName(delegateDeclarationSyntax);
             }
 
             var parentDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>();
             if (parentDeclarationSyntax != null)
             {
-                return _fullNameProvider.GetFullName(parentDeclarationSyntax);
+                return GetFullName(parentDeclarationSyntax);
             }
 
             return _fullNameProvider.CreateEntityTypeModel(syntaxNode.ToString());

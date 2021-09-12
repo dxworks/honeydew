@@ -53,6 +53,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                 return modelType;
             }
 
+            var missingLocalVariablesCount = 0;
+
             // normal local variables
             foreach (var localDeclarationStatementSyntax in syntaxNode.Body.ChildNodes()
                 .OfType<LocalDeclarationStatementSyntax>())
@@ -79,7 +81,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                         }
                     }
 
-                    modelType.LocalVariableTypes.Add(localVariableModel);
+                    if (!string.IsNullOrEmpty(localVariableModel.Type.Name))
+                    {
+                        modelType.LocalVariableTypes.Add(localVariableModel);
+                    }
+                    else
+                    {
+                        missingLocalVariablesCount++;
+                    }
                 }
             }
 
@@ -114,7 +123,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                     }
                 }
 
-                modelType.LocalVariableTypes.Add(localVariableModel);
+                if (!string.IsNullOrEmpty(localVariableModel.Type.Name))
+                {
+                    modelType.LocalVariableTypes.Add(localVariableModel);
+                }
+                else
+                {
+                    missingLocalVariablesCount++;
+                }
             }
 
             // local variables from foreach
@@ -140,7 +156,19 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                     }
                 }
 
-                modelType.LocalVariableTypes.Add(localVariableModel);
+                if (!string.IsNullOrEmpty(localVariableModel.Type.Name))
+                {
+                    modelType.LocalVariableTypes.Add(localVariableModel);
+                }
+                else
+                {
+                    missingLocalVariablesCount++;
+                }
+            }
+
+            if (missingLocalVariablesCount > 0)
+            {
+                Logger.Log($"Could not set {missingLocalVariablesCount} local variables", LogLevels.Warning);
             }
 
             return modelType;
@@ -148,6 +176,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
 
         private void SetLocalVariables(SyntaxNode syntaxNode, ITypeWithLocalVariables typeWithLocalVariables)
         {
+            var missingLocalVariablesCount = 0;
+
             // normal local variables
             foreach (var variableDeclaratorSyntax in
                 syntaxNode.DescendantNodes().OfType<VariableDeclaratorSyntax>())
@@ -169,7 +199,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                     }
                 }
 
-                typeWithLocalVariables.LocalVariableTypes.Add(localVariableModel);
+                if (!string.IsNullOrEmpty(localVariableModel.Type.Name))
+                {
+                    typeWithLocalVariables.LocalVariableTypes.Add(localVariableModel);
+                }
+                else
+                {
+                    missingLocalVariablesCount++;
+                }
             }
 
             // local variables from ifs and switches
@@ -194,7 +231,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                     }
                 }
 
-                typeWithLocalVariables.LocalVariableTypes.Add(localVariableModel);
+                if (!string.IsNullOrEmpty(localVariableModel.Type.Name))
+                {
+                    typeWithLocalVariables.LocalVariableTypes.Add(localVariableModel);
+                }
+                else
+                {
+                    missingLocalVariablesCount++;
+                }
             }
 
             // local variables from foreach
@@ -220,7 +264,19 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                     }
                 }
 
-                typeWithLocalVariables.LocalVariableTypes.Add(localVariableModel);
+                if (!string.IsNullOrEmpty(localVariableModel.Type.Name))
+                {
+                    typeWithLocalVariables.LocalVariableTypes.Add(localVariableModel);
+                }
+                else
+                {
+                    missingLocalVariablesCount++;
+                }
+            }
+
+            if (missingLocalVariablesCount > 0)
+            {
+                Logger.Log($"Could not set {missingLocalVariablesCount} local variables", LogLevels.Warning);
             }
         }
     }

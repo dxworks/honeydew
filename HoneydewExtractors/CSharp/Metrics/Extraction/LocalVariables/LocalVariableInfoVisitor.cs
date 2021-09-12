@@ -1,4 +1,5 @@
-﻿using HoneydewExtractors.Core.Metrics.Visitors;
+﻿using System.Linq;
+using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
 using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.Types;
@@ -47,7 +48,22 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables
                         }
                         else if (declarationVariable.Initializer != null)
                         {
-                            localVariableType = CSharpHelperMethods.GetFullName(declarationVariable.Initializer.Value);
+                            var memberAccessExpressionSyntax = declarationVariable.Initializer.ChildNodes()
+                                .OfType<MemberAccessExpressionSyntax>().SingleOrDefault();
+                            if (memberAccessExpressionSyntax != null)
+                            {
+                                localVariableType = CSharpHelperMethods.GetFullName(memberAccessExpressionSyntax.Name);
+                                if (localVariableType.Name == memberAccessExpressionSyntax.Name.ToString())
+                                {
+                                    localVariableType.Name = "";
+                                    localVariableType.FullType.Name = "";
+                                }
+                            }
+                            else
+                            {
+                                localVariableType =
+                                    CSharpHelperMethods.GetFullName(declarationVariable.Initializer.Value);
+                            }
                         }
                     }
                 }

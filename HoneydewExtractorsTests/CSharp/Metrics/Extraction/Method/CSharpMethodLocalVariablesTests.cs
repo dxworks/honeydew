@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
@@ -12,6 +13,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
@@ -19,6 +21,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
     public class CSharpMethodLocalVariablesTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpMethodLocalVariablesTests()
         {
@@ -47,8 +50,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 }),
             }));
 
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
         }
 
         [Theory]
@@ -94,6 +99,41 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
 
             Assert.Equal("Namespace1.Class2", classModel.Methods[1].LocalVariableTypes[1].Type.Name);
             Assert.Equal("Namespace1.Class3", classModel.Methods[1].LocalVariableTypes[2].Type.Name);
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithLocalVariableFromTypeof.txt")]
+        public void Extract_ShouldExtractLocalVariables_WhenProvidedWithTypeofSyntax(string fileContent)
+        {
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+            Assert.Equal(2, classModel.Methods.Count);
+
+            foreach (var methodType in classModel.Methods)
+            {
+                Assert.Equal(1, methodType.LocalVariableTypes.Count);
+                Assert.Equal("System.Type", methodType.LocalVariableTypes[0].Type.Name);
+            }
+        }
+
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithLocalVariableFromNameof.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithLocalVariableFromNameofOfEnum.txt")]
+        public void Extract_ShouldExtractLocalVariables_WhenProvidedWithNameofSyntax(string fileContent)
+        {
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+            Assert.Equal(2, classModel.Methods.Count);
+
+            foreach (var methodType in classModel.Methods)
+            {
+                Assert.Equal(1, methodType.LocalVariableTypes.Count);
+                Assert.Equal("string", methodType.LocalVariableTypes[0].Type.Name);
+            }
         }
 
         [Theory]
@@ -315,6 +355,48 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("ExternClass", method2.LocalFunctions[0].LocalVariableTypes[1].Type.Name);
             Assert.Equal("ExternClass", method2.LocalFunctions[0].LocalFunctions[0].LocalVariableTypes[0].Type.Name);
             Assert.Equal("ExternClass", method2.LocalFunctions[0].LocalFunctions[0].LocalVariableTypes[1].Type.Name);
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/ClassWithNonPrimitiveLocalVariablesOfPropertyFromOtherClass.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/ClassWithNonPrimitiveLocalVariablesOfMethodFromOtherClass.txt")]
+        public void
+            Extract_ShouldHaveLocalVariablesDependencies_WhenGivenPropertyFromOtherClass(string fileContent)
+        {
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            foreach (var methodType in classModel.Methods)
+            {
+                foreach (var localVariableType in methodType.LocalVariableTypes)
+                {
+                    Assert.Equal("int", localVariableType.Type.Name);
+                }
+            }
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithUnknownClassMembersInLocalVariables.txt")]
+        public void Extract_ShouldHaveNoLocalVariablesDependencies_WhenGivenUnknownClassMembers(string fileContent)
+        {
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            foreach (var methodType in classModel.Methods)
+            {
+                Assert.Equal(3, methodType.LocalVariableTypes.Count);
+                foreach (var localVariableType in methodType.LocalVariableTypes)
+                {
+                    Assert.Equal("int", localVariableType.Type.Name);
+                }
+            }
+
+            _loggerMock.Verify(logger => logger.Log("Could not set 3 local variables", LogLevels.Warning), Times.Once);
         }
     }
 }

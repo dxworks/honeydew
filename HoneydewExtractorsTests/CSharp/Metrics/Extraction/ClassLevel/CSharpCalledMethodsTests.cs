@@ -57,7 +57,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
             _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
         }
 
         [Fact]
@@ -712,6 +712,40 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("TopLevel.Bar", calledMethod2.ContainingTypeName);
             Assert.Equal(1, calledMethod2.ParameterTypes.Count);
             Assert.Equal("double", calledMethod2.ParameterTypes[0].Type.Name);
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithLocalVariableFromTypeof.txt")]
+        public void Extract_ShouldHaveNoCalledMethods_WhenProvidedWithTypeofSyntax(string fileContent)
+        {
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+            Assert.Equal(2, classModel.Methods.Count);
+
+            foreach (var methodType in classModel.Methods)
+            {
+                Assert.Empty(methodType.CalledMethods);
+            }
+        }
+
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithLocalVariableFromNameof.txt")]
+        [FileData("TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithLocalVariableFromNameofOfEnum.txt")]
+        public void Extract_ShouldExtractNameof_WhenProvidedWithNameofSyntax(string fileContent)
+        {
+            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+            Assert.Equal(2, classModel.Methods.Count);
+
+            foreach (var methodType in classModel.Methods)
+            {
+                Assert.Equal(1, methodType.CalledMethods.Count);
+                Assert.Equal("nameof", methodType.CalledMethods[0].Name);
+                Assert.Equal("string", methodType.CalledMethods[0].ContainingTypeName);
+            }
         }
     }
 }

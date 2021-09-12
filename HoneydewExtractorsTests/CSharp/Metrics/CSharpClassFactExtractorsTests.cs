@@ -76,7 +76,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
             _sut = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
         }
 
         [Theory]
@@ -912,6 +912,56 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             Assert.Equal("ref readonly", ((ReturnValueModel)classModel.Methods[1].ReturnValue).Modifier);
             Assert.Equal("bool", classModel.Methods[1].ParameterTypes[1].Type.Name);
+        }
+
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/ClassInfo/ClassWithNullableEntities.txt")]
+        public void Extract_ShouldHaveNullableEntities_WhenProvidedWithClassWithNullableEntities(string fileContent)
+        {
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            Assert.Equal("Namespace1.Class1", classModel.Name);
+
+            var types = new[]
+            {
+                classModel.Fields[0].Type,
+                classModel.Properties[0].Type,
+                classModel.Methods[0].ReturnValue.Type,
+                classModel.Methods[0].ParameterTypes[0].Type,
+                classModel.Constructors[0].ParameterTypes[0].Type,
+            };
+
+            foreach (var type in types)
+            {
+                Assert.Equal("int?", type.Name);
+            }
+        }
+        
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/ClassInfo/ClassWithNullableClassEntities.txt")]
+        public void Extract_ShouldHaveNullableEntities_WhenProvidedWithClassWithNullableClassEntities(string fileContent)
+        {
+            var classTypes = _sut.Extract(fileContent).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            Assert.Equal("Namespace1.Class1", classModel.Name);
+
+            var types = new[]
+            {
+                classModel.Fields[0].Type,
+                classModel.Properties[0].Type,
+                classModel.Methods[0].ReturnValue.Type,
+                classModel.Methods[0].ParameterTypes[0].Type,
+                classModel.Constructors[0].ParameterTypes[0].Type,
+            };
+
+            foreach (var type in types)
+            {
+                Assert.Equal("Namespace1.Class2?", type.Name);
+            }
         }
     }
 }

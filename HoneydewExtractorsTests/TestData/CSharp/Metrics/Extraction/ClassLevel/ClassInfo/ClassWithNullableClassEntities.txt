@@ -1,0 +1,21 @@
+namespace Namespace1
+{
+    public class Class1
+    {
+        private Class2? _a;
+        public Class2? Value { get; set; }
+        
+        public Class1(Class2? a)
+        {
+        }
+        
+        public Class2? Method1(Class2? a)
+        {
+            return a;
+        }
+    }
+    
+    public class Class2
+    {
+    }
+}
