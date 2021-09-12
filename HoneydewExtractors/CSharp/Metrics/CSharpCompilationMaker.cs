@@ -62,9 +62,7 @@ namespace HoneydewExtractors.CSharp.Metrics
             {
                 try
                 {
-                    _references ??= FindReferences();
-
-                    _references.RemoveRange(_trustedReferencesCount, _references.Count - _trustedReferencesCount);
+                    _references = new List<MetadataReference>();
 
                     foreach (var reference in compilation.References)
                     {

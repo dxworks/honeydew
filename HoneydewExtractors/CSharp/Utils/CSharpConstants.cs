@@ -37,6 +37,11 @@
 
         public static bool IsPrimitive(string type)
         {
+            if (type.EndsWith('?'))
+            {
+                type = type[..^1];
+            }
+            
             type = ConvertSystemTypeToPrimitiveType(type);
 
             return type is "object" or "string" or "bool" or "byte" or "char" or "decimal" or "double" or "short"
