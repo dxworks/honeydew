@@ -22,7 +22,6 @@ using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
-using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Attribute;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
@@ -176,7 +175,8 @@ namespace Honeydew
                     progressLogger.Log("Resolving Full Name Dependencies");
                     progressLogger.Log();
 
-                    var fullNameModelProcessor = new FullNameModelProcessor(logger, progressLogger, options.DisableLocalVariablesBinding);
+                    var fullNameModelProcessor =
+                        new FullNameModelProcessor(logger, progressLogger, options.DisableLocalVariablesBinding);
                     repositoryModel = fullNameModelProcessor.Process(repositoryModel);
 
                     logger.Log();
@@ -222,7 +222,7 @@ namespace Honeydew
                                 new ParameterRelationVisitor(),
                                 new ReturnValueRelationVisitor(),
                                 new LocalVariablesRelationVisitor(),
-                                
+
                                 new ExternCallsRelationVisitor(),
                             })
                         })
@@ -392,16 +392,15 @@ namespace Honeydew
         {
             var solutionProvider = new MsBuildSolutionProvider();
             var projectProvider = new MsBuildProjectProvider();
-            ICompilationMaker compilationMaker = new CSharpCompilationMaker(logger);
             // Create repository model from path
-            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger, compilationMaker);
+            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger);
 
             var solutionLoadingStrategy =
                 new BasicSolutionLoadingStrategy(logger, projectLoadingStrategy, progressLogger);
 
             var repositoryLoader = new CSharpRepositoryLoader(solutionProvider, projectProvider, projectLoadingStrategy,
                 solutionLoadingStrategy, logger, progressLogger,
-                new FactExtractorCreator(LoadVisitors(relationMetricHolder, logger), compilationMaker));
+                new FactExtractorCreator(LoadVisitors(relationMetricHolder, logger)));
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;
@@ -433,7 +432,7 @@ namespace Honeydew
                 classRelationsRepresentation);
 
             var allFileRelationsRepresentation =
-                new RepositoryModelToFileRelationsProcessor(new ChooseAllStrategy()).Process(repositoryModel);
+                new RepositoryModelToFileRelationsProcessor(new HoneydewChooseStrategy()).Process(repositoryModel);
             csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations_all{nameModifier}.csv"),
                 allFileRelationsRepresentation);
 
@@ -467,7 +466,7 @@ namespace Honeydew
             RepositoryModel repositoryModel)
         {
             var classRelationsRepresentation =
-                new RepositoryModelToClassRelationsProcessor()
+                new RepositoryModelToClassRelationsProcessor(new HoneydewChooseStrategy())
                     .Process(repositoryModel);
             return classRelationsRepresentation;
         }

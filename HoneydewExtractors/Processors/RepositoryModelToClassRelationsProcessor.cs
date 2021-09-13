@@ -9,6 +9,13 @@ namespace HoneydewExtractors.Processors
 {
     public class RepositoryModelToClassRelationsProcessor : IProcessorFunction<RepositoryModel, RelationsRepresentation>
     {
+        private readonly IRelationsMetricChooseStrategy _metricChooseStrategy;
+
+        public RepositoryModelToClassRelationsProcessor(IRelationsMetricChooseStrategy metricChooseStrategy)
+        {
+            _metricChooseStrategy = metricChooseStrategy;
+        }
+
         public RelationsRepresentation Process(RepositoryModel repositoryModel)
         {
             if (repositoryModel == null)
@@ -26,6 +33,11 @@ namespace HoneydewExtractors.Processors
                     {
                         var type = Type.GetType(metricModel.ExtractorName);
                         if (type == null)
+                        {
+                            continue;
+                        }
+
+                        if (!_metricChooseStrategy.Choose(type))
                         {
                             continue;
                         }

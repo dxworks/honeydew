@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using HoneydewCore.Logging;
 using HoneydewExtractors.Core;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -12,13 +11,6 @@ namespace HoneydewExtractors.CSharp.Metrics
     public class CSharpCompilationMaker : ICompilationMaker
     {
         private List<MetadataReference> _references;
-        private readonly ILogger _logger;
-        private int _trustedReferencesCount;
-
-        public CSharpCompilationMaker(ILogger logger)
-        {
-            _logger = logger;
-        }
 
         public Compilation GetCompilation()
         {
@@ -27,53 +19,6 @@ namespace HoneydewExtractors.CSharp.Metrics
             var compilation = CSharpCompilation.Create("Compilation", references: _references,
                 options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
             return compilation;
-        }
-
-        public void AddReference(Compilation compilation, string referencePath)
-        {
-            if (File.Exists(referencePath))
-            {
-                try
-                {
-                    _references ??= FindReferences();
-
-                    _references.RemoveRange(_trustedReferencesCount, _references.Count - _trustedReferencesCount);
-
-                    var parent = Directory.GetParent(referencePath);
-
-                    if (parent == null)
-                    {
-                        _references.Add(MetadataReference.CreateFromFile(referencePath));
-                    }
-                    else
-                    {
-                        foreach (var fileInfo in parent.GetFiles("*.dll"))
-                        {
-                            _references.Add(MetadataReference.CreateFromFile(fileInfo.FullName));
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    _logger.Log($"Could not add references from {referencePath} because {e}");
-                }
-            }
-            else
-            {
-                try
-                {
-                    _references = new List<MetadataReference>();
-
-                    foreach (var reference in compilation.References)
-                    {
-                        _references.Add(reference);
-                    }
-                }
-                catch (Exception e)
-                {
-                    _logger.Log($"Could not add references from {compilation.AssemblyName} because {e}");
-                }
-            }
         }
 
         private List<MetadataReference> FindReferences()
@@ -90,8 +35,6 @@ namespace HoneydewExtractors.CSharp.Metrics
                     references.Add(reference);
                 }
             }
-
-            _trustedReferencesCount = references.Count;
 
             return references;
         }

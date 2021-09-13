@@ -64,8 +64,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Attributes
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
@@ -110,7 +109,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Attributes
     }}
 }}
 ";
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var syntacticModelCreator = new CSharpSyntacticModelCreator();
+            var semanticModelCreator = new CSharpSemanticModelCreator(new CSharpCompilationMaker());
+            var syntaxTree = syntacticModelCreator.Create(fileContent);
+            var semanticModel = semanticModelCreator.Create(syntaxTree);
+
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 

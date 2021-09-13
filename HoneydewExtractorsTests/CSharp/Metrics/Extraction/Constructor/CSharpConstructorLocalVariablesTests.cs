@@ -20,6 +20,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
     {
         private readonly CSharpFactExtractor _factExtractor;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpConstructorLocalVariablesTests()
         {
@@ -40,8 +42,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
@@ -49,7 +50,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             "TestData/CSharp/Metrics/Extraction/Constructor/LocalVariables/ConstructorWithPrimitiveLocalVariables.txt")]
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithPrimitiveTypes(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(2, classModel.Constructors.Count);
@@ -69,7 +72,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             "TestData/CSharp/Metrics/Extraction/Constructor/LocalVariables/ConstructorWithCustomClassLocalVariables.txt")]
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithCustomClassTypes(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(2, classModel.Constructors.Count);
@@ -94,7 +99,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             "TestData/CSharp/Metrics/Extraction/Constructor/LocalVariables/ConstructorWithExternClassLocalVariables.txt")]
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithExternClassTypes(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(2, classModel.Constructors.Count);
@@ -114,7 +121,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             "TestData/CSharp/Metrics/Extraction/Constructor/LocalVariables/ConstructorWithArrayLocalVariable.txt")]
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithArrayLocalVariable(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(2, classModel.Constructors.Count);

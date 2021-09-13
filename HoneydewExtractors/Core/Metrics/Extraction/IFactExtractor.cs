@@ -1,9 +1,10 @@
 ﻿using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 
 namespace HoneydewExtractors.Core.Metrics.Extraction
 {
     public interface IFactExtractor
     {
-        public ICompilationUnitType Extract(string fileContent);
+        ICompilationUnitType Extract(SyntaxTree syntacticTree, SemanticModel semanticModel);
     }
 }

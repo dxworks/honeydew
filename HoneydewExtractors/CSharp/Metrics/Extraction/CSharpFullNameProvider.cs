@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
@@ -392,42 +391,6 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             {
                 Name = declarationSyntax.ToString()
             };
-        }
-
-        public static string GetFullMetadataName(ISymbol s)
-        {
-            if (s == null || IsRootNamespace(s))
-            {
-                return string.Empty;
-            }
-
-            var sb = new StringBuilder(s.MetadataName);
-            var last = s;
-
-            s = s.ContainingSymbol;
-
-            while (!IsRootNamespace(s))
-            {
-                if (s is ITypeSymbol && last is ITypeSymbol)
-                {
-                    sb.Insert(0, '+');
-                }
-                else
-                {
-                    sb.Insert(0, '.');
-                }
-
-                sb.Insert(0, s.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
-                //sb.Insert(0, s.MetadataName);
-                s = s.ContainingSymbol;
-            }
-
-            return sb.ToString();
-        }
-
-        private static bool IsRootNamespace(ISymbol symbol)
-        {
-            return symbol is INamespaceSymbol { IsGlobalNamespace: true };
         }
 
         private IEntityType GetFullName(ImplicitArrayCreationExpressionSyntax declarationSyntax)

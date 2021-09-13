@@ -1,35 +1,41 @@
-﻿using HoneydewExtractors.Core.Metrics.Extraction;
+﻿using System.Linq;
+using HoneydewExtractors.Core;
+using HoneydewExtractors.Core.Metrics.Extraction;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
 using HoneydewExtractors.CSharp.Metrics.Extraction;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics
 {
     public class CSharpFactExtractor : IFactExtractor
     {
-        private readonly CSharpSyntacticModelCreator _syntacticModelCreator;
-        private readonly CSharpSemanticModelCreator _semanticModelCreator;
         private readonly ICompositeVisitor _compositeVisitor;
 
-        public CSharpFactExtractor(CSharpSyntacticModelCreator syntacticModelCreator,
-            CSharpSemanticModelCreator semanticModelCreator, ICompositeVisitor compositeVisitor)
+        public CSharpFactExtractor(ICompositeVisitor compositeVisitor)
         {
-            _syntacticModelCreator = syntacticModelCreator;
-            _semanticModelCreator = semanticModelCreator;
             _compositeVisitor = compositeVisitor;
         }
 
-        public ICompilationUnitType Extract(string text)
+        public ICompilationUnitType Extract(SyntaxTree syntacticTree, SemanticModel semanticModel)
         {
-            var syntacticModel = _syntacticModelCreator.Create(text);
-            var semanticModel = _semanticModelCreator.Create(syntacticModel);
-
+            var syntacticModel = new CSharpSyntacticModel
+            {
+                Tree = syntacticTree,
+                CompilationUnitSyntax = GetCompilationUnitSyntaxTree(syntacticTree)
+            };
+            var cSharpSemanticModel = new CSharpSemanticModel
+            {
+                Model = semanticModel
+            };
 
             IVisitor extractionModelsSetterVisitor =
-                new ExtractionModelsSetterVisitor(new CSharpExtractionHelperMethods(semanticModel));
-            
+                new ExtractionModelsSetterVisitor(new CSharpExtractionHelperMethods(cSharpSemanticModel));
+
             _compositeVisitor.Accept(extractionModelsSetterVisitor);
 
             ICompilationUnitType compilationUnitModel = new CompilationUnitModel();
@@ -44,6 +50,22 @@ namespace HoneydewExtractors.CSharp.Metrics
             }
 
             return compilationUnitModel;
+        }
+
+        private static CompilationUnitSyntax GetCompilationUnitSyntaxTree(SyntaxTree tree)
+        {
+            var root = tree.GetCompilationUnitRoot();
+
+            var diagnostics = root.GetDiagnostics();
+
+            var enumerable = diagnostics as Diagnostic[] ?? diagnostics.ToArray();
+            if (diagnostics != null && enumerable.Any(d => d.Severity == DiagnosticSeverity.Error))
+            {
+                var result = enumerable.Aggregate("", (current, diagnostic) => current + diagnostic);
+                throw new ExtractionException(result);
+            }
+
+            return root;
         }
     }
 }

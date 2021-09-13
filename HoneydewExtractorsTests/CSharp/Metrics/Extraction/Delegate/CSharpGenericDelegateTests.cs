@@ -18,6 +18,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Delegate
     {
         private readonly CSharpFactExtractor _factExtractor;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpGenericDelegateTests()
         {
@@ -34,8 +36,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Delegate
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Fact]
@@ -45,7 +46,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Delegate
 {
     public delegate T Delegate1<T>(T item);
 }";
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (DelegateModel)classTypes[0];
 
@@ -65,7 +69,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Delegate
     public delegate T Delegate1<T,R,K>(R r, K k1, K k2);
 }";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (DelegateModel)classTypes[0];
 
@@ -87,7 +93,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Delegate
     public delegate T Delegate1<out T, in TR, in TK>(TR r, TK tk, TK tk2);
 }";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (DelegateModel)classTypes[0];
 
@@ -104,9 +112,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Delegate
         [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/Delegate/GenericExtraction/GenericTypeWithPredefinedConstrains.txt")]
-        public void Extract_ShouldHaveGenericTypesWithPredefinedConstrains_WhenProvidedWithDelegate(string fileContent)
+        public void Extract_ShouldHaveGenericTypesWithPredefinedConstrains_WhenProvidedWithDelegate(
+            string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel1 = (DelegateModel)classTypes[0];
 
@@ -146,7 +157,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Delegate
             "TestData/CSharp/Metrics/Extraction/Delegate/GenericExtraction/GenericTypeWithMultipleConstrains.txt")]
         public void Extract_ShouldHaveGenericTypesWithMultipleConstrains_WhenProvidedWithDelegate(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (DelegateModel)classTypes[0];
 

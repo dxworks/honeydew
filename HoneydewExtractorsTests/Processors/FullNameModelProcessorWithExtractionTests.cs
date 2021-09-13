@@ -35,6 +35,8 @@ namespace HoneydewExtractorsTests.Processors
         private readonly Mock<IProgressLogger> _progressLoggerMock = new();
         private readonly Mock<IProgressLoggerBar> _progressLoggerBarMock = new();
         private readonly CSharpFactExtractor _extractor;
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public FullNameModelProcessorWithExtractionTests()
         {
@@ -86,8 +88,7 @@ namespace HoneydewExtractorsTests.Processors
                 })
             }));
 
-            _extractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
+            _extractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Fact]
@@ -119,8 +120,15 @@ namespace Services
 }
 ";
 
-            var classModels1 = _extractor.Extract(fileContent1).ClassTypes;
-            var classModels2 = _extractor.Extract(fileContent2).ClassTypes;
+            var syntaxTree1 = _syntacticModelCreator.Create(fileContent1);
+            var semanticModel1 = _semanticModelCreator.Create(syntaxTree1);
+
+            var syntaxTree2 = _syntacticModelCreator.Create(fileContent2);
+            var semanticModel2 = _semanticModelCreator.Create(syntaxTree2);
+
+
+            var classModels1 = _extractor.Extract(syntaxTree1, semanticModel1).ClassTypes;
+            var classModels2 = _extractor.Extract(syntaxTree2, semanticModel2).ClassTypes;
 
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -218,8 +226,14 @@ namespace MyNamespace
 }
 ";
 
-            var classModels1 = _extractor.Extract(fileContent1).ClassTypes;
-            var classModels2 = _extractor.Extract(fileContent2).ClassTypes;
+            var syntaxTree1 = _syntacticModelCreator.Create(fileContent1);
+            var semanticModel1 = _semanticModelCreator.Create(syntaxTree1);
+
+            var syntaxTree2 = _syntacticModelCreator.Create(fileContent2);
+            var semanticModel2 = _semanticModelCreator.Create(syntaxTree2);
+
+            var classModels1 = _extractor.Extract(syntaxTree1, semanticModel1).ClassTypes;
+            var classModels2 = _extractor.Extract(syntaxTree2, semanticModel2).ClassTypes;
 
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -338,8 +352,14 @@ namespace MyCompany
 }
 ";
 
-            var classModels1 = _extractor.Extract(fileContent1).ClassTypes;
-            var classModels2 = _extractor.Extract(fileContent2).ClassTypes;
+            var syntaxTree1 = _syntacticModelCreator.Create(fileContent1);
+            var semanticModel1 = _semanticModelCreator.Create(syntaxTree1);
+
+            var syntaxTree2 = _syntacticModelCreator.Create(fileContent2);
+            var semanticModel2 = _semanticModelCreator.Create(syntaxTree2);
+
+            var classModels1 = _extractor.Extract(syntaxTree1, semanticModel1).ClassTypes;
+            var classModels2 = _extractor.Extract(syntaxTree2, semanticModel2).ClassTypes;
 
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -436,9 +456,18 @@ namespace NameSpace3
     }
 }";
 
-            var classModels1 = _extractor.Extract(fileContent1).ClassTypes;
-            var classModels2 = _extractor.Extract(fileContent2).ClassTypes;
-            var classModels3 = _extractor.Extract(fileContent3).ClassTypes;
+            var syntaxTree1 = _syntacticModelCreator.Create(fileContent1);
+            var semanticModel1 = _semanticModelCreator.Create(syntaxTree1);
+
+            var syntaxTree2 = _syntacticModelCreator.Create(fileContent2);
+            var semanticModel2 = _semanticModelCreator.Create(syntaxTree2);
+
+            var syntaxTree3 = _syntacticModelCreator.Create(fileContent3);
+            var semanticModel3 = _semanticModelCreator.Create(syntaxTree3);
+
+            var classModels1 = _extractor.Extract(syntaxTree1, semanticModel1).ClassTypes;
+            var classModels2 = _extractor.Extract(syntaxTree2, semanticModel2).ClassTypes;
+            var classModels3 = _extractor.Extract(syntaxTree3, semanticModel3).ClassTypes;
 
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -527,8 +556,14 @@ namespace MyNamespace
     }
 }";
 
-            var classModels1 = _extractor.Extract(fileContent1).ClassTypes;
-            var classModels2 = _extractor.Extract(fileContent2).ClassTypes;
+            var syntaxTree1 = _syntacticModelCreator.Create(fileContent1);
+            var semanticModel1 = _semanticModelCreator.Create(syntaxTree1);
+
+            var syntaxTree2 = _syntacticModelCreator.Create(fileContent2);
+            var semanticModel2 = _semanticModelCreator.Create(syntaxTree2);
+
+            var classModels1 = _extractor.Extract(syntaxTree1, semanticModel1).ClassTypes;
+            var classModels2 = _extractor.Extract(syntaxTree2, semanticModel2).ClassTypes;
 
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -595,7 +630,10 @@ namespace MyNamespace
     }
 }";
 
-            var classTypes = _extractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var classTypes = _extractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -706,8 +744,14 @@ namespace MyNamespace
         }}
     }}
 }}";
-            var classModels1 = _extractor.Extract(fileContent1).ClassTypes;
-            var classModels2 = _extractor.Extract(fileContent2).ClassTypes;
+            var syntaxTree1 = _syntacticModelCreator.Create(fileContent1);
+            var semanticModel1 = _semanticModelCreator.Create(syntaxTree1);
+
+            var syntaxTree2 = _syntacticModelCreator.Create(fileContent2);
+            var semanticModel2 = _semanticModelCreator.Create(syntaxTree2);
+
+            var classModels1 = _extractor.Extract(syntaxTree1, semanticModel1).ClassTypes;
+            var classModels2 = _extractor.Extract(syntaxTree2, semanticModel2).ClassTypes;
 
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -798,11 +842,19 @@ namespace HoneydewTestProject
         public int X { get; set; }
     }
 }";
+            var syntaxTree2 = _syntacticModelCreator.Create(fileContent2);
+            var semanticModel2 = _semanticModelCreator.Create(syntaxTree2);
 
-            var firstProjectClassModels = _extractor.Extract(fileContent2).ClassTypes;
-            var secondProjectClassModels = _extractor.Extract(fileContent3).ClassTypes;
+            var syntaxTree3 = _syntacticModelCreator.Create(fileContent3);
+            var semanticModel3 = _semanticModelCreator.Create(syntaxTree3);
 
-            var classTypes = _extractor.Extract(fileContent).ClassTypes;
+            var firstProjectClassModels = _extractor.Extract(syntaxTree2, semanticModel2).ClassTypes;
+            var secondProjectClassModels = _extractor.Extract(syntaxTree3, semanticModel3).ClassTypes;
+
+            var syntaxTree1 = _syntacticModelCreator.Create(fileContent);
+            var semanticModel1 = _semanticModelCreator.Create(syntaxTree1);
+
+            var classTypes = _extractor.Extract(syntaxTree1, semanticModel1).ClassTypes;
 
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -885,11 +937,19 @@ namespace HoneydewTestProject
         public int X { get; set; }
     }
 }";
+            var syntaxTree2 = _syntacticModelCreator.Create(fileContent2);
+            var semanticModel2 = _semanticModelCreator.Create(syntaxTree2);
 
-            var firstProjectClassModels = _extractor.Extract(fileContent2).ClassTypes;
-            var secondProjectClassModels = _extractor.Extract(fileContent3).ClassTypes;
+            var syntaxTree3 = _syntacticModelCreator.Create(fileContent3);
+            var semanticModel3 = _semanticModelCreator.Create(syntaxTree3);
 
-            var classTypes = _extractor.Extract(fileContent1).ClassTypes;
+            var firstProjectClassModels = _extractor.Extract(syntaxTree2, semanticModel2).ClassTypes;
+            var secondProjectClassModels = _extractor.Extract(syntaxTree3, semanticModel3).ClassTypes;
+
+            var syntaxTree1 = _syntacticModelCreator.Create(fileContent1);
+            var semanticModel1 = _semanticModelCreator.Create(syntaxTree1);
+
+            var classTypes = _extractor.Extract(syntaxTree1, semanticModel1).ClassTypes;
 
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -959,9 +1019,18 @@ namespace NameSpace3
     }
 }";
 
-            var classModels1 = _extractor.Extract(fileContent1).ClassTypes;
-            var classModels2 = _extractor.Extract(fileContent2).ClassTypes;
-            var classModels3 = _extractor.Extract(fileContent3).ClassTypes;
+            var syntaxTree1 = _syntacticModelCreator.Create(fileContent1);
+            var semanticModel1 = _semanticModelCreator.Create(syntaxTree1);
+
+            var syntaxTree2 = _syntacticModelCreator.Create(fileContent2);
+            var semanticModel2 = _semanticModelCreator.Create(syntaxTree2);
+
+            var syntaxTree3 = _syntacticModelCreator.Create(fileContent3);
+            var semanticModel3 = _semanticModelCreator.Create(syntaxTree3);
+
+            var classModels1 = _extractor.Extract(syntaxTree1, semanticModel1).ClassTypes;
+            var classModels2 = _extractor.Extract(syntaxTree2, semanticModel2).ClassTypes;
+            var classModels3 = _extractor.Extract(syntaxTree3, semanticModel3).ClassTypes;
 
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -1025,9 +1094,18 @@ namespace NameSpace1.N1.OtherChild
     }
 }";
 
-            var classModels1 = _extractor.Extract(fileContent1).ClassTypes;
-            var classModels2 = _extractor.Extract(fileContent2).ClassTypes;
-            var classModels3 = _extractor.Extract(fileContent3).ClassTypes;
+            var syntaxTree1 = _syntacticModelCreator.Create(fileContent1);
+            var semanticModel1 = _semanticModelCreator.Create(syntaxTree1);
+
+            var syntaxTree2 = _syntacticModelCreator.Create(fileContent2);
+            var semanticModel2 = _semanticModelCreator.Create(syntaxTree2);
+
+            var syntaxTree3 = _syntacticModelCreator.Create(fileContent3);
+            var semanticModel3 = _semanticModelCreator.Create(syntaxTree3);
+
+            var classModels1 = _extractor.Extract(syntaxTree1, semanticModel1).ClassTypes;
+            var classModels2 = _extractor.Extract(syntaxTree2, semanticModel2).ClassTypes;
+            var classModels3 = _extractor.Extract(syntaxTree3, semanticModel3).ClassTypes;
 
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
@@ -1098,8 +1176,14 @@ namespace NameSpace1
         }
     }
 }";
-            var classModels1 = _extractor.Extract(fileContent1).ClassTypes;
-            var classModels2 = _extractor.Extract(fileContent2).ClassTypes;
+            var syntaxTree1 = _syntacticModelCreator.Create(fileContent1);
+            var semanticModel1 = _semanticModelCreator.Create(syntaxTree1);
+
+            var syntaxTree2 = _syntacticModelCreator.Create(fileContent2);
+            var semanticModel2 = _semanticModelCreator.Create(syntaxTree2);
+
+            var classModels1 = _extractor.Extract(syntaxTree1, semanticModel1).ClassTypes;
+            var classModels2 = _extractor.Extract(syntaxTree2, semanticModel2).ClassTypes;
 
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();

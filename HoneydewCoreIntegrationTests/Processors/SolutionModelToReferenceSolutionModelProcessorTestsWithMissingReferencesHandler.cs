@@ -30,6 +30,8 @@ namespace HoneydewCoreIntegrationTests.Processors
 
         private readonly CSharpFactExtractor _extractor;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public SolutionModelToReferenceSolutionModelProcessorTestsWithMissingReferencesHandler()
         {
@@ -70,8 +72,7 @@ namespace HoneydewCoreIntegrationTests.Processors
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _extractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
+            _extractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Fact]
@@ -121,8 +122,10 @@ namespace HoneydewCoreIntegrationTests.Processors
                  }
              }
          }";
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
 
-            var classModels = _extractor.Extract(fileContent).ClassTypes;
+            var classModels = _extractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var solutionModel = new SolutionModel
             {
@@ -311,8 +314,10 @@ namespace HoneydewCoreIntegrationTests.Processors
                  }
              }
          }";
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
 
-            var classModels = _extractor.Extract(fileContent).ClassTypes;
+            var classModels = _extractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var solutionModel = new SolutionModel
             {
@@ -462,8 +467,10 @@ namespace HoneydewCoreIntegrationTests.Processors
 
               public class ChildClass3 : ChildClass1 {}
           }";
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
 
-            var classModels = _extractor.Extract(fileContent).ClassTypes;
+            var classModels = _extractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var solutionModel = new SolutionModel
             {
@@ -631,8 +638,10 @@ namespace HoneydewCoreIntegrationTests.Processors
               }
           }";
 
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
 
-            var classModels = _extractor.Extract(fileContent).ClassTypes;
+            var classModels = _extractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var solutionModel = new SolutionModel
             {

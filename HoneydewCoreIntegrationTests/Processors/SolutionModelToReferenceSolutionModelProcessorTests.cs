@@ -23,6 +23,8 @@ namespace HoneydewCoreIntegrationTests.Processors
     public class SolutionModelToReferenceSolutionModelProcessorTests
     {
         private readonly SolutionModelToReferenceSolutionModelProcessor _sut;
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public SolutionModelToReferenceSolutionModelProcessorTests()
         {
@@ -571,10 +573,12 @@ namespace Project1.Services
 
             compositeVisitor.Accept(new LoggerSetterVisitor(loggerMock.Object));
 
-            var extractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker(loggerMock.Object)), compositeVisitor);
+            var extractor = new CSharpFactExtractor(compositeVisitor);
 
-            var classModels = extractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            
+            var classModels = extractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var solutionModel = new SolutionModel
             {

@@ -11,12 +11,10 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
     public class BasicProjectLoadingStrategy : IProjectLoadingStrategy
     {
         private readonly ILogger _logger;
-        private readonly ICompilationMaker _compilationMaker;
 
-        public BasicProjectLoadingStrategy(ILogger logger, ICompilationMaker compilationMaker)
+        public BasicProjectLoadingStrategy(ILogger logger)
         {
             _logger = logger;
-            _compilationMaker = compilationMaker;
         }
 
         public async Task<ProjectModel> Load(Project project, IFactExtractorCreator extractorCreator)
@@ -27,9 +25,6 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                 ProjectReferences = project.AllProjectReferences
                     .Select(reference => ExtractPathFromProjectId(reference.ProjectId.ToString())).ToList()
             };
-
-            var compilation = await project.GetCompilationAsync();
-            _compilationMaker.AddReference(compilation, project.CompilationOutputInfo.AssemblyPath);
 
             var extractor = extractorCreator.Create(project.Language);
 
@@ -50,10 +45,10 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                 {
                     _logger.Log($"Extracting facts from {document.FilePath} ({i}/{documentCount})...");
 
-                    var fileContent = await document.GetTextAsync();
+                    var syntacticTree = await document.GetSyntaxTreeAsync();
+                    var semanticModel = await document.GetSemanticModelAsync();
 
-
-                    var compilationUnitType = extractor.Extract(fileContent.ToString());
+                    var compilationUnitType = extractor.Extract(syntacticTree, semanticModel);
                     compilationUnitType.FilePath = document.FilePath;
                     var classTypes = compilationUnitType.ClassTypes;
 

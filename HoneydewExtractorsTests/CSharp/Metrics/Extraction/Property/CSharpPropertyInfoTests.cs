@@ -22,6 +22,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
     {
         private readonly CSharpFactExtractor _factExtractor;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpPropertyInfoTests()
         {
@@ -49,8 +51,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
@@ -67,7 +68,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         public int Value {{get;set;}}
     }}
 }}";
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -99,7 +103,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         public event System.Func<int> Value {{add{{}} remove{{}}}}
     }}
 }}";
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -127,7 +133,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         public int Value { get; set; }
     }
 }";
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -146,7 +154,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/Accessors/ClassWithPropertyOnlyGet.txt")]
         public void Extract_ShouldHaveOnlyGetAccessors_WhenGivenClassWithProperty(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -173,7 +183,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/Accessors/ClassWithPropertyOnlySet.txt")]
         public void Extract_ShouldHaveOnlySetAccessors_WhenGivenClassWithProperty(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -198,7 +210,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/Accessors/ClassWithPropertyOnlyInit.txt")]
         public void Extract_ShouldHaveOnlyInitAccessors_WhenGivenClassWithProperty(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -223,7 +237,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/Accessors/ClassWithPropertyGetSet.txt")]
         public void Extract_ShouldHaveGetSetAccessors_WhenGivenClassWithProperty(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -251,7 +267,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/Accessors/ClassWithPropertyGetInit.txt")]
         public void Extract_ShouldHaveGetInitAccessors_WhenGivenClassWithProperty(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -281,7 +299,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/Accessors/ClassWithPropertyExpressionBody_CalledMethods.txt")]
         public void Extract_ShouldCalledMethods_WhenGivenPropertyWithExpressionBodiedMember(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(2, classTypes.Count);
 
@@ -320,7 +340,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/Accessors/ClassWithPropertiesWithStatementBody.txt")]
         public void Extract_ShouldHaveCyclomaticComplexity_WhenGivenClassWithProperties(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -340,10 +362,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         }
 
         [Theory]
-        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/InterfaceWithProperty.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/InterfaceWithProperty.txt")]
         public void Extract_ShouldHaveProperties_WhenGivenAnInterface(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -367,7 +392,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             Extract_ShouldHavePrivatePropertiesWithModifiers_WhenGivenClassWithPropertiesAndModifiersWithDefaultAccess(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -415,8 +442,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                                           public class Foo {{ {modifier} int AnimalNest{{get;set;}} {modifier} float X {{get;set;}} {modifier} CSharpMetricExtractor extractor{{get;init;}}}}                                        
                                       }}";
 
-
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -479,8 +507,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                                           public class Foo {{ {visibility} event CSharpMetricExtractor extractor {{add{{}} remove{{}} }} {visibility} event int _some_event{{add{{}} remove{{}} }} {visibility} event Action MyAction1{{add{{}} remove{{}} }}}}                                        
                                       }}";
 
-
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -525,7 +554,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         public void Extract_ShouldHavePropertiesWithAccessors_WhenGivenClassWithPropertiesWithDifferentAccessors(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -592,7 +623,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         public void
             Extract_ShouldHaveProperties_WhenGivenClassWithComputedEmptyProperties(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(2, classTypes.Count);
 
@@ -618,7 +651,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         public void
             Extract_ShouldHaveProperties_WhenGivenClassWithComputedPropertyThatCallsInnerMethods(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -663,7 +698,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             Extract_ShouldHaveProperties_WhenGivenClassWithComputedPropertyThatCallsMethodsFromOtherClassFromTheSameNamespace(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(2, classTypes.Count);
 
@@ -708,7 +745,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             Extract_ShouldHaveProperties_WhenGivenClassWithComputedPropertyThatCallsStaticMethodsFromUnknownClass(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -753,7 +792,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             Extract_ShouldHaveEventProperties_WhenGivenClassWithComputedPropertyThatCallsInnerMethods(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -798,7 +839,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             Extract_ShouldHaveEventProperties_WhenGivenClassWithComputedPropertyThatCallsMethodsFromOtherClassFromTheSameNamespace(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(2, classTypes.Count);
 
@@ -843,7 +886,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             Extract_ShouldHaveEventProperties_WhenGivenClassWithComputedPropertyThatCallsStaticMethodsFromUnknownClass(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -888,7 +933,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
             Extract_ShouldHaveEventProperties_WhenGivenClassWithComputedPropertyThatCallsMethodsFromOtherClassFromTheSameNamespaceAsProperty(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(2, classTypes.Count);
 

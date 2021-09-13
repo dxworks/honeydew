@@ -18,6 +18,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
     {
         private readonly CSharpFactExtractor _sut;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpClassFactExtractorDelegateTests()
         {
@@ -34,8 +36,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _sut = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
+            _sut = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Fact]
@@ -49,7 +50,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
                                 public delegate int Delegate3(double b, char c);
                               }";
-            var classTypes = _sut.Extract(fileContent).ClassTypes;
+            
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var classTypes = _sut.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(3, classTypes.Count);
 
@@ -106,7 +111,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
                                 public delegate Class1 Delegate2(ExternClass c);
                               }";
-            var classTypes = _sut.Extract(fileContent).ClassTypes;
+            
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var classTypes = _sut.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(2, classTypes.Count);
 
@@ -148,7 +157,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                           {
                                                 public delegate void Delegate1(out int c, in string a, char x = 'a');
                                           }";
-            var classTypes = _sut.Extract(fileContent).ClassTypes;
+            
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var classTypes = _sut.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -190,7 +203,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                                                     }
                                                 }
                                           }";
-            var classTypes = _sut.Extract(fileContent).ClassTypes;
+            
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var classTypes = _sut.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(3, classTypes.Count);
 

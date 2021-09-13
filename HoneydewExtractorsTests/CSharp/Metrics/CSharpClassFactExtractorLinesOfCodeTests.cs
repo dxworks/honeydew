@@ -22,6 +22,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
     {
         private readonly CSharpFactExtractor _sut;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpClassFactExtractorLinesOfCodeTests()
         {
@@ -61,15 +63,17 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _sut = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
+            _sut = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
         [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/ClassWithCommentsWithPropertyAndMethod.txt")]
         public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithClassWithMethodsAndProperties(string fileContent)
         {
-            var compilationUnit = _sut.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _sut.Extract(syntaxTree, semanticModel);
 
             var classModels = compilationUnit.ClassTypes;
 
@@ -92,10 +96,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
         }
 
         [Theory]
-        [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/ClassWithPropertyAndMethodAndDelegateWithComments.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/CSharpLinesOfCode/ClassWithPropertyAndMethodAndDelegateWithComments.txt")]
         public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithClassAndDelegate(string fileContent)
         {
-            var compilationUnit = _sut.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _sut.Extract(syntaxTree, semanticModel);
 
             var classModels = compilationUnit.ClassTypes;
 
@@ -121,7 +129,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
         [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/LocalFunctionWithComments.txt")]
         public void Extract_ShouldHaveLinesOfCode_WhenMethodWithLocalFunction(string fileContent)
         {
-            var compilationUnit = _sut.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _sut.Extract(syntaxTree, semanticModel);
 
             var classTypes = compilationUnit.ClassTypes;
 
@@ -136,7 +147,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
         [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/ClassWithCommentsWithPropertyAndMethod.txt")]
         public void Extract_ShouldHaveLinesOfCode_WhenGivenPropertyWithGetAccessor(string fileContent)
         {
-            var compilationUnit = _sut.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _sut.Extract(syntaxTree, semanticModel);
 
             var classTypes = compilationUnit.ClassTypes;
 
@@ -152,7 +166,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpPropertiesInfo/ClassWithEventPropertyThatCallsMethodFromExternClass.txt")]
         public void Extract_ShouldHaveLinesOfCode_WhenGivenEventPropertyWithGetAccessor(string fileContent)
         {
-            var compilationUnit = _sut.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _sut.Extract(syntaxTree, semanticModel);
 
             var classTypes = compilationUnit.ClassTypes;
 
@@ -160,7 +177,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal(4, addAccessor.Loc.SourceLines);
             Assert.Equal(0, addAccessor.Loc.CommentedLines);
             Assert.Equal(0, addAccessor.Loc.EmptyLines);
-            
+
             var removeAccessor = ((ClassModel)classTypes[0]).Properties[0].Accessors[1];
             Assert.Equal(1, removeAccessor.Loc.SourceLines);
             Assert.Equal(0, removeAccessor.Loc.CommentedLines);

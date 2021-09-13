@@ -11,6 +11,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
     {
         private readonly CSharpFactExtractor _factExtractor;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpImportsCountMetricTests()
         {
@@ -20,8 +22,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Fact]
@@ -39,7 +40,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
                                          public class Foo { int a; public void f(); }                                        
                                      }";
 
-            var compilationUnit = _factExtractor.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _factExtractor.Extract(syntaxTree, semanticModel);
 
             Assert.Equal(1, compilationUnit.Metrics.Count);
             Assert.Equal(
@@ -81,7 +85,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
                                          }
                                      }";
 
-            var compilationUnit = _factExtractor.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _factExtractor.Extract(syntaxTree, semanticModel);
 
             Assert.Equal(1, compilationUnit.Metrics.Count);
             Assert.Equal(

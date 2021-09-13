@@ -14,6 +14,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
     {
         private readonly CSharpFactExtractor _factExtractor;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpCompilationUnitImportsMetricTests()
         {
@@ -23,8 +25,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
@@ -47,7 +48,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
                                          public {classType} Foo {{ }}                                        
                                      }}";
 
-            var compilationUnit = _factExtractor.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _factExtractor.Extract(syntaxTree, semanticModel);
 
             Assert.Equal(6, compilationUnit.Imports.Count);
 
@@ -71,7 +75,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
             "TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithClassRecordStructInterfaceAndDelegate_SharedUsings.txt")]
         public void Extract_ShouldHaveUsings_WhenCompilationUnitText(string fileContent)
         {
-            var compilationUnit = _factExtractor.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _factExtractor.Extract(syntaxTree, semanticModel);
 
             Assert.Equal(6, compilationUnit.Imports.Count);
 
@@ -93,7 +100,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
         public void Extract_ShouldHaveUsings_WhenGivenMultipleClassesAndDelegatesInImbricatedNamespaces(
             string fileContent)
         {
-            var compilationUnit = _factExtractor.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _factExtractor.Extract(syntaxTree, semanticModel);
 
             Assert.Equal(8, compilationUnit.Imports.Count);
 
@@ -114,7 +124,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
         [FileData("TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithInnerClasses.txt")]
         public void Extract_ShouldHaveUsings_WhenGivenMultipleClassesWithInnerClasses(string fileContent)
         {
-            var compilationUnit = _factExtractor.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _factExtractor.Extract(syntaxTree, semanticModel);
 
             Assert.Equal(6, compilationUnit.Imports.Count);
 
@@ -132,9 +145,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
         [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithInnerClasses_ButNoNamespace.txt")]
-        public void Extract_ShouldHaveUsings_WhenGivenMultipleClassesWithInnerClasses_ButNoNamespace(string fileContent)
+        public void Extract_ShouldHaveUsings_WhenGivenMultipleClassesWithInnerClasses_ButNoNamespace(
+            string fileContent)
         {
-            var compilationUnit = _factExtractor.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _factExtractor.Extract(syntaxTree, semanticModel);
 
             Assert.Equal(4, compilationUnit.Imports.Count);
             Assert.NotNull(compilationUnit.Imports.SingleOrDefault(model => model.Name == "System"));
@@ -149,7 +166,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
             "TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithClassRecordStructInterfaceAndDelegate_StaticUsings.txt")]
         public void Extract_ShouldHaveUsingsInClassModels_WhenGivenStaticUsings(string fileContent)
         {
-            var compilationUnit = _factExtractor.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _factExtractor.Extract(syntaxTree, semanticModel);
 
             var usingModels = compilationUnit.Imports.Cast<UsingModel>().ToList();
             Assert.Equal(9, usingModels.Count);
@@ -174,7 +194,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
         [FileData("TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithAliasedNamespace.txt")]
         public void Extract_ShouldHaveUsingsInClassModels_WhenGivenAliasedNamespace(string fileContent)
         {
-            var compilationUnit = _factExtractor.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _factExtractor.Extract(syntaxTree, semanticModel);
 
             Assert.Equal(3, compilationUnit.Imports.Count);
 
@@ -193,7 +216,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
         [FileData("TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithAliasedClass.txt")]
         public void Extract_ShouldHaveUsingsInClassModels_WhenGivenAliasedClass(string fileContent)
         {
-            var compilationUnit = _factExtractor.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _factExtractor.Extract(syntaxTree, semanticModel);
 
             Assert.Equal(3, compilationUnit.Imports.Count);
 

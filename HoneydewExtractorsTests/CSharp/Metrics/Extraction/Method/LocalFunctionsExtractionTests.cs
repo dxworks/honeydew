@@ -28,6 +28,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
     {
         private readonly CSharpFactExtractor _factExtractor;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public LocalFunctionsExtractionTests()
         {
@@ -79,8 +81,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker(_loggerMock.Object)), compositeVisitor);
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
@@ -90,7 +91,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Extract_ShouldExtractLocalFunction_WhenGivenMethodWithOneLocalFunctionThatReturnsVoidAndHasNoParameters(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
 
@@ -110,7 +113,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalFunction_WhenGivenLocalFunctionWithReturnValueAndParameters(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
 
@@ -129,9 +134,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/Method/LocalFunctions/MethodWithMultipleLocalFunctionsWithModifiers.txt")]
-        public void Extract_ShouldExtractMultipleLocalFunctions_WhenGivenLocalFunctionsWithModifiers(string fileContent)
+        public void Extract_ShouldExtractMultipleLocalFunctions_WhenGivenLocalFunctionsWithModifiers(
+            string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
 
@@ -169,7 +177,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Extract_ShouldExtractLocalFunctionCyclomaticComplexity_WhenGivenLocalFunctionWithHighCyclomaticComplexity(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
 
@@ -185,7 +195,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalFunction_WhenGivenMethodPropertyConstructorWithLocalFunction(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
             var constructor = (ConstructorModel)((ClassModel)classTypes[0]).Constructors[0];
@@ -226,7 +238,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalFunctionAndUsages_WhenGivenMethodWithMultipleLocalFunctions(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
 
@@ -296,7 +310,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalFunctions_WhenGivenMethodWithImbricatedLocalFunctions(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
 
@@ -368,7 +384,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalFunctionsWithCalledMethods_WhenGivenMethodWithImbricatedLocalFunctions(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
 
@@ -459,7 +477,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalFunctions_WhenGivenPropertyWithImbricatedLocalFunctions(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var property = (PropertyModel)((ClassModel)classTypes[0]).Properties[0];
 
@@ -531,7 +551,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalFunctionsWithCalledMethods_WhenGivenPropertyWithImbricatedLocalFunctions(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var property = (PropertyModel)((ClassModel)classTypes[0]).Properties[0];
 
@@ -613,15 +635,17 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("int", stringifyNumberFunctionCalledMethod.ContainingTypeName);
             Assert.Empty(stringifyNumberFunctionCalledMethod.ParameterTypes);
         }
-        
-        
+
         [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/Method/LocalFunctions/EventPropertyWithImbricatedLocalFunctions.txt")]
-         public void Extract_ShouldExtractLocalFunctionsWithCalledMethods_WhenGivenEventPropertyWithImbricatedLocalFunctions(
-            string fileContent)
+        public void
+            Extract_ShouldExtractLocalFunctionsWithCalledMethods_WhenGivenEventPropertyWithImbricatedLocalFunctions(
+                string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var property = (PropertyModel)((ClassModel)classTypes[0]).Properties[0];
 
