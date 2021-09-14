@@ -7,6 +7,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
+using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
@@ -81,7 +82,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(localVariableModel.Type.Name))
+                    if (!string.IsNullOrEmpty(localVariableModel.Type.Name) &&
+                        localVariableModel.Type.Name != CSharpConstants.VarIdentifier)
                     {
                         modelType.LocalVariableTypes.Add(localVariableModel);
                     }
@@ -123,7 +125,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                     }
                 }
 
-                if (!string.IsNullOrEmpty(localVariableModel.Type.Name))
+                if (!string.IsNullOrEmpty(localVariableModel.Type.Name) &&
+                    localVariableModel.Type.Name != CSharpConstants.VarIdentifier)
                 {
                     modelType.LocalVariableTypes.Add(localVariableModel);
                 }
@@ -156,7 +159,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                     }
                 }
 
-                if (!string.IsNullOrEmpty(localVariableModel.Type.Name))
+                if (!string.IsNullOrEmpty(localVariableModel.Type.Name) &&
+                    localVariableModel.Type.Name != CSharpConstants.VarIdentifier)
                 {
                     modelType.LocalVariableTypes.Add(localVariableModel);
                 }
@@ -199,7 +203,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                     }
                 }
 
-                if (!string.IsNullOrEmpty(localVariableModel.Type.Name))
+                if (!string.IsNullOrEmpty(localVariableModel.Type.Name) &&
+                    localVariableModel.Type.Name != CSharpConstants.VarIdentifier)
                 {
                     typeWithLocalVariables.LocalVariableTypes.Add(localVariableModel);
                 }
@@ -231,7 +236,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                     }
                 }
 
-                if (!string.IsNullOrEmpty(localVariableModel.Type.Name))
+                if (!string.IsNullOrEmpty(localVariableModel.Type.Name) &&
+                    localVariableModel.Type.Name != CSharpConstants.VarIdentifier)
                 {
                     typeWithLocalVariables.LocalVariableTypes.Add(localVariableModel);
                 }
@@ -264,7 +270,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                     }
                 }
 
-                if (!string.IsNullOrEmpty(localVariableModel.Type.Name))
+                if (!string.IsNullOrEmpty(localVariableModel.Type.Name) &&
+                    localVariableModel.Type.Name != CSharpConstants.VarIdentifier)
                 {
                     typeWithLocalVariables.LocalVariableTypes.Add(localVariableModel);
                 }

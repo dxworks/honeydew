@@ -781,5 +781,26 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                 Assert.Equal("string", methodType.CalledMethods[0].ContainingTypeName);
             }
         }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithAwaitStatement.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithAwaitStatementWithUnknownClass.txt")]
+        public void Extract_ShouldHaveCalledMethods_WhenGivenMethodWithAwaitStatement(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            var methodType = classModel.Methods[0];
+            Assert.Equal(4, methodType.CalledMethods.Count);
+            Assert.Equal("Wait", methodType.CalledMethods[0].Name);
+            Assert.Equal("Get", methodType.CalledMethods[1].Name);
+            Assert.Equal("Wait", methodType.CalledMethods[2].Name);
+            Assert.Equal("Get", methodType.CalledMethods[3].Name);
+        }
     }
 }

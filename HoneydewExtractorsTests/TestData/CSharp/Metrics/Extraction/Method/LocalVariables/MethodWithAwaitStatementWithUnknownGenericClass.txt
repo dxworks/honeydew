@@ -1,0 +1,28 @@
+namespace App
+{
+    using System.Threading.Tasks;
+                                           
+    public class Class1
+    {                                           
+        public async void Method()
+        {
+            await Wait();
+            
+            var i = await Get();
+            
+            await Wait();
+            
+            ExternClass<int,ExternClass<double>> x = await Get();
+        }
+
+        public Task<ExternClass<int,ExternClass<double>>> Get()
+        {
+            return Task.FromResult(new ExternClass<int, ExternClass<double>>());
+        }
+
+        public Task Wait()
+        {
+            return Task.Delay(100);
+        }
+    }
+}

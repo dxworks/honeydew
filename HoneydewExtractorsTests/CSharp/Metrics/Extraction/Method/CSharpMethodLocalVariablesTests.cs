@@ -427,5 +427,62 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
 
             _loggerMock.Verify(logger => logger.Log("Could not set 3 local variables", LogLevels.Warning), Times.Once);
         }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithAwaitStatement.txt")]
+        public void Extract_ShouldHaveLocalVariableDependencies_WhenGivenMethodWithAwaitStatement(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            var methodType = classModel.Methods[0];
+            Assert.Equal(2, methodType.LocalVariableTypes.Count);
+            foreach (var localVariableType in methodType.LocalVariableTypes)
+            {
+                Assert.Equal("int", localVariableType.Type.Name);
+            }
+        }
+        
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithAwaitStatementWithUnknownClass.txt")]
+        public void Extract_ShouldHaveLocalVariableDependencies_WhenGivenMethodWithAwaitStatementWithUnknownClass(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            var methodType = classModel.Methods[0];
+            Assert.Equal(2, methodType.LocalVariableTypes.Count);
+            foreach (var localVariableType in methodType.LocalVariableTypes)
+            {
+                Assert.Equal("ExternClass", localVariableType.Type.Name);
+            }
+        }
+        
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithAwaitStatementWithUnknownGenericClass.txt")]
+        public void Extract_ShouldHaveLocalVariableDependencies_WhenGivenMethodWithAwaitStatementWithUnknownGenericClass(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            var methodType = classModel.Methods[0];
+            Assert.Equal(2, methodType.LocalVariableTypes.Count);
+            foreach (var localVariableType in methodType.LocalVariableTypes)
+            {
+                Assert.Equal("ExternClass<int, ExternClass<double>>", localVariableType.Type.Name);
+            }
+        }
     }
 }

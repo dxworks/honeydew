@@ -10,19 +10,24 @@ namespace HoneydewExtractors.CSharp.Metrics
 {
     public class CSharpCompilationMaker : ICompilationMaker
     {
-        private List<MetadataReference> _references;
+        private IEnumerable<MetadataReference> _references;
 
         public Compilation GetCompilation()
         {
-            _references ??= FindReferences();
+            _references = FindTrustedReferences();
 
             var compilation = CSharpCompilation.Create("Compilation", references: _references,
                 options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
             return compilation;
         }
 
-        private List<MetadataReference> FindReferences()
+        public IEnumerable<MetadataReference> FindTrustedReferences()
         {
+            if (_references != null)
+            {
+                return _references;
+            }
+
             var references = new List<MetadataReference>();
 
             var value = (string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES");
@@ -35,6 +40,8 @@ namespace HoneydewExtractors.CSharp.Metrics
                     references.Add(reference);
                 }
             }
+
+            _references = references;
 
             return references;
         }

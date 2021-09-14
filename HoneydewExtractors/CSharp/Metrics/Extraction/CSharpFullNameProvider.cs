@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
@@ -155,6 +156,17 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                             return GetFullName(implicitArrayCreationExpressionSyntax);
                         case ParenthesizedExpressionSyntax parenthesizedExpressionSyntax:
                             return GetFullName(parenthesizedExpressionSyntax.Expression);
+                        case AwaitExpressionSyntax awaitExpressionSyntax:
+                        {
+                            var entityType = GetFullName(awaitExpressionSyntax.Expression);
+                            if (entityType.FullType.ContainedTypes.Count > 0)
+                            {
+                                var fullName = ReconstructFullName(entityType.FullType.ContainedTypes[0]);
+                                return CreateEntityTypeModel(fullName);
+                            }
+
+                            return entityType;
+                        }
                         case TypeOfExpressionSyntax:
                         {
                             name = "System.Type";
@@ -165,9 +177,6 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                             name = "";
                         }
                             break;
-                        // local variable type
-                        // case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
-                        //     return GetFullName(memberAccessExpressionSyntax.Name);
                     }
                 }
                     break;
@@ -196,6 +205,39 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             }
 
             return CreateEntityTypeModel(name);
+        }
+
+        private string ReconstructFullName(GenericType genericType)
+        {
+            if (genericType == null)
+            {
+                return "";
+            }
+
+            var stringBuilder = new StringBuilder();
+            var name = genericType.Name;
+
+            stringBuilder.Append(name);
+
+            if (genericType.ContainedTypes.Count <= 0)
+            {
+                return stringBuilder.ToString();
+            }
+
+            stringBuilder.Append('<');
+            for (var i = 0; i < genericType.ContainedTypes.Count; i++)
+            {
+                var containedType = genericType.ContainedTypes[i];
+                stringBuilder.Append(ReconstructFullName(containedType));
+                if (i != genericType.ContainedTypes.Count - 1)
+                {
+                    stringBuilder.Append(", ");
+                }
+            }
+
+            stringBuilder.Append('>');
+
+            return stringBuilder.ToString();
         }
 
         private IEntityType GetFullName(ISymbol symbolInfo, bool isNullable = false)
