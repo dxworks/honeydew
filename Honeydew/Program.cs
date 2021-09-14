@@ -22,6 +22,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
+using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Attribute;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
@@ -393,7 +394,7 @@ namespace Honeydew
             var solutionProvider = new MsBuildSolutionProvider();
             var projectProvider = new MsBuildProjectProvider();
             // Create repository model from path
-            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger);
+            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger, new CSharpCompilationMaker());
 
             var solutionLoadingStrategy =
                 new BasicSolutionLoadingStrategy(logger, projectLoadingStrategy, progressLogger);

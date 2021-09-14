@@ -255,11 +255,11 @@ namespace NameSpace1
             Assert.Equal("OtherNamespace.Generic<T>", genericClass.Name);
 
             var classType = (ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0];
-            Assert.Equal("OtherMyNamespace.Generic<OtherNamespace.Generic<int>,OtherMyNamespace.Generic<string,char>>",
+            Assert.Equal("OtherMyNamespace.Generic<OtherNamespace.Generic<int>, OtherMyNamespace.Generic<string, char>>",
                 classType.Methods[0].ParameterTypes[0].Type.Name);
             Assert.Equal("OtherNamespace.Generic<OtherNamespace.Generic<string>>",
                 classType.Methods[0].LocalVariableTypes[0].Type.Name);
-            Assert.Equal("OtherMyNamespace.Generic<float,double>",
+            Assert.Equal("OtherMyNamespace.Generic<float, double>",
                 classType.Methods[0].LocalVariableTypes[1].Type.Name);
         }
 
