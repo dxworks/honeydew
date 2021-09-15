@@ -13,6 +13,8 @@ namespace HoneydewModels.CSharp.ReferenceModel
         public string Modifier { get; set; } = "";
         
         public ReferenceNamespaceModel NamespaceReference { get; init; }
+        
+        public ReferenceCompilationUnitModel CompilationUnitReference { get; init; }
 
         public ReferenceClassModel BaseClass { get; set; }
 

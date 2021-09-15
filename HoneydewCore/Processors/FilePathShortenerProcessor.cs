@@ -52,13 +52,13 @@ namespace HoneydewCore.Processors
                         }
                     }
 
-                    foreach (var namespaceModel in projectModel.Namespaces)
+                    foreach (var compilationUnitType in projectModel.CompilationUnits)
                     {
-                        foreach (var classModel in namespaceModel.ClassModels)
+                        foreach (var classType in compilationUnitType.ClassTypes)
                         {
-                            if (!string.IsNullOrWhiteSpace(classModel.FilePath))
+                            if (!string.IsNullOrWhiteSpace(classType.FilePath))
                             {
-                                classModel.FilePath = TrimPath(classModel.FilePath);
+                                classType.FilePath = TrimPath(classType.FilePath);
                             }
                         }
                     }

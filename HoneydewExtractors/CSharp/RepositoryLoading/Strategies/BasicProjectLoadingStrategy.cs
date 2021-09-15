@@ -62,16 +62,17 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     var semanticModel = compilation.GetSemanticModel(syntaxTree);
 
                     var compilationUnitType = extractor.Extract(syntaxTree, semanticModel);
-                    compilationUnitType.FilePath = syntaxTree.FilePath;
-                    var classTypes = compilationUnitType.ClassTypes;
 
                     _logger.Log($"Done extracting from {syntaxTree.FilePath} ({i}/{documentCount})");
 
-                    foreach (var classModel in classTypes)
+                    compilationUnitType.FilePath = syntaxTree.FilePath;
+
+                    foreach (var classModel in compilationUnitType.ClassTypes)
                     {
                         classModel.FilePath = syntaxTree.FilePath;
-                        projectModel.Add(classModel);
                     }
+
+                    projectModel.Add(compilationUnitType);
                 }
                 catch (Exception e)
                 {

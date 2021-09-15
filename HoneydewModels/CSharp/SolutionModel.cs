@@ -12,11 +12,11 @@ namespace HoneydewModels.CSharp
         {
             foreach (var projectModel in Projects)
             {
-                foreach (var namespaceModel in projectModel.Namespaces)
+                foreach (var compilationUnitType in projectModel.CompilationUnits)
                 {
-                    foreach (var classModel in namespaceModel.ClassModels)
+                    foreach (var classType in compilationUnitType.ClassTypes)
                     {
-                        yield return classModel;
+                        yield return classType;
                     }
                 }
             }

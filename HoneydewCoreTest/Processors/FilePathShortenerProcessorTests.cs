@@ -114,11 +114,11 @@ namespace HoneydewCoreTest.Processors
                 {
                     new ProjectModel
                     {
-                        Namespaces =
+                        CompilationUnits =
                         {
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                ClassModels =
+                                ClassTypes =
                                 {
                                     new ClassModel
                                     {
@@ -134,11 +134,11 @@ namespace HoneydewCoreTest.Processors
                     },
                     new ProjectModel
                     {
-                        Namespaces =
+                        CompilationUnits =
                         {
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                ClassModels =
+                                ClassTypes =
                                 {
                                     new ClassModel
                                     {
@@ -150,9 +150,9 @@ namespace HoneydewCoreTest.Processors
                                     }
                                 }
                             },
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                ClassModels =
+                                ClassTypes =
                                 {
                                     new ClassModel
                                     {
@@ -170,11 +170,11 @@ namespace HoneydewCoreTest.Processors
                 {
                     new ProjectModel
                     {
-                        Namespaces =
+                        CompilationUnits =
                         {
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                ClassModels =
+                                ClassTypes =
                                 {
                                     new ClassModel
                                     {
@@ -195,17 +195,17 @@ namespace HoneydewCoreTest.Processors
             var processesRepositoryModel = sut.Process(repositoryModel);
 
             Assert.Equal("Project1/Namespace1/Class1.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FilePath);
+                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
             Assert.Equal("Project1/Namespace1/Class2.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[1].FilePath);
+                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[1].FilePath);
             Assert.Equal("Project2/Models/Model1.cs",
-                processesRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].FilePath);
+                processesRepositoryModel.Solutions[0].Projects[1].CompilationUnits[0].ClassTypes[0].FilePath);
             Assert.Equal("Project2/Models/Model2.cs",
-                processesRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[1].FilePath);
+                processesRepositoryModel.Solutions[0].Projects[1].CompilationUnits[0].ClassTypes[1].FilePath);
             Assert.Equal("Project2/Controllers/Controller.cs",
-                processesRepositoryModel.Solutions[0].Projects[1].Namespaces[1].ClassModels[0].FilePath);
+                processesRepositoryModel.Solutions[0].Projects[1].CompilationUnits[1].ClassTypes[0].FilePath);
             Assert.Equal("SomeFolder/Folder1/Folder2/Folder3/_my_class.cs",
-                processesRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0].FilePath);
+                processesRepositoryModel.Solutions[1].Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
         }
 
         [Fact(Skip = "Fails on Linux")]
@@ -220,11 +220,11 @@ namespace HoneydewCoreTest.Processors
                     new ProjectModel
                     {
                         FilePath = "Path1/Path2/Project.csproj",
-                        Namespaces =
+                        CompilationUnits =
                         {
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                ClassModels =
+                                ClassTypes =
                                 {
                                     new ClassModel
                                     {
@@ -248,11 +248,11 @@ namespace HoneydewCoreTest.Processors
                     new ProjectModel
                     {
                         FilePath = "Folder1\\Folder\\Project2\\Project2.csproj",
-                        Namespaces =
+                        CompilationUnits =
                         {
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                ClassModels =
+                                ClassTypes =
                                 {
                                     new ClassModel
                                     {
@@ -264,9 +264,9 @@ namespace HoneydewCoreTest.Processors
                                     }
                                 }
                             },
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                ClassModels =
+                                ClassTypes =
                                 {
                                     new ClassModel
                                     {
@@ -289,20 +289,20 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("Path1/Path2/Project.csproj",
                 processesRepositoryModel.Solutions[0].Projects[0].FilePath);
             Assert.Equal("Class1.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FilePath);
+                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
             Assert.Equal("Path1/Path2/Namespace1/Class2.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[1].FilePath);
+                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[1].FilePath);
 
             Assert.Equal("Folder1/Folder/Solution1.sln",
                 processesRepositoryModel.Solutions[1].FilePath);
             Assert.Equal("Folder1/Folder/Project2/Project2.csproj",
                 processesRepositoryModel.Solutions[1].Projects[0].FilePath);
             Assert.Equal("Models/Model1.cs",
-                processesRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0].FilePath);
+                processesRepositoryModel.Solutions[1].Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
             Assert.Equal("Folder1/Folder/Models/Model2.cs",
-                processesRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[1].FilePath);
+                processesRepositoryModel.Solutions[1].Projects[0].CompilationUnits[0].ClassTypes[1].FilePath);
             Assert.Equal("Controllers/Controller.cs",
-                processesRepositoryModel.Solutions[1].Projects[0].Namespaces[1].ClassModels[0].FilePath);
+                processesRepositoryModel.Solutions[1].Projects[0].CompilationUnits[1].ClassTypes[0].FilePath);
         }
 
         [Fact(Skip = "Fails on Linux")]
@@ -317,11 +317,11 @@ namespace HoneydewCoreTest.Processors
                     new ProjectModel
                     {
                         FilePath = "D:/SomePath/Project1/Project1.csproj",
-                        Namespaces =
+                        CompilationUnits =
                         {
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                ClassModels =
+                                ClassTypes =
                                 {
                                     new ClassModel
                                     {
@@ -338,11 +338,11 @@ namespace HoneydewCoreTest.Processors
                     new ProjectModel
                     {
                         FilePath = "D:\\SomePath\\Project2\\Project2.csproj",
-                        Namespaces =
+                        CompilationUnits =
                         {
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                ClassModels =
+                                ClassTypes =
                                 {
                                     new ClassModel
                                     {
@@ -350,9 +350,9 @@ namespace HoneydewCoreTest.Processors
                                     }
                                 }
                             },
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                ClassModels =
+                                ClassTypes =
                                 {
                                     new ClassModel
                                     {
@@ -376,15 +376,15 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("Project1/Project1.csproj",
                 processesRepositoryModel.Solutions[0].Projects[0].FilePath);
             Assert.Equal("Project1/Models/Model1.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FilePath);
+                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
             Assert.Equal("Project1/Models/Model2.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[1].FilePath);
+                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[1].FilePath);
             Assert.Equal("Project2/Project2.csproj",
                 processesRepositoryModel.Solutions[0].Projects[1].FilePath);
             Assert.Equal("Project2/Controller/Impl/Controller.cs",
-                processesRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].FilePath);
+                processesRepositoryModel.Solutions[0].Projects[1].CompilationUnits[0].ClassTypes[0].FilePath);
             Assert.Equal("Project2/Repository/IRepository.cs",
-                processesRepositoryModel.Solutions[0].Projects[1].Namespaces[1].ClassModels[0].FilePath);
+                processesRepositoryModel.Solutions[0].Projects[1].CompilationUnits[1].ClassTypes[0].FilePath);
         }
 
         [Fact(Skip = "Fails on Linux")]
@@ -398,11 +398,11 @@ namespace HoneydewCoreTest.Processors
                     new ProjectModel
                     {
                         FilePath = "D:/SomePath/Project1/Project1.csproj",
-                        Namespaces =
+                        CompilationUnits =
                         {
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                ClassModels =
+                                ClassTypes =
                                 {
                                     new ClassModel
                                     {
@@ -414,9 +414,9 @@ namespace HoneydewCoreTest.Processors
                                     }
                                 }
                             },
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                ClassModels =
+                                ClassTypes =
                                 {
                                     new ClassModel
                                     {
@@ -424,9 +424,9 @@ namespace HoneydewCoreTest.Processors
                                     }
                                 }
                             },
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                ClassModels =
+                                ClassTypes =
                                 {
                                     new ClassModel
                                     {
@@ -450,13 +450,13 @@ namespace HoneydewCoreTest.Processors
             Assert.Equal("Project1/Project1.csproj",
                 processesRepositoryModel.Solutions[0].Projects[0].FilePath);
             Assert.Equal("Project1/Models/Model1.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].FilePath);
+                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
             Assert.Equal("Project1/Models/Model2.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[1].FilePath);
+                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[1].FilePath);
             Assert.Equal("Project1/Controller/Impl/Controller.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].FilePath);
+                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[1].ClassTypes[0].FilePath);
             Assert.Equal("Project1/Repository/IRepository.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].FilePath);
+                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[2].ClassTypes[0].FilePath);
         }
     }
 }

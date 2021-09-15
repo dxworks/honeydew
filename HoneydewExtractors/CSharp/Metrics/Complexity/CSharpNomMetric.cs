@@ -15,9 +15,9 @@ namespace HoneydewExtractors.CSharp.Metrics.Complexity
             {
                 foreach (var projectModel in solutionModel.Projects)
                 {
-                    foreach (var namespaceModel in projectModel.Namespaces)
+                    foreach (var compilationUnitType in projectModel.CompilationUnits)
                     {
-                        foreach (var classType in namespaceModel.ClassModels)
+                        foreach (var classType in compilationUnitType.ClassTypes)
                         {
                             if (classType is not ClassModel classModel)
                             {

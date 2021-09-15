@@ -79,14 +79,14 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
                     new ProjectModel
                     {
                         Name = "Project1",
-                        Namespaces =
+                        CompilationUnits = 
                         {
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                Name = "Project1.Services",
-                                ClassModels = new List<IClassType>
+                                FilePath = "validPathToProject/Project1/Services/CreateService.cs",
+                                ClassTypes = new List<IClassType>
                                 {
-                                    new ClassModel()
+                                    new ClassModel
                                     {
                                         Name = "CreateService",
                                         FilePath = "validPathToProject/Project1/Services/CreateService.cs",
@@ -196,13 +196,13 @@ namespace HoneydewExtractorsTests.CSharp.RepositoryLoading
             Assert.NotNull(loadSolution);
             Assert.Equal(1, loadSolution.Projects.Count);
             Assert.Equal("Project1", loadSolution.Projects[0].Name);
-            Assert.Equal(1, loadSolution.Projects[0].Namespaces.Count);
+            Assert.Equal(1, loadSolution.Projects[0].CompilationUnits.Count);
 
-            var namespaceModel = loadSolution.Projects[0].Namespaces[0];
-            Assert.Equal("Project1.Services", namespaceModel.Name);
-            Assert.Equal(1, namespaceModel.ClassModels.Count);
+            var compilationUnit = loadSolution.Projects[0].CompilationUnits[0];
+            Assert.Equal("validPathToProject/Project1/Services/CreateService.cs", compilationUnit.FilePath);
+            Assert.Equal(1, compilationUnit.ClassTypes.Count);
 
-            var classModel = (ClassModel)namespaceModel.ClassModels[0];
+            var classModel = (ClassModel)compilationUnit.ClassTypes[0];
             Assert.Equal("CreateService", classModel.Name);
             Assert.Equal(2, classModel.BaseTypes.Count);
 

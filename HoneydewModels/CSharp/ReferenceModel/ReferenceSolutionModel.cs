@@ -39,8 +39,8 @@ namespace HoneydewModels.CSharp.ReferenceModel
         public ReferenceClassModel FindFirstClass(Func<ReferenceClassModel, bool> predicate)
         {
             return (from projectModel in Projects
-                from namespaceModel in projectModel.Namespaces
-                from classModel in namespaceModel.ClassModels
+                from compilationUnit in projectModel.CompilationUnits
+                from classModel in compilationUnit.ClassModels
                 select classModel).FirstOrDefault(predicate.Invoke);
         }
     }

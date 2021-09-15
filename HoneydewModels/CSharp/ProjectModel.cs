@@ -14,6 +14,8 @@ namespace HoneydewModels.CSharp
 
         public IList<NamespaceModel> Namespaces { get; set; } = new List<NamespaceModel>();
 
+        public IList<ICompilationUnitType> CompilationUnits { get; set; } = new List<ICompilationUnitType>();
+
         public ProjectModel()
         {
         }
@@ -23,19 +25,24 @@ namespace HoneydewModels.CSharp
             Name = name;
         }
 
-        public void Add(IClassType classModel)
+        public void Add(ICompilationUnitType compilationUnitType)
         {
-            var namespaceModel = Namespaces.FirstOrDefault(model => model.Name == classModel.ContainingTypeName);
+            CompilationUnits.Add(compilationUnitType);
 
-            if (namespaceModel == null)
+            foreach (var classType in compilationUnitType.ClassTypes)
             {
-                var model = new NamespaceModel();
-                model.Add(classModel);
-                Namespaces.Add(model);
-            }
-            else
-            {
-                namespaceModel.Add(classModel);
+                var namespaceModel = Namespaces.FirstOrDefault(model => model.Name == classType.ContainingTypeName);
+
+                if (namespaceModel == null)
+                {
+                    var model = new NamespaceModel();
+                    model.Add(classType);
+                    Namespaces.Add(model);
+                }
+                else
+                {
+                    namespaceModel.Add(classType);
+                }
             }
         }
     }

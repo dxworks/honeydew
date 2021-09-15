@@ -7,5 +7,8 @@ namespace HoneydewModels.CSharp.ReferenceModel
         public ReferenceSolutionModel SolutionReference { get; init; }
 
         public IList<ReferenceNamespaceModel> Namespaces { get; } = new List<ReferenceNamespaceModel>();
+
+        public IList<ReferenceCompilationUnitModel> CompilationUnits { get; set; } =
+            new List<ReferenceCompilationUnitModel>();
     }
 }
