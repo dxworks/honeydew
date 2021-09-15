@@ -22,6 +22,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
         public IEntityType GetFullName(SyntaxNode syntaxNode)
         {
             var name = syntaxNode.ToString();
+            var isExtern = false;
 
             switch (syntaxNode)
             {
@@ -59,6 +60,9 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                     {
                         return CreateEntityTypeModel(typeInfo.Type.ToString());
                     }
+
+                    name = "";
+                    isExtern = true;
                 }
                     break;
 
@@ -101,6 +105,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                             else
                             {
                                 name = typeSyntax.ToString();
+                                isExtern = true;
                             }
                         }
                             break;
@@ -118,6 +123,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                     else
                     {
                         name = attributeSyntax.Name.ToString();
+                        isExtern = true;
                     }
                 }
                     break;
@@ -137,13 +143,13 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                     var symbolInfo = _semanticModel.GetSymbolInfo(expressionSyntax);
                     if (symbolInfo.Symbol != null)
                     {
-                        return GetFullName(symbolInfo.Symbol);
+                        return GetFullName(symbolInfo.Symbol, false);
                     }
 
                     var typeInfo = _semanticModel.GetTypeInfo(expressionSyntax);
                     if (typeInfo.Type != null && typeInfo.Type.ToString() != "?" && typeInfo.Type.ToString() != "?[]")
                     {
-                        return GetFullName(typeInfo.Type);
+                        return GetFullName(typeInfo.Type, false);
                     }
 
                     switch (expressionSyntax)
@@ -175,6 +181,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                         default:
                         {
                             name = "";
+                            isExtern = true;
                         }
                             break;
                     }
@@ -204,7 +211,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                     break;
             }
 
-            return CreateEntityTypeModel(name);
+            return CreateEntityTypeModel(name, isExtern);
         }
 
         private string ReconstructFullName(GenericType genericType)
@@ -240,7 +247,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             return stringBuilder.ToString();
         }
 
-        private IEntityType GetFullName(ISymbol symbolInfo, bool isNullable = false)
+        private IEntityType GetFullName(ISymbol symbolInfo, bool isExternType, bool isNullable = false)
         {
             if (symbolInfo == null)
             {
@@ -297,17 +304,18 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 }
             }
 
-            return CreateEntityTypeModel(name);
+            return CreateEntityTypeModel(name, isExternType);
         }
 
-        public EntityTypeModel CreateEntityTypeModel(string name)
+        public EntityTypeModel CreateEntityTypeModel(string name, bool isExternType = false)
         {
             try
             {
                 return new EntityTypeModel
                 {
                     Name = name,
-                    FullType = GetContainedTypes(name)
+                    FullType = GetContainedTypes(name),
+                    IsExtern = isExternType
                 };
             }
             catch (Exception)
@@ -318,7 +326,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                     FullType = new GenericType
                     {
                         Name = name
-                    }
+                    },
+                    IsExtern = isExternType
                 };
             }
         }

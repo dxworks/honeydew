@@ -7,7 +7,7 @@ Honeydew is a tool that extracts facts from a C# Solution or C# Project
 For extracting information about a solution or project use the following command:
 
 ```
-.\Honeydew extract <input_path> [--no-progress-bars] [--no-bindings] [--no-trim-paths]
+.\Honeydew extract <input_path> [--no-progress-bars] [--no-bindings] [--no-local-variables-bindings] [--no-trim-paths] [--no-extern-types-search]
 ```
 
 If `input_path` is a path to a solution file (.sln), Honeydew will extract facts from that solution file
@@ -32,16 +32,29 @@ The output files will be placed in a folder named `results`
   If present, Honeydew will not try to set the **Fully Qualified Name** of the entities of the created model
 
 
+- `--no-local-variables-bindings`
+
+  If present, Honeydew will not try to set the **Fully Qualified Name** of the local variables of the created model
+
+
 - `--no-trim-paths`
 
   If present, Honeydew will not trim the File Paths present in the created model
+
+
+- `--no-extern-types-search`
+
+  If present, Honeydew will not search in the entire model for extern types that have the same name with types
+  identified in the provided input
+  
+  If such types were found, the result will be placed in a file named `extern_types.txt`
 
 ## Load Model from file
 
 For loading a model from a json file
 
 ```
-.\Honeydew load <path_to_json_model> [--no-progress-bars] [--no-bindings] [--no-trim-paths]
+.\Honeydew load <path_to_json_model> [--no-progress-bars] [--no-bindings] [--no-local-variables-bindings] [--no-trim-paths] [--no-extern-types-search]
 ```
 
 ### Options
@@ -57,9 +70,22 @@ For loading a model from a json file
   If present, Honeydew will not try to set the **Fully Qualified Name** of the entities of the created model
 
 
+- `--no-local-variables-bindings`
+
+  If present, Honeydew will not try to set the **Fully Qualified Name** of the local variables of the created model
+
+
 - `--no-trim-paths`
 
   If present, Honeydew will not trim the File Paths present in the created model
+
+
+- `--no-extern-types-search`
+
+  If present, Honeydew will not search in the entire model for extern types that have the same name with types
+  identified in the provided input
+
+  If such types were found, the result will be placed in a file named `extern_types.txt`
 
 ## Build Project
 

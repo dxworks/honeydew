@@ -18,7 +18,7 @@ namespace Honeydew
         [Option("no-bindings", Required = false, Default = false,
             HelpText = "Deactivate Binding Processing")]
         public bool DeactivateBindingProcessing { get; set; }
-        
+
         [Option("no-local-variables-bindings", Required = false, Default = false,
             HelpText = "Deactivate Local Variables Binding")]
         public bool DisableLocalVariablesBinding { get; set; }
@@ -26,5 +26,10 @@ namespace Honeydew
         [Option("no-trim-paths", Required = false, Default = false,
             HelpText = "Deactivate File Path Trimming")]
         public bool DisablePathTrimming { get; set; }
+
+
+        [Option("no-extern-types-search", Required = false, Default = false,
+            HelpText = "Deactivate Extern Type in Local Types Search")]
+        public bool DisableExternTypeInLocalTypeSearch { get; set; }
     }
 }

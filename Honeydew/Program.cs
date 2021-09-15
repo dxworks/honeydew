@@ -154,7 +154,7 @@ namespace Honeydew
                     progressLogger.Log();
                     progressLogger.Log("Applying Post Extraction Metrics");
 
-                    ApplyPostExtractionVisitors(repositoryModel);
+                    ApplyPostExtractionVisitors(repositoryModel, options.DisableExternTypeInLocalTypeSearch);
 
                     WriteAllRepresentations(repositoryModel,
                         null,
@@ -185,7 +185,7 @@ namespace Honeydew
                     progressLogger.Log();
                     progressLogger.Log("Applying Post Extraction Metrics");
 
-                    ApplyPostExtractionVisitors(repositoryModel);
+                    ApplyPostExtractionVisitors(repositoryModel, options.DisableExternTypeInLocalTypeSearch);
 
                     WriteAllRepresentations(repositoryModel,
                         fullNameModelProcessor.NamespacesDictionary,
@@ -206,8 +206,34 @@ namespace Honeydew
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
-        private static void ApplyPostExtractionVisitors(RepositoryModel repositoryModel)
+        private static void ApplyPostExtractionVisitors(RepositoryModel repositoryModel,
+            bool disableSearchForExternTypes)
         {
+            var classNames = new HashSet<string>();
+
+            foreach (var classType in repositoryModel.GetEnumerable())
+            {
+                classNames.Add(classType.Name);
+            }
+
+            var modelVisitors = new List<IModelVisitor<IClassType>>
+            {
+                new PropertiesRelationVisitor(),
+                new FieldsRelationVisitor(),
+                new ParameterRelationVisitor(),
+                new ReturnValueRelationVisitor(),
+                new LocalVariablesRelationVisitor(),
+
+                new ExternCallsRelationVisitor(),
+            };
+
+            if (!disableSearchForExternTypes)
+            {
+                var logFilePath = $"{DefaultPathForAllRepresentations}/extern_types.txt";
+                var logger = new SerilogLogger(logFilePath);
+                modelVisitors.Add(new ExternEntityTypeVisitor(classNames, logger));
+            }
+
             var repositoryModelIterator = new RepositoryModelIterator(new List<ModelIterator<SolutionModel>>
             {
                 new SolutionModelIterator(new List<ModelIterator<ProjectModel>>
@@ -216,16 +242,7 @@ namespace Honeydew
                     {
                         new NamespaceModelIterator(new List<ModelIterator<IClassType>>
                         {
-                            new ClassTypePropertyIterator(new List<IModelVisitor<IClassType>>
-                            {
-                                new PropertiesRelationVisitor(),
-                                new FieldsRelationVisitor(),
-                                new ParameterRelationVisitor(),
-                                new ReturnValueRelationVisitor(),
-                                new LocalVariablesRelationVisitor(),
-
-                                new ExternCallsRelationVisitor(),
-                            })
+                            new ClassTypePropertyIterator(modelVisitors)
                         })
                     })
                 })
