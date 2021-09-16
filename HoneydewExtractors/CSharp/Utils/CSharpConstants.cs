@@ -39,8 +39,12 @@
         {
             type = ConvertSystemTypeToPrimitiveType(type);
 
-            return type is "object" or "string" or "bool" or "byte" or "char" or "decimal" or "double" or "short"
-                or "int" or "long" or "sbyte" or "float" or "ushort" or "uint" or "ulong" or "void";
+            if (type.EndsWith('?'))
+            {
+                type = type[..^1];
+            }
+            
+            return type is "object" or "string" or "bool" or "byte" or "char" or "decimal" or "double" or "short"or "int" or "long" or "sbyte" or "float" or "ushort" or "uint" or "ulong" or "void";
         }
 
         private static string ConvertSystemTypeToPrimitiveType(string type)

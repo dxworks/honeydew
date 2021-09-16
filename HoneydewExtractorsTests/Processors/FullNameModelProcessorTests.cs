@@ -10,14 +10,19 @@ namespace HoneydewExtractorsTests.Processors
 {
     public class FullNameModelProcessorTests
     {
-        private readonly FullNameModelProcessor _sut;
+        private readonly NewFullNameModelProcessor _sut;
+
+        // private readonly FullNameModelProcessor _sut;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly Mock<ILogger> _ambiguousClassLogger = new();
         private readonly Mock<IProgressLogger> _progressLoggerMock = new();
         private readonly Mock<IProgressLoggerBar> _progressLoggerBarMock = new();
 
         public FullNameModelProcessorTests()
         {
-            _sut = new FullNameModelProcessor(_loggerMock.Object, _progressLoggerMock.Object, false);
+            // _sut = new FullNameModelProcessor(_loggerMock.Object, _progressLoggerMock.Object, false);
+            _sut = new NewFullNameModelProcessor(_loggerMock.Object, _ambiguousClassLogger.Object,
+                _progressLoggerMock.Object, false);
         }
 
         [Fact]

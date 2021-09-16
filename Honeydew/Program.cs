@@ -176,7 +176,10 @@ namespace Honeydew
                     progressLogger.Log("Resolving Full Name Dependencies");
                     progressLogger.Log();
 
-                    var fullNameModelProcessor = new FullNameModelProcessor(logger, progressLogger, options.DisableLocalVariablesBinding);
+                    var fqnLogger = new SerilogLogger($"{DefaultPathForAllRepresentations}/fqn_logs.txt");
+                    var fullNameModelProcessor = new NewFullNameModelProcessor(logger, fqnLogger, progressLogger,
+                        options.DisableLocalVariablesBinding);
+                    // var fullNameModelProcessor = new FullNameModelProcessor(logger,progressLogger, options.DisableLocalVariablesBinding);
                     repositoryModel = fullNameModelProcessor.Process(repositoryModel);
 
                     logger.Log();
@@ -222,7 +225,7 @@ namespace Honeydew
                                 new ParameterRelationVisitor(),
                                 new ReturnValueRelationVisitor(),
                                 new LocalVariablesRelationVisitor(),
-                                
+
                                 new ExternCallsRelationVisitor(),
                             })
                         })
@@ -433,14 +436,14 @@ namespace Honeydew
                 classRelationsRepresentation);
 
             //var allFileRelationsRepresentation =
-           //     new RepositoryModelToFileRelationsProcessor(new ChooseAllStrategy()).Process(repositoryModel);
-           // csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations_all{nameModifier}.csv"),
+            //     new RepositoryModelToFileRelationsProcessor(new ChooseAllStrategy()).Process(repositoryModel);
+            // csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations_all{nameModifier}.csv"),
             //    allFileRelationsRepresentation);
 
-           // var jafaxFileRelationsRepresentation =
-          //      new RepositoryModelToFileRelationsProcessor(new JafaxChooseStrategy()).Process(repositoryModel);
-          //  csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations{nameModifier}.csv"),
-          //      jafaxFileRelationsRepresentation);
+            // var jafaxFileRelationsRepresentation =
+            //      new RepositoryModelToFileRelationsProcessor(new JafaxChooseStrategy()).Process(repositoryModel);
+            //  csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations{nameModifier}.csv"),
+            //      jafaxFileRelationsRepresentation);
 
             var cyclomaticComplexityPerFileRepresentation =
                 GetCyclomaticComplexityPerFileRepresentation(repositoryModel);
