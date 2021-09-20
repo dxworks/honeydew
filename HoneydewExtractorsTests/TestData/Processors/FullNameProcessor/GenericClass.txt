@@ -1,0 +1,19 @@
+﻿namespace NameSpace1
+{
+    public class MyClass<T, K>
+    {
+        public T _field;
+        public K Prop {get;set;}
+    
+        public MyClass(int a)
+        {
+        }
+    
+        public void Method<R>(R r)
+        {
+            void F()
+            {
+            }
+        }
+    }
+}

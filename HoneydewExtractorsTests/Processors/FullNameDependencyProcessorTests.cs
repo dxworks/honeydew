@@ -3,6 +3,7 @@ using HoneydewCore.Logging;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
 using HoneydewExtractors.Processors;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Moq;
 using Xunit;
 
@@ -12,12 +13,14 @@ namespace HoneydewExtractorsTests.Processors
     {
         private readonly FullNameModelProcessor _sut;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly Mock<ILogger> _ambiguousClassLoggerMock = new();
         private readonly Mock<IProgressLogger> _progressLoggerMock = new();
         private readonly Mock<IProgressLoggerBar> _progressLoggerBarMock = new();
 
         public FullNameDependencyProcessorTests()
         {
-            _sut = new FullNameModelProcessor(_loggerMock.Object, _progressLoggerMock.Object, false);
+            _sut = new FullNameModelProcessor(_loggerMock.Object, _ambiguousClassLoggerMock.Object,
+                _progressLoggerMock.Object, false);
         }
 
         [Fact]
@@ -95,16 +98,16 @@ namespace HoneydewExtractorsTests.Processors
 
             var projectModel = new ProjectModel();
 
-            projectModel.Add(classModel1);
-            projectModel.Add(classModel2);
-            projectModel.Add(classModel3);
-            projectModel.Add(classModel4);
-            projectModel.Add(classModel5);
+            projectModel.Add(new CompilationUnitModel { ClassTypes = new List<IClassType> { classModel1 } });
+            projectModel.Add(new CompilationUnitModel { ClassTypes = new List<IClassType> { classModel2 } });
+            projectModel.Add(new CompilationUnitModel { ClassTypes = new List<IClassType> { classModel3 } });
+            projectModel.Add(new CompilationUnitModel { ClassTypes = new List<IClassType> { classModel4 } });
+            projectModel.Add(new CompilationUnitModel { ClassTypes = new List<IClassType> { classModel5 } });
 
-            solutionModel.Projects.Add(projectModel);
 
             var repositoryModel = new RepositoryModel();
             repositoryModel.Solutions.Add(solutionModel);
+            repositoryModel.Projects.Add(projectModel);
 
             _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(5, "Resolving Class Names"))
                 .Returns(_progressLoggerBarMock.Object);
@@ -117,22 +120,22 @@ namespace HoneydewExtractorsTests.Processors
 
             var processedRepositoryModel = _sut.Process(repositoryModel);
 
-            var processedProjectModel = processedRepositoryModel.Solutions[0].Projects[0];
+            var processedProjectModel = processedRepositoryModel.Projects[0];
 
             Assert.False(
-                ((Dictionary<string, int>)processedProjectModel.Namespaces[0].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.CompilationUnits[0].ClassTypes[0].Metrics[0].Value)
                 .TryGetValue("Full.Path.Dependency1", out _));
             Assert.False(
-                ((Dictionary<string, int>)processedProjectModel.Namespaces[1].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.CompilationUnits[1].ClassTypes[0].Metrics[0].Value)
                 .TryGetValue("Full.Path.Dependency1", out _));
             Assert.False(
-                ((Dictionary<string, int>)processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.CompilationUnits[2].ClassTypes[0].Metrics[0].Value)
                 .TryGetValue("Full.Path.Dependency1", out _));
             Assert.False(
-                ((Dictionary<string, int>)processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.CompilationUnits[2].ClassTypes[0].Metrics[0].Value)
                 .TryGetValue("Full.Path.Dependency2", out _));
             Assert.False(
-                ((Dictionary<string, int>)processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.CompilationUnits[3].ClassTypes[0].Metrics[0].Value)
                 .TryGetValue("Full.Path.Dependency2", out _));
         }
 
@@ -154,7 +157,14 @@ namespace HoneydewExtractorsTests.Processors
 
             ClassModel classModel2 = new()
             {
-                Name = "Services.Class2", FilePath = "path/Services/Class2.cs"
+                Name = "Services.Class2", FilePath = "path/Services/Class2.cs",
+                Imports = new List<IImportType>
+                {
+                    new UsingModel
+                    {
+                        Name = "Models"
+                    }
+                }
             };
             classModel2.Metrics.Add(new MetricModel
             {
@@ -168,7 +178,18 @@ namespace HoneydewExtractorsTests.Processors
 
             ClassModel classModel3 = new()
             {
-                Name = "Controllers.Class3", FilePath = "path/Controllers/Class3.cs"
+                Name = "Controllers.Class3", FilePath = "path/Controllers/Class3.cs",
+                Imports = new List<IImportType>
+                {
+                    new UsingModel
+                    {
+                        Name = "Models"
+                    },
+                    new UsingModel
+                    {
+                        Name = "Services"
+                    }
+                }
             };
             classModel3.Metrics.Add(new MetricModel
             {
@@ -183,7 +204,18 @@ namespace HoneydewExtractorsTests.Processors
 
             ClassModel classModel4 = new()
             {
-                Name = "Domain.Data.Class4", FilePath = "path/Domain/Data/Class4.cs"
+                Name = "Domain.Data.Class4", FilePath = "path/Domain/Data/Class4.cs",
+                Imports = new List<IImportType>
+                {
+                    new UsingModel
+                    {
+                        Name = "Models"
+                    },
+                    new UsingModel
+                    {
+                        Name = "Controllers"
+                    }
+                }
             };
             classModel4.Metrics.Add(new MetricModel
             {
@@ -209,16 +241,16 @@ namespace HoneydewExtractorsTests.Processors
 
             var projectModel = new ProjectModel();
 
-            projectModel.Add(classModel1);
-            projectModel.Add(classModel2);
-            projectModel.Add(classModel3);
-            projectModel.Add(classModel4);
-            projectModel.Add(classModel5);
+            projectModel.Add(new CompilationUnitModel { ClassTypes = new List<IClassType> { classModel1 } });
+            projectModel.Add(new CompilationUnitModel { ClassTypes = new List<IClassType> { classModel2 } });
+            projectModel.Add(new CompilationUnitModel { ClassTypes = new List<IClassType> { classModel3 } });
+            projectModel.Add(new CompilationUnitModel { ClassTypes = new List<IClassType> { classModel4 } });
+            projectModel.Add(new CompilationUnitModel { ClassTypes = new List<IClassType> { classModel5 } });
 
-            solutionModel.Projects.Add(projectModel);
 
             var repositoryModel = new RepositoryModel();
             repositoryModel.Solutions.Add(solutionModel);
+            repositoryModel.Projects.Add(projectModel);
 
             _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(5, "Resolving Class Names"))
                 .Returns(_progressLoggerBarMock.Object);
@@ -231,31 +263,31 @@ namespace HoneydewExtractorsTests.Processors
 
             var processedRepositoryModel = _sut.Process(repositoryModel);
 
-            var processedProjectModel = processedRepositoryModel.Solutions[0].Projects[0];
+            var processedProjectModel = processedRepositoryModel.Projects[0];
 
             Assert.Empty(
-                (Dictionary<string, int>)processedProjectModel.Namespaces[0].ClassModels[0].Metrics[0].Value);
+                (Dictionary<string, int>)processedProjectModel.CompilationUnits[0].ClassTypes[0].Metrics[0].Value);
 
             Assert.True(
-                ((Dictionary<string, int>)processedProjectModel.Namespaces[1].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.CompilationUnits[1].ClassTypes[0].Metrics[0].Value)
                 .TryGetValue("Models.Class1", out var depCount1));
             Assert.Equal(2, depCount1);
 
             Assert.True(
-                ((Dictionary<string, int>)processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.CompilationUnits[2].ClassTypes[0].Metrics[0].Value)
                 .TryGetValue("Models.Class1", out var depCount2));
             Assert.Equal(6, depCount2);
             Assert.True(
-                ((Dictionary<string, int>)processedProjectModel.Namespaces[2].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.CompilationUnits[2].ClassTypes[0].Metrics[0].Value)
                 .TryGetValue("Services.Class2", out var depCount3));
             Assert.Equal(2, depCount3);
 
             Assert.True(
-                ((Dictionary<string, int>)processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.CompilationUnits[3].ClassTypes[0].Metrics[0].Value)
                 .TryGetValue("Controllers.Class3", out var depCount4));
             Assert.Equal(4, depCount4);
             Assert.True(
-                ((Dictionary<string, int>)processedProjectModel.Namespaces[3].ClassModels[0].Metrics[0].Value)
+                ((Dictionary<string, int>)processedProjectModel.CompilationUnits[3].ClassTypes[0].Metrics[0].Value)
                 .TryGetValue("Controllers.Class5", out var depCount5));
             Assert.Equal(1, depCount5);
         }

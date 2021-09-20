@@ -12,12 +12,14 @@ namespace HoneydewExtractorsTests.Processors
     {
         private readonly FullNameModelProcessor _sut;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly Mock<ILogger> _ambiguousClassLoggerMock = new();
         private readonly Mock<IProgressLogger> _progressLoggerMock = new();
         private readonly Mock<IProgressLoggerBar> _progressLoggerBarMock = new();
 
         public FullNameModelProcessorTests()
         {
-            _sut = new FullNameModelProcessor(_loggerMock.Object, _progressLoggerMock.Object, false);
+            _sut = new FullNameModelProcessor(_loggerMock.Object, _ambiguousClassLoggerMock.Object,
+                _progressLoggerMock.Object, false);
         }
 
         [Fact]
@@ -27,34 +29,34 @@ namespace HoneydewExtractorsTests.Processors
             var solutionModel = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Models",
-                ClassModels =
+                FilePath = "Models",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "Class1"
+                        Name = "Models.Class1"
                     }
                 }
             });
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Services",
-                ClassModels =
+                FilePath = "Services",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "Class2"
+                        Name = "Services.Class2"
                     }
                 }
             });
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Controllers",
-                ClassModels =
+                FilePath = "Controllers",
+                ClassTypes =
                 {
                     new ClassModel
                     {
@@ -62,28 +64,28 @@ namespace HoneydewExtractorsTests.Processors
                     },
                     new ClassModel
                     {
-                        Name = "Class4"
+                        Name = "Controllers.Class4"
                     }
                 }
             });
 
-            solutionModel.Projects.Add(projectModel1);
+            repositoryModel.Projects.Add(projectModel1);
 
             var projectModel2 = new ProjectModel();
 
-            projectModel2.Namespaces.Add(new NamespaceModel
+            projectModel2.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Domain.Data",
-                ClassModels =
+                FilePath = "Domain.Data",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "Class5"
+                        Name = "Domain.Data.Class5"
                     }
                 }
             });
 
-            solutionModel.Projects.Add(projectModel2);
+            repositoryModel.Projects.Add(projectModel2);
 
             repositoryModel.Solutions.Add(solutionModel);
 
@@ -100,15 +102,15 @@ namespace HoneydewExtractorsTests.Processors
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.Class1",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].Name);
+                actualRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[0].Name);
             Assert.Equal("Services.Class2",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].Name);
+                actualRepositoryModel.Projects[0].CompilationUnits[1].ClassTypes[0].Name);
             Assert.Equal("Controllers.Class3",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Name);
+                actualRepositoryModel.Projects[0].CompilationUnits[2].ClassTypes[0].Name);
             Assert.Equal("Controllers.Class4",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[1].Name);
+                actualRepositoryModel.Projects[0].CompilationUnits[2].ClassTypes[1].Name);
             Assert.Equal("Domain.Data.Class5",
-                actualRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].Name);
+                actualRepositoryModel.Projects[1].CompilationUnits[0].ClassTypes[0].Name);
         }
 
         [Fact]
@@ -118,27 +120,27 @@ namespace HoneydewExtractorsTests.Processors
             var solutionModel = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Project1.Models",
-                ClassModels =
+                FilePath = "Project1.Models",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "Class1"
+                        Name = "Project1.Models.Class1"
                     },
                     new ClassModel
                     {
-                        Name = "Class1.InnerClass1"
+                        Name = "Project1.Models.Class1.InnerClass1"
                     },
                     new ClassModel
                     {
-                        Name = "Class1.InnerClass1.InnerClass2"
+                        Name = "Project1.Models.Class1.InnerClass1.InnerClass2"
                     }
                 }
             });
 
-            solutionModel.Projects.Add(projectModel1);
+            repositoryModel.Projects.Add(projectModel1);
 
             repositoryModel.Solutions.Add(solutionModel);
 
@@ -154,10 +156,10 @@ namespace HoneydewExtractorsTests.Processors
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
-            var namespaceModel = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
-            Assert.Equal("Project1.Models.Class1", namespaceModel.ClassModels[0].Name);
-            Assert.Equal("Project1.Models.Class1.InnerClass1", namespaceModel.ClassModels[1].Name);
-            Assert.Equal("Project1.Models.Class1.InnerClass1.InnerClass2", namespaceModel.ClassModels[2].Name);
+            var compilationUnitModel = actualRepositoryModel.Projects[0].CompilationUnits[0];
+            Assert.Equal("Project1.Models.Class1", compilationUnitModel.ClassTypes[0].Name);
+            Assert.Equal("Project1.Models.Class1.InnerClass1", compilationUnitModel.ClassTypes[1].Name);
+            Assert.Equal("Project1.Models.Class1.InnerClass1.InnerClass2", compilationUnitModel.ClassTypes[2].Name);
         }
 
         [Fact]
@@ -167,18 +169,18 @@ namespace HoneydewExtractorsTests.Processors
             var solutionModel = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Project1.Models",
-                ClassModels =
+                FilePath = "Project1.Models",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "Class1"
+                        Name = "Project1.Models.Class1"
                     },
                     new ClassModel
                     {
-                        Name = "Class2",
+                        Name = "Project1.Models.Class2",
                         Constructors =
                         {
                             new ConstructorModel
@@ -219,7 +221,7 @@ namespace HoneydewExtractorsTests.Processors
                 }
             });
 
-            solutionModel.Projects.Add(projectModel1);
+            repositoryModel.Projects.Add(projectModel1);
 
             repositoryModel.Solutions.Add(solutionModel);
 
@@ -235,8 +237,8 @@ namespace HoneydewExtractorsTests.Processors
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
-            var namespaceModel = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
-            var classModel = (ClassModel)namespaceModel.ClassModels[1];
+            var compilationUnitModel = actualRepositoryModel.Projects[0].CompilationUnits[0];
+            var classModel = (ClassModel)compilationUnitModel.ClassTypes[1];
             Assert.Equal("Project1.Models.Class1",
                 classModel.Constructors[0].ParameterTypes[0].Type.Name);
             Assert.Equal("Project1.Models.Class1",
@@ -250,10 +252,10 @@ namespace HoneydewExtractorsTests.Processors
             var solutionModel = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Models",
-                ClassModels =
+                FilePath = "Models",
+                ClassTypes =
                 {
                     new ClassModel
                     {
@@ -318,10 +320,10 @@ namespace HoneydewExtractorsTests.Processors
                 }
             });
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Models.Other",
-                ClassModels =
+                FilePath = "Models.Other",
+                ClassTypes =
                 {
                     new ClassModel
                     {
@@ -386,14 +388,14 @@ namespace HoneydewExtractorsTests.Processors
                 }
             });
 
-            solutionModel.Projects.Add(projectModel1);
+            repositoryModel.Projects.Add(projectModel1);
 
             var projectModel2 = new ProjectModel();
 
-            projectModel2.Namespaces.Add(new NamespaceModel
+            projectModel2.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "MyNamespace",
-                ClassModels =
+                FilePath = "MyNamespace",
+                ClassTypes =
                 {
                     new ClassModel
                     {
@@ -408,6 +410,13 @@ namespace HoneydewExtractorsTests.Processors
                                 },
                                 Kind = "class"
                             }
+                        },
+                        Imports = new List<IImportType>
+                        {
+                            new UsingModel
+                            {
+                                Name = "Models.Other"
+                            }
                         }
                     }
                 }
@@ -416,7 +425,7 @@ namespace HoneydewExtractorsTests.Processors
             projectModel1.FilePath = "path1";
             projectModel2.ProjectReferences = new List<string> { "path1" };
 
-            solutionModel.Projects.Add(projectModel2);
+            repositoryModel.Projects.Add(projectModel2);
             repositoryModel.Solutions.Add(solutionModel);
 
             _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(9, "Resolving Class Names"))
@@ -430,31 +439,31 @@ namespace HoneydewExtractorsTests.Processors
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
-            var modelsNamespace = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
-            foreach (var classModel in modelsNamespace.ClassModels)
+            var modelsNamespace = actualRepositoryModel.Projects[0].CompilationUnits[0];
+            foreach (var classModel in modelsNamespace.ClassTypes)
             {
                 Assert.Equal("class", classModel.BaseTypes[0].Kind);
             }
 
-            Assert.Equal("object", modelsNamespace.ClassModels[0].BaseTypes[0].Type.Name);
-            Assert.Equal("Models.Class1", modelsNamespace.ClassModels[1].BaseTypes[0].Type.Name);
-            Assert.Equal("Models.Class1", modelsNamespace.ClassModels[2].BaseTypes[0].Type.Name);
-            Assert.Equal("Models.Class3", modelsNamespace.ClassModels[3].BaseTypes[0].Type.Name);
+            Assert.Equal("object", modelsNamespace.ClassTypes[0].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Class1", modelsNamespace.ClassTypes[1].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Class1", modelsNamespace.ClassTypes[2].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Class3", modelsNamespace.ClassTypes[3].BaseTypes[0].Type.Name);
 
 
-            var otherModelsNamespace = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1];
-            foreach (var classModel in otherModelsNamespace.ClassModels)
+            var otherModelsNamespace = actualRepositoryModel.Projects[0].CompilationUnits[1];
+            foreach (var classModel in otherModelsNamespace.ClassTypes)
             {
                 Assert.Equal("class", classModel.BaseTypes[0].Kind);
             }
 
-            Assert.Equal("Models.Other.Class2", otherModelsNamespace.ClassModels[0].BaseTypes[0].Type.Name);
-            Assert.Equal("Models.Class1", otherModelsNamespace.ClassModels[1].BaseTypes[0].Type.Name);
-            Assert.Equal("Models.TheClass", otherModelsNamespace.ClassModels[2].BaseTypes[0].Type.Name);
-            Assert.Equal("Models.Other.Class3", otherModelsNamespace.ClassModels[3].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Other.Class2", otherModelsNamespace.ClassTypes[0].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Class1", otherModelsNamespace.ClassTypes[1].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.TheClass", otherModelsNamespace.ClassTypes[2].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Other.Class3", otherModelsNamespace.ClassTypes[3].BaseTypes[0].Type.Name);
 
             Assert.Equal("Models.Other.SuperClass",
-                actualRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0]
+                actualRepositoryModel.Projects[1].CompilationUnits[0].ClassTypes[0]
                     .BaseTypes[0].Type.Name);
         }
 
@@ -466,14 +475,14 @@ namespace HoneydewExtractorsTests.Processors
             var projectModel1 = new ProjectModel();
 
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Models.Interfaces",
-                ClassModels =
+                FilePath = "Models.Interfaces",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "IInterface1"
+                        Name = "Models.Interfaces.IInterface1"
                     },
                     new ClassModel
                     {
@@ -516,10 +525,10 @@ namespace HoneydewExtractorsTests.Processors
                 }
             });
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Models",
-                ClassModels =
+                FilePath = "Models",
+                ClassTypes =
                 {
                     new ClassModel
                     {
@@ -533,6 +542,13 @@ namespace HoneydewExtractorsTests.Processors
                                     Name = "IInterface3"
                                 },
                                 Kind = "interface"
+                            }
+                        },
+                        Imports = new List<IImportType>
+                        {
+                            new UsingModel
+                            {
+                                Name = "Models.Interfaces"
                             }
                         }
                     },
@@ -548,6 +564,13 @@ namespace HoneydewExtractorsTests.Processors
                                     Name = "IInterface1"
                                 },
                                 Kind = "interface"
+                            }
+                        },
+                        Imports = new List<IImportType>
+                        {
+                            new UsingModel
+                            {
+                                Name = "Models.Interfaces"
                             }
                         }
                     },
@@ -580,6 +603,13 @@ namespace HoneydewExtractorsTests.Processors
                                 },
                                 Kind = "interface"
                             }
+                        },
+                        Imports = new List<IImportType>
+                        {
+                            new UsingModel
+                            {
+                                Name = "Models.Interfaces"
+                            }
                         }
                     },
                     new ClassModel
@@ -603,23 +633,37 @@ namespace HoneydewExtractorsTests.Processors
                                 },
                                 Kind = "interface"
                             }
+                        },
+                        Imports = new List<IImportType>
+                        {
+                            new UsingModel
+                            {
+                                Name = "MyNamespace"
+                            }
                         }
                     }
                 }
             });
 
-            solutionModel.Projects.Add(projectModel1);
+            repositoryModel.Projects.Add(projectModel1);
 
             var projectModel2 = new ProjectModel();
 
-            projectModel2.Namespaces.Add(new NamespaceModel
+            projectModel2.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "MyNamespace",
-                ClassModels =
+                FilePath = "MyNamespace",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "AInterface",
+                        Name = "MyNamespace.AInterface",
+                        Imports = new List<IImportType>
+                        {
+                            new UsingModel
+                            {
+                                Name = "Models"
+                            }
+                        }
                     }
                 }
             });
@@ -627,7 +671,7 @@ namespace HoneydewExtractorsTests.Processors
             projectModel2.FilePath = "path2";
             projectModel1.ProjectReferences = new List<string> { "path2" };
 
-            solutionModel.Projects.Add(projectModel2);
+            repositoryModel.Projects.Add(projectModel2);
 
             repositoryModel.Solutions.Add(solutionModel);
 
@@ -643,10 +687,10 @@ namespace HoneydewExtractorsTests.Processors
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
-            var modelInterfacesNamespace = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
-            Assert.Empty(modelInterfacesNamespace.ClassModels[0].BaseTypes);
+            var modelInterfacesNamespace = actualRepositoryModel.Projects[0].CompilationUnits[0];
+            Assert.Empty(modelInterfacesNamespace.ClassTypes[0].BaseTypes);
 
-            foreach (var classModel in modelInterfacesNamespace.ClassModels)
+            foreach (var classModel in modelInterfacesNamespace.ClassTypes)
             {
                 foreach (var baseType in classModel.BaseTypes)
                 {
@@ -655,15 +699,15 @@ namespace HoneydewExtractorsTests.Processors
             }
 
             Assert.Equal("Models.Interfaces.IInterface1",
-                modelInterfacesNamespace.ClassModels[1].BaseTypes[0].Type.Name);
+                modelInterfacesNamespace.ClassTypes[1].BaseTypes[0].Type.Name);
             Assert.Equal("Models.Interfaces.IInterface1",
-                modelInterfacesNamespace.ClassModels[2].BaseTypes[0].Type.Name);
+                modelInterfacesNamespace.ClassTypes[2].BaseTypes[0].Type.Name);
             Assert.Equal("Models.Interfaces.IInterface2",
-                modelInterfacesNamespace.ClassModels[2].BaseTypes[1].Type.Name);
+                modelInterfacesNamespace.ClassTypes[2].BaseTypes[1].Type.Name);
 
-            var modelsNamespace = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1];
+            var modelsNamespace = actualRepositoryModel.Projects[0].CompilationUnits[1];
 
-            foreach (var classModel in modelsNamespace.ClassModels)
+            foreach (var classModel in modelsNamespace.ClassTypes)
             {
                 foreach (var baseType in classModel.BaseTypes)
                 {
@@ -671,15 +715,15 @@ namespace HoneydewExtractorsTests.Processors
                 }
             }
 
-            Assert.Equal("Models.Interfaces.IInterface3", modelsNamespace.ClassModels[0].BaseTypes[0].Type.Name);
-            Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[1].BaseTypes[0].Type.Name);
-            Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[2].BaseTypes[0].Type.Name);
-            Assert.Equal("Models.Interfaces.IInterface2", modelsNamespace.ClassModels[2].BaseTypes[1].Type.Name);
-            Assert.Equal("Models.Interfaces.IInterface3", modelsNamespace.ClassModels[2].BaseTypes[2].Type.Name);
-            Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassModels[3].BaseTypes[0].Type.Name);
-            Assert.Equal("MyNamespace.AInterface", modelsNamespace.ClassModels[3].BaseTypes[1].Type.Name);
+            Assert.Equal("Models.Interfaces.IInterface3", modelsNamespace.ClassTypes[0].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassTypes[1].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassTypes[2].BaseTypes[0].Type.Name);
+            Assert.Equal("Models.Interfaces.IInterface2", modelsNamespace.ClassTypes[2].BaseTypes[1].Type.Name);
+            Assert.Equal("Models.Interfaces.IInterface3", modelsNamespace.ClassTypes[2].BaseTypes[2].Type.Name);
+            Assert.Equal("Models.Interfaces.IInterface1", modelsNamespace.ClassTypes[3].BaseTypes[0].Type.Name);
+            Assert.Equal("MyNamespace.AInterface", modelsNamespace.ClassTypes[3].BaseTypes[1].Type.Name);
 
-            Assert.Empty(actualRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0].BaseTypes);
+            Assert.Empty(actualRepositoryModel.Projects[1].CompilationUnits[0].ClassTypes[0].BaseTypes);
         }
 
         [Fact]
@@ -690,14 +734,14 @@ namespace HoneydewExtractorsTests.Processors
             var projectModel1 = new ProjectModel();
 
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Project1.Models.Classes",
-                ClassModels =
+                FilePath = "Project1.Models.Classes",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "Class1",
+                        Name = "Project1.Models.Classes.Class1",
                         Methods =
                         {
                             new MethodModel
@@ -746,7 +790,7 @@ namespace HoneydewExtractorsTests.Processors
                 }
             });
 
-            solutionModel.Projects.Add(projectModel1);
+            repositoryModel.Projects.Add(projectModel1);
             repositoryModel.Solutions.Add(solutionModel);
 
             _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
@@ -762,9 +806,9 @@ namespace HoneydewExtractorsTests.Processors
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             var modelInterfacesNamespace =
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0];
+                actualRepositoryModel.Projects[0].CompilationUnits[0];
 
-            var classModel1 = (ClassModel)modelInterfacesNamespace.ClassModels[0];
+            var classModel1 = (ClassModel)modelInterfacesNamespace.ClassTypes[0];
             Assert.Empty(classModel1.Constructors);
             Assert.Equal(2, classModel1.Methods.Count);
             Assert.Equal("Project1.Models.Classes.Class1",
@@ -772,7 +816,7 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Equal("Project1.Models.Classes.Class1",
                 classModel1.Methods[1].ContainingTypeName);
 
-            var classModel2 = (ClassModel)modelInterfacesNamespace.ClassModels[1];
+            var classModel2 = (ClassModel)modelInterfacesNamespace.ClassTypes[1];
             Assert.Equal(1, classModel2.Methods.Count);
             Assert.Equal("Project1.Models.Classes.Class2",
                 classModel2.Methods[0].ContainingTypeName);
@@ -782,7 +826,7 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Equal("Project1.Models.Classes.Class2",
                 classModel2.Constructors[1].ContainingTypeName);
 
-            var classModel3 = (ClassModel)modelInterfacesNamespace.ClassModels[2];
+            var classModel3 = (ClassModel)modelInterfacesNamespace.ClassTypes[2];
             Assert.Empty(classModel3.Methods);
             Assert.Equal(1, classModel3.Constructors.Count);
             Assert.Equal("Project1.Models.Classes.Class3",
@@ -797,37 +841,48 @@ namespace HoneydewExtractorsTests.Processors
             var solutionModel = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Models",
-                ClassModels =
+                FilePath = "Models",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "SomeModel"
+                        Name = "Models.SomeModel",
                     }
                 }
             });
 
-            solutionModel.Projects.Add(projectModel1);
+            repositoryModel.Projects.Add(projectModel1);
 
             var projectModel2 = new ProjectModel();
-            projectModel2.Namespaces.Add(new NamespaceModel
+            projectModel2.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Services",
-                ClassModels =
+                FilePath = "Services",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "Service",
+                        Name = "Services.Service",
                         Fields =
                         {
                             new FieldModel
                             {
                                 Type = new EntityTypeModel
                                 {
-                                    Name = "SomeModel"
+                                    Name = "SomeModel",
+                                    FullType = new GenericType
+                                    {
+                                        Name = "SomeModel"
+                                    }
                                 }
+                            }
+                        },
+                        Imports = new List<IImportType>
+                        {
+                            new UsingModel
+                            {
+                                Name = "Models"
                             }
                         }
                     }
@@ -837,7 +892,7 @@ namespace HoneydewExtractorsTests.Processors
             projectModel1.FilePath = "path1";
             projectModel2.ProjectReferences = new List<string> { "path1" };
 
-            solutionModel.Projects.Add(projectModel2);
+            repositoryModel.Projects.Add(projectModel2);
             repositoryModel.Solutions.Add(solutionModel);
 
             _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(2, "Resolving Class Names"))
@@ -852,7 +907,7 @@ namespace HoneydewExtractorsTests.Processors
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.SomeModel",
-                ((ClassModel)actualRepositoryModel.Solutions[0].Projects[1].Namespaces[0].ClassModels[0]).Fields[0].Type
+                ((ClassModel)actualRepositoryModel.Projects[1].CompilationUnits[0].ClassTypes[0]).Fields[0].Type
                 .Name);
         }
 
@@ -864,46 +919,47 @@ namespace HoneydewExtractorsTests.Processors
             var solutionModel1 = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+
+            projectModel1.Add(new CompilationUnitModel
             {
-                Name = "Models",
-                ClassModels =
+                FilePath = "Models",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "SomeModel"
+                        Name = "Models.SomeModel"
                     }
                 }
             });
 
-            solutionModel1.Projects.Add(projectModel1);
+            repositoryModel.Projects.Add(projectModel1);
 
             var projectModel2 = new ProjectModel();
-            projectModel2.Namespaces.Add(new NamespaceModel
+            projectModel2.Add(new CompilationUnitModel
             {
-                Name = "Services",
-                ClassModels =
+                FilePath = "Services",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "Service",
+                        Name = "Services.Service",
                     }
                 }
             });
 
-            solutionModel1.Projects.Add(projectModel2);
+            repositoryModel.Projects.Add(projectModel2);
 
             var solutionModel2 = new SolutionModel();
             var projectModel3 = new ProjectModel();
 
-            projectModel3.Namespaces.Add(new NamespaceModel
+            projectModel3.Add(new CompilationUnitModel
             {
-                Name = "OtherSolutionNamespace",
-                ClassModels =
+                FilePath = "OtherSolutionNamespace",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "Controller",
+                        Name = "OtherSolutionNamespace.Controller",
                         Fields =
                         {
                             new FieldModel
@@ -927,6 +983,17 @@ namespace HoneydewExtractorsTests.Processors
                                     Modifier = "ref"
                                 }
                             }
+                        },
+                        Imports = new List<IImportType>
+                        {
+                            new UsingModel
+                            {
+                                Name = "Models"
+                            },
+                            new UsingModel
+                            {
+                                Name = "Services"
+                            }
                         }
                     }
                 }
@@ -936,7 +1003,7 @@ namespace HoneydewExtractorsTests.Processors
             projectModel2.FilePath = "path2";
             projectModel3.ProjectReferences = new List<string> { "path1", "path2" };
 
-            solutionModel2.Projects.Add(projectModel3);
+            repositoryModel.Projects.Add(projectModel3);
 
             repositoryModel.Solutions.Add(solutionModel1);
             repositoryModel.Solutions.Add(solutionModel2);
@@ -952,7 +1019,7 @@ namespace HoneydewExtractorsTests.Processors
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
-            var classModel = (ClassModel)actualRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0];
+            var classModel = (ClassModel)actualRepositoryModel.Projects[2].CompilationUnits[0].ClassTypes[0];
             Assert.Equal("Models.SomeModel", classModel.Fields[0].Type.Name);
             Assert.Equal("Services.Service", classModel.Methods[0].ReturnValue.Type.Name);
             Assert.Equal("ref", ((ReturnValueModel)classModel.Methods[0].ReturnValue).Modifier);
@@ -966,51 +1033,51 @@ namespace HoneydewExtractorsTests.Processors
             var solutionModel = new SolutionModel();
             var projectModel = new ProjectModel();
 
-            projectModel.Namespaces.Add(new NamespaceModel
+            projectModel.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Models",
-                ClassModels =
+                FilePath = "Models",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "AmbiguousClass"
+                        Name = "Models.AmbiguousClass"
                     }
                 }
             });
 
-            projectModel.Namespaces.Add(new NamespaceModel
+            projectModel.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Services",
-                ClassModels =
+                FilePath = "Services",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "AmbiguousClass"
+                        Name = "Services.AmbiguousClass"
                     }
                 }
             });
 
-            projectModel.Namespaces.Add(new NamespaceModel
+            projectModel.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Controllers",
-                ClassModels =
+                FilePath = "Controllers",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "AmbiguousClass"
+                        Name = "Controllers.AmbiguousClass"
                     }
                 }
             });
 
-            projectModel.Namespaces.Add(new NamespaceModel
+            projectModel.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "SomeNamespace",
-                ClassModels =
+                FilePath = "SomeNamespace",
+                ClassTypes =
                 {
                     new ClassModel
                     {
                         FilePath = "SomePath/SomeClass.cs",
-                        Name = "SomeClass",
+                        Name = "SomeNamespace.SomeClass",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -1105,7 +1172,7 @@ namespace HoneydewExtractorsTests.Processors
                 }
             });
 
-            solutionModel.Projects.Add(projectModel);
+            repositoryModel.Projects.Add(projectModel);
 
             repositoryModel.Solutions.Add(solutionModel);
 
@@ -1121,14 +1188,14 @@ namespace HoneydewExtractorsTests.Processors
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("Models.AmbiguousClass",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0].Name);
+                actualRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[0].Name);
             Assert.Equal("Services.AmbiguousClass",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0].Name);
+                actualRepositoryModel.Projects[0].CompilationUnits[1].ClassTypes[0].Name);
             Assert.Equal("Controllers.AmbiguousClass",
-                actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0].Name);
+                actualRepositoryModel.Projects[0].CompilationUnits[2].ClassTypes[0].Name);
 
             var someClassModel =
-                (ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[3].ClassModels[0];
+                (ClassModel)actualRepositoryModel.Projects[0].CompilationUnits[3].ClassTypes[0];
             Assert.Equal("SomeNamespace.SomeClass",
                 someClassModel.Name);
 
@@ -1148,13 +1215,6 @@ namespace HoneydewExtractorsTests.Processors
             var metricDependencies = ((Dictionary<string, int>)someClassModel.Metrics[0].Value);
             Assert.Single(metricDependencies);
             Assert.True(metricDependencies.ContainsKey("AmbiguousClass"));
-
-            _loggerMock.Verify(
-                logger => logger.Log("Multiple full names found for AmbiguousClass in SomePath/SomeClass.cs :",
-                    LogLevels.Warning),
-                Times.Once);
-            _loggerMock.Verify(logger => logger.Log("Models.AmbiguousClass", LogLevels.Information));
-            _loggerMock.Verify(logger => logger.Log("Services.AmbiguousClass", LogLevels.Information));
         }
 
         [Fact]
@@ -1165,10 +1225,10 @@ namespace HoneydewExtractorsTests.Processors
             var solutionModel = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Project1.Services",
-                ClassModels =
+                FilePath = "Project1.Services",
+                ClassTypes =
                 {
                     new ClassModel
                     {
@@ -1178,10 +1238,10 @@ namespace HoneydewExtractorsTests.Processors
             });
 
             var projectModel2 = new ProjectModel();
-            projectModel2.Namespaces.Add(new NamespaceModel
+            projectModel2.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Project2.Services",
-                ClassModels =
+                FilePath = "Project2.Services",
+                ClassTypes =
                 {
                     new ClassModel
                     {
@@ -1191,10 +1251,10 @@ namespace HoneydewExtractorsTests.Processors
             });
 
             var projectModel3 = new ProjectModel();
-            projectModel3.Namespaces.Add(new NamespaceModel
+            projectModel3.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Controllers",
-                ClassModels =
+                FilePath = "Controllers",
+                ClassTypes =
                 {
                     new ClassModel
                     {
@@ -1214,9 +1274,9 @@ namespace HoneydewExtractorsTests.Processors
                 }
             });
 
-            solutionModel.Projects.Add(projectModel1);
-            solutionModel.Projects.Add(projectModel2);
-            solutionModel.Projects.Add(projectModel3);
+            repositoryModel.Projects.Add(projectModel1);
+            repositoryModel.Projects.Add(projectModel2);
+            repositoryModel.Projects.Add(projectModel3);
 
             projectModel1.FilePath = "path1";
             projectModel2.FilePath = "path2";
@@ -1236,15 +1296,8 @@ namespace HoneydewExtractorsTests.Processors
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("MyService",
-                ((ClassModel)actualRepositoryModel.Solutions[0].Projects[2].Namespaces[0].ClassModels[0]).Fields[0].Type
+                ((ClassModel)actualRepositoryModel.Projects[2].CompilationUnits[0].ClassTypes[0]).Fields[0].Type
                 .Name);
-
-            _loggerMock.Verify(
-                logger => logger.Log("Multiple full names found for MyService in SomePath/MyController.cs :",
-                    LogLevels.Warning),
-                Times.Once);
-            _loggerMock.Verify(logger => logger.Log("Project1.Services.MyService", LogLevels.Information));
-            _loggerMock.Verify(logger => logger.Log("Project2.Services.MyService", LogLevels.Information));
         }
 
         [Fact]
@@ -1256,47 +1309,47 @@ namespace HoneydewExtractorsTests.Processors
             var solutionModel1 = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Project1.Services",
-                ClassModels =
+                FilePath = "Project1.Services",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "MyService"
+                        Name = "Project1.Services.MyService"
                     }
                 }
             });
 
-            solutionModel1.Projects.Add(projectModel1);
+            repositoryModel.Projects.Add(projectModel1);
 
             var solutionModel2 = new SolutionModel();
             var projectModel2 = new ProjectModel();
-            projectModel2.Namespaces.Add(new NamespaceModel
+            projectModel2.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Project2.Services",
-                ClassModels =
+                FilePath = "Project2.Services",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "MyService"
+                        Name = "Project2.Services.MyService"
                     }
                 }
             });
 
 
-            solutionModel2.Projects.Add(projectModel2);
+            repositoryModel.Projects.Add(projectModel2);
 
             var solutionModel3 = new SolutionModel();
             var projectModel3 = new ProjectModel();
-            projectModel3.Namespaces.Add(new NamespaceModel
+            projectModel3.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "NamespaceName",
-                ClassModels =
+                FilePath = "NamespaceName",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "MyController",
+                        Name = "NamespaceName.MyController",
                         FilePath = "SomePath/MyController.cs",
                         Fields =
                         {
@@ -1311,7 +1364,7 @@ namespace HoneydewExtractorsTests.Processors
                     }
                 }
             });
-            solutionModel3.Projects.Add(projectModel3);
+            repositoryModel.Projects.Add(projectModel3);
 
             projectModel1.FilePath = "path1";
             projectModel2.FilePath = "path2";
@@ -1333,15 +1386,8 @@ namespace HoneydewExtractorsTests.Processors
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("MyService",
-                ((ClassModel)actualRepositoryModel.Solutions[2].Projects[0].Namespaces[0].ClassModels[0]).Fields[0].Type
+                ((ClassModel)actualRepositoryModel.Projects[2].CompilationUnits[0].ClassTypes[0]).Fields[0].Type
                 .Name);
-
-            _loggerMock.Verify(
-                logger => logger.Log("Multiple full names found for MyService in SomePath/MyController.cs :",
-                    LogLevels.Warning),
-                Times.Once);
-            _loggerMock.Verify(logger => logger.Log("Project1.Services.MyService", LogLevels.Information));
-            _loggerMock.Verify(logger => logger.Log("Project2.Services.MyService", LogLevels.Information));
         }
 
         [Fact]
@@ -1352,10 +1398,10 @@ namespace HoneydewExtractorsTests.Processors
             var solutionModel1 = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Project1.Services",
-                ClassModels =
+                FilePath = "Project1.Services",
+                ClassTypes =
                 {
                     new ClassModel
                     {
@@ -1365,10 +1411,10 @@ namespace HoneydewExtractorsTests.Processors
             });
 
             var projectModel2 = new ProjectModel();
-            projectModel2.Namespaces.Add(new NamespaceModel
+            projectModel2.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Project2.Services",
-                ClassModels =
+                FilePath = "Project2.Services",
+                ClassTypes =
                 {
                     new ClassModel
                     {
@@ -1378,10 +1424,10 @@ namespace HoneydewExtractorsTests.Processors
             });
 
             var projectModel3 = new ProjectModel();
-            projectModel3.Namespaces.Add(new NamespaceModel
+            projectModel3.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Controllers",
-                ClassModels =
+                FilePath = "Controllers",
+                ClassTypes =
                 {
                     new ClassModel
                     {
@@ -1400,12 +1446,12 @@ namespace HoneydewExtractorsTests.Processors
                 }
             });
 
-            solutionModel1.Projects.Add(projectModel1);
-            solutionModel1.Projects.Add(projectModel2);
+            repositoryModel.Projects.Add(projectModel1);
+            repositoryModel.Projects.Add(projectModel2);
 
 
             var solutionModel2 = new SolutionModel();
-            solutionModel2.Projects.Add(projectModel3);
+            repositoryModel.Projects.Add(projectModel3);
             repositoryModel.Solutions.Add(solutionModel1);
             repositoryModel.Solutions.Add(solutionModel2);
 
@@ -1421,7 +1467,7 @@ namespace HoneydewExtractorsTests.Processors
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("OutOfRepositoryClass",
-                ((ClassModel)actualRepositoryModel.Solutions[1].Projects[0].Namespaces[0].ClassModels[0]).Fields[0].Type
+                ((ClassModel)actualRepositoryModel.Projects[2].CompilationUnits[0].ClassTypes[0]).Fields[0].Type
                 .Name);
 
             _loggerMock.Verify(
@@ -1436,14 +1482,14 @@ namespace HoneydewExtractorsTests.Processors
             var solutionModel = new SolutionModel();
             var projectModel1 = new ProjectModel();
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Models",
-                ClassModels =
+                FilePath = "Models",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "Class1",
+                        Name = "Models.Class1",
                         Properties =
                         {
                             new PropertyModel
@@ -1458,14 +1504,14 @@ namespace HoneydewExtractorsTests.Processors
                 }
             });
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Services",
-                ClassModels =
+                FilePath = "Services",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "Class2",
+                        Name = "Services.Class2",
                         Properties =
                         {
                             new PropertyModel
@@ -1475,19 +1521,26 @@ namespace HoneydewExtractorsTests.Processors
                                     Name = "Class1"
                                 }
                             }
+                        },
+                        Imports = new List<IImportType>
+                        {
+                            new UsingModel
+                            {
+                                Name = "Models"
+                            }
                         }
                     }
                 }
             });
 
-            projectModel1.Namespaces.Add(new NamespaceModel
+            projectModel1.CompilationUnits.Add(new CompilationUnitModel
             {
-                Name = "Controllers",
-                ClassModels =
+                FilePath = "Controllers",
+                ClassTypes =
                 {
                     new ClassModel
                     {
-                        Name = "Class4",
+                        Name = "Controllers.Class4",
                         Properties =
                         {
                             new PropertyModel
@@ -1511,12 +1564,19 @@ namespace HoneydewExtractorsTests.Processors
                                     Name = "Namespace.RandomClassClass"
                                 }
                             }
+                        },
+                        Imports = new List<IImportType>
+                        {
+                            new UsingModel
+                            {
+                                Name = "Services"
+                            }
                         }
                     }
                 }
             });
 
-            solutionModel.Projects.Add(projectModel1);
+            repositoryModel.Projects.Add(projectModel1);
 
             repositoryModel.Solutions.Add(solutionModel);
 
@@ -1532,19 +1592,19 @@ namespace HoneydewExtractorsTests.Processors
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
             Assert.Equal("int",
-                ((ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0]).Properties[0]
+                ((ClassModel)actualRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[0]).Properties[0]
                 .Type.Name);
             Assert.Equal("Models.Class1",
-                ((ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0]).Properties[0]
+                ((ClassModel)actualRepositoryModel.Projects[0].CompilationUnits[1].ClassTypes[0]).Properties[0]
                 .Type.Name);
             Assert.Equal("Services.Class2",
-                ((ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0]).Properties[0]
+                ((ClassModel)actualRepositoryModel.Projects[0].CompilationUnits[2].ClassTypes[0]).Properties[0]
                 .Type.Name);
             Assert.Equal("string",
-                ((ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0]).Properties[1]
+                ((ClassModel)actualRepositoryModel.Projects[0].CompilationUnits[2].ClassTypes[0]).Properties[1]
                 .Type.Name);
             Assert.Equal("Namespace.RandomClassClass",
-                ((ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0]).Properties[2]
+                ((ClassModel)actualRepositoryModel.Projects[0].CompilationUnits[2].ClassTypes[0]).Properties[2]
                 .Type.Name);
         }
     }
