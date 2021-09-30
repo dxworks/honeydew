@@ -29,4 +29,11 @@
       <Compile Remove="Processors\RelationMetricHolderToClassRelationsProcessorTests.cs" />
     </ItemGroup>
 
+
+    <ItemGroup>
+        <Content Include="TestData\**">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
 </Project>

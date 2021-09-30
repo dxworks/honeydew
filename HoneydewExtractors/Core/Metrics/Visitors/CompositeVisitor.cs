@@ -43,18 +43,5 @@ namespace HoneydewExtractors.Core.Metrics.Visitors
                 visitor.Visit(typeVisitor);
             }
         }
-
-        // public IType Visit(IType modelType)
-        // {
-        //     foreach (var visitor in _visitors)
-        //     {
-        //         if (visitor is IModelVisitor modelVisitor)
-        //         {
-        //             modelType = modelVisitor.Visit(modelType);
-        //         }
-        //     }
-        //
-        //     return modelType;
-        // }
     }
 }

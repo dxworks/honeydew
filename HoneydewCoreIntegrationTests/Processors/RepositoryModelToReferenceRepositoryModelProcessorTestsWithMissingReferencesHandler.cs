@@ -9,6 +9,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Fields;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
+using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Common;
@@ -18,24 +19,28 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Field;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Extraction.MethodCall;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
+using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
+using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.CSharp;
 using Moq;
 using Xunit;
+using MethodModel = HoneydewModels.Reference.MethodModel;
 
 namespace HoneydewCoreIntegrationTests.Processors
 {
-    public class SolutionModelToReferenceSolutionModelProcessorTestsWithMissingReferencesHandler
+    public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingReferencesHandler
     {
-        private readonly SolutionModelToReferenceSolutionModelProcessor _sut;
+        private readonly RepositoryModelToReferenceRepositoryModelProcessor _sut;
 
         private readonly CSharpFactExtractor _extractor;
         private readonly Mock<ILogger> _loggerMock = new();
         private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
         private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
-        public SolutionModelToReferenceSolutionModelProcessorTestsWithMissingReferencesHandler()
+        public RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingReferencesHandler()
         {
-            _sut = new SolutionModelToReferenceSolutionModelProcessor();
+            _sut = new RepositoryModelToReferenceRepositoryModelProcessor();
 
             var compositeVisitor = new CompositeVisitor();
 
@@ -47,6 +52,14 @@ namespace HoneydewCoreIntegrationTests.Processors
             {
                 new ParameterInfoVisitor()
             });
+            var localFunctionsSetterClassVisitor = new LocalFunctionsSetterClassVisitor(new List<ILocalFunctionVisitor>
+            {
+                new LocalFunctionInfoVisitor(new List<ILocalFunctionVisitor>
+                {
+                    calledMethodSetterVisitor
+                }),
+                calledMethodSetterVisitor
+            });
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
             {
                 new BaseInfoClassVisitor(),
@@ -55,19 +68,31 @@ namespace HoneydewCoreIntegrationTests.Processors
                 {
                     new MethodInfoVisitor(),
                     calledMethodSetterVisitor,
-                    parameterSetterVisitor
+                    parameterSetterVisitor,
+                    localFunctionsSetterClassVisitor
                 }),
                 new ConstructorSetterClassVisitor(new List<ICSharpConstructorVisitor>
                 {
                     new ConstructorInfoVisitor(),
                     calledMethodSetterVisitor,
-                    parameterSetterVisitor
+                    parameterSetterVisitor,
+                    localFunctionsSetterClassVisitor
                 }),
                 new FieldSetterClassVisitor(new List<ICSharpFieldVisitor>(
                     new List<ICSharpFieldVisitor>
                     {
                         new FieldInfoVisitor()
-                    }))
+                    })),
+                new PropertySetterClassVisitor(new List<IPropertyVisitor>
+                {
+                    new PropertyInfoVisitor(),
+                    new MethodAccessorSetterPropertyVisitor(new List<IMethodVisitor>
+                    {
+                        new MethodInfoVisitor(),
+                        calledMethodSetterVisitor,
+                        localFunctionsSetterClassVisitor
+                    })
+                })
             }));
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
@@ -125,21 +150,21 @@ namespace HoneydewCoreIntegrationTests.Processors
             var syntaxTree = _syntacticModelCreator.Create(fileContent);
             var semanticModel = _semanticModelCreator.Create(syntaxTree);
 
-            var classModels = _extractor.Extract(syntaxTree, semanticModel).ClassTypes;
+            var classTypes = _extractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-            var solutionModel = new SolutionModel
+            var repositoryModel = new RepositoryModel
             {
                 Projects =
                 {
                     new ProjectModel
                     {
                         Name = "Project1",
-                        Namespaces =
+                        CompilationUnits =
                         {
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                Name = "Project1.Services",
-                                ClassModels = classModels
+                                FilePath = "Project1.Services",
+                                ClassTypes = classTypes
                             }
                         }
                     }
@@ -147,10 +172,10 @@ namespace HoneydewCoreIntegrationTests.Processors
             };
 
 
-            var referenceSolutionModel = _sut.Process(solutionModel);
+            var referenceSolutionModel = _sut.Process(repositoryModel);
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-            var allCreatedReferences = referenceSolutionModel.CreatedClassModels;
+            var allCreatedReferences = referenceSolutionModel.CreatedClasses;
             Assert.Equal(5, allCreatedReferences.Count);
 
             var objectClassModel =
@@ -183,23 +208,23 @@ namespace HoneydewCoreIntegrationTests.Processors
             var parseMethodModel = intClassModel.Methods.First(model => model.Name == "Parse");
 
             Assert.Equal("ToString", toStringMethodModel.Name);
-            Assert.Equal(intClassModel, toStringMethodModel.ContainingClass);
+            Assert.Equal(intClassModel, toStringMethodModel.ContainingType);
             Assert.Empty(toStringMethodModel.Parameters);
 
             Assert.Equal("Parse", parseMethodModel.Name);
-            Assert.Equal(intClassModel, parseMethodModel.ContainingClass);
+            Assert.Equal(intClassModel, parseMethodModel.ContainingType);
             Assert.Equal(1, parseMethodModel.Parameters.Count);
-            Assert.Equal(stringClassModel, parseMethodModel.Parameters[0].Type);
+            Assert.Equal(stringClassModel, parseMethodModel.Parameters[0].Type.TypeReference);
             Assert.Equal("", parseMethodModel.Parameters[0].Modifier);
             Assert.Null(parseMethodModel.Parameters[0].DefaultValue);
 
-            var referenceNamespaceServices = referenceSolutionModel.Projects[0].Namespaces[0];
-            var referenceMyClass = referenceNamespaceServices.ClassModels[0];
+            var compilationUnitModelServices = referenceSolutionModel.Projects[0].CompilationUnits[0];
+            var referenceMyClass = compilationUnitModelServices.Classes[0];
 
-            Assert.Equal(1, referenceNamespaceServices.ClassModels.Count);
+            Assert.Equal(1, compilationUnitModelServices.Classes.Count);
 
             Assert.Equal("Project1.Services.MyClass", referenceMyClass.Name);
-            Assert.Equal(referenceNamespaceServices, referenceMyClass.NamespaceReference);
+            Assert.Equal(compilationUnitModelServices, referenceMyClass.File);
             Assert.Empty(referenceMyClass.Fields);
             Assert.Equal(5, referenceMyClass.Methods.Count);
 
@@ -210,70 +235,70 @@ namespace HoneydewCoreIntegrationTests.Processors
             var methodPrint2 = referenceMyClass.Methods[4];
 
             Assert.Equal("Function1", methodFunction1.Name);
-            Assert.Equal(referenceMyClass, methodFunction1.ContainingClass);
+            Assert.Equal(referenceMyClass, methodFunction1.ContainingType);
             Assert.Equal("", methodFunction1.Modifier);
             Assert.Equal("public", methodFunction1.AccessModifier);
-            Assert.Equal(floatClassModel, methodFunction1.ReturnTypeReferenceClassModel);
+            Assert.Equal(floatClassModel, methodFunction1.ReturnValue.Type.TypeReference);
             Assert.Equal(2, methodFunction1.Parameters.Count);
-            Assert.Equal(intClassModel, methodFunction1.Parameters[0].Type);
+            Assert.Equal(intClassModel, methodFunction1.Parameters[0].Type.TypeReference);
             Assert.Equal("", methodFunction1.Parameters[0].Modifier);
             Assert.Null(methodFunction1.Parameters[0].DefaultValue);
-            Assert.Equal(intClassModel, methodFunction1.Parameters[1].Type);
+            Assert.Equal(intClassModel, methodFunction1.Parameters[1].Type.TypeReference);
             Assert.Equal("", methodFunction1.Parameters[1].Modifier);
             Assert.Null(methodFunction1.Parameters[1].DefaultValue);
             Assert.Equal(5, methodFunction1.CalledMethods.Count);
-            Assert.Equal(methodFunction3, methodFunction1.CalledMethods[0]);
-            Assert.Equal(methodFunction3, methodFunction1.CalledMethods[1]);
-            Assert.Equal(methodFunction2, methodFunction1.CalledMethods[2]);
-            Assert.Equal(methodFunction2, methodFunction1.CalledMethods[3]);
-            Assert.Equal(methodPrint2, methodFunction1.CalledMethods[4]);
+            Assert.Equal(methodFunction3, methodFunction1.CalledMethods[0].Method);
+            Assert.Equal(methodFunction3, methodFunction1.CalledMethods[1].Method);
+            Assert.Equal(methodFunction2, methodFunction1.CalledMethods[2].Method);
+            Assert.Equal(methodFunction2, methodFunction1.CalledMethods[3].Method);
+            Assert.Equal(methodPrint2, methodFunction1.CalledMethods[4].Method);
 
             Assert.Equal("Function2", methodFunction2.Name);
-            Assert.Equal(referenceMyClass, methodFunction2.ContainingClass);
+            Assert.Equal(referenceMyClass, methodFunction2.ContainingType);
             Assert.Equal("", methodFunction2.Modifier);
             Assert.Equal("public", methodFunction2.AccessModifier);
-            Assert.Equal(intClassModel, methodFunction2.ReturnTypeReferenceClassModel);
+            Assert.Equal(intClassModel, methodFunction2.ReturnValue.Type.TypeReference);
             Assert.Equal(1, methodFunction2.Parameters.Count);
-            Assert.Equal(stringClassModel, methodFunction2.Parameters[0].Type);
+            Assert.Equal(stringClassModel, methodFunction2.Parameters[0].Type.TypeReference);
             Assert.Equal("", methodFunction2.Parameters[0].Modifier);
             Assert.Null(methodFunction2.Parameters[0].DefaultValue);
             Assert.Equal(1, methodFunction2.CalledMethods.Count);
-            Assert.Equal(parseMethodModel, methodFunction2.CalledMethods[0]);
+            Assert.Equal(parseMethodModel, methodFunction2.CalledMethods[0].Method);
 
             Assert.Equal("Function3", methodFunction3.Name);
-            Assert.Equal(referenceMyClass, methodFunction3.ContainingClass);
+            Assert.Equal(referenceMyClass, methodFunction3.ContainingType);
             Assert.Equal("", methodFunction3.Modifier);
             Assert.Equal("public", methodFunction3.AccessModifier);
-            Assert.Equal(stringClassModel, methodFunction3.ReturnTypeReferenceClassModel);
+            Assert.Equal(stringClassModel, methodFunction3.ReturnValue.Type.TypeReference);
             Assert.Equal(1, methodFunction3.Parameters.Count);
-            Assert.Equal(intClassModel, methodFunction3.Parameters[0].Type);
+            Assert.Equal(intClassModel, methodFunction3.Parameters[0].Type.TypeReference);
             Assert.Equal("", methodFunction3.Parameters[0].Modifier);
             Assert.Null(methodFunction3.Parameters[0].DefaultValue);
             Assert.Equal(1, methodFunction3.CalledMethods.Count);
-            Assert.Equal(toStringMethodModel, methodFunction3.CalledMethods[0]);
+            Assert.Equal(toStringMethodModel, methodFunction3.CalledMethods[0].Method);
 
             Assert.Equal("Print", methodPrint1.Name);
-            Assert.Equal(referenceMyClass, methodPrint1.ContainingClass);
+            Assert.Equal(referenceMyClass, methodPrint1.ContainingType);
             Assert.Equal("static", methodPrint1.Modifier);
             Assert.Equal("private", methodPrint1.AccessModifier);
-            Assert.Equal(voidClassModel, methodPrint1.ReturnTypeReferenceClassModel);
+            Assert.Equal(voidClassModel, methodPrint1.ReturnValue.Type.TypeReference);
             Assert.Equal(1, methodPrint1.Parameters.Count);
-            Assert.Equal(floatClassModel, methodPrint1.Parameters[0].Type);
+            Assert.Equal(floatClassModel, methodPrint1.Parameters[0].Type.TypeReference);
             Assert.Equal("", methodPrint1.Parameters[0].Modifier);
             Assert.Null(methodPrint1.Parameters[0].DefaultValue);
             Assert.Empty(methodPrint1.CalledMethods);
 
             Assert.Equal("Print", methodPrint2.Name);
-            Assert.Equal(referenceMyClass, methodPrint2.ContainingClass);
+            Assert.Equal(referenceMyClass, methodPrint2.ContainingType);
             Assert.Equal("", methodPrint2.Modifier);
             Assert.Equal("private", methodPrint2.AccessModifier);
-            Assert.Equal(voidClassModel, methodPrint2.ReturnTypeReferenceClassModel);
+            Assert.Equal(voidClassModel, methodPrint2.ReturnValue.Type.TypeReference);
             Assert.Equal(1, methodPrint2.Parameters.Count);
-            Assert.Equal(intClassModel, methodPrint2.Parameters[0].Type);
+            Assert.Equal(intClassModel, methodPrint2.Parameters[0].Type.TypeReference);
             Assert.Equal("", methodPrint2.Parameters[0].Modifier);
             Assert.Null(methodPrint2.Parameters[0].DefaultValue);
             Assert.Equal(1, methodPrint2.CalledMethods.Count);
-            Assert.Equal(methodPrint2, methodPrint2.CalledMethods[0]);
+            Assert.Equal(methodPrint2, methodPrint2.CalledMethods[0].Method);
         }
 
         [Fact]
@@ -317,31 +342,31 @@ namespace HoneydewCoreIntegrationTests.Processors
             var syntaxTree = _syntacticModelCreator.Create(fileContent);
             var semanticModel = _semanticModelCreator.Create(syntaxTree);
 
-            var classModels = _extractor.Extract(syntaxTree, semanticModel).ClassTypes;
+            var classTypes = _extractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-            var solutionModel = new SolutionModel
+            var repositoryModel = new RepositoryModel
             {
                 Projects =
                 {
                     new ProjectModel
                     {
                         Name = "Project1",
-                        Namespaces =
+                        CompilationUnits =
                         {
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                Name = "Project1.Services",
-                                ClassModels = classModels,
+                                FilePath = "Project1.Services",
+                                ClassTypes = classTypes,
                             }
                         }
                     }
                 }
             };
 
-            var referenceSolutionModel = _sut.Process(solutionModel);
+            var referenceSolutionModel = _sut.Process(repositoryModel);
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-            var allCreatedReferences = referenceSolutionModel.CreatedClassModels;
+            var allCreatedReferences = referenceSolutionModel.CreatedClasses;
             Assert.Equal(6, allCreatedReferences.Count);
 
             var objectClassModel =
@@ -371,13 +396,13 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("byte", byteClassModel.Name);
             Assert.Equal("void", voidClassModel.Name);
 
-            var referenceNamespaceServices = referenceSolutionModel.Projects[0].Namespaces[0];
-            var referenceMyClass = referenceNamespaceServices.ClassModels[0];
+            var referenceCompilationUnitServices = referenceSolutionModel.Projects[0].CompilationUnits[0];
+            var referenceMyClass = referenceCompilationUnitServices.Classes[0];
 
-            Assert.Equal(1, referenceNamespaceServices.ClassModels.Count);
+            Assert.Equal(1, referenceCompilationUnitServices.Classes.Count);
 
             Assert.Equal("Project1.Services.MyClass", referenceMyClass.Name);
-            Assert.Equal(referenceNamespaceServices, referenceMyClass.NamespaceReference);
+            Assert.Equal(referenceCompilationUnitServices, referenceMyClass.File);
             Assert.Empty(referenceMyClass.Fields);
             Assert.Equal(5, referenceMyClass.Methods.Count);
 
@@ -388,57 +413,57 @@ namespace HoneydewCoreIntegrationTests.Processors
             var printByte = referenceMyClass.Methods[4];
 
             Assert.Equal("Print", printNoArg.Name);
-            Assert.Equal(referenceMyClass, printNoArg.ContainingClass);
+            Assert.Equal(referenceMyClass, printNoArg.ContainingType);
             Assert.Equal("", printNoArg.Modifier);
             Assert.Equal("public", printNoArg.AccessModifier);
-            Assert.Equal(voidClassModel, printNoArg.ReturnTypeReferenceClassModel);
+            Assert.Equal(voidClassModel, printNoArg.ReturnValue.Type.TypeReference);
             Assert.Empty(printNoArg.Parameters);
             Assert.Equal(4, printNoArg.CalledMethods.Count);
-            Assert.Equal(printInt, printNoArg.CalledMethods[0]);
-            Assert.Equal(printLong, printNoArg.CalledMethods[1]);
-            Assert.Equal(printShort, printNoArg.CalledMethods[2]);
-            Assert.Equal(printByte, printNoArg.CalledMethods[3]);
+            Assert.Equal(printInt, printNoArg.CalledMethods[0].Method);
+            Assert.Equal(printLong, printNoArg.CalledMethods[1].Method);
+            Assert.Equal(printShort, printNoArg.CalledMethods[2].Method);
+            Assert.Equal(printByte, printNoArg.CalledMethods[3].Method);
 
             Assert.Equal("Print", printInt.Name);
-            Assert.Equal(referenceMyClass, printInt.ContainingClass);
+            Assert.Equal(referenceMyClass, printInt.ContainingType);
             Assert.Equal("", printInt.Modifier);
             Assert.Equal("private", printInt.AccessModifier);
-            Assert.Equal(voidClassModel, printInt.ReturnTypeReferenceClassModel);
+            Assert.Equal(voidClassModel, printInt.ReturnValue.Type.TypeReference);
             Assert.Equal(1, printInt.Parameters.Count);
-            Assert.Equal(intClassModel, printInt.Parameters[0].Type);
+            Assert.Equal(intClassModel, printInt.Parameters[0].Type.TypeReference);
             Assert.Equal("", printInt.Parameters[0].Modifier);
             Assert.Null(printInt.Parameters[0].DefaultValue);
             Assert.Empty(printInt.CalledMethods);
 
             Assert.Equal("Print", printShort.Name);
-            Assert.Equal(referenceMyClass, printShort.ContainingClass);
+            Assert.Equal(referenceMyClass, printShort.ContainingType);
             Assert.Equal("", printShort.Modifier);
             Assert.Equal("private", printShort.AccessModifier);
-            Assert.Equal(voidClassModel, printShort.ReturnTypeReferenceClassModel);
+            Assert.Equal(voidClassModel, printShort.ReturnValue.Type.TypeReference);
             Assert.Equal(1, printShort.Parameters.Count);
-            Assert.Equal(shortClassModel, printShort.Parameters[0].Type);
+            Assert.Equal(shortClassModel, printShort.Parameters[0].Type.TypeReference);
             Assert.Equal("", printShort.Parameters[0].Modifier);
             Assert.Null(printShort.Parameters[0].DefaultValue);
             Assert.Empty(printShort.CalledMethods);
 
             Assert.Equal("Print", printLong.Name);
-            Assert.Equal(referenceMyClass, printLong.ContainingClass);
+            Assert.Equal(referenceMyClass, printLong.ContainingType);
             Assert.Equal("", printLong.Modifier);
             Assert.Equal("private", printLong.AccessModifier);
-            Assert.Equal(voidClassModel, printLong.ReturnTypeReferenceClassModel);
+            Assert.Equal(voidClassModel, printLong.ReturnValue.Type.TypeReference);
             Assert.Equal(1, printLong.Parameters.Count);
-            Assert.Equal(longClassModel, printLong.Parameters[0].Type);
+            Assert.Equal(longClassModel, printLong.Parameters[0].Type.TypeReference);
             Assert.Equal("", printLong.Parameters[0].Modifier);
             Assert.Null(printLong.Parameters[0].DefaultValue);
             Assert.Empty(printLong.CalledMethods);
 
             Assert.Equal("Print", printByte.Name);
-            Assert.Equal(referenceMyClass, printByte.ContainingClass);
+            Assert.Equal(referenceMyClass, printByte.ContainingType);
             Assert.Equal("", printByte.Modifier);
             Assert.Equal("private", printByte.AccessModifier);
-            Assert.Equal(voidClassModel, printByte.ReturnTypeReferenceClassModel);
+            Assert.Equal(voidClassModel, printByte.ReturnValue.Type.TypeReference);
             Assert.Equal(1, printByte.Parameters.Count);
-            Assert.Equal(byteClassModel, printByte.Parameters[0].Type);
+            Assert.Equal(byteClassModel, printByte.Parameters[0].Type.TypeReference);
             Assert.Equal("", printByte.Parameters[0].Modifier);
             Assert.Null(printByte.Parameters[0].DefaultValue);
             Assert.Empty(printByte.CalledMethods);
@@ -470,31 +495,31 @@ namespace HoneydewCoreIntegrationTests.Processors
             var syntaxTree = _syntacticModelCreator.Create(fileContent);
             var semanticModel = _semanticModelCreator.Create(syntaxTree);
 
-            var classModels = _extractor.Extract(syntaxTree, semanticModel).ClassTypes;
+            var classTypes = _extractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-            var solutionModel = new SolutionModel
+            var repositoryModel = new RepositoryModel
             {
                 Projects =
                 {
                     new ProjectModel
                     {
                         Name = "Project1",
-                        Namespaces =
+                        CompilationUnits =
                         {
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                Name = "Project1.Services",
-                                ClassModels = classModels,
+                                FilePath = "Project1.Services",
+                                ClassTypes = classTypes,
                             }
                         }
                     }
                 }
             };
 
-            var referenceSolutionModel = _sut.Process(solutionModel);
+            var referenceSolutionModel = _sut.Process(repositoryModel);
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-            var allCreatedReferences = referenceSolutionModel.CreatedClassModels;
+            var allCreatedReferences = referenceSolutionModel.CreatedClasses;
             Assert.Equal(1, allCreatedReferences.Count);
 
             var objectClassModel =
@@ -503,84 +528,81 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.NotNull(objectClassModel);
             Assert.Equal("object", objectClassModel.Name);
 
-            var referenceNamespaceServices = referenceSolutionModel.Projects[0].Namespaces[0];
+            var referenceNamespaceServices = referenceSolutionModel.Projects[0].CompilationUnits[0];
 
-            var referenceIInterface = referenceNamespaceServices.ClassModels[0];
-            var referenceMyInterface = referenceNamespaceServices.ClassModels[1];
-            var referenceOtherInterface = referenceNamespaceServices.ClassModels[2];
-            var referenceBaseClass = referenceNamespaceServices.ClassModels[3];
-            var referenceChildClass1 = referenceNamespaceServices.ClassModels[4];
-            var referenceChildClass2 = referenceNamespaceServices.ClassModels[5];
-            var referenceModel = referenceNamespaceServices.ClassModels[6];
-            var referenceChildClass3 = referenceNamespaceServices.ClassModels[7];
+            var referenceIInterface = referenceNamespaceServices.Classes[0];
+            var referenceMyInterface = referenceNamespaceServices.Classes[1];
+            var referenceOtherInterface = referenceNamespaceServices.Classes[2];
+            var referenceBaseClass = referenceNamespaceServices.Classes[3];
+            var referenceChildClass1 = referenceNamespaceServices.Classes[4];
+            var referenceChildClass2 = referenceNamespaceServices.Classes[5];
+            var referenceModel = referenceNamespaceServices.Classes[6];
+            var referenceChildClass3 = referenceNamespaceServices.Classes[7];
 
-            Assert.Equal(8, referenceNamespaceServices.ClassModels.Count);
+            Assert.Equal(8, referenceNamespaceServices.Classes.Count);
 
             Assert.Equal("Project1.MyNamespace.IInterface", referenceIInterface.Name);
-            Assert.Equal(referenceNamespaceServices, referenceIInterface.NamespaceReference);
-            Assert.Null(referenceIInterface.BaseClass);
-            Assert.Empty(referenceIInterface.BaseInterfaces);
+            Assert.Equal(referenceNamespaceServices, referenceIInterface.File);
+            Assert.Empty(referenceIInterface.BaseTypes);
 
             Assert.Equal("Project1.MyNamespace.MyInterface", referenceMyInterface.Name);
-            Assert.Equal(referenceNamespaceServices, referenceMyInterface.NamespaceReference);
+            Assert.Equal(referenceNamespaceServices, referenceMyInterface.File);
             Assert.Equal("interface", referenceMyInterface.ClassType);
             Assert.Equal("public", referenceMyInterface.AccessModifier);
             Assert.Equal("", referenceMyInterface.Modifier);
-            Assert.Null(referenceMyInterface.BaseClass);
-            Assert.Equal(1, referenceMyInterface.BaseInterfaces.Count);
-            Assert.Equal(referenceIInterface, referenceMyInterface.BaseInterfaces[0]);
+            Assert.Equal(1, referenceMyInterface.BaseTypes.Count);
+            Assert.Equal(referenceIInterface, referenceMyInterface.BaseTypes[0]);
 
             Assert.Equal("Project1.MyNamespace.OtherInterface", referenceOtherInterface.Name);
-            Assert.Equal(referenceNamespaceServices, referenceOtherInterface.NamespaceReference);
+            Assert.Equal(referenceNamespaceServices, referenceOtherInterface.File);
             Assert.Equal("interface", referenceOtherInterface.ClassType);
             Assert.Equal("public", referenceOtherInterface.AccessModifier);
             Assert.Equal("", referenceOtherInterface.Modifier);
-            Assert.Null(referenceOtherInterface.BaseClass);
-            Assert.Empty(referenceOtherInterface.BaseInterfaces);
+            Assert.Empty(referenceOtherInterface.BaseTypes);
 
             Assert.Equal("Project1.MyNamespace.BaseClass", referenceBaseClass.Name);
-            Assert.Equal(referenceNamespaceServices, referenceBaseClass.NamespaceReference);
+            Assert.Equal(referenceNamespaceServices, referenceBaseClass.File);
             Assert.Equal("class", referenceBaseClass.ClassType);
             Assert.Equal("public", referenceBaseClass.AccessModifier);
             Assert.Equal("", referenceBaseClass.Modifier);
-            Assert.Equal(objectClassModel, referenceBaseClass.BaseClass);
-            Assert.Empty(referenceBaseClass.BaseInterfaces);
+            Assert.Equal(1, referenceBaseClass.BaseTypes.Count);
+            Assert.Equal(objectClassModel, referenceBaseClass.BaseTypes[0]);
 
             Assert.Equal("Project1.MyNamespace.ChildClass1", referenceChildClass1.Name);
-            Assert.Equal(referenceNamespaceServices, referenceChildClass1.NamespaceReference);
+            Assert.Equal(referenceNamespaceServices, referenceChildClass1.File);
             Assert.Equal("class", referenceChildClass1.ClassType);
             Assert.Equal("public", referenceChildClass1.AccessModifier);
             Assert.Equal("", referenceChildClass1.Modifier);
-            Assert.Equal(referenceBaseClass, referenceChildClass1.BaseClass);
-            Assert.Equal(1, referenceChildClass1.BaseInterfaces.Count);
-            Assert.Equal(referenceIInterface, referenceChildClass1.BaseInterfaces[0]);
+            Assert.Equal(2, referenceChildClass1.BaseTypes.Count);
+            Assert.Equal(referenceBaseClass, referenceChildClass1.BaseTypes[0]);
+            Assert.Equal(referenceIInterface, referenceChildClass1.BaseTypes[1]);
 
             Assert.Equal("Project1.MyNamespace.ChildClass2", referenceChildClass2.Name);
-            Assert.Equal(referenceNamespaceServices, referenceChildClass2.NamespaceReference);
+            Assert.Equal(referenceNamespaceServices, referenceChildClass2.File);
             Assert.Equal("class", referenceChildClass2.ClassType);
             Assert.Equal("public", referenceChildClass2.AccessModifier);
             Assert.Equal("", referenceChildClass2.Modifier);
-            Assert.Equal(referenceBaseClass, referenceChildClass2.BaseClass);
-            Assert.Equal(2, referenceChildClass2.BaseInterfaces.Count);
-            Assert.Equal(referenceMyInterface, referenceChildClass2.BaseInterfaces[0]);
-            Assert.Equal(referenceOtherInterface, referenceChildClass2.BaseInterfaces[1]);
+            Assert.Equal(3, referenceChildClass2.BaseTypes.Count);
+            Assert.Equal(referenceBaseClass, referenceChildClass2.BaseTypes[0]);
+            Assert.Equal(referenceMyInterface, referenceChildClass2.BaseTypes[1]);
+            Assert.Equal(referenceOtherInterface, referenceChildClass2.BaseTypes[2]);
 
             Assert.Equal("Project1.MyNamespace.Model", referenceModel.Name);
-            Assert.Equal(referenceNamespaceServices, referenceModel.NamespaceReference);
+            Assert.Equal(referenceNamespaceServices, referenceModel.File);
             Assert.Equal("class", referenceModel.ClassType);
             Assert.Equal("public", referenceModel.AccessModifier);
             Assert.Equal("", referenceModel.Modifier);
-            Assert.Equal(objectClassModel, referenceModel.BaseClass);
-            Assert.Equal(1, referenceModel.BaseInterfaces.Count);
-            Assert.Equal(referenceOtherInterface, referenceModel.BaseInterfaces[0]);
+            Assert.Equal(2, referenceModel.BaseTypes.Count);
+            Assert.Equal(objectClassModel, referenceModel.BaseTypes[0]);
+            Assert.Equal(referenceOtherInterface, referenceModel.BaseTypes[1]);
 
             Assert.Equal("Project1.MyNamespace.ChildClass3", referenceChildClass3.Name);
-            Assert.Equal(referenceNamespaceServices, referenceChildClass3.NamespaceReference);
+            Assert.Equal(referenceNamespaceServices, referenceChildClass3.File);
             Assert.Equal("class", referenceChildClass3.ClassType);
             Assert.Equal("public", referenceChildClass3.AccessModifier);
             Assert.Equal("", referenceChildClass3.Modifier);
-            Assert.Equal(referenceChildClass1, referenceChildClass3.BaseClass);
-            Assert.Empty(referenceChildClass3.BaseInterfaces);
+            Assert.Equal(1, referenceChildClass3.BaseTypes.Count);
+            Assert.Equal(referenceChildClass1, referenceChildClass3.BaseTypes[0]);
         }
 
         [Fact]
@@ -641,21 +663,21 @@ namespace HoneydewCoreIntegrationTests.Processors
             var syntaxTree = _syntacticModelCreator.Create(fileContent);
             var semanticModel = _semanticModelCreator.Create(syntaxTree);
 
-            var classModels = _extractor.Extract(syntaxTree, semanticModel).ClassTypes;
+            var classTypes = _extractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-            var solutionModel = new SolutionModel
+            var solutionModel = new RepositoryModel
             {
                 Projects =
                 {
                     new ProjectModel
                     {
                         Name = "Project1",
-                        Namespaces =
+                        CompilationUnits =
                         {
-                            new NamespaceModel
+                            new CompilationUnitModel
                             {
-                                Name = "Project1.MyNamespace",
-                                ClassModels = classModels,
+                                FilePath = "Project1.MyNamespace",
+                                ClassTypes = classTypes,
                             }
                         }
                     }
@@ -665,7 +687,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             var referenceSolutionModel = _sut.Process(solutionModel);
 
             Assert.Equal(1, referenceSolutionModel.Projects.Count);
-            var allCreatedReferences = referenceSolutionModel.CreatedClassModels;
+            var allCreatedReferences = referenceSolutionModel.CreatedClasses;
             Assert.Equal(4, allCreatedReferences.Count);
 
             var objectClassModel =
@@ -688,116 +710,209 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("float", floatClassModel.Name);
             Assert.Equal("void", voidClassModel.Name);
 
-            var referenceNamespaceServices = referenceSolutionModel.Projects[0].Namespaces[0];
-            var baseClass = referenceNamespaceServices.ClassModels[0];
-            var childClass1 = referenceNamespaceServices.ClassModels[1];
-            var childClass2 = referenceNamespaceServices.ClassModels[2];
-            var modelClass = referenceNamespaceServices.ClassModels[3];
-            var childClass3 = referenceNamespaceServices.ClassModels[4];
-            var callerClass = referenceNamespaceServices.ClassModels[5];
+            var referenceNamespaceServices = referenceSolutionModel.Projects[0].CompilationUnits[0];
+            var baseClass = referenceNamespaceServices.Classes[0];
+            var childClass1 = referenceNamespaceServices.Classes[1];
+            var childClass2 = referenceNamespaceServices.Classes[2];
+            var modelClass = referenceNamespaceServices.Classes[3];
+            var childClass3 = referenceNamespaceServices.Classes[4];
+            var callerClass = referenceNamespaceServices.Classes[5];
 
-            Assert.Equal(6, referenceNamespaceServices.ClassModels.Count);
+            Assert.Equal(6, referenceNamespaceServices.Classes.Count);
 
             Assert.Equal("Project1.MyNamespace.BaseClass", baseClass.Name);
-            Assert.Equal(referenceNamespaceServices, baseClass.NamespaceReference);
+            Assert.Equal(referenceNamespaceServices, baseClass.File);
             Assert.Equal(1, baseClass.Constructors.Count);
             Assert.Equal("BaseClass", baseClass.Constructors[0].Name);
             Assert.Equal("", baseClass.Constructors[0].Modifier);
             Assert.Equal("public", baseClass.Constructors[0].AccessModifier);
             Assert.Empty(baseClass.Constructors[0].CalledMethods);
-            Assert.Equal(baseClass, baseClass.Constructors[0].ContainingClass);
+            Assert.Equal(baseClass, baseClass.Constructors[0].Class);
             Assert.Empty(baseClass.Constructors[0].Parameters);
-            Assert.Null(baseClass.Constructors[0].ReturnTypeReferenceClassModel);
             Assert.Empty(baseClass.Methods);
             Assert.Empty(baseClass.Metrics);
             Assert.Equal(1, baseClass.Fields.Count);
 
             var baseClassFieldX = baseClass.Fields[0];
             Assert.Equal("X", baseClassFieldX.Name);
-            Assert.Equal(baseClass, baseClassFieldX.ContainingClass);
-            Assert.Equal(intClassModel, baseClassFieldX.Type);
+            Assert.Equal(baseClass, baseClassFieldX.Class);
+            Assert.Equal(intClassModel, baseClassFieldX.Type.TypeReference);
             Assert.Equal("", baseClassFieldX.Modifier);
             Assert.Equal("public", baseClassFieldX.AccessModifier);
             Assert.False(baseClassFieldX.IsEvent);
 
 
             Assert.Equal("Project1.MyNamespace.ChildClass1", childClass1.Name);
-            Assert.Equal(referenceNamespaceServices, childClass1.NamespaceReference);
+            Assert.Equal(referenceNamespaceServices, childClass1.File);
             Assert.Empty(childClass1.Methods);
             Assert.Empty(childClass1.Metrics);
             Assert.Empty(childClass1.Fields);
 
 
             Assert.Equal("Project1.MyNamespace.ChildClass2", childClass2.Name);
-            Assert.Equal(referenceNamespaceServices, childClass2.NamespaceReference);
+            Assert.Equal(referenceNamespaceServices, childClass2.File);
             Assert.Empty(childClass2.Methods);
             Assert.Empty(childClass2.Metrics);
             Assert.Equal(1, childClass2.Fields.Count);
 
             var childClass2FieldZ = childClass2.Fields[0];
             Assert.Equal("Z", childClass2FieldZ.Name);
-            Assert.Equal(childClass2, childClass2FieldZ.ContainingClass);
-            Assert.Equal(floatClassModel, childClass2FieldZ.Type);
+            Assert.Equal(childClass2, childClass2FieldZ.Class);
+            Assert.Equal(floatClassModel, childClass2FieldZ.Type.TypeReference);
             Assert.Equal("", childClass2FieldZ.Modifier);
             Assert.Equal("public", childClass2FieldZ.AccessModifier);
             Assert.False(childClass2FieldZ.IsEvent);
 
 
             Assert.Equal("Project1.MyNamespace.Model", modelClass.Name);
-            Assert.Equal(referenceNamespaceServices, modelClass.NamespaceReference);
+            Assert.Equal(referenceNamespaceServices, modelClass.File);
             Assert.Empty(modelClass.Methods);
             Assert.Empty(modelClass.Metrics);
             Assert.Empty(modelClass.Fields);
 
 
             Assert.Equal("Project1.MyNamespace.ChildClass3", childClass3.Name);
-            Assert.Equal(referenceNamespaceServices, childClass3.NamespaceReference);
+            Assert.Equal(referenceNamespaceServices, childClass3.File);
             Assert.Empty(childClass3.Methods);
             Assert.Empty(childClass3.Metrics);
             Assert.Equal(1, childClass3.Fields.Count);
 
             var childClass3ModelField = childClass3.Fields[0];
             Assert.Equal("_model", childClass3ModelField.Name);
-            Assert.Equal(childClass3, childClass3ModelField.ContainingClass);
-            Assert.Equal(modelClass, childClass3ModelField.Type);
+            Assert.Equal(childClass3, childClass3ModelField.Class);
+            Assert.Equal(modelClass, childClass3ModelField.Type.TypeReference);
             Assert.Equal("readonly", childClass3ModelField.Modifier);
             Assert.Equal("private", childClass3ModelField.AccessModifier);
             Assert.False(childClass3ModelField.IsEvent);
 
 
             Assert.Equal("Project1.MyNamespace.Caller", callerClass.Name);
-            Assert.Equal(referenceNamespaceServices, callerClass.NamespaceReference);
+            Assert.Equal(referenceNamespaceServices, callerClass.File);
             Assert.Empty(callerClass.Fields);
             Assert.Empty(callerClass.Metrics);
             Assert.Equal(2, callerClass.Methods.Count);
 
             var callMethod0 = callerClass.Methods[0];
             Assert.Equal("Call", callMethod0.Name);
-            Assert.Equal(callerClass, callMethod0.ContainingClass);
+            Assert.Equal(callerClass, callMethod0.ContainingType);
             Assert.Equal("", callMethod0.Modifier);
             Assert.Equal("public", callMethod0.AccessModifier);
-            Assert.Equal(voidClassModel, callMethod0.ReturnTypeReferenceClassModel);
+            Assert.Equal(voidClassModel, callMethod0.ReturnValue.Type.TypeReference);
             Assert.Equal(1, callMethod0.Parameters.Count);
-            Assert.Equal(baseClass, callMethod0.Parameters[0].Type);
+            Assert.Equal(baseClass, callMethod0.Parameters[0].Type.TypeReference);
             Assert.Equal("", callMethod0.Parameters[0].Modifier);
             Assert.Null(callMethod0.Parameters[0].DefaultValue);
             Assert.Empty(callMethod0.CalledMethods);
-            Assert.False(callMethod0.IsConstructor);
-
 
             var callMethod1 = callerClass.Methods[1];
             Assert.Equal("Call", callMethod1.Name);
-            Assert.Equal(callerClass, callMethod1.ContainingClass);
+            Assert.Equal(callerClass, callMethod1.ContainingType);
             Assert.Equal("static", callMethod1.Modifier);
             Assert.Equal("public", callMethod1.AccessModifier);
-            Assert.Equal(voidClassModel, callMethod1.ReturnTypeReferenceClassModel);
+            Assert.Equal(voidClassModel, callMethod1.ReturnValue.Type.TypeReference);
             Assert.Empty(callMethod1.Parameters);
             Assert.Equal(6, callMethod1.CalledMethods.Count);
-            Assert.False(callMethod1.IsConstructor);
 
             foreach (var calledMethod in callMethod1.CalledMethods)
             {
-                Assert.Equal(callMethod0, calledMethod);
+                Assert.Equal(callMethod0, calledMethod.Method);
+            }
+        }
+
+        [Theory]
+        [FileData("TestData/Processors/ReferenceOfDeepNestedLocalFunctions.txt")]
+        public void Process_ShouldHaveLocalFunctionReferences_WhenGivenMethodWithDeepNestedLocalFunctions(
+            string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var classTypes = _extractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var repositoryModel = new RepositoryModel
+            {
+                Projects =
+                {
+                    new ProjectModel
+                    {
+                        Name = "Project1",
+                        CompilationUnits =
+                        {
+                            new CompilationUnitModel
+                            {
+                                FilePath = "Project1/class1.cs",
+                                ClassTypes = classTypes,
+                            }
+                        }
+                    }
+                }
+            };
+
+            var referenceSolutionModel = _sut.Process(repositoryModel);
+
+            var classModel = referenceSolutionModel.Projects[0].CompilationUnits[0].Classes[0];
+            var methodModel = classModel.Methods[0];
+            var methodModelLocalFunction = methodModel.LocalFunctions[0];
+
+            Assert.Equal(classModel, methodModel.ContainingType);
+            Assert.Equal(1, methodModel.CalledMethods.Count);
+            Assert.Equal(methodModel, methodModel.CalledMethods[0].Caller);
+            Assert.Equal(methodModelLocalFunction, methodModel.CalledMethods[0].Method);
+            Assert.Equal(methodModel, methodModelLocalFunction.ContainingType);
+            Assert.Equal(1, methodModel.LocalFunctions.Count);
+            AssertLocalFunctions(methodModelLocalFunction);
+
+            var constructorModel = classModel.Constructors[0];
+            var constructorModelLocalFunction = constructorModel.LocalFunctions[0];
+            Assert.Equal(classModel, constructorModel.Class);
+            Assert.Equal(1, constructorModel.CalledMethods.Count);
+            Assert.Equal(constructorModel, constructorModel.CalledMethods[0].Caller);
+            Assert.Equal(constructorModelLocalFunction, constructorModel.CalledMethods[0].Method);
+            Assert.Equal(constructorModel, constructorModelLocalFunction.ContainingType);
+            Assert.Equal(1, constructorModel.LocalFunctions.Count);
+            AssertLocalFunctions(constructorModelLocalFunction);
+
+            var propertyModel = classModel.Properties[0];
+            var getAccessor = propertyModel.Accessors[0];
+            var getAccessorModelLocalFunction = getAccessor.LocalFunctions[0];
+            Assert.Equal(propertyModel, getAccessor.ContainingType);
+            Assert.Equal(1, getAccessor.CalledMethods.Count);
+            Assert.Equal(getAccessor, getAccessor.CalledMethods[0].Caller);
+            Assert.Equal(getAccessorModelLocalFunction, getAccessor.CalledMethods[0].Method);
+            Assert.Equal(getAccessor, getAccessorModelLocalFunction.ContainingType);
+            Assert.Equal(1, getAccessor.LocalFunctions.Count);
+            AssertLocalFunctions(getAccessorModelLocalFunction);
+
+            var setAccessor = propertyModel.Accessors[1];
+            var setAccessorModelLocalFunction = setAccessor.LocalFunctions[0];
+            Assert.Equal(propertyModel, setAccessor.ContainingType);
+            Assert.Equal(1, constructorModel.CalledMethods.Count);
+            Assert.Equal(constructorModel, constructorModel.CalledMethods[0].Caller);
+            Assert.Equal(constructorModelLocalFunction, constructorModel.CalledMethods[0].Method);
+            Assert.Equal(setAccessor, setAccessorModelLocalFunction.ContainingType);
+            Assert.Equal(1, constructorModel.LocalFunctions.Count);
+            AssertLocalFunctions(setAccessorModelLocalFunction);
+
+            void AssertLocalFunctions(MethodModel localFunction1)
+            {
+                Assert.Equal("LocalFunction1", localFunction1.Name);
+                Assert.Equal(1, localFunction1.CalledMethods.Count);
+
+                var localFunction2 = localFunction1.LocalFunctions[0];
+                Assert.Equal(localFunction1, localFunction1.CalledMethods[0].Caller);
+                Assert.Equal(localFunction2, localFunction1.CalledMethods[0].Method);
+                Assert.Equal(1, localFunction1.LocalFunctions.Count);
+                Assert.Equal("LocalFunction2", localFunction2.Name);
+                Assert.Equal(localFunction1, localFunction2.ContainingType);
+                Assert.Equal(1, localFunction2.CalledMethods.Count);
+
+                var localFunction3 = localFunction2.LocalFunctions[0];
+                Assert.Equal(localFunction2, localFunction2.CalledMethods[0].Caller);
+                Assert.Equal(localFunction3, localFunction2.CalledMethods[0].Method);
+                Assert.Equal(1, localFunction2.LocalFunctions.Count);
+                Assert.Equal("LocalFunction3", localFunction3.Name);
+                Assert.Equal(localFunction2, localFunction3.ContainingType);
+                Assert.Empty(localFunction3.CalledMethods);
             }
         }
     }

@@ -35,7 +35,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
             var projectModel = new ProjectModel();
-            var namespaceModel = new NamespaceModel();
+            var compilationUnitModel = new CompilationUnitModel();
             var classModel = new ClassModel
             {
                 FilePath = "path",
@@ -53,10 +53,10 @@ namespace HoneydewCoreIntegrationTests.Processors
                     }
                 }
             };
-            namespaceModel.ClassModels.Add(classModel);
-            projectModel.Namespaces.Add(namespaceModel);
-            solutionModel.Projects.Add(projectModel);
+            compilationUnitModel.ClassTypes.Add(classModel);
+            projectModel.CompilationUnits.Add(compilationUnitModel);
             repositoryModel.Solutions.Add(solutionModel);
+            repositoryModel.Projects.Add(projectModel);
 
             var representation = _sut.Process(repositoryModel);
             Assert.Equal(4, representation.File.Concerns.Count);
@@ -79,7 +79,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
             var projectModel = new ProjectModel();
-            var namespaceModel = new NamespaceModel();
+            var compilationUnitModel = new CompilationUnitModel();
             var classModel = new ClassModel
             {
                 FilePath = "path",
@@ -91,9 +91,9 @@ namespace HoneydewCoreIntegrationTests.Processors
                     }
                 }
             };
-            namespaceModel.ClassModels.Add(classModel);
-            projectModel.Namespaces.Add(namespaceModel);
-            solutionModel.Projects.Add(projectModel);
+            compilationUnitModel.ClassTypes.Add(classModel);
+            projectModel.CompilationUnits.Add(compilationUnitModel);
+            repositoryModel.Projects.Add(projectModel);
             repositoryModel.Solutions.Add(solutionModel);
 
             var representation = _sut.Process(repositoryModel);
@@ -117,7 +117,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
             var projectModel = new ProjectModel();
-            var namespaceModel = new NamespaceModel();
+            var compilationUnitModel = new CompilationUnitModel();
             var classModel1 = new ClassModel
             {
                 FilePath = "path",
@@ -141,10 +141,10 @@ namespace HoneydewCoreIntegrationTests.Processors
                 }
             };
 
-            namespaceModel.ClassModels.Add(classModel1);
-            namespaceModel.ClassModels.Add(classModel2);
-            projectModel.Namespaces.Add(namespaceModel);
-            solutionModel.Projects.Add(projectModel);
+            compilationUnitModel.ClassTypes.Add(classModel1);
+            compilationUnitModel.ClassTypes.Add(classModel2);
+            projectModel.CompilationUnits.Add(compilationUnitModel);
+            repositoryModel.Projects.Add(projectModel);
             repositoryModel.Solutions.Add(solutionModel);
 
             var representation = _sut.Process(repositoryModel);
@@ -174,7 +174,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
             var projectModel = new ProjectModel();
-            var namespaceModel = new NamespaceModel();
+            var compilationUnitModel = new CompilationUnitModel();
             var classModel1 = new ClassModel
             {
                 FilePath = "path",
@@ -195,9 +195,9 @@ namespace HoneydewCoreIntegrationTests.Processors
                 }
             };
 
-            namespaceModel.ClassModels.Add(classModel1);
-            projectModel.Namespaces.Add(namespaceModel);
-            solutionModel.Projects.Add(projectModel);
+            compilationUnitModel.ClassTypes.Add(classModel1);
+            projectModel.CompilationUnits.Add(compilationUnitModel);
+            repositoryModel.Projects.Add(projectModel);
             repositoryModel.Solutions.Add(solutionModel);
 
             var representation = _sut.Process(repositoryModel);
@@ -228,7 +228,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
             var projectModel = new ProjectModel();
-            var namespaceModel = new NamespaceModel();
+            var compilationUnitModel = new CompilationUnitModel();
             var classModel1 = new ClassModel
             {
                 FilePath = "path1",
@@ -270,10 +270,10 @@ namespace HoneydewCoreIntegrationTests.Processors
                 }
             };
 
-            namespaceModel.ClassModels.Add(classModel1);
-            namespaceModel.ClassModels.Add(classModel2);
-            projectModel.Namespaces.Add(namespaceModel);
-            solutionModel.Projects.Add(projectModel);
+            compilationUnitModel.ClassTypes.Add(classModel1);
+            compilationUnitModel.ClassTypes.Add(classModel2);
+            projectModel.CompilationUnits.Add(compilationUnitModel);
+            repositoryModel.Projects.Add(projectModel);
             repositoryModel.Solutions.Add(solutionModel);
 
             var representation = _sut.Process(repositoryModel);

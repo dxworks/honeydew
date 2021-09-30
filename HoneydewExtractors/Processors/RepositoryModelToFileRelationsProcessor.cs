@@ -27,125 +27,118 @@ namespace HoneydewExtractors.Processors
             var fileRelationsRepresentation = new RelationsRepresentation();
 
             var classFilePaths = new Dictionary<Tuple<string, string>, string>();
-
-            foreach (var solutionModel in repositoryModel.Solutions)
+            
+            foreach (var projectModel in repositoryModel.Projects)
             {
-                foreach (var projectModel in solutionModel.Projects)
+                foreach (var compilationUnitType in projectModel.CompilationUnits)
                 {
-                    foreach (var namespaceModel in projectModel.Namespaces)
+                    foreach (var classType in compilationUnitType.ClassTypes)
                     {
-                        foreach (var classType in namespaceModel.ClassModels)
-                        {
-                            classFilePaths.Add(new Tuple<string, string>(classType.Name, projectModel.FilePath),
-                                classType.FilePath);
-                        }
+                        classFilePaths.Add(new Tuple<string, string>(classType.Name, projectModel.FilePath),
+                            classType.FilePath);
                     }
                 }
             }
 
-
-            foreach (var solutionModel in repositoryModel.Solutions)
+            foreach (var projectModel in repositoryModel.Projects)
             {
-                foreach (var projectModel in solutionModel.Projects)
+                foreach (var compilationUnitType in projectModel.CompilationUnits)
                 {
-                    foreach (var namespaceModel in projectModel.Namespaces)
+                    var groupBy = compilationUnitType.ClassTypes.GroupBy(classModel => classModel.FilePath);
+
+                    foreach (var grouping in groupBy)
                     {
-                        var groupBy = namespaceModel.ClassModels.GroupBy(classModel => classModel.FilePath);
+                        var dependencyDictionary = new Dictionary<string, Dictionary<string, int>>();
 
-                        foreach (var grouping in groupBy)
+                        foreach (var classType in grouping)
                         {
-                            var dependencyDictionary = new Dictionary<string, Dictionary<string, int>>();
-
-                            foreach (var classType in grouping)
+                            foreach (var metricModel in classType.Metrics)
                             {
-                                foreach (var metricModel in classType.Metrics)
+                                try
                                 {
-                                    try
+                                    var type = Type.GetType(metricModel.ExtractorName);
+                                    if (type == null)
                                     {
-                                        var type = Type.GetType(metricModel.ExtractorName);
-                                        if (type == null)
-                                        {
-                                            continue;
-                                        }
+                                        continue;
+                                    }
 
-                                        if (!_metricChooseStrategy.Choose(type))
-                                        {
-                                            continue;
-                                        }
+                                    if (!_metricChooseStrategy.Choose(type))
+                                    {
+                                        continue;
+                                    }
 
-                                        var instance = Activator.CreateInstance(type);
-                                        if (instance is IRelationVisitor relationVisitor)
+                                    var instance = Activator.CreateInstance(type);
+                                    if (instance is IRelationVisitor relationVisitor)
+                                    {
+                                        var dictionary = (Dictionary<string, int>)metricModel.Value;
+                                        foreach (var (targetName, count) in dictionary)
                                         {
-                                            var dictionary = (Dictionary<string, int>)metricModel.Value;
-                                            foreach (var (targetName, count) in dictionary)
+                                            if (CSharpConstants.IsPrimitive(targetName))
                                             {
-                                                if (CSharpConstants.IsPrimitive(targetName))
-                                                {
-                                                    continue;
-                                                }
+                                                continue;
+                                            }
 
-                                                var possibleClasses = classFilePaths
-                                                    .Where(pair => pair.Key.Item1 == targetName).ToList();
+                                            var possibleClasses = classFilePaths
+                                                .Where(pair => pair.Key.Item1 == targetName).ToList();
 
-                                                if (possibleClasses.Count == 1)
-                                                {
-                                                    var (_, classFilePath) = possibleClasses[0];
+                                            if (possibleClasses.Count == 1)
+                                            {
+                                                var (_, classFilePath) = possibleClasses[0];
 
-                                                    AddToDependencyDictionary(classFilePath);
-                                                }
-                                                else
+                                                AddToDependencyDictionary(classFilePath);
+                                            }
+                                            else
+                                            {
+                                                var projectPaths = new List<string>
                                                 {
-                                                    var projectPaths = new List<string>
+                                                    projectModel.FilePath,
+                                                };
+                                                projectPaths.AddRange(projectModel.ProjectReferences);
+
+                                                var (_, classFilePath) = possibleClasses.FirstOrDefault(pair =>
+                                                    projectPaths.Contains(pair.Key.Item2));
+
+                                                AddToDependencyDictionary(classFilePath);
+                                            }
+
+                                            void AddToDependencyDictionary(string filePath)
+                                            {
+                                                if (dependencyDictionary.TryGetValue(relationVisitor.PrettyPrint(),
+                                                    out var dependency))
+                                                {
+                                                    if (dependency.ContainsKey(filePath))
                                                     {
-                                                        projectModel.FilePath,
-                                                    };
-                                                    projectPaths.AddRange(projectModel.ProjectReferences);
-
-                                                    var (_, classFilePath) = possibleClasses.FirstOrDefault(pair =>
-                                                        projectPaths.Contains(pair.Key.Item2));
-
-                                                    AddToDependencyDictionary(classFilePath);
-                                                }
-
-                                                void AddToDependencyDictionary(string filePath)
-                                                {
-                                                    if (dependencyDictionary.TryGetValue(relationVisitor.PrettyPrint(),
-                                                        out var dependency))
-                                                    {
-                                                        if (dependency.ContainsKey(filePath))
-                                                        {
-                                                            dependency[filePath] += count;
-                                                        }
-                                                        else
-                                                        {
-                                                            dependency.Add(filePath, count);
-                                                        }
+                                                        dependency[filePath] += count;
                                                     }
                                                     else
                                                     {
-                                                        dependencyDictionary.Add(relationVisitor.PrettyPrint(),
-                                                            new Dictionary<string, int>
-                                                            {
-                                                                { filePath, count }
-                                                            });
+                                                        dependency.Add(filePath, count);
                                                     }
+                                                }
+                                                else
+                                                {
+                                                    dependencyDictionary.Add(relationVisitor.PrettyPrint(),
+                                                        new Dictionary<string, int>
+                                                        {
+                                                            { filePath, count }
+                                                        });
                                                 }
                                             }
                                         }
                                     }
-                                    catch (Exception)
-                                    {
-                                        // 
-                                    }
+                                }
+                                catch (Exception)
+                                {
+                                    // 
                                 }
                             }
+                        }
 
-                            foreach (var (relationType, dictionary) in dependencyDictionary)
+                        foreach (var (relationType, dictionary) in dependencyDictionary)
+                        {
+                            foreach (var (filePath, count) in dictionary)
                             {
-                                foreach (var (filePath, count) in dictionary)
-                                {
-                                    fileRelationsRepresentation.Add(grouping.Key, filePath, relationType, count);
-                                }
+                                fileRelationsRepresentation.Add(grouping.Key, filePath, relationType, count);
                             }
                         }
                     }
