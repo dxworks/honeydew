@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using HoneydewCore.IO;
 using HoneydewModels.CSharp;
 
@@ -37,29 +38,37 @@ namespace HoneydewCore.Processors
                     solutionModel.FilePath = TrimPath(solutionModel.FilePath);
                 }
 
-                foreach (var projectModel in solutionModel.Projects)
+                solutionModel.ProjectsPaths = solutionModel.ProjectsPaths
+                    .Select(path => !string.IsNullOrWhiteSpace(path) ? TrimPath(path) : path).ToList();
+            }
+
+            foreach (var projectModel in repositoryModel.Projects)
+            {
+                if (!string.IsNullOrWhiteSpace(projectModel.FilePath))
                 {
-                    if (!string.IsNullOrWhiteSpace(projectModel.FilePath))
+                    projectModel.FilePath = TrimPath(projectModel.FilePath);
+                }
+
+                for (var i = 0; i < projectModel.ProjectReferences.Count; i++)
+                {
+                    if (!string.IsNullOrWhiteSpace(projectModel.ProjectReferences[i]))
                     {
-                        projectModel.FilePath = TrimPath(projectModel.FilePath);
+                        projectModel.ProjectReferences[i] = TrimPath(projectModel.ProjectReferences[i]);
+                    }
+                }
+
+                foreach (var compilationUnitType in projectModel.CompilationUnits)
+                {
+                    if (!string.IsNullOrWhiteSpace(compilationUnitType.FilePath))
+                    {
+                        compilationUnitType.FilePath = TrimPath(compilationUnitType.FilePath);
                     }
 
-                    for (var i = 0; i < projectModel.ProjectReferences.Count; i++)
+                    foreach (var classType in compilationUnitType.ClassTypes)
                     {
-                        if (!string.IsNullOrWhiteSpace(projectModel.ProjectReferences[i]))
+                        if (!string.IsNullOrWhiteSpace(classType.FilePath))
                         {
-                            projectModel.ProjectReferences[i] = TrimPath(projectModel.ProjectReferences[i]);
-                        }
-                    }
-
-                    foreach (var compilationUnitType in projectModel.CompilationUnits)
-                    {
-                        foreach (var classType in compilationUnitType.ClassTypes)
-                        {
-                            if (!string.IsNullOrWhiteSpace(classType.FilePath))
-                            {
-                                classType.FilePath = TrimPath(classType.FilePath);
-                            }
+                            classType.FilePath = TrimPath(classType.FilePath);
                         }
                     }
                 }

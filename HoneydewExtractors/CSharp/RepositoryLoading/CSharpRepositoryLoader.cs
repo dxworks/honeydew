@@ -73,10 +73,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
 
                     if (projectModel != null)
                     {
-                        repositoryModel.Solutions.Add(new SolutionModel
-                        {
-                            Projects = { projectModel }
-                        });
+                        repositoryModel.Projects.Add(projectModel);
                     }
                 }
                 else
@@ -136,8 +133,6 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                 _progressLogger.Log(
                     $"Searching for C# Project files that are not in any of the found solutions at {path}");
 
-                var defaultSolutionModel = new SolutionModel();
-
                 var notProcessedProjectPaths = new List<string>();
 
                 foreach (var relativeProjectPath in Directory.GetFiles(path, $"*{CsprojExtension}",
@@ -146,7 +141,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                     var projectPath = Path.GetFullPath(relativeProjectPath);
 
                     var isUsedInASolution = repositoryModel.Solutions.Any(solutionModel =>
-                        solutionModel.Projects.Any(project => project.FilePath == projectPath));
+                        solutionModel.ProjectsPaths.Any(projectFilePath => projectFilePath == projectPath));
 
                     if (isUsedInASolution) continue;
                     notProcessedProjectPaths.Add(projectPath);
@@ -174,13 +169,11 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                         var projectModel = await projectLoader.Load(projectPath);
                         if (projectModel != null)
                         {
-                            defaultSolutionModel.Projects.Add(projectModel);
+                            repositoryModel.Projects.Add(projectModel);
                         }
                     }
 
                     progressBar.Stop();
-
-                    repositoryModel.Solutions.Add(defaultSolutionModel);
                 }
             }
 

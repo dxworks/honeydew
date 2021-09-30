@@ -1,4 +1,5 @@
-﻿using HoneydewCore.IO;
+﻿using System.Collections.Generic;
+using HoneydewCore.IO;
 using HoneydewCore.Processors;
 using HoneydewModels.CSharp;
 using Moq;
@@ -47,43 +48,25 @@ namespace HoneydewCoreTest.Processors
         public void Process_ShouldHaveProjectsWithShortenedPath_WhenProvidedWithInputPathToAFolder()
         {
             var repositoryModel = new RepositoryModel();
-            repositoryModel.Solutions.Add(new SolutionModel
+            repositoryModel.Projects.Add(new ProjectModel
             {
-                Projects =
-                {
-                    new ProjectModel
-                    {
-                        FilePath = "C:/SomePath/InputFolder/Project1/Project1.csproj"
-                    },
-                    new ProjectModel
-                    {
-                        FilePath = "C:\\SomePath\\InputFolder\\Project2\\Project2.csproj"
-                    }
-                }
+                FilePath = "C:/SomePath/InputFolder/Project1/Project1.csproj"
             });
-            repositoryModel.Solutions.Add(new SolutionModel
+            repositoryModel.Projects.Add(new ProjectModel
             {
-                Projects =
-                {
-                    new ProjectModel
-                    {
-                        FilePath = "C:/SomePath/InputFolder/SomeFolder/Proj.csproj"
-                    }
-                }
+                FilePath = "C:\\SomePath\\InputFolder\\Project2\\Project2.csproj"
             });
-            repositoryModel.Solutions.Add(new SolutionModel
+            repositoryModel.Projects.Add(new ProjectModel
             {
-                Projects =
-                {
-                    new ProjectModel
-                    {
-                        FilePath = "C:\\SomePath\\InputFolder\\Folder\\Folder2\\Folder3\\Project1.csproj"
-                    },
-                    new ProjectModel
-                    {
-                        FilePath = "C:\\SomePath\\InputFolder\\Folder\\Folder1\\Folder3\\Project2.csproj"
-                    }
-                }
+                FilePath = "C:/SomePath/InputFolder/SomeFolder/Proj.csproj"
+            });
+            repositoryModel.Projects.Add(new ProjectModel
+            {
+                FilePath = "C:\\SomePath\\InputFolder\\Folder\\Folder2\\Folder3\\Project1.csproj"
+            });
+            repositoryModel.Projects.Add(new ProjectModel
+            {
+                FilePath = "C:\\SomePath\\InputFolder\\Folder\\Folder1\\Folder3\\Project2.csproj"
             });
 
             var folderPathValidatorMock = new Mock<IFolderPathValidator>();
@@ -92,96 +75,79 @@ namespace HoneydewCoreTest.Processors
 
             var processesRepositoryModel = sut.Process(repositoryModel);
 
-            Assert.Equal("Project1/Project1.csproj",
-                processesRepositoryModel.Solutions[0].Projects[0].FilePath);
-            Assert.Equal("Project2/Project2.csproj",
-                processesRepositoryModel.Solutions[0].Projects[1].FilePath);
-            Assert.Equal("SomeFolder/Proj.csproj",
-                processesRepositoryModel.Solutions[1].Projects[0].FilePath);
-            Assert.Equal("Folder/Folder2/Folder3/Project1.csproj",
-                processesRepositoryModel.Solutions[2].Projects[0].FilePath);
-            Assert.Equal("Folder/Folder1/Folder3/Project2.csproj",
-                processesRepositoryModel.Solutions[2].Projects[1].FilePath);
+            Assert.Equal("Project1/Project1.csproj", processesRepositoryModel.Projects[0].FilePath);
+            Assert.Equal("Project2/Project2.csproj", processesRepositoryModel.Projects[1].FilePath);
+            Assert.Equal("SomeFolder/Proj.csproj", processesRepositoryModel.Projects[2].FilePath);
+            Assert.Equal("Folder/Folder2/Folder3/Project1.csproj", processesRepositoryModel.Projects[3].FilePath);
+            Assert.Equal("Folder/Folder1/Folder3/Project2.csproj", processesRepositoryModel.Projects[4].FilePath);
         }
 
         [Fact(Skip = "Fails on Linux")]
         public void Process_ShouldHaveClassesWithShortenedPath_WhenProvidedWithInputPathToAFolder()
         {
             var repositoryModel = new RepositoryModel();
-            repositoryModel.Solutions.Add(new SolutionModel
+            repositoryModel.Projects.Add(new ProjectModel
             {
-                Projects =
+                CompilationUnits =
                 {
-                    new ProjectModel
+                    new CompilationUnitModel
                     {
-                        CompilationUnits =
+                        ClassTypes =
                         {
-                            new CompilationUnitModel
+                            new ClassModel
                             {
-                                ClassTypes =
-                                {
-                                    new ClassModel
-                                    {
-                                        FilePath = "C:/SomePath/InputFolder/Project1/Namespace1/Class1.cs"
-                                    },
-                                    new ClassModel
-                                    {
-                                        FilePath = "C:/SomePath/InputFolder/Project1/Namespace1/Class2.cs"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    new ProjectModel
-                    {
-                        CompilationUnits =
-                        {
-                            new CompilationUnitModel
-                            {
-                                ClassTypes =
-                                {
-                                    new ClassModel
-                                    {
-                                        FilePath = "C:\\SomePath\\InputFolder\\Project2\\Models\\Model1.cs"
-                                    },
-                                    new ClassModel
-                                    {
-                                        FilePath = "C:\\SomePath\\InputFolder\\Project2\\Models\\Model2.cs"
-                                    }
-                                }
+                                FilePath = "C:/SomePath/InputFolder/Project1/Namespace1/Class1.cs"
                             },
-                            new CompilationUnitModel
+                            new ClassModel
                             {
-                                ClassTypes =
-                                {
-                                    new ClassModel
-                                    {
-                                        FilePath = "C:\\SomePath\\InputFolder\\Project2\\Controllers\\Controller.cs"
-                                    }
-                                }
+                                FilePath = "C:/SomePath/InputFolder/Project1/Namespace1/Class2.cs"
                             }
                         }
                     }
                 }
             });
-            repositoryModel.Solutions.Add(new SolutionModel
+            repositoryModel.Projects.Add(new ProjectModel
             {
-                Projects =
+                CompilationUnits =
                 {
-                    new ProjectModel
+                    new CompilationUnitModel
                     {
-                        CompilationUnits =
+                        ClassTypes =
                         {
-                            new CompilationUnitModel
+                            new ClassModel
                             {
-                                ClassTypes =
-                                {
-                                    new ClassModel
-                                    {
-                                        FilePath =
-                                            "C:/SomePath/InputFolder/SomeFolder/Folder1/Folder2/Folder3/_my_class.cs"
-                                    }
-                                }
+                                FilePath = "C:\\SomePath\\InputFolder\\Project2\\Models\\Model1.cs"
+                            },
+                            new ClassModel
+                            {
+                                FilePath = "C:\\SomePath\\InputFolder\\Project2\\Models\\Model2.cs"
+                            }
+                        }
+                    },
+                    new CompilationUnitModel
+                    {
+                        ClassTypes =
+                        {
+                            new ClassModel
+                            {
+                                FilePath = "C:\\SomePath\\InputFolder\\Project2\\Controllers\\Controller.cs"
+                            }
+                        }
+                    }
+                }
+            });
+            repositoryModel.Projects.Add(new ProjectModel
+            {
+                CompilationUnits =
+                {
+                    new CompilationUnitModel
+                    {
+                        ClassTypes =
+                        {
+                            new ClassModel
+                            {
+                                FilePath =
+                                    "C:/SomePath/InputFolder/SomeFolder/Folder1/Folder2/Folder3/_my_class.cs"
                             }
                         }
                     }
@@ -195,17 +161,17 @@ namespace HoneydewCoreTest.Processors
             var processesRepositoryModel = sut.Process(repositoryModel);
 
             Assert.Equal("Project1/Namespace1/Class1.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
+                processesRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
             Assert.Equal("Project1/Namespace1/Class2.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[1].FilePath);
+                processesRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[1].FilePath);
             Assert.Equal("Project2/Models/Model1.cs",
-                processesRepositoryModel.Solutions[0].Projects[1].CompilationUnits[0].ClassTypes[0].FilePath);
+                processesRepositoryModel.Projects[1].CompilationUnits[0].ClassTypes[0].FilePath);
             Assert.Equal("Project2/Models/Model2.cs",
-                processesRepositoryModel.Solutions[0].Projects[1].CompilationUnits[0].ClassTypes[1].FilePath);
+                processesRepositoryModel.Projects[1].CompilationUnits[0].ClassTypes[1].FilePath);
             Assert.Equal("Project2/Controllers/Controller.cs",
-                processesRepositoryModel.Solutions[0].Projects[1].CompilationUnits[1].ClassTypes[0].FilePath);
+                processesRepositoryModel.Projects[1].CompilationUnits[1].ClassTypes[0].FilePath);
             Assert.Equal("SomeFolder/Folder1/Folder2/Folder3/_my_class.cs",
-                processesRepositoryModel.Solutions[1].Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
+                processesRepositoryModel.Projects[2].CompilationUnits[0].ClassTypes[0].FilePath);
         }
 
         [Fact(Skip = "Fails on Linux")]
@@ -215,64 +181,68 @@ namespace HoneydewCoreTest.Processors
             repositoryModel.Solutions.Add(new SolutionModel
             {
                 FilePath = "RandomPathToSolution1",
-                Projects =
+                ProjectsPaths = new List<string>
                 {
-                    new ProjectModel
+                    "Path1/Path2/Project.csproj"
+                }
+            });
+            repositoryModel.Projects.Add(new ProjectModel
+            {
+                FilePath = "Path1/Path2/Project.csproj",
+                CompilationUnits =
+                {
+                    new CompilationUnitModel
                     {
-                        FilePath = "Path1/Path2/Project.csproj",
-                        CompilationUnits =
+                        ClassTypes =
                         {
-                            new CompilationUnitModel
+                            new ClassModel
                             {
-                                ClassTypes =
-                                {
-                                    new ClassModel
-                                    {
-                                        FilePath = "Class1.cs"
-                                    },
-                                    new ClassModel
-                                    {
-                                        FilePath = "Path1/Path2/Namespace1/Class2.cs"
-                                    }
-                                }
+                                FilePath = "Class1.cs"
+                            },
+                            new ClassModel
+                            {
+                                FilePath = "Path1/Path2/Namespace1/Class2.cs"
                             }
                         }
                     }
                 }
             });
+
             repositoryModel.Solutions.Add(new SolutionModel
             {
                 FilePath = "Folder1\\Folder\\Solution1.sln",
-                Projects =
+                ProjectsPaths = new List<string>
                 {
-                    new ProjectModel
+                    "Folder1\\Folder\\Project2\\Project2.csproj"
+                }
+            });
+
+            repositoryModel.Projects.Add(new ProjectModel
+            {
+                FilePath = "Folder1\\Folder\\Project2\\Project2.csproj",
+                CompilationUnits =
+                {
+                    new CompilationUnitModel
                     {
-                        FilePath = "Folder1\\Folder\\Project2\\Project2.csproj",
-                        CompilationUnits =
+                        ClassTypes =
                         {
-                            new CompilationUnitModel
+                            new ClassModel
                             {
-                                ClassTypes =
-                                {
-                                    new ClassModel
-                                    {
-                                        FilePath = "Models\\Model1.cs"
-                                    },
-                                    new ClassModel
-                                    {
-                                        FilePath = "Folder1\\Folder\\Models\\Model2.cs"
-                                    }
-                                }
+                                FilePath = "Models\\Model1.cs"
                             },
-                            new CompilationUnitModel
+                            new ClassModel
                             {
-                                ClassTypes =
-                                {
-                                    new ClassModel
-                                    {
-                                        FilePath = "Controllers\\Controller.cs"
-                                    }
-                                }
+                                FilePath = "Folder1\\Folder\\Models\\Model2.cs"
+                            }
+                        }
+                    },
+                    new CompilationUnitModel
+                    {
+                        ClassTypes =
+                        {
+                            new ClassModel
+                            {
+                                FilePath = "Controllers\\Controller.cs"
                             }
                         }
                     }
@@ -286,23 +256,21 @@ namespace HoneydewCoreTest.Processors
             var processesRepositoryModel = sut.Process(repositoryModel);
 
             Assert.Equal("RandomPathToSolution1", processesRepositoryModel.Solutions[0].FilePath);
-            Assert.Equal("Path1/Path2/Project.csproj",
-                processesRepositoryModel.Solutions[0].Projects[0].FilePath);
-            Assert.Equal("Class1.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
+            Assert.Equal("Path1/Path2/Project.csproj", processesRepositoryModel.Projects[0].FilePath);
+            Assert.Equal("Class1.cs", processesRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
             Assert.Equal("Path1/Path2/Namespace1/Class2.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[1].FilePath);
+                processesRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[1].FilePath);
 
             Assert.Equal("Folder1/Folder/Solution1.sln",
                 processesRepositoryModel.Solutions[1].FilePath);
             Assert.Equal("Folder1/Folder/Project2/Project2.csproj",
-                processesRepositoryModel.Solutions[1].Projects[0].FilePath);
+                processesRepositoryModel.Projects[1].FilePath);
             Assert.Equal("Models/Model1.cs",
-                processesRepositoryModel.Solutions[1].Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
+                processesRepositoryModel.Projects[1].CompilationUnits[0].ClassTypes[0].FilePath);
             Assert.Equal("Folder1/Folder/Models/Model2.cs",
-                processesRepositoryModel.Solutions[1].Projects[0].CompilationUnits[0].ClassTypes[1].FilePath);
+                processesRepositoryModel.Projects[1].CompilationUnits[0].ClassTypes[1].FilePath);
             Assert.Equal("Controllers/Controller.cs",
-                processesRepositoryModel.Solutions[1].Projects[0].CompilationUnits[1].ClassTypes[0].FilePath);
+                processesRepositoryModel.Projects[1].CompilationUnits[1].ClassTypes[0].FilePath);
         }
 
         [Fact(Skip = "Fails on Linux")]
@@ -312,53 +280,56 @@ namespace HoneydewCoreTest.Processors
             repositoryModel.Solutions.Add(new SolutionModel
             {
                 FilePath = "D:/SomePath/Solution.sln",
-                Projects =
+                ProjectsPaths = new List<string>
                 {
-                    new ProjectModel
+                    "D:/SomePath/Project1/Project1.csproj",
+                    "D:\\SomePath\\Project2\\Project2.csproj",
+                }
+            });
+
+            repositoryModel.Projects.Add(new ProjectModel
+            {
+                FilePath = "D:/SomePath/Project1/Project1.csproj",
+                CompilationUnits =
+                {
+                    new CompilationUnitModel
                     {
-                        FilePath = "D:/SomePath/Project1/Project1.csproj",
-                        CompilationUnits =
+                        ClassTypes =
                         {
-                            new CompilationUnitModel
+                            new ClassModel
                             {
-                                ClassTypes =
-                                {
-                                    new ClassModel
-                                    {
-                                        FilePath = "D:/SomePath/Project1/Models/Model1.cs"
-                                    },
-                                    new ClassModel
-                                    {
-                                        FilePath = "D:/SomePath/Project1/Models/Model2.cs"
-                                    }
-                                }
+                                FilePath = "D:/SomePath/Project1/Models/Model1.cs"
+                            },
+                            new ClassModel
+                            {
+                                FilePath = "D:/SomePath/Project1/Models/Model2.cs"
+                            }
+                        }
+                    }
+                }
+            });
+            repositoryModel.Projects.Add(new ProjectModel
+            {
+                FilePath = "D:\\SomePath\\Project2\\Project2.csproj",
+                CompilationUnits =
+                {
+                    new CompilationUnitModel
+                    {
+                        ClassTypes =
+                        {
+                            new ClassModel
+                            {
+                                FilePath = "D:\\SomePath\\Project2\\Controller\\Impl\\Controller.cs"
                             }
                         }
                     },
-                    new ProjectModel
+                    new CompilationUnitModel
                     {
-                        FilePath = "D:\\SomePath\\Project2\\Project2.csproj",
-                        CompilationUnits =
+                        ClassTypes =
                         {
-                            new CompilationUnitModel
+                            new ClassModel
                             {
-                                ClassTypes =
-                                {
-                                    new ClassModel
-                                    {
-                                        FilePath = "D:\\SomePath\\Project2\\Controller\\Impl\\Controller.cs"
-                                    }
-                                }
-                            },
-                            new CompilationUnitModel
-                            {
-                                ClassTypes =
-                                {
-                                    new ClassModel
-                                    {
-                                        FilePath = "D:\\SomePath\\Project2\\Repository\\IRepository.cs"
-                                    }
-                                }
+                                FilePath = "D:\\SomePath\\Project2\\Repository\\IRepository.cs"
                             }
                         }
                     }
@@ -373,72 +344,63 @@ namespace HoneydewCoreTest.Processors
                     repositoryModel);
 
             Assert.Equal("Solution.sln", processesRepositoryModel.Solutions[0].FilePath);
-            Assert.Equal("Project1/Project1.csproj",
-                processesRepositoryModel.Solutions[0].Projects[0].FilePath);
+            Assert.Equal("Project1/Project1.csproj", processesRepositoryModel.Projects[0].FilePath);
             Assert.Equal("Project1/Models/Model1.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
+                processesRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
             Assert.Equal("Project1/Models/Model2.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[1].FilePath);
-            Assert.Equal("Project2/Project2.csproj",
-                processesRepositoryModel.Solutions[0].Projects[1].FilePath);
+                processesRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[1].FilePath);
+            Assert.Equal("Project2/Project2.csproj", processesRepositoryModel.Projects[1].FilePath);
             Assert.Equal("Project2/Controller/Impl/Controller.cs",
-                processesRepositoryModel.Solutions[0].Projects[1].CompilationUnits[0].ClassTypes[0].FilePath);
+                processesRepositoryModel.Projects[1].CompilationUnits[0].ClassTypes[0].FilePath);
             Assert.Equal("Project2/Repository/IRepository.cs",
-                processesRepositoryModel.Solutions[0].Projects[1].CompilationUnits[1].ClassTypes[0].FilePath);
+                processesRepositoryModel.Projects[1].CompilationUnits[1].ClassTypes[0].FilePath);
         }
 
         [Fact(Skip = "Fails on Linux")]
         public void Process_ShouldHaveFilePathsShortened_WhenProvidedWithInputPathToACSharpProjectFile()
         {
             var repositoryModel = new RepositoryModel();
-            repositoryModel.Solutions.Add(new SolutionModel
+            repositoryModel.Projects.Add(new ProjectModel
             {
-                Projects =
+                FilePath = "D:/SomePath/Project1/Project1.csproj",
+                CompilationUnits =
                 {
-                    new ProjectModel
+                    new CompilationUnitModel
                     {
-                        FilePath = "D:/SomePath/Project1/Project1.csproj",
-                        CompilationUnits =
+                        ClassTypes =
                         {
-                            new CompilationUnitModel
+                            new ClassModel
                             {
-                                ClassTypes =
-                                {
-                                    new ClassModel
-                                    {
-                                        FilePath = "D:/SomePath/Project1/Models/Model1.cs"
-                                    },
-                                    new ClassModel
-                                    {
-                                        FilePath = "D:/SomePath/Project1/Models/Model2.cs"
-                                    }
-                                }
+                                FilePath = "D:/SomePath/Project1/Models/Model1.cs"
                             },
-                            new CompilationUnitModel
+                            new ClassModel
                             {
-                                ClassTypes =
-                                {
-                                    new ClassModel
-                                    {
-                                        FilePath = "D:\\SomePath\\Project1\\Controller\\Impl\\Controller.cs"
-                                    }
-                                }
-                            },
-                            new CompilationUnitModel
+                                FilePath = "D:/SomePath/Project1/Models/Model2.cs"
+                            }
+                        }
+                    },
+                    new CompilationUnitModel
+                    {
+                        ClassTypes =
+                        {
+                            new ClassModel
                             {
-                                ClassTypes =
-                                {
-                                    new ClassModel
-                                    {
-                                        FilePath = "D:\\SomePath\\Project1\\Repository\\IRepository.cs"
-                                    }
-                                }
+                                FilePath = "D:\\SomePath\\Project1\\Controller\\Impl\\Controller.cs"
+                            }
+                        }
+                    },
+                    new CompilationUnitModel
+                    {
+                        ClassTypes =
+                        {
+                            new ClassModel
+                            {
+                                FilePath = "D:\\SomePath\\Project1\\Repository\\IRepository.cs"
                             }
                         }
                     }
                 }
             });
-
             var folderPathValidatorMock = new Mock<IFolderPathValidator>();
             folderPathValidatorMock.Setup(validator => validator.IsFolder("D:/SomePath/Project.csproj"))
                 .Returns(false);
@@ -447,16 +409,15 @@ namespace HoneydewCoreTest.Processors
                 new FilePathShortenerProcessor(folderPathValidatorMock.Object, "D:/SomePath/Project.csproj").Process(
                     repositoryModel);
 
-            Assert.Equal("Project1/Project1.csproj",
-                processesRepositoryModel.Solutions[0].Projects[0].FilePath);
+            Assert.Equal("Project1/Project1.csproj", processesRepositoryModel.Projects[0].FilePath);
             Assert.Equal("Project1/Models/Model1.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
+                processesRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[0].FilePath);
             Assert.Equal("Project1/Models/Model2.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[0].ClassTypes[1].FilePath);
+                processesRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[1].FilePath);
             Assert.Equal("Project1/Controller/Impl/Controller.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[1].ClassTypes[0].FilePath);
+                processesRepositoryModel.Projects[0].CompilationUnits[1].ClassTypes[0].FilePath);
             Assert.Equal("Project1/Repository/IRepository.cs",
-                processesRepositoryModel.Solutions[0].Projects[0].CompilationUnits[2].ClassTypes[0].FilePath);
+                processesRepositoryModel.Projects[0].CompilationUnits[2].ClassTypes[0].FilePath);
         }
     }
 }

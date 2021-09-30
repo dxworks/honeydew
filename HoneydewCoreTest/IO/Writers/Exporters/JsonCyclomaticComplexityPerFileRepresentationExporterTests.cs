@@ -18,7 +18,7 @@
 //         {
 //             const string expectedString = @"{""file"":{""concerns"":[]}}";
 //
-//             var exportString = _sut.Export(TODO, new CyclomaticComplexityPerFileRepresentation());
+//             var exportString = _sut.Export(, new CyclomaticComplexityPerFileRepresentation());
 //
 //             Assert.Equal(expectedString, exportString);
 //         }
@@ -54,7 +54,7 @@
 //                 Tag = "sumCyclo",
 //                 Strength = "20"
 //             });
-//             var exportString = _sut.Export(TODO, representation);
+//             var exportString = _sut.Export(, representation);
 //
 //             Assert.Equal(expectedString, exportString);
 //         }
@@ -116,7 +116,7 @@
 //                 Tag = "sumCyclo",
 //                 Strength = "45"
 //             });
-//             var exportString = _sut.Export(TODO, representation);
+//             var exportString = _sut.Export(, representation);
 //
 //             Assert.Equal(expectedString, exportString);
 //         }

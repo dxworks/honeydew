@@ -11,21 +11,18 @@ namespace HoneydewExtractors.CSharp.Metrics.Complexity
 
         public void Calculate(RepositoryModel model)
         {
-            foreach (var solutionModel in model.Solutions)
+            foreach (var projectModel in model.Projects)
             {
-                foreach (var projectModel in solutionModel.Projects)
+                foreach (var compilationUnitType in projectModel.CompilationUnits)
                 {
-                    foreach (var compilationUnitType in projectModel.CompilationUnits)
+                    foreach (var classType in compilationUnitType.ClassTypes)
                     {
-                        foreach (var classType in compilationUnitType.ClassTypes)
+                        if (classType is not ClassModel classModel)
                         {
-                            if (classType is not ClassModel classModel)
-                            {
-                                continue;
-                            }
-                            
-                            _numberOfMethods += classModel.Methods.Count;
+                            continue;
                         }
+
+                        _numberOfMethods += classModel.Methods.Count;
                     }
                 }
             }
