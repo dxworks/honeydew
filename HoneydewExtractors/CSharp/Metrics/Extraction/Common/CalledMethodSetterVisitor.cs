@@ -58,8 +58,29 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                 return modelType;
             }
 
-            foreach (var invocationExpressionSyntax in
-                syntaxNode.Body.ChildNodes().OfType<InvocationExpressionSyntax>())
+            var invocationExpressionSyntaxes =
+                syntaxNode.Body.ChildNodes().OfType<InvocationExpressionSyntax>().ToList();
+
+            foreach (var returnStatementSyntax in syntaxNode.Body.ChildNodes().OfType<ReturnStatementSyntax>())
+            {
+                invocationExpressionSyntaxes.AddRange(returnStatementSyntax.DescendantNodes()
+                    .OfType<InvocationExpressionSyntax>());
+            }
+
+            foreach (var awaitExpressionSyntax in syntaxNode.Body.ChildNodes().OfType<AwaitExpressionSyntax>())
+            {
+                invocationExpressionSyntaxes.AddRange(awaitExpressionSyntax.DescendantNodes()
+                    .OfType<InvocationExpressionSyntax>());
+            }
+
+            foreach (var awaitExpressionSyntax in
+                syntaxNode.Body.ChildNodes().OfType<LocalDeclarationStatementSyntax>())
+            {
+                invocationExpressionSyntaxes.AddRange(awaitExpressionSyntax.DescendantNodes()
+                    .OfType<InvocationExpressionSyntax>());
+            }
+
+            foreach (var invocationExpressionSyntax in invocationExpressionSyntaxes)
             {
                 IMethodSignatureType methodModel = new MethodModel();
 
@@ -82,11 +103,6 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                 modelType.CalledMethods.Add(methodModel);
             }
 
-            foreach (var returnStatementSyntax in syntaxNode.Body.ChildNodes().OfType<ReturnStatementSyntax>())
-            {
-                SetMethodCalls(returnStatementSyntax, modelType);
-            }
-
             return modelType;
         }
 
@@ -95,6 +111,11 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
             foreach (var invocationExpressionSyntax in
                 syntaxNode.DescendantNodes().OfType<InvocationExpressionSyntax>())
             {
+                if (invocationExpressionSyntax.GetParentDeclarationSyntax<LocalFunctionStatementSyntax>() != null)
+                {
+                    continue;
+                }
+
                 IMethodSignatureType methodModel = new MethodModel();
 
                 foreach (var visitor in GetContainedVisitors())

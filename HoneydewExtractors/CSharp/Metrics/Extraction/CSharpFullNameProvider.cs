@@ -81,7 +81,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                     var symbolInfo = _semanticModel.GetSymbolInfo(syntaxNode);
                     if (symbolInfo.Symbol != null)
                     {
-                        return GetFullName(symbolInfo.Symbol, typeSyntax is NullableTypeSyntax);
+                        return GetFullName(symbolInfo.Symbol, false, typeSyntax is NullableTypeSyntax);
                     }
 
                     switch (typeSyntax)
@@ -143,13 +143,13 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                     var symbolInfo = _semanticModel.GetSymbolInfo(expressionSyntax);
                     if (symbolInfo.Symbol != null)
                     {
-                        return GetFullName(symbolInfo.Symbol, false);
+                        return GetFullName(symbolInfo.Symbol, false, false);
                     }
 
                     var typeInfo = _semanticModel.GetTypeInfo(expressionSyntax);
                     if (typeInfo.Type != null && typeInfo.Type.ToString() != "?" && typeInfo.Type.ToString() != "?[]")
                     {
-                        return GetFullName(typeInfo.Type, false);
+                        return GetFullName(typeInfo.Type, false, false);
                     }
 
                     switch (expressionSyntax)
@@ -247,7 +247,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             return stringBuilder.ToString();
         }
 
-        private IEntityType GetFullName(ISymbol symbolInfo, bool isExternType, bool isNullable = false)
+        private IEntityType GetFullName(ISymbol symbolInfo, bool isExternType, bool isNullable)
         {
             if (symbolInfo == null)
             {
