@@ -2,7 +2,7 @@
 
 namespace HoneydewModels.CSharp
 {
-    public record LocalVariableModel : IModelEntity, ILocalVariableType
+    public record LocalVariableModel : ILocalVariableType
     {
         public IEntityType Type { get; set; }
     }

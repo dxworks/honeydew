@@ -4,7 +4,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public record NamespaceModel : IModelEntity
+    public record NamespaceModel
     {
         public string Name { get; set; } = "";
         public IList<string> ClassNames { get; set; } = new List<string>();

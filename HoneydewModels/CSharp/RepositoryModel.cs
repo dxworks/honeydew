@@ -9,18 +9,17 @@ namespace HoneydewModels.CSharp
 
         public IList<SolutionModel> Solutions { get; set; } = new List<SolutionModel>();
 
+        public IList<ProjectModel> Projects { get; set; } = new List<ProjectModel>();
+
         public IEnumerable<IClassType> GetEnumerable()
         {
-            foreach (var solutionModel in Solutions)
+            foreach (var projectModel in Projects)
             {
-                foreach (var projectModel in solutionModel.Projects)
+                foreach (var compilationUnitType in projectModel.CompilationUnits)
                 {
-                    foreach (var compilationUnitType in projectModel.CompilationUnits)
+                    foreach (var classType in compilationUnitType.ClassTypes)
                     {
-                        foreach (var classType in compilationUnitType.ClassTypes)
-                        {
-                            yield return classType;
-                        }
+                        yield return classType;
                     }
                 }
             }

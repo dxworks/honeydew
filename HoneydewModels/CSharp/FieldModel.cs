@@ -3,7 +3,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public record FieldModel : IModelEntity, IFieldType
+    public record FieldModel : IFieldType
     {
         public string Name { get; set; }
 

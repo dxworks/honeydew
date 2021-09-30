@@ -3,7 +3,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public record ReturnValueModel : IModelEntity, IReturnValueType
+    public record ReturnValueModel : IReturnValueType
     {
         public IEntityType Type { get; set; }
         public string Modifier { get; set; } = "";

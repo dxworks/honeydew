@@ -4,7 +4,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public record ProjectModel : IModelEntity
+    public record ProjectModel
     {
         public string Name { get; set; }
 

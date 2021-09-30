@@ -4,7 +4,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public record ClassModel : IPropertyMembersClassType, IModelEntity
+    public record ClassModel : IPropertyMembersClassType
     {
         public string ClassType { get; set; }
 
