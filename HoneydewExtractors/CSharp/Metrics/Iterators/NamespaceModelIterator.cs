@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using HoneydewExtractors.Core.Metrics.Iterators;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewModels.CSharp;
@@ -23,13 +24,13 @@ namespace HoneydewExtractors.CSharp.Metrics.Iterators
 
         public override void Iterate(NamespaceModel namespaceModel)
         {
-            foreach (var solutionModel in namespaceModel.ClassModels)
+            Parallel.ForEach(namespaceModel.ClassModels, classType =>
             {
                 foreach (var iterator in _iterators)
                 {
-                    iterator.Iterate(solutionModel);
+                    iterator.Iterate(classType);
                 }
-            }
+            });
 
             base.Iterate(namespaceModel);
         }

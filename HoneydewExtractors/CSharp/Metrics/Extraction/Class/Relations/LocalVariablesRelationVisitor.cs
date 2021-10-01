@@ -13,13 +13,25 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
             return "Local Variables Dependency";
         }
 
-        public void Visit(IClassType modelType)
+        public void Visit(IClassType classType)
         {
-            if (modelType is not IPropertyMembersClassType classTypeWithProperties)
+            if (classType is not IPropertyMembersClassType classTypeWithProperties)
             {
                 return;
             }
 
+            var dependencies = GetDependencies(classTypeWithProperties);
+
+            classTypeWithProperties.Metrics.Add(new MetricModel
+            {
+                ExtractorName = GetType().ToString(),
+                Value = dependencies,
+                ValueType = dependencies.GetType().ToString()
+            });
+        }
+
+        public Dictionary<string, int> GetDependencies(IPropertyMembersClassType classTypeWithProperties)
+        {
             var dependencies = new Dictionary<string, int>();
 
             foreach (var propertyType in classTypeWithProperties.Properties)
@@ -58,7 +70,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
                         dependencies.Add(localVariableType.Type.Name, 1);
                     }
                 }
-                
+
                 if (methodType is ITypeWithLocalFunctions typeWithLocalFunctions)
                 {
                     ExtractLocalVariablesFromLocalFunctions(typeWithLocalFunctions, dependencies);
@@ -78,19 +90,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
                         dependencies.Add(localVariableType.Type.Name, 1);
                     }
                 }
-                
+
                 if (constructorType is ITypeWithLocalFunctions typeWithLocalFunctions)
                 {
                     ExtractLocalVariablesFromLocalFunctions(typeWithLocalFunctions, dependencies);
                 }
             }
 
-            classTypeWithProperties.Metrics.Add(new MetricModel
-            {
-                ExtractorName = GetType().ToString(),
-                Value = dependencies,
-                ValueType = dependencies.GetType().ToString()
-            });
+            return dependencies;
         }
 
         private static void ExtractLocalVariablesFromLocalFunctions(ITypeWithLocalFunctions typeWithLocalFunctions,

@@ -34,8 +34,8 @@ namespace TopLevel
 }";
             var linesOfCode = _sut.Count(fileContent);
 
-            Assert.Equal(16, linesOfCode.SourceLines);
-            Assert.Equal(0, linesOfCode.EmptyLines);
+            Assert.Equal(8, linesOfCode.SourceLines);
+            Assert.Equal(8, linesOfCode.EmptyLines);
             Assert.Equal(0, linesOfCode.CommentedLines);
         }
 
@@ -123,8 +123,8 @@ namespace TopLevel
 }";
             var linesOfCode = _sut.Count(fileContent);
 
-            Assert.Equal(18, linesOfCode.SourceLines);
-            Assert.Equal(7, linesOfCode.EmptyLines);
+            Assert.Equal(9, linesOfCode.SourceLines);
+            Assert.Equal(16, linesOfCode.EmptyLines);
         }
         
         [Fact]
@@ -150,8 +150,7 @@ namespace TopLevel
 
                 return Calc(_f);
             }
-         }
-        //
+         } //
 
 
         /* this method calculates */
@@ -168,8 +167,8 @@ namespace TopLevel
 }";
             var linesOfCode = _sut.Count(fileContent);
 
-            Assert.Equal(21, linesOfCode.SourceLines);
-            Assert.Equal(7, linesOfCode.EmptyLines);
+            Assert.Equal(11, linesOfCode.SourceLines);
+            Assert.Equal(16, linesOfCode.EmptyLines);
             Assert.Equal(8, linesOfCode.CommentedLines);
         }
         
@@ -189,8 +188,8 @@ namespace TopLevel
 }";
             var linesOfCode = _sut.Count(fileContent);
 
-            Assert.Equal(8, linesOfCode.SourceLines);
-            Assert.Equal(0, linesOfCode.EmptyLines);
+            Assert.Equal(5, linesOfCode.SourceLines);
+            Assert.Equal(3, linesOfCode.EmptyLines);
             Assert.Equal(3, linesOfCode.CommentedLines);
         }
         
@@ -211,9 +210,9 @@ namespace TopLevel
 }";
             var linesOfCode = _sut.Count(fileContent);
 
-            Assert.Equal(5, linesOfCode.SourceLines);
-            Assert.Equal(0, linesOfCode.EmptyLines);
-            Assert.Equal(7, linesOfCode.CommentedLines);
+            Assert.Equal(3, linesOfCode.SourceLines);
+            Assert.Equal(1, linesOfCode.EmptyLines);
+            Assert.Equal(8, linesOfCode.CommentedLines);
         }
         
         [Fact]
@@ -230,8 +229,8 @@ namespace TopLevel
 }";
             var linesOfCode = _sut.Count(fileContent);
 
-            Assert.Equal(7, linesOfCode.SourceLines);
-            Assert.Equal(0, linesOfCode.EmptyLines);
+            Assert.Equal(4, linesOfCode.SourceLines);
+            Assert.Equal(3, linesOfCode.EmptyLines);
             Assert.Equal(2, linesOfCode.CommentedLines);
         }
         [Fact]
@@ -250,8 +249,8 @@ namespace TopLevel
 }";
             var linesOfCode = _sut.Count(fileContent);
 
-            Assert.Equal(7, linesOfCode.SourceLines);
-            Assert.Equal(1, linesOfCode.EmptyLines);
+            Assert.Equal(4, linesOfCode.SourceLines);
+            Assert.Equal(4, linesOfCode.EmptyLines);
             Assert.Equal(3, linesOfCode.CommentedLines);
         }
     }

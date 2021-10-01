@@ -144,7 +144,10 @@ namespace HoneydewExtractors.Processors
                             {
                                 foreach (var (filePath, count) in dictionary)
                                 {
-                                    fileRelationsRepresentation.Add(grouping.Key, filePath, relationType, count);
+                                    if (grouping.Key != filePath)
+                                    {
+                                        fileRelationsRepresentation.Add(grouping.Key, filePath, relationType, count);
+                                    }
                                 }
                             }
                         }

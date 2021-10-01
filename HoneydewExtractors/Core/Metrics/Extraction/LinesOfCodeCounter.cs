@@ -18,7 +18,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction
 
         public LinesOfCode Count(string fileContent)
         {
-            var lines = fileContent.Split(new[] {"\r\n", "\r", "\n"}, StringSplitOptions.None);
+            var lines = fileContent.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
             var sourceLines = 0;
             var commentLines = 0;
@@ -35,7 +35,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction
 
                 if (!isInsideMultiLineComment)
                 {
-                    if (string.IsNullOrWhiteSpace(trimmedLine))
+                    if (IsLineEmpty(trimmedLine))
                     {
                         emptyLines++;
                         continue;
@@ -72,7 +72,7 @@ namespace HoneydewExtractors.Core.Metrics.Extraction
                 if (singleLineCommentIndex >= 0)
                 {
                     trimmedLine = trimmedLine[..singleLineCommentIndex];
-                    if (string.IsNullOrWhiteSpace(trimmedLine))
+                    if (IsLineEmpty(trimmedLine))
                     {
                         commentLines++;
                         continue;
@@ -92,7 +92,8 @@ namespace HoneydewExtractors.Core.Metrics.Extraction
                         break;
                     }
 
-                    trimmedLine = trimmedLine.Remove(startMultilineCommentIndex,endMultilineCommentIndex + _multiLineCommentEnd.Length- startMultilineCommentIndex);
+                    trimmedLine = trimmedLine.Remove(startMultilineCommentIndex,
+                        endMultilineCommentIndex + _multiLineCommentEnd.Length - startMultilineCommentIndex);
                     isInsideMultiLineComment = false;
 
                     startMultilineCommentIndex = trimmedLine.IndexOf(_multiLineCommentStart, StringComparison.Ordinal);
@@ -101,13 +102,13 @@ namespace HoneydewExtractors.Core.Metrics.Extraction
                     endMultilineCommentIndex = trimmedLine.IndexOf(_multiLineCommentEnd, StringComparison.Ordinal);
                 }
 
-                if (!string.IsNullOrWhiteSpace(trimmedLine))
+                if (IsLineEmpty(trimmedLine))
                 {
-                    sourceLines++;
+                    commentLines++;
                 }
                 else
                 {
-                    commentLines++;
+                    sourceLines++;
                 }
             }
 
@@ -117,6 +118,11 @@ namespace HoneydewExtractors.Core.Metrics.Extraction
                 CommentedLines = commentLines,
                 EmptyLines = emptyLines
             };
+        }
+
+        private bool IsLineEmpty(string line)
+        {
+            return string.IsNullOrWhiteSpace(line) || line.Trim() is "{" or "}";
         }
     }
 }

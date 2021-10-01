@@ -210,6 +210,11 @@ namespace Honeydew
 
         private static void ApplyPostExtractionVisitors(RepositoryModel repositoryModel)
         {
+            var propertiesRelationVisitor = new PropertiesRelationVisitor();
+            var fieldsRelationVisitor = new FieldsRelationVisitor();
+            var parameterRelationVisitor = new ParameterRelationVisitor();
+            var localVariablesRelationVisitor = new LocalVariablesRelationVisitor();
+
             var repositoryModelIterator = new RepositoryModelIterator(new List<ModelIterator<SolutionModel>>
             {
                 new SolutionModelIterator(new List<ModelIterator<ProjectModel>>
@@ -220,13 +225,16 @@ namespace Honeydew
                         {
                             new ClassTypePropertyIterator(new List<IModelVisitor<IClassType>>
                             {
-                                new PropertiesRelationVisitor(),
-                                new FieldsRelationVisitor(),
-                                new ParameterRelationVisitor(),
-                                new ReturnValueRelationVisitor(),
-                                new LocalVariablesRelationVisitor(),
+                                propertiesRelationVisitor,
+                                fieldsRelationVisitor,
+                                parameterRelationVisitor,
+                                localVariablesRelationVisitor,
 
                                 new ExternCallsRelationVisitor(),
+                                new HierarchyRelationVisitor(),
+                                new ReturnValueRelationVisitor(),
+                                new DeclarationRelationVisitor(localVariablesRelationVisitor, parameterRelationVisitor,
+                                    fieldsRelationVisitor, propertiesRelationVisitor),
                             })
                         })
                     })
@@ -440,10 +448,16 @@ namespace Honeydew
             // csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations_all{nameModifier}.csv"),
             //    allFileRelationsRepresentation);
 
-            // var jafaxFileRelationsRepresentation =
-            //      new RepositoryModelToFileRelationsProcessor(new JafaxChooseStrategy()).Process(repositoryModel);
-            //  csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations{nameModifier}.csv"),
-            //      jafaxFileRelationsRepresentation);
+            var jafaxFileRelationsRepresentation =
+                 new RepositoryModelToFileRelationsProcessor(new JafaxChooseStrategy()).Process(repositoryModel);
+             csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations{nameModifier}.csv"),
+                 jafaxFileRelationsRepresentation, new List<string>
+                 {
+                     "extCalls",
+                     "hierarchy",
+                     "returns",
+                     "declarations"
+                 });
 
             var cyclomaticComplexityPerFileRepresentation =
                 GetCyclomaticComplexityPerFileRepresentation(repositoryModel);
@@ -459,7 +473,7 @@ namespace Honeydew
             {
                 ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
                 {
-                    new("Total Count", ExportUtils.CsvSumPerLine)
+                    new("all", ExportUtils.CsvSumPerLine)
                 }
             };
 
