@@ -78,7 +78,7 @@ jobs:
         run: zip -r results.zip results
 
       - name: Upload results artifact
-        uses: actions\upload-artifact@v2
+        uses: actions/upload-artifact@v2
         with:
           name: results-${{matrix.os}}.zip
           path: results.zip
