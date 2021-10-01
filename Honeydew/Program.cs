@@ -454,9 +454,11 @@ namespace Honeydew
                  jafaxFileRelationsRepresentation, new List<string>
                  {
                      "extCalls",
+                     "extData",
                      "hierarchy",
                      "returns",
-                     "declarations"
+                     "declarations",
+                     "extDataStrict",
                  });
 
             var cyclomaticComplexityPerFileRepresentation =
