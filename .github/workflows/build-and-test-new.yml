@@ -27,7 +27,7 @@ jobs:
       run: zip -r honeydew.zip bin/Debug/
 
     - name: Upload results artifact
-      uses: actions\upload-artifact@v2
+      uses: actions/upload-artifact@v2
       with:
         name: honeydew.zip
         path: honwydew.zip
