@@ -1,4 +1,4 @@
-name: Build and Test
+name: New Build
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
 
 
     - name: Package Build Result
-      run: zip -r honeydew.zip bin/Debug/
+      run: zip -r honeydew.zip Honeydew/bin/Debug/
 
     - name: Upload results artifact
       uses: actions/upload-artifact@v2
