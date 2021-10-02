@@ -247,7 +247,7 @@ namespace Honeydew
             
             var repositoryModelIterator = new RepositoryModelIterator(new List<ModelIterator<ProjectModel>>
             {
-                new ProjectModelIterator(new List<ModelIterator<CompilationUnitModel>>
+                new ProjectModelIterator(new List<ModelIterator<ICompilationUnitType>>
                 {
                     new CompilationUnitModelIterator(new List<ModelIterator<IClassType>>
                     {

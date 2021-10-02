@@ -46,6 +46,8 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     continue;
                 }
 
+                solutionModel.ProjectsPaths.Add(project.FilePath);
+                
                 _logger.Log();
                 _logger.Log($"Loading C# Project from {project.FilePath} ({i}/{projectCount})");
                 var projectModel = await _projectLoadingStrategy.Load(project, extractorCreator);
@@ -54,7 +56,8 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
 
                 if (projectModel != null)
                 {
-                    solutionModel.Projects.Add(projectModel);
+                    // todo
+                    // solutionModel.Projects.Add(projectModel);
                 }
                 else
                 {

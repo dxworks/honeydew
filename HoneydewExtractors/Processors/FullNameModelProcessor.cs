@@ -506,9 +506,9 @@ namespace HoneydewExtractors.Processors
                         var end = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                         _logger.Log(
                             $"Resolving Elements for {classType.Name} from {classType.FilePath} ({currentClassCount}/{_classCount})");
-                        currentClassCount++;
                         progressBar.Step(
                             $"\r{classType.Name} from {classType.FilePath} ({currentClassCount}/{_classCount}) - {(end - start) / 1000} s");
+                        currentClassCount++;
                     });
                     // }
                 }
