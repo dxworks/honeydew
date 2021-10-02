@@ -20,6 +20,18 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
                 return;
             }
 
+            var dependencies = GetDependencies(classTypeWithProperties);
+
+            classTypeWithProperties.Metrics.Add(new MetricModel
+            {
+                ExtractorName = GetType().ToString(),
+                Value = dependencies,
+                ValueType = dependencies.GetType().ToString()
+            });
+        }
+
+        public Dictionary<string, int> GetDependencies(IPropertyMembersClassType classTypeWithProperties)
+        {
             var dependencies = new Dictionary<string, int>();
 
             foreach (var propertyType in classTypeWithProperties.Properties)
@@ -34,12 +46,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
                 }
             }
 
-            classTypeWithProperties.Metrics.Add(new MetricModel
-            {
-                ExtractorName = GetType().ToString(),
-                Value = dependencies,
-                ValueType = dependencies.GetType().ToString()
-            });
+            return dependencies;
         }
     }
 }

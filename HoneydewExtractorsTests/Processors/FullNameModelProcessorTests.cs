@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using HoneydewCore.Logging;
 using HoneydewExtractors.Processors;
 using HoneydewModels.CSharp;

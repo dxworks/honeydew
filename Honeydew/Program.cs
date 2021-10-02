@@ -176,8 +176,10 @@ namespace Honeydew
                     progressLogger.Log("Resolving Full Name Dependencies");
                     progressLogger.Log();
 
-                    var fullNameModelProcessor =
-                        new FullNameModelProcessor(logger, progressLogger, options.DisableLocalVariablesBinding);
+                    var fqnLogger = new SerilogLogger($"{DefaultPathForAllRepresentations}/fqn_logs.txt");
+                    var fullNameModelProcessor = new FullNameModelProcessor(logger, fqnLogger, progressLogger,
+                        options.DisableLocalVariablesBinding);
+
                     repositoryModel = fullNameModelProcessor.Process(repositoryModel);
 
                     logger.Log();
@@ -187,9 +189,9 @@ namespace Honeydew
 
                     ApplyPostExtractionVisitors(repositoryModel, options.DisableExternTypeInLocalTypeSearch);
 
-                    WriteAllRepresentations(repositoryModel,
-                        fullNameModelProcessor.NamespacesDictionary,
-                        DefaultPathForAllRepresentations);
+                    // WriteAllRepresentations(repositoryModel,
+                    //     fullNameModelProcessor.NamespacesDictionary,
+                    //     DefaultPathForAllRepresentations);
                 }
 
                 logger.Log();
@@ -215,16 +217,25 @@ namespace Honeydew
             {
                 classNames.Add(classType.Name);
             }
+            
+            var propertiesRelationVisitor = new PropertiesRelationVisitor();
+            var fieldsRelationVisitor = new FieldsRelationVisitor();
+            var parameterRelationVisitor = new ParameterRelationVisitor();
+            var localVariablesRelationVisitor = new LocalVariablesRelationVisitor();
 
             var modelVisitors = new List<IModelVisitor<IClassType>>
             {
-                new PropertiesRelationVisitor(),
-                new FieldsRelationVisitor(),
-                new ParameterRelationVisitor(),
-                new ReturnValueRelationVisitor(),
-                new LocalVariablesRelationVisitor(),
+               
+                propertiesRelationVisitor,
+                fieldsRelationVisitor,
+                parameterRelationVisitor,
+                localVariablesRelationVisitor,
 
                 new ExternCallsRelationVisitor(),
+                new HierarchyRelationVisitor(),
+                new ReturnValueRelationVisitor(),
+                new DeclarationRelationVisitor(localVariablesRelationVisitor, parameterRelationVisitor,
+                    fieldsRelationVisitor, propertiesRelationVisitor),
             };
 
             if (!disableSearchForExternTypes)
@@ -233,17 +244,14 @@ namespace Honeydew
                 var logger = new SerilogLogger(logFilePath);
                 modelVisitors.Add(new ExternEntityTypeVisitor(classNames, logger));
             }
-
-            var repositoryModelIterator = new RepositoryModelIterator(new List<ModelIterator<SolutionModel>>
+            
+            var repositoryModelIterator = new RepositoryModelIterator(new List<ModelIterator<ProjectModel>>
             {
-                new SolutionModelIterator(new List<ModelIterator<ProjectModel>>
+                new ProjectModelIterator(new List<ModelIterator<CompilationUnitModel>>
                 {
-                    new ProjectModelIterator(new List<ModelIterator<NamespaceModel>>
+                    new CompilationUnitModelIterator(new List<ModelIterator<IClassType>>
                     {
-                        new NamespaceModelIterator(new List<ModelIterator<IClassType>>
-                        {
-                            new ClassTypePropertyIterator(modelVisitors)
-                        })
+                        new ClassTypePropertyIterator(modelVisitors)
                     })
                 })
             });
@@ -455,9 +463,17 @@ namespace Honeydew
                 allFileRelationsRepresentation);
 
             var jafaxFileRelationsRepresentation =
-                new RepositoryModelToFileRelationsProcessor(new JafaxChooseStrategy()).Process(repositoryModel);
-            csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations{nameModifier}.csv"),
-                jafaxFileRelationsRepresentation);
+                 new RepositoryModelToFileRelationsProcessor(new JafaxChooseStrategy()).Process(repositoryModel);
+             csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations{nameModifier}.csv"),
+                 jafaxFileRelationsRepresentation, new List<string>
+                 {
+                     "extCalls",
+                     "extData",
+                     "hierarchy",
+                     "returns",
+                     "declarations",
+                     "extDataStrict",
+                 });
 
             var cyclomaticComplexityPerFileRepresentation =
                 GetCyclomaticComplexityPerFileRepresentation(repositoryModel);
@@ -473,7 +489,7 @@ namespace Honeydew
             {
                 ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
                 {
-                    new("Total Count", ExportUtils.CsvSumPerLine)
+                    new("all", ExportUtils.CsvSumPerLine)
                 }
             };
 

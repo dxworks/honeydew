@@ -10,7 +10,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
     {
         public string PrettyPrint()
         {
-            return "Return Value Dependency";
+            return "returns";
         }
 
         public void Visit(IClassType modelType)

@@ -7,7 +7,10 @@ namespace HoneydewExtractors.Processors
     {
         public bool Choose(Type type)
         {
-            return type == typeof(ExternCallsRelationVisitor);
+            return type == typeof(ExternCallsRelationVisitor) ||
+                   type == typeof(HierarchyRelationVisitor) ||
+                   type == typeof(ReturnValueRelationVisitor) ||
+                   type == typeof(DeclarationRelationVisitor);
         }
     }
 }

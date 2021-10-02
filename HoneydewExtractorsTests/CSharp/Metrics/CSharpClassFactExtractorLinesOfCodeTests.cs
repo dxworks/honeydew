@@ -77,22 +77,22 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             var classModels = compilationUnit.ClassTypes;
 
-            Assert.Equal(21, compilationUnit.Loc.SourceLines);
-            Assert.Equal(10, compilationUnit.Loc.EmptyLines);
+            Assert.Equal(11, compilationUnit.Loc.SourceLines);
+            Assert.Equal(18, compilationUnit.Loc.EmptyLines);
             Assert.Equal(8, compilationUnit.Loc.CommentedLines);
 
             var classModel = (ClassModel)classModels[0];
-            Assert.Equal(16, classModel.Loc.SourceLines);
-            Assert.Equal(6, classModel.Loc.EmptyLines);
+            Assert.Equal(8, classModel.Loc.SourceLines);
+            Assert.Equal(12, classModel.Loc.EmptyLines);
             Assert.Equal(5, classModel.Loc.CommentedLines);
 
-            Assert.Equal(5, classModel.Methods[0].Loc.SourceLines);
+            Assert.Equal(3, classModel.Methods[0].Loc.SourceLines);
             Assert.Equal(2, classModel.Methods[0].Loc.CommentedLines);
             Assert.Equal(2, classModel.Methods[0].Loc.EmptyLines);
 
-            Assert.Equal(7, classModel.Properties[0].Loc.SourceLines);
+            Assert.Equal(3, classModel.Properties[0].Loc.SourceLines);
             Assert.Equal(1, classModel.Properties[0].Loc.CommentedLines);
-            Assert.Equal(1, classModel.Properties[0].Loc.EmptyLines);
+            Assert.Equal(5, classModel.Properties[0].Loc.EmptyLines);
         }
 
         [Theory]
@@ -107,22 +107,22 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             var classModels = compilationUnit.ClassTypes;
 
-            Assert.Equal(22, compilationUnit.Loc.SourceLines);
-            Assert.Equal(9, compilationUnit.Loc.EmptyLines);
+            Assert.Equal(12, compilationUnit.Loc.SourceLines);
+            Assert.Equal(19, compilationUnit.Loc.EmptyLines);
             Assert.Equal(8, compilationUnit.Loc.CommentedLines);
 
             var classModel = (ClassModel)classModels[0];
-            Assert.Equal(16, classModel.Loc.SourceLines);
-            Assert.Equal(6, classModel.Loc.EmptyLines);
+            Assert.Equal(8, classModel.Loc.SourceLines);
+            Assert.Equal(14, classModel.Loc.EmptyLines);
             Assert.Equal(5, classModel.Loc.CommentedLines);
 
-            Assert.Equal(5, classModel.Methods[0].Loc.SourceLines);
+            Assert.Equal(3, classModel.Methods[0].Loc.SourceLines);
             Assert.Equal(2, classModel.Methods[0].Loc.CommentedLines);
-            Assert.Equal(2, classModel.Methods[0].Loc.EmptyLines);
+            Assert.Equal(4, classModel.Methods[0].Loc.EmptyLines);
 
-            Assert.Equal(7, classModel.Properties[0].Loc.SourceLines);
+            Assert.Equal(3, classModel.Properties[0].Loc.SourceLines);
             Assert.Equal(1, classModel.Properties[0].Loc.CommentedLines);
-            Assert.Equal(1, classModel.Properties[0].Loc.EmptyLines);
+            Assert.Equal(5, classModel.Properties[0].Loc.EmptyLines);
         }
 
         [Theory]
@@ -138,9 +138,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             var localFunction = ((MethodModel)((ClassModel)classTypes[0]).Methods[0]).LocalFunctions[0];
 
-            Assert.Equal(4, localFunction.Loc.SourceLines);
+            Assert.Equal(2, localFunction.Loc.SourceLines);
             Assert.Equal(1, localFunction.Loc.CommentedLines);
-            Assert.Equal(1, localFunction.Loc.EmptyLines);
+            Assert.Equal(3, localFunction.Loc.EmptyLines);
         }
 
         [Theory]
@@ -156,9 +156,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
 
             var accessor = ((ClassModel)classTypes[0]).Properties[0].Accessors[0];
 
-            Assert.Equal(4, accessor.Loc.SourceLines);
+            Assert.Equal(2, accessor.Loc.SourceLines);
             Assert.Equal(1, accessor.Loc.CommentedLines);
-            Assert.Equal(1, accessor.Loc.EmptyLines);
+            Assert.Equal(3, accessor.Loc.EmptyLines);
         }
 
         [Theory]
@@ -174,9 +174,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             var classTypes = compilationUnit.ClassTypes;
 
             var addAccessor = ((ClassModel)classTypes[0]).Properties[0].Accessors[0];
-            Assert.Equal(4, addAccessor.Loc.SourceLines);
+            Assert.Equal(2, addAccessor.Loc.SourceLines);
             Assert.Equal(0, addAccessor.Loc.CommentedLines);
-            Assert.Equal(0, addAccessor.Loc.EmptyLines);
+            Assert.Equal(2, addAccessor.Loc.EmptyLines);
 
             var removeAccessor = ((ClassModel)classTypes[0]).Properties[0].Accessors[1];
             Assert.Equal(1, removeAccessor.Loc.SourceLines);

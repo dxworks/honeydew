@@ -25,9 +25,7 @@ namespace TopLevel
 
         // this method calculates
         public int Calc(int a)
-        {
- 
-            // calculate double
+        { // calculate double
 
             var d = a*2;
             return d;

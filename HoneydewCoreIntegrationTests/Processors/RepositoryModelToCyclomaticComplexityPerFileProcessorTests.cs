@@ -59,7 +59,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             repositoryModel.Projects.Add(projectModel);
 
             var representation = _sut.Process(repositoryModel);
-            Assert.Equal(4, representation.File.Concerns.Count);
+            Assert.Equal(5, representation.File.Concerns.Count);
 
             foreach (var concern in representation.File.Concerns)
             {
@@ -67,10 +67,11 @@ namespace HoneydewCoreIntegrationTests.Processors
                 Assert.Equal("0", concern.Strength);
             }
 
-            Assert.Equal("maxCyclo", representation.File.Concerns[0].Tag);
-            Assert.Equal("minCyclo", representation.File.Concerns[1].Tag);
-            Assert.Equal("avgCyclo", representation.File.Concerns[2].Tag);
-            Assert.Equal("sumCyclo", representation.File.Concerns[3].Tag);
+            Assert.Equal("metric.maxCyclo", representation.File.Concerns[0].Tag);
+            Assert.Equal("metric.minCyclo", representation.File.Concerns[1].Tag);
+            Assert.Equal("metric.avgCyclo", representation.File.Concerns[2].Tag);
+            Assert.Equal("metric.sumCyclo", representation.File.Concerns[3].Tag);
+            Assert.Equal("metric.atc", representation.File.Concerns[4].Tag);
         }
 
         [Fact]
@@ -97,18 +98,23 @@ namespace HoneydewCoreIntegrationTests.Processors
             repositoryModel.Solutions.Add(solutionModel);
 
             var representation = _sut.Process(repositoryModel);
-            Assert.Equal(4, representation.File.Concerns.Count);
+            Assert.Equal(5, representation.File.Concerns.Count);
 
-            foreach (var concern in representation.File.Concerns)
+            for (var i = 0; i < representation.File.Concerns.Count - 1; i++)
             {
+                var concern = representation.File.Concerns[i];
                 Assert.Equal("path", concern.Entity);
                 Assert.Equal("12", concern.Strength);
             }
 
-            Assert.Equal("maxCyclo", representation.File.Concerns[0].Tag);
-            Assert.Equal("minCyclo", representation.File.Concerns[1].Tag);
-            Assert.Equal("avgCyclo", representation.File.Concerns[2].Tag);
-            Assert.Equal("sumCyclo", representation.File.Concerns[3].Tag);
+            Assert.Equal("path", representation.File.Concerns[4].Entity);
+            Assert.Equal("1", representation.File.Concerns[4].Strength);
+
+            Assert.Equal("metric.maxCyclo", representation.File.Concerns[0].Tag);
+            Assert.Equal("metric.minCyclo", representation.File.Concerns[1].Tag);
+            Assert.Equal("metric.avgCyclo", representation.File.Concerns[2].Tag);
+            Assert.Equal("metric.sumCyclo", representation.File.Concerns[3].Tag);
+            Assert.Equal("metric.atc", representation.File.Concerns[4].Tag);
         }
 
         [Fact]
@@ -148,24 +154,27 @@ namespace HoneydewCoreIntegrationTests.Processors
             repositoryModel.Solutions.Add(solutionModel);
 
             var representation = _sut.Process(repositoryModel);
-            Assert.Equal(4, representation.File.Concerns.Count);
+            Assert.Equal(5, representation.File.Concerns.Count);
 
             foreach (var concern in representation.File.Concerns)
             {
                 Assert.Equal("path", concern.Entity);
             }
 
-            Assert.Equal("maxCyclo", representation.File.Concerns[0].Tag);
+            Assert.Equal("metric.maxCyclo", representation.File.Concerns[0].Tag);
             Assert.Equal("12", representation.File.Concerns[0].Strength);
 
-            Assert.Equal("minCyclo", representation.File.Concerns[1].Tag);
+            Assert.Equal("metric.minCyclo", representation.File.Concerns[1].Tag);
             Assert.Equal("6", representation.File.Concerns[1].Strength);
 
-            Assert.Equal("avgCyclo", representation.File.Concerns[2].Tag);
+            Assert.Equal("metric.avgCyclo", representation.File.Concerns[2].Tag);
             Assert.Equal("9", representation.File.Concerns[2].Strength);
 
-            Assert.Equal("sumCyclo", representation.File.Concerns[3].Tag);
+            Assert.Equal("metric.sumCyclo", representation.File.Concerns[3].Tag);
             Assert.Equal("18", representation.File.Concerns[3].Strength);
+            
+            Assert.Equal("metric.atc", representation.File.Concerns[4].Tag);
+            Assert.Equal("1", representation.File.Concerns[4].Strength);
         }
 
         [Fact]
@@ -201,24 +210,27 @@ namespace HoneydewCoreIntegrationTests.Processors
             repositoryModel.Solutions.Add(solutionModel);
 
             var representation = _sut.Process(repositoryModel);
-            Assert.Equal(4, representation.File.Concerns.Count);
+            Assert.Equal(5, representation.File.Concerns.Count);
 
             foreach (var concern in representation.File.Concerns)
             {
                 Assert.Equal("path", concern.Entity);
             }
 
-            Assert.Equal("maxCyclo", representation.File.Concerns[0].Tag);
+            Assert.Equal("metric.maxCyclo", representation.File.Concerns[0].Tag);
             Assert.Equal("12", representation.File.Concerns[0].Strength);
 
-            Assert.Equal("minCyclo", representation.File.Concerns[1].Tag);
+            Assert.Equal("metric.minCyclo", representation.File.Concerns[1].Tag);
             Assert.Equal("1", representation.File.Concerns[1].Strength);
 
-            Assert.Equal("avgCyclo", representation.File.Concerns[2].Tag);
+            Assert.Equal("metric.avgCyclo", representation.File.Concerns[2].Tag);
             Assert.Equal("6", representation.File.Concerns[2].Strength);
 
-            Assert.Equal("sumCyclo", representation.File.Concerns[3].Tag);
+            Assert.Equal("metric.sumCyclo", representation.File.Concerns[3].Tag);
             Assert.Equal("20", representation.File.Concerns[3].Strength);
+            
+            Assert.Equal("metric.atc", representation.File.Concerns[4].Tag);
+            Assert.Equal("1", representation.File.Concerns[4].Strength);
         }
 
         [Fact]
@@ -277,41 +289,48 @@ namespace HoneydewCoreIntegrationTests.Processors
             repositoryModel.Solutions.Add(solutionModel);
 
             var representation = _sut.Process(repositoryModel);
-            Assert.Equal(8, representation.File.Concerns.Count);
+            Assert.Equal(10, representation.File.Concerns.Count);
 
 
             Assert.Equal("path1", representation.File.Concerns[0].Entity);
-            Assert.Equal("maxCyclo", representation.File.Concerns[0].Tag);
+            Assert.Equal("metric.maxCyclo", representation.File.Concerns[0].Tag);
             Assert.Equal("12", representation.File.Concerns[0].Strength);
 
             Assert.Equal("path1", representation.File.Concerns[1].Entity);
-            Assert.Equal("minCyclo", representation.File.Concerns[1].Tag);
+            Assert.Equal("metric.minCyclo", representation.File.Concerns[1].Tag);
             Assert.Equal("8", representation.File.Concerns[1].Strength);
 
             Assert.Equal("path1", representation.File.Concerns[2].Entity);
-            Assert.Equal("avgCyclo", representation.File.Concerns[2].Tag);
+            Assert.Equal("metric.avgCyclo", representation.File.Concerns[2].Tag);
             Assert.Equal("10", representation.File.Concerns[2].Strength);
 
             Assert.Equal("path1", representation.File.Concerns[3].Entity);
-            Assert.Equal("sumCyclo", representation.File.Concerns[3].Tag);
+            Assert.Equal("metric.sumCyclo", representation.File.Concerns[3].Tag);
             Assert.Equal("20", representation.File.Concerns[3].Strength);
 
-
-            Assert.Equal("path2", representation.File.Concerns[4].Entity);
-            Assert.Equal("maxCyclo", representation.File.Concerns[4].Tag);
-            Assert.Equal("6", representation.File.Concerns[4].Strength);
+            Assert.Equal("path1", representation.File.Concerns[4].Entity);
+            Assert.Equal("metric.atc", representation.File.Concerns[4].Tag);
+            Assert.Equal("1", representation.File.Concerns[4].Strength);
 
             Assert.Equal("path2", representation.File.Concerns[5].Entity);
-            Assert.Equal("minCyclo", representation.File.Concerns[5].Tag);
-            Assert.Equal("1", representation.File.Concerns[5].Strength);
+            Assert.Equal("metric.maxCyclo", representation.File.Concerns[5].Tag);
+            Assert.Equal("6", representation.File.Concerns[5].Strength);
 
             Assert.Equal("path2", representation.File.Concerns[6].Entity);
-            Assert.Equal("avgCyclo", representation.File.Concerns[6].Tag);
-            Assert.Equal("2", representation.File.Concerns[6].Strength);
+            Assert.Equal("metric.minCyclo", representation.File.Concerns[6].Tag);
+            Assert.Equal("1", representation.File.Concerns[6].Strength);
 
             Assert.Equal("path2", representation.File.Concerns[7].Entity);
-            Assert.Equal("sumCyclo", representation.File.Concerns[7].Tag);
-            Assert.Equal("8", representation.File.Concerns[7].Strength);
+            Assert.Equal("metric.avgCyclo", representation.File.Concerns[7].Tag);
+            Assert.Equal("2", representation.File.Concerns[7].Strength);
+
+            Assert.Equal("path2", representation.File.Concerns[8].Entity);
+            Assert.Equal("metric.sumCyclo", representation.File.Concerns[8].Tag);
+            Assert.Equal("8", representation.File.Concerns[8].Strength);
+            
+            Assert.Equal("path2", representation.File.Concerns[9].Entity);
+            Assert.Equal("metric.atc", representation.File.Concerns[9].Tag);
+            Assert.Equal("0", representation.File.Concerns[9].Strength);
         }
     }
 }

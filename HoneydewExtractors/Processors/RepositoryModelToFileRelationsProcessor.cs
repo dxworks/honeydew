@@ -27,7 +27,7 @@ namespace HoneydewExtractors.Processors
             var fileRelationsRepresentation = new RelationsRepresentation();
 
             var classFilePaths = new Dictionary<Tuple<string, string>, string>();
-            
+
             foreach (var projectModel in repositoryModel.Projects)
             {
                 foreach (var compilationUnitType in projectModel.CompilationUnits)
@@ -138,7 +138,10 @@ namespace HoneydewExtractors.Processors
                         {
                             foreach (var (filePath, count) in dictionary)
                             {
-                                fileRelationsRepresentation.Add(grouping.Key, filePath, relationType, count);
+                                if (grouping.Key != filePath)
+                                {
+                                    fileRelationsRepresentation.Add(grouping.Key, filePath, relationType, count);
+                                }
                             }
                         }
                     }

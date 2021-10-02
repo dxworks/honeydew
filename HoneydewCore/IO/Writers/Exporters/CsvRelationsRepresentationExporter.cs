@@ -12,14 +12,22 @@ namespace HoneydewCore.IO.Writers.Exporters
         public IList<Tuple<string, Func<string, string>>> ColumnFunctionForEachRow =
             new List<Tuple<string, Func<string, string>>>();
 
-        public void Export(string filePath, RelationsRepresentation classRelationsRepresentation)
+        public void Export(string filePath, RelationsRepresentation classRelationsRepresentation,
+            List<string> csvHeaders = null)
         {
             var csvBuilder = new CsvBuilder();
             var headers = new List<string>
             {
                 "Source", "Target"
             };
-            headers.AddRange(classRelationsRepresentation.DependenciesType);
+            if (csvHeaders == null)
+            {
+                headers.AddRange(classRelationsRepresentation.DependenciesType);
+            }
+            else
+            {
+                headers.AddRange(csvHeaders);
+            }
 
             csvBuilder.AddHeader(headers);
 
@@ -33,10 +41,18 @@ namespace HoneydewCore.IO.Writers.Exporters
                         targetName
                     };
 
-                    values.AddRange(classRelationsRepresentation.DependenciesType
-                        .Select(relation => dependenciesDictionary.TryGetValue(relation, out var value)
-                            ? value.ToString()
-                            : ""));
+                    if (csvHeaders == null)
+                    {
+                        values.AddRange(classRelationsRepresentation.DependenciesType
+                            .Select(relation => dependenciesDictionary.TryGetValue(relation, out var value)
+                                ? value.ToString()
+                                : "0"));
+                    }
+                    else
+                    {
+                        values.AddRange(csvHeaders.Select(relation =>
+                            dependenciesDictionary.TryGetValue(relation, out var value) ? value.ToString() : "0"));
+                    }
 
                     csvBuilder.AddLine(values);
                 }
