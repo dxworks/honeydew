@@ -1,10 +1,10 @@
-﻿using System.Threading.Tasks;
-using HoneydewModels.CSharp;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead
 {
     public interface ISolutionLoader
     {
-        Task<SolutionModel> LoadSolution(string pathToFile);
+        Task<SolutionLoadingResult> LoadSolution(string pathToFile, ISet<string> processedProjectPaths);
     }
 }

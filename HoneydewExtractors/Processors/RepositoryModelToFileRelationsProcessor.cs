@@ -26,7 +26,7 @@ namespace HoneydewExtractors.Processors
 
             var fileRelationsRepresentation = new RelationsRepresentation();
 
-            var classFilePaths = new Dictionary<Tuple<string, string>, string>();
+            var classFilePaths = new Dictionary<string, List<string>>();
 
             foreach (var projectModel in repositoryModel.Projects)
             {
@@ -34,8 +34,17 @@ namespace HoneydewExtractors.Processors
                 {
                     foreach (var classType in compilationUnitType.ClassTypes)
                     {
-                        classFilePaths.Add(new Tuple<string, string>(classType.Name, projectModel.FilePath),
-                            classType.FilePath);
+                        if (classFilePaths.TryGetValue(classType.Name, out var dictionary))
+                        {
+                            dictionary.Add(compilationUnitType.FilePath);
+                        }
+                        else
+                        {
+                            classFilePaths.Add(classType.Name, new List<string>
+                            {
+                                compilationUnitType.FilePath
+                            });
+                        }
                     }
                 }
             }
@@ -78,27 +87,35 @@ namespace HoneydewExtractors.Processors
                                                 continue;
                                             }
 
-                                            var possibleClasses = classFilePaths
-                                                .Where(pair => pair.Key.Item1 == targetName).ToList();
+                                            if (!classFilePaths.TryGetValue(targetName, out var possibleClasses))
+                                            {
+                                                continue;
+                                            }
+
 
                                             if (possibleClasses.Count == 1)
                                             {
-                                                var (_, classFilePath) = possibleClasses[0];
-
-                                                AddToDependencyDictionary(classFilePath);
+                                                AddToDependencyDictionary(possibleClasses[0]);
                                             }
                                             else
                                             {
-                                                var projectPaths = new List<string>
+                                                var added = false;
+                                                foreach (var possibleClass in possibleClasses)
                                                 {
-                                                    projectModel.FilePath,
-                                                };
-                                                projectPaths.AddRange(projectModel.ProjectReferences);
+                                                    if (possibleClass.Contains(projectModel.FilePath))
+                                                    {
+                                                        AddToDependencyDictionary(possibleClass);
+                                                        added = true;
+                                                        break;
+                                                    }
+                                                }
 
-                                                var (_, classFilePath) = possibleClasses.FirstOrDefault(pair =>
-                                                    projectPaths.Contains(pair.Key.Item2));
+                                                if (added)
+                                                {
+                                                    continue;
+                                                }
 
-                                                AddToDependencyDictionary(classFilePath);
+                                                AddToDependencyDictionary(possibleClasses[0]);
                                             }
 
                                             void AddToDependencyDictionary(string filePath)

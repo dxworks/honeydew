@@ -20,7 +20,6 @@ namespace HoneydewExtractors.Core
             switch (language)
             {
                 case "C#":
-
                     return _cSharpFactExtractor ??= new CSharpFactExtractor(_compositeVisitor);
 
                 case "Visual Basic":

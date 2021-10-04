@@ -62,6 +62,9 @@ namespace Honeydew
 
             await result.MapResult(async options =>
             {
+                var missingFilesLogger =
+                    new SerilogLogger($"{DefaultPathForAllRepresentations}/missing_files_logs.txt");
+
                 var logFilePath = $"{DefaultPathForAllRepresentations}/logs.txt";
                 var logger = new SerilogLogger(logFilePath);
                 IProgressLogger progressLogger =
@@ -124,7 +127,8 @@ namespace Honeydew
 
                     case "extract":
                     {
-                        repositoryModel = await ExtractModel(logger, progressLogger, relationMetricHolder, inputPath);
+                        repositoryModel = await ExtractModel(logger, progressLogger, missingFilesLogger,
+                            relationMetricHolder, inputPath);
                     }
                         break;
 
@@ -189,9 +193,7 @@ namespace Honeydew
 
                     ApplyPostExtractionVisitors(repositoryModel, options.DisableExternTypeInLocalTypeSearch);
 
-                    // WriteAllRepresentations(repositoryModel,
-                    //     fullNameModelProcessor.NamespacesDictionary,
-                    //     DefaultPathForAllRepresentations);
+                    WriteAllRepresentations(repositoryModel, null, DefaultPathForAllRepresentations);
                 }
 
                 logger.Log();
@@ -217,7 +219,7 @@ namespace Honeydew
             {
                 classNames.Add(classType.Name);
             }
-            
+
             var propertiesRelationVisitor = new PropertiesRelationVisitor();
             var fieldsRelationVisitor = new FieldsRelationVisitor();
             var parameterRelationVisitor = new ParameterRelationVisitor();
@@ -225,7 +227,6 @@ namespace Honeydew
 
             var modelVisitors = new List<IModelVisitor<IClassType>>
             {
-               
                 propertiesRelationVisitor,
                 fieldsRelationVisitor,
                 parameterRelationVisitor,
@@ -244,7 +245,7 @@ namespace Honeydew
                 var logger = new SerilogLogger(logFilePath);
                 modelVisitors.Add(new ExternEntityTypeVisitor(classNames, logger));
             }
-            
+
             var repositoryModelIterator = new RepositoryModelIterator(new List<ModelIterator<ProjectModel>>
             {
                 new ProjectModelIterator(new List<ModelIterator<ICompilationUnitType>>
@@ -413,20 +414,20 @@ namespace Honeydew
         }
 
         private static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger progressLogger,
-            IRelationMetricHolder relationMetricHolder,
-            string inputPath)
+            ILogger missingFilesLogger, IRelationMetricHolder relationMetricHolder, string inputPath)
         {
             var solutionProvider = new MsBuildSolutionProvider();
             var projectProvider = new MsBuildProjectProvider();
-            // Create repository model from path
-            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger, new CSharpCompilationMaker());
+
+            var cSharpCompilationMaker = new CSharpCompilationMaker();
+            var projectLoadingStrategy = new BasicProjectLoadingStrategy(logger, cSharpCompilationMaker);
 
             var solutionLoadingStrategy =
                 new BasicSolutionLoadingStrategy(logger, projectLoadingStrategy, progressLogger);
 
             var repositoryLoader = new CSharpRepositoryLoader(solutionProvider, projectProvider, projectLoadingStrategy,
-                solutionLoadingStrategy, logger, progressLogger,
-                new FactExtractorCreator(LoadVisitors(relationMetricHolder, logger)));
+                solutionLoadingStrategy, logger, progressLogger, missingFilesLogger,
+                new FactExtractorCreator(LoadVisitors(relationMetricHolder, logger)), cSharpCompilationMaker);
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;
@@ -463,17 +464,17 @@ namespace Honeydew
                 allFileRelationsRepresentation);
 
             var jafaxFileRelationsRepresentation =
-                 new RepositoryModelToFileRelationsProcessor(new JafaxChooseStrategy()).Process(repositoryModel);
-             csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations{nameModifier}.csv"),
-                 jafaxFileRelationsRepresentation, new List<string>
-                 {
-                     "extCalls",
-                     "extData",
-                     "hierarchy",
-                     "returns",
-                     "declarations",
-                     "extDataStrict",
-                 });
+                new RepositoryModelToFileRelationsProcessor(new JafaxChooseStrategy()).Process(repositoryModel);
+            csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations{nameModifier}.csv"),
+                jafaxFileRelationsRepresentation, new List<string>
+                {
+                    "extCalls",
+                    "extData",
+                    "hierarchy",
+                    "returns",
+                    "declarations",
+                    "extDataStrict",
+                });
 
             var cyclomaticComplexityPerFileRepresentation =
                 GetCyclomaticComplexityPerFileRepresentation(repositoryModel);
