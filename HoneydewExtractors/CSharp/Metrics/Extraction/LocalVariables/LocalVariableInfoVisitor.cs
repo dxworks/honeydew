@@ -27,6 +27,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables
             IEntityType localVariableType = CSharpHelperMethods.GetFullName(variableDeclarationSyntax.Type);
             var fullName = localVariableType.Name;
 
+            var modifier = CSharpHelperMethods.SetTypeModifier(variableDeclarationSyntax.Type.ToString(), "");
+            modelType.Modifier = modifier;
+
+            if (!string.IsNullOrEmpty(modifier) && fullName.Contains(modifier))
+            {
+                fullName = fullName.Replace(modifier, "").Trim();
+            }
+
             if (fullName == CSharpConstants.VarIdentifier)
             {
                 fullName = CSharpHelperMethods.GetFullName(variableDeclarationSyntax).Name;
