@@ -4,7 +4,7 @@ namespace HoneydewModels.Reference
 {
     public record GenericType
     {
-        public string Name { get; set; }
+        public ReferenceEntity Reference { get; set; }
 
         public bool IsNullable { get; set; }
 

@@ -314,6 +314,16 @@ namespace HoneydewCore.Processors
 
         private ReferenceEntity SearchEntityByName(string className, ProjectModel projectModel, bool shouldAdd = true)
         {
+            if (string.IsNullOrEmpty(className))
+            {
+                return null;
+            }
+
+            if (className.EndsWith('?'))
+            {
+                className = className[..^1];
+            }
+
             if (_classModels.TryGetValue((projectModel, className), out var referenceEntity))
             {
                 return referenceEntity;
@@ -441,6 +451,7 @@ namespace HoneydewCore.Processors
                 Loc = ConvertLoc(propertyType.Loc),
                 CyclomaticComplexity = propertyType.CyclomaticComplexity,
                 Type = ConvertEntityType(propertyType.Type, projectModel),
+                IsNullable = propertyType.IsNullable,
             };
             model.Attributes = ConvertAttributes(model, propertyType.Attributes, projectModel);
             model.Accessors = propertyType.Accessors.Select(accessor => ConvertMethod(model, accessor, projectModel))
@@ -460,6 +471,7 @@ namespace HoneydewCore.Processors
                 IsEvent = fieldType.IsEvent,
                 Metrics = ConvertMetrics(fieldType),
                 Type = ConvertEntityType(fieldType.Type, projectModel),
+                IsNullable = fieldType.IsNullable,
             };
             model.Attributes = ConvertAttributes(model, fieldType.Attributes, projectModel);
 
@@ -537,7 +549,8 @@ namespace HoneydewCore.Processors
                 localVariables.Add(new LocalVariableModel
                 {
                     Type = ConvertEntityType(localVariableType.Type, projectModel),
-                    ContainingType = parentModel
+                    ContainingType = parentModel,
+                    IsNullable = localVariableType.IsNullable,
                 });
             }
 
@@ -725,6 +738,12 @@ namespace HoneydewCore.Processors
                         var parameterModel = methodModel.Parameters[i];
                         var parameterType = methodSignatureType.ParameterTypes[i];
 
+                        if (parameterModel.IsNullable && !parameterType.IsNullable ||
+                            !parameterModel.IsNullable && parameterType.IsNullable)
+                        {
+                            continue;
+                        }
+
                         if (parameterModel.Type.Name != parameterType.Type.Name)
                         {
                             allParametersMatch = false;
@@ -756,7 +775,8 @@ namespace HoneydewCore.Processors
                     var param = p as HoneydewModels.CSharp.ParameterModel;
                     var parameterModel = new ParameterModel
                     {
-                        Type = ConvertEntityType(p.Type, projectModel)
+                        Type = ConvertEntityType(p.Type, projectModel),
+                        IsNullable = p.IsNullable,
                     };
                     parameterModel.Attributes = ConvertAttributes(parameterModel, p.Attributes, projectModel);
                     if (param != null)
@@ -963,6 +983,22 @@ namespace HoneydewCore.Processors
                     var parameterModel = methodModel.Parameters[i];
                     var parameterType = parameters[i];
 
+                    if (parameterModel.IsNullable && parameterType.EndsWith('?'))
+                    {
+                        parameterType = parameterType[..^1];
+                        if (parameterModel.Type.Name != parameterType)
+                        {
+                            allParametersMatch = false;
+                            break;
+                        }
+                    }
+
+                    if (!(!parameterModel.IsNullable && !parameterType.EndsWith('?')))
+                    {
+                        allParametersMatch = false;
+                        break;
+                    }
+
                     if (parameterModel.Type.Name != parameterType)
                     {
                         allParametersMatch = false;
@@ -1003,6 +1039,22 @@ namespace HoneydewCore.Processors
                     var parameterModel = constructorModel.Parameters[i];
                     var parameterType = parameters[i];
 
+                    if (parameterModel.IsNullable && parameterType.EndsWith('?'))
+                    {
+                        parameterType = parameterType[..^1];
+                        if (parameterModel.Type.Name != parameterType)
+                        {
+                            allParametersMatch = false;
+                            break;
+                        }
+                    }
+
+                    if (!(!parameterModel.IsNullable && !parameterType.EndsWith('?')))
+                    {
+                        allParametersMatch = false;
+                        break;
+                    }
+
                     if (parameterModel.Type.Name != parameterType)
                     {
                         allParametersMatch = false;
@@ -1027,6 +1079,7 @@ namespace HoneydewCore.Processors
             {
                 ContainingType = parentModel,
                 Type = ConvertEntityType(returnValueType.Type, projectModel),
+                IsNullable = returnValueType.IsNullable,
             };
 
             returnValueModel.Attributes = ConvertAttributes(returnValueModel, returnValueType.Attributes, projectModel);
@@ -1072,7 +1125,8 @@ namespace HoneydewCore.Processors
                 var parameterModel = new ParameterModel
                 {
                     ContainingType = parentModel,
-                    Type = ConvertEntityType(parameterType.Type, projectModel)
+                    Type = ConvertEntityType(parameterType.Type, projectModel),
+                    IsNullable = parameterType.IsNullable,
                 };
                 parameterModel.Attributes = ConvertAttributes(parameterModel, parameterType.Attributes, projectModel);
 
@@ -1143,7 +1197,8 @@ namespace HoneydewCore.Processors
 
                 var genericType = new GenericType
                 {
-                    Name = genType.Name,
+                    Reference = SearchEntityByName(GetNonNullableName(genType.Name), projectModel),
+                    IsNullable = genType.IsNullable,
                 };
 
                 foreach (var containedType in genType.ContainedTypes)
@@ -1153,6 +1208,11 @@ namespace HoneydewCore.Processors
 
                 return genericType;
             }
+        }
+
+        private static string GetNonNullableName(string name)
+        {
+            return name.EndsWith('?') ? name[..^1] : name;
         }
     }
 }
