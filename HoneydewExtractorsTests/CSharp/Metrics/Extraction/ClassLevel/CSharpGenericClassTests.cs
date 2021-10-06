@@ -325,6 +325,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("TK", classModel1.GenericParameters[1].Name);
             Assert.Equal(1, classModel1.GenericParameters[1].Constraints.Count);
             Assert.Equal("class?", classModel1.GenericParameters[1].Constraints[0].Name);
+            Assert.Equal("class", classModel1.GenericParameters[1].Constraints[0].FullType.Name);
+            Assert.True(classModel1.GenericParameters[1].Constraints[0].FullType.IsNullable);
 
             Assert.Equal("TR", classModel1.GenericParameters[2].Name);
             Assert.Equal(1, classModel1.GenericParameters[2].Constraints.Count);

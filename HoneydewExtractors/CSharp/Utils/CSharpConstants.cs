@@ -37,19 +37,12 @@
 
         public static bool IsPrimitive(string type)
         {
-            if (type.EndsWith('?'))
-            {
-                type = type[..^1];
-            }
-            
+            type = GetNonNullableName(type);
+
             type = ConvertSystemTypeToPrimitiveType(type);
 
-            if (type.EndsWith('?'))
-            {
-                type = type[..^1];
-            }
-            
-            return type is "object" or "string" or "bool" or "byte" or "char" or "decimal" or "double" or "short"or "int" or "long" or "sbyte" or "float" or "ushort" or "uint" or "ulong" or "void";
+            return type is "object" or "string" or "bool" or "byte" or "char" or "decimal" or "double" or "short"or
+                "int" or "long" or "sbyte" or "float" or "ushort" or "uint" or "ulong" or "void";
         }
 
         private static string ConvertSystemTypeToPrimitiveType(string type)
@@ -98,6 +91,11 @@
                 "DateTime" => "System.DateTime",
                 _ => type
             };
+        }
+
+        public static string GetNonNullableName(string name)
+        {
+            return name.EndsWith('?') ? name[..^1] : name;
         }
     }
 }

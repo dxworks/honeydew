@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
 using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 
@@ -36,13 +37,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
 
             foreach (var propertyType in classTypeWithProperties.Properties)
             {
-                if (dependencies.ContainsKey(propertyType.Type.Name))
+                var typeName = CSharpConstants.GetNonNullableName(propertyType.Type.Name);
+                if (dependencies.ContainsKey(typeName))
                 {
-                    dependencies[propertyType.Type.Name]++;
+                    dependencies[typeName]++;
                 }
                 else
                 {
-                    dependencies.Add(propertyType.Type.Name, 1);
+                    dependencies.Add(typeName, 1);
                 }
             }
 

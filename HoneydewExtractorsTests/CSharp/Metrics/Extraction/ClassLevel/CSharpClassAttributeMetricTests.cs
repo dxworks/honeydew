@@ -62,6 +62,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("Namespace1.Class1", classTypes[0].Attributes[0].ContainingTypeName);
             Assert.Equal(1, classTypes[0].Attributes[0].ParameterTypes.Count);
             Assert.Equal("string?", classTypes[0].Attributes[0].ParameterTypes[0].Type.Name);
+            Assert.Equal("string", classTypes[0].Attributes[0].ParameterTypes[0].Type.FullType.Name);
+            Assert.True(classTypes[0].Attributes[0].ParameterTypes[0].Type.FullType.IsNullable);
         }
 
         [Theory]
@@ -95,6 +97,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("Namespace1.Class1", classTypes[0].Attributes[0].ContainingTypeName);
             Assert.Equal(1, classTypes[0].Attributes[0].ParameterTypes.Count);
             Assert.Equal("string?", classTypes[0].Attributes[0].ParameterTypes[0].Type.Name);
+            Assert.Equal("string", classTypes[0].Attributes[0].ParameterTypes[0].Type.FullType.Name);
+            Assert.True(classTypes[0].Attributes[0].ParameterTypes[0].Type.FullType.IsNullable);
         }
 
         [Theory]
@@ -120,6 +124,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(2, attribute1.ParameterTypes.Count);
             Assert.Equal("System.ObsoleteAttribute", attribute1.Name);
             Assert.Equal("string?", attribute1.ParameterTypes[0].Type.Name);
+            Assert.Equal("string", attribute1.ParameterTypes[0].Type.FullType.Name);
+            Assert.True(attribute1.ParameterTypes[0].Type.FullType.IsNullable);
             Assert.Equal("bool", attribute1.ParameterTypes[1].Type.Name);
 
             var attribute2 = classTypes[0].Attributes[1];

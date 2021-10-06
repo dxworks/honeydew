@@ -1,5 +1,6 @@
 "Source","Target","Object Creation Dependency","Properties Dependency","Fields Dependency","Parameter Dependency","Local Variables Dependency","declarations","all"
 "HoneydewTestProject/NotAmbiguous.cs","HoneydewTestProject.A/D1.cs","2","1","1","1","2","5","12"
+"HoneydewTestProject/NullableReferenceType.cs","HoneydewTestProject.A/C1.cs","0","0","0","1","0","1","2"
 "HoneydewTestProject/ReferencesABViaNamespacePrefix.cs","HoneydewTestProject.A/C1.cs","0","0","0","1","0","1","2"
 "HoneydewTestProject/ReferencesABViaNamespacePrefix.cs","HoneydewTestProject.B/C1.cs","0","0","0","1","0","1","2"
 "HoneydewTestProject/ReferencesABViaUsingAlias.cs","HoneydewTestProject.A/C1.cs","0","0","0","1","0","1","2"

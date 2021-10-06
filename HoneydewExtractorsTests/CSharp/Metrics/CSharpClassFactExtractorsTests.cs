@@ -89,7 +89,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
         [InlineData(null)]
         public void Extract_ShouldThrowEmptyContentException_WhenTryingToExtractFromEmptyString(string emptyContent)
         {
-            var extractionException = Assert.Throws<ExtractionException>(() => _syntacticModelCreator.Create(emptyContent));
+            var extractionException =
+                Assert.Throws<ExtractionException>(() => _syntacticModelCreator.Create(emptyContent));
             Assert.Equal("Empty Content", extractionException.Message);
         }
 
@@ -1004,7 +1005,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             foreach (var type in types)
             {
                 Assert.Equal("int?", type.Name);
+                Assert.Equal("int", type.FullType.Name);
+                Assert.True(type.FullType.IsNullable);
             }
+
+            Assert.True(classModel.Fields[0].IsNullable);
+            Assert.True(classModel.Properties[0].IsNullable);
+            Assert.True(classModel.Methods[0].ReturnValue.IsNullable);
+            Assert.True(classModel.Methods[0].ParameterTypes[0].IsNullable);
+            Assert.True(classModel.Constructors[0].ParameterTypes[0].IsNullable);
         }
 
         [Theory]
@@ -1033,7 +1042,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             foreach (var type in types)
             {
                 Assert.Equal("Namespace1.Class2?", type.Name);
+                Assert.Equal("Namespace1.Class2", type.FullType.Name);
+                Assert.True(type.FullType.IsNullable);
             }
+
+            Assert.True(classModel.Fields[0].IsNullable);
+            Assert.True(classModel.Properties[0].IsNullable);
+            Assert.True(classModel.Methods[0].ReturnValue.IsNullable);
+            Assert.True(classModel.Methods[0].ParameterTypes[0].IsNullable);
+            Assert.True(classModel.Constructors[0].ParameterTypes[0].IsNullable);
         }
     }
 }

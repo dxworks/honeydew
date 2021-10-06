@@ -1,0 +1,46 @@
+﻿namespace Namespace1
+{
+    class MyClass
+    {
+        public MyClass()
+        {
+            int? x = 2;
+            var y = x;
+        }
+
+        public void Method1()
+        {
+            int? x = 2;
+            var y = x;
+        }
+
+        public int Prop1
+        {
+            get
+            {
+                int? x = 2;
+                var y = x;
+                return 0;
+            }
+            set
+            {
+                int? x = 2;
+                var y = x;
+            }
+        }
+
+        public event System.Func<int> Event1
+        {
+            add
+            {
+                int? x = 2;
+                var y = x;
+            }
+            remove
+            {
+                int? x = 2;
+                var y = x;
+            }
+        }
+    }
+}

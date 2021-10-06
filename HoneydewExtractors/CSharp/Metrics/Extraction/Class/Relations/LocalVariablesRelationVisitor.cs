@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
 using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 
@@ -40,13 +41,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
                 {
                     foreach (var localVariableType in accessor.LocalVariableTypes)
                     {
-                        if (dependencies.ContainsKey(localVariableType.Type.Name))
+                        var typeName = CSharpConstants.GetNonNullableName(localVariableType.Type.Name);
+                        if (dependencies.ContainsKey(typeName))
                         {
-                            dependencies[localVariableType.Type.Name]++;
+                            dependencies[typeName]++;
                         }
                         else
                         {
-                            dependencies.Add(localVariableType.Type.Name, 1);
+                            dependencies.Add(typeName, 1);
                         }
                     }
 
@@ -61,13 +63,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
             {
                 foreach (var localVariableType in methodType.LocalVariableTypes)
                 {
-                    if (dependencies.ContainsKey(localVariableType.Type.Name))
+                    var typeName = CSharpConstants.GetNonNullableName(localVariableType.Type.Name);
+                    if (dependencies.ContainsKey(typeName))
                     {
-                        dependencies[localVariableType.Type.Name]++;
+                        dependencies[typeName]++;
                     }
                     else
                     {
-                        dependencies.Add(localVariableType.Type.Name, 1);
+                        dependencies.Add(typeName, 1);
                     }
                 }
 
@@ -81,13 +84,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
             {
                 foreach (var localVariableType in constructorType.LocalVariableTypes)
                 {
-                    if (dependencies.ContainsKey(localVariableType.Type.Name))
+                    var typeName = CSharpConstants.GetNonNullableName(localVariableType.Type.Name);
+                    if (dependencies.ContainsKey(typeName))
                     {
-                        dependencies[localVariableType.Type.Name]++;
+                        dependencies[typeName]++;
                     }
                     else
                     {
-                        dependencies.Add(localVariableType.Type.Name, 1);
+                        dependencies.Add(typeName, 1);
                     }
                 }
 
@@ -107,13 +111,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
             {
                 foreach (var localVariableType in localFunction.LocalVariableTypes)
                 {
-                    if (dependencies.ContainsKey(localVariableType.Type.Name))
+                    var typeName = CSharpConstants.GetNonNullableName(localVariableType.Type.Name);
+                    if (dependencies.ContainsKey(typeName))
                     {
-                        dependencies[localVariableType.Type.Name]++;
+                        dependencies[typeName]++;
                     }
                     else
                     {
-                        dependencies.Add(localVariableType.Type.Name, 1);
+                        dependencies.Add(typeName, 1);
                     }
                 }
 

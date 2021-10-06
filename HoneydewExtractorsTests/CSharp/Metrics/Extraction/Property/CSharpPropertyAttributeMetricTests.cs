@@ -91,6 +91,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                     Assert.Equal($"Namespace1.Class1.{propertyType.Name}", attributeType.ContainingTypeName);
                     Assert.Equal(1, attributeType.ParameterTypes.Count);
                     Assert.Equal("string?", attributeType.ParameterTypes[0].Type.Name);
+                    Assert.Equal("string", attributeType.ParameterTypes[0].Type.FullType.Name);
+                    Assert.True(attributeType.ParameterTypes[0].Type.FullType.IsNullable);
                 }
             }
         }
@@ -147,6 +149,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                     Assert.Equal("System.ObsoleteAttribute", attributeType.Name);
                     Assert.Equal(1, attributeType.ParameterTypes.Count);
                     Assert.Equal("string?", attributeType.ParameterTypes[0].Type.Name);
+                    Assert.Equal("string", attributeType.ParameterTypes[0].Type.FullType.Name);
+                    Assert.True(attributeType.ParameterTypes[0].Type.FullType.IsNullable);
                 }
             }
 
@@ -184,6 +188,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                 Assert.Equal(2, attribute1.ParameterTypes.Count);
                 Assert.Equal("System.ObsoleteAttribute", attribute1.Name);
                 Assert.Equal("string?", attribute1.ParameterTypes[0].Type.Name);
+                Assert.Equal("string", attribute1.ParameterTypes[0].Type.FullType.Name);
+                Assert.True(attribute1.ParameterTypes[0].Type.FullType.IsNullable);
                 Assert.Equal("bool", attribute1.ParameterTypes[1].Type.Name);
 
                 var attribute2 = attributeTypes[1];

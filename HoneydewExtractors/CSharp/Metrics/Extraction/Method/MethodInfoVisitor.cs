@@ -28,7 +28,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Method
 
             CSharpConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier, ref modifier);
 
-            var returnType = CSharpHelperMethods.GetFullName(syntaxNode.ReturnType);
+            var returnType = CSharpHelperMethods.GetFullName(syntaxNode.ReturnType, out var isNullable);
 
             var returnTypeModifier = CSharpHelperMethods.SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
 
@@ -37,7 +37,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Method
             modelType.ReturnValue = new ReturnValueModel
             {
                 Type = returnType,
-                Modifier = returnTypeModifier
+                Modifier = returnTypeModifier,
+                IsNullable = isNullable
             };
             modelType.ContainingTypeName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);
             modelType.Modifier = modifier;
@@ -59,20 +60,23 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Method
             {
                 Name = "void"
             };
+            var isNullable = false;
+            
             if (keyword == "get")
             {
                 var basePropertyDeclarationSyntax =
                     syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
                 if (basePropertyDeclarationSyntax != null)
                 {
-                    returnType = CSharpHelperMethods.GetFullName(basePropertyDeclarationSyntax.Type);
+                    returnType = CSharpHelperMethods.GetFullName(basePropertyDeclarationSyntax.Type, out isNullable);
                 }
             }
 
             modelType.Name = keyword;
             modelType.ReturnValue = new ReturnValueModel
             {
-                Type = returnType
+                Type = returnType,
+                IsNullable = isNullable
             };
             modelType.ContainingTypeName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);
             modelType.Modifier = modifier;
@@ -88,10 +92,11 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Method
             {
                 Name = "void"
             };
+            var isNullable = false;
             var basePropertyDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
             if (basePropertyDeclarationSyntax != null)
             {
-                returnType = CSharpHelperMethods.GetFullName(basePropertyDeclarationSyntax.Type);
+                returnType = CSharpHelperMethods.GetFullName(basePropertyDeclarationSyntax.Type, out isNullable);
             }
 
             modelType.Name = "get";
@@ -99,7 +104,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Method
             modelType.ContainingTypeName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);
             modelType.ReturnValue = new ReturnValueModel
             {
-                Type = returnType
+                Type = returnType,
+                IsNullable = isNullable
             };
             modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
 

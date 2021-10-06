@@ -15,6 +15,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Moq;
 using Xunit;
 
@@ -101,7 +102,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.LocalVariable
                 }
             }
         }
-        
+
         [Theory]
         [FileData("TestData/CSharp/Metrics/Extraction/LocalVariable/ConstructorWithRefLocals.txt")]
         public void Extract_ShouldHaveRefModifier_WhenGivenConstructorWithLocalVariables(string fileContent)
@@ -139,7 +140,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.LocalVariable
                 }
             }
         }
-        
+
         [Theory]
         [FileData("TestData/CSharp/Metrics/Extraction/LocalVariable/PropertyWithRefLocals.txt")]
         public void Extract_ShouldHaveRefModifier_WhenGivenPropertyWithLocalVariables(string fileContent)
@@ -157,7 +158,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.LocalVariable
                     foreach (var localVariableType in accessor.LocalVariableTypes)
                     {
                         Assert.Equal("ref", localVariableType.Modifier);
-                    }   
+                    }
                 }
             }
         }
@@ -179,7 +180,69 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.LocalVariable
                     foreach (var localVariableType in accessor.LocalVariableTypes)
                     {
                         Assert.Equal("ref readonly", localVariableType.Modifier);
-                    }   
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/LocalVariable/EntitiesWithNullableLocalVariables.txt")]
+        public void Extract_ShouldHaveNullableVariables_WhenEntitiesWithLocalVariables(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            var typeWithLocalVariables = new ITypeWithLocalVariables[]
+            {
+                classModel.Constructors[0],
+                classModel.Methods[0],
+                classModel.Properties[0].Accessors[0],
+                classModel.Properties[0].Accessors[1],
+                classModel.Properties[1].Accessors[0],
+                classModel.Properties[1].Accessors[1],
+            };
+
+            foreach (var typeWithLocalVariable in typeWithLocalVariables)
+            {
+                foreach (var localVariableType in typeWithLocalVariable.LocalVariableTypes)
+                {
+                    Assert.Equal("int?", localVariableType.Type.Name);
+                    Assert.Equal("int", localVariableType.Type.FullType.Name);
+                    Assert.True(localVariableType.IsNullable);
+                }
+            }
+        }
+
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/Extraction/LocalVariable/EntitiesWithNullableLocalVariablesOfClassType.txt")]
+        public void Extract_ShouldHaveNullableVariables_WhenEntitiesWithLocalVariablesOfClassType(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            var typeWithLocalVariables = new ITypeWithLocalVariables[]
+            {
+                classModel.Constructors[0],
+                classModel.Methods[0],
+                classModel.Properties[0].Accessors[0],
+                classModel.Properties[0].Accessors[1],
+                classModel.Properties[1].Accessors[0],
+                classModel.Properties[1].Accessors[1],
+            };
+
+            foreach (var typeWithLocalVariable in typeWithLocalVariables)
+            {
+                foreach (var localVariableType in typeWithLocalVariable.LocalVariableTypes)
+                {
+                    Assert.Equal("Namespace1.MyClass2?", localVariableType.Type.Name);
+                    Assert.Equal("Namespace1.MyClass2", localVariableType.Type.FullType.Name);
+                    Assert.True(localVariableType.IsNullable);
                 }
             }
         }

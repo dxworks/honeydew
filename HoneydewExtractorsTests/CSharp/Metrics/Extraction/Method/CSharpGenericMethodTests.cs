@@ -131,10 +131,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("T", methodModel.GenericParameters[0].Name);
             Assert.Equal(1, methodModel.GenericParameters[0].Constraints.Count);
             Assert.Equal("struct", methodModel.GenericParameters[0].Constraints[0].Name);
+            Assert.False(methodModel.GenericParameters[0].Constraints[0].FullType.IsNullable);
 
             Assert.Equal("TK", methodModel.GenericParameters[1].Name);
             Assert.Equal(1, methodModel.GenericParameters[1].Constraints.Count);
             Assert.Equal("class?", methodModel.GenericParameters[1].Constraints[0].Name);
+            Assert.Equal("class", methodModel.GenericParameters[1].Constraints[0].FullType.Name);
+            Assert.True(methodModel.GenericParameters[1].Constraints[0].FullType.IsNullable);
 
             Assert.Equal("TR", methodModel.GenericParameters[2].Name);
             Assert.Equal(1, methodModel.GenericParameters[2].Constraints.Count);
@@ -211,10 +214,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 Assert.Equal("T" + (i + 1), localFunction.GenericParameters[0].Name);
                 Assert.Equal(1, localFunction.GenericParameters[0].Constraints.Count);
                 Assert.Equal("struct", localFunction.GenericParameters[0].Constraints[0].Name);
+                Assert.False(localFunction.GenericParameters[0].Constraints[0].FullType.IsNullable);
 
                 Assert.Equal("TK" + (i + 1), localFunction.GenericParameters[1].Name);
                 Assert.Equal(1, localFunction.GenericParameters[1].Constraints.Count);
                 Assert.Equal("class?", localFunction.GenericParameters[1].Constraints[0].Name);
+                Assert.Equal("class", localFunction.GenericParameters[1].Constraints[0].FullType.Name);
+                Assert.True(localFunction.GenericParameters[1].Constraints[0].FullType.IsNullable);
 
                 Assert.Equal("TR" + (i + 1), localFunction.GenericParameters[2].Name);
                 Assert.Equal(1, localFunction.GenericParameters[2].Constraints.Count);

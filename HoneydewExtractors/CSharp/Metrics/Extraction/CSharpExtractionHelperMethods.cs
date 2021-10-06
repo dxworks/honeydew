@@ -22,9 +22,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             _fullNameProvider = new CSharpFullNameProvider(_semanticModel);
         }
 
+        public IEntityType GetFullName(SyntaxNode syntaxNode, out bool isNullable)
+        {
+            return _fullNameProvider.GetFullName(syntaxNode, out isNullable);
+        }
+
         public IEntityType GetFullName(SyntaxNode syntaxNode)
         {
-            return _fullNameProvider.GetFullName(syntaxNode);
+            return _fullNameProvider.GetFullName(syntaxNode, out _);
         }
 
         public IList<IEntityType> GetBaseInterfaces(BaseTypeDeclarationSyntax node)
@@ -167,7 +172,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
         public ParameterModel ExtractInfoAboutParameter(BaseParameterSyntax baseParameterSyntax)
         {
-            var parameterType = GetFullName(baseParameterSyntax.Type);
+            var parameterType = GetFullName(baseParameterSyntax.Type, out var isNullable);
 
             string defaultValue = null;
 
@@ -180,7 +185,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             {
                 Type = parameterType,
                 Modifier = baseParameterSyntax.Modifiers.ToString(),
-                DefaultValue = defaultValue
+                DefaultValue = defaultValue,
+                IsNullable = isNullable
             };
         }
 

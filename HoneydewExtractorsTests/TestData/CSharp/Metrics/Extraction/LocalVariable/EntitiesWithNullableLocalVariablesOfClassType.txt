@@ -1,0 +1,46 @@
+namespace Namespace1
+{
+    class MyClass
+    {
+        private MyClass2? _myClass2;
+        
+        public MyClass()
+        {
+            MyClass2? x = _myClass2;
+        }
+
+        public void Method1()
+        {
+            MyClass2? x = _myClass2;
+        }
+
+        public MyClass2 Prop1
+        {
+            get
+            {
+                MyClass2? x = _myClass2;
+                return _myClass2;
+            }
+            set
+            {
+                MyClass2? x = _myClass2;
+            }
+        }
+
+        public event System.Func<MyClass2> Event1
+        {
+            add
+            {
+                MyClass2? x = _myClass2;
+            }
+            remove
+            {
+                MyClass2? x = _myClass2;
+            }
+        }
+    }
+
+    public class MyClass2
+    {
+    }
+}

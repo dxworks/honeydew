@@ -80,6 +80,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
                 Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
                 Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
                 Assert.Equal("string?", attributeTypes[0].ParameterTypes[0].Type.Name);
+                Assert.Equal("string", attributeTypes[0].ParameterTypes[0].Type.FullType.Name);
+                Assert.True(attributeTypes[0].ParameterTypes[0].Type.FullType.IsNullable);
             }
 
             Assert.Equal("Namespace1.Class1.Class1()", classModel.Constructors[0].Attributes[0].ContainingTypeName);
@@ -91,7 +93,6 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             "TestData/CSharp/Metrics/Extraction/Constructor/Attributes/ConstructorWithOneAttributeWithNoParams.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithOneAttributeWithNoParams(string fileContent)
         {
-
             var syntaxTree = _syntacticModelCreator.Create(fileContent);
             var semanticModel = _semanticModelCreator.Create(syntaxTree);
             var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
@@ -112,7 +113,6 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             "TestData/CSharp/Metrics/Extraction/Constructor/Attributes/ConstructorWithOneAttributeWithOneParam.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithOneAttributeWithOneParams(string fileContent)
         {
-
             var syntaxTree = _syntacticModelCreator.Create(fileContent);
             var semanticModel = _semanticModelCreator.Create(syntaxTree);
             var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
@@ -128,6 +128,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             Assert.Equal("Namespace1.Class1.Class1(int)", attributeTypes[0].ContainingTypeName);
             Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
             Assert.Equal("string?", attributeTypes[0].ParameterTypes[0].Type.Name);
+            Assert.Equal("string", attributeTypes[0].ParameterTypes[0].Type.FullType.Name);
+            Assert.True(attributeTypes[0].ParameterTypes[0].Type.FullType.IsNullable);
         }
 
         [Theory]
@@ -138,7 +140,6 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
         public void Extract_ShouldExtractAttribute_WhenProvidedWithMultipleAttributesWitMultipleParams(
             string fileContent)
         {
-
             var syntaxTree = _syntacticModelCreator.Create(fileContent);
             var semanticModel = _semanticModelCreator.Create(syntaxTree);
             var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
@@ -161,6 +162,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
                 Assert.Equal(2, attribute1.ParameterTypes.Count);
                 Assert.Equal("System.ObsoleteAttribute", attribute1.Name);
                 Assert.Equal("string?", attribute1.ParameterTypes[0].Type.Name);
+                Assert.Equal("string", attribute1.ParameterTypes[0].Type.FullType.Name);
+                Assert.True(attribute1.ParameterTypes[0].Type.FullType.IsNullable);
                 Assert.Equal("bool", attribute1.ParameterTypes[1].Type.Name);
 
                 var attribute2 = attributeTypes[1];
@@ -180,7 +183,6 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             "TestData/CSharp/Metrics/Extraction/Constructor/Attributes/ConstructorWithCustomAttribute.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithCustomAttribute(string fileContent)
         {
-
             var syntaxTree = _syntacticModelCreator.Create(fileContent);
             var semanticModel = _semanticModelCreator.Create(syntaxTree);
             var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
@@ -221,7 +223,6 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             "TestData/CSharp/Metrics/Extraction/Constructor/Attributes/ConstructorWithExternAttribute.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithExternAttribute(string fileContent)
         {
-
             var syntaxTree = _syntacticModelCreator.Create(fileContent);
             var semanticModel = _semanticModelCreator.Create(syntaxTree);
             var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;

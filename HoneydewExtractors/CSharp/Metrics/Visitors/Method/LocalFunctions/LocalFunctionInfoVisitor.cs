@@ -23,14 +23,15 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions
         public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode,
             IMethodTypeWithLocalFunctions modelType)
         {
-            var returnType = CSharpHelperMethods.GetFullName(syntaxNode.ReturnType);
+            var returnType = CSharpHelperMethods.GetFullName(syntaxNode.ReturnType, out var isNullable);
             var returnTypeModifier = CSharpHelperMethods.SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
 
             modelType.Name = syntaxNode.Identifier.ToString();
             modelType.ReturnValue = new ReturnValueModel
             {
                 Type = returnType,
-                Modifier = returnTypeModifier
+                Modifier = returnTypeModifier,
+                IsNullable = isNullable
             };
             modelType.ContainingTypeName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);
             modelType.Modifier = syntaxNode.Modifiers.ToString();
