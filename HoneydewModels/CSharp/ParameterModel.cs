@@ -11,6 +11,8 @@ namespace HoneydewModels.CSharp
 
         public string DefaultValue { get; set; }
 
+        public bool IsNullable { get; set; }
+
         public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
     }
 }

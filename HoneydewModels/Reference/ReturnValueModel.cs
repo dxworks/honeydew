@@ -8,6 +8,8 @@ namespace HoneydewModels.Reference
 
         public string Modifier { get; set; } = "";
 
+        public bool IsNullable { get; set; }
+
         public IList<AttributeModel> Attributes { get; set; } = new List<AttributeModel>();
 
         public ReferenceEntity ContainingType { get; set; }

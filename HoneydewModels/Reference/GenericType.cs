@@ -6,6 +6,8 @@ namespace HoneydewModels.Reference
     {
         public string Name { get; set; }
 
+        public bool IsNullable { get; set; }
+
         public IList<GenericType> ContainedTypes { get; set; } = new List<GenericType>();
     }
 }

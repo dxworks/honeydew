@@ -1,6 +1,6 @@
 ﻿namespace HoneydewModels.Types
 {
-    public interface IReturnValueType : ITypeWithAttributes
+    public interface IReturnValueType : ITypeWithAttributes, INullableType
     {
         public IEntityType Type { get; set; }
     }

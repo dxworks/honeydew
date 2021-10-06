@@ -10,6 +10,8 @@ namespace HoneydewModels.Reference
 
         public string DefaultValue { get; set; }
 
+        public bool IsNullable { get; set; }
+        
         public IList<AttributeModel> Attributes { get; set; } = new List<AttributeModel>();
         
         public ReferenceEntity ContainingType { get; set; }

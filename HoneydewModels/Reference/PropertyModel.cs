@@ -18,12 +18,14 @@ namespace HoneydewModels.Reference
 
         public bool IsEvent { get; set; }
 
+        public bool IsNullable { get; set; }
+
         public IList<MethodModel> Accessors { get; set; } = new List<MethodModel>();
 
         public LinesOfCode Loc { get; set; }
 
         public int CyclomaticComplexity { get; set; }
-        
+
         public IList<MetricModel> Metrics { get; init; } = new List<MetricModel>();
     }
 }

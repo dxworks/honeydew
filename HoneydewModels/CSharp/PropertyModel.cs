@@ -20,6 +20,8 @@ namespace HoneydewModels.CSharp
 
         public bool IsEvent { get; set; }
 
+        public bool IsNullable { get; set; }
+
         public IList<IMethodType> Accessors { get; set; } = new List<IMethodType>();
 
         public LinesOfCode Loc { get; set; }

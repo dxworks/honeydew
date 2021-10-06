@@ -16,6 +16,8 @@ namespace HoneydewModels.Reference
 
         public bool IsEvent { get; set; }
 
+        public bool IsNullable { get; set; }
+
         public IList<AttributeModel> Attributes { get; set; } = new List<AttributeModel>();
 
         public IList<MetricModel> Metrics { get; init; } = new List<MetricModel>();
