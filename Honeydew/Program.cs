@@ -4,41 +4,15 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using CommandLine;
+using Honeydew.Scripts;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Logging;
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
 using HoneydewExtractors.Core;
-using HoneydewExtractors.Core.Metrics.Iterators;
-using HoneydewExtractors.Core.Metrics.Visitors;
-using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
-using HoneydewExtractors.Core.Metrics.Visitors.Classes;
-using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
-using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
-using HoneydewExtractors.Core.Metrics.Visitors.Fields;
-using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
-using HoneydewExtractors.Core.Metrics.Visitors.Methods;
-using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
-using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
-using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Attribute;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Common;
-using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Constructor;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Delegate;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Field;
-using HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
-using HoneydewExtractors.CSharp.Metrics.Extraction.MethodCall;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
-using HoneydewExtractors.CSharp.Metrics.Iterators;
-using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
-using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewExtractors.CSharp.RepositoryLoading;
 using HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead;
 using HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead;
@@ -48,7 +22,7 @@ using HoneydewModels;
 using HoneydewModels.CSharp;
 using HoneydewModels.Exporters;
 using HoneydewModels.Importers;
-using HoneydewModels.Types;
+using static Honeydew.VisitorLoaderHelper;
 
 namespace Honeydew
 {
@@ -151,18 +125,29 @@ namespace Honeydew
                     repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
                 }
 
+                var scriptRunner = new ScriptRunner(logger, new Dictionary<string, object>
+                {
+                    { "outputPath", DefaultPathForAllRepresentations },
+                    { "repositoryModel", repositoryModel },
+                    { "rawJsonOutputName", "honeydew.json" },
+                    { "classRelationsOutputName", "honeydew.csv" },
+                    { "cycloOutputName", "honeydew_cyclomatic.json" }
+                });
+
+                var csvRelationsRepresentationExporter = new CsvRelationsRepresentationExporter
+                {
+                    ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
+                    {
+                        new("all", ExportUtils.CsvSumPerLine)
+                    }
+                };
+
+                var jsonModelExporter = new JsonModelExporter();
+
                 if (options.DeactivateBindingProcessing)
                 {
-                    logger.Log();
-                    logger.Log("Applying Post Extraction Metrics");
-                    progressLogger.Log();
-                    progressLogger.Log("Applying Post Extraction Metrics");
-
-                    ApplyPostExtractionVisitors(repositoryModel, options.DisableExternTypeInLocalTypeSearch);
-
-                    WriteAllRepresentations(repositoryModel,
-                        null,
-                        DefaultPathForAllRepresentations);
+                    RunScripts(scriptRunner, jsonModelExporter, csvRelationsRepresentationExporter,
+                        options.DisableExternTypeInLocalTypeSearch, logger, progressLogger);
                 }
                 else
                 {
@@ -171,8 +156,7 @@ namespace Honeydew
                     progressLogger.Log();
                     progressLogger.Log("Exporting Intermediate Results");
 
-                    WriteRepresentationsToFile(repositoryModel, "_intermediate",
-                        DefaultPathForAllRepresentations);
+                    RunIntermediateScripts(scriptRunner, jsonModelExporter, csvRelationsRepresentationExporter);
 
                     logger.Log();
                     logger.Log("Resolving Full Name Dependencies");
@@ -180,20 +164,16 @@ namespace Honeydew
                     progressLogger.Log("Resolving Full Name Dependencies");
                     progressLogger.Log();
 
-                    var fqnLogger = new SerilogLogger($"{DefaultPathForAllRepresentations}/fqn_logs.txt");
-                    var fullNameModelProcessor = new FullNameModelProcessor(logger, fqnLogger, progressLogger,
-                        options.DisableLocalVariablesBinding);
+                    scriptRunner.Run(new List<ScriptRuntime>
+                    {
+                        new(new FullNameModelProcessorScript(logger, progressLogger), new Dictionary<string, object>
+                        {
+                            { "disableLocalVariablesBinding", options.DisableLocalVariablesBinding }
+                        })
+                    }, true);
 
-                    repositoryModel = fullNameModelProcessor.Process(repositoryModel);
-
-                    logger.Log();
-                    logger.Log("Applying Post Extraction Metrics");
-                    progressLogger.Log();
-                    progressLogger.Log("Applying Post Extraction Metrics");
-
-                    ApplyPostExtractionVisitors(repositoryModel, options.DisableExternTypeInLocalTypeSearch);
-
-                    WriteAllRepresentations(repositoryModel, null, DefaultPathForAllRepresentations);
+                    RunScripts(scriptRunner, jsonModelExporter, csvRelationsRepresentationExporter,
+                        options.DisableExternTypeInLocalTypeSearch, logger, progressLogger);
                 }
 
                 logger.Log();
@@ -210,198 +190,92 @@ namespace Honeydew
             }, _ => Task.FromResult("Some Error Occurred"));
         }
 
-        private static void ApplyPostExtractionVisitors(RepositoryModel repositoryModel,
-            bool disableSearchForExternTypes)
+        private static void RunIntermediateScripts(ScriptRunner scriptRunner, JsonModelExporter jsonModelExporter,
+            CsvRelationsRepresentationExporter csvRelationsRepresentationExporter)
         {
-            var classNames = new HashSet<string>();
+            var exportFileRelationsScript = new ExportFileRelationsScript(csvRelationsRepresentationExporter);
 
-            foreach (var classType in repositoryModel.GetEnumerable())
+            scriptRunner.Run(new List<ScriptRuntime>
             {
-                classNames.Add(classType.Name);
-            }
-
-            var propertiesRelationVisitor = new PropertiesRelationVisitor();
-            var fieldsRelationVisitor = new FieldsRelationVisitor();
-            var parameterRelationVisitor = new ParameterRelationVisitor();
-            var localVariablesRelationVisitor = new LocalVariablesRelationVisitor();
-
-            var modelVisitors = new List<IModelVisitor<IClassType>>
-            {
-                propertiesRelationVisitor,
-                fieldsRelationVisitor,
-                parameterRelationVisitor,
-                localVariablesRelationVisitor,
-
-                new ExternCallsRelationVisitor(),
-                new HierarchyRelationVisitor(),
-                new ReturnValueRelationVisitor(),
-                new DeclarationRelationVisitor(localVariablesRelationVisitor, parameterRelationVisitor,
-                    fieldsRelationVisitor, propertiesRelationVisitor),
-            };
-
-            if (!disableSearchForExternTypes)
-            {
-                var logFilePath = $"{DefaultPathForAllRepresentations}/extern_types.txt";
-                var logger = new SerilogLogger(logFilePath);
-                modelVisitors.Add(new ExternEntityTypeVisitor(classNames, logger));
-            }
-
-            var repositoryModelIterator = new RepositoryModelIterator(new List<ModelIterator<ProjectModel>>
-            {
-                new ProjectModelIterator(new List<ModelIterator<ICompilationUnitType>>
+                new(new ExportRawModelScript(jsonModelExporter), new Dictionary<string, object>
                 {
-                    new CompilationUnitModelIterator(new List<ModelIterator<IClassType>>
+                    { "rawJsonOutputName", "honeydew_intermediate.json" }
+                }),
+                new(new ExportCyclomaticComplexityPerFileScript(jsonModelExporter), new Dictionary<string, object>
+                {
+                    { "cycloOutputName", "honeydew_cyclomatic_intermediate.json" }
+                }),
+                new(new ExportClassRelationsScript(csvRelationsRepresentationExporter), new Dictionary<string, object>
+                {
+                    { "classRelationsOutputName", "honeydew_intermediate.csv" }
+                }),
+                new(exportFileRelationsScript, new Dictionary<string, object>
+                {
+                    { "fileRelationsOutputName", "honeydew_file_relations_all_intermediate.csv" },
+                    { "fileRelationsStrategy", new HoneydewChooseStrategy() },
+                    { "fileRelationsHeaders", null },
+                }),
+                new(exportFileRelationsScript, new Dictionary<string, object>
+                {
+                    { "fileRelationsOutputName", "honeydew_file_relations_intermediate.csv" },
+                    { "fileRelationsStrategy", new JafaxChooseStrategy() },
                     {
-                        new ClassTypePropertyIterator(modelVisitors)
-                    })
-                })
+                        "fileRelationsHeaders", new List<string>
+                        {
+                            "extCalls",
+                            "extData",
+                            "hierarchy",
+                            "returns",
+                            "declarations",
+                            "extDataStrict",
+                        }
+                    },
+                }),
             });
-
-            repositoryModelIterator.Iterate(repositoryModel);
         }
 
-        private static ICompositeVisitor LoadVisitors(IRelationMetricHolder relationMetricHolder, ILogger logger)
+        private static void RunScripts(ScriptRunner scriptRunner, JsonModelExporter jsonModelExporter,
+            CsvRelationsRepresentationExporter csvRelationsRepresentationExporter,
+            bool disableExternTypeInLocalTypeSearch, ILogger logger, IProgressLogger progressLogger)
         {
-            var linesOfCodeVisitor = new LinesOfCodeVisitor();
+            var exportFileRelationsScript = new ExportFileRelationsScript(csvRelationsRepresentationExporter);
 
-            var attributeSetterVisitor = new AttributeSetterVisitor(new List<IAttributeVisitor>
+            scriptRunner.Run(new List<ScriptRuntime>
             {
-                new AttributeInfoVisitor()
-            });
-
-            var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
-            {
-                new MethodCallInfoVisitor()
-            });
-
-            var parameterSetterVisitor = new ParameterSetterVisitor(new List<IParameterVisitor>
-            {
-                new ParameterInfoVisitor(),
-                attributeSetterVisitor
-            });
-
-            var genericParameterSetterVisitor = new GenericParameterSetterVisitor(new List<IGenericParameterVisitor>
-            {
-                new GenericParameterInfoVisitor(),
-                attributeSetterVisitor
-            });
-
-            var localVariablesTypeSetterVisitor = new LocalVariablesTypeSetterVisitor(new List<ILocalVariablesVisitor>
-            {
-                new LocalVariableInfoVisitor()
-            });
-
-            var localFunctionsSetterClassVisitor = new LocalFunctionsSetterClassVisitor(new List<ILocalFunctionVisitor>
-            {
-                new LocalFunctionInfoVisitor(new List<ILocalFunctionVisitor>
+                new(new ApplyPostExtractionVisitorsScript(logger, progressLogger), new Dictionary<string, object>
                 {
-                    calledMethodSetterVisitor,
-                    linesOfCodeVisitor,
-                    parameterSetterVisitor,
-                    localVariablesTypeSetterVisitor,
-                    genericParameterSetterVisitor,
-                }),
-                calledMethodSetterVisitor,
-                linesOfCodeVisitor,
-                parameterSetterVisitor,
-                localVariablesTypeSetterVisitor,
-                genericParameterSetterVisitor,
-            });
+                    { "disableSearchForExternTypes", disableExternTypeInLocalTypeSearch }
+                })
+            }, true);
 
-            var methodInfoVisitor = new MethodInfoVisitor();
-
-            var methodVisitors = new List<ICSharpMethodVisitor>
+            scriptRunner.Run(new List<ScriptRuntime>
             {
-                methodInfoVisitor,
-                linesOfCodeVisitor,
-                calledMethodSetterVisitor,
-                localFunctionsSetterClassVisitor,
-                attributeSetterVisitor,
-                parameterSetterVisitor,
-                localVariablesTypeSetterVisitor,
-                genericParameterSetterVisitor,
-            };
-
-            var constructorVisitors = new List<ICSharpConstructorVisitor>
-            {
-                new ConstructorInfoVisitor(),
-                linesOfCodeVisitor,
-                calledMethodSetterVisitor,
-                new ConstructorCallsVisitor(),
-                localFunctionsSetterClassVisitor,
-                attributeSetterVisitor,
-                parameterSetterVisitor,
-                localVariablesTypeSetterVisitor,
-            };
-
-            var fieldVisitors = new List<ICSharpFieldVisitor>
-            {
-                new FieldInfoVisitor(),
-                attributeSetterVisitor,
-            };
-
-            var propertyVisitors = new List<ICSharpPropertyVisitor>
-            {
-                new PropertyInfoVisitor(),
-                new MethodAccessorSetterPropertyVisitor(new List<IMethodVisitor>
+                new(new ExportRawModelScript(jsonModelExporter)),
+                new(new ExportCyclomaticComplexityPerFileScript(jsonModelExporter)),
+                new(new ExportClassRelationsScript(csvRelationsRepresentationExporter)),
+                new(exportFileRelationsScript, new Dictionary<string, object>
                 {
-                    methodInfoVisitor,
-                    calledMethodSetterVisitor,
-                    attributeSetterVisitor,
-                    linesOfCodeVisitor,
-                    localFunctionsSetterClassVisitor,
-                    localVariablesTypeSetterVisitor,
+                    { "fileRelationsOutputName", "honeydew_file_relations_all.csv" },
+                    { "fileRelationsStrategy", new HoneydewChooseStrategy() },
+                    { "fileRelationsHeaders", null },
                 }),
-                linesOfCodeVisitor,
-                attributeSetterVisitor,
-            };
-
-            var classVisitors = new List<ICSharpClassVisitor>
-            {
-                new BaseInfoClassVisitor(),
-                new BaseTypesClassVisitor(),
-                new MethodSetterClassVisitor(methodVisitors),
-                new ConstructorSetterClassVisitor(constructorVisitors),
-                new FieldSetterClassVisitor(fieldVisitors),
-                new PropertySetterClassVisitor(propertyVisitors),
-                new ImportsVisitor(),
-                linesOfCodeVisitor,
-                attributeSetterVisitor,
-                genericParameterSetterVisitor,
-
-                // metrics visitor
-                new IsAbstractClassVisitor(),
-                new ExceptionsThrownRelationVisitor(relationMetricHolder),
-                new ObjectCreationRelationVisitor(relationMetricHolder),
-            };
-
-            var delegateVisitors = new List<ICSharpDelegateVisitor>
-            {
-                new BaseInfoDelegateVisitor(),
-                new ImportsVisitor(),
-                attributeSetterVisitor,
-                parameterSetterVisitor,
-                genericParameterSetterVisitor,
-            };
-            var compilationUnitVisitors = new List<ICSharpCompilationUnitVisitor>
-            {
-                new ClassSetterCompilationUnitVisitor(classVisitors),
-                new DelegateSetterCompilationUnitVisitor(delegateVisitors),
-                new ImportsVisitor(),
-                linesOfCodeVisitor,
-            };
-
-            var compositeVisitor = new CompositeVisitor();
-
-            foreach (var compilationUnitVisitor in compilationUnitVisitors)
-            {
-                compositeVisitor.Add(compilationUnitVisitor);
-            }
-
-            compositeVisitor.Accept(new LoggerSetterVisitor(logger));
-
-
-            return compositeVisitor;
+                new(exportFileRelationsScript, new Dictionary<string, object>
+                {
+                    { "fileRelationsOutputName", "honeydew_file_relations.csv" },
+                    { "fileRelationsStrategy", new JafaxChooseStrategy() },
+                    {
+                        "fileRelationsHeaders", new List<string>
+                        {
+                            "extCalls",
+                            "extData",
+                            "hierarchy",
+                            "returns",
+                            "declarations",
+                            "extDataStrict",
+                        }
+                    },
+                }),
+            });
         }
 
         private static async Task<RepositoryModel> LoadModel(ILogger logger, string inputPath)
@@ -431,85 +305,6 @@ namespace Honeydew
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;
-        }
-
-        private static void WriteAllRepresentations(RepositoryModel repositoryModel,
-            IDictionary<string, NamespaceTree> fullNameNamespaces, string outputPath)
-        {
-            WriteRepresentationsToFile(repositoryModel, "", outputPath);
-
-            if (fullNameNamespaces != null)
-            {
-                var fullNameNamespacesExporter = new JsonModelExporter();
-                fullNameNamespacesExporter.Export(Path.Combine(outputPath, "honeydew_namespaces.json"),
-                    fullNameNamespaces);
-            }
-        }
-
-        private static void WriteRepresentationsToFile(RepositoryModel repositoryModel, string nameModifier,
-            string outputPath)
-        {
-            var repositoryExporter = new JsonModelExporter();
-            repositoryExporter.Export(Path.Combine(outputPath, $"honeydew{nameModifier}.json"), repositoryModel);
-
-            var csvModelExporter = GetRelationsRepresentationExporter();
-
-            var classRelationsRepresentation = GetClassRelationsRepresentation(repositoryModel);
-            csvModelExporter.Export(Path.Combine(outputPath, $"honeydew{nameModifier}.csv"),
-                classRelationsRepresentation);
-
-            var allFileRelationsRepresentation =
-                new RepositoryModelToFileRelationsProcessor(new HoneydewChooseStrategy()).Process(repositoryModel);
-            csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations_all{nameModifier}.csv"),
-                allFileRelationsRepresentation);
-
-            var jafaxFileRelationsRepresentation =
-                new RepositoryModelToFileRelationsProcessor(new JafaxChooseStrategy()).Process(repositoryModel);
-            csvModelExporter.Export(Path.Combine(outputPath, $"honeydew_file_relations{nameModifier}.csv"),
-                jafaxFileRelationsRepresentation, new List<string>
-                {
-                    "extCalls",
-                    "extData",
-                    "hierarchy",
-                    "returns",
-                    "declarations",
-                    "extDataStrict",
-                });
-
-            var cyclomaticComplexityPerFileRepresentation =
-                GetCyclomaticComplexityPerFileRepresentation(repositoryModel);
-            var cyclomaticComplexityPerFileExporter = new JsonModelExporter();
-            cyclomaticComplexityPerFileExporter.Export(
-                Path.Combine(outputPath, $"honeydew_cyclomatic{nameModifier}.json"),
-                cyclomaticComplexityPerFileRepresentation);
-        }
-
-        private static CsvRelationsRepresentationExporter GetRelationsRepresentationExporter()
-        {
-            var csvModelExporter = new CsvRelationsRepresentationExporter
-            {
-                ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
-                {
-                    new("all", ExportUtils.CsvSumPerLine)
-                }
-            };
-
-            return csvModelExporter;
-        }
-
-        private static RelationsRepresentation GetClassRelationsRepresentation(
-            RepositoryModel repositoryModel)
-        {
-            var classRelationsRepresentation =
-                new RepositoryModelToClassRelationsProcessor(new HoneydewChooseStrategy())
-                    .Process(repositoryModel);
-            return classRelationsRepresentation;
-        }
-
-        private static CyclomaticComplexityPerFileRepresentation GetCyclomaticComplexityPerFileRepresentation(
-            RepositoryModel repositoryModel)
-        {
-            return new RepositoryModelToCyclomaticComplexityPerFileProcessor().Process(repositoryModel);
         }
     }
 }

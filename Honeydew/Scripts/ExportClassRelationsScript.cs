@@ -1,0 +1,44 @@
+﻿using System.Collections.Generic;
+using System.IO;
+using HoneydewCore.IO.Writers.Exporters;
+using HoneydewExtractors.Processors;
+using HoneydewModels.CSharp;
+
+namespace Honeydew.Scripts
+{
+    /// <summary>
+    /// Requires the following arguments:
+    /// <list type="bullet">
+    ///     <item>
+    ///         <description>outputPath</description>
+    ///     </item>
+    ///     <item>
+    ///         <description>classRelationsOutputName</description>
+    ///     </item>
+    ///     <item>
+    ///         <description>repositoryModel</description>
+    ///     </item>
+    /// </list>
+    /// </summary>
+    public class ExportClassRelationsScript : Script
+    {
+        private readonly CsvRelationsRepresentationExporter _representationExporter;
+
+        public ExportClassRelationsScript(CsvRelationsRepresentationExporter representationExporter)
+        {
+            _representationExporter = representationExporter;
+        }
+
+        public override void Run(Dictionary<string, object> arguments)
+        {
+            var outputPath = VerifyArgument<string>(arguments, "outputPath");
+            var outputName = VerifyArgument<string>(arguments, "classRelationsOutputName");
+            var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "repositoryModel");
+
+            var classRelationsRepresentation =
+                new RepositoryModelToClassRelationsProcessor(new HoneydewChooseStrategy()).Process(repositoryModel);
+
+            _representationExporter.Export(Path.Combine(outputPath, outputName), classRelationsRepresentation);
+        }
+    }
+}
