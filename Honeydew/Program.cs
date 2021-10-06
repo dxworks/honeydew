@@ -22,7 +22,6 @@ using HoneydewModels;
 using HoneydewModels.CSharp;
 using HoneydewModels.Exporters;
 using HoneydewModels.Importers;
-using static Honeydew.VisitorLoaderHelper;
 
 namespace Honeydew
 {
@@ -131,7 +130,8 @@ namespace Honeydew
                     { "repositoryModel", repositoryModel },
                     { "rawJsonOutputName", "honeydew.json" },
                     { "classRelationsOutputName", "honeydew.csv" },
-                    { "cycloOutputName", "honeydew_cyclomatic.json" }
+                    { "cycloOutputName", "honeydew_cyclomatic.json" },
+                    { "statisticsFileOutputName", "honeydew_stats.txt" },
                 });
 
                 var csvRelationsRepresentationExporter = new CsvRelationsRepresentationExporter
@@ -253,6 +253,7 @@ namespace Honeydew
                 new(new ExportRawModelScript(jsonModelExporter)),
                 new(new ExportCyclomaticComplexityPerFileScript(jsonModelExporter)),
                 new(new ExportClassRelationsScript(csvRelationsRepresentationExporter)),
+                new(new ExportStatisticsScript(jsonModelExporter)),
                 new(exportFileRelationsScript, new Dictionary<string, object>
                 {
                     { "fileRelationsOutputName", "honeydew_file_relations_all.csv" },
@@ -301,7 +302,7 @@ namespace Honeydew
 
             var repositoryLoader = new CSharpRepositoryLoader(solutionProvider, projectProvider, projectLoadingStrategy,
                 solutionLoadingStrategy, logger, progressLogger, missingFilesLogger,
-                new FactExtractorCreator(LoadVisitors(relationMetricHolder, logger)), cSharpCompilationMaker);
+                new FactExtractorCreator(VisitorLoaderHelper.LoadVisitors(relationMetricHolder, logger)), cSharpCompilationMaker);
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;

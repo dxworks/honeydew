@@ -22,8 +22,7 @@ namespace Honeydew.Scripts
     public class ExportRawModelScript : Script
     {
         private readonly JsonModelExporter _repositoryExporter;
-
-
+        
         public ExportRawModelScript(JsonModelExporter repositoryExporter)
         {
             _repositoryExporter = repositoryExporter;
