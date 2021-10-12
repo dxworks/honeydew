@@ -131,7 +131,7 @@ namespace Honeydew
                     { "rawJsonOutputName", "honeydew.json" },
                     { "classRelationsOutputName", "honeydew.csv" },
                     { "cycloOutputName", "honeydew_cyclomatic.json" },
-                    { "statisticsFileOutputName", "honeydew_stats.txt" },
+                    { "statisticsFileOutputName", "honeydew_stats.json" },
                 });
 
                 var csvRelationsRepresentationExporter = new CsvRelationsRepresentationExporter
@@ -302,7 +302,8 @@ namespace Honeydew
 
             var repositoryLoader = new CSharpRepositoryLoader(solutionProvider, projectProvider, projectLoadingStrategy,
                 solutionLoadingStrategy, logger, progressLogger, missingFilesLogger,
-                new FactExtractorCreator(VisitorLoaderHelper.LoadVisitors(relationMetricHolder, logger)), cSharpCompilationMaker);
+                new FactExtractorCreator(VisitorLoaderHelper.LoadVisitors(relationMetricHolder, logger)),
+                cSharpCompilationMaker);
             var repositoryModel = await repositoryLoader.Load(inputPath);
 
             return repositoryModel;
