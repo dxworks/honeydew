@@ -20,6 +20,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
     {
         private readonly CSharpFactExtractor _factExtractor;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpClassInfoTests()
         {
@@ -40,15 +42,16 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
         [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/ClassInfo/InterfaceWithImplementedMethods.txt")]
         public void Extract_ShouldHaveMethods_WhenProvidedWithInterfaceWithImplementedMethods(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 

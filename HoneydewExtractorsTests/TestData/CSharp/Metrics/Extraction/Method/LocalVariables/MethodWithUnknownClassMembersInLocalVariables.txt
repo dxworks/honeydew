@@ -1,0 +1,19 @@
+using System;
+using HoneydewCore.Extractors;
+
+namespace App
+{                                       
+    public class Class1
+    {                                           
+        public void Method(Class2 c)
+        {
+            var v = c.Method();
+            var v2 = c.Field;
+            var v3 = c.Property;
+            
+            int a = c.Method();
+            int a2 = c.Field;
+            int a3 = c.Property;
+        }
+    }
+}

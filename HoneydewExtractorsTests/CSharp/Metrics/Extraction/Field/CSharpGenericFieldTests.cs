@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Fields;
@@ -7,6 +8,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Field;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Field
@@ -14,6 +16,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Field
     public class CSharpGenericFieldTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpGenericFieldTests()
         {
@@ -28,8 +33,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Field
                 })
             }));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
@@ -50,7 +56,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Field
     public class GenericClass<T> {{}}
 }}";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -93,7 +101,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Field
     public class GenericClass<T,R,K> {{}}
 }}";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 

@@ -10,48 +10,38 @@ namespace HoneydewExtractors.CSharp.Metrics
 {
     public class CSharpCompilationMaker : ICompilationMaker
     {
-        private List<PortableExecutableReference> _references;
+        private IEnumerable<MetadataReference> _references;
 
         public Compilation GetCompilation()
         {
-            _references ??= FindReferences();
+            _references = FindTrustedReferences();
 
-            var compilation = CSharpCompilation.Create("Compilation");
-            return compilation.AddReferences(_references);
-            //
-            // return _references
-            //     .Aggregate(compilation, (current, reference) => current.AddReferences(reference));
+            var compilation = CSharpCompilation.Create("Compilation", references: _references,
+                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            return compilation;
         }
 
-        public void AddReference(string path)
+        public IEnumerable<MetadataReference> FindTrustedReferences()
         {
-            if (File.Exists(path))
+            if (_references != null)
             {
-                try
-                {
-                    _references ??= FindReferences();
-
-                    _references.Add(MetadataReference.CreateFromFile(path));
-                }
-                catch (Exception)
-                {
-                    //
-                }
+                return _references;
             }
-        }
 
-        private static List<PortableExecutableReference> FindReferences()
-        {
-            var references = new List<PortableExecutableReference>();
+            var references = new List<MetadataReference>();
 
             var value = (string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES");
             if (value != null)
             {
                 var pathToDlls = value.Split(Path.PathSeparator);
-                references.AddRange(pathToDlls.Where(pathToDll => !string.IsNullOrEmpty(pathToDll))
-                    .Select(pathToDll => MetadataReference.CreateFromFile(pathToDll))
-                );
+                foreach (var reference in pathToDlls.Where(pathToDll => !string.IsNullOrEmpty(pathToDll))
+                    .Select(pathToDll => MetadataReference.CreateFromFile(pathToDll)))
+                {
+                    references.Add(reference);
+                }
             }
+
+            _references = references;
 
             return references;
         }

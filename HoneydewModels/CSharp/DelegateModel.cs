@@ -3,7 +3,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public record DelegateModel : IDelegateType, IModelEntity
+    public record DelegateModel : IDelegateType
     {
         public string ClassType { get; set; }
 

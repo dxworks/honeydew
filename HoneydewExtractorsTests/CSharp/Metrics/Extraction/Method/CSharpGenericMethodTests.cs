@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
@@ -12,6 +13,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
@@ -19,6 +21,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
     public class CSharpGenericMethodTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpGenericMethodTests()
         {
@@ -46,8 +51,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 }),
             }));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
@@ -64,7 +70,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public T Method<T>(T t) {{ return t; }} 
     }}
 }}";
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -92,7 +101,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
     }}
 }}";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -108,7 +119,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             "TestData/CSharp/Metrics/Extraction/Method/GenericExtraction/GenericMethodWithPredefinedConstrains.txt")]
         public void Extract_ShouldHaveGenericTypesWithPredefinedConstrains_WhenProvidedWithClass(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             var methodModel = classModel.Methods[0];
@@ -118,10 +131,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("T", methodModel.GenericParameters[0].Name);
             Assert.Equal(1, methodModel.GenericParameters[0].Constraints.Count);
             Assert.Equal("struct", methodModel.GenericParameters[0].Constraints[0].Name);
+            Assert.False(methodModel.GenericParameters[0].Constraints[0].FullType.IsNullable);
 
             Assert.Equal("TK", methodModel.GenericParameters[1].Name);
             Assert.Equal(1, methodModel.GenericParameters[1].Constraints.Count);
             Assert.Equal("class?", methodModel.GenericParameters[1].Constraints[0].Name);
+            Assert.Equal("class", methodModel.GenericParameters[1].Constraints[0].FullType.Name);
+            Assert.True(methodModel.GenericParameters[1].Constraints[0].FullType.IsNullable);
 
             Assert.Equal("TR", methodModel.GenericParameters[2].Name);
             Assert.Equal(1, methodModel.GenericParameters[2].Constraints.Count);
@@ -149,7 +165,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             "TestData/CSharp/Metrics/Extraction/Method/GenericExtraction/GenericMethodWithMultipleConstrains.txt")]
         public void Extract_ShouldHaveGenericTypesWithMultipleConstrains_WhenProvidedWithClass(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             var methodModel = classModel.Methods[0];
@@ -173,7 +191,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldHaveLocalFunctionGenericMethodWithConstraints_WhenProvidedWithClass(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             var methodModel = (MethodModel)classModel.Methods[0];
@@ -194,10 +214,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 Assert.Equal("T" + (i + 1), localFunction.GenericParameters[0].Name);
                 Assert.Equal(1, localFunction.GenericParameters[0].Constraints.Count);
                 Assert.Equal("struct", localFunction.GenericParameters[0].Constraints[0].Name);
+                Assert.False(localFunction.GenericParameters[0].Constraints[0].FullType.IsNullable);
 
                 Assert.Equal("TK" + (i + 1), localFunction.GenericParameters[1].Name);
                 Assert.Equal(1, localFunction.GenericParameters[1].Constraints.Count);
                 Assert.Equal("class?", localFunction.GenericParameters[1].Constraints[0].Name);
+                Assert.Equal("class", localFunction.GenericParameters[1].Constraints[0].FullType.Name);
+                Assert.True(localFunction.GenericParameters[1].Constraints[0].FullType.IsNullable);
 
                 Assert.Equal("TR" + (i + 1), localFunction.GenericParameters[2].Name);
                 Assert.Equal(1, localFunction.GenericParameters[2].Constraints.Count);
@@ -227,9 +250,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/Method/GenericExtraction/GenericLocalFunctionWithMultipleConstrains.txt")]
-        public void Extract_ShouldHaveGenericLocalMethodWithMultipleConstrains_WhenProvidedWithClass(string fileContent)
+        public void Extract_ShouldHaveGenericLocalMethodWithMultipleConstrains_WhenProvidedWithClass(
+            string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             var methodModel = (MethodModel)classModel.Methods[0];

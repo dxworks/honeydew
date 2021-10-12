@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HoneydewCore.Logging;
 using HoneydewExtractors.Core;
 using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
-using HoneydewModels.CSharp;
 
 namespace HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead
 {
@@ -25,7 +25,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead
             _solutionLoadingStrategy = solutionLoadingStrategy;
         }
 
-        public async Task<SolutionModel> LoadSolution(string pathToFile)
+        public async Task<SolutionLoadingResult> LoadSolution(string pathToFile, ISet<string> processedProjectPaths)
         {
             _logger.Log();
             _logger.Log();
@@ -37,9 +37,9 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead
 
                 _logger.Log($"Found {solution?.Projects.Count()} C# Projects in solution {pathToFile}");
 
-                var solutionModel = await _solutionLoadingStrategy.Load(solution, _extractorCreator);
+                var loadingResult = await _solutionLoadingStrategy.Load(solution, _extractorCreator, processedProjectPaths);
 
-                return solutionModel;
+                return loadingResult;
             }
             catch (Exception e)
             {

@@ -2,7 +2,7 @@
 
 namespace HoneydewModels.CSharp
 {
-    public record UsingModel : IModelEntity, IImportType
+    public record UsingModel : IImportType
     {
         public string Name { get; set; }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -15,6 +16,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Attributes
@@ -22,6 +24,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Attributes
     public class CSharpAttributeForGenericTypesTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
 
         public CSharpAttributeForGenericTypesTests()
         {
@@ -59,8 +62,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Attributes
                 genericParameterSetterVisitor
             }));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
@@ -105,7 +109,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Attributes
     }}
 }}
 ";
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var syntacticModelCreator = new CSharpSyntacticModelCreator();
+            var semanticModelCreator = new CSharpSemanticModelCreator(new CSharpCompilationMaker());
+            var syntaxTree = syntacticModelCreator.Create(fileContent);
+            var semanticModel = semanticModelCreator.Create(syntaxTree);
+
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -123,7 +133,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Attributes
             foreach (var genericParameter in genericParameters)
             {
                 Assert.Equal(3, genericParameter.Attributes.Count);
-                
+
                 Assert.Equal("parameter", genericParameter.Attributes[0].Target);
                 Assert.Equal("System.ComponentModel.TypeConverterAttribute", genericParameter.Attributes[0].Name);
                 Assert.Equal("Namespace1.MyAttribute", genericParameter.Attributes[1].Name);

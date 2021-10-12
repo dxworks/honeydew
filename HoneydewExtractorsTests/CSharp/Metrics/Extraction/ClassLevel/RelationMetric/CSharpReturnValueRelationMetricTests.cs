@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
@@ -9,6 +10,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Iterators;
 using HoneydewModels.Types;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
@@ -18,6 +20,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         private readonly ReturnValueRelationVisitor _sut;
         private readonly CSharpFactExtractor _factExtractor;
         private readonly ClassTypePropertyIterator _classTypePropertyIterator;
+        private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpReturnValueRelationMetricTests()
         {
@@ -34,8 +39,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                 })
             }));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
 
             _classTypePropertyIterator = new ClassTypePropertyIterator(new List<IModelVisitor<IClassType>>
             {
@@ -46,14 +52,16 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         [Fact]
         public void PrettyPrint_ShouldReturnReturnValueDependency()
         {
-            Assert.Equal("Return Value Dependency", _sut.PrettyPrint());
+            Assert.Equal("returns", _sut.PrettyPrint());
         }
 
         [Theory]
         [FileData("TestData/CSharp/Metrics/Extraction/Relations/ClassWithTwoFunctions.txt")]
         public void Extract_ShouldHaveVoidReturnValues_WhenClassHasMethodsThatReturnVoid(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             foreach (var model in classTypes)
             {
@@ -78,7 +86,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         public void Extract_ShouldHavePrimitiveReturnValues_WhenClassHasMethodsThatReturnPrimitiveValues(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             foreach (var model in classTypes)
             {
@@ -105,7 +115,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         public void Extract_ShouldHavePrimitiveReturnValues_WhenInterfaceHasMethodsWithPrimitiveReturnValues(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             foreach (var model in classTypes)
             {
@@ -133,7 +145,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         public void Extract_ShouldHaveDependenciesReturnValues_WhenInterfaceHasMethodsWithDependenciesReturnValues(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             foreach (var model in classTypes)
             {
@@ -156,9 +170,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/Relations/ReturnValueRelations/ClassWithMethodsWithNonPrimitiveReturnValue.txt")]
-        public void Extract_ShouldHaveDependenciesReturnValues_WhenClassHasMethodsWithDependenciesReturnValues(string fileContent)
+        public void Extract_ShouldHaveDependenciesReturnValues_WhenClassHasMethodsWithDependenciesReturnValues(
+            string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             foreach (var model in classTypes)
             {

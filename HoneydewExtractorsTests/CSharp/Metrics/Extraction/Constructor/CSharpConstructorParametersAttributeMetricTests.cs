@@ -22,6 +22,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
     {
         private readonly CSharpFactExtractor _factExtractor;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpConstructorParametersAttributeMetricTests()
         {
@@ -48,8 +50,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
@@ -68,7 +69,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
     }}
 }}";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -92,7 +95,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             "TestData/CSharp/Metrics/Extraction/Constructor/ParameterAttributes/ConstructorParametersWithSystemAttributes.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithSystemAttributes(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(1, classModel.Constructors.Count);
@@ -123,10 +128,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
         [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/Constructor/ParameterAttributes/ConstructorParametersWithCustomAttribute.txt")]
-        public void Extract_ShouldExtractAttribute_WhenProvidedWithCustomAttribute(
-            string fileContent)
+        public void Extract_ShouldExtractAttribute_WhenProvidedWithCustomAttribute(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classType = (ClassModel)classTypes[1];
 
@@ -180,10 +186,11 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
         [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/Constructor/ParameterAttributes/ConstructorParametersWithExternAttribute.txt")]
-        public void Extract_ShouldExtractAttribute_WhenProvidedWithExternAttribute(
-            string fileContent)
+        public void Extract_ShouldExtractAttribute_WhenProvidedWithExternAttribute(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classType = (ClassModel)classTypes[0];
 

@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using HoneydewCore.ModelRepresentations;
+using HoneydewExtractors.CSharp.Utils;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
@@ -24,36 +25,53 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
             foreach (var objectCreationExpressionSyntax in syntaxNode.DescendantNodes()
                 .OfType<ObjectCreationExpressionSyntax>())
             {
-                MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(objectCreationExpressionSyntax.Type).Name, this);
+                var dependencyName = CSharpHelperMethods.GetFullName(objectCreationExpressionSyntax.Type).Name;
+                if (dependencyName != CSharpConstants.VarIdentifier)
+                {
+                    MetricHolder.Add(className, dependencyName, this);
+                }
             }
 
             foreach (var implicitObjectCreationExpressionSyntax in syntaxNode.DescendantNodes()
                 .OfType<ImplicitObjectCreationExpressionSyntax>())
             {
-                MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(implicitObjectCreationExpressionSyntax).Name, this);
+                var dependencyName = CSharpHelperMethods.GetFullName(implicitObjectCreationExpressionSyntax).Name;
+                if (dependencyName != CSharpConstants.VarIdentifier)
+                {
+                    MetricHolder.Add(className, dependencyName, this);
+                }
             }
 
             foreach (var arrayCreationExpressionSyntax in syntaxNode.DescendantNodes()
                 .OfType<ArrayCreationExpressionSyntax>())
             {
-                MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(arrayCreationExpressionSyntax.Type).Name, this);
+                var dependencyName = CSharpHelperMethods.GetFullName(arrayCreationExpressionSyntax.Type).Name;
+                if (dependencyName != CSharpConstants.VarIdentifier)
+                {
+                    MetricHolder.Add(className,
+                        dependencyName, this);
+                }
             }
 
             foreach (var implicitArrayCreationExpressionSyntax in syntaxNode.DescendantNodes()
                 .OfType<ImplicitArrayCreationExpressionSyntax>())
             {
-                MetricHolder.Add(className,
-                    CSharpHelperMethods.GetFullName(implicitArrayCreationExpressionSyntax).Name, this);
+                var dependencyName = CSharpHelperMethods.GetFullName(implicitArrayCreationExpressionSyntax).Name;
+                if (dependencyName != CSharpConstants.VarIdentifier)
+                {
+                    MetricHolder.Add(className, dependencyName, this);
+                }
             }
 
             foreach (var expressionSyntax in syntaxNode.DescendantNodes().OfType<InitializerExpressionSyntax>()
                 .Where(syntax => syntax.Parent is EqualsValueClauseSyntax)
                 .Select(syntax => syntax.Parent))
             {
-                MetricHolder.Add(className, CSharpHelperMethods.GetContainingType(expressionSyntax).Name, this);
+                var dependencyName = CSharpHelperMethods.GetContainingType(expressionSyntax).Name;
+                if (dependencyName != CSharpConstants.VarIdentifier)
+                {
+                    MetricHolder.Add(className, dependencyName, this);
+                }
             }
         }
     }

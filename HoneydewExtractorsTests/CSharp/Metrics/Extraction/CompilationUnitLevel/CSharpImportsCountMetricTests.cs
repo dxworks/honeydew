@@ -1,6 +1,8 @@
-﻿using HoneydewExtractors.Core.Metrics.Visitors;
+﻿using HoneydewCore.Logging;
+using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
@@ -8,15 +10,19 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
     public class CSharpImportsCountMetricTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpImportsCountMetricTests()
         {
             var compositeVisitor = new CompositeVisitor();
-            
+
             compositeVisitor.Add(new ImportCountCompilationUnitVisitor());
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Fact]
@@ -34,10 +40,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
                                          public class Foo { int a; public void f(); }                                        
                                      }";
 
-            var compilationUnit = _factExtractor.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _factExtractor.Extract(syntaxTree, semanticModel);
 
             Assert.Equal(1, compilationUnit.Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit.ImportCountCompilationUnitVisitor",
+            Assert.Equal(
+                "HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit.ImportCountCompilationUnitVisitor",
                 compilationUnit.Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", compilationUnit.Metrics[0].ValueType);
             Assert.Equal(6, compilationUnit.Metrics[0].Value);
@@ -75,10 +85,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.CompilationUnitLevel
                                          }
                                      }";
 
-            var compilationUnit = _factExtractor.Extract(fileContent);
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _factExtractor.Extract(syntaxTree, semanticModel);
 
             Assert.Equal(1, compilationUnit.Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit.ImportCountCompilationUnitVisitor",
+            Assert.Equal(
+                "HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit.ImportCountCompilationUnitVisitor",
                 compilationUnit.Metrics[0].ExtractorName);
             Assert.Equal("System.Int32", compilationUnit.Metrics[0].ValueType);
             Assert.Equal(12, compilationUnit.Metrics[0].Value);

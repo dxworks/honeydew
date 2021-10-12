@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
@@ -18,6 +19,7 @@ using HoneydewExtractors.CSharp.Metrics.Iterators;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.Types;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
@@ -27,6 +29,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         private readonly LocalVariablesRelationVisitor _sut;
         private readonly CSharpFactExtractor _factExtractor;
         private readonly ClassTypePropertyIterator _classTypePropertyIterator;
+        private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpLocalVariablesRelationVisitorTests()
         {
@@ -72,8 +77,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                     })
                 })
             }));
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
 
 
             _classTypePropertyIterator = new ClassTypePropertyIterator(new List<IModelVisitor<IClassType>>
@@ -90,9 +97,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
 
         [Theory]
         [FileData("TestData/CSharp/Metrics/Extraction/Relations/ClassWithTwoFunctions.txt")]
-        public void Extract_ShouldHaveNoLocalVariables_WhenClassHasMethodsThatDontUseLocalVariables(string fileContent)
+        public void Extract_ShouldHaveNoLocalVariables_WhenClassHasMethodsThatDontUseLocalVariables(
+            string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             foreach (var model in classTypes)
             {
@@ -112,9 +122,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/Relations/LocalVariablesRelations/ClassWithPrimitiveLocalVariables.txt")]
-        public void Extract_ShouldHavePrimitiveLocalValues_WhenClassHasMethodsThatHaveLocalVariables(string fileContent)
+        public void Extract_ShouldHavePrimitiveLocalValues_WhenClassHasMethodsThatHaveLocalVariables(
+            string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             foreach (var model in classTypes)
             {
@@ -136,10 +149,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         }
 
         [Theory]
-        [FileData("TestData/CSharp/Metrics/Extraction/Relations/LocalVariablesRelations/InterfaceWithMethods.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Relations/LocalVariablesRelations/InterfaceWithMethods.txt")]
         public void Extract_ShouldHaveNoPrimitiveLocalVariables_WhenGivenAnInterface(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             foreach (var model in classTypes)
             {
@@ -161,7 +177,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             "TestData/CSharp/Metrics/Extraction/Relations/LocalVariablesRelations/InterfaceWithMethodsWithNonPrimitiveParams.txt")]
         public void Extract_ShouldHaveNoDependencies_WhenGivenAnInterface(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             foreach (var model in classTypes)
             {
@@ -184,7 +202,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         public void Extract_ShouldHaveLocalVariablesDependencies_WhenClassHasMethodsWithNonPrimitiveLocalVariables(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             foreach (var model in classTypes)
             {
@@ -210,7 +230,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         public void Extract_ShouldHaveLocalVariablesDependencies_WhenClassHasConstructorLocalVariables(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             foreach (var model in classTypes)
             {
@@ -238,7 +260,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Extract_ShouldHaveLocalVariablesDependencies_WhenClassHasMethodsWithNonPrimitiveLocalVariablesInAForLoop(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             foreach (var model in classTypes)
             {
@@ -264,7 +288,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         public void
             Extract_ShouldHaveLocalVariablesDependencies_WhenNamespaceHasMultipleClasses(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             foreach (var model in classTypes)
             {
@@ -292,7 +318,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
                 classTypes[1].Metrics[0].ValueType);
 
-            var dependencies2 = ((Dictionary<string, int>)classTypes[1].Metrics[0].Value);
+            var dependencies2 = (Dictionary<string, int>)classTypes[1].Metrics[0].Value;
 
             Assert.Equal(3, dependencies2.Count);
             Assert.Equal(1, dependencies2["CSharpMetricExtractor"]);

@@ -1,10 +1,9 @@
 ﻿using HoneydewExtractors.Core;
-using HoneydewExtractors.Core.Metrics;
 using Microsoft.CodeAnalysis;
 
 namespace HoneydewExtractors.CSharp.Metrics
 {
-    public class CSharpSemanticModelCreator : ISemanticModelCreator<CSharpSyntacticModel, CSharpSemanticModel>
+    public class CSharpSemanticModelCreator
     {
         private readonly ICompilationMaker _compilationMaker;
 
@@ -13,16 +12,7 @@ namespace HoneydewExtractors.CSharp.Metrics
             _compilationMaker = compilationMaker;
         }
 
-        public CSharpSemanticModel Create(CSharpSyntacticModel syntacticModel)
-        {
-            var semanticModel = CreateSemanticModel(syntacticModel?.Tree);
-            return new CSharpSemanticModel
-            {
-                Model = semanticModel
-            };
-        }
-
-        private SemanticModel CreateSemanticModel(SyntaxTree tree)
+        public SemanticModel Create(SyntaxTree tree)
         {
             var compilation = _compilationMaker.GetCompilation();
 

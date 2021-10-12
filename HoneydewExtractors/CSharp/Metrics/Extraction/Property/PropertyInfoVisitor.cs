@@ -34,7 +34,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Property
                 modifier = CSharpConstants.AbstractIdentifier;
             }
 
-            var typeName = CSharpHelperMethods.GetFullName(syntaxNode.Type);
+            var typeName = CSharpHelperMethods.GetFullName(syntaxNode.Type, out var isNullable);
 
             modifier = CSharpHelperMethods.SetTypeModifier(syntaxNode.Type.ToString(), modifier);
 
@@ -59,6 +59,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Property
             modelType.Name = name;
             modelType.ContainingTypeName = containingClass;
             modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
+            modelType.IsNullable = isNullable;
 
             return modelType;
         }

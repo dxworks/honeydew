@@ -3,7 +3,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public record FieldModel : IModelEntity, IFieldType
+    public record FieldModel : IFieldType
     {
         public string Name { get; set; }
 
@@ -16,6 +16,8 @@ namespace HoneydewModels.CSharp
         public string ContainingTypeName { get; set; }
 
         public bool IsEvent { get; set; }
+
+        public bool IsNullable { get; set; }
 
         public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
 

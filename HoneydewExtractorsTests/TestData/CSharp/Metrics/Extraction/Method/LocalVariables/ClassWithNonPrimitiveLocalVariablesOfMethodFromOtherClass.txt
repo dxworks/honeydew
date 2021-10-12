@@ -1,0 +1,21 @@
+using System;
+using HoneydewCore.Extractors;
+
+namespace App
+{                                       
+    public class Class1
+    {                                           
+        public void Method(Class2 c)
+        {
+            var v = c.Method();
+        }
+    }
+    
+    public class Class2
+    {                                       
+        public int Method()
+        {
+            return 6;
+        }
+    }
+}

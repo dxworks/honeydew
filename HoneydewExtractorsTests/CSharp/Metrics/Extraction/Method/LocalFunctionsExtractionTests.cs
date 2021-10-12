@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
@@ -18,6 +19,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
@@ -25,6 +27,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
     public class LocalFunctionsExtractionTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public LocalFunctionsExtractionTests()
         {
@@ -74,8 +79,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 })
             }));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
@@ -85,7 +91,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Extract_ShouldExtractLocalFunction_WhenGivenMethodWithOneLocalFunctionThatReturnsVoidAndHasNoParameters(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
 
@@ -105,7 +113,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalFunction_WhenGivenLocalFunctionWithReturnValueAndParameters(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
 
@@ -124,9 +134,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/Method/LocalFunctions/MethodWithMultipleLocalFunctionsWithModifiers.txt")]
-        public void Extract_ShouldExtractMultipleLocalFunctions_WhenGivenLocalFunctionsWithModifiers(string fileContent)
+        public void Extract_ShouldExtractMultipleLocalFunctions_WhenGivenLocalFunctionsWithModifiers(
+            string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
 
@@ -164,7 +177,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Extract_ShouldExtractLocalFunctionCyclomaticComplexity_WhenGivenLocalFunctionWithHighCyclomaticComplexity(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
 
@@ -180,7 +195,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalFunction_WhenGivenMethodPropertyConstructorWithLocalFunction(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
             var constructor = (ConstructorModel)((ClassModel)classTypes[0]).Constructors[0];
@@ -221,7 +238,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalFunctionAndUsages_WhenGivenMethodWithMultipleLocalFunctions(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
 
@@ -291,7 +310,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalFunctions_WhenGivenMethodWithImbricatedLocalFunctions(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
 
@@ -363,7 +384,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalFunctionsWithCalledMethods_WhenGivenMethodWithImbricatedLocalFunctions(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
 
@@ -454,7 +477,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalFunctions_WhenGivenPropertyWithImbricatedLocalFunctions(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var property = (PropertyModel)((ClassModel)classTypes[0]).Properties[0];
 
@@ -523,12 +548,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/Method/LocalFunctions/PropertyWithImbricatedLocalFunctions.txt")]
-        [FileData(
-            "TestData/CSharp/Metrics/Extraction/Method/LocalFunctions/EventPropertyWithImbricatedLocalFunctions.txt")]
         public void Extract_ShouldExtractLocalFunctionsWithCalledMethods_WhenGivenPropertyWithImbricatedLocalFunctions(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var property = (PropertyModel)((ClassModel)classTypes[0]).Properties[0];
 
@@ -540,7 +565,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal(2, stringSumFunction.LocalFunctions.Count);
             Assert.Equal(1, stringSumFunction.CalledMethods.Count);
             Assert.Equal("Stringify", stringSumFunction.CalledMethods[0].Name);
-            Assert.Equal("Namespace1.Class1.Value.StringSum(int, int)",
+            Assert.Equal("Namespace1.Class1.Value.set.StringSum(int, int)",
                 stringSumFunction.CalledMethods[0].ContainingTypeName);
             Assert.Equal(2, stringSumFunction.CalledMethods[0].ParameterTypes.Count);
             Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[0].Type.Name);
@@ -553,7 +578,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             foreach (var calledMethod in sumFunction.CalledMethods)
             {
                 Assert.Equal("Doubled", calledMethod.Name);
-                Assert.Equal("Namespace1.Class1.Value.StringSum(int, int).Sum(int, int)",
+                Assert.Equal("Namespace1.Class1.Value.set.StringSum(int, int).Sum(int, int)",
                     calledMethod.ContainingTypeName);
                 Assert.Equal(1, calledMethod.ParameterTypes.Count);
                 Assert.Equal("int", calledMethod.ParameterTypes[0].Type.Name);
@@ -572,14 +597,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
 
             var stringifyFunctionCalledMethod1 = stringifyFunction.CalledMethods[0];
             Assert.Equal("StringifyNumber", stringifyFunctionCalledMethod1.Name);
-            Assert.Equal("Namespace1.Class1.Value.StringSum(int, int).Stringify(int, int)",
+            Assert.Equal("Namespace1.Class1.Value.set.StringSum(int, int).Stringify(int, int)",
                 stringifyFunctionCalledMethod1.ContainingTypeName);
             Assert.Equal(1, stringifyFunctionCalledMethod1.ParameterTypes.Count);
             Assert.Equal("int", stringifyFunctionCalledMethod1.ParameterTypes[0].Type.Name);
 
             var stringifyFunctionCalledMethod2 = stringifyFunction.CalledMethods[1];
             Assert.Equal("Calculate", stringifyFunctionCalledMethod2.Name);
-            Assert.Equal("Namespace1.Class1.Value.StringSum(int, int).Stringify(int, int)",
+            Assert.Equal("Namespace1.Class1.Value.set.StringSum(int, int).Stringify(int, int)",
                 stringifyFunctionCalledMethod2.ContainingTypeName);
             Assert.Equal(2, stringifyFunctionCalledMethod2.ParameterTypes.Count);
             Assert.Equal("int", stringifyFunctionCalledMethod2.ParameterTypes[0].Type.Name);
@@ -593,7 +618,99 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
 
             var calculateFunctionCalledMethod = calculateFunction.CalledMethods[0];
             Assert.Equal("Sum", calculateFunctionCalledMethod.Name);
-            Assert.Equal("Namespace1.Class1.Value.StringSum(int, int)",
+            Assert.Equal("Namespace1.Class1.Value.set.StringSum(int, int)",
+                calculateFunctionCalledMethod.ContainingTypeName);
+            Assert.Equal(2, calculateFunctionCalledMethod.ParameterTypes.Count);
+            Assert.Equal("int", calculateFunctionCalledMethod.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", calculateFunctionCalledMethod.ParameterTypes[1].Type.Name);
+
+
+            var stringifyNumberFunction = (MethodModel)stringifyFunction.LocalFunctions[1];
+            Assert.Equal("StringifyNumber", stringifyNumberFunction.Name);
+            Assert.Empty(stringifyNumberFunction.LocalFunctions);
+            Assert.Equal(1, stringifyNumberFunction.CalledMethods.Count);
+
+            var stringifyNumberFunctionCalledMethod = stringifyNumberFunction.CalledMethods[0];
+            Assert.Equal("ToString", stringifyNumberFunctionCalledMethod.Name);
+            Assert.Equal("int", stringifyNumberFunctionCalledMethod.ContainingTypeName);
+            Assert.Empty(stringifyNumberFunctionCalledMethod.ParameterTypes);
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalFunctions/EventPropertyWithImbricatedLocalFunctions.txt")]
+        public void
+            Extract_ShouldExtractLocalFunctionsWithCalledMethods_WhenGivenEventPropertyWithImbricatedLocalFunctions(
+                string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var property = (PropertyModel)((ClassModel)classTypes[0]).Properties[0];
+
+            Assert.Equal("Value", property.Name);
+            Assert.Equal(1, ((MethodModel)property.Accessors[0]).LocalFunctions.Count);
+
+            var stringSumFunction = ((MethodModel)property.Accessors[0]).LocalFunctions[0];
+            Assert.Equal("StringSum", stringSumFunction.Name);
+            Assert.Equal(2, stringSumFunction.LocalFunctions.Count);
+            Assert.Equal(1, stringSumFunction.CalledMethods.Count);
+            Assert.Equal("Stringify", stringSumFunction.CalledMethods[0].Name);
+            Assert.Equal("Namespace1.Class1.Value.add.StringSum(int, int)",
+                stringSumFunction.CalledMethods[0].ContainingTypeName);
+            Assert.Equal(2, stringSumFunction.CalledMethods[0].ParameterTypes.Count);
+            Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[0].Type.Name);
+            Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[1].Type.Name);
+
+            var sumFunction = (MethodModel)stringSumFunction.LocalFunctions[0];
+            Assert.Equal("Sum", sumFunction.Name);
+            Assert.Equal(1, sumFunction.LocalFunctions.Count);
+            Assert.Equal(2, sumFunction.CalledMethods.Count);
+            foreach (var calledMethod in sumFunction.CalledMethods)
+            {
+                Assert.Equal("Doubled", calledMethod.Name);
+                Assert.Equal("Namespace1.Class1.Value.add.StringSum(int, int).Sum(int, int)",
+                    calledMethod.ContainingTypeName);
+                Assert.Equal(1, calledMethod.ParameterTypes.Count);
+                Assert.Equal("int", calledMethod.ParameterTypes[0].Type.Name);
+            }
+
+            var doubledFunction = (MethodModel)sumFunction.LocalFunctions[0];
+            Assert.Equal("Doubled", doubledFunction.Name);
+            Assert.Empty(doubledFunction.LocalFunctions);
+            Assert.Empty(doubledFunction.CalledMethods);
+
+
+            var stringifyFunction = (MethodModel)stringSumFunction.LocalFunctions[1];
+            Assert.Equal("Stringify", stringifyFunction.Name);
+            Assert.Equal(2, stringifyFunction.LocalFunctions.Count);
+            Assert.Equal(2, stringifyFunction.CalledMethods.Count);
+
+            var stringifyFunctionCalledMethod1 = stringifyFunction.CalledMethods[0];
+            Assert.Equal("StringifyNumber", stringifyFunctionCalledMethod1.Name);
+            Assert.Equal("Namespace1.Class1.Value.add.StringSum(int, int).Stringify(int, int)",
+                stringifyFunctionCalledMethod1.ContainingTypeName);
+            Assert.Equal(1, stringifyFunctionCalledMethod1.ParameterTypes.Count);
+            Assert.Equal("int", stringifyFunctionCalledMethod1.ParameterTypes[0].Type.Name);
+
+            var stringifyFunctionCalledMethod2 = stringifyFunction.CalledMethods[1];
+            Assert.Equal("Calculate", stringifyFunctionCalledMethod2.Name);
+            Assert.Equal("Namespace1.Class1.Value.add.StringSum(int, int).Stringify(int, int)",
+                stringifyFunctionCalledMethod2.ContainingTypeName);
+            Assert.Equal(2, stringifyFunctionCalledMethod2.ParameterTypes.Count);
+            Assert.Equal("int", stringifyFunctionCalledMethod2.ParameterTypes[0].Type.Name);
+            Assert.Equal("int", stringifyFunctionCalledMethod2.ParameterTypes[1].Type.Name);
+
+
+            var calculateFunction = (MethodModel)stringifyFunction.LocalFunctions[0];
+            Assert.Equal("Calculate", calculateFunction.Name);
+            Assert.Empty(calculateFunction.LocalFunctions);
+            Assert.Equal(1, calculateFunction.CalledMethods.Count);
+
+            var calculateFunctionCalledMethod = calculateFunction.CalledMethods[0];
+            Assert.Equal("Sum", calculateFunctionCalledMethod.Name);
+            Assert.Equal("Namespace1.Class1.Value.add.StringSum(int, int)",
                 calculateFunctionCalledMethod.ContainingTypeName);
             Assert.Equal(2, calculateFunctionCalledMethod.ParameterTypes.Count);
             Assert.Equal("int", calculateFunctionCalledMethod.ParameterTypes[0].Type.Name);

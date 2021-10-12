@@ -14,6 +14,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
     {
         private readonly CSharpFactExtractor _factExtractor;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpBaseClassMetricTests()
         {
@@ -27,8 +29,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
@@ -47,7 +48,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                         }}
                                     }}";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntacticModelCreator = new CSharpSyntacticModelCreator();
+            var semanticModelCreator = new CSharpSemanticModelCreator(new CSharpCompilationMaker());
+            var syntaxTree = syntacticModelCreator.Create(fileContent);
+            var semanticModel = semanticModelCreator.Create(syntaxTree);
+
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -59,33 +65,37 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal(baseType, classModel.BaseTypes[0].Type.Name);
             Assert.Equal("class", classModel.BaseTypes[0].Kind);
         }
-        
+
         [Theory]
         [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/SimpleRecord.txt")]
         [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/SimpleRecord2.txt")]
         public void Extract_ShouldHaveBaseClass_WhenProvidedWithRecord(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
             var classModel = classTypes[0];
 
             Assert.Equal(2, classModel.BaseTypes.Count);
-            
+
             Assert.Equal("App.MyClass", classModel.Name);
             Assert.Equal("object", classModel.BaseTypes[0].Type.Name);
             Assert.Equal("class", classModel.BaseTypes[0].Kind);
-            
+
             Assert.Equal("System.IEquatable<App.MyClass>", classModel.BaseTypes[1].Type.Name);
             Assert.Equal("interface", classModel.BaseTypes[1].Kind);
         }
-        
+
         [Theory]
         [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/SimpleInterface.txt")]
         public void Extract_ShouldHaveNoBaseClass_WhenProvidedWithInterface(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -100,7 +110,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/SimpleEnum.txt")]
         public void Extract_ShouldHaveEnumBaseClass_WhenProvidedWithEnum(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -113,10 +125,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         }
 
         [Theory]
-        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/ClassThatExtendsExternClasses.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/ClassThatExtendsExternClasses.txt")]
         public void Extract_ShouldHaveBaseClassIMetric_WhenClassExtendsIMetricInterface(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -135,10 +150,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         }
 
         [Theory]
-        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/ClassThatExtendsOtherClass.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/ClassThatExtendsOtherClass.txt")]
         public void Extract_ShouldHaveBaseObjectAndNoInterfaces_WhenClassOnlyExtendsOtherClass(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(2, classTypes.Count);
 
@@ -160,11 +178,15 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         }
 
         [Theory]
-        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/ClassThatExtendsOtherClassAndExternInterfaces.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/ClassThatExtendsOtherClassAndExternInterfaces.txt")]
         public void
-            Extract_ShouldHaveBaseObjectAndInterfaces_WhenClassExtendsOtherClassAndImplementsMultipleInterfaces(string fileContent)
+            Extract_ShouldHaveBaseObjectAndInterfaces_WhenClassExtendsOtherClassAndImplementsMultipleInterfaces(
+                string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(2, classTypes.Count);
 

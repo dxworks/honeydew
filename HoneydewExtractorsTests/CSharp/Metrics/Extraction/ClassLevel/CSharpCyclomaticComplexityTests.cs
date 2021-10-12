@@ -22,6 +22,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
     {
         private readonly CSharpFactExtractor _factExtractor;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpCyclomaticComplexityTests()
         {
@@ -50,8 +52,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
@@ -60,7 +61,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void Extract_ShouldHave1CyclomaticComplexity_WhenGivenClassWithMethodsAndPropertiesAndDelegate(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(2, classTypes.Count);
 
@@ -77,7 +80,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Extract_ShouldCountCyclomaticComplexityFromWhiles_WhenGivenClassWithMethodsAndPropertiesAndDelegate(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(2, classTypes.Count);
 
@@ -93,7 +98,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void
             Extract_ShouldCountCyclomaticComplexityFromIfs_WhenGivenClassWithMethodsAndProperties(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -109,7 +116,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void
             Extract_ShouldCountCyclomaticComplexityFromFors_WhenGivenClassWithMethods(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -122,7 +131,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void
             Extract_ShouldCountCyclomaticComplexityFromUnaryExpression_WhenGivenClassWithMethods(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -136,7 +147,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Extract_ShouldCountCyclomaticComplexityFromComplexBinaryExpression_WhenGivenClassWithMethods(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -150,7 +163,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Extract_ShouldCountCyclomaticComplexityFromComplexBinaryExpressionWithIsAndOr_WhenGivenClassWithMethods(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -163,7 +178,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void
             Extract_ShouldCountCyclomaticComplexityFromDoWhile_WhenGivenClassWithMethods(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -176,7 +193,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void
             Extract_ShouldCountCyclomaticComplexityFromForeach_WhenGivenClassWithMethods(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -189,7 +208,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void
             Extract_ShouldCountCyclomaticComplexityFromSwitch_WhenGivenClassWithMethods(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -203,7 +224,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Extract_ShouldCountCyclomaticComplexityFromPatternSwitchWithOperators_WhenGivenClassWithMethods(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -217,7 +240,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Extract_ShouldCountCyclomaticComplexityFromReturnSwitchWithStrings_WhenGivenClassWithMethods(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -231,7 +256,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Extract_ShouldCountCyclomaticComplexityFromPatternSwitchWithClassHierarchy_WhenGivenClassWithMethods(
                 string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(5, classTypes.Count);
 
@@ -242,9 +269,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         [FileData(
             "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpCyclomaticComplexity/ClassWithMethodContainingConditionalOperators.txt")]
         public void
-            Extract_ShouldCountCyclomaticComplexityForConditionalOperators_WhenGivenClassWithMethods(string fileContent)
+            Extract_ShouldCountCyclomaticComplexityForConditionalOperators_WhenGivenClassWithMethods(
+                string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 

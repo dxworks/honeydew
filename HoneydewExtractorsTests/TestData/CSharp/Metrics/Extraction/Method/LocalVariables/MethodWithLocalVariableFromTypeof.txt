@@ -1,0 +1,17 @@
+using System;
+
+namespace Namespace1
+{
+    public class Class1
+    {
+        public void Method()
+        {
+            Type type = typeof(Class1);           
+        }
+
+        public void MethodWithVar()
+        {
+            var type = typeof(Class1);
+        }
+    }
+}

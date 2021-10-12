@@ -3,7 +3,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public record MethodModel : IModelEntity, IMethodTypeWithLocalFunctions
+    public record MethodModel : IMethodTypeWithLocalFunctions
     {
         public string Name { get; set; }
 

@@ -20,6 +20,8 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Extraction.MethodCall;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
+using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
+using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewExtractors.Processors;
 using HoneydewModels.CSharp;
 using Moq;
@@ -31,13 +33,17 @@ namespace HoneydewExtractorsTests.Processors
     {
         private readonly FullNameModelProcessor _sut;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly Mock<ILogger> _ambiguousClassLoggerMock = new();
         private readonly Mock<IProgressLogger> _progressLoggerMock = new();
         private readonly Mock<IProgressLoggerBar> _progressLoggerBarMock = new();
         private readonly CSharpFactExtractor _extractor;
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public FullNameModelProcessorForGenericTypesTests()
         {
-            _sut = new FullNameModelProcessor(_loggerMock.Object, _progressLoggerMock.Object, false);
+            _sut = new FullNameModelProcessor(_loggerMock.Object, _ambiguousClassLoggerMock.Object,
+                _progressLoggerMock.Object, false);
 
             var compositeVisitor = new CompositeVisitor();
             var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<IMethodSignatureVisitor>
@@ -63,6 +69,10 @@ namespace HoneydewExtractorsTests.Processors
                     calledMethodSetterVisitor,
                     parameterSetterVisitor,
                     localVariablesTypeSetterVisitor,
+                    new LocalFunctionsSetterClassVisitor(new List<ILocalFunctionVisitor>
+                    {
+                        new LocalFunctionInfoVisitor(new List<ILocalFunctionVisitor>())
+                    })
                 }),
                 new ConstructorSetterClassVisitor(new List<IConstructorVisitor>
                 {
@@ -81,8 +91,7 @@ namespace HoneydewExtractorsTests.Processors
                 })
             }));
 
-            _extractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            _extractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Fact]
@@ -116,30 +125,28 @@ namespace NameSpace1
     }
 }";
 
-            var classModels1 = _extractor.Extract(fileContent1).ClassTypes;
-            var classModels2 = _extractor.Extract(fileContent2).ClassTypes;
-            var classModels3 = _extractor.Extract(fileContent3).ClassTypes;
+            var syntaxTree1 = _syntacticModelCreator.Create(fileContent1);
+            var semanticModel1 = _semanticModelCreator.Create(syntaxTree1);
+
+            var syntaxTree2 = _syntacticModelCreator.Create(fileContent2);
+            var semanticModel2 = _semanticModelCreator.Create(syntaxTree2);
+
+            var syntaxTree3 = _syntacticModelCreator.Create(fileContent3);
+            var semanticModel3 = _semanticModelCreator.Create(syntaxTree3);
+
+            var compilationUnitType1 = _extractor.Extract(syntaxTree1, semanticModel1);
+            var compilationUnitType2 = _extractor.Extract(syntaxTree2, semanticModel2);
+            var compilationUnitType3 = _extractor.Extract(syntaxTree3, semanticModel3);
 
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
             var projectModel = new ProjectModel();
 
-            foreach (var classModel in classModels1)
-            {
-                projectModel.Add(classModel);
-            }
+            projectModel.Add(compilationUnitType1);
+            projectModel.Add(compilationUnitType2);
+            projectModel.Add(compilationUnitType3);
 
-            foreach (var classModel in classModels2)
-            {
-                projectModel.Add(classModel);
-            }
-
-            foreach (var classModel in classModels3)
-            {
-                projectModel.Add(classModel);
-            }
-
-            solutionModel.Projects.Add(projectModel);
+            repositoryModel.Projects.Add(projectModel);
             repositoryModel.Solutions.Add(solutionModel);
 
             _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
@@ -153,10 +160,10 @@ namespace NameSpace1
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
-            var genericClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0];
+            var genericClass = actualRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[0];
             Assert.Equal("OtherNamespace.Generic<T>", genericClass.Name);
 
-            var classType = (ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0];
+            var classType = (ClassModel)actualRepositoryModel.Projects[0].CompilationUnits[2].ClassTypes[0];
             Assert.Equal("OtherNamespace.Generic<OtherNamespace.Generic<int>>",
                 classType.Methods[0].ParameterTypes[0].Type.Name);
             Assert.Equal("OtherNamespace.Generic<OtherNamespace.Generic<string>>",
@@ -195,30 +202,28 @@ namespace NameSpace1
     }
 }";
 
-            var classModels1 = _extractor.Extract(fileContent1).ClassTypes;
-            var classModels2 = _extractor.Extract(fileContent2).ClassTypes;
-            var classModels3 = _extractor.Extract(fileContent3).ClassTypes;
+            var syntaxTree1 = _syntacticModelCreator.Create(fileContent1);
+            var semanticModel1 = _semanticModelCreator.Create(syntaxTree1);
+
+            var syntaxTree2 = _syntacticModelCreator.Create(fileContent2);
+            var semanticModel2 = _semanticModelCreator.Create(syntaxTree2);
+
+            var syntaxTree3 = _syntacticModelCreator.Create(fileContent3);
+            var semanticModel3 = _semanticModelCreator.Create(syntaxTree3);
+
+            var compilationUnitType1 = _extractor.Extract(syntaxTree1, semanticModel1);
+            var compilationUnitType2 = _extractor.Extract(syntaxTree2, semanticModel2);
+            var compilationUnitType3 = _extractor.Extract(syntaxTree3, semanticModel3);
 
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
             var projectModel = new ProjectModel();
 
-            foreach (var classModel in classModels1)
-            {
-                projectModel.Add(classModel);
-            }
+            projectModel.Add(compilationUnitType1);
+            projectModel.Add(compilationUnitType2);
+            projectModel.Add(compilationUnitType3);
 
-            foreach (var classModel in classModels2)
-            {
-                projectModel.Add(classModel);
-            }
-
-            foreach (var classModel in classModels3)
-            {
-                projectModel.Add(classModel);
-            }
-
-            solutionModel.Projects.Add(projectModel);
+            repositoryModel.Projects.Add(projectModel);
             repositoryModel.Solutions.Add(solutionModel);
 
             _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
@@ -232,11 +237,12 @@ namespace NameSpace1
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
-            var genericClass = actualRepositoryModel.Solutions[0].Projects[0].Namespaces[0].ClassModels[0];
+            var genericClass = actualRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[0];
             Assert.Equal("OtherNamespace.Generic<T>", genericClass.Name);
 
-            var classType = (ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[2].ClassModels[0];
-            Assert.Equal("OtherMyNamespace.Generic<OtherNamespace.Generic<int>,OtherMyNamespace.Generic<string,char>>",
+            var classType = (ClassModel)actualRepositoryModel.Projects[0].CompilationUnits[2].ClassTypes[0];
+            Assert.Equal(
+                "OtherMyNamespace.Generic<OtherNamespace.Generic<int>,OtherMyNamespace.Generic<string,char>>",
                 classType.Methods[0].ParameterTypes[0].Type.Name);
             Assert.Equal("OtherNamespace.Generic<OtherNamespace.Generic<string>>",
                 classType.Methods[0].LocalVariableTypes[0].Type.Name);
@@ -253,7 +259,7 @@ namespace OtherNamespace
     public class Class1 { }
 }";
 
-            const string fileContent3 = @"
+            const string fileContent2 = @"
 using OtherNamespace;
 using System.Collections.Generic;
     
@@ -269,24 +275,23 @@ namespace NameSpace1
     }
 }";
 
-            var classModels1 = _extractor.Extract(fileContent1).ClassTypes;
-            var classModels3 = _extractor.Extract(fileContent3).ClassTypes;
+            var syntaxTree1 = _syntacticModelCreator.Create(fileContent1);
+            var semanticModel1 = _semanticModelCreator.Create(syntaxTree1);
+
+            var syntaxTree2 = _syntacticModelCreator.Create(fileContent2);
+            var semanticModel2 = _semanticModelCreator.Create(syntaxTree2);
+
+            var compilationUnitType1 = _extractor.Extract(syntaxTree1, semanticModel1);
+            var compilationUnitType2 = _extractor.Extract(syntaxTree2, semanticModel2);
 
             var repositoryModel = new RepositoryModel();
             var solutionModel = new SolutionModel();
             var projectModel = new ProjectModel();
 
-            foreach (var classModel in classModels1)
-            {
-                projectModel.Add(classModel);
-            }
+            projectModel.Add(compilationUnitType1);
+            projectModel.Add(compilationUnitType2);
 
-            foreach (var classModel in classModels3)
-            {
-                projectModel.Add(classModel);
-            }
-
-            solutionModel.Projects.Add(projectModel);
+            repositoryModel.Projects.Add(projectModel);
             repositoryModel.Solutions.Add(solutionModel);
 
             _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(2, "Resolving Class Names"))
@@ -300,13 +305,55 @@ namespace NameSpace1
 
             var actualRepositoryModel = _sut.Process(repositoryModel);
 
-            var classType = (ClassModel)actualRepositoryModel.Solutions[0].Projects[0].Namespaces[1].ClassModels[0];
+            var classType = (ClassModel)actualRepositoryModel.Projects[0].CompilationUnits[1].ClassTypes[0];
             Assert.Equal("System.Collections.Generic.List<OtherNamespace.Class1>",
                 classType.Methods[0].ParameterTypes[0].Type.Name);
             Assert.Equal("System.Collections.Generic.List<OtherNamespace.Class1>",
                 classType.Methods[0].LocalVariableTypes[0].Type.Name);
             Assert.Equal("System.Collections.Generic.List<OtherNamespace.Class1>",
                 classType.Methods[0].LocalVariableTypes[1].Type.Name);
+        }
+
+        [Theory]
+        [FileData("TestData/Processors/FullNameProcessor/GenericClass.txt")]
+        public void Process_ShouldReturnTheFullClassNamesOfContainingClass_WhenGivenClassModelsWithGenericTypes(
+            string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnitType3 = _extractor.Extract(syntaxTree, semanticModel);
+
+            var repositoryModel = new RepositoryModel();
+            var solutionModel = new SolutionModel();
+            var projectModel = new ProjectModel();
+
+            projectModel.Add(compilationUnitType3);
+
+            repositoryModel.Projects.Add(projectModel);
+            repositoryModel.Solutions.Add(solutionModel);
+
+            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(1, "Resolving Class Names"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(1, "Resolving Using Statements for Each Class"))
+                .Returns(_progressLoggerBarMock.Object);
+            _progressLoggerMock.Setup(logger =>
+                    logger.CreateProgressLogger(1, "Resolving Class Elements (Fields, Methods, Properties,...)"))
+                .Returns(_progressLoggerBarMock.Object);
+
+            var actualRepositoryModel = _sut.Process(repositoryModel);
+
+            var genericClass = (ClassModel)actualRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[0];
+            Assert.Equal("NameSpace1.MyClass<T, K>", genericClass.Name);
+
+            Assert.Equal("NameSpace1.MyClass<T, K>", genericClass.Methods[0].ContainingTypeName);
+            Assert.Equal("NameSpace1.MyClass<T, K>", genericClass.Constructors[0].ContainingTypeName);
+            Assert.Equal("NameSpace1.MyClass<T, K>", genericClass.Fields[0].ContainingTypeName);
+            Assert.Equal("NameSpace1.MyClass<T, K>", genericClass.Properties[0].ContainingTypeName);
+
+            Assert.Equal("NameSpace1.MyClass<T, K>.Method<R>(R)",
+                ((MethodModel)genericClass.Methods[0]).LocalFunctions[0].ContainingTypeName);
         }
     }
 }

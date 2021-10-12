@@ -5,6 +5,8 @@
         public string Alias { get; init; }
 
         public string AliasType { get; set; }
+
+        public bool IsStatic { get; init; }
     }
 
     public enum EAliasType

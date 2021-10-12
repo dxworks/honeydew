@@ -28,9 +28,16 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     .Select(reference => ExtractPathFromProjectId(reference.ProjectId.ToString())).ToList()
             };
 
-            _compilationMaker.AddReference(project.CompilationOutputInfo.AssemblyPath);
-
             var extractor = extractorCreator.Create(project.Language);
+
+            var compilation = await project.GetCompilationAsync();
+            if (compilation == null)
+            {
+                _logger.Log();
+                _logger.Log($"Could not get compilation from {project.FilePath} !", LogLevels.Warning);
+
+                return null;
+            }
 
             if (extractor == null)
             {
@@ -40,33 +47,36 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                 return null;
             }
 
+            compilation = compilation.AddReferences(_compilationMaker.FindTrustedReferences());
+
             var i = 1;
             var documentCount = project.Documents.Count();
 
-            foreach (var document in project.Documents)
+            foreach (var syntaxTree in compilation.SyntaxTrees)
             {
                 try
                 {
-                    _logger.Log($"Extracting facts from {document.FilePath} ({i}/{documentCount})...");
-
-                    var fileContent = await document.GetTextAsync();
+                    _logger.Log($"Extracting facts from {syntaxTree.FilePath} ({i}/{documentCount})...");
 
 
-                    var compilationUnitType = extractor.Extract(fileContent.ToString());
-                    compilationUnitType.FilePath = document.FilePath;
-                    var classTypes = compilationUnitType.ClassTypes;
+                    var semanticModel = compilation.GetSemanticModel(syntaxTree);
 
-                    _logger.Log($"Done extracting from {document.FilePath} ({i}/{documentCount})");
+                    var compilationUnitType = extractor.Extract(syntaxTree, semanticModel);
 
-                    foreach (var classModel in classTypes)
+                    _logger.Log($"Done extracting from {syntaxTree.FilePath} ({i}/{documentCount})");
+
+                    compilationUnitType.FilePath = syntaxTree.FilePath;
+
+                    foreach (var classModel in compilationUnitType.ClassTypes)
                     {
-                        classModel.FilePath = document.FilePath;
-                        projectModel.Add(classModel);
+                        classModel.FilePath = syntaxTree.FilePath;
                     }
+
+                    projectModel.Add(compilationUnitType);
                 }
                 catch (Exception e)
                 {
-                    _logger.Log($"Could not extract from {document.FilePath} ({i}/{documentCount}) because {e}",
+                    _logger.Log($"Could not extract from {syntaxTree.FilePath} ({i}/{documentCount}) because {e}",
                         LogLevels.Warning);
                 }
 

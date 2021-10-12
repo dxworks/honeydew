@@ -3,7 +3,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public record PropertyModel : IModelEntity, IPropertyType
+    public record PropertyModel : IPropertyType
     {
         public int CyclomaticComplexity { get; set; }
         public string Name { get; set; }
@@ -19,6 +19,8 @@ namespace HoneydewModels.CSharp
         public IEntityType Type { get; set; }
 
         public bool IsEvent { get; set; }
+
+        public bool IsNullable { get; set; }
 
         public IList<IMethodType> Accessors { get; set; } = new List<IMethodType>();
 

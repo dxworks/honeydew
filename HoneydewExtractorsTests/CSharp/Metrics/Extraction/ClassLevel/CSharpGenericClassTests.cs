@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
@@ -8,6 +9,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Common;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
@@ -15,6 +17,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
     public class CSharpGenericClassTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpGenericClassTests()
         {
@@ -30,8 +35,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                 })
             }));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
@@ -45,7 +51,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 {{
     public {classType} Class1<T>  {{ }}
 }}";
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -69,8 +77,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 {{
     public {classType} Class1<T,R,K> {{ }}
 }}";
-
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -90,7 +99,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
     public interface BaseType<T>{}
 }";
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -112,7 +124,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
     public interface BaseType<T>{}
 }";
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -134,7 +149,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
     public interface BaseType<T>{}
 }";
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -164,7 +182,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
     public interface BaseType<T>{}
 }";
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -183,7 +204,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
     public class Class1<T,R,K> : Base1<T>, Base2, Base3<R,K>, Base4<C<T,R>, K> { }
 }";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -232,7 +255,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             "TestData/CSharp/Metrics/Extraction/ClassLevel/GenericExtraction/GenericBaseTypeWithConcreteType.txt")]
         public void Extract_ShouldHaveMultipleBaseConcreteGenericTypes_WhenProvidedWithClass(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -262,7 +287,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             "TestData/CSharp/Metrics/Extraction/ClassLevel/GenericExtraction/GenericInterfaceWithModifiers.txt")]
         public void Extract_ShouldHaveGenericModifiers_WhenProvidedWithGenericInterface(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -282,7 +309,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             "TestData/CSharp/Metrics/Extraction/ClassLevel/GenericExtraction/GenericTypeWithPredefinedConstrains.txt")]
         public void Extract_ShouldHaveGenericTypesWithPredefinedConstrains_WhenProvidedWithClass(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel1 = (ClassModel)classTypes[0];
             var classModel2 = (ClassModel)classTypes[1];
@@ -296,6 +325,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("TK", classModel1.GenericParameters[1].Name);
             Assert.Equal(1, classModel1.GenericParameters[1].Constraints.Count);
             Assert.Equal("class?", classModel1.GenericParameters[1].Constraints[0].Name);
+            Assert.Equal("class", classModel1.GenericParameters[1].Constraints[0].FullType.Name);
+            Assert.True(classModel1.GenericParameters[1].Constraints[0].FullType.IsNullable);
 
             Assert.Equal("TR", classModel1.GenericParameters[2].Name);
             Assert.Equal(1, classModel1.GenericParameters[2].Constraints.Count);
@@ -330,7 +361,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             "TestData/CSharp/Metrics/Extraction/ClassLevel/GenericExtraction/GenericTypeWithMultipleConstrains.txt")]
         public void Extract_ShouldHaveGenericTypesWithMultipleConstrains_WhenProvidedWithClass(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 

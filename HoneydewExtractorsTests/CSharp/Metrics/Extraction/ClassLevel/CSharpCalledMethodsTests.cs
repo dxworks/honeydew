@@ -24,6 +24,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
     {
         private readonly CSharpFactExtractor _factExtractor;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpCalledMethodsTests()
         {
@@ -56,8 +58,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Fact]
@@ -79,7 +80,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                          }                                        
                                       }";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -168,7 +171,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                              }                                  
                                       }";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var methodModel = ((ClassModel)classTypes[1]).Methods[0];
 
@@ -210,7 +215,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                                  }                                  
                                           }";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var methodModelM = ((ClassModel)classTypes[1]).Methods[1];
             Assert.Equal("M", methodModelM.Name);
@@ -256,7 +263,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                                  }                                  
                                           }";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var methodModelM = ((ClassModel)classTypes[0]).Methods[0];
             Assert.Equal("M", methodModelM.Name);
@@ -301,7 +310,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                                  }                                  
                                           }";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var methodModelM = ((ClassModel)classTypes[0]).Methods[1];
             Assert.Equal("Method", methodModelM.Name);
@@ -351,7 +362,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                                 }
                                             }                                      
                                           }";
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var methodModelM = ((ClassModel)classTypes[0]).Methods[1];
             Assert.Equal("Method", methodModelM.Name);
@@ -397,7 +411,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                                 }
                                             }                                       
                                           }";
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var methodModelM = ((ClassModel)classTypes[0]).Methods[2];
             Assert.Equal("Method", methodModelM.Name);
@@ -486,7 +503,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                                 }
                                             }                                          
                                           }";
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var methodModelM = ((ClassModel)classTypes[2]).Methods[0];
             Assert.Equal("Method", methodModelM.Name);
@@ -537,7 +557,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                             }                                          
                                           }";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var methodModelM = ((ClassModel)classTypes[0]).Methods[0];
             Assert.Equal("Method", methodModelM.Name);
@@ -606,7 +628,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                             }                                              
                                           }";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var methodModelM = ((ClassModel)classTypes[1]).Methods[0];
             Assert.Equal("Method", methodModelM.Name);
@@ -654,7 +678,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                             }                                              
                                           }";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var methodModelM = ((ClassModel)classTypes[1]).Methods[0];
             Assert.Equal("Method", methodModelM.Name);
@@ -682,7 +708,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             "TestData/CSharp/Metrics/Extraction/ClassLevel/CSharpCalledMethods/ClassWithMethodsThatCallsInnerGenericMethod.txt")]
         public void Extract_ShouldHaveCalledMethods_WhenProvidedWithGenericMethods(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var genericMethodModel = ((ClassModel)classTypes[0]).Methods[0];
             Assert.Equal("Method", genericMethodModel.Name);
@@ -712,6 +740,67 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             Assert.Equal("TopLevel.Bar", calledMethod2.ContainingTypeName);
             Assert.Equal(1, calledMethod2.ParameterTypes.Count);
             Assert.Equal("double", calledMethod2.ParameterTypes[0].Type.Name);
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithLocalVariableFromTypeof.txt")]
+        public void Extract_ShouldHaveNoCalledMethods_WhenProvidedWithTypeofSyntax(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+            Assert.Equal(2, classModel.Methods.Count);
+
+            foreach (var methodType in classModel.Methods)
+            {
+                Assert.Empty(methodType.CalledMethods);
+            }
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithLocalVariableFromNameof.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithLocalVariableFromNameofOfEnum.txt")]
+        public void Extract_ShouldExtractNameof_WhenProvidedWithNameofSyntax(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+            Assert.Equal(2, classModel.Methods.Count);
+
+            foreach (var methodType in classModel.Methods)
+            {
+                Assert.Equal(1, methodType.CalledMethods.Count);
+                Assert.Equal("nameof", methodType.CalledMethods[0].Name);
+                Assert.Equal("string", methodType.CalledMethods[0].ContainingTypeName);
+            }
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithAwaitStatement.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithAwaitStatementWithUnknownClass.txt")]
+        public void Extract_ShouldHaveCalledMethods_WhenGivenMethodWithAwaitStatement(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            var methodType = classModel.Methods[0];
+            Assert.Equal(4, methodType.CalledMethods.Count);
+            Assert.Equal("Wait", methodType.CalledMethods[0].Name);
+            Assert.Equal("Get", methodType.CalledMethods[1].Name);
+            Assert.Equal("Wait", methodType.CalledMethods[2].Name);
+            Assert.Equal("Get", methodType.CalledMethods[3].Name);
         }
     }
 }

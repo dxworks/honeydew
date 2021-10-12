@@ -1,0 +1,27 @@
+namespace Namespace1
+{
+    class MyClass
+    {
+        private MyClass2 _myClass2;
+
+        public MyClass()
+        {
+            ref readonly var a = ref _myClass2.Method();
+        }
+        
+        public MyClass(int x)
+        {
+            ref readonly int a = ref _myClass2.Method();
+        }
+    }
+
+    class MyClass2
+    {
+        public ref readonly int Method()
+        {
+            int[] a = new int[2];
+            
+            return ref a[0];
+        }
+    }
+}

@@ -1,7 +1,9 @@
 ﻿namespace HoneydewModels.Types
 {
-    public interface ILocalVariableType : IType
+    public interface ILocalVariableType : INullableType
     {
-       public IEntityType Type { get; set; }  
+        public IEntityType Type { get; set; }
+
+        public string Modifier { get; set; }
     }
 }

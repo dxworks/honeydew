@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
 using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 
@@ -20,19 +21,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
                 return;
             }
 
-            var dependencies = new Dictionary<string, int>();
-
-            foreach (var propertyType in classTypeWithProperties.Properties)
-            {
-                if (dependencies.ContainsKey(propertyType.Type.Name))
-                {
-                    dependencies[propertyType.Type.Name]++;
-                }
-                else
-                {
-                    dependencies.Add(propertyType.Type.Name, 1);
-                }
-            }
+            var dependencies = GetDependencies(classTypeWithProperties);
 
             classTypeWithProperties.Metrics.Add(new MetricModel
             {
@@ -40,6 +29,26 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
                 Value = dependencies,
                 ValueType = dependencies.GetType().ToString()
             });
+        }
+
+        public Dictionary<string, int> GetDependencies(IPropertyMembersClassType classTypeWithProperties)
+        {
+            var dependencies = new Dictionary<string, int>();
+
+            foreach (var propertyType in classTypeWithProperties.Properties)
+            {
+                var typeName = CSharpConstants.GetNonNullableName(propertyType.Type.Name);
+                if (dependencies.ContainsKey(typeName))
+                {
+                    dependencies[typeName]++;
+                }
+                else
+                {
+                    dependencies.Add(typeName, 1);
+                }
+            }
+
+            return dependencies;
         }
     }
 }

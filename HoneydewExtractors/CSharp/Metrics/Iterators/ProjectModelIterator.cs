@@ -2,31 +2,32 @@
 using HoneydewExtractors.Core.Metrics.Iterators;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 
 namespace HoneydewExtractors.CSharp.Metrics.Iterators
 {
     public class ProjectModelIterator : ModelIterator<ProjectModel>
     {
-        private readonly IList<ModelIterator<NamespaceModel>> _iterators;
+        private readonly IList<ModelIterator<ICompilationUnitType>> _iterators;
 
-        public ProjectModelIterator(IList<ModelIterator<NamespaceModel>> iterators,
+        public ProjectModelIterator(IList<ModelIterator<ICompilationUnitType>> iterators,
             IList<IModelVisitor<ProjectModel>> modelVisitors) : base(modelVisitors)
         {
             _iterators = iterators;
         }
 
-        public ProjectModelIterator(IList<ModelIterator<NamespaceModel>> iterators) : this(iterators,
+        public ProjectModelIterator(IList<ModelIterator<ICompilationUnitType>> iterators) : this(iterators,
             new List<IModelVisitor<ProjectModel>>())
         {
         }
 
         public override void Iterate(ProjectModel projectModel)
         {
-            foreach (var solutionModel in projectModel.Namespaces)
+            foreach (var compilationUnitType in projectModel.CompilationUnits)
             {
                 foreach (var iterator in _iterators)
                 {
-                    iterator.Iterate(solutionModel);
+                    iterator.Iterate(compilationUnitType);
                 }
             }
 

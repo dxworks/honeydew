@@ -17,6 +17,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
     {
         private readonly CSharpFactExtractor _factExtractor;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpFieldsInfoMetricTests()
         {
@@ -33,8 +35,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Fact]
@@ -49,8 +50,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                           public interface Bar { public void f(int a); string g(int a, float b); }                                        
                                       }";
 
-
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(2, classTypes.Count);
 
@@ -74,8 +76,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                                            }                                        
                                       }";
 
-
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -123,8 +126,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                           public class Foo {{ {modifier} int AnimalNest; {modifier} float X,Yaz_fafa; {modifier} string _zxy; {modifier} CSharpMetricExtractor extractor;}}                                        
                                       }}";
 
-
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -180,8 +184,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                           public class Foo {{ {visibility} event CSharpMetricExtractor extractor; {visibility} event int _some_event; {visibility} event Action MyAction1,MyAction2;}}                                        
                                       }}";
 
-
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -230,8 +235,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                               }}                                        
                                       }}";
 
-
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 

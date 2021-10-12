@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
@@ -12,6 +13,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
@@ -19,6 +21,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
     public class CSharpMethodLocalVariablesTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpMethodLocalVariablesTests()
         {
@@ -47,16 +52,18 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
                 }),
             }));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
-        [FileData(
-            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithPrimitiveLocalVariables.txt")]
+        [FileData("TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithPrimitiveLocalVariables.txt")]
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithPrimitiveTypes(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(2, classModel.Methods.Count);
@@ -76,7 +83,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithCustomClassLocalVariables.txt")]
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithCustomClassTypes(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(2, classModel.Methods.Count);
@@ -98,10 +107,52 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
 
         [Theory]
         [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithLocalVariableFromTypeof.txt")]
+        public void Extract_ShouldExtractLocalVariables_WhenProvidedWithTypeofSyntax(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+            Assert.Equal(2, classModel.Methods.Count);
+
+            foreach (var methodType in classModel.Methods)
+            {
+                Assert.Equal(1, methodType.LocalVariableTypes.Count);
+                Assert.Equal("System.Type", methodType.LocalVariableTypes[0].Type.Name);
+            }
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithLocalVariableFromNameof.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithLocalVariableFromNameofOfEnum.txt")]
+        public void Extract_ShouldExtractLocalVariables_WhenProvidedWithNameofSyntax(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+            Assert.Equal(2, classModel.Methods.Count);
+
+            foreach (var methodType in classModel.Methods)
+            {
+                Assert.Equal(1, methodType.LocalVariableTypes.Count);
+                Assert.Equal("string", methodType.LocalVariableTypes[0].Type.Name);
+            }
+        }
+
+        [Theory]
+        [FileData(
             "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithExternClassLocalVariables.txt")]
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithExternClassTypes(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(2, classModel.Methods.Count);
@@ -121,7 +172,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithArrayLocalVariable.txt")]
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithArrayLocalVariable(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(2, classModel.Methods.Count);
@@ -141,7 +194,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithLocalFunctionWithLocalVariables(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             var method = (MethodModel)classModel.Methods[0];
@@ -171,7 +226,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithLocalFunctionWithArrayLocalVariables(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             var method = (MethodModel)classModel.Methods[0];
@@ -201,7 +258,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithLocalVariablesFromIfAndSwitch(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(2, classModel.Methods.Count);
@@ -220,7 +279,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithLocalFunctionsWithLocalVariablesFromIfAndSwitch(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             var method = (MethodModel)classModel.Methods[0];
@@ -248,7 +309,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithLocalVariablesFromForeach(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(3, classModel.Methods.Count);
@@ -274,7 +337,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
         public void Extract_ShouldExtractLocalVariables_WhenProvidedWithLocalFunctionsWithLocalVariablesFromForeach(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -315,6 +380,109 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             Assert.Equal("ExternClass", method2.LocalFunctions[0].LocalVariableTypes[1].Type.Name);
             Assert.Equal("ExternClass", method2.LocalFunctions[0].LocalFunctions[0].LocalVariableTypes[0].Type.Name);
             Assert.Equal("ExternClass", method2.LocalFunctions[0].LocalFunctions[0].LocalVariableTypes[1].Type.Name);
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/ClassWithNonPrimitiveLocalVariablesOfPropertyFromOtherClass.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/ClassWithNonPrimitiveLocalVariablesOfMethodFromOtherClass.txt")]
+        public void
+            Extract_ShouldHaveLocalVariablesDependencies_WhenGivenPropertyFromOtherClass(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            foreach (var methodType in classModel.Methods)
+            {
+                foreach (var localVariableType in methodType.LocalVariableTypes)
+                {
+                    Assert.Equal("int", localVariableType.Type.Name);
+                }
+            }
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithUnknownClassMembersInLocalVariables.txt")]
+        public void Extract_ShouldHaveNoLocalVariablesDependencies_WhenGivenUnknownClassMembers(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            foreach (var methodType in classModel.Methods)
+            {
+                Assert.Equal(3, methodType.LocalVariableTypes.Count);
+                foreach (var localVariableType in methodType.LocalVariableTypes)
+                {
+                    Assert.Equal("int", localVariableType.Type.Name);
+                }
+            }
+
+            _loggerMock.Verify(logger => logger.Log("Could not set 3 local variables", LogLevels.Warning), Times.Once);
+        }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithAwaitStatement.txt")]
+        public void Extract_ShouldHaveLocalVariableDependencies_WhenGivenMethodWithAwaitStatement(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            var methodType = classModel.Methods[0];
+            Assert.Equal(2, methodType.LocalVariableTypes.Count);
+            foreach (var localVariableType in methodType.LocalVariableTypes)
+            {
+                Assert.Equal("int", localVariableType.Type.Name);
+            }
+        }
+        
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithAwaitStatementWithUnknownClass.txt")]
+        public void Extract_ShouldHaveLocalVariableDependencies_WhenGivenMethodWithAwaitStatementWithUnknownClass(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            var methodType = classModel.Methods[0];
+            Assert.Equal(2, methodType.LocalVariableTypes.Count);
+            foreach (var localVariableType in methodType.LocalVariableTypes)
+            {
+                Assert.Equal("ExternClass", localVariableType.Type.Name);
+            }
+        }
+        
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Method/LocalVariables/MethodWithAwaitStatementWithUnknownGenericClass.txt")]
+        public void Extract_ShouldHaveLocalVariableDependencies_WhenGivenMethodWithAwaitStatementWithUnknownGenericClass(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+
+            var methodType = classModel.Methods[0];
+            Assert.Equal(2, methodType.LocalVariableTypes.Count);
+            foreach (var localVariableType in methodType.LocalVariableTypes)
+            {
+                Assert.Equal("ExternClass<int, ExternClass<double>>", localVariableType.Type.Name);
+            }
         }
     }
 }

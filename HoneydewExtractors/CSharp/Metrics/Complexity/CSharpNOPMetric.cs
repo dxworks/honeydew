@@ -11,12 +11,9 @@ namespace HoneydewExtractors.CSharp.Metrics.Complexity
 
         public void Calculate(RepositoryModel model)
         {
-            foreach (var solutionModel in model.Solutions)
+            foreach (var projectModel in model.Projects)
             {
-                foreach (var projectModel in solutionModel.Projects)
-                {
-                    _numberOfPackages += projectModel.Namespaces.Count;
-                }
+                _numberOfPackages += projectModel.Namespaces.Count;
             }
         }
 

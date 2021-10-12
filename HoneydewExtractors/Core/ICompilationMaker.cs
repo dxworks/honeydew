@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
 
 namespace HoneydewExtractors.Core
 {
@@ -6,6 +7,6 @@ namespace HoneydewExtractors.Core
     {
         Compilation GetCompilation();
 
-        void AddReference(string path);
+        IEnumerable<MetadataReference> FindTrustedReferences();
     }
 }

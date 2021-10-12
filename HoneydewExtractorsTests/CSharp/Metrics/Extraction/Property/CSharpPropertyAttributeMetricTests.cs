@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -12,6 +13,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
 using HoneydewModels.CSharp;
+using Moq;
 using Xunit;
 
 namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
@@ -19,6 +21,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
     public class CSharpPropertyAttributeMetricTests
     {
         private readonly CSharpFactExtractor _factExtractor;
+        private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpPropertyAttributeMetricTests()
         {
@@ -43,8 +48,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                 })
             }));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
@@ -65,7 +71,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
     }}
 }}";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -83,16 +91,21 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                     Assert.Equal($"Namespace1.Class1.{propertyType.Name}", attributeType.ContainingTypeName);
                     Assert.Equal(1, attributeType.ParameterTypes.Count);
                     Assert.Equal("string?", attributeType.ParameterTypes[0].Type.Name);
+                    Assert.Equal("string", attributeType.ParameterTypes[0].Type.FullType.Name);
+                    Assert.True(attributeType.ParameterTypes[0].Type.FullType.IsNullable);
                 }
             }
         }
 
 
         [Theory]
-        [FileData("TestData/CSharp/Metrics/Extraction/Property/Attributes/PropertyWithOneAttributeWithNoParams.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Property/Attributes/PropertyWithOneAttributeWithNoParams.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithOneAttributeWithNoParams(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
             Assert.Equal(2, classModel.Properties.Count);
@@ -113,10 +126,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         }
 
         [Theory]
-        [FileData("TestData/CSharp/Metrics/Extraction/Property/Attributes/PropertyWithOneAttributeWithOneParam.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/Property/Attributes/PropertyWithOneAttributeWithOneParam.txt")]
         public void Extract_ShouldExtractAttribute_WhenProvidedWithOneAttributeWithOneParams(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classModel = (ClassModel)classTypes[0];
 
@@ -133,6 +149,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                     Assert.Equal("System.ObsoleteAttribute", attributeType.Name);
                     Assert.Equal(1, attributeType.ParameterTypes.Count);
                     Assert.Equal("string?", attributeType.ParameterTypes[0].Type.Name);
+                    Assert.Equal("string", attributeType.ParameterTypes[0].Type.FullType.Name);
+                    Assert.True(attributeType.ParameterTypes[0].Type.FullType.IsNullable);
                 }
             }
 
@@ -148,7 +166,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         public void Extract_ShouldExtractAttribute_WhenProvidedWithMultipleAttributesWitMultipleParams(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var properties = ((ClassModel)classTypes[0]).Properties;
 
@@ -168,6 +188,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
                 Assert.Equal(2, attribute1.ParameterTypes.Count);
                 Assert.Equal("System.ObsoleteAttribute", attribute1.Name);
                 Assert.Equal("string?", attribute1.ParameterTypes[0].Type.Name);
+                Assert.Equal("string", attribute1.ParameterTypes[0].Type.FullType.Name);
+                Assert.True(attribute1.ParameterTypes[0].Type.FullType.IsNullable);
                 Assert.Equal("bool", attribute1.ParameterTypes[1].Type.Name);
 
                 var attribute2 = attributeTypes[1];
@@ -188,7 +210,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         public void Extract_ShouldExtractAttribute_WhenProvidedWithCustomAttribute(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classType = (ClassModel)classTypes[1];
 
@@ -227,7 +251,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         public void Extract_ShouldExtractAttribute_WhenProvidedWithExternAttribute(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classType = (ClassModel)classTypes[0];
 
@@ -277,7 +303,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         public void Extract_ShouldExtractAttribute_WhenProvidedWithPropertyAccessors(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classType = (ClassModel)classTypes[0];
 
@@ -321,7 +349,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Property
         public void Extract_ShouldExtractAttribute_WhenProvidedWithPropertyAccessorsForReturnValue(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var classType = (ClassModel)classTypes[0];
 

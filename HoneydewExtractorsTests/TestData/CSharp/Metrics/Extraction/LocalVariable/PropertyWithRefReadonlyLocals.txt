@@ -1,0 +1,69 @@
+using System;
+
+namespace Namespace1
+{
+    class MyClass
+    {
+        private MyClass2 _myClass2;
+
+        public int Prop1
+        {
+            get 
+            {
+                ref readonly var a = ref _myClass2.Method();
+                return 0;
+            }
+            set 
+            {
+                ref readonly int a = ref _myClass2.Method();
+            }
+        }
+        
+        public int Prop2
+        {
+            get 
+            {
+                ref readonly int a = ref _myClass2.Method();
+                return 2;
+            }
+            init
+            {
+                ref readonly var a = ref _myClass2.Method();
+            }
+        }
+        
+        public event Func<int> Event1
+        {
+            add
+            {
+                ref readonly var a = ref _myClass2.Method();
+            }
+            remove 
+            {
+                ref readonly int a = ref _myClass2.Method();
+            }
+        }
+        
+        public event Func<int> Event2
+        {
+            add
+            {
+                ref readonly int a = ref _myClass2.Method();
+            }
+            remove
+            {
+                ref readonly var a = ref _myClass2.Method();
+            }
+        }
+    }
+
+    class MyClass2
+    {
+        public ref int Method()
+        {
+            int[] a = new int[2];
+            
+            return ref a[0];
+        }
+    }
+}

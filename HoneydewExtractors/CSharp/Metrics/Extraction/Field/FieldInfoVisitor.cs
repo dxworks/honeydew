@@ -26,12 +26,12 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Field
             var containingClass = "";
             if (syntaxNode.Parent is BaseTypeDeclarationSyntax classDeclarationSyntax)
             {
-                containingClass = CSharpHelperMethods.GetFullName(classDeclarationSyntax).Name;
+                containingClass = CSharpHelperMethods.GetFullName(classDeclarationSyntax, out _).Name;
             }
 
             CSharpConstants.SetModifiers(allModifiers, ref accessModifier, ref modifier);
 
-            var typeName = CSharpHelperMethods.GetFullName(syntaxNode.Declaration);
+            var typeName = CSharpHelperMethods.GetFullName(syntaxNode.Declaration, out var isNullable);
 
             var isEvent = syntaxNode is EventFieldDeclarationSyntax;
 
@@ -45,7 +45,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Field
                     IsEvent = isEvent,
                     Type = typeName,
                     Name = variable.Identifier.ToString(),
-                    ContainingTypeName = containingClass
+                    ContainingTypeName = containingClass,
+                    IsNullable = isNullable
                 });
             }
 

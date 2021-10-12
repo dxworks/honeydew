@@ -1,7 +1,9 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using HoneydewCore.Logging;
 using HoneydewExtractors.Core;
+using HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead;
 using HoneydewModels.CSharp;
 using Microsoft.CodeAnalysis;
 
@@ -21,7 +23,8 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
             _progressLogger = progressLogger;
         }
 
-        public async Task<SolutionModel> Load(Solution solution, IFactExtractorCreator extractorCreator)
+        public async Task<SolutionLoadingResult> Load(Solution solution, IFactExtractorCreator extractorCreator,
+            ISet<string> processedProjectsPaths)
         {
             SolutionModel solutionModel = new()
             {
@@ -38,6 +41,8 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
 
             var dependencyGraph = solution.GetProjectDependencyGraph();
 
+            var projectModels = new List<ProjectModel>();
+
             foreach (var projectId in dependencyGraph.GetTopologicallySortedProjects())
             {
                 var project = solution.GetProject(projectId);
@@ -46,19 +51,31 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     continue;
                 }
 
+                solutionModel.ProjectsPaths.Add(project.FilePath);
+
+
                 _logger.Log();
                 _logger.Log($"Loading C# Project from {project.FilePath} ({i}/{projectCount})");
+
                 var projectModel = await _projectLoadingStrategy.Load(project, extractorCreator);
 
                 progressLogger.Step($"{project.FilePath}");
 
-                if (projectModel != null)
+                if (processedProjectsPaths.Contains(project.FilePath))
                 {
-                    solutionModel.Projects.Add(projectModel);
+                    _progressLogger.Log($"Skipping {project.FilePath}. Was already processed ({i}/{projectCount})");
+                    _logger.Log($"Skipping {project.FilePath}. Was already processed ({i}/{projectCount})");
                 }
                 else
                 {
-                    _logger.Log($"Skipping {project.FilePath} ({i}/{projectCount})", LogLevels.Warning);
+                    if (projectModel != null)
+                    {
+                        projectModels.Add(projectModel);
+                    }
+                    else
+                    {
+                        _logger.Log($"Skipping {project.FilePath} ({i}/{projectCount})", LogLevels.Warning);
+                    }
                 }
 
                 i++;
@@ -66,7 +83,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
 
             progressLogger.Stop();
 
-            return solutionModel;
+            return new SolutionLoadingResult(solutionModel, projectModels);
         }
     }
 }

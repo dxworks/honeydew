@@ -19,6 +19,8 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
     {
         private readonly CSharpFactExtractor _factExtractor;
         private readonly Mock<ILogger> _loggerMock = new();
+        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
         public CSharpClassImportsMetricTests()
         {
@@ -38,8 +40,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
 
             compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(new CSharpSyntacticModelCreator(),
-                new CSharpSemanticModelCreator(new CSharpCompilationMaker()), compositeVisitor);
+            _factExtractor = new CSharpFactExtractor(compositeVisitor);
         }
 
         [Theory]
@@ -62,7 +63,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
                                          public {classType} Foo {{ }}                                        
                                      }}";
 
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             var importTypes = classTypes[0].Imports;
 
@@ -80,7 +83,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         [FileData("TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithOneDelegate.txt")]
         public void Extract_ShouldHaveUsings_WhenGivenOneDelegate(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(1, classTypes.Count);
 
@@ -101,9 +106,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             "TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithClassRecordStructInterfaceAndDelegate.txt")]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithClassRecordStructInterfaceAndDelegate_DeclaredInside.txt")]
-        public void Extract_ShouldHaveUsings_WhenGivenMultipleClassesAndDelegatesWithTheSameUsings(string fileContent)
+        public void Extract_ShouldHaveUsings_WhenGivenMultipleClassesAndDelegatesWithTheSameUsings(
+            string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(5, classTypes.Count);
 
@@ -127,7 +135,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void Extract_ShouldHaveUsings_WhenGivenMultipleClassesAndDelegatesInMultipleNamespacesWithSharedUsings(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(5, classTypes.Count);
 
@@ -172,7 +182,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         public void Extract_ShouldHaveUsings_WhenGivenMultipleClassesAndDelegatesInImbricatedNamespaces(
             string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(4, classTypes.Count);
 
@@ -207,7 +219,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         [FileData("TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithInnerClasses.txt")]
         public void Extract_ShouldHaveUsings_WhenGivenMultipleClassesWithInnerClasses(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(7, classTypes.Count);
 
@@ -249,9 +263,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithInnerClasses_ButNoNamespace.txt")]
-        public void Extract_ShouldHaveUsings_WhenGivenMultipleClassesWithInnerClasses_ButNoNamespace(string fileContent)
+        public void Extract_ShouldHaveUsings_WhenGivenMultipleClassesWithInnerClasses_ButNoNamespace(
+            string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(3, classTypes.Count);
 
@@ -271,7 +288,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             "TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithClassRecordStructInterfaceAndDelegate_SharedUsings_MultipleLevels.txt")]
         public void Extract_ShouldHaveUsingsInClassModels_WhenGivenText(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(5, classTypes.Count);
 
@@ -310,7 +329,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
             "TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithClassRecordStructInterfaceAndDelegate_StaticUsings.txt")]
         public void Extract_ShouldHaveUsingsInClassModels_WhenGivenStaticUsings(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(5, classTypes.Count);
 
@@ -354,10 +375,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         }
 
         [Theory]
-        [FileData("TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithAliasedNamespace.txt")]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithAliasedNamespace.txt")]
         public void Extract_ShouldHaveUsingsInClassModels_WhenGivenAliasedNamespace(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(2, classTypes.Count);
 
@@ -384,7 +408,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
         [FileData("TestData/CSharp/Metrics/Extraction/CSharpImports/CompilationUnitWithAliasedClass.txt")]
         public void Extract_ShouldHaveUsingsInClassModels_WhenGivenAliasedClass(string fileContent)
         {
-            var classTypes = _factExtractor.Extract(fileContent).ClassTypes;
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
             Assert.Equal(3, classTypes.Count);
 

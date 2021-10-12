@@ -19,6 +19,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Parameter
         {
             var parameterInfo = CSharpHelperMethods.ExtractInfoAboutParameter(syntaxNode);
             modelType.Type = parameterInfo.Type;
+            modelType.IsNullable = parameterInfo.IsNullable;
 
             if (modelType is not ParameterModel parameterModel)
             {

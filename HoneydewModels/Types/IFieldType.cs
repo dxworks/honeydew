@@ -1,6 +1,6 @@
 ﻿namespace HoneydewModels.Types
 {
-    public interface IFieldType : IContainedType, ITypeWithModifiers, ITypeWithAttributes, ITypeWithMetrics
+    public interface IFieldType : IContainedType, ITypeWithModifiers, ITypeWithAttributes, ITypeWithMetrics, INullableType
     {
         public IEntityType Type { get; set; }
 

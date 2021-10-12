@@ -1,12 +1,14 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using HoneydewExtractors.Core;
-using HoneydewModels.CSharp;
+using HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead;
 using Microsoft.CodeAnalysis;
 
 namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
 {
     public interface ISolutionLoadingStrategy
     {
-        Task<SolutionModel> Load(Solution solution, IFactExtractorCreator extractorCreator);
+        Task<SolutionLoadingResult> Load(Solution solution, IFactExtractorCreator extractorCreator,
+            ISet<string> processedProjectsPaths);
     }
 }

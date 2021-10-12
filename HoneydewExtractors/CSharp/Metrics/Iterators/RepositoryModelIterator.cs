@@ -7,15 +7,15 @@ namespace HoneydewExtractors.CSharp.Metrics.Iterators
 {
     public class RepositoryModelIterator : ModelIterator<RepositoryModel>
     {
-        private readonly IList<ModelIterator<SolutionModel>> _iterators;
+        private readonly IList<ModelIterator<ProjectModel>> _iterators;
 
-        public RepositoryModelIterator(IList<ModelIterator<SolutionModel>> iterators,
+        public RepositoryModelIterator(IList<ModelIterator<ProjectModel>> iterators,
             IList<IModelVisitor<RepositoryModel>> modelVisitors) : base(modelVisitors)
         {
             _iterators = iterators;
         }
 
-        public RepositoryModelIterator(IList<ModelIterator<SolutionModel>> iterators) : this(iterators,
+        public RepositoryModelIterator(IList<ModelIterator<ProjectModel>> iterators) : this(iterators,
             new List<IModelVisitor<RepositoryModel>>())
         {
             _iterators = iterators;
@@ -23,11 +23,11 @@ namespace HoneydewExtractors.CSharp.Metrics.Iterators
 
         public override void Iterate(RepositoryModel repositoryModel)
         {
-            foreach (var solutionModel in repositoryModel.Solutions)
+            foreach (var projectModel in repositoryModel.Projects)
             {
                 foreach (var iterator in _iterators)
                 {
-                    iterator.Iterate(solutionModel);
+                    iterator.Iterate(projectModel);
                 }
             }
 

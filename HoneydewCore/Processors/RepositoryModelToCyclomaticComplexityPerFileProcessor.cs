@@ -23,34 +23,41 @@ namespace HoneydewCore.Processors
             foreach (var (filePath, classModels) in classesGroupedByFilePath)
             {
                 CalculateCycloComponents(classModels, out var maxCyclo, out var minCyclo, out var avgCyclo,
-                    out var sumCyclo);
+                    out var sumCyclo, out var atc);
 
                 representation.AddConcern(new Concern
                 {
                     Entity = filePath,
-                    Tag = "maxCyclo",
+                    Tag = "metric.maxCyclo",
                     Strength = maxCyclo.ToString()
                 });
 
                 representation.AddConcern(new Concern
                 {
                     Entity = filePath,
-                    Tag = "minCyclo",
+                    Tag = "metric.minCyclo",
                     Strength = minCyclo.ToString()
                 });
 
                 representation.AddConcern(new Concern
                 {
                     Entity = filePath,
-                    Tag = "avgCyclo",
+                    Tag = "metric.avgCyclo",
                     Strength = avgCyclo.ToString()
                 });
 
                 representation.AddConcern(new Concern
                 {
                     Entity = filePath,
-                    Tag = "sumCyclo",
+                    Tag = "metric.sumCyclo",
                     Strength = sumCyclo.ToString()
+                });
+
+                representation.AddConcern(new Concern
+                {
+                    Entity = filePath,
+                    Tag = "metric.atc",
+                    Strength = atc.ToString()
                 });
             }
 
@@ -58,7 +65,7 @@ namespace HoneydewCore.Processors
         }
 
         private static void CalculateCycloComponents(List<IClassType> classModels, out int maxCyclo, out int minCyclo,
-            out int avgCyclo, out int sumCyclo)
+            out int avgCyclo, out int sumCyclo, out int atc)
         {
             var maxCyclomatic = 1;
             var minCyclomatic = int.MaxValue;
@@ -70,12 +77,16 @@ namespace HoneydewCore.Processors
             minCyclo = minCyclomatic;
             avgCyclo = 0;
             sumCyclo = 0;
+            atc = 0;
 
             if (classModels.Count <= 0)
             {
-                minCyclo = 1;
+                minCyclo = 0;
+                maxCyclo = 0;
                 return;
             }
+
+            var atcSum = 0;
 
             foreach (var classType in classModels)
             {
@@ -115,8 +126,11 @@ namespace HoneydewCore.Processors
                 sumCyclomatic += cyclomaticComplexity;
 
                 count++;
+
+                atcSum += cyclomaticComplexity / 10;
             }
 
+            atc = atcSum;
             maxCyclo = maxCyclomatic;
             minCyclo = minCyclomatic;
             sumCyclo = sumCyclomatic;

@@ -4,10 +4,10 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp
 {
-    public record NamespaceModel : IModelEntity
+    public record NamespaceModel
     {
         public string Name { get; set; } = "";
-        public IList<IClassType> ClassModels { get; set; } = new List<IClassType>();
+        public IList<string> ClassNames { get; set; } = new List<string>();
 
         public void Add(IClassType classType)
         {
@@ -16,14 +16,14 @@ namespace HoneydewModels.CSharp
                 return;
             }
 
-            if (ClassModels.Any(model => model.Name == classType.Name))
+            if (ClassNames.Any(name => name == classType.Name))
             {
                 return;
             }
 
             Name = classType.ContainingTypeName;
 
-            ClassModels.Add(classType);
+            ClassNames.Add(classType.Name);
         }
     }
 }

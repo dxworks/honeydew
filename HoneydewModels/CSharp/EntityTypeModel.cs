@@ -7,5 +7,7 @@ namespace HoneydewModels.CSharp
         public string Name { get; set; }
 
         public GenericType FullType { get; set; }
+
+        public bool IsExtern { get; set; } = false;
     }
 }
