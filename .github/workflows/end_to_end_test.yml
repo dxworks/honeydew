@@ -80,5 +80,5 @@ jobs:
       - name: Upload results artifact
         uses: actions/upload-artifact@v2
         with:
-          name: results-${{matrix.os}}.zip
+          name: results-${{matrix.os}}
           path: results.zip
