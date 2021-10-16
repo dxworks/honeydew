@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
-using HoneydewExtractors.CSharp.Utils;
+using HoneydewCore.Utils;
 using HoneydewModels.CSharp;
 
 namespace HoneydewExtractors.Processors

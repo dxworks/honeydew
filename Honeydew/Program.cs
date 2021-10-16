@@ -86,6 +86,8 @@ namespace Honeydew
 
                 var inputPath = options.InputFilePath;
 
+                var projectName = GetProjectName(inputPath);
+
                 var relationMetricHolder = new RelationMetricHolder();
                 RepositoryModel repositoryModel;
                 switch (options.Command)
@@ -124,10 +126,14 @@ namespace Honeydew
                     repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
                 }
 
+                var referenceRepositoryModel =
+                    new RepositoryModelToReferenceRepositoryModelProcessor().Process(repositoryModel);
+
                 var scriptRunner = new ScriptRunner(logger, new Dictionary<string, object>
                 {
                     { "outputPath", DefaultPathForAllRepresentations },
                     { "repositoryModel", repositoryModel },
+                    { "referenceRepositoryModel", referenceRepositoryModel },
                     { "rawJsonOutputName", "honeydew.json" },
                     { "classRelationsOutputName", "honeydew.csv" },
                     { "cycloOutputName", "honeydew_cyclomatic.json" },
@@ -144,12 +150,7 @@ namespace Honeydew
 
                 var jsonModelExporter = new JsonModelExporter();
 
-                if (options.DeactivateBindingProcessing)
-                {
-                    RunScripts(scriptRunner, jsonModelExporter, csvRelationsRepresentationExporter,
-                        options.DisableExternTypeInLocalTypeSearch, logger, progressLogger);
-                }
-                else
+                if (!options.DeactivateBindingProcessing)
                 {
                     logger.Log();
                     logger.Log("Exporting Intermediate Results");
@@ -171,10 +172,10 @@ namespace Honeydew
                             { "disableLocalVariablesBinding", options.DisableLocalVariablesBinding }
                         })
                     }, true);
-
-                    RunScripts(scriptRunner, jsonModelExporter, csvRelationsRepresentationExporter,
-                        options.DisableExternTypeInLocalTypeSearch, logger, progressLogger);
                 }
+
+                RunScripts(scriptRunner, jsonModelExporter, csvRelationsRepresentationExporter,
+                    options.DisableExternTypeInLocalTypeSearch, logger, progressLogger, projectName);
 
                 logger.Log();
                 logger.Log("Extraction Complete!");
@@ -188,6 +189,11 @@ namespace Honeydew
 
                 logger.CloseAndFlush();
             }, _ => Task.FromResult("Some Error Occurred"));
+        }
+
+        private static string GetProjectName(string inputPath)
+        {
+            return Path.GetFileNameWithoutExtension(inputPath);
         }
 
         private static void RunIntermediateScripts(ScriptRunner scriptRunner, JsonModelExporter jsonModelExporter,
@@ -236,7 +242,7 @@ namespace Honeydew
 
         private static void RunScripts(ScriptRunner scriptRunner, JsonModelExporter jsonModelExporter,
             CsvRelationsRepresentationExporter csvRelationsRepresentationExporter,
-            bool disableExternTypeInLocalTypeSearch, ILogger logger, IProgressLogger progressLogger)
+            bool disableExternTypeInLocalTypeSearch, ILogger logger, IProgressLogger progressLogger, string projectName)
         {
             var exportFileRelationsScript = new ExportFileRelationsScript(csvRelationsRepresentationExporter);
 
@@ -276,6 +282,10 @@ namespace Honeydew
                         }
                     },
                 }),
+                new(new ClassRelationScript(csvRelationsRepresentationExporter), new Dictionary<string, object>
+                {
+                    { "classRelationsOutputName", $"{projectName}-class_relations.csv" }
+                })
             });
         }
 

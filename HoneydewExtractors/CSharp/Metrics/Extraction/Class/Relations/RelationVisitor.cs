@@ -33,7 +33,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
         {
         }
 
-        public IList<FileRelation> GetRelations(
+        public IList<Relation> GetRelations(
             IDictionary<string, IDictionary<IRelationVisitor, IDictionary<string, int>>> dependencies)
         {
             return MetricHolder.GetRelations();

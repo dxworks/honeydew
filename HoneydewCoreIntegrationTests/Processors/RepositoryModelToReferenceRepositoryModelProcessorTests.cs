@@ -204,10 +204,10 @@ namespace HoneydewCoreIntegrationTests.Processors
             var projectModel1 = referenceRepositoryModel.Projects[0];
             Assert.Equal("Project1", projectModel1.Name);
             Assert.Equal(referenceRepositoryModel, projectModel1.Repository);
-            Assert.Equal(2, projectModel1.CompilationUnits.Count);
+            Assert.Equal(2, projectModel1.Files.Count);
 
 
-            var compilationUnitModel1 = projectModel1.CompilationUnits[0];
+            var compilationUnitModel1 = projectModel1.Files[0];
             Assert.Equal("Project1.Services", compilationUnitModel1.FilePath);
             Assert.Equal(projectModel1, compilationUnitModel1.Project);
             Assert.Equal(2, compilationUnitModel1.Classes.Count);
@@ -227,7 +227,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("int", referenceClassModel2.Metrics[0].ValueType);
             Assert.Equal("SomeExtractor", referenceClassModel2.Metrics[0].ExtractorName);
 
-            var referenceNamespaceModel2 = projectModel1.CompilationUnits[1];
+            var referenceNamespaceModel2 = projectModel1.Files[1];
             Assert.Equal("Project1.Models", referenceNamespaceModel2.FilePath);
             Assert.Equal(projectModel1, referenceNamespaceModel2.Project);
             Assert.Equal(1, referenceNamespaceModel2.Classes.Count);
@@ -454,12 +454,12 @@ namespace HoneydewCoreIntegrationTests.Processors
 
             var projectModel1 = referenceRepositoryModel.Projects[0];
 
-            var compilationUnitModel = projectModel1.CompilationUnits[0];
+            var compilationUnitModel = projectModel1.Files[0];
             var referenceClassCreateService = compilationUnitModel.Classes[0];
 
             Assert.Equal("Project1", projectModel1.Name);
             Assert.Equal(referenceRepositoryModel, projectModel1.Repository);
-            Assert.Equal(2, projectModel1.CompilationUnits.Count);
+            Assert.Equal(2, projectModel1.Files.Count);
 
             Assert.Equal("Project1.Services", compilationUnitModel.FilePath);
             Assert.Equal(projectModel1, compilationUnitModel.Project);
@@ -477,7 +477,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             var referenceConvertMethodModel2 = referenceClassCreateService.Methods[2];
             var referenceProcessMethodModel = referenceClassCreateService.Methods[3];
 
-            var referenceNamespaceModels = projectModel1.CompilationUnits[1];
+            var referenceNamespaceModels = projectModel1.Files[1];
             var referenceClassMyModel = referenceNamespaceModels.Classes[0];
             var referenceClassOtherModel = referenceNamespaceModels.Classes[1];
 
@@ -499,7 +499,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("", referenceConvertMethodModel1.Parameters[0].Modifier);
             Assert.Null(referenceConvertMethodModel1.Parameters[0].DefaultValue);
             Assert.Equal(1, referenceConvertMethodModel1.CalledMethods.Count);
-            Assert.Equal(referenceCreateMethodModel, referenceConvertMethodModel1.CalledMethods[0].Method);
+            Assert.Equal(referenceCreateMethodModel, referenceConvertMethodModel1.CalledMethods[0]);
 
             Assert.Equal("Convert", referenceConvertMethodModel2.Name);
             Assert.Equal(referenceClassCreateService, referenceConvertMethodModel2.ContainingType);
@@ -511,7 +511,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("", referenceConvertMethodModel2.Parameters[0].Modifier);
             Assert.Null(referenceConvertMethodModel2.Parameters[0].DefaultValue);
             Assert.Equal(1, referenceConvertMethodModel2.CalledMethods.Count);
-            Assert.Equal(referenceConvertMethodModel1, referenceConvertMethodModel2.CalledMethods[0].Method);
+            Assert.Equal(referenceConvertMethodModel1, referenceConvertMethodModel2.CalledMethods[0]);
 
             Assert.Equal("Process", referenceProcessMethodModel.Name);
             Assert.Equal(referenceClassCreateService, referenceProcessMethodModel.ContainingType);
@@ -523,8 +523,8 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("", referenceProcessMethodModel.Parameters[0].Modifier);
             Assert.Null(referenceProcessMethodModel.Parameters[0].DefaultValue);
             Assert.Equal(2, referenceProcessMethodModel.CalledMethods.Count);
-            Assert.Equal(referenceCreateMethodModel, referenceProcessMethodModel.CalledMethods[0].Method);
-            Assert.Equal(referenceConvertMethodModel2, referenceProcessMethodModel.CalledMethods[1].Method);
+            Assert.Equal(referenceCreateMethodModel, referenceProcessMethodModel.CalledMethods[0]);
+            Assert.Equal(referenceConvertMethodModel2, referenceProcessMethodModel.CalledMethods[1]);
 
 
             Assert.Equal("Project1.Models", referenceNamespaceModels.FilePath);
@@ -670,7 +670,7 @@ namespace Project1.Services
 
             var projectModel1 = referenceSolutionModel.Projects[0];
 
-            var referenceNamespaceServices = projectModel1.CompilationUnits[0];
+            var referenceNamespaceServices = projectModel1.Files[0];
             var referenceMyClass = referenceNamespaceServices.Classes[0];
 
             Assert.Equal(1, referenceNamespaceServices.Classes.Count);
@@ -699,11 +699,11 @@ namespace Project1.Services
             Assert.Equal("", methodFunction1.Parameters[1].Modifier);
             Assert.Null(methodFunction1.Parameters[1].DefaultValue);
             Assert.Equal(5, methodFunction1.CalledMethods.Count);
-            Assert.Equal(methodFunction3, methodFunction1.CalledMethods[0].Method);
-            Assert.Equal(methodFunction3, methodFunction1.CalledMethods[1].Method);
-            Assert.Equal(methodFunction2, methodFunction1.CalledMethods[2].Method);
-            Assert.Equal(methodFunction2, methodFunction1.CalledMethods[3].Method);
-            Assert.Equal(methodPrint2, methodFunction1.CalledMethods[4].Method);
+            Assert.Equal(methodFunction3, methodFunction1.CalledMethods[0]);
+            Assert.Equal(methodFunction3, methodFunction1.CalledMethods[1]);
+            Assert.Equal(methodFunction2, methodFunction1.CalledMethods[2]);
+            Assert.Equal(methodFunction2, methodFunction1.CalledMethods[3]);
+            Assert.Equal(methodPrint2, methodFunction1.CalledMethods[4]);
 
             Assert.Equal("Function2", methodFunction2.Name);
             Assert.Equal(referenceMyClass, methodFunction2.ContainingType);
@@ -715,7 +715,7 @@ namespace Project1.Services
             Assert.Equal("", methodFunction2.Parameters[0].Modifier);
             Assert.Null(methodFunction2.Parameters[0].DefaultValue);
             Assert.Equal(1, methodFunction2.CalledMethods.Count);
-            Assert.Equal(intParseMethodReference, methodFunction2.CalledMethods[0].Method);
+            Assert.Equal(intParseMethodReference, methodFunction2.CalledMethods[0]);
 
             Assert.Equal("Function3", methodFunction3.Name);
             Assert.Equal(referenceMyClass, methodFunction3.ContainingType);
@@ -727,7 +727,7 @@ namespace Project1.Services
             Assert.Equal("", methodFunction3.Parameters[0].Modifier);
             Assert.Null(methodFunction3.Parameters[0].DefaultValue);
             Assert.Equal(1, methodFunction3.CalledMethods.Count);
-            Assert.Equal(intToStringReferenceMethod, methodFunction3.CalledMethods[0].Method);
+            Assert.Equal(intToStringReferenceMethod, methodFunction3.CalledMethods[0]);
 
             Assert.Equal("Print", methodPrint1.Name);
             Assert.Equal(referenceMyClass, methodPrint1.ContainingType);
@@ -750,7 +750,7 @@ namespace Project1.Services
             Assert.Equal("", methodPrint2.Parameters[0].Modifier);
             Assert.Null(methodPrint2.Parameters[0].DefaultValue);
             Assert.Equal(1, methodPrint2.CalledMethods.Count);
-            Assert.Equal(methodPrint2, methodPrint2.CalledMethods[0].Method);
+            Assert.Equal(methodPrint2, methodPrint2.CalledMethods[0]);
         }
 
         [Fact]
@@ -862,10 +862,10 @@ namespace Project1.Services
 
             var projectModel1 = referenceRepositoryModel.Projects[0];
 
-            var referenceNamespaceServices = projectModel1.CompilationUnits[0];
+            var referenceNamespaceServices = projectModel1.Files[0];
             var referenceClassCreateService = referenceNamespaceServices.Classes[0];
 
-            var referenceNamespaceModels = projectModel1.CompilationUnits[1];
+            var referenceNamespaceModels = projectModel1.Files[1];
             var referenceClassMyModel = referenceNamespaceModels.Classes[0];
             var referenceClassOtherModel = referenceNamespaceModels.Classes[1];
 

@@ -1,6 +1,6 @@
-﻿using HoneydewExtractors.Core.Metrics.Visitors;
+﻿using HoneydewCore.Utils;
+using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
-using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 

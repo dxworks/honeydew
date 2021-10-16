@@ -73,27 +73,27 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
             Assert.Equal(4, fileRelations.Count);
 
             var fileRelation1 = fileRelations[0];
-            Assert.Equal("Class1", fileRelation1.FileSource);
-            Assert.Equal("IFactExtractor", fileRelation1.FileTarget);
-            Assert.Equal(2, fileRelation1.RelationCount);
+            Assert.Equal("Class1", fileRelation1.Source);
+            Assert.Equal("IFactExtractor", fileRelation1.Target);
+            Assert.Equal(2, fileRelation1.Strength);
             Assert.Equal("Relation 1", fileRelation1.Type);
 
             var fileRelation2 = fileRelations[1];
-            Assert.Equal("Class1", fileRelation2.FileSource);
-            Assert.Equal("CSharpMetricExtractor", fileRelation2.FileTarget);
-            Assert.Equal(1, fileRelation2.RelationCount);
+            Assert.Equal("Class1", fileRelation2.Source);
+            Assert.Equal("CSharpMetricExtractor", fileRelation2.Target);
+            Assert.Equal(1, fileRelation2.Strength);
             Assert.Equal("Relation 1", fileRelation2.Type);
 
             var fileRelation3 = fileRelations[2];
-            Assert.Equal("Class2", fileRelation3.FileSource);
-            Assert.Equal("IMetric", fileRelation3.FileTarget);
-            Assert.Equal(5, fileRelation3.RelationCount);
+            Assert.Equal("Class2", fileRelation3.Source);
+            Assert.Equal("IMetric", fileRelation3.Target);
+            Assert.Equal(5, fileRelation3.Strength);
             Assert.Equal("Relation 2", fileRelation3.Type);
 
             var fileRelation4 = fileRelations[3];
-            Assert.Equal("Class2", fileRelation4.FileSource);
-            Assert.Equal("IFactExtractor", fileRelation4.FileTarget);
-            Assert.Equal(1, fileRelation4.RelationCount);
+            Assert.Equal("Class2", fileRelation4.Source);
+            Assert.Equal("IFactExtractor", fileRelation4.Target);
+            Assert.Equal(1, fileRelation4.Strength);
             Assert.Equal("Relation 2", fileRelation4.Type);
         }
     }

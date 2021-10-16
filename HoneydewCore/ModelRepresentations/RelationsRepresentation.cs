@@ -9,9 +9,9 @@ namespace HoneydewCore.ModelRepresentations
         public IDictionary<string, IDictionary<string, IDictionary<string, int>>> ClassRelations { get; } =
             new Dictionary<string, IDictionary<string, IDictionary<string, int>>>();
 
-        public void Add(FileRelation relation)
+        public void Add(Relation relation)
         {
-            Add(relation.FileSource, relation.FileTarget, relation.Type, relation.RelationCount);
+            Add(relation.Source, relation.Target, relation.Type, relation.Strength);
         }
 
         public void Add(string sourceName, string targetName, string dependencyType, int dependencyValue)

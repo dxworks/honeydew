@@ -218,7 +218,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("", parseMethodModel.Parameters[0].Modifier);
             Assert.Null(parseMethodModel.Parameters[0].DefaultValue);
 
-            var compilationUnitModelServices = referenceSolutionModel.Projects[0].CompilationUnits[0];
+            var compilationUnitModelServices = referenceSolutionModel.Projects[0].Files[0];
             var referenceMyClass = compilationUnitModelServices.Classes[0];
 
             Assert.Equal(1, compilationUnitModelServices.Classes.Count);
@@ -247,11 +247,11 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("", methodFunction1.Parameters[1].Modifier);
             Assert.Null(methodFunction1.Parameters[1].DefaultValue);
             Assert.Equal(5, methodFunction1.CalledMethods.Count);
-            Assert.Equal(methodFunction3, methodFunction1.CalledMethods[0].Method);
-            Assert.Equal(methodFunction3, methodFunction1.CalledMethods[1].Method);
-            Assert.Equal(methodFunction2, methodFunction1.CalledMethods[2].Method);
-            Assert.Equal(methodFunction2, methodFunction1.CalledMethods[3].Method);
-            Assert.Equal(methodPrint2, methodFunction1.CalledMethods[4].Method);
+            Assert.Equal(methodFunction3, methodFunction1.CalledMethods[0]);
+            Assert.Equal(methodFunction3, methodFunction1.CalledMethods[1]);
+            Assert.Equal(methodFunction2, methodFunction1.CalledMethods[2]);
+            Assert.Equal(methodFunction2, methodFunction1.CalledMethods[3]);
+            Assert.Equal(methodPrint2, methodFunction1.CalledMethods[4]);
 
             Assert.Equal("Function2", methodFunction2.Name);
             Assert.Equal(referenceMyClass, methodFunction2.ContainingType);
@@ -263,7 +263,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("", methodFunction2.Parameters[0].Modifier);
             Assert.Null(methodFunction2.Parameters[0].DefaultValue);
             Assert.Equal(1, methodFunction2.CalledMethods.Count);
-            Assert.Equal(parseMethodModel, methodFunction2.CalledMethods[0].Method);
+            Assert.Equal(parseMethodModel, methodFunction2.CalledMethods[0]);
 
             Assert.Equal("Function3", methodFunction3.Name);
             Assert.Equal(referenceMyClass, methodFunction3.ContainingType);
@@ -275,7 +275,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("", methodFunction3.Parameters[0].Modifier);
             Assert.Null(methodFunction3.Parameters[0].DefaultValue);
             Assert.Equal(1, methodFunction3.CalledMethods.Count);
-            Assert.Equal(toStringMethodModel, methodFunction3.CalledMethods[0].Method);
+            Assert.Equal(toStringMethodModel, methodFunction3.CalledMethods[0]);
 
             Assert.Equal("Print", methodPrint1.Name);
             Assert.Equal(referenceMyClass, methodPrint1.ContainingType);
@@ -298,7 +298,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("", methodPrint2.Parameters[0].Modifier);
             Assert.Null(methodPrint2.Parameters[0].DefaultValue);
             Assert.Equal(1, methodPrint2.CalledMethods.Count);
-            Assert.Equal(methodPrint2, methodPrint2.CalledMethods[0].Method);
+            Assert.Equal(methodPrint2, methodPrint2.CalledMethods[0]);
         }
 
         [Fact]
@@ -396,7 +396,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("byte", byteClassModel.Name);
             Assert.Equal("void", voidClassModel.Name);
 
-            var referenceCompilationUnitServices = referenceSolutionModel.Projects[0].CompilationUnits[0];
+            var referenceCompilationUnitServices = referenceSolutionModel.Projects[0].Files[0];
             var referenceMyClass = referenceCompilationUnitServices.Classes[0];
 
             Assert.Equal(1, referenceCompilationUnitServices.Classes.Count);
@@ -419,10 +419,10 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal(voidClassModel, printNoArg.ReturnValue.Type.TypeReference);
             Assert.Empty(printNoArg.Parameters);
             Assert.Equal(4, printNoArg.CalledMethods.Count);
-            Assert.Equal(printInt, printNoArg.CalledMethods[0].Method);
-            Assert.Equal(printLong, printNoArg.CalledMethods[1].Method);
-            Assert.Equal(printShort, printNoArg.CalledMethods[2].Method);
-            Assert.Equal(printByte, printNoArg.CalledMethods[3].Method);
+            Assert.Equal(printInt, printNoArg.CalledMethods[0]);
+            Assert.Equal(printLong, printNoArg.CalledMethods[1]);
+            Assert.Equal(printShort, printNoArg.CalledMethods[2]);
+            Assert.Equal(printByte, printNoArg.CalledMethods[3]);
 
             Assert.Equal("Print", printInt.Name);
             Assert.Equal(referenceMyClass, printInt.ContainingType);
@@ -528,7 +528,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.NotNull(objectClassModel);
             Assert.Equal("object", objectClassModel.Name);
 
-            var referenceNamespaceServices = referenceSolutionModel.Projects[0].CompilationUnits[0];
+            var referenceNamespaceServices = referenceSolutionModel.Projects[0].Files[0];
 
             var referenceIInterface = referenceNamespaceServices.Classes[0];
             var referenceMyInterface = referenceNamespaceServices.Classes[1];
@@ -710,7 +710,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("float", floatClassModel.Name);
             Assert.Equal("void", voidClassModel.Name);
 
-            var referenceNamespaceServices = referenceSolutionModel.Projects[0].CompilationUnits[0];
+            var referenceNamespaceServices = referenceSolutionModel.Projects[0].Files[0];
             var baseClass = referenceNamespaceServices.Classes[0];
             var childClass1 = referenceNamespaceServices.Classes[1];
             var childClass2 = referenceNamespaceServices.Classes[2];
@@ -815,7 +815,7 @@ namespace HoneydewCoreIntegrationTests.Processors
 
             foreach (var calledMethod in callMethod1.CalledMethods)
             {
-                Assert.Equal(callMethod0, calledMethod.Method);
+                Assert.Equal(callMethod0, calledMethod);
             }
         }
 
@@ -850,14 +850,13 @@ namespace HoneydewCoreIntegrationTests.Processors
 
             var referenceSolutionModel = _sut.Process(repositoryModel);
 
-            var classModel = referenceSolutionModel.Projects[0].CompilationUnits[0].Classes[0];
+            var classModel = referenceSolutionModel.Projects[0].Files[0].Classes[0];
             var methodModel = classModel.Methods[0];
             var methodModelLocalFunction = methodModel.LocalFunctions[0];
 
             Assert.Equal(classModel, methodModel.ContainingType);
             Assert.Equal(1, methodModel.CalledMethods.Count);
-            Assert.Equal(methodModel, methodModel.CalledMethods[0].Caller);
-            Assert.Equal(methodModelLocalFunction, methodModel.CalledMethods[0].Method);
+            Assert.Equal(methodModelLocalFunction, methodModel.CalledMethods[0]);
             Assert.Equal(methodModel, methodModelLocalFunction.ContainingType);
             Assert.Equal(1, methodModel.LocalFunctions.Count);
             AssertLocalFunctions(methodModelLocalFunction);
@@ -866,8 +865,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             var constructorModelLocalFunction = constructorModel.LocalFunctions[0];
             Assert.Equal(classModel, constructorModel.Class);
             Assert.Equal(1, constructorModel.CalledMethods.Count);
-            Assert.Equal(constructorModel, constructorModel.CalledMethods[0].Caller);
-            Assert.Equal(constructorModelLocalFunction, constructorModel.CalledMethods[0].Method);
+            Assert.Equal(constructorModelLocalFunction, constructorModel.CalledMethods[0]);
             Assert.Equal(constructorModel, constructorModelLocalFunction.ContainingType);
             Assert.Equal(1, constructorModel.LocalFunctions.Count);
             AssertLocalFunctions(constructorModelLocalFunction);
@@ -877,8 +875,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             var getAccessorModelLocalFunction = getAccessor.LocalFunctions[0];
             Assert.Equal(propertyModel, getAccessor.ContainingType);
             Assert.Equal(1, getAccessor.CalledMethods.Count);
-            Assert.Equal(getAccessor, getAccessor.CalledMethods[0].Caller);
-            Assert.Equal(getAccessorModelLocalFunction, getAccessor.CalledMethods[0].Method);
+            Assert.Equal(getAccessorModelLocalFunction, getAccessor.CalledMethods[0]);
             Assert.Equal(getAccessor, getAccessorModelLocalFunction.ContainingType);
             Assert.Equal(1, getAccessor.LocalFunctions.Count);
             AssertLocalFunctions(getAccessorModelLocalFunction);
@@ -887,8 +884,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             var setAccessorModelLocalFunction = setAccessor.LocalFunctions[0];
             Assert.Equal(propertyModel, setAccessor.ContainingType);
             Assert.Equal(1, constructorModel.CalledMethods.Count);
-            Assert.Equal(constructorModel, constructorModel.CalledMethods[0].Caller);
-            Assert.Equal(constructorModelLocalFunction, constructorModel.CalledMethods[0].Method);
+            Assert.Equal(constructorModelLocalFunction, constructorModel.CalledMethods[0]);
             Assert.Equal(setAccessor, setAccessorModelLocalFunction.ContainingType);
             Assert.Equal(1, constructorModel.LocalFunctions.Count);
             AssertLocalFunctions(setAccessorModelLocalFunction);
@@ -899,16 +895,14 @@ namespace HoneydewCoreIntegrationTests.Processors
                 Assert.Equal(1, localFunction1.CalledMethods.Count);
 
                 var localFunction2 = localFunction1.LocalFunctions[0];
-                Assert.Equal(localFunction1, localFunction1.CalledMethods[0].Caller);
-                Assert.Equal(localFunction2, localFunction1.CalledMethods[0].Method);
+                Assert.Equal(localFunction2, localFunction1.CalledMethods[0]);
                 Assert.Equal(1, localFunction1.LocalFunctions.Count);
                 Assert.Equal("LocalFunction2", localFunction2.Name);
                 Assert.Equal(localFunction1, localFunction2.ContainingType);
                 Assert.Equal(1, localFunction2.CalledMethods.Count);
 
                 var localFunction3 = localFunction2.LocalFunctions[0];
-                Assert.Equal(localFunction2, localFunction2.CalledMethods[0].Caller);
-                Assert.Equal(localFunction3, localFunction2.CalledMethods[0].Method);
+                Assert.Equal(localFunction3, localFunction2.CalledMethods[0]);
                 Assert.Equal(1, localFunction2.LocalFunctions.Count);
                 Assert.Equal("LocalFunction3", localFunction3.Name);
                 Assert.Equal(localFunction2, localFunction3.ContainingType);

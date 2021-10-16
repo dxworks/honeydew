@@ -1,7 +1,7 @@
 ﻿using System.Linq;
+using HoneydewCore.Utils;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
-using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
