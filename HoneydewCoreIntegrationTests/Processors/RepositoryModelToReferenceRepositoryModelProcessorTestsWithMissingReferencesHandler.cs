@@ -729,7 +729,9 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Empty(baseClass.Constructors[0].CalledMethods);
             Assert.Equal(baseClass, baseClass.Constructors[0].Class);
             Assert.Empty(baseClass.Constructors[0].Parameters);
-            Assert.Empty(baseClass.Methods);
+            Assert.Equal(1, baseClass.Methods.Count);
+            Assert.Equal(1, baseClass.Constructors.Count);
+            Assert.True(baseClass.Methods[0].IsConstructor);
             Assert.Empty(baseClass.Metrics);
             Assert.Equal(1, baseClass.Fields.Count);
 
