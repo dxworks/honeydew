@@ -59,8 +59,9 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields
             "TestData/CSharp/Metrics/Extraction/AccessedFields/PropertyAccessedFields/PropertyAccessedNonStaticFieldAndPropertyFromOtherClass.txt")]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/AccessedFields/PropertyAccessedFields/PropertyAccessedStaticFieldAndPropertyFromOtherClass.txt")]
-        public void Extract_ShouldHaveAccessedFields_WhenGivenPropertyAccessorThatAccessesFieldsAndPropertiesFromOtherClass(
-            string fileContent)
+        public void
+            Extract_ShouldHaveAccessedFields_WhenGivenPropertyAccessorThatAccessesFieldsAndPropertiesFromOtherClass(
+                string fileContent)
         {
             var syntaxTree = _syntacticModelCreator.Create(fileContent);
             var semanticModel = _semanticModelCreator.Create(syntaxTree);
@@ -103,12 +104,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields
                 Assert.Equal(AccessedField.AccessType.Setter, accessedField.Type);
             }
         }
-        
-          [Theory]
+
+        [Theory]
         [FileData(
             "TestData/CSharp/Metrics/Extraction/AccessedFields/PropertyAccessedFields/PropertyAccessedStaticFieldAndPropertyFromOtherClassArrowSyntax.txt")]
-        public void Extract_ShouldHaveAccessedFields_WhenGivenPropertyArrowSyntaxThatAccessesFieldsAndPropertiesFromOtherClass(
-            string fileContent)
+        public void
+            Extract_ShouldHaveAccessedFields_WhenGivenPropertyArrowSyntaxThatAccessesFieldsAndPropertiesFromOtherClass(
+                string fileContent)
         {
             var syntaxTree = _syntacticModelCreator.Create(fileContent);
             var semanticModel = _semanticModelCreator.Create(syntaxTree);

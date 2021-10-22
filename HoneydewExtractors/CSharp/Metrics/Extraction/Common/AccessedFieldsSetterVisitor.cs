@@ -50,28 +50,64 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
         }
 
         public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode,
-            IMethodTypeWithLocalFunctions modelType)
+            IMethodTypeWithLocalFunctions containedTypeWithAccessedFields)
         {
-            throw new NotImplementedException();
+            if (syntaxNode.Body == null)
+            {
+                return containedTypeWithAccessedFields;
+            }
+
+            var descendantNodes = syntaxNode.Body.ChildNodes().ToList();
+            var possibleMemberAccessExpressions = descendantNodes.OfType<LocalDeclarationStatementSyntax>()
+                .SelectMany(syntax => GetPossibleAccessFields(syntax.DescendantNodes().ToList()));
+
+            possibleMemberAccessExpressions = possibleMemberAccessExpressions.Concat(descendantNodes
+                .OfType<ExpressionStatementSyntax>()
+                .SelectMany(syntax => GetPossibleAccessFields(syntax.DescendantNodes().ToList())));
+
+            foreach (var memberAccessExpressionSyntax in possibleMemberAccessExpressions)
+            {
+                var accessedField = new AccessedField();
+                var shouldIgnoreIdentifierBecauseIsNotField = false;
+
+                foreach (var visitor in GetContainedVisitors())
+                {
+                    try
+                    {
+                        if (visitor is ICSharpAccessedFieldsVisitor extractionVisitor)
+                        {
+                            accessedField = extractionVisitor.Visit(memberAccessExpressionSyntax, accessedField);
+                            if (accessedField == null)
+                            {
+                                shouldIgnoreIdentifierBecauseIsNotField = true;
+                                break;
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log($"Could not extract from Local Function Accessed Fields Visitor because {e}",
+                            LogLevels.Warning);
+                    }
+                }
+
+                if (shouldIgnoreIdentifierBecauseIsNotField)
+                {
+                    continue;
+                }
+
+                containedTypeWithAccessedFields.AccessedFields.Add(accessedField);
+            }
+
+            return containedTypeWithAccessedFields;
         }
 
         private void SetAccessedFields(SyntaxNode syntaxNode,
             IContainedTypeWithAccessedFields containedTypeWithAccessedFields)
         {
             var descendantNodes = syntaxNode.DescendantNodes().ToList();
-            var possibleMemberAccessExpressions = descendantNodes
-                .OfType<MemberAccessExpressionSyntax>().Cast<ExpressionSyntax>().ToList();
+            var possibleMemberAccessExpressions = GetPossibleAccessFields(descendantNodes);
 
-            possibleMemberAccessExpressions = possibleMemberAccessExpressions.Concat(descendantNodes
-                .OfType<VariableDeclaratorSyntax>()
-                .Select(syntax => syntax.Initializer?.Value)).ToList();
-
-            possibleMemberAccessExpressions = possibleMemberAccessExpressions.Concat(descendantNodes
-                .OfType<AssignmentExpressionSyntax>()
-                .SelectMany(syntax => new List<ExpressionSyntax> { syntax.Left, syntax.Right })).ToList();
-
-            possibleMemberAccessExpressions = possibleMemberAccessExpressions.Distinct().ToList();
-            
             foreach (var memberAccessExpressionSyntax in possibleMemberAccessExpressions)
             {
                 if (memberAccessExpressionSyntax.GetParentDeclarationSyntax<LocalFunctionStatementSyntax>() != null)
@@ -80,8 +116,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                 }
 
                 var accessedField = new AccessedField();
-
                 var shouldIgnoreIdentifierBecauseIsNotField = false;
+
                 foreach (var visitor in GetContainedVisitors())
                 {
                     try
@@ -109,6 +145,23 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
 
                 containedTypeWithAccessedFields.AccessedFields.Add(accessedField);
             }
+        }
+
+        private static List<ExpressionSyntax> GetPossibleAccessFields(List<SyntaxNode> descendantNodes)
+        {
+            var possibleMemberAccessExpressions = descendantNodes
+                .OfType<MemberAccessExpressionSyntax>().Cast<ExpressionSyntax>().ToList();
+
+            possibleMemberAccessExpressions = possibleMemberAccessExpressions.Concat(descendantNodes
+                .OfType<VariableDeclaratorSyntax>()
+                .Select(syntax => syntax.Initializer?.Value)).ToList();
+
+            possibleMemberAccessExpressions = possibleMemberAccessExpressions.Concat(descendantNodes
+                .OfType<AssignmentExpressionSyntax>()
+                .SelectMany(syntax => new List<ExpressionSyntax> { syntax.Left, syntax.Right })).ToList();
+
+            possibleMemberAccessExpressions = possibleMemberAccessExpressions.Distinct().ToList();
+            return possibleMemberAccessExpressions;
         }
     }
 }
