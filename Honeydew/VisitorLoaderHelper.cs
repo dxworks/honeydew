@@ -2,6 +2,7 @@
 using HoneydewCore.Logging;
 using HoneydewCore.ModelRepresentations;
 using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.AccessedFields;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
@@ -12,6 +13,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
+using HoneydewExtractors.CSharp.Metrics.Extraction.AccessField;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Attribute;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
@@ -46,6 +48,11 @@ namespace Honeydew
                 new MethodCallInfoVisitor()
             });
 
+            var accessedFieldsSetterVisitor = new AccessedFieldsSetterVisitor(new List<ICSharpAccessedFieldsVisitor>
+            {
+                new AccessFieldVisitor()
+            });
+
             var parameterSetterVisitor = new ParameterSetterVisitor(new List<IParameterVisitor>
             {
                 new ParameterInfoVisitor(),
@@ -72,12 +79,14 @@ namespace Honeydew
                     parameterSetterVisitor,
                     localVariablesTypeSetterVisitor,
                     genericParameterSetterVisitor,
+                    accessedFieldsSetterVisitor,
                 }),
                 calledMethodSetterVisitor,
                 linesOfCodeVisitor,
                 parameterSetterVisitor,
                 localVariablesTypeSetterVisitor,
                 genericParameterSetterVisitor,
+                accessedFieldsSetterVisitor,
             });
 
             var methodInfoVisitor = new MethodInfoVisitor();
@@ -92,6 +101,7 @@ namespace Honeydew
                 parameterSetterVisitor,
                 localVariablesTypeSetterVisitor,
                 genericParameterSetterVisitor,
+                accessedFieldsSetterVisitor,
             };
 
             var constructorVisitors = new List<ICSharpConstructorVisitor>
@@ -104,6 +114,7 @@ namespace Honeydew
                 attributeSetterVisitor,
                 parameterSetterVisitor,
                 localVariablesTypeSetterVisitor,
+                accessedFieldsSetterVisitor,
             };
 
             var fieldVisitors = new List<ICSharpFieldVisitor>
@@ -123,6 +134,7 @@ namespace Honeydew
                     linesOfCodeVisitor,
                     localFunctionsSetterClassVisitor,
                     localVariablesTypeSetterVisitor,
+                    accessedFieldsSetterVisitor,
                 }),
                 linesOfCodeVisitor,
                 attributeSetterVisitor,

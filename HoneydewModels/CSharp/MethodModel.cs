@@ -21,6 +21,8 @@ namespace HoneydewModels.CSharp
 
         public IList<IMethodSignatureType> CalledMethods { get; set; } = new List<IMethodSignatureType>();
 
+        public IList<AccessedField> AccessedFields { get; set; } = new List<AccessedField>();
+
         public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
 
         public IList<IMethodTypeWithLocalFunctions> LocalFunctions { get; set; } =
