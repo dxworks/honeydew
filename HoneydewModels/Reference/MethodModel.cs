@@ -20,6 +20,8 @@ namespace HoneydewModels.Reference
 
         public IList<MethodCallModel> CalledMethods { get; set; } = new List<MethodCallModel>();
 
+        public IList<AccessedField> AccessedFields { get; set; } = new List<AccessedField>();
+
         public IList<AttributeModel> Attributes { get; set; } = new List<AttributeModel>();
 
         public IList<MethodModel> LocalFunctions { get; set; } = new List<MethodModel>();

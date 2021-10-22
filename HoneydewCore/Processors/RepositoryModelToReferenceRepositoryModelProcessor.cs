@@ -2,6 +2,7 @@
 using System.Linq;
 using HoneydewModels.Reference;
 using HoneydewModels.Types;
+using AccessedField = HoneydewModels.Reference.AccessedField;
 using ClassModel = HoneydewModels.Reference.ClassModel;
 using ConstructorModel = HoneydewModels.Reference.ConstructorModel;
 using DelegateModel = HoneydewModels.CSharp.DelegateModel;
@@ -598,6 +599,8 @@ namespace HoneydewCore.Processors
 
                             methodModel.CalledMethods = ConvertCalledMethods(methodModel, methodType.CalledMethods);
 
+                            methodModel.AccessedFields = ConvertAccessFields(methodType.AccessedFields);
+
                             SetCalledMethodsForMethodLocalFunctions(methodModel, methodType);
                         }
 
@@ -630,6 +633,8 @@ namespace HoneydewCore.Processors
 
                                 accessor.CalledMethods = ConvertCalledMethods(accessor, accessorType.CalledMethods);
 
+                                accessor.AccessedFields = ConvertAccessFields(accessorType.AccessedFields);
+
                                 SetCalledMethodsForMethodLocalFunctions(accessor, accessorType);
                             }
                         }
@@ -650,6 +655,43 @@ namespace HoneydewCore.Processors
                         }
 
                         return calledMethodModels;
+                    }
+
+                    IList<AccessedField> ConvertAccessFields(
+                        IEnumerable<HoneydewModels.Types.AccessedField> accessedFields)
+                    {
+                        return accessedFields.Select(field =>
+                        {
+                            var containingClass =
+                                SearchEntityByName(field.ContainingTypeName, projectModel) as ClassModel;
+                            if (containingClass == null)
+                            {
+                                return null;
+                            }
+
+                            var fieldReference = containingClass.Fields.FirstOrDefault(f => f.Name == field.Name);
+                            if (fieldReference != null)
+                            {
+                                return new AccessedField
+                                {
+                                    Field = fieldReference,
+                                    AccessType = nameof(field.Type),
+                                };
+                            }
+
+                            var propertyReference =
+                                containingClass.Properties.FirstOrDefault(p => p.Name == field.Name);
+                            if (propertyReference != null)
+                            {
+                                return new AccessedField
+                                {
+                                    Property = propertyReference,
+                                    AccessType = nameof(field.Type),
+                                };
+                            }
+
+                            return null;
+                        }).Where(x => x != null).ToList();
                     }
 
                     void SetCalledMethodsForMethodLocalFunctions(MethodModel methodModel, IMethodType methodType)
