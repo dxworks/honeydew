@@ -1,0 +1,21 @@
+﻿namespace Namespace1 
+{
+    public class Class1
+    {
+        private int Field1;
+        
+        public float Property1 { get; set; }
+        
+        public void Method1()
+        {
+            var x = Field1;
+            var y = Property1;
+        }
+        
+        public void Method2(int x, float y)
+        {
+            Field1 = x;
+            Property1 = y;
+        }
+    }
+}
