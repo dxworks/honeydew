@@ -579,5 +579,62 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
             return attributeListSyntax.Target.Identifier.ToString();
         }
+
+        public AccessedField GetAccessField(ExpressionSyntax identifierNameSyntax)
+        {
+            if (identifierNameSyntax == null)
+            {
+                return null;
+            }
+
+            var symbolInfo = _semanticModel.GetSymbolInfo(identifierNameSyntax);
+
+            if (symbolInfo.Symbol is IFieldSymbol fieldSymbol)
+            {
+                return new AccessedField
+                {
+                    Name = fieldSymbol.Name,
+                    ContainingTypeName = fieldSymbol.ContainingType.ToString(),
+                    Type = GetAccessType(identifierNameSyntax)
+                };
+            }
+
+            if (symbolInfo.Symbol is IPropertySymbol propertySymbol)
+            {
+                return new AccessedField
+                {
+                    Name = propertySymbol.Name,
+                    ContainingTypeName = propertySymbol.ContainingType.ToString(),
+                    Type = GetAccessType(identifierNameSyntax)
+                };
+            }
+
+            if (identifierNameSyntax is MemberAccessExpressionSyntax memberAccessExpressionSyntax)
+            {
+                if (memberAccessExpressionSyntax.Parent is InvocationExpressionSyntax)
+                {
+                    return null;
+                }
+
+                return new AccessedField
+                {
+                    Name = memberAccessExpressionSyntax.Name.ToString(),
+                    ContainingTypeName = memberAccessExpressionSyntax.Expression.ToString(),
+                    Type = GetAccessType(memberAccessExpressionSyntax)
+                };
+            }
+
+            return null;
+
+            AccessedField.AccessType GetAccessType(SyntaxNode syntax)
+            {
+                if (syntax?.Parent is AssignmentExpressionSyntax)
+                {
+                    return AccessedField.AccessType.Setter;
+                }
+
+                return AccessedField.AccessType.Getter;
+            }
+        }
     }
 }
