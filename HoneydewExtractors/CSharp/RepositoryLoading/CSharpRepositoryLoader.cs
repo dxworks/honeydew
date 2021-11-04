@@ -206,9 +206,9 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                 }
 
                 _logger.Log();
-                _logger.Log($"Searching for C# Files that are were processed yet at {path}");
+                _logger.Log($"Searching for C# Files that were not processed yet at {path}");
                 _progressLogger.Log();
-                _progressLogger.Log($"Searching for C# Files that are were processed yet at {path}");
+                _progressLogger.Log($"Searching for C# Files that were not processed yet at {path}");
 
                 var notProcessedFilePaths = new List<string>();
 
