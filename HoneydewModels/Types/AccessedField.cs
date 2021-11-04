@@ -4,11 +4,13 @@
     {
         public string Name { get; set; }
 
+        public IEntityType Type { get; set; }
+
         public string ContainingTypeName { get; set; }
 
-        public AccessType Type { get; set; }
+        public AccessKind Kind { get; set; }
 
-        public enum AccessType
+        public enum AccessKind
         {
             Getter,
             Setter,

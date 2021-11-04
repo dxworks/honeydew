@@ -675,7 +675,7 @@ namespace HoneydewCore.Processors
                                 return new AccessedField
                                 {
                                     Field = fieldReference,
-                                    AccessType = nameof(field.Type),
+                                    AccessType = nameof(field.Kind),
                                 };
                             }
 
@@ -686,7 +686,7 @@ namespace HoneydewCore.Processors
                                 return new AccessedField
                                 {
                                     Property = propertyReference,
-                                    AccessType = nameof(field.Type),
+                                    AccessType = nameof(field.Kind),
                                 };
                             }
 

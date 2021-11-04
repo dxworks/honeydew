@@ -67,7 +67,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields
                 Assert.Equal(2, methodType.AccessedFields.Count);
 
                 Assert.Equal("Field1", methodType.AccessedFields[0].Name);
+                Assert.Equal("int", methodType.AccessedFields[0].Type.Name);
+
                 Assert.Equal("Property1", methodType.AccessedFields[1].Name);
+                Assert.Equal("float", methodType.AccessedFields[1].Type.Name);
 
                 foreach (var accessedField in methodType.AccessedFields)
                 {
@@ -77,12 +80,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields
 
             foreach (var accessedField in classModel.Methods[0].AccessedFields)
             {
-                Assert.Equal(AccessedField.AccessType.Getter, accessedField.Type);
+                Assert.Equal(AccessedField.AccessKind.Getter, accessedField.Kind);
             }
 
             foreach (var accessedField in classModel.Methods[1].AccessedFields)
             {
-                Assert.Equal(AccessedField.AccessType.Setter, accessedField.Type);
+                Assert.Equal(AccessedField.AccessKind.Setter, accessedField.Kind);
             }
         }
 
@@ -104,7 +107,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields
                 Assert.Equal(2, methodType.AccessedFields.Count);
 
                 Assert.Equal("Field1", methodType.AccessedFields[0].Name);
+                Assert.Equal("int", methodType.AccessedFields[0].Type.Name);
+
                 Assert.Equal("Property1", methodType.AccessedFields[1].Name);
+                Assert.Equal("float", methodType.AccessedFields[1].Type.Name);
 
                 foreach (var accessedField in methodType.AccessedFields)
                 {
@@ -114,12 +120,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields
 
             foreach (var accessedField in classModel.Methods[0].AccessedFields)
             {
-                Assert.Equal(AccessedField.AccessType.Getter, accessedField.Type);
+                Assert.Equal(AccessedField.AccessKind.Getter, accessedField.Kind);
             }
 
             foreach (var accessedField in classModel.Methods[1].AccessedFields)
             {
-                Assert.Equal(AccessedField.AccessType.Setter, accessedField.Type);
+                Assert.Equal(AccessedField.AccessKind.Setter, accessedField.Kind);
             }
         }
 
@@ -151,12 +157,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields
 
             foreach (var accessedField in classModel.Methods[0].AccessedFields)
             {
-                Assert.Equal(AccessedField.AccessType.Getter, accessedField.Type);
+                Assert.Equal(AccessedField.AccessKind.Getter, accessedField.Kind);
             }
 
             foreach (var accessedField in classModel.Methods[1].AccessedFields)
             {
-                Assert.Equal(AccessedField.AccessType.Setter, accessedField.Type);
+                Assert.Equal(AccessedField.AccessKind.Setter, accessedField.Kind);
             }
         }
     }

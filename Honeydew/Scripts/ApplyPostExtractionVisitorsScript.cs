@@ -72,6 +72,7 @@ namespace Honeydew.Scripts
                 localVariablesRelationVisitor,
 
                 new ExternCallsRelationVisitor(),
+                new ExternDataRelationVisitor(),
                 new HierarchyRelationVisitor(),
                 new ReturnValueRelationVisitor(),
                 new DeclarationRelationVisitor(localVariablesRelationVisitor, parameterRelationVisitor,

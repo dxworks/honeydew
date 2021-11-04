@@ -91,7 +91,10 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields
                 Assert.Equal(2, localFunction.AccessedFields.Count);
 
                 Assert.Equal("Field1", localFunction.AccessedFields[0].Name);
+                Assert.Equal("int", localFunction.AccessedFields[0].Type.Name);
+                
                 Assert.Equal("Property1", localFunction.AccessedFields[1].Name);
+                Assert.Equal("float", localFunction.AccessedFields[1].Type.Name);
 
                 foreach (var accessedField in localFunction.AccessedFields)
                 {
@@ -101,14 +104,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields
 
             for (var i = 0; i < 3; i++)
             {
-                Assert.Equal(AccessedField.AccessType.Getter, localFunctions[i].AccessedFields[0].Type);
-                Assert.Equal(AccessedField.AccessType.Getter, localFunctions[i].AccessedFields[1].Type);
+                Assert.Equal(AccessedField.AccessKind.Getter, localFunctions[i].AccessedFields[0].Kind);
+                Assert.Equal(AccessedField.AccessKind.Getter, localFunctions[i].AccessedFields[1].Kind);
             }
 
             for (var i = 3; i < localFunctions.Length; i++)
             {
-                Assert.Equal(AccessedField.AccessType.Setter, localFunctions[i].AccessedFields[0].Type);
-                Assert.Equal(AccessedField.AccessType.Setter, localFunctions[i].AccessedFields[1].Type);
+                Assert.Equal(AccessedField.AccessKind.Setter, localFunctions[i].AccessedFields[0].Kind);
+                Assert.Equal(AccessedField.AccessKind.Setter, localFunctions[i].AccessedFields[1].Kind);
             }
         }
     }

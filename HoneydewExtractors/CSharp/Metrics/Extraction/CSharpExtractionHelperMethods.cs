@@ -595,7 +595,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 {
                     Name = fieldSymbol.Name,
                     ContainingTypeName = fieldSymbol.ContainingType.ToString(),
-                    Type = GetAccessType(identifierNameSyntax)
+                    Kind = GetAccessType(identifierNameSyntax),
+                    Type = GetFullName(identifierNameSyntax),
                 };
             }
 
@@ -605,7 +606,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 {
                     Name = propertySymbol.Name,
                     ContainingTypeName = propertySymbol.ContainingType.ToString(),
-                    Type = GetAccessType(identifierNameSyntax)
+                    Kind = GetAccessType(identifierNameSyntax),
+                    Type = GetFullName(identifierNameSyntax),
                 };
             }
 
@@ -620,20 +622,21 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 {
                     Name = memberAccessExpressionSyntax.Name.ToString(),
                     ContainingTypeName = memberAccessExpressionSyntax.Expression.ToString(),
-                    Type = GetAccessType(memberAccessExpressionSyntax)
+                    Kind = GetAccessType(memberAccessExpressionSyntax),
+                    Type = GetFullName(identifierNameSyntax),
                 };
             }
 
             return null;
 
-            AccessedField.AccessType GetAccessType(SyntaxNode syntax)
+            AccessedField.AccessKind GetAccessType(SyntaxNode syntax)
             {
                 if (syntax?.Parent is AssignmentExpressionSyntax)
                 {
-                    return AccessedField.AccessType.Setter;
+                    return AccessedField.AccessKind.Setter;
                 }
 
-                return AccessedField.AccessType.Getter;
+                return AccessedField.AccessKind.Getter;
             }
         }
     }
