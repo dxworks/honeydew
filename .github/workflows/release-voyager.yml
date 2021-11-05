@@ -34,14 +34,64 @@ jobs:
       - name: Release for OS
         run: |
           mkdir bin
-          dotnet publish -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
+          dotnet publish -r ${{matrix.os}}-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
+
       - name: Prepare Assets
         run: |
-          mkdir -p honeydew
+          mkdir -p ${{matrix.os}}
           rm bin/*.pdb
-          cp -R bin/* honeydew
+          cp -R bin/* ${{matrix.os}}
+
       - name: Create Archive
-        run: zip -r honeydew.zip honeydew
+        run: zip -r honeydew-${{ matrix.os }}.zip ${{matrix.os}}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: honeydew-${{ matrix.os }}.zip
+          path: honeydew-${{ matrix.os }}.zip
+
+  release-and-upload:
+    name: Release Honeydew for Voyager
+    runs-on: ubuntu-latest
+    needs: build-and-publish
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Extract Semver
+        id: semver_parser
+        run: |
+          semver=${TAG#"refs/tags/v"}
+          semver=${semver%"-voyager"}
+
+          echo ::set-output name=semver::$semver
+        env:
+          TAG: ${{ github.ref }}
+
+      - name: Prepare Assets
+        run: |
+          mkdir -p honeydew/results
+          mkdir -p honeydew/bin
+
+          cp README.md honeydew/README.md
+          cp instrument.yml honeydew/instrument.yml
+
+          unzip ./honeydew-win.zip/honeydew-win.zip -d honeydew/bin
+          unzip ./honeydew-linux.zip/honeydew-linux.zip -d honeydew/bin
+          unzip ./honeydew-osx.zip/honeydew-osx.zip -d honeydew/bin
+
+          ls -al -R honeydew
+
+          chmod +x honeydew/bin/win/Honeydew.exe
+          chmod +x honeydew/bin/linux/Honeydew
+          chmod +x honeydew/bin/osx/Honeydew
+
+      - name: Zip Voyager Release
+        run: zip -rl honeydew.zip honeydew
 
       - name: Prepare Release Notes
         run: touch ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
