@@ -31,5 +31,8 @@ namespace Honeydew
         [Option("no-extern-types-search", Required = false, Default = false,
             HelpText = "Deactivate Extern Type in Local Types Search")]
         public bool DisableExternTypeInLocalTypeSearch { get; set; }
+
+        [Option("voyager", Required = false, Default = false, HelpText = "Use Voyager Options")]
+        public bool UseVoyager { get; set; }
     }
 }

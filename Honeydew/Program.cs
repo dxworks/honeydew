@@ -40,8 +40,9 @@ namespace Honeydew
 
                 var logFilePath = $"{DefaultPathForAllRepresentations}/logs.txt";
                 var logger = new SerilogLogger(logFilePath);
+                var disableProgressBars = options.DisableProgressBars || options.UseVoyager;
                 IProgressLogger progressLogger =
-                    options.DisableProgressBars ? new NoBarsProgressLogger() : new ProgressLogger();
+                    disableProgressBars ? new NoBarsProgressLogger() : new ProgressLogger();
 
                 var honeydewVersion = "";
                 try
@@ -75,7 +76,7 @@ namespace Honeydew
                 progressLogger.Log($"Log will be stored at {logFilePath}");
                 progressLogger.Log();
 
-                if (options.DisableProgressBars)
+                if (disableProgressBars)
                 {
                     logger.Log("Progress bars are disabled");
                     logger.Log();
@@ -102,6 +103,25 @@ namespace Honeydew
                     {
                         repositoryModel = await ExtractModel(logger, progressLogger, missingFilesLogger,
                             relationMetricHolder, inputPath);
+
+                        if (options.UseVoyager)
+                        {
+                            logger.Log("Exporting Raw Model");
+                            progressLogger.Log("Exporting Raw Model");
+                            
+                            var runner = new ScriptRunner(logger, new Dictionary<string, object>
+                            {
+                                { "outputPath", DefaultPathForAllRepresentations },
+                                { "repositoryModel", repositoryModel },
+                                { "rawJsonOutputName", "honeydew.json" },
+                            });
+                            runner.Run(new List<ScriptRuntime>
+                            {
+                                new(new ExportRawModelScript(new JsonModelExporter())),
+                            });
+
+                            return;
+                        }
                     }
                         break;
 
