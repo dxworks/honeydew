@@ -7,7 +7,7 @@ Honeydew is a tool that extracts facts from a C# Solution or C# Project
 For extracting information about a solution or project use the following command:
 
 ```
-.\Honeydew extract <input_path> [--no-progress-bars] [--no-bindings] [--no-local-variables-bindings] [--no-trim-paths] [--no-extern-types-search]
+.\Honeydew extract <input_path> [--no-progress-bars] [--no-bindings] [--no-local-variables-bindings] [--no-trim-paths] [--no-extern-types-search] [--voyager]
 ```
 
 If `input_path` is a path to a solution file (.sln), Honeydew will extract facts from that solution file
@@ -46,15 +46,21 @@ The output files will be placed in a folder named `results`
 
   If present, Honeydew will not search in the entire model for extern types that have the same name with types
   identified in the provided input
-  
+
   If such types were found, the result will be placed in a file named `extern_types.txt`
+
+
+- `--voyager`
+
+  If present, Honeydew will extract the model and export it raw in a json file. The post extraction metrics will not be
+  used. The extraction will run as if the `--no-progress-bars` flag was set.
 
 ## Load Model from file
 
 For loading a model from a json file
 
 ```
-.\Honeydew load <path_to_json_model> [--no-progress-bars] [--no-bindings] [--no-local-variables-bindings] [--no-trim-paths] [--no-extern-types-search]
+.\Honeydew load <path_to_json_model> [--no-progress-bars] [--no-bindings] [--no-local-variables-bindings] [--no-trim-paths] [--no-extern-types-search]  [--voyager]
 ```
 
 ### Options
@@ -86,6 +92,12 @@ For loading a model from a json file
   identified in the provided input
 
   If such types were found, the result will be placed in a file named `extern_types.txt`
+
+
+- `--voyager`
+
+  If present, Honeydew will extract the model and export it raw in a json file. The post extraction metrics will not be
+  used. The extraction will run as if the `--no-progress-bars` flag was set.
 
 ## Build Project
 
