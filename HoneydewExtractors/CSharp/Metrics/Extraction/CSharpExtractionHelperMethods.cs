@@ -596,7 +596,6 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                     Name = fieldSymbol.Name,
                     ContainingTypeName = fieldSymbol.ContainingType.ToString(),
                     Kind = GetAccessType(identifierNameSyntax),
-                    Type = GetFullName(identifierNameSyntax),
                 };
             }
 
@@ -607,7 +606,6 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                     Name = propertySymbol.Name,
                     ContainingTypeName = propertySymbol.ContainingType.ToString(),
                     Kind = GetAccessType(identifierNameSyntax),
-                    Type = GetFullName(identifierNameSyntax),
                 };
             }
 
@@ -623,7 +621,6 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                     Name = memberAccessExpressionSyntax.Name.ToString(),
                     ContainingTypeName = memberAccessExpressionSyntax.Expression.ToString(),
                     Kind = GetAccessType(memberAccessExpressionSyntax),
-                    Type = GetFullName(identifierNameSyntax),
                 };
             }
 

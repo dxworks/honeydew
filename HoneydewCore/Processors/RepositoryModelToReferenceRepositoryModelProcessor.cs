@@ -10,7 +10,7 @@ using ClassModel = HoneydewModels.Reference.ClassModel;
 using DelegateModel = HoneydewModels.CSharp.DelegateModel;
 using FieldModel = HoneydewModels.Reference.FieldModel;
 using GenericParameterModel = HoneydewModels.Reference.GenericParameterModel;
-using GenericType = HoneydewModels.Reference.GenericType;
+using GenericType = HoneydewModels.Types.GenericType;
 using LocalVariableModel = HoneydewModels.Reference.LocalVariableModel;
 using MethodModel = HoneydewModels.Reference.MethodModel;
 using MetricModel = HoneydewModels.Reference.MetricModel;
@@ -411,8 +411,9 @@ namespace HoneydewCore.Processors
                             continue;
                         }
 
-                        classModel.Properties =
-                            PopulateWithPropertyModels(classModel, propertyMembersClassType.Properties);
+                        classModel.Fields = classModel.Fields
+                            .Concat(PopulateWithPropertyModels(classModel, propertyMembersClassType.Properties))
+                            .ToList();
                     }
 
                     IList<MethodModel> PopulateWithMethodModels(ClassModel parentClass,
@@ -513,10 +514,10 @@ namespace HoneydewCore.Processors
                 Type = new EntityTypeModel
                 {
                     Name = "void",
-                    FullType = new HoneydewModels.Types.GenericType
+                    FullType = new GenericType
                     {
                         Name = "void",
-                        ContainedTypes = new List<HoneydewModels.Types.GenericType>()
+                        ContainedTypes = new List<GenericType>()
                     }
                 }
             }, projectModel);
@@ -692,9 +693,8 @@ namespace HoneydewCore.Processors
                     {
                         return accessedFields.Select(field =>
                         {
-                            var containingClass =
-                                SearchEntityByName(field.ContainingTypeName, projectModel) as ClassModel;
-                            if (containingClass == null)
+                            if (SearchEntityByName(field.ContainingTypeName, projectModel) is not ClassModel
+                                containingClass)
                             {
                                 return null;
                             }
@@ -715,7 +715,7 @@ namespace HoneydewCore.Processors
                             {
                                 return new AccessedField
                                 {
-                                    Property = propertyReference,
+                                    Field = propertyReference,
                                     AccessType = nameof(field.Kind),
                                 };
                             }
@@ -1265,14 +1265,14 @@ namespace HoneydewCore.Processors
 
             return entityType;
 
-            GenericType ConvertGeneric(HoneydewModels.Types.GenericType genType)
+            HoneydewModels.Reference.GenericType ConvertGeneric(GenericType genType)
             {
                 if (genType == null)
                 {
-                    return new GenericType();
+                    return new HoneydewModels.Reference.GenericType();
                 }
 
-                var genericType = new GenericType
+                var genericType = new HoneydewModels.Reference.GenericType
                 {
                     Reference = SearchEntityByName(GetNonNullableName(genType.Name), projectModel),
                     IsNullable = genType.IsNullable,

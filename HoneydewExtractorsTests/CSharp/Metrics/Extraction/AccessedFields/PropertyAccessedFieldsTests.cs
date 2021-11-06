@@ -75,10 +75,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields
                     Assert.Equal(2, accessor.AccessedFields.Count);
 
                     Assert.Equal("Field1", accessor.AccessedFields[0].Name);
-                    Assert.Equal("int", accessor.AccessedFields[0].Type.Name);
-                    
                     Assert.Equal("Property1", accessor.AccessedFields[1].Name);
-                    Assert.Equal("float", accessor.AccessedFields[1].Type.Name);
 
                     foreach (var accessedField in accessor.AccessedFields)
                     {
@@ -127,10 +124,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields
                     Assert.Equal(2, accessor.AccessedFields.Count);
 
                     Assert.Equal("Field1", accessor.AccessedFields[0].Name);
-                    Assert.Equal("int", accessor.AccessedFields[0].Type.Name);
-                    
                     Assert.Equal("Property1", accessor.AccessedFields[1].Name);
-                    Assert.Equal("float", accessor.AccessedFields[1].Type.Name);
 
                     foreach (var accessedField in accessor.AccessedFields)
                     {

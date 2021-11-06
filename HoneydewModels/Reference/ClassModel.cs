@@ -27,7 +27,8 @@ namespace HoneydewModels.Reference
 
         public IList<FieldModel> Fields { get; set; } = new List<FieldModel>();
 
-        public IList<PropertyModel> Properties { get; set; } = new List<PropertyModel>();
+        public IList<PropertyModel> Properties =>
+            Fields.Where(model => model is PropertyModel).Cast<PropertyModel>().ToList();
 
         public IList<MethodModel> Constructors => Methods.Where(model => model.IsConstructor).ToList();
 

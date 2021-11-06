@@ -6,13 +6,13 @@ namespace HoneydewModels.Reference
     {
         public string Name { get; set; }
 
-        public EntityType Type { get; set; }
-
-        public string Modifier { get; set; } = "";
+        public ClassModel Class { get; set; }
 
         public string AccessModifier { get; set; }
 
-        public ClassModel Class { get; set; }
+        public string Modifier { get; set; } = "";
+
+        public EntityType Type { get; set; }
 
         public bool IsEvent { get; set; }
 

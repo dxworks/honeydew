@@ -91,10 +91,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields
                 Assert.Equal(2, localFunction.AccessedFields.Count);
 
                 Assert.Equal("Field1", localFunction.AccessedFields[0].Name);
-                Assert.Equal("int", localFunction.AccessedFields[0].Type.Name);
-                
                 Assert.Equal("Property1", localFunction.AccessedFields[1].Name);
-                Assert.Equal("float", localFunction.AccessedFields[1].Type.Name);
 
                 foreach (var accessedField in localFunction.AccessedFields)
                 {
