@@ -14,7 +14,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                     return syntax;
                 }
 
-                if (node.Parent == null)
+                if (node?.Parent == null)
                 {
                     return null;
                 }
