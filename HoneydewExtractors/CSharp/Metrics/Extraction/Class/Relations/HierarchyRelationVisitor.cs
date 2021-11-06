@@ -19,7 +19,14 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
 
             foreach (var modelTypeBaseType in modelType.BaseTypes)
             {
-                dict.Add(modelTypeBaseType.Type.Name, 1);
+                if (dict.ContainsKey(modelTypeBaseType.Type.Name))
+                {
+                    dict[modelTypeBaseType.Type.Name]++;
+                }
+                else
+                {
+                    dict.Add(modelTypeBaseType.Type.Name, 1);
+                }
             }
 
             modelType.Metrics.Add(new MetricModel
