@@ -6,6 +6,10 @@ namespace HoneydewModels.Reference
     {
         public string Name { get; set; }
 
+        public ClassModel Class { get; set; }
+
+        public bool IsConstructor { get; set; }
+        
         public ReferenceEntity ContainingType { get; set; }
 
         public string Modifier { get; set; } = "";
@@ -18,7 +22,7 @@ namespace HoneydewModels.Reference
 
         public IList<GenericParameterModel> GenericParameters { get; set; } = new List<GenericParameterModel>();
 
-        public IList<MethodCallModel> CalledMethods { get; set; } = new List<MethodCallModel>();
+        public IList<MethodModel> CalledMethods { get; set; } = new List<MethodModel>();
 
         public IList<AccessedField> AccessedFields { get; set; } = new List<AccessedField>();
 

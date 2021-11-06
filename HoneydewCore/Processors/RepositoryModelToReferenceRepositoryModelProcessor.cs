@@ -1,17 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using HoneydewCore.Utils;
+using HoneydewModels.CSharp;
 using HoneydewModels.Reference;
 using HoneydewModels.Types;
 using AccessedField = HoneydewModels.Reference.AccessedField;
+using AttributeModel = HoneydewModels.Reference.AttributeModel;
 using ClassModel = HoneydewModels.Reference.ClassModel;
-using ConstructorModel = HoneydewModels.Reference.ConstructorModel;
 using DelegateModel = HoneydewModels.CSharp.DelegateModel;
 using FieldModel = HoneydewModels.Reference.FieldModel;
+using GenericParameterModel = HoneydewModels.Reference.GenericParameterModel;
 using GenericType = HoneydewModels.Reference.GenericType;
+using LocalVariableModel = HoneydewModels.Reference.LocalVariableModel;
 using MethodModel = HoneydewModels.Reference.MethodModel;
+using MetricModel = HoneydewModels.Reference.MetricModel;
+using ParameterModel = HoneydewModels.Reference.ParameterModel;
 using ProjectModel = HoneydewModels.Reference.ProjectModel;
 using PropertyModel = HoneydewModels.Reference.PropertyModel;
 using RepositoryModel = HoneydewModels.CSharp.RepositoryModel;
+using ReturnValueModel = HoneydewModels.Reference.ReturnValueModel;
+using SolutionModel = HoneydewModels.Reference.SolutionModel;
 
 namespace HoneydewCore.Processors
 {
@@ -91,7 +99,7 @@ namespace HoneydewCore.Processors
                         Metrics = ConvertMetrics(compilationUnitType)
                     };
 
-                    referenceProjectModel.CompilationUnits.Add(referenceCompilationUnit);
+                    referenceProjectModel.Files.Add(referenceCompilationUnit);
 
                     foreach (var classType in compilationUnitType.ClassTypes)
                     {
@@ -267,10 +275,10 @@ namespace HoneydewCore.Processors
             {
                 var projectModel = referenceRepositoryModel.Projects[projectIndex];
                 for (var compilationUnitIndex = 0;
-                    compilationUnitIndex < projectModel.CompilationUnits.Count;
+                    compilationUnitIndex < projectModel.Files.Count;
                     compilationUnitIndex++)
                 {
-                    var compilationUnit = projectModel.CompilationUnits[compilationUnitIndex];
+                    var compilationUnit = projectModel.Files[compilationUnitIndex];
                     var compilationUnitType =
                         repositoryModel.Projects[projectIndex].CompilationUnits[compilationUnitIndex];
 
@@ -352,7 +360,7 @@ namespace HoneydewCore.Processors
                 }
             }
 
-            if (!shouldAdd)
+            if (!CSharpConstants.IsPrimitive(className) && !shouldAdd)
             {
                 return null;
             }
@@ -375,10 +383,10 @@ namespace HoneydewCore.Processors
             {
                 var projectModel = referenceRepositoryModel.Projects[projectIndex];
                 for (var compilationUnitIndex = 0;
-                    compilationUnitIndex < projectModel.CompilationUnits.Count;
+                    compilationUnitIndex < projectModel.Files.Count;
                     compilationUnitIndex++)
                 {
-                    var compilationUnit = projectModel.CompilationUnits[compilationUnitIndex];
+                    var compilationUnit = projectModel.Files[compilationUnitIndex];
                     var compilationUnitType = repositoryModel.Projects[projectIndex]
                         .CompilationUnits[compilationUnitIndex];
 
@@ -393,8 +401,9 @@ namespace HoneydewCore.Processors
                         }
 
                         classModel.Methods = PopulateWithMethodModels(classModel, membersClassType.Methods);
-                        classModel.Constructors =
-                            PopulateWithConstructorModels(classModel, membersClassType.Constructors);
+                        classModel.Methods = classModel.Methods
+                            .Concat(PopulateWithConstructorModels(classModel, membersClassType.Constructors))
+                            .ToList();
                         classModel.Fields = PopulateWithFieldModels(classModel, membersClassType.Fields);
 
                         if (classType is not IPropertyMembersClassType propertyMembersClassType)
@@ -413,7 +422,7 @@ namespace HoneydewCore.Processors
                             .ToList();
                     }
 
-                    IList<ConstructorModel> PopulateWithConstructorModels(ClassModel parentClass,
+                    IList<MethodModel> PopulateWithConstructorModels(ClassModel parentClass,
                         IEnumerable<IConstructorType> constructorTypes)
                     {
                         return constructorTypes
@@ -479,12 +488,14 @@ namespace HoneydewCore.Processors
             return model;
         }
 
-        private ConstructorModel ConvertConstructor(ClassModel parentClass, IConstructorType constructorType,
+        private MethodModel ConvertConstructor(ClassModel parentClass, IConstructorType constructorType,
             ProjectModel projectModel)
         {
-            var model = new ConstructorModel
+            var model = new MethodModel
             {
                 Class = parentClass,
+                ContainingType = parentClass,
+                IsConstructor = true,
                 Name = constructorType.Name,
                 Modifier = constructorType.Modifier,
                 AccessModifier = constructorType.AccessModifier,
@@ -496,6 +507,19 @@ namespace HoneydewCore.Processors
             model.Attributes = ConvertAttributes(model, constructorType.Attributes, projectModel);
             model.Parameters = ConvertParameters(model, constructorType.ParameterTypes, projectModel);
             model.LocalVariables = ConvertLocalVariables(model, constructorType.LocalVariableTypes, projectModel);
+
+            model.ReturnValue = ConvertReturnValue(model, new HoneydewModels.CSharp.ReturnValueModel
+            {
+                Type = new EntityTypeModel
+                {
+                    Name = "void",
+                    FullType = new HoneydewModels.Types.GenericType
+                    {
+                        Name = "void",
+                        ContainedTypes = new List<HoneydewModels.Types.GenericType>()
+                    }
+                }
+            }, projectModel);
             if (constructorType is ITypeWithLocalFunctions typeWithLocalFunctions)
             {
                 model.LocalFunctions =
@@ -511,6 +535,7 @@ namespace HoneydewCore.Processors
             var model = new MethodModel
             {
                 ContainingType = parentModel,
+                Class = GetClass(parentModel),
                 Name = methodType.Name,
                 Loc = ConvertLoc(methodType.Loc),
                 Modifier = methodType.Modifier,
@@ -531,6 +556,16 @@ namespace HoneydewCore.Processors
             }
 
             return model;
+        }
+
+        private ClassModel GetClass(ReferenceEntity parentModel)
+        {
+            return parentModel switch
+            {
+                ClassModel classModel => classModel,
+                MethodModel methodModel => GetClass(methodModel.ContainingType),
+                null or _ => null,
+            };
         }
 
         private IList<MethodModel> ConvertLocalFunctions(ReferenceEntity parentModel,
@@ -575,10 +610,10 @@ namespace HoneydewCore.Processors
             {
                 var projectModel = referenceRepositoryModel.Projects[projectIndex];
                 for (var compilationUnitIndex = 0;
-                    compilationUnitIndex < projectModel.CompilationUnits.Count;
+                    compilationUnitIndex < projectModel.Files.Count;
                     compilationUnitIndex++)
                 {
-                    var compilationUnit = projectModel.CompilationUnits[compilationUnitIndex];
+                    var compilationUnit = projectModel.Files[compilationUnitIndex];
                     var compilationUnitType =
                         repositoryModel.Projects[projectIndex].CompilationUnits[compilationUnitIndex];
 
@@ -592,12 +627,12 @@ namespace HoneydewCore.Processors
                             continue;
                         }
 
-                        for (var methodIndex = 0; methodIndex < classModel.Methods.Count; methodIndex++)
+                        for (var methodIndex = 0; methodIndex < membersClassType.Methods.Count; methodIndex++)
                         {
                             var methodModel = classModel.Methods[methodIndex];
                             var methodType = membersClassType.Methods[methodIndex];
 
-                            methodModel.CalledMethods = ConvertCalledMethods(methodModel, methodType.CalledMethods);
+                            methodModel.CalledMethods = ConvertCalledMethods(methodType.CalledMethods);
 
                             methodModel.AccessedFields = ConvertAccessFields(methodType.AccessedFields);
 
@@ -605,14 +640,14 @@ namespace HoneydewCore.Processors
                         }
 
                         for (var constructorIndex = 0;
-                            constructorIndex < classModel.Constructors.Count;
+                            constructorIndex < membersClassType.Constructors.Count;
                             constructorIndex++)
                         {
                             var constructorModel = classModel.Constructors[constructorIndex];
                             var constructorType = membersClassType.Constructors[constructorIndex];
 
                             constructorModel.CalledMethods =
-                                ConvertCalledMethods(constructorModel, constructorType.CalledMethods);
+                                ConvertCalledMethods(constructorType.CalledMethods);
 
                             SetCalledMethodsForConstructorLocalFunctions(constructorModel, constructorType);
                         }
@@ -631,7 +666,7 @@ namespace HoneydewCore.Processors
                                 var accessor = propertyModel.Accessors[accessorIndex];
                                 var accessorType = propertyType.Accessors[accessorIndex];
 
-                                accessor.CalledMethods = ConvertCalledMethods(accessor, accessorType.CalledMethods);
+                                accessor.CalledMethods = ConvertCalledMethods(accessorType.CalledMethods);
 
                                 accessor.AccessedFields = ConvertAccessFields(accessorType.AccessedFields);
 
@@ -640,18 +675,13 @@ namespace HoneydewCore.Processors
                         }
                     }
 
-                    IList<MethodCallModel> ConvertCalledMethods(ReferenceEntity callerModel,
-                        IEnumerable<IMethodSignatureType> calledMethods)
+                    IList<MethodModel> ConvertCalledMethods(IEnumerable<IMethodSignatureType> calledMethods)
                     {
-                        var calledMethodModels = new List<MethodCallModel>();
+                        var calledMethodModels = new List<MethodModel>();
 
                         foreach (var calledMethod in calledMethods)
                         {
-                            calledMethodModels.Add(new MethodCallModel
-                            {
-                                Caller = callerModel,
-                                Method = GetMethodReference(calledMethod, projectModel)
-                            });
+                            calledMethodModels.Add(GetMethodReference(calledMethod, projectModel));
                         }
 
                         return calledMethodModels;
@@ -696,7 +726,7 @@ namespace HoneydewCore.Processors
 
                     void SetCalledMethodsForMethodLocalFunctions(MethodModel methodModel, IMethodType methodType)
                     {
-                        methodModel.CalledMethods = ConvertCalledMethods(methodModel, methodType.CalledMethods);
+                        methodModel.CalledMethods = ConvertCalledMethods(methodType.CalledMethods);
 
                         for (var localFunctionIndex = 0;
                             localFunctionIndex < methodModel.LocalFunctions.Count;
@@ -710,8 +740,7 @@ namespace HoneydewCore.Processors
                             var localFunction = methodModel.LocalFunctions[localFunctionIndex];
                             var localFunctionType = typeWithLocalFunctions.LocalFunctions[localFunctionIndex];
 
-                            localFunction.CalledMethods =
-                                ConvertCalledMethods(localFunction, localFunctionType.CalledMethods);
+                            localFunction.CalledMethods = ConvertCalledMethods(localFunctionType.CalledMethods);
 
                             for (var i = 0; i < localFunction.LocalFunctions.Count; i++)
                             {
@@ -721,11 +750,10 @@ namespace HoneydewCore.Processors
                         }
                     }
 
-                    void SetCalledMethodsForConstructorLocalFunctions(ConstructorModel constructorModel,
+                    void SetCalledMethodsForConstructorLocalFunctions(MethodModel constructorModel,
                         IConstructorType constructorType)
                     {
-                        constructorModel.CalledMethods =
-                            ConvertCalledMethods(constructorModel, constructorType.CalledMethods);
+                        constructorModel.CalledMethods = ConvertCalledMethods(constructorType.CalledMethods);
 
 
                         for (var localFunctionIndex = 0;
@@ -740,8 +768,7 @@ namespace HoneydewCore.Processors
                             var localFunction = constructorModel.LocalFunctions[localFunctionIndex];
                             var localFunctionType = typeWithLocalFunctions.LocalFunctions[localFunctionIndex];
 
-                            localFunction.CalledMethods =
-                                ConvertCalledMethods(localFunction, localFunctionType.CalledMethods);
+                            localFunction.CalledMethods = ConvertCalledMethods(localFunctionType.CalledMethods);
 
                             for (int i = 0; i < localFunction.LocalFunctions.Count; i++)
                             {
@@ -801,16 +828,24 @@ namespace HoneydewCore.Processors
             }
             else
             {
-                var entity = GetMethodReferenceFromLocalFunction(methodSignatureType, projectModel);
-                if (entity != null)
+                try
                 {
-                    return entity;
+                    var entity = GetMethodReferenceFromLocalFunction(methodSignatureType, projectModel);
+                    if (entity != null)
+                    {
+                        return entity;
+                    }
+                }
+                catch
+                {
+                    // ignored
                 }
             }
 
             var createdMethodModel = new MethodModel
             {
                 ContainingType = classModel,
+                Class = classModel,
                 Name = methodSignatureType.Name,
                 Parameters = methodSignatureType.ParameterTypes.Select(p =>
                 {
@@ -1058,10 +1093,10 @@ namespace HoneydewCore.Processors
             return reference;
         }
 
-        private ConstructorModel GetConstructorReferenceFromClass(ClassModel classModel, string constructorName,
+        private MethodModel GetConstructorReferenceFromClass(ClassModel classModel, string constructorName,
             IReadOnlyList<string> parameters)
         {
-            ConstructorModel reference = null;
+            MethodModel reference = null;
 
             foreach (var constructorModel in classModel.Constructors)
             {

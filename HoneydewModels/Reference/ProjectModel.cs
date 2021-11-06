@@ -12,7 +12,7 @@ namespace HoneydewModels.Reference
 
         public IList<NamespaceModel> Namespaces { get; set; } = new List<NamespaceModel>();
 
-        public IList<FileModel> CompilationUnits { get; set; } = new List<FileModel>();
+        public IList<FileModel> Files { get; set; } = new List<FileModel>();
 
         public IList<SolutionModel> Solutions { get; set; } = new List<SolutionModel>(); 
         

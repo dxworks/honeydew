@@ -1,4 +1,4 @@
-﻿namespace HoneydewExtractors.CSharp.Utils
+﻿namespace HoneydewCore.Utils
 {
     public static class CSharpConstants
     {

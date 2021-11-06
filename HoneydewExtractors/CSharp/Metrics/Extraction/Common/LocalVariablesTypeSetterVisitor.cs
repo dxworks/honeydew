@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.Logging;
+using HoneydewCore.Utils;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
-using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
