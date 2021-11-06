@@ -159,5 +159,39 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields
                 Assert.Equal(AccessedField.AccessKind.Setter, accessedField.Kind);
             }
         }
+
+        [Theory]
+        [FileData(
+            "TestData/CSharp/Metrics/Extraction/AccessedFields/MethodAccessedFields/MethodAccessedFieldWithBracketOperator.txt")]
+        public void Extract_ShouldNotHaveAccessedFields_WhenGivenArrayAccessor(string fileContent) // field[]
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+            var classModel = (ClassModel)classTypes[0];
+            foreach (var methodType in classModel.Methods)
+            {
+                Assert.Equal(2, methodType.AccessedFields.Count);
+
+                Assert.Equal("Field1", methodType.AccessedFields[0].Name);
+                Assert.Equal("Property1", methodType.AccessedFields[1].Name);
+
+                foreach (var accessedField in methodType.AccessedFields)
+                {
+                    Assert.Equal("Namespace1.Class1", accessedField.ContainingTypeName);
+                }
+            }
+
+            foreach (var accessedField in classModel.Methods[0].AccessedFields)
+            {
+                Assert.Equal(AccessedField.AccessKind.Getter, accessedField.Kind);
+            }
+
+            foreach (var accessedField in classModel.Methods[1].AccessedFields)
+            {
+                Assert.Equal(AccessedField.AccessKind.Setter, accessedField.Kind);
+            }
+        }
     }
 }

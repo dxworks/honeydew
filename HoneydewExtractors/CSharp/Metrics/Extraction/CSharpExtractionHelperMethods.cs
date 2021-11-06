@@ -582,12 +582,18 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
 
         public AccessedField GetAccessField(ExpressionSyntax identifierNameSyntax)
         {
-            if (identifierNameSyntax == null)
+            var expressionSyntax = identifierNameSyntax;
+            if (expressionSyntax == null)
             {
                 return null;
             }
 
-            var symbolInfo = _semanticModel.GetSymbolInfo(identifierNameSyntax);
+            if (identifierNameSyntax is ElementAccessExpressionSyntax elementAccessExpressionSyntax)
+            {
+                expressionSyntax = elementAccessExpressionSyntax.Expression;
+            }
+
+            var symbolInfo = _semanticModel.GetSymbolInfo(expressionSyntax);
 
             if (symbolInfo.Symbol is IFieldSymbol fieldSymbol)
             {
@@ -609,7 +615,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
                 };
             }
 
-            if (identifierNameSyntax is MemberAccessExpressionSyntax memberAccessExpressionSyntax)
+            if (expressionSyntax is MemberAccessExpressionSyntax memberAccessExpressionSyntax)
             {
                 if (memberAccessExpressionSyntax.Parent is InvocationExpressionSyntax)
                 {
