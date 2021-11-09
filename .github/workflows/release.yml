@@ -189,7 +189,7 @@ jobs:
           TAG: ${{ github.ref }}
 
       - name: Setup Version
-        run: json -I -f package.json -e "this.version='$VERSION'"
+        run: node_modules/.bin/json -I -f package.json -e "this.version='$VERSION'"
         env:
           VERSION: ${{ steps.semver_parser.outputs.semver }}
 
