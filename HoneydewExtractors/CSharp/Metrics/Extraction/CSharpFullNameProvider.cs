@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using HoneydewCore.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
@@ -13,6 +13,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
     internal class CSharpFullNameProvider
     {
         private readonly SemanticModel _semanticModel;
+        private readonly FullTypeNameBuilder _fullTypeNameBuilder = new();
 
         public CSharpFullNameProvider(SemanticModel semanticModel)
         {
@@ -239,6 +240,11 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             return CreateEntityTypeModel(name, isExtern);
         }
 
+        public IEntityType CreateEntityTypeModel(string name, bool isExternType = false)
+        {
+            return _fullTypeNameBuilder.CreateEntityTypeModel(name, isExternType);
+        }
+
         private string ReconstructFullName(GenericType genericType)
         {
             if (genericType == null)
@@ -334,129 +340,6 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             }
 
             return CreateEntityTypeModel(name, isExternType);
-        }
-
-        public EntityTypeModel CreateEntityTypeModel(string name, bool isExternType = false)
-        {
-            try
-            {
-                return new EntityTypeModel
-                {
-                    Name = name,
-                    FullType = GetFullType(name),
-                    IsExtern = isExternType
-                };
-            }
-            catch (Exception)
-            {
-                return new EntityTypeModel
-                {
-                    Name = name,
-                    FullType = new GenericType
-                    {
-                        Name = name
-                    },
-                    IsExtern = isExternType
-                };
-            }
-        }
-
-        private GenericType GetFullType(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                return new GenericType
-                {
-                    Name = name
-                };
-            }
-
-            var isNullable = false;
-
-            if (name.EndsWith('?'))
-            {
-                isNullable = true;
-                name = name[..^1];
-            }
-
-            ReadOnlySpan<char> span = name;
-
-            var fullType = GetFullType(span);
-            fullType.IsNullable = isNullable;
-
-            return fullType;
-        }
-
-        private GenericType GetFullType(ReadOnlySpan<char> name)
-        {
-            if (!name.Contains('<'))
-            {
-                var trimmedName = name.ToString().Trim();
-                var isNullable = false;
-                if (trimmedName.EndsWith('?'))
-                {
-                    isNullable = true;
-                    trimmedName = trimmedName[..^1];
-                }
-
-                return new GenericType
-                {
-                    Name = trimmedName,
-                    IsNullable = isNullable
-                };
-            }
-
-            var genericType = new GenericType
-            {
-                IsNullable = name[^1] == '?'
-            };
-
-            var genericStart = name.IndexOf('<');
-            var genericEnd = name.LastIndexOf('>');
-
-            genericType.Name = name[..genericStart].ToString().Trim();
-
-
-            ReadOnlySpan<char> span = name;
-
-            var commaIndices = new List<int>
-            {
-                genericStart
-            };
-
-            var angleBracketCount = 0;
-
-            for (var i = genericStart + 1; i < genericEnd; i++)
-            {
-                switch (span[i])
-                {
-                    case '<':
-                        angleBracketCount++;
-                        break;
-                    case '>':
-                        angleBracketCount--;
-                        break;
-                    case ',':
-                    {
-                        if (angleBracketCount == 0)
-                        {
-                            commaIndices.Add(i);
-                        }
-
-                        break;
-                    }
-                }
-            }
-
-            commaIndices.Add(genericEnd);
-
-            for (var i = 0; i < commaIndices.Count - 1; i++)
-            {
-                var part = span.Slice(commaIndices[i] + 1, commaIndices[i + 1] - commaIndices[i] - 1);
-                genericType.ContainedTypes.Add(GetFullType(part));
-            }
-
-            return genericType;
         }
 
         private IEntityType GetFullName(BaseObjectCreationExpressionSyntax declarationSyntax, out bool isNullable)

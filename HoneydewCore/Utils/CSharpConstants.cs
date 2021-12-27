@@ -1,4 +1,6 @@
-﻿namespace HoneydewCore.Utils
+﻿using System;
+
+namespace HoneydewCore.Utils
 {
     public static class CSharpConstants
     {
@@ -35,13 +37,24 @@
             }
         }
 
+        public static bool IsPrimitiveArray(string type)
+        {
+            if (string.IsNullOrEmpty(type))
+            {
+                return false;
+            }
+
+            var indexOfParenthesis = type.IndexOf("[]", StringComparison.Ordinal);
+            return indexOfParenthesis >= 0 && IsPrimitive(type[..indexOfParenthesis]);
+        }
+
         public static bool IsPrimitive(string type)
         {
             type = GetNonNullableName(type);
 
             type = ConvertSystemTypeToPrimitiveType(type);
 
-            return type is "object" or "string" or "bool" or "byte" or "char" or "decimal" or "double" or "short"or
+            return type is "object" or "string" or "bool" or "byte" or "char" or "decimal" or "double" or "short" or
                 "int" or "long" or "sbyte" or "float" or "ushort" or "uint" or "ulong" or "void";
         }
 

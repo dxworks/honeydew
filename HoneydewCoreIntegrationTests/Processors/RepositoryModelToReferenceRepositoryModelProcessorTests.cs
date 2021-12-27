@@ -121,7 +121,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             var projectService2Namespace = projectModel2.Namespaces[0];
             Assert.Equal("Services", projectService2Namespace.Name);
             Assert.Equal("Project2.Services", projectService2Namespace.FullName);
-            
+
             var projectModel2Namespace = projectModel2.Namespaces[1];
             Assert.Equal("Models", projectModel2Namespace.Name);
             Assert.Equal("Project2.Models", projectModel2Namespace.FullName);
@@ -213,13 +213,13 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal(2, compilationUnitModel1.Classes.Count);
 
             var referenceClassModel1 = compilationUnitModel1.Classes[0];
-            Assert.Equal("Project1.Services.CreateService", referenceClassModel1.Name);
+            Assert.Equal("Project1.Services.CreateService", referenceClassModel1.Type.Name);
             Assert.Equal("validPathToProject/Project1/Services/CreateService.cs", referenceClassModel1.FilePath);
             Assert.Equal(compilationUnitModel1, referenceClassModel1.File);
             Assert.Empty(referenceClassModel1.Metrics);
 
             var referenceClassModel2 = compilationUnitModel1.Classes[1];
-            Assert.Equal("Project1.Services.RetrieveService", referenceClassModel2.Name);
+            Assert.Equal("Project1.Services.RetrieveService", referenceClassModel2.Type.Name);
             Assert.Equal("validPathToProject/Project1/Services/RetrieveService.cs", referenceClassModel2.FilePath);
             Assert.Equal(compilationUnitModel1, referenceClassModel2.File);
             Assert.Equal(1, referenceClassModel2.Metrics.Count);
@@ -233,7 +233,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal(1, referenceNamespaceModel2.Classes.Count);
 
             var referenceClassModel3 = referenceNamespaceModel2.Classes[0];
-            Assert.Equal("Project1.Models.MyModel", referenceClassModel3.Name);
+            Assert.Equal("Project1.Models.MyModel", referenceClassModel3.Type.Name);
             Assert.Equal("validPathToProject/Project1/Models/MyModel.cs", referenceClassModel3.FilePath);
             Assert.Equal(referenceNamespaceModel2, referenceClassModel3.File);
             Assert.Empty(referenceClassModel3.Metrics);
@@ -466,7 +466,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal(1, compilationUnitModel.Classes.Count);
 
 
-            Assert.Equal("Project1.Services.CreateService", referenceClassCreateService.Name);
+            Assert.Equal("Project1.Services.CreateService", referenceClassCreateService.Type.Name);
             Assert.Equal("validPathToProject/Project1/Services/CreateService.cs", referenceClassCreateService.FilePath);
             Assert.Equal(compilationUnitModel, referenceClassCreateService.File);
             Assert.Empty(referenceClassCreateService.Fields);
@@ -531,62 +531,21 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal(projectModel1, referenceNamespaceModels.Project);
             Assert.Equal(2, referenceNamespaceModels.Classes.Count);
 
-            Assert.Equal("Project1.Models.MyModel", referenceClassMyModel.Name);
+            Assert.Equal("Project1.Models.MyModel", referenceClassMyModel.Type.Name);
             Assert.Equal("validPathToProject/Project1/Models/MyModel.cs", referenceClassMyModel.FilePath);
             Assert.Equal(referenceNamespaceModels, referenceClassMyModel.File);
 
-            Assert.Equal("Project1.Models.OtherModel", referenceClassOtherModel.Name);
+            Assert.Equal("Project1.Models.OtherModel", referenceClassOtherModel.Type.Name);
             Assert.Equal("validPathToProject/Project1/Models/OtherModel.cs", referenceClassOtherModel.FilePath);
             Assert.Equal(referenceNamespaceModels, referenceClassOtherModel.File);
         }
 
-        [Fact]
+        [Theory]
+        [FileData("TestData/Processors/ReferenceOfClassWithMethodWithPrimitiveTypes.txt")]
         public void
-            GetFunction_ShouldReturnReferenceSolutionModelWithMethodReferences_WhenGivenASolutionModelWithClassesWithMethodReferencesOnlyWithPrimitiveTypesAsParameters_UsingCSharpClassFactExtractor()
+            GetFunction_ShouldReturnReferenceSolutionModelWithMethodReferences_WhenGivenASolutionModelWithClassesWithMethodReferencesOnlyWithPrimitiveTypesAsParameters_UsingCSharpClassFactExtractor(
+                string fileContent)
         {
-            const string fileContent = @"
-namespace Project1.Services
-{
-    public class MyClass
-    {
-        public float Function1(int a, int b)
-        {
-            var aString = Function3(a);
-            var bString = Function3(b);
-
-            var aInt = Function2(aString);
-            var bInt = Function2(bString);
-
-            var c = aInt + bInt;
-            
-            Print(c);
-            
-            return c;
-        }
-        
-        public int Function2(string s)
-        {
-            return int.Parse(s);
-        }
-
-        public string Function3(int a)
-        {
-            return a.ToString();
-        }
-
-        private static void Print(float o)
-        {
-        }
-
-        private void Print(int a)
-        {
-            if (a > 0)
-            {
-                Print(--a);
-            }
-        }
-    }
-}";
             var compositeVisitor = new CompositeVisitor();
 
             compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
@@ -675,7 +634,7 @@ namespace Project1.Services
 
             Assert.Equal(1, referenceNamespaceServices.Classes.Count);
 
-            Assert.Equal("Project1.Services.MyClass", referenceMyClass.Name);
+            Assert.Equal("Project1.Services.MyClass", referenceMyClass.Type.Name);
             Assert.Equal(referenceNamespaceServices, referenceMyClass.File);
             Assert.Empty(referenceMyClass.Fields);
             Assert.Equal(5, referenceMyClass.Methods.Count);
@@ -870,7 +829,7 @@ namespace Project1.Services
             var referenceClassOtherModel = referenceNamespaceModels.Classes[1];
 
 
-            Assert.Equal("Project1.Services.CreateService", referenceClassCreateService.Name);
+            Assert.Equal("Project1.Services.CreateService", referenceClassCreateService.Type.Name);
             Assert.Equal("validPathToProject/Project1/Services/CreateService.cs", referenceClassCreateService.FilePath);
             Assert.Equal(referenceNamespaceServices, referenceClassCreateService.File);
             Assert.Empty(referenceClassCreateService.Methods);
@@ -885,7 +844,7 @@ namespace Project1.Services
             Assert.False(createServiceClassField.IsEvent);
 
 
-            Assert.Equal("Project1.Models.MyModel", referenceClassMyModel.Name);
+            Assert.Equal("Project1.Models.MyModel", referenceClassMyModel.Type.Name);
             Assert.Equal("validPathToProject/Project1/Models/MyModel.cs", referenceClassMyModel.FilePath);
             Assert.Equal(referenceNamespaceModels, referenceClassMyModel.File);
             Assert.Empty(referenceClassMyModel.Methods);
@@ -907,7 +866,7 @@ namespace Project1.Services
             Assert.Equal("public", valueEventFieldModel.AccessModifier);
             Assert.True(valueEventFieldModel.IsEvent);
 
-            Assert.Equal("Project1.Models.OtherModel", referenceClassOtherModel.Name);
+            Assert.Equal("Project1.Models.OtherModel", referenceClassOtherModel.Type.Name);
             Assert.Equal("validPathToProject/Project1/Models/OtherModel.cs", referenceClassOtherModel.FilePath);
             Assert.Equal(referenceNamespaceModels, referenceClassOtherModel.File);
             Assert.Empty(referenceClassOtherModel.Fields);

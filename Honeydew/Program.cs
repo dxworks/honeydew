@@ -12,6 +12,7 @@ using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
 using HoneydewExtractors.Core;
 using HoneydewExtractors.CSharp.Metrics;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Class.ReferenceRelations;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
 using HoneydewExtractors.CSharp.RepositoryLoading;
 using HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead;
@@ -137,6 +138,18 @@ namespace Honeydew
                         new(new ExportRawModelScript(new JsonModelExporter())),
                     });
 
+                    logger.Log();
+                    logger.Log("Extraction Complete!");
+                    logger.Log();
+                    logger.Log($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
+
+                    progressLogger.Log();
+                    progressLogger.Log("Extraction Complete!");
+                    progressLogger.Log();
+                    progressLogger.Log($"Output will be found at {Path.GetFullPath(DefaultPathForAllRepresentations)}");
+
+                    logger.CloseAndFlush();
+
                     return;
                 }
 
@@ -235,9 +248,16 @@ namespace Honeydew
                         }
                     },
                 }),
-                new(new ClassRelationScript(csvRelationsRepresentationExporter), new Dictionary<string, object>
+                new(new ClassRelationScript(csvRelationsRepresentationExporter))
+            });
+
+            scriptRunner.Run(new List<ScriptRuntime>
+            {
+                new(new GenericDependenciesScript(csvRelationsRepresentationExporter), new Dictionary<string, object>
                 {
-                    { "classRelationsOutputName", $"{projectName}-class_relations.csv" }
+                    { "genericDependenciesOutputName", $"{projectName}-generic_relations.csv" },
+                    { "addStrategy", new AddGenericNamesStrategy() },
+                    { "ignorePrimitives", true }
                 })
             });
         }

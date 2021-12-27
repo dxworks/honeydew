@@ -43,12 +43,6 @@ namespace Honeydew.Scripts
             _progressLogger.Log();
             _progressLogger.Log("Applying Post Extraction Metrics");
 
-            var classNames = new HashSet<string>();
-
-            foreach (var classType in repositoryModel.GetEnumerable())
-            {
-                classNames.Add(classType.Name);
-            }
 
             var propertiesRelationVisitor = new PropertiesRelationVisitor();
             var fieldsRelationVisitor = new FieldsRelationVisitor();

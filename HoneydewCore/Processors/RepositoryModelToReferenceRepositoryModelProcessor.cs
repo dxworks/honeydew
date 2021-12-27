@@ -10,7 +10,7 @@ using ClassModel = HoneydewModels.Reference.ClassModel;
 using DelegateModel = HoneydewModels.CSharp.DelegateModel;
 using FieldModel = HoneydewModels.Reference.FieldModel;
 using GenericParameterModel = HoneydewModels.Reference.GenericParameterModel;
-using GenericType = HoneydewModels.Types.GenericType;
+using GenericType = HoneydewModels.Reference.GenericType;
 using LocalVariableModel = HoneydewModels.Reference.LocalVariableModel;
 using MethodModel = HoneydewModels.Reference.MethodModel;
 using MetricModel = HoneydewModels.Reference.MetricModel;
@@ -30,6 +30,8 @@ namespace HoneydewCore.Processors
 
         private readonly Dictionary<(ProjectModel, string), ReferenceEntity> _classModels = new();
 
+        private readonly FullTypeNameBuilder _fullTypeNameBuilder = new();
+
         public HoneydewModels.Reference.RepositoryModel Process(RepositoryModel inputRepositoryModel)
         {
             var repositoryModel = new HoneydewModels.Reference.RepositoryModel();
@@ -40,6 +42,8 @@ namespace HoneydewCore.Processors
             repositoryModel.Version = inputRepositoryModel.Version;
 
             PopulateModelWithSolutionProjectNamespacesCompilationUnitsAndClasses(inputRepositoryModel, repositoryModel);
+
+            PopulateWithTypeReferences(inputRepositoryModel, repositoryModel);
 
             PopulateProjectWithProjectReferences(inputRepositoryModel, repositoryModel);
 
@@ -231,6 +235,47 @@ namespace HoneydewCore.Processors
             }
         }
 
+        private void PopulateWithTypeReferences(RepositoryModel repositoryModel,
+            HoneydewModels.Reference.RepositoryModel referenceRepositoryModel)
+        {
+            for (var projectIndex = 0; projectIndex < referenceRepositoryModel.Projects.Count; projectIndex++)
+            {
+                var projectModel = referenceRepositoryModel.Projects[projectIndex];
+                for (var compilationUnitIndex = 0;
+                     compilationUnitIndex < projectModel.Files.Count;
+                     compilationUnitIndex++)
+                {
+                    var compilationUnit = projectModel.Files[compilationUnitIndex];
+                    var compilationUnitType =
+                        repositoryModel.Projects[projectIndex].CompilationUnits[compilationUnitIndex];
+
+                    foreach (var classModel in compilationUnit.Classes)
+                    {
+                        var classType =
+                            compilationUnitType.ClassTypes.FirstOrDefault(c => c.Name == classModel.Name);
+                        if (classType == null)
+                        {
+                            continue;
+                        }
+
+                        classModel.Type = ConvertEntityType(classType.Name, classModel, projectModel);
+                    }
+
+                    foreach (var delegateModel in compilationUnit.Delegates)
+                    {
+                        var classType =
+                            compilationUnitType.ClassTypes.FirstOrDefault(c => c.Name == delegateModel.Name);
+                        if (classType == null)
+                        {
+                            continue;
+                        }
+
+                        delegateModel.Type = ConvertEntityType(classType.Name, delegateModel, projectModel);
+                    }
+                }
+            }
+        }
+
         private static void PopulateProjectWithProjectReferences(RepositoryModel repositoryModel,
             HoneydewModels.Reference.RepositoryModel referenceRepositoryModel)
         {
@@ -238,12 +283,12 @@ namespace HoneydewCore.Processors
 
             var externProjects = new Dictionary<string, ProjectModel>();
             for (var projectIndex = 0;
-                projectIndex < repositoryModel.Projects.Count;
-                projectIndex++)
+                 projectIndex < repositoryModel.Projects.Count;
+                 projectIndex++)
             {
                 var projectModel = referenceRepositoryModel.Projects[projectIndex];
                 foreach (var projectReference in repositoryModel.Projects[projectIndex]
-                    .ProjectReferences)
+                             .ProjectReferences)
                 {
                     var project = allProjects.FirstOrDefault(project => project.FilePath == projectReference);
                     if (project == null) // project is extern
@@ -275,8 +320,8 @@ namespace HoneydewCore.Processors
             {
                 var projectModel = referenceRepositoryModel.Projects[projectIndex];
                 for (var compilationUnitIndex = 0;
-                    compilationUnitIndex < projectModel.Files.Count;
-                    compilationUnitIndex++)
+                     compilationUnitIndex < projectModel.Files.Count;
+                     compilationUnitIndex++)
                 {
                     var compilationUnit = projectModel.Files[compilationUnitIndex];
                     var compilationUnitType =
@@ -370,6 +415,7 @@ namespace HoneydewCore.Processors
                 Name = className,
                 Namespace = namespaceModel,
             };
+            generatedType.Type = ConvertEntityType(className, generatedType);
 
             _generatedTypes.Add(className, generatedType);
 
@@ -383,8 +429,8 @@ namespace HoneydewCore.Processors
             {
                 var projectModel = referenceRepositoryModel.Projects[projectIndex];
                 for (var compilationUnitIndex = 0;
-                    compilationUnitIndex < projectModel.Files.Count;
-                    compilationUnitIndex++)
+                     compilationUnitIndex < projectModel.Files.Count;
+                     compilationUnitIndex++)
                 {
                     var compilationUnit = projectModel.Files[compilationUnitIndex];
                     var compilationUnitType = repositoryModel.Projects[projectIndex]
@@ -514,10 +560,10 @@ namespace HoneydewCore.Processors
                 Type = new EntityTypeModel
                 {
                     Name = "void",
-                    FullType = new GenericType
+                    FullType = new HoneydewModels.Types.GenericType
                     {
                         Name = "void",
-                        ContainedTypes = new List<GenericType>()
+                        ContainedTypes = new List<HoneydewModels.Types.GenericType>()
                     }
                 }
             }, projectModel);
@@ -611,8 +657,8 @@ namespace HoneydewCore.Processors
             {
                 var projectModel = referenceRepositoryModel.Projects[projectIndex];
                 for (var compilationUnitIndex = 0;
-                    compilationUnitIndex < projectModel.Files.Count;
-                    compilationUnitIndex++)
+                     compilationUnitIndex < projectModel.Files.Count;
+                     compilationUnitIndex++)
                 {
                     var compilationUnit = projectModel.Files[compilationUnitIndex];
                     var compilationUnitType =
@@ -641,8 +687,8 @@ namespace HoneydewCore.Processors
                         }
 
                         for (var constructorIndex = 0;
-                            constructorIndex < membersClassType.Constructors.Count;
-                            constructorIndex++)
+                             constructorIndex < membersClassType.Constructors.Count;
+                             constructorIndex++)
                         {
                             var constructorModel = classModel.Constructors[constructorIndex];
                             var constructorType = membersClassType.Constructors[constructorIndex];
@@ -729,8 +775,8 @@ namespace HoneydewCore.Processors
                         methodModel.CalledMethods = ConvertCalledMethods(methodType.CalledMethods);
 
                         for (var localFunctionIndex = 0;
-                            localFunctionIndex < methodModel.LocalFunctions.Count;
-                            localFunctionIndex++)
+                             localFunctionIndex < methodModel.LocalFunctions.Count;
+                             localFunctionIndex++)
                         {
                             if (methodType is not ITypeWithLocalFunctions typeWithLocalFunctions)
                             {
@@ -757,8 +803,8 @@ namespace HoneydewCore.Processors
 
 
                         for (var localFunctionIndex = 0;
-                            localFunctionIndex < constructorModel.LocalFunctions.Count;
-                            localFunctionIndex++)
+                             localFunctionIndex < constructorModel.LocalFunctions.Count;
+                             localFunctionIndex++)
                         {
                             if (constructorType is not ITypeWithLocalFunctions typeWithLocalFunctions)
                             {
@@ -1251,6 +1297,22 @@ namespace HoneydewCore.Processors
             };
         }
 
+        private EntityType ConvertEntityType(string name, ReferenceEntity referenceEntity,
+            ProjectModel projectModel = null)
+        {
+            var entityTypeModel = _fullTypeNameBuilder.CreateEntityTypeModel(name);
+
+            var entityType = new EntityType
+            {
+                TypeReference = referenceEntity,
+                IsExtern = entityTypeModel.IsExtern,
+                FullType = ConvertGeneric(entityTypeModel.FullType, projectModel),
+                Name = entityTypeModel.Name,
+            };
+
+            return entityType;
+        }
+
         private EntityType ConvertEntityType(IEntityType type, ProjectModel projectModel)
         {
             var referenceEntity = SearchEntityByName(type.Name, projectModel);
@@ -1259,32 +1321,37 @@ namespace HoneydewCore.Processors
             {
                 TypeReference = referenceEntity,
                 IsExtern = type.IsExtern,
-                FullType = ConvertGeneric(type.FullType),
+                FullType = ConvertGeneric(type.FullType, projectModel),
                 Name = type.Name,
             };
 
             return entityType;
+        }
 
-            HoneydewModels.Reference.GenericType ConvertGeneric(GenericType genType)
+        private GenericType ConvertGeneric(HoneydewModels.Types.GenericType genType, ProjectModel projectModel)
+        {
+            if (genType == null)
             {
-                if (genType == null)
-                {
-                    return new HoneydewModels.Reference.GenericType();
-                }
+                return new GenericType();
+            }
 
-                var genericType = new HoneydewModels.Reference.GenericType
-                {
-                    Reference = SearchEntityByName(GetNonNullableName(genType.Name), projectModel),
-                    IsNullable = genType.IsNullable,
-                };
+            var genericType = new GenericType
+            {
+                Reference = projectModel != null
+                    ? SearchEntityByName(GetNonNullableName(genType.Name), projectModel)
+                    : null,
+                IsNullable = genType.IsNullable,
+            };
 
+            if (projectModel != null)
+            {
                 foreach (var containedType in genType.ContainedTypes)
                 {
-                    genericType.ContainedTypes.Add(ConvertGeneric(containedType));
+                    genericType.ContainedTypes.Add(ConvertGeneric(containedType, projectModel));
                 }
-
-                return genericType;
             }
+
+            return genericType;
         }
 
         private static string GetNonNullableName(string name)

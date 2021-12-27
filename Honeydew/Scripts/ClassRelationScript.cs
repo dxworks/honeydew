@@ -39,6 +39,7 @@ namespace Honeydew.Scripts
             IEnumerable<Relation> ExtCallsRelations(ClassModel classModel)
             {
                 return classModel.Methods.SelectMany(method => method.CalledMethods)
+                    .Where(method => method.Class != null)
                     .GroupBy(method => method.Class.Name)
                     .Where(grouping => classModel.Name != grouping.Key)
                     .Select(grouping => new Relation
