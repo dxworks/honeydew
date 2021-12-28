@@ -1,0 +1,22 @@
+﻿namespace Project1
+{
+    public static class Class1
+    {
+        public static void Method(this Class2 c, int a)
+        {
+        } 
+        
+        public static int M2(this Class2 c)
+        {
+            return 2;
+        }
+        
+        public static void Print(this int x)
+        {
+        }
+    }
+    
+    public class Class2
+    {
+    }
+}

@@ -23,9 +23,12 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.CSharp;
+using HoneydewModels.Reference;
 using Moq;
 using Xunit;
 using MethodModel = HoneydewModels.Reference.MethodModel;
+using ProjectModel = HoneydewModels.CSharp.ProjectModel;
+using RepositoryModel = HoneydewModels.CSharp.RepositoryModel;
 
 namespace HoneydewCoreIntegrationTests.Processors
 {
@@ -592,7 +595,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Empty(baseClass.Constructors[0].Parameters);
             Assert.Equal(1, baseClass.Methods.Count);
             Assert.Equal(1, baseClass.Constructors.Count);
-            Assert.True(baseClass.Methods[0].IsConstructor);
+            Assert.Equal(nameof(MethodType.Constructor), baseClass.Methods[0].MethodType);
             Assert.Empty(baseClass.Metrics);
             Assert.Equal(1, baseClass.Fields.Count);
 
@@ -673,6 +676,7 @@ namespace HoneydewCoreIntegrationTests.Processors
             Assert.Equal("static", callMethod1.Modifier);
             Assert.Equal("public", callMethod1.AccessModifier);
             Assert.Equal(voidClassModel, callMethod1.ReturnValue.Type.TypeReference);
+            Assert.Equal(nameof(MethodType.Method), callMethod1.MethodType);
             Assert.Empty(callMethod1.Parameters);
             Assert.Equal(6, callMethod1.CalledMethods.Count);
 

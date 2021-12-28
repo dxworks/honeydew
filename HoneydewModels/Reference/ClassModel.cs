@@ -8,7 +8,7 @@ namespace HoneydewModels.Reference
         public string ClassType { get; set; }
 
         public string Name { get; set; }
-        
+
         public EntityType Type { get; set; }
 
         public string FilePath { get; set; }
@@ -32,7 +32,8 @@ namespace HoneydewModels.Reference
         public IList<PropertyModel> Properties =>
             Fields.Where(model => model is PropertyModel).Cast<PropertyModel>().ToList();
 
-        public IList<MethodModel> Constructors => Methods.Where(model => model.IsConstructor).ToList();
+        public IList<MethodModel> Constructors =>
+            Methods.Where(model => model.MethodType == nameof(MethodType.Constructor)).ToList();
 
         public IList<MethodModel> Methods { get; set; } = new List<MethodModel>();
 

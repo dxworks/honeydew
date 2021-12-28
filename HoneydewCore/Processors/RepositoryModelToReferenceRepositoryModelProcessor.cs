@@ -542,7 +542,7 @@ namespace HoneydewCore.Processors
             {
                 Class = parentClass,
                 ContainingType = parentClass,
-                IsConstructor = true,
+                MethodType = nameof(MethodType.Constructor),
                 Name = constructorType.Name,
                 Modifier = constructorType.Modifier,
                 AccessModifier = constructorType.AccessModifier,
@@ -584,6 +584,7 @@ namespace HoneydewCore.Processors
                 ContainingType = parentModel,
                 Class = GetClass(parentModel),
                 Name = methodType.Name,
+                MethodType = nameof(MethodType.Method),
                 Loc = ConvertLoc(methodType.Loc),
                 Modifier = methodType.Modifier,
                 AccessModifier = methodType.AccessModifier,
@@ -591,10 +592,21 @@ namespace HoneydewCore.Processors
                 CyclomaticComplexity = methodType.CyclomaticComplexity,
                 Metrics = ConvertMetrics(methodType),
             };
+
             model.Attributes = ConvertAttributes(model, methodType.Attributes, projectModel);
             model.ReturnValue = ConvertReturnValue(model, methodType.ReturnValue, projectModel);
             model.Parameters = ConvertParameters(model, methodType.ParameterTypes, projectModel);
             model.LocalVariables = ConvertLocalVariables(model, methodType.LocalVariableTypes, projectModel);
+
+
+            if (model.Name.StartsWith('~'))
+            {
+                model.MethodType = nameof(MethodType.Destructor);
+            }
+            else if (model.Parameters.Count > 0 && model.Parameters[0].Modifier == "this")
+            {
+                model.MethodType = nameof(MethodType.Extension);
+            }
 
             if (methodType is ITypeWithLocalFunctions typeWithLocalFunctions)
             {
@@ -618,7 +630,12 @@ namespace HoneydewCore.Processors
         private IList<MethodModel> ConvertLocalFunctions(ReferenceEntity parentModel,
             IEnumerable<IMethodTypeWithLocalFunctions> localFunctions, ProjectModel projectModel)
         {
-            return localFunctions.Select(localFunction => ConvertMethod(parentModel, localFunction, projectModel))
+            return localFunctions.Select(localFunction =>
+                {
+                    var localFunctionMethod = ConvertMethod(parentModel, localFunction, projectModel);
+                    localFunctionMethod.MethodType = nameof(MethodType.LocalFunction);
+                    return localFunctionMethod;
+                })
                 .ToList();
         }
 

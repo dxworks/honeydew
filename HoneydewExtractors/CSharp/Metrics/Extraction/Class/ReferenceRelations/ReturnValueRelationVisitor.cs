@@ -23,7 +23,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.ReferenceRelations
 
             foreach (var methodType in classModel.Methods)
             {
-                if (!methodType.IsConstructor && methodType.ReturnValue != null)
+                if (methodType.MethodType is nameof(MethodType.Method) or nameof(MethodType.LocalFunction)
+                        or nameof(MethodType.Extension) && methodType.ReturnValue != null)
                 {
                     _addStrategy.AddDependency(dependencies, methodType.ReturnValue.Type);
                 }

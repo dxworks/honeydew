@@ -8,8 +8,8 @@ namespace HoneydewModels.Reference
 
         public ClassModel Class { get; set; }
 
-        public bool IsConstructor { get; set; }
-        
+        public string MethodType { get; set; }
+
         public ReferenceEntity ContainingType { get; set; }
 
         public string Modifier { get; set; } = "";
