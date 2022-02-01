@@ -446,9 +446,9 @@ namespace HoneydewCore.Processors
                             continue;
                         }
 
-                        classModel.Methods = PopulateWithMethodModels(classModel, membersClassType.Methods);
-                        classModel.Methods = classModel.Methods
+                        classModel.Methods = PopulateWithMethodModels(classModel, membersClassType.Methods)
                             .Concat(PopulateWithConstructorModels(classModel, membersClassType.Constructors))
+                            .Concat(PopulateWithDestructorModel(classModel, membersClassType.Destructor))
                             .ToList();
                         classModel.Fields = PopulateWithFieldModels(classModel, membersClassType.Fields);
 
@@ -462,19 +462,33 @@ namespace HoneydewCore.Processors
                             .ToList();
                     }
 
-                    IList<MethodModel> PopulateWithMethodModels(ClassModel parentClass,
+                    IEnumerable<MethodModel> PopulateWithMethodModels(ClassModel parentClass,
                         IEnumerable<IMethodType> methodModels)
                     {
                         return methodModels.Select(methodType => ConvertMethod(parentClass, methodType, projectModel))
                             .ToList();
                     }
 
-                    IList<MethodModel> PopulateWithConstructorModels(ClassModel parentClass,
+                    IEnumerable<MethodModel> PopulateWithConstructorModels(ClassModel parentClass,
                         IEnumerable<IConstructorType> constructorTypes)
                     {
                         return constructorTypes
                             .Select(constructorType => ConvertConstructor(parentClass, constructorType, projectModel))
                             .ToList();
+                    }
+
+                    IEnumerable<MethodModel> PopulateWithDestructorModel(ClassModel parentClass,
+                        IDestructorType destructorType)
+                    {
+                        if (destructorType == null)
+                        {
+                            return new List<MethodModel>();
+                        }
+
+                        return new List<MethodModel>
+                        {
+                            ConvertDestructor(parentClass, destructorType, projectModel)
+                        };
                     }
 
                     IList<FieldModel> PopulateWithFieldModels(ClassModel classModel,
@@ -483,7 +497,7 @@ namespace HoneydewCore.Processors
                         return fields.Select(fieldType => ConvertField(classModel, fieldType, projectModel)).ToList();
                     }
 
-                    IList<PropertyModel> PopulateWithPropertyModels(ClassModel classModel,
+                    IEnumerable<PropertyModel> PopulateWithPropertyModels(ClassModel classModel,
                         IEnumerable<IPropertyType> properties)
                     {
                         return properties
@@ -576,6 +590,48 @@ namespace HoneydewCore.Processors
             return model;
         }
 
+        private MethodModel ConvertDestructor(ClassModel parentClass, IDestructorType destructorType,
+            ProjectModel projectModel)
+        {
+            var model = new MethodModel
+            {
+                Class = parentClass,
+                ContainingType = parentClass,
+                MethodType = nameof(MethodType.Destructor),
+                Name = destructorType.Name,
+                Modifier = destructorType.Modifier,
+                AccessModifier = destructorType.AccessModifier,
+                Loc = ConvertLoc(destructorType.Loc),
+                CyclomaticComplexity = destructorType.CyclomaticComplexity,
+                Metrics = ConvertMetrics(destructorType),
+            };
+
+            model.Attributes = ConvertAttributes(model, destructorType.Attributes, projectModel);
+            model.Parameters = ConvertParameters(model, destructorType.ParameterTypes, projectModel);
+            model.LocalVariables = ConvertLocalVariables(model, destructorType.LocalVariableTypes, projectModel);
+
+            model.ReturnValue = ConvertReturnValue(model, new HoneydewModels.CSharp.ReturnValueModel
+            {
+                Type = new EntityTypeModel
+                {
+                    Name = "void",
+                    FullType = new HoneydewModels.Types.GenericType
+                    {
+                        Name = "void",
+                        ContainedTypes = new List<HoneydewModels.Types.GenericType>()
+                    }
+                }
+            }, projectModel);
+
+            if (destructorType is ITypeWithLocalFunctions typeWithLocalFunctions)
+            {
+                model.LocalFunctions =
+                    ConvertLocalFunctions(model, typeWithLocalFunctions.LocalFunctions, projectModel);
+            }
+
+            return model;
+        }
+
         private MethodModel ConvertMethod(ReferenceEntity parentModel, IMethodType methodType,
             ProjectModel projectModel)
         {
@@ -598,12 +654,7 @@ namespace HoneydewCore.Processors
             model.Parameters = ConvertParameters(model, methodType.ParameterTypes, projectModel);
             model.LocalVariables = ConvertLocalVariables(model, methodType.LocalVariableTypes, projectModel);
 
-
-            if (model.Name.StartsWith('~'))
-            {
-                model.MethodType = nameof(MethodType.Destructor);
-            }
-            else if (model.Parameters.Count > 0 && model.Parameters[0].Modifier == "this")
+            if (model.Parameters.Count > 0 && model.Parameters[0].Modifier == "this")
             {
                 model.MethodType = nameof(MethodType.Extension);
             }

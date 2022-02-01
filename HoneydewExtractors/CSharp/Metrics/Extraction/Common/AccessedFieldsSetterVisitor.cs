@@ -5,6 +5,7 @@ using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.AccessedFields;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
+using HoneydewExtractors.Core.Metrics.Visitors.Destructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewModels.Types;
@@ -13,9 +14,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
 {
-    public class AccessedFieldsSetterVisitor : CompositeVisitor, ICSharpMethodVisitor,
-        ICSharpConstructorVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor,
-        ICSharpArrowExpressionMethodVisitor
+    public class AccessedFieldsSetterVisitor : CompositeVisitor, ICSharpMethodVisitor, ICSharpConstructorVisitor,
+        ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor, ICSharpArrowExpressionMethodVisitor,
+        ICSharpDestructorVisitor
     {
         public AccessedFieldsSetterVisitor(IEnumerable<IAccessedFieldsVisitor> visitors) : base(visitors)
         {
@@ -29,6 +30,13 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
         }
 
         public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, IConstructorType modelType)
+        {
+            SetAccessedFields(syntaxNode, modelType);
+
+            return modelType;
+        }
+
+        public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, IDestructorType modelType)
         {
             SetAccessedFields(syntaxNode, modelType);
 

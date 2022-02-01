@@ -4,6 +4,7 @@ using HoneydewCore.Processors;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
+using HoneydewExtractors.Core.Metrics.Visitors.Destructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Fields;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
@@ -14,6 +15,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Common;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Constructor;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Destructor;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Field;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Extraction.MethodCall;
@@ -93,6 +95,12 @@ namespace HoneydewCoreIntegrationTests.Processors
                         calledMethodSetterVisitor,
                         localFunctionsSetterClassVisitor
                     })
+                }),
+                new DestructorSetterClassVisitor(new List<IDestructorVisitor>
+                {
+                    new DestructorInfoVisitor(),
+                    calledMethodSetterVisitor,
+                    localFunctionsSetterClassVisitor,
                 })
             }));
 
@@ -176,9 +184,8 @@ namespace HoneydewCoreIntegrationTests.Processors
 
 
             var classModel = referenceSolutionModel.Projects[0].Files[0].Classes[0];
-            var methodModel = classModel.Methods[0];
 
-            Assert.Equal(nameof(MethodType.Destructor), methodModel.MethodType);
+            Assert.Equal(nameof(MethodType.Destructor), classModel.Destructor.MethodType);
         }
     }
 }

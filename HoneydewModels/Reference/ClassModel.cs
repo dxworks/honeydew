@@ -37,6 +37,9 @@ namespace HoneydewModels.Reference
 
         public IList<MethodModel> Methods { get; set; } = new List<MethodModel>();
 
+        public MethodModel Destructor =>
+            Methods.FirstOrDefault(model => model.MethodType == nameof(MethodType.Destructor));
+
         public IList<AttributeModel> Attributes { get; set; } = new List<AttributeModel>();
 
         public LinesOfCode Loc { get; set; }
