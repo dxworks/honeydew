@@ -281,34 +281,22 @@ namespace HoneydewCore.Processors
         {
             var allProjects = referenceRepositoryModel.Solutions.SelectMany(model => model.Projects).ToList();
 
-            var externProjects = new Dictionary<string, ProjectModel>();
             for (var projectIndex = 0;
                  projectIndex < repositoryModel.Projects.Count;
                  projectIndex++)
             {
                 var projectModel = referenceRepositoryModel.Projects[projectIndex];
-                foreach (var projectReference in repositoryModel.Projects[projectIndex]
-                             .ProjectReferences)
+                foreach (var projectReference in repositoryModel.Projects[projectIndex].ProjectReferences)
                 {
                     var project = allProjects.FirstOrDefault(project => project.FilePath == projectReference);
-                    if (project == null) // project is extern
+                    if (project == null)
                     {
-                        if (externProjects.TryGetValue(projectReference, out var externProject))
-                        {
-                            project = externProject;
-                        }
-                        else
-                        {
-                            project = new ProjectModel
-                            {
-                                FilePath = projectReference,
-                                Name = "ExternProject"
-                            };
-                            externProjects.Add(projectReference, project);
-                        }
+                        projectModel.ExternalProjectReferences.Add(projectReference);
                     }
-
-                    projectModel.ProjectReferences.Add(project);
+                    else
+                    {
+                        projectModel.ProjectReferences.Add(project);
+                    }
                 }
             }
         }

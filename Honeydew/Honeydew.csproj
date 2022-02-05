@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     </PropertyGroup>
 
@@ -16,7 +16,7 @@
         <PackageReference Include="Goblinfactory.Konsole" Version="7.0.0.7-alpha" />
     
         <PackageReference Include="Serilog" Version="2.10.1-dev-01343" />
-        <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1-dev-00874" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
         <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     </ItemGroup>
 </Project>
