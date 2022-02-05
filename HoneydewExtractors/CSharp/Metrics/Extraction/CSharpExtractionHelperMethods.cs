@@ -51,7 +51,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             return interfaces;
         }
 
-        public IEntityType GetBaseClassName(TypeDeclarationSyntax node)
+        private IEntityType GetBaseClassName(TypeDeclarationSyntax node)
         {
             var declaredSymbol = ModelExtensions.GetDeclaredSymbol(_semanticModel, node);
 
@@ -194,35 +194,19 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
         {
             CSharpSyntaxNode declarationSyntax = syntaxNode.GetParentDeclarationSyntax<LocalFunctionStatementSyntax>();
 
-            if (declarationSyntax == null)
-            {
-                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseMethodDeclarationSyntax>();
-            }
+            declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<BaseMethodDeclarationSyntax>();
 
-            if (declarationSyntax == null)
-            {
-                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
-            }
+            declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
 
-            if (declarationSyntax == null)
-            {
-                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<EventDeclarationSyntax>();
-            }
+            declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<EventDeclarationSyntax>();
 
-            if (declarationSyntax == null)
-            {
-                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<DelegateDeclarationSyntax>();
-            }
+            declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<DelegateDeclarationSyntax>();
 
-            if (declarationSyntax == null)
-            {
-                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>();
-            }
+            declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>();
 
-            if (declarationSyntax == null)
-            {
-                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<NamespaceDeclarationSyntax>();
-            }
+            declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<NamespaceDeclarationSyntax>();
+
+            declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<FileScopedNamespaceDeclarationSyntax>();
 
             if (declarationSyntax != null)
             {
