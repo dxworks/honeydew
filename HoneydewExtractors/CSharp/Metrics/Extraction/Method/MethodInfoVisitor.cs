@@ -61,7 +61,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Method
                 Name = "void"
             };
             var isNullable = false;
-            
+
             if (keyword == "get")
             {
                 var basePropertyDeclarationSyntax =

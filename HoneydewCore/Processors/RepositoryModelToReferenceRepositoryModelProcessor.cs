@@ -175,7 +175,26 @@ namespace HoneydewCore.Processors
                                 namespaceModel.Classes.Add(model);
                                 referenceCompilationUnit.Classes.Add(model);
 
-                                _classModels.Add((referenceProjectModel, classModel.Name), model);
+                                if (_classModels.TryGetValue((referenceProjectModel, classModel.Name),
+                                        out var existingReferenceEntity))
+                                {
+                                    // this is a partial class, so combine contents
+                                    if (existingReferenceEntity is ClassModel existingClassModel)
+                                    {
+                                        existingClassModel.Attributes.AddRange(existingClassModel.Attributes);
+                                        existingClassModel.Imports.AddRange(existingClassModel.Imports);
+                                        existingClassModel.Metrics.AddRange(existingClassModel.Metrics);
+                                        existingClassModel.Constructors.AddRange(existingClassModel.Constructors);
+                                        existingClassModel.Methods.AddRange(existingClassModel.Methods);
+                                        existingClassModel.Properties.AddRange(existingClassModel.Properties);
+                                        existingClassModel.BaseTypes.AddRange(existingClassModel.BaseTypes);
+                                        existingClassModel.Fields.AddRange(existingClassModel.Fields);
+                                    }
+                                }
+                                else
+                                {
+                                    _classModels.Add((referenceProjectModel, classModel.Name), model);
+                                }
                             }
                                 break;
                             default:
@@ -434,11 +453,11 @@ namespace HoneydewCore.Processors
                             continue;
                         }
 
-                        classModel.Methods = PopulateWithMethodModels(classModel, membersClassType.Methods)
+                        classModel.Methods.AddRange(PopulateWithMethodModels(classModel, membersClassType.Methods)
                             .Concat(PopulateWithConstructorModels(classModel, membersClassType.Constructors))
                             .Concat(PopulateWithDestructorModel(classModel, membersClassType.Destructor))
-                            .ToList();
-                        classModel.Fields = PopulateWithFieldModels(classModel, membersClassType.Fields);
+                            .ToList());
+                        classModel.Fields.AddRange(PopulateWithFieldModels(classModel, membersClassType.Fields));
 
                         if (classType is not IPropertyMembersClassType propertyMembersClassType)
                         {

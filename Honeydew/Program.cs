@@ -109,7 +109,7 @@ namespace Honeydew
                     case "extract":
                     {
                         repositoryModel = await ExtractModel(logger, progressLogger, missingFilesLogger,
-                            relationMetricHolder, inputPath);
+                            relationMetricHolder, inputPath, options.UseOptionalMetrics);
                     }
                         break;
 
@@ -272,7 +272,8 @@ namespace Honeydew
         }
 
         private static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger progressLogger,
-            ILogger missingFilesLogger, IRelationMetricHolder relationMetricHolder, string inputPath)
+            ILogger missingFilesLogger, IRelationMetricHolder relationMetricHolder, string inputPath,
+            bool useOptionalMetrics)
         {
             var solutionProvider = new MsBuildSolutionProvider();
             var projectProvider = new MsBuildProjectProvider();
@@ -285,7 +286,8 @@ namespace Honeydew
 
             var repositoryLoader = new CSharpRepositoryLoader(solutionProvider, projectProvider, projectLoadingStrategy,
                 solutionLoadingStrategy, logger, progressLogger, missingFilesLogger,
-                new FactExtractorCreator(VisitorLoaderHelper.LoadVisitors(relationMetricHolder, logger)),
+                new FactExtractorCreator(VisitorLoaderHelper.LoadVisitors(relationMetricHolder, logger,
+                    useOptionalMetrics)),
                 cSharpCompilationMaker);
             var repositoryModel = await repositoryLoader.Load(inputPath);
 

@@ -33,8 +33,10 @@ namespace HoneydewCore.Utils
 
                 accessModifier = m;
                 modifier = allModifiers.Replace(m, "").Trim();
-                break;
+                return;
             }
+
+            modifier = allModifiers;
         }
 
         public static bool IsPrimitiveArray(string type)

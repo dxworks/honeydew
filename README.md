@@ -7,7 +7,7 @@ Honeydew is a tool that extracts facts from a C# Solution or C# Project
 For extracting information about a solution or project use the following command:
 
 ```
-.\Honeydew extract <input_path> [--no-progress-bars] [--no-trim-paths] [--voyager] [-n|--project-name <name>]
+.\Honeydew extract <input_path> [--no-progress-bars] [--no-trim-paths] [--voyager] [-n|--project-name <name>] [-o|--optional-metrics]
 ```
 
 If `input_path` is a path to a solution file (.sln), Honeydew will extract facts from that solution file
@@ -42,6 +42,11 @@ The output files will be placed in a folder named `results`
 
   The flag must be followed by a string. This flag is used to set the project name. If not present, the project name
   will be deduced from the `<input_path>`. The project name is used to name the output files
+
+- `-o` or `--optional-metrics`
+
+  If present, Honeydew will apply additional metrics. These are
+  - GotoStatements Extraction
 
 ## Load Model from file
 
