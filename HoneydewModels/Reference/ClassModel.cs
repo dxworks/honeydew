@@ -21,6 +21,8 @@ namespace HoneydewModels.Reference
 
         public string Modifier { get; set; } = "";
 
+        public PartialClassModel PartialClass { get; set; }
+
         public IList<GenericParameterModel> GenericParameters { get; set; } = new List<GenericParameterModel>();
 
         public IList<ClassModel> BaseTypes { get; set; } = new List<ClassModel>();

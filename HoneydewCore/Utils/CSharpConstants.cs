@@ -36,7 +36,10 @@ namespace HoneydewCore.Utils
                 return;
             }
 
-            modifier = allModifiers;
+            if (string.IsNullOrEmpty(modifier))
+            {
+                modifier = allModifiers;
+            }
         }
 
         public static bool IsPrimitiveArray(string type)

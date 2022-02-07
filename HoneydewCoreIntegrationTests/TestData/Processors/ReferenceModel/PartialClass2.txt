@@ -1,0 +1,20 @@
+﻿using System.Generics;
+using Extern;
+
+namespace PartialClasses
+{
+    public partial class C1 : Class
+    {
+        private int _a;
+        public readonly float b;
+        protected int A;
+        
+        public int L {get;init;}
+        
+        private float L2 => "ss";
+    
+        public C1(int x) {}
+        
+        public void Print() {}
+    }
+}
