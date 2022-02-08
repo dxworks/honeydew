@@ -109,7 +109,7 @@ namespace Honeydew
                     case "extract":
                     {
                         repositoryModel = await ExtractModel(logger, progressLogger, missingFilesLogger,
-                            relationMetricHolder, inputPath, options.UseOptionalMetrics);
+                            relationMetricHolder, inputPath);
                     }
                         break;
 
@@ -260,6 +260,14 @@ namespace Honeydew
                     { "ignorePrimitives", true }
                 })
             });
+
+            scriptRunner.Run(new List<ScriptRuntime>
+            {
+                new(new TestingStuffExportScript(jsonModelExporter), new Dictionary<string, object>
+                {
+                    { "testingStuffOutputName", $"{projectName}-testing_stuff.json" },
+                })
+            });
         }
 
         private static async Task<RepositoryModel> LoadModel(ILogger logger, string inputPath)
@@ -272,8 +280,7 @@ namespace Honeydew
         }
 
         private static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger progressLogger,
-            ILogger missingFilesLogger, IRelationMetricHolder relationMetricHolder, string inputPath,
-            bool useOptionalMetrics)
+            ILogger missingFilesLogger, IRelationMetricHolder relationMetricHolder, string inputPath)
         {
             var solutionProvider = new MsBuildSolutionProvider();
             var projectProvider = new MsBuildProjectProvider();
@@ -286,8 +293,7 @@ namespace Honeydew
 
             var repositoryLoader = new CSharpRepositoryLoader(solutionProvider, projectProvider, projectLoadingStrategy,
                 solutionLoadingStrategy, logger, progressLogger, missingFilesLogger,
-                new FactExtractorCreator(VisitorLoaderHelper.LoadVisitors(relationMetricHolder, logger,
-                    useOptionalMetrics)),
+                new FactExtractorCreator(VisitorLoaderHelper.LoadVisitors(relationMetricHolder, logger)),
                 cSharpCompilationMaker);
             var repositoryModel = await repositoryLoader.Load(inputPath);
 

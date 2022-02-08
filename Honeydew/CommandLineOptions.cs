@@ -25,9 +25,5 @@ namespace Honeydew
 
         [Option("voyager", Required = false, Default = false, HelpText = "Use Voyager Options. Export Raw Model")]
         public bool UseVoyager { get; set; }
-
-        [Option('o', "optional-metrics", Required = false, Default = false,
-            HelpText = "Include Optional Metrics in Extraction. Optional Metrics: GotoStatements")]
-        public bool UseOptionalMetrics { get; set; }
     }
 }

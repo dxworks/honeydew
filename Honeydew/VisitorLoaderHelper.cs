@@ -36,8 +36,7 @@ namespace Honeydew
 {
     internal static class VisitorLoaderHelper
     {
-        public static ICompositeVisitor LoadVisitors(IRelationMetricHolder relationMetricHolder, ILogger logger,
-            bool useOptionalMetrics)
+        public static ICompositeVisitor LoadVisitors(IRelationMetricHolder relationMetricHolder, ILogger logger)
         {
             var linesOfCodeVisitor = new LinesOfCodeVisitor();
 
@@ -75,37 +74,27 @@ namespace Honeydew
 
             var gotoInfoVisitor = new GotoStatementVisitor();
 
-            var nestedLocalFunctionVisitors = new List<ILocalFunctionVisitor>
-            {
-                calledMethodSetterVisitor,
-                linesOfCodeVisitor,
-                parameterSetterVisitor,
-                localVariablesTypeSetterVisitor,
-                genericParameterSetterVisitor,
-                accessedFieldsSetterVisitor,
-            };
-
-            if (useOptionalMetrics)
-            {
-                nestedLocalFunctionVisitors.Add(gotoInfoVisitor);
-            }
-            
             var localFunctionsSetterClassVisitor = new LocalFunctionsSetterClassVisitor(new List<ILocalFunctionVisitor>
             {
-                new LocalFunctionInfoVisitor(nestedLocalFunctionVisitors),
+                new LocalFunctionInfoVisitor(new List<ILocalFunctionVisitor>
+                {
+                    calledMethodSetterVisitor,
+                    linesOfCodeVisitor,
+                    parameterSetterVisitor,
+                    localVariablesTypeSetterVisitor,
+                    genericParameterSetterVisitor,
+                    accessedFieldsSetterVisitor,
+                    gotoInfoVisitor,
+                }),
                 calledMethodSetterVisitor,
                 linesOfCodeVisitor,
                 parameterSetterVisitor,
                 localVariablesTypeSetterVisitor,
                 genericParameterSetterVisitor,
                 accessedFieldsSetterVisitor,
+                gotoInfoVisitor,
             });
 
-            if (useOptionalMetrics)
-            {
-                localFunctionsSetterClassVisitor.Add(gotoInfoVisitor);
-            }
-            
             var methodInfoVisitor = new MethodInfoVisitor();
 
             var methodVisitors = new List<ICSharpMethodVisitor>
@@ -119,6 +108,7 @@ namespace Honeydew
                 localVariablesTypeSetterVisitor,
                 genericParameterSetterVisitor,
                 accessedFieldsSetterVisitor,
+                gotoInfoVisitor,
             };
 
             var constructorVisitors = new List<ICSharpConstructorVisitor>
@@ -132,6 +122,7 @@ namespace Honeydew
                 parameterSetterVisitor,
                 localVariablesTypeSetterVisitor,
                 accessedFieldsSetterVisitor,
+                gotoInfoVisitor,
             };
 
             var destructorVisitors = new List<IDestructorVisitor>
@@ -143,6 +134,7 @@ namespace Honeydew
                 attributeSetterVisitor,
                 localVariablesTypeSetterVisitor,
                 accessedFieldsSetterVisitor,
+                gotoInfoVisitor,
             };
 
             var fieldVisitors = new List<ICSharpFieldVisitor>
@@ -162,15 +154,7 @@ namespace Honeydew
                 accessedFieldsSetterVisitor,
                 gotoInfoVisitor,
             };
-            
-            if (useOptionalMetrics)
-            {
-                methodVisitors.Add(gotoInfoVisitor);
-                constructorVisitors.Add(gotoInfoVisitor);
-                destructorVisitors.Add(gotoInfoVisitor);
-                propertyAccessorsVisitors.Add(gotoInfoVisitor);
-            }
-            
+
             var propertyVisitors = new List<ICSharpPropertyVisitor>
             {
                 new PropertyInfoVisitor(),
