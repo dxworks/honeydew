@@ -39,6 +39,29 @@ public class TestingStuffExportScript : Script
             repositoryModel.Solutions.Select(solution =>
                 new Solution(solution.FilePath, solution.Projects.Select(project => project.FilePath).ToHashSet()));
 
+        var callersDictionary = new Dictionary<string, ISet<string>>();
+
+        foreach (var methodModel in repositoryModel.Projects.SelectMany(project =>
+                     project.Files.SelectMany(file =>
+                         file.Classes.SelectMany(c => c.Methods.Concat(c.Properties.SelectMany(p => p.Accessors))))))
+        {
+            var methodId = GenerateMethodId(methodModel);
+
+            foreach (var calledMethod in methodModel.CalledMethods)
+            {
+                var calledMethodId = GenerateMethodId(calledMethod);
+
+                if (callersDictionary.TryGetValue(calledMethodId, out var list))
+                {
+                    list.Add(methodId);
+                }
+                else
+                {
+                    callersDictionary.Add(calledMethodId, new HashSet<string>() { methodId });
+                }
+            }
+        }
+
         var projects = repositoryModel.Projects.Select(project => new Project(
             name: project.Name, path: project.FilePath,
             externalReferences: project.ExternalProjectReferences,
@@ -48,6 +71,7 @@ public class TestingStuffExportScript : Script
                         .Select(grouping => new Namespace(grouping.Key,
                             grouping.Select(@class => new Class(
                                     name: @class.Name, usingStatements: @class.Imports.Select(i => i.Name).ToHashSet(),
+                                    type: @class.ClassType,
                                     attributes: @class.Attributes.Select(a => a.Name).ToHashSet(),
                                     usedClasses: GetUsedClasses(@class),
                                     methods: @class.Methods.Select(method => new Method(name: method.Name,
@@ -55,8 +79,9 @@ public class TestingStuffExportScript : Script
                                             attributes: method.Attributes.Select(a => a.Name).ToHashSet(),
                                             modifiers: method.Modifier.Split(' ')
                                                 .Concat(new[] { method.AccessModifier })
+                                                .Where(modifier => !string.IsNullOrWhiteSpace(modifier))
                                                 .ToHashSet(),
-                                            callers: GetCallers(method),
+                                            callers: GetCallers(callersDictionary, method),
                                             calledMethods: method.CalledMethods.Select(GenerateMethodId).ToHashSet()))
                                         .Concat(@class.Properties.SelectMany(prop => prop.Accessors.Select(accessor =>
                                             new Method(name: accessor.Name, type: GetAccessorType(accessor),
@@ -64,7 +89,7 @@ public class TestingStuffExportScript : Script
                                                 modifiers: accessor.Modifier.Split(' ')
                                                     .Concat(new[] { accessor.AccessModifier })
                                                     .ToHashSet(),
-                                                callers: GetCallers(accessor),
+                                                callers: GetCallers(callersDictionary, accessor),
                                                 calledMethods: accessor.CalledMethods.Select(GenerateMethodId)
                                                     .ToHashSet()
                                             ))))
@@ -78,9 +103,12 @@ public class TestingStuffExportScript : Script
         _repositoryExporter.Export(Path.Combine(outputPath, outputName), root);
     }
 
-    private static ISet<string> GetCallers(MethodModel methodModel)
+    private static ISet<string> GetCallers(IDictionary<string, ISet<string>> callersDictionary,
+        MethodModel methodModel)
     {
-        return new HashSet<string>();
+        return !callersDictionary.TryGetValue(GenerateMethodId(methodModel), out var callers)
+            ? new HashSet<string>()
+            : callers;
     }
 
     private static string GetAccessorType(MethodModel accessor)
@@ -156,8 +184,8 @@ internal record File(string name, string path, ISet<Namespace> namespaces);
 
 internal record Namespace(string name, ISet<Class> classes);
 
-internal record Class(string name, ISet<string> usingStatements, ISet<string> attributes, ISet<string> usedClasses,
-    ISet<Method> methods);
+internal record Class(string name, string type, ISet<string> usingStatements, ISet<string> attributes,
+    ISet<string> usedClasses, ISet<Method> methods);
 
 internal record Method(string name, string type, ISet<string> attributes, ISet<string> modifiers, ISet<string> callers,
     ISet<string> calledMethods);

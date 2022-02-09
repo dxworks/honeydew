@@ -984,6 +984,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             ContainingType = classModel,
             Class = classModel,
             Name = methodSignatureType.Name,
+            MethodType = nameof(MethodType.Method),
             Parameters = methodSignatureType.ParameterTypes.Select(p =>
             {
                 var param = p as HoneydewModels.CSharp.ParameterModel;
