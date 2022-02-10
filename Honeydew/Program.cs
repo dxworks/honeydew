@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using CommandLine;
+using DotNetGraph;
+using DotNetGraph.Edge;
+using DotNetGraph.Extensions;
+using DotNetGraph.Node;
 using Honeydew.Scripts;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Writers.Exporters;
@@ -23,6 +28,7 @@ using HoneydewModels;
 using HoneydewModels.CSharp;
 using HoneydewModels.Exporters;
 using HoneydewModels.Importers;
+using File = System.IO.File;
 
 namespace Honeydew
 {
@@ -127,7 +133,7 @@ namespace Honeydew
                     logger.Log("Exporting Raw Model");
                     progressLogger.Log("Exporting Raw Model");
 
-                    var runner = new ScriptRunner(logger, new Dictionary<string, object>
+                    var runner = new ScriptRunner(progressLogger, new Dictionary<string, object>
                     {
                         { "outputPath", DefaultPathForAllRepresentations },
                         { "repositoryModel", repositoryModel },
@@ -166,7 +172,7 @@ namespace Honeydew
                 var referenceRepositoryModel =
                     new RepositoryModelToReferenceRepositoryModelProcessor().Process(repositoryModel);
 
-                var scriptRunner = new ScriptRunner(logger, new Dictionary<string, object>
+                var scriptRunner = new ScriptRunner(progressLogger, new Dictionary<string, object>
                 {
                     { "outputPath", DefaultPathForAllRepresentations },
                     { "repositoryModel", repositoryModel },
@@ -175,6 +181,7 @@ namespace Honeydew
                     { "classRelationsOutputName", $"{projectName}-class_relations.csv" },
                     { "cycloOutputName", $"{projectName}-cyclomatic.json" },
                     { "statisticsFileOutputName", $"{projectName}-stats.json" },
+                    { "projectName", projectName },
                 });
 
                 var csvRelationsRepresentationExporter = new CsvRelationsRepresentationExporter
@@ -228,13 +235,13 @@ namespace Honeydew
                 new(new ExportStatisticsScript(jsonModelExporter)),
                 new(exportFileRelationsScript, new Dictionary<string, object>
                 {
-                    { "fileRelationsOutputName", $"{projectName}-file_relations_all.csv" },
+                    { "fileRelationsOutputName", $"{projectName}-structural_relations_all.csv" },
                     { "fileRelationsStrategy", new HoneydewChooseStrategy() },
                     { "fileRelationsHeaders", null },
                 }),
                 new(exportFileRelationsScript, new Dictionary<string, object>
                 {
-                    { "fileRelationsOutputName", $"{projectName}-file_relations.csv" },
+                    { "fileRelationsOutputName", $"{projectName}-structural_relations.csv" },
                     { "fileRelationsStrategy", new JafaxChooseStrategy() },
                     {
                         "fileRelationsHeaders", new List<string>
@@ -248,7 +255,13 @@ namespace Honeydew
                         }
                     },
                 }),
-                new(new ClassRelationScript(csvRelationsRepresentationExporter))
+                new(new ClassRelationScript(csvRelationsRepresentationExporter)),
+            });
+
+            scriptRunner.Run(new List<ScriptRuntime>
+            {
+                new(new ExportRelationsBetweenSolutionsAndProjectsScripts(new CsvRelationsRepresentationExporter(),
+                    new TextFileExporter())),
             });
 
             scriptRunner.Run(new List<ScriptRuntime>

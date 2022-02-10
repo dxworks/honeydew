@@ -7,9 +7,9 @@ namespace Honeydew.Scripts
     internal class ScriptRunner
     {
         private readonly Dictionary<string, object> _defaultArguments;
-        private readonly ILogger _logger;
+        private readonly IProgressLogger _logger;
 
-        public ScriptRunner(ILogger logger, Dictionary<string, object> defaultArguments)
+        public ScriptRunner(IProgressLogger logger, Dictionary<string, object> defaultArguments)
         {
             _logger = logger;
             _defaultArguments = defaultArguments;
@@ -59,7 +59,7 @@ namespace Honeydew.Scripts
                 }
                 catch (Exception e)
                 {
-                    _logger.Log($"Could not run script because {e}", LogLevels.Error);
+                    _logger.Log($"Could not run script because {e}");
                 }
             }
         }
