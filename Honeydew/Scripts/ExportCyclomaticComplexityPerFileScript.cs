@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using HoneydewCore.Processors;
-using HoneydewModels.CSharp;
 using HoneydewModels.Exporters;
+using HoneydewModels.Reference;
 
 namespace Honeydew.Scripts
 {
@@ -16,7 +16,7 @@ namespace Honeydew.Scripts
     ///         <description>cycloOutputName</description>
     ///     </item>
     ///     <item>
-    ///         <description>repositoryModel</description>
+    ///         <description>referenceRepositoryModel</description>
     ///     </item>
     /// </list>
     /// </summary>
@@ -33,7 +33,7 @@ namespace Honeydew.Scripts
         {
             var outputPath = VerifyArgument<string>(arguments, "outputPath");
             var outputName = VerifyArgument<string>(arguments, "cycloOutputName");
-            var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "repositoryModel");
+            var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel");
 
             var cyclomaticComplexityPerFileRepresentation =
                 new RepositoryModelToCyclomaticComplexityPerFileProcessor().Process(repositoryModel);

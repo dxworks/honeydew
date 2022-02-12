@@ -2,7 +2,7 @@
 using System.IO;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewExtractors.Processors;
-using HoneydewModels.CSharp;
+using HoneydewModels.Reference;
 
 namespace Honeydew.Scripts
 {
@@ -16,7 +16,7 @@ namespace Honeydew.Scripts
     ///         <description>classRelationsOutputName</description>
     ///     </item>
     ///     <item>
-    ///         <description>repositoryModel</description>
+    ///         <description>referenceRepositoryModel</description>
     ///     </item>
     /// </list>
     /// </summary>
@@ -33,7 +33,7 @@ namespace Honeydew.Scripts
         {
             var outputPath = VerifyArgument<string>(arguments, "outputPath");
             var outputName = VerifyArgument<string>(arguments, "classRelationsOutputName");
-            var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "repositoryModel");
+            var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel");
 
             var classRelationsRepresentation =
                 new RepositoryModelToClassRelationsProcessor(new HoneydewChooseStrategy()).Process(repositoryModel);

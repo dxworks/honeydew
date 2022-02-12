@@ -1,169 +1,168 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
-using HoneydewModels.CSharp;
-using HoneydewModels.Types;
+using HoneydewModels.Reference;
 
-namespace HoneydewCore.Processors
+namespace HoneydewCore.Processors;
+
+public class
+    RepositoryModelToCyclomaticComplexityPerFileProcessor : IProcessorFunction<RepositoryModel,
+        CyclomaticComplexityPerFileRepresentation>
 {
-    public class
-        RepositoryModelToCyclomaticComplexityPerFileProcessor : IProcessorFunction<RepositoryModel,
-            CyclomaticComplexityPerFileRepresentation>
+    public CyclomaticComplexityPerFileRepresentation Process(RepositoryModel repositoryModel)
     {
-        public CyclomaticComplexityPerFileRepresentation Process(RepositoryModel repositoryModel)
+        var representation = new CyclomaticComplexityPerFileRepresentation();
+
+        if (repositoryModel == null)
         {
-            var representation = new CyclomaticComplexityPerFileRepresentation();
-
-            if (repositoryModel == null)
-            {
-                return representation;
-            }
-
-            var classesGroupedByFilePath = GroupClassesByFilePath(repositoryModel);
-
-            foreach (var (filePath, classModels) in classesGroupedByFilePath)
-            {
-                CalculateCycloComponents(classModels, out var maxCyclo, out var minCyclo, out var avgCyclo,
-                    out var sumCyclo, out var atc);
-
-                representation.AddConcern(new Concern
-                {
-                    Entity = filePath,
-                    Tag = "metric.maxCyclo",
-                    Strength = maxCyclo.ToString()
-                });
-
-                representation.AddConcern(new Concern
-                {
-                    Entity = filePath,
-                    Tag = "metric.minCyclo",
-                    Strength = minCyclo.ToString()
-                });
-
-                representation.AddConcern(new Concern
-                {
-                    Entity = filePath,
-                    Tag = "metric.avgCyclo",
-                    Strength = avgCyclo.ToString()
-                });
-
-                representation.AddConcern(new Concern
-                {
-                    Entity = filePath,
-                    Tag = "metric.sumCyclo",
-                    Strength = sumCyclo.ToString()
-                });
-
-                representation.AddConcern(new Concern
-                {
-                    Entity = filePath,
-                    Tag = "metric.atc",
-                    Strength = atc.ToString()
-                });
-            }
-
             return representation;
         }
 
-        private static void CalculateCycloComponents(List<IClassType> classModels, out int maxCyclo, out int minCyclo,
-            out int avgCyclo, out int sumCyclo, out int atc)
+        var classesGroupedByFilePath = GroupClassesByFilePath(repositoryModel);
+
+        foreach (var (filePath, classModels) in classesGroupedByFilePath)
         {
-            var maxCyclomatic = 1;
-            var minCyclomatic = int.MaxValue;
-            var sumCyclomatic = 0;
+            CalculateCycloComponents(classModels, out var maxCyclo, out var minCyclo, out var avgCyclo,
+                out var sumCyclo, out var atc);
 
-            var count = 0;
-
-            maxCyclo = maxCyclomatic;
-            minCyclo = minCyclomatic;
-            avgCyclo = 0;
-            sumCyclo = 0;
-            atc = 0;
-
-            if (classModels.Count <= 0)
+            representation.AddConcern(new Concern
             {
-                minCyclo = 0;
-                maxCyclo = 0;
-                return;
+                Entity = filePath,
+                Tag = "metric.maxCyclo",
+                Strength = maxCyclo.ToString()
+            });
+
+            representation.AddConcern(new Concern
+            {
+                Entity = filePath,
+                Tag = "metric.minCyclo",
+                Strength = minCyclo.ToString()
+            });
+
+            representation.AddConcern(new Concern
+            {
+                Entity = filePath,
+                Tag = "metric.avgCyclo",
+                Strength = avgCyclo.ToString()
+            });
+
+            representation.AddConcern(new Concern
+            {
+                Entity = filePath,
+                Tag = "metric.sumCyclo",
+                Strength = sumCyclo.ToString()
+            });
+
+            representation.AddConcern(new Concern
+            {
+                Entity = filePath,
+                Tag = "metric.atc",
+                Strength = atc.ToString()
+            });
+        }
+
+        return representation;
+    }
+
+    private static void CalculateCycloComponents(List<ClassModel> classModels, out int maxCyclo, out int minCyclo,
+        out int avgCyclo, out int sumCyclo, out int atc)
+    {
+        var maxCyclomatic = 1;
+        var minCyclomatic = int.MaxValue;
+        var sumCyclomatic = 0;
+
+        var count = 0;
+
+        maxCyclo = maxCyclomatic;
+        minCyclo = minCyclomatic;
+        avgCyclo = 0;
+        sumCyclo = 0;
+        atc = 0;
+
+        if (classModels.Count <= 0)
+        {
+            minCyclo = 0;
+            maxCyclo = 0;
+            return;
+        }
+
+        var atcSum = 0;
+
+        foreach (var classModel in classModels)
+        {
+            foreach (var methodModel in classModel.Methods)
+            {
+                UpdateVariables(methodModel.CyclomaticComplexity);
             }
 
-            var atcSum = 0;
-
-            foreach (var classType in classModels)
+            foreach (var constructorModel in classModel.Constructors)
             {
-                if (classType is not ClassModel classModel)
-                {
-                    continue;
-                }
-
-                foreach (var methodModel in classModel.Methods)
-                {
-                    UpdateVariables(methodModel.CyclomaticComplexity);
-                }
-
-                foreach (var constructorModel in classModel.Constructors)
-                {
-                    UpdateVariables(constructorModel.CyclomaticComplexity);
-                }
-
-                foreach (var propertyModel in classModel.Properties)
-                {
-                    UpdateVariables(propertyModel.CyclomaticComplexity);
-                }
+                UpdateVariables(constructorModel.CyclomaticComplexity);
             }
 
-            void UpdateVariables(int cyclomaticComplexity)
+            foreach (var propertyModel in classModel.Properties)
             {
-                if (maxCyclomatic < cyclomaticComplexity)
-                {
-                    maxCyclomatic = cyclomaticComplexity;
-                }
-
-                if (minCyclomatic > cyclomaticComplexity)
-                {
-                    minCyclomatic = cyclomaticComplexity;
-                }
-
-                sumCyclomatic += cyclomaticComplexity;
-
-                count++;
-
-                atcSum += cyclomaticComplexity / 10;
-            }
-
-            atc = atcSum;
-            maxCyclo = maxCyclomatic;
-            minCyclo = minCyclomatic;
-            sumCyclo = sumCyclomatic;
-            if (count != 0)
-            {
-                avgCyclo = sumCyclomatic / count;
-            }
-            else
-            {
-                maxCyclo = minCyclo = sumCyclo = avgCyclo = 0;
+                UpdateVariables(propertyModel.CyclomaticComplexity);
             }
         }
 
-        private static Dictionary<string, List<IClassType>> GroupClassesByFilePath(RepositoryModel repositoryModel)
+        void UpdateVariables(int cyclomaticComplexity)
         {
-            var classModelDictionary = new Dictionary<string, List<IClassType>>();
-
-            foreach (var classModel in repositoryModel.GetEnumerable())
+            if (maxCyclomatic < cyclomaticComplexity)
             {
-                if (classModelDictionary.TryGetValue(classModel.FilePath, out var classModels))
-                {
-                    classModels.Add(classModel);
-                }
-                else
-                {
-                    classModelDictionary.Add(classModel.FilePath, new List<IClassType>
+                maxCyclomatic = cyclomaticComplexity;
+            }
+
+            if (minCyclomatic > cyclomaticComplexity)
+            {
+                minCyclomatic = cyclomaticComplexity;
+            }
+
+            sumCyclomatic += cyclomaticComplexity;
+
+            count++;
+
+            atcSum += cyclomaticComplexity / 10;
+        }
+
+        atc = atcSum;
+        maxCyclo = maxCyclomatic;
+        minCyclo = minCyclomatic;
+        sumCyclo = sumCyclomatic;
+        if (count != 0)
+        {
+            avgCyclo = sumCyclomatic / count;
+        }
+        else
+        {
+            maxCyclo = minCyclo = sumCyclo = avgCyclo = 0;
+        }
+    }
+
+    private static Dictionary<string, List<ClassModel>> GroupClassesByFilePath(RepositoryModel repositoryModel)
+    {
+        var classModelDictionary = new Dictionary<string, List<ClassModel>>();
+
+        foreach (var classOption in repositoryModel.GetEnumerable())
+        {
+            switch (classOption)
+            {
+                case ClassOption.Class(var classModel):
+                    if (classModelDictionary.TryGetValue(classModel.FilePath, out var classModels))
                     {
-                        classModel
-                    });
-                }
-            }
+                        classModels.Add(classModel);
+                    }
+                    else
+                    {
+                        classModelDictionary.Add(classModel.FilePath, new List<ClassModel>
+                        {
+                            classModel
+                        });
+                    }
 
-            return classModelDictionary;
+                    break;
+            }
         }
+
+        return classModelDictionary;
     }
 }
