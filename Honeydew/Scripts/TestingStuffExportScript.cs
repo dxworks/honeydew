@@ -132,20 +132,22 @@ public class TestingStuffExportScript : Script
                     .Concat(method.ReturnValue != null
                         ? GetGenericNames(method.ReturnValue.Type)
                         : new List<string>())
+                    .Concat(method.AccessedFields.SelectMany(field => GetGenericNames(field.Field.Type)))
                     .Concat(method.LocalVariables.SelectMany(v => GetGenericNames(v.Type)))
                     .Concat(method.LocalFunctions.SelectMany(GetUsedClassesFromLocalFunctions))
             ))
             .ToHashSet();
     }
 
-    private static IEnumerable<string> GetUsedClassesFromLocalFunctions(MethodModel methodModel)
+    private static IEnumerable<string> GetUsedClassesFromLocalFunctions(MethodModel method)
     {
-        return methodModel.Parameters.SelectMany(param => GetGenericNames(param.Type))
-            .Concat(methodModel.ReturnValue != null
-                ? GetGenericNames(methodModel.ReturnValue.Type)
+        return method.Parameters.SelectMany(param => GetGenericNames(param.Type))
+            .Concat(method.ReturnValue != null
+                ? GetGenericNames(method.ReturnValue.Type)
                 : new List<string>())
-            .Concat(methodModel.LocalVariables.SelectMany(v => GetGenericNames(v.Type)))
-            .Concat(methodModel.LocalFunctions.SelectMany(GetUsedClassesFromLocalFunctions));
+            .Concat(method.AccessedFields.SelectMany(field => GetGenericNames(field.Field.Type)))
+            .Concat(method.LocalVariables.SelectMany(v => GetGenericNames(v.Type)))
+            .Concat(method.LocalFunctions.SelectMany(GetUsedClassesFromLocalFunctions));
     }
 
     private static IEnumerable<string> GetGenericNames(EntityType entityType)
