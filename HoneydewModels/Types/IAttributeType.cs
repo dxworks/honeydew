@@ -1,7 +1,8 @@
-﻿namespace HoneydewModels.Types
+﻿namespace HoneydewModels.Types;
+
+public interface IAttributeType : IMethodSignatureType
 {
-    public interface IAttributeType : IMethodSignatureType
-    {
-        public string Target { get; set; }
-    }
+    public IEntityType Type { get; set; }
+
+    public string Target { get; set; }
 }

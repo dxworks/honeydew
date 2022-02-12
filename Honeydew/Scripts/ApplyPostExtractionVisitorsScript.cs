@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Iterators;
 using HoneydewExtractors.Core.Metrics.Visitors;
@@ -14,13 +13,7 @@ namespace Honeydew.Scripts
     /// Requires the following arguments:
     /// <list type="bullet">
     ///     <item>
-    ///         <description>outputPath</description>
-    ///     </item>
-    ///     <item>
     ///         <description>repositoryModel</description>
-    ///     </item>
-    ///     <item>
-    ///         <description>disableSearchForExternTypes</description>
     ///     </item>
     /// </list>
     /// Modifies the following arguments:
@@ -43,21 +36,13 @@ namespace Honeydew.Scripts
 
         public override void Run(Dictionary<string, object> arguments)
         {
-            var outputPath = VerifyArgument<string>(arguments, "outputPath");
             var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "repositoryModel");
-            var disableSearchForExternTypes = VerifyArgument<bool>(arguments, "disableSearchForExternTypes");
 
             _logger.Log();
             _logger.Log("Applying Post Extraction Metrics");
             _progressLogger.Log();
             _progressLogger.Log("Applying Post Extraction Metrics");
 
-            var classNames = new HashSet<string>();
-
-            foreach (var classType in repositoryModel.GetEnumerable())
-            {
-                classNames.Add(classType.Name);
-            }
 
             var propertiesRelationVisitor = new PropertiesRelationVisitor();
             var fieldsRelationVisitor = new FieldsRelationVisitor();
@@ -72,17 +57,12 @@ namespace Honeydew.Scripts
                 localVariablesRelationVisitor,
 
                 new ExternCallsRelationVisitor(),
+                new ExternDataRelationVisitor(),
                 new HierarchyRelationVisitor(),
                 new ReturnValueRelationVisitor(),
                 new DeclarationRelationVisitor(localVariablesRelationVisitor, parameterRelationVisitor,
                     fieldsRelationVisitor, propertiesRelationVisitor),
             };
-
-            if (!disableSearchForExternTypes)
-            {
-                var logger = new SerilogLogger(Path.Combine(outputPath, "extern_types.txt"));
-                modelVisitors.Add(new ExternEntityTypeVisitor(classNames, logger));
-            }
 
             var repositoryModelIterator = new RepositoryModelIterator(new List<ModelIterator<ProjectModel>>
             {

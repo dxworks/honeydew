@@ -1,0 +1,19 @@
+﻿namespace Namespace1 
+{
+    public class Class1
+    {       
+        public static void Method1()
+        {
+            ExternClass.Method();
+            var x = ExternClass.Field1;
+            var y = ExternClass.Property1;
+        }
+        
+        public static void Method2(int x, float y)
+        {
+            ExternClass.Method();
+            ExternClass.Field1 = x;
+            ExternClass.Property1 = y;
+        }
+    }
+}

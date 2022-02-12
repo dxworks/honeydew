@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using HoneydewCore.Logging;
+using HoneydewCore.Utils;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
+using HoneydewExtractors.Core.Metrics.Visitors.Destructors;
 using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
-using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
@@ -16,8 +17,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
 {
     public class LocalVariablesTypeSetterVisitor : CompositeVisitor, IRequireCSharpExtractionHelperMethodsVisitor,
-        ICSharpMethodVisitor, ICSharpConstructorVisitor,
-        ICSharpMethodAccessorVisitor, ICSharpLocalFunctionVisitor
+        ICSharpMethodVisitor, ICSharpConstructorVisitor, ICSharpMethodAccessorVisitor, ICSharpLocalFunctionVisitor,
+        ICSharpDestructorVisitor
     {
         public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
 
@@ -33,6 +34,13 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
         }
 
         public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, IConstructorType modelType)
+        {
+            SetLocalVariables(syntaxNode, modelType);
+
+            return modelType;
+        }
+
+        public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, IDestructorType modelType)
         {
             SetLocalVariables(syntaxNode, modelType);
 
@@ -58,10 +66,10 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
 
             // normal local variables
             foreach (var localDeclarationStatementSyntax in syntaxNode.Body.ChildNodes()
-                .OfType<LocalDeclarationStatementSyntax>())
+                         .OfType<LocalDeclarationStatementSyntax>())
             {
                 foreach (var variableDeclaratorSyntax in localDeclarationStatementSyntax.DescendantNodes()
-                    .OfType<VariableDeclaratorSyntax>())
+                             .OfType<VariableDeclaratorSyntax>())
                 {
                     ILocalVariableType localVariableModel = new LocalVariableModel();
 
@@ -96,7 +104,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
 
             // local variables from ifs and switches
             foreach (var declarationPatternSyntax in syntaxNode.Body.DescendantNodes()
-                .OfType<DeclarationPatternSyntax>())
+                         .OfType<DeclarationPatternSyntax>())
             {
                 var parentDeclarationSyntax =
                     declarationPatternSyntax.GetParentDeclarationSyntax<LocalFunctionStatementSyntax>();
@@ -138,7 +146,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
 
             // local variables from foreach
             foreach (var forEachStatementSyntax in syntaxNode.Body.ChildNodes()
-                .OfType<ForEachStatementSyntax>())
+                         .OfType<ForEachStatementSyntax>())
             {
                 ILocalVariableType localVariableModel = new LocalVariableModel();
 
@@ -184,7 +192,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
 
             // normal local variables
             foreach (var variableDeclaratorSyntax in
-                syntaxNode.DescendantNodes().OfType<VariableDeclaratorSyntax>())
+                     syntaxNode.DescendantNodes().OfType<VariableDeclaratorSyntax>())
             {
                 ILocalVariableType localVariableModel = new LocalVariableModel();
 
@@ -216,7 +224,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
 
             // local variables from ifs and switches
             foreach (var declarationPatternSyntax in
-                syntaxNode.DescendantNodes().OfType<DeclarationPatternSyntax>())
+                     syntaxNode.DescendantNodes().OfType<DeclarationPatternSyntax>())
             {
                 ILocalVariableType localVariableModel = new LocalVariableModel();
 
@@ -249,7 +257,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
 
             // local variables from foreach
             foreach (var forEachVariableStatementSyntax in
-                syntaxNode.DescendantNodes().OfType<ForEachStatementSyntax>())
+                     syntaxNode.DescendantNodes().OfType<ForEachStatementSyntax>())
             {
                 ILocalVariableType localVariableModel = new LocalVariableModel();
 

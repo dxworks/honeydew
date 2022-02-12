@@ -28,14 +28,14 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
         {
             SolutionModel solutionModel = new()
             {
-                FilePath = solution.FilePath
+                FilePath = ActualFilePathProvider.GetActualFilePath(solution.FilePath)
             };
 
             var i = 1;
             var projectCount = solution.Projects.Count();
 
             var progressLogger =
-                _progressLogger.CreateProgressLogger(projectCount == 0 ? 1 : projectCount, solution.FilePath);
+                _progressLogger.CreateProgressLogger(projectCount == 0 ? 1 : projectCount, solutionModel.FilePath);
 
             progressLogger.Start();
 
@@ -51,20 +51,21 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     continue;
                 }
 
-                solutionModel.ProjectsPaths.Add(project.FilePath);
+                var projectFilePath = ActualFilePathProvider.GetActualFilePath(project.FilePath);
+                solutionModel.ProjectsPaths.Add(projectFilePath);
 
 
                 _logger.Log();
-                _logger.Log($"Loading C# Project from {project.FilePath} ({i}/{projectCount})");
+                _logger.Log($"Loading C# Project from {projectFilePath} ({i}/{projectCount})");
 
                 var projectModel = await _projectLoadingStrategy.Load(project, extractorCreator);
 
-                progressLogger.Step($"{project.FilePath}");
+                progressLogger.Step($"{projectFilePath}");
 
-                if (processedProjectsPaths.Contains(project.FilePath))
+                if (processedProjectsPaths.Contains(projectFilePath))
                 {
-                    _progressLogger.Log($"Skipping {project.FilePath}. Was already processed ({i}/{projectCount})");
-                    _logger.Log($"Skipping {project.FilePath}. Was already processed ({i}/{projectCount})");
+                    _progressLogger.Log($"Skipping {projectFilePath}. Was already processed ({i}/{projectCount})");
+                    _logger.Log($"Skipping {projectFilePath}. Was already processed ({i}/{projectCount})");
                 }
                 else
                 {
@@ -74,7 +75,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
                     }
                     else
                     {
-                        _logger.Log($"Skipping {project.FilePath} ({i}/{projectCount})", LogLevels.Warning);
+                        _logger.Log($"Skipping {projectFilePath} ({i}/{projectCount})", LogLevels.Warning);
                     }
                 }
 

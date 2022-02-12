@@ -1,0 +1,18 @@
+﻿namespace Namespace1 
+{
+    public class Class1
+    {
+        private static int Field1;
+        
+        public static float Property1 { get; set; }
+        
+        static Class1()
+        {
+            var x = Field1;
+            var y = Property1;
+            
+            Field1 = 2;
+            Property1 = 7;
+        }             
+    }
+}

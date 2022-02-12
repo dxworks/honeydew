@@ -1,0 +1,9 @@
+﻿namespace Namespace1;
+
+partial class C1 
+{
+}
+
+public partial class C1
+{
+}

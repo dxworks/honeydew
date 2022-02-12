@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
-using HoneydewExtractors.CSharp.Utils;
+using HoneydewCore.Utils;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
 {
@@ -65,11 +65,11 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
             return metricDependencies;
         }
 
-        public IList<FileRelation> GetRelations()
+        public IList<Relation> GetRelations()
         {
             try
             {
-                IList<FileRelation> fileRelations = new List<FileRelation>();
+                IList<Relation> fileRelations = new List<Relation>();
 
                 foreach (var (className, relationDictionary) in _dependencies)
                 {
@@ -90,12 +90,12 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
                                 // if exception occurs means 'dependency' is not a primitive type
                             }
 
-                            var fileRelation = new FileRelation
+                            var fileRelation = new Relation
                             {
                                 Type = relationMetric.PrettyPrint(),
-                                FileTarget = dependency,
-                                RelationCount = count,
-                                FileSource = className
+                                Target = dependency,
+                                Strength = count,
+                                Source = className
                             };
                             fileRelations.Add(fileRelation);
                         }
@@ -106,7 +106,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
             }
             catch (Exception)
             {
-                return new List<FileRelation>();
+                return new List<Relation>();
             }
         }
     }

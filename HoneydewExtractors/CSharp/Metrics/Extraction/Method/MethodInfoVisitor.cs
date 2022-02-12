@@ -1,6 +1,6 @@
-﻿using HoneydewExtractors.Core.Metrics.Visitors;
+﻿using HoneydewCore.Utils;
+using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
-using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -61,7 +61,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Method
                 Name = "void"
             };
             var isNullable = false;
-            
+
             if (keyword == "get")
             {
                 var basePropertyDeclarationSyntax =

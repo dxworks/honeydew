@@ -1,0 +1,42 @@
+﻿namespace Project1.Services
+{
+    public class MyClass
+    {
+        public float Function1(int a, int b)
+        {
+            var aString = Function3(a);
+            var bString = Function3(b);
+
+            var aInt = Function2(aString);
+            var bInt = Function2(bString);
+
+            var c = aInt + bInt;
+            
+            Print(c);
+            
+            return c;
+        }
+        
+        public int Function2(string s)
+        {
+            return int.Parse(s);
+        }
+
+        public string Function3(int a)
+        {
+            return a.ToString();
+        }
+
+        private static void Print(float o)
+        {
+        }
+
+        private void Print(int a)
+        {
+            if (a > 0)
+            {
+                Print(--a);
+            }
+        }
+    }
+}

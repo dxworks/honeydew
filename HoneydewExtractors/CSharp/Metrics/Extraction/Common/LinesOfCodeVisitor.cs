@@ -2,6 +2,7 @@
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
+using HoneydewExtractors.Core.Metrics.Visitors.Destructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
@@ -12,7 +13,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
 {
     public class LinesOfCodeVisitor : ICSharpPropertyVisitor, ICSharpMethodVisitor, ICSharpConstructorVisitor,
-        ICSharpClassVisitor, ICSharpCompilationUnitVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor
+        ICSharpClassVisitor, ICSharpCompilationUnitVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor,
+        ICSharpDestructorVisitor
     {
         private readonly CSharpLinesOfCodeCounter _linesOfCodeCounter = new();
         private bool _visited;
@@ -36,6 +38,12 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
         }
 
         public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, IConstructorType modelType)
+        {
+            modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
+            return modelType;
+        }
+
+        public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, IDestructorType modelType)
         {
             modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
             return modelType;

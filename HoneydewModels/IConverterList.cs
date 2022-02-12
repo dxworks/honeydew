@@ -23,6 +23,7 @@ namespace HoneydewModels
                 new ModelJsonConverter<IParameterType, ParameterModel>(),
                 new ModelJsonConverter<IBaseType, BaseTypeModel>(),
                 new ModelJsonConverter<IConstructorType, ConstructorModel>(),
+                new ModelJsonConverter<IDestructorType, DestructorModel>(),
                 new ModelJsonConverter<IMethodType, MethodModel>(),
                 new ModelJsonConverter<IFieldType, FieldModel>(),
                 new ModelJsonConverter<IPropertyType, PropertyModel>(),
@@ -33,6 +34,7 @@ namespace HoneydewModels
                 new ModelJsonConverter<IAttributeType, AttributeModel>(),
                 new ModelJsonConverter<ILocalVariableType, LocalVariableModel>(),
                 new ModelJsonConverter<IGenericParameterType, GenericParameterModel>(),
+                new ModelJsonConverter<ICompilationUnitType, CompilationUnitModel>(),
 
                 new ClassTypeConverter(new CSharpClassTypeConverter())
             };

@@ -14,60 +14,80 @@ using HoneydewModels.CSharp;
 using Moq;
 using Xunit;
 
-namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel
+namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel;
+
+public class CSharpClassInfoTests
 {
-    public class CSharpClassInfoTests
+    private readonly CSharpFactExtractor _factExtractor;
+    private readonly Mock<ILogger> _loggerMock = new();
+    private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+    private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
+
+    public CSharpClassInfoTests()
     {
-        private readonly CSharpFactExtractor _factExtractor;
-        private readonly Mock<ILogger> _loggerMock = new();
-        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
-        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
+        var compositeVisitor = new CompositeVisitor();
 
-        public CSharpClassInfoTests()
+        compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
         {
-            var compositeVisitor = new CompositeVisitor();
-
-            compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
+            new BaseInfoClassVisitor(),
+            new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
             {
-                new BaseInfoClassVisitor(),
-                new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
+                new MethodInfoVisitor(),
+                new ParameterSetterVisitor(new List<IParameterVisitor>
                 {
-                    new MethodInfoVisitor(),
-                    new ParameterSetterVisitor(new List<IParameterVisitor>
-                    {
-                        new ParameterInfoVisitor()
-                    })
+                    new ParameterInfoVisitor()
                 })
-            }));
+            })
+        }));
 
-            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+        compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(compositeVisitor);
-        }
+        _factExtractor = new CSharpFactExtractor(compositeVisitor);
+    }
 
-        [Theory]
-        [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/ClassInfo/InterfaceWithImplementedMethods.txt")]
-        public void Extract_ShouldHaveMethods_WhenProvidedWithInterfaceWithImplementedMethods(string fileContent)
-        {
-            var syntaxTree = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntaxTree);
-            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+    [Theory]
+    [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/ClassInfo/InterfaceWithImplementedMethods.txt")]
+    public void Extract_ShouldHaveMethods_WhenProvidedWithInterfaceWithImplementedMethods(string fileContent)
+    {
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-            var classModel = (ClassModel)classTypes[0];
+        var classModel = (ClassModel)classTypes[0];
 
-            Assert.Equal("Namespace1.IInterface", classModel.Name);
+        Assert.Equal("Namespace1.IInterface", classModel.Name);
 
-            Assert.Equal(2, classModel.Methods.Count);
-            Assert.Equal("Method1", classModel.Methods[0].Name);
-            Assert.Equal("void", classModel.Methods[0].ReturnValue.Type.Name);
-            Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
-            Assert.Equal("int", classModel.Methods[0].ParameterTypes[0].Type.Name);
+        Assert.Equal(2, classModel.Methods.Count);
+        Assert.Equal("Method1", classModel.Methods[0].Name);
+        Assert.Equal("void", classModel.Methods[0].ReturnValue.Type.Name);
+        Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
+        Assert.Equal("int", classModel.Methods[0].ParameterTypes[0].Type.Name);
 
-            Assert.Equal("Method2", classModel.Methods[1].Name);
-            Assert.Equal("int", classModel.Methods[1].ReturnValue.Type.Name);
-            Assert.Equal(2, classModel.Methods[1].ParameterTypes.Count);
-            Assert.Equal("string", classModel.Methods[1].ParameterTypes[0].Type.Name);
-            Assert.Equal("string", classModel.Methods[1].ParameterTypes[1].Type.Name);
-        }
+        Assert.Equal("Method2", classModel.Methods[1].Name);
+        Assert.Equal("int", classModel.Methods[1].ReturnValue.Type.Name);
+        Assert.Equal(2, classModel.Methods[1].ParameterTypes.Count);
+        Assert.Equal("string", classModel.Methods[1].ParameterTypes[0].Type.Name);
+        Assert.Equal("string", classModel.Methods[1].ParameterTypes[1].Type.Name);
+    }
+    
+    [Theory]
+    [FileData(
+        "TestData/CSharp/Metrics/Extraction/ClassLevel/ClassInfo/PartialClass.txt")]
+    public void Extract_ShouldHaveBaseObjectAndInterfaces_WhenClassExtendsOtherClassAndImplementsMultipleInterfaces(
+        string fileContent)
+    {
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+        Assert.Equal("partial", classTypes[0].Modifier);
+        Assert.Equal("private", classTypes[0].AccessModifier);
+        Assert.Equal("Namespace1.C1", classTypes[0].Name);
+        Assert.Equal("Namespace1", classTypes[0].ContainingTypeName);
+        
+        Assert.Equal("partial", classTypes[1].Modifier);
+        Assert.Equal("public", classTypes[1].AccessModifier);
+        Assert.Equal("Namespace1.C1", classTypes[1].Name);
+        Assert.Equal("Namespace1", classTypes[1].ContainingTypeName);
     }
 }

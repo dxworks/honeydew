@@ -58,7 +58,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
 
                     _progressLogger.CreateProgressBars(new[] { path });
 
-                    var solutionLoader = new SolutionFileLoader(_logger, _extractorCreator,
+                    var solutionLoader = new SolutionFileLoader(_logger, _progressLogger, _extractorCreator,
                         _solutionProvider,
                         _solutionLoadingStrategy);
 
@@ -81,7 +81,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                     _progressLogger.Log("Started Extracting...");
 
                     var projectLoader = new ProjectLoader(_extractorCreator, _projectProvider,
-                        _projectLoadingStrategy, _logger);
+                        _projectLoadingStrategy, _logger, _progressLogger);
                     var projectModel = await projectLoader.Load(path);
 
                     if (projectModel != null)
@@ -127,7 +127,8 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                 {
                     _progressLogger.Log();
                     _progressLogger.Log($"Solution {currentSolutionIndex}/{totalSolutions} - {solutionPath}");
-                    var solutionLoader = new SolutionFileLoader(_logger, _extractorCreator, _solutionProvider,
+                    var solutionLoader = new SolutionFileLoader(_logger, _progressLogger, _extractorCreator,
+                        _solutionProvider,
                         _solutionLoadingStrategy);
                     var solutionLoadingResult =
                         await solutionLoader.LoadSolution(solutionPath, processedProjectFilePaths);
@@ -194,7 +195,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                         progressBar.Step(projectPath);
 
                         var projectLoader = new ProjectLoader(_extractorCreator, _projectProvider,
-                            _projectLoadingStrategy, _logger);
+                            _projectLoadingStrategy, _logger, _progressLogger);
                         var projectModel = await projectLoader.Load(projectPath);
                         if (projectModel != null)
                         {
@@ -206,9 +207,9 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading
                 }
 
                 _logger.Log();
-                _logger.Log($"Searching for C# Files that are were processed yet at {path}");
+                _logger.Log($"Searching for C# Files that were not processed yet at {path}");
                 _progressLogger.Log();
-                _progressLogger.Log($"Searching for C# Files that are were processed yet at {path}");
+                _progressLogger.Log($"Searching for C# Files that were not processed yet at {path}");
 
                 var notProcessedFilePaths = new List<string>();
 

@@ -11,18 +11,20 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead
     public class SolutionFileLoader : ISolutionLoader
     {
         private readonly ILogger _logger;
+        private readonly IProgressLogger _progressLogger;
         private readonly IFactExtractorCreator _extractorCreator;
 
         private readonly ISolutionProvider _solutionProvider;
         private readonly ISolutionLoadingStrategy _solutionLoadingStrategy;
 
-        public SolutionFileLoader(ILogger logger, IFactExtractorCreator extractorCreator,
+        public SolutionFileLoader(ILogger logger, IProgressLogger progressLogger, IFactExtractorCreator extractorCreator,
             ISolutionProvider solutionProvider, ISolutionLoadingStrategy solutionLoadingStrategy)
         {
             _logger = logger;
             _extractorCreator = extractorCreator;
             _solutionProvider = solutionProvider;
             _solutionLoadingStrategy = solutionLoadingStrategy;
+            _progressLogger = progressLogger;
         }
 
         public async Task<SolutionLoadingResult> LoadSolution(string pathToFile, ISet<string> processedProjectPaths)
@@ -44,6 +46,7 @@ namespace HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead
             catch (Exception e)
             {
                 _logger.Log($"Could not open solution from {pathToFile} because {e}", LogLevels.Error);
+                _progressLogger.Log($"Could not open solution from {pathToFile} because {e}");
             }
 
             return null;

@@ -1,0 +1,33 @@
+﻿ namespace Project1.Services
+ {
+     public class MyClass
+     {
+         public void Print()
+         {
+             Print(2);
+             Print(2L);
+             
+             const short a = 2;
+             Print(a);
+             Print((byte)a);
+         }
+
+         private void Print(int a)
+         {
+         }
+
+         private void Print(short a)
+         {
+
+         }
+
+         private void Print(long a)
+         {
+
+         }
+
+         private void Print(byte a)
+         {
+         }
+     }
+ }

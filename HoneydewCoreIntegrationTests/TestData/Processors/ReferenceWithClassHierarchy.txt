@@ -1,0 +1,49 @@
+﻿namespace Project1.MyNamespace
+{
+  public class BaseClass
+  {
+      public int X;
+
+      public BaseClass() {}
+  }
+
+  public class ChildClass1 : BaseClass
+  {
+  }
+
+  public class ChildClass2 : BaseClass
+  {
+      public float Z;
+  }
+
+  public class Model
+  {
+  }
+
+  public class ChildClass3 : ChildClass1
+  {
+      private readonly Model _model;
+  }
+
+  public class Caller
+  {
+      public void Call(BaseClass c)
+      {
+      }
+
+      public static void Call()
+      {
+          var caller = new Caller();
+          
+          caller.Call(new BaseClass());
+          caller.Call(new ChildClass1());
+          caller.Call(new ChildClass2());
+          caller.Call(new ChildClass3());
+
+          BaseClass a = new ChildClass1();
+          caller.Call(a);
+          a = new ChildClass3();
+          caller.Call(a);
+      }
+  }
+}

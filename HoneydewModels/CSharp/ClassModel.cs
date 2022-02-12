@@ -56,6 +56,8 @@ namespace HoneydewModels.CSharp
 
         public IList<IMethodType> Methods { get; init; } = new List<IMethodType>();
 
+        public IDestructorType Destructor { get; set; }
+
         public IList<MetricModel> Metrics { get; init; } = new List<MetricModel>();
 
         public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();

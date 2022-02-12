@@ -15,6 +15,11 @@ namespace HoneydewCore.IO.Writers.Exporters
         public void Export(string filePath, RelationsRepresentation classRelationsRepresentation,
             List<string> csvHeaders = null)
         {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                throw new ArgumentNullException(nameof(filePath));
+            }
+
             var csvBuilder = new CsvBuilder();
             var headers = new List<string>
             {
@@ -62,6 +67,8 @@ namespace HoneydewCore.IO.Writers.Exporters
             {
                 csvBuilder.AddColumnWithFormulaForEachRow(header, func);
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 
             using (var writer = new StreamWriter(filePath))
             {

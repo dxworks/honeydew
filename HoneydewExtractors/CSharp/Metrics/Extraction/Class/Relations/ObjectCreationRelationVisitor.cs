@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using HoneydewCore.ModelRepresentations;
-using HoneydewExtractors.CSharp.Utils;
+using HoneydewCore.Utils;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations

@@ -7,7 +7,7 @@ Honeydew is a tool that extracts facts from a C# Solution or C# Project
 For extracting information about a solution or project use the following command:
 
 ```
-.\Honeydew extract <input_path> [--no-progress-bars] [--no-bindings] [--no-local-variables-bindings] [--no-trim-paths] [--no-extern-types-search]
+.\Honeydew extract <input_path> [--no-progress-bars] [--no-trim-paths] [--voyager] [-n|--project-name <name>]
 ```
 
 If `input_path` is a path to a solution file (.sln), Honeydew will extract facts from that solution file
@@ -27,34 +27,28 @@ The output files will be placed in a folder named `results`
   better visualisation of the progress
 
 
-- `--no-bindings`
-
-  If present, Honeydew will not try to set the **Fully Qualified Name** of the entities of the created model
-
-
-- `--no-local-variables-bindings`
-
-  If present, Honeydew will not try to set the **Fully Qualified Name** of the local variables of the created model
-
-
 - `--no-trim-paths`
 
   If present, Honeydew will not trim the File Paths present in the created model
 
 
-- `--no-extern-types-search`
+- `--voyager`
 
-  If present, Honeydew will not search in the entire model for extern types that have the same name with types
-  identified in the provided input
-  
-  If such types were found, the result will be placed in a file named `extern_types.txt`
+  If present, Honeydew will extract the model and export it raw in a json file. The post extraction metrics will not be
+  used. The extraction will run as if the `--no-progress-bars` flag was set.
+
+
+- `-n` or `--project-name`
+
+  The flag must be followed by a string. This flag is used to set the project name. If not present, the project name
+  will be deduced from the `<input_path>`. The project name is used to name the output files
 
 ## Load Model from file
 
 For loading a model from a json file
 
 ```
-.\Honeydew load <path_to_json_model> [--no-progress-bars] [--no-bindings] [--no-local-variables-bindings] [--no-trim-paths] [--no-extern-types-search]
+.\Honeydew load <path_to_json_model> [--no-progress-bars] [--no-trim-paths] [--voyager] [-n|--project-name <name>]
 ```
 
 ### Options
@@ -65,27 +59,21 @@ For loading a model from a json file
   better visualisation of the progress
 
 
-- `--no-bindings`
-
-  If present, Honeydew will not try to set the **Fully Qualified Name** of the entities of the created model
-
-
-- `--no-local-variables-bindings`
-
-  If present, Honeydew will not try to set the **Fully Qualified Name** of the local variables of the created model
-
-
 - `--no-trim-paths`
 
   If present, Honeydew will not trim the File Paths present in the created model
 
 
-- `--no-extern-types-search`
+- `--voyager`
 
-  If present, Honeydew will not search in the entire model for extern types that have the same name with types
-  identified in the provided input
+  If present, Honeydew will extract the model and export it raw in a json file. The post extraction metrics will not be
+  used. The extraction will run as if the `--no-progress-bars` flag was set.
 
-  If such types were found, the result will be placed in a file named `extern_types.txt`
+
+- `-n` or `--project-name`
+
+  The flag must be followed by a string. This flag is used to set the project name. If not present, the project name
+  will be deduced from the `<path_to_json_model>`. The project name is used to name the output files
 
 ## Build Project
 

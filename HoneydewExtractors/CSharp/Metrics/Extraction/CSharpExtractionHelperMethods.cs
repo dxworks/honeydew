@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using HoneydewCore.Utils;
 using HoneydewExtractors.Core.Metrics.Extraction;
-using HoneydewExtractors.CSharp.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
@@ -51,7 +51,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             return interfaces;
         }
 
-        public IEntityType GetBaseClassName(TypeDeclarationSyntax node)
+        private IEntityType GetBaseClassName(TypeDeclarationSyntax node)
         {
             var declaredSymbol = ModelExtensions.GetDeclaredSymbol(_semanticModel, node);
 
@@ -194,35 +194,19 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
         {
             CSharpSyntaxNode declarationSyntax = syntaxNode.GetParentDeclarationSyntax<LocalFunctionStatementSyntax>();
 
-            if (declarationSyntax == null)
-            {
-                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseMethodDeclarationSyntax>();
-            }
+            declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<BaseMethodDeclarationSyntax>();
 
-            if (declarationSyntax == null)
-            {
-                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
-            }
+            declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
 
-            if (declarationSyntax == null)
-            {
-                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<EventDeclarationSyntax>();
-            }
+            declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<EventDeclarationSyntax>();
 
-            if (declarationSyntax == null)
-            {
-                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<DelegateDeclarationSyntax>();
-            }
+            declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<DelegateDeclarationSyntax>();
 
-            if (declarationSyntax == null)
-            {
-                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>();
-            }
+            declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>();
 
-            if (declarationSyntax == null)
-            {
-                declarationSyntax = syntaxNode.GetParentDeclarationSyntax<NamespaceDeclarationSyntax>();
-            }
+            declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<NamespaceDeclarationSyntax>();
+
+            declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<FileScopedNamespaceDeclarationSyntax>();
 
             if (declarationSyntax != null)
             {
@@ -578,6 +562,69 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction
             }
 
             return attributeListSyntax.Target.Identifier.ToString();
+        }
+
+        public AccessedField GetAccessField(ExpressionSyntax identifierNameSyntax)
+        {
+            var expressionSyntax = identifierNameSyntax;
+            if (expressionSyntax == null)
+            {
+                return null;
+            }
+
+            if (identifierNameSyntax is ElementAccessExpressionSyntax elementAccessExpressionSyntax)
+            {
+                expressionSyntax = elementAccessExpressionSyntax.Expression;
+            }
+
+            var symbolInfo = _semanticModel.GetSymbolInfo(expressionSyntax);
+
+            if (symbolInfo.Symbol is IFieldSymbol fieldSymbol)
+            {
+                return new AccessedField
+                {
+                    Name = fieldSymbol.Name,
+                    ContainingTypeName = fieldSymbol.ContainingType.ToString(),
+                    Kind = GetAccessType(identifierNameSyntax),
+                };
+            }
+
+            if (symbolInfo.Symbol is IPropertySymbol propertySymbol)
+            {
+                return new AccessedField
+                {
+                    Name = propertySymbol.Name,
+                    ContainingTypeName = propertySymbol.ContainingType.ToString(),
+                    Kind = GetAccessType(identifierNameSyntax),
+                };
+            }
+
+            if (expressionSyntax is MemberAccessExpressionSyntax memberAccessExpressionSyntax)
+            {
+                if (memberAccessExpressionSyntax.Parent is InvocationExpressionSyntax)
+                {
+                    return null;
+                }
+
+                return new AccessedField
+                {
+                    Name = memberAccessExpressionSyntax.Name.ToString(),
+                    ContainingTypeName = memberAccessExpressionSyntax.Expression.ToString(),
+                    Kind = GetAccessType(memberAccessExpressionSyntax),
+                };
+            }
+
+            return null;
+
+            AccessedField.AccessKind GetAccessType(SyntaxNode syntax)
+            {
+                if (syntax?.Parent is AssignmentExpressionSyntax)
+                {
+                    return AccessedField.AccessKind.Setter;
+                }
+
+                return AccessedField.AccessKind.Getter;
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
+using HoneydewExtractors.Core.Metrics.Visitors.Destructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
@@ -16,7 +17,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
 {
     public class CalledMethodSetterVisitor : CompositeVisitor, ICSharpMethodVisitor,
         ICSharpConstructorVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor,
-        ICSharpArrowExpressionMethodVisitor
+        ICSharpArrowExpressionMethodVisitor, ICSharpDestructorVisitor
     {
         public CalledMethodSetterVisitor(IEnumerable<IMethodSignatureVisitor> visitors) : base(visitors)
         {
@@ -30,6 +31,13 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
         }
 
         public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, IConstructorType modelType)
+        {
+            SetMethodCalls(syntaxNode, modelType);
+
+            return modelType;
+        }
+
+        public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, IDestructorType modelType)
         {
             SetMethodCalls(syntaxNode, modelType);
 

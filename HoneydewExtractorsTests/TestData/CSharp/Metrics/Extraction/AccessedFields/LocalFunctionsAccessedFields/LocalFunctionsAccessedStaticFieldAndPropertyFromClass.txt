@@ -1,0 +1,51 @@
+﻿namespace Namespace1 
+{
+    public class Class1
+    {
+        private static int Field1;
+        
+        public static float Property1 { get; set; }
+        
+        public static void Method()
+        {
+            void LocalF1()
+            {
+                var x = Field1;
+                var y = Property1;
+                
+                void LocalF2(int a)
+                {
+                    var w = Field1;
+                    var z = Property1;
+                    
+                    void LocalF3()
+                    {
+                        var g = Field1;
+                        var h = Property1;
+                    }
+                }
+            }            
+        }
+        
+        public static void Method2()
+        {
+            void LocalF1()
+            {
+                Field1 = 4;
+                Property1 = 46f;
+                
+                void LocalF2(int a)
+                {
+                    Field1 = 2;
+                    Property1 = 12f;
+                    
+                    void LocalF3()
+                    {
+                        Field1 = a;
+                        Property1 = 0.0f;
+                    }
+                }
+            }            
+        }         
+    }
+}

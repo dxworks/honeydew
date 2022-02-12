@@ -1,0 +1,14 @@
+﻿namespace Namespace1 
+{
+    public class Class1
+    {            
+        public int Property6 => Class2.Field1 + (int) Class2.Property1;        
+    }
+        
+    public class Class2
+    {
+       internal static int Field1;
+               
+       public static float Property1 { get; set; }
+    }
+}

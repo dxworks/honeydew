@@ -7,6 +7,8 @@ namespace HoneydewModels.Reference
         public string FilePath { get; set; }
 
         public string Name { get; set; }
+        
+        public EntityType Type { get; set; }
 
         public string ClassType { get; set; }
 

@@ -8,6 +8,6 @@ namespace HoneydewCore.ModelRepresentations
 
         IDictionary<string, IDictionary<string, int>> GetDependencies(string className);
 
-        IList<FileRelation> GetRelations();
+        IList<Relation> GetRelations();
     }
 }

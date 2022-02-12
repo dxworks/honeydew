@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using HoneydewCore.Logging;
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
-using HoneydewExtractors.CSharp.Utils;
+using HoneydewCore.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 

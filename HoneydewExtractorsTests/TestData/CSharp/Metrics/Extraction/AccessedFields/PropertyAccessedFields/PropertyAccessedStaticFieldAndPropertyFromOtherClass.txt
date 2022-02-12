@@ -1,0 +1,42 @@
+﻿namespace Namespace1 
+{
+    public class Class1
+    {            
+        public int Property6
+        {
+            get 
+            {
+                var x = Class2.Field1;
+                var y = Class2.Property1;
+                return 0;
+            }
+            set
+            {            
+                Class2.Field1 = value;
+                Class2.Property1 = 6.2f;
+            }
+        }
+        
+       public int Property4
+       {
+           get 
+           {
+               var x = Class2.Field1;
+               var y = Class2.Property1;
+               return 0;
+           }
+           init
+           {            
+               Class2.Field1 = value;
+               Class2.Property1 = 6.2f;
+           }
+       }
+    }
+        
+    public class Class2
+    {
+       internal static int Field1;
+               
+       public static float Property1 { get; set; }
+    }
+}

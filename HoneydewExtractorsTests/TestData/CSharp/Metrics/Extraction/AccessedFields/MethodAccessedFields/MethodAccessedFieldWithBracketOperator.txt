@@ -1,0 +1,23 @@
+﻿using System.Collections.Generic;
+
+namespace Namespace1 
+{
+    public class Class1
+    {
+        private List<int> Field1;
+        
+        public List<int> Property1 { get; set; }
+        
+        public void Method1()
+        {
+            var x = Field1[0];
+            var y = Property1[0];
+        }
+        
+        public void Method2(int x, float y)
+        {
+            Field1[0] = x;
+            Property1[0] = y;
+        }
+    }
+}

@@ -4,6 +4,7 @@ using System.Linq;
 using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
+using HoneydewExtractors.Core.Metrics.Visitors.Destructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -12,8 +13,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method
 {
-    public class LocalFunctionsSetterClassVisitor : CompositeVisitor, ICSharpMethodVisitor,
-        ICSharpConstructorVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor
+    public class LocalFunctionsSetterClassVisitor : CompositeVisitor, ICSharpMethodVisitor, ICSharpConstructorVisitor,
+        ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor, ICSharpDestructorVisitor
     {
         public LocalFunctionsSetterClassVisitor(IEnumerable<ILocalFunctionVisitor> visitors) : base(visitors)
         {
@@ -53,6 +54,23 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method
             return constructorModel;
         }
 
+        public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, IDestructorType modelType)
+        {
+            if (modelType is not DestructorModel destructorModel)
+            {
+                return modelType;
+            }
+
+            if (syntaxNode.Body == null)
+            {
+                return destructorModel;
+            }
+
+            SetLocalFunctionInfo(syntaxNode.Body, destructorModel);
+
+            return destructorModel;
+        }
+
         public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, IMethodType modelType)
         {
             if (modelType is not MethodModel methodModel)
@@ -86,7 +104,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method
         private void SetLocalFunctionInfo(SyntaxNode syntaxNode, ITypeWithLocalFunctions typeWithLocalFunctions)
         {
             foreach (var localFunctionStatementSyntax in
-                syntaxNode.ChildNodes().OfType<LocalFunctionStatementSyntax>())
+                     syntaxNode.ChildNodes().OfType<LocalFunctionStatementSyntax>())
             {
                 IMethodTypeWithLocalFunctions localFunction = new MethodModel();
 

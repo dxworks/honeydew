@@ -1,0 +1,20 @@
+﻿using System;
+using System.Collections;
+using P;
+
+namespace PartialClasses;
+
+[Serializable]
+partial class C1 : IInterface
+{
+    int G;
+    
+    public event Func<int> K {add{} remove{}}
+    
+    public int I1 {get;set;}
+    
+
+    ~C1() { }
+    
+    public int Method() {return 0;}
+}

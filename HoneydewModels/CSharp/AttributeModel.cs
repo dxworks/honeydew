@@ -6,6 +6,8 @@ namespace HoneydewModels.CSharp
     public class AttributeModel : IAttributeType
     {
         public string Name { get; set; }
+        
+        public IEntityType Type { get; set; }
 
         public string ContainingTypeName { get; set; }
 

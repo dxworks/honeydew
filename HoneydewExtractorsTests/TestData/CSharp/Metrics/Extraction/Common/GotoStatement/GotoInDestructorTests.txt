@@ -1,0 +1,37 @@
+namespace Namespace1;
+
+class Class1
+{
+    public ~Class1()
+    {
+        int a = 66;
+    
+        if (a == 2)
+        {
+            goto L2;
+        }
+
+        var b = a;
+
+        L2:
+        var x = 5;
+
+        switch (a)
+        {
+            case 0:
+            {
+                var y = x;
+                goto case default;
+            }
+            case 5:
+            {
+            }
+                break;
+            default:
+            {
+                a = 6;
+                goto case 5;
+            }
+        }
+    }
+}
