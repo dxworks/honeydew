@@ -2,72 +2,49 @@
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Utils;
 using HoneydewExtractors.Core.Metrics.Visitors;
-using HoneydewModels.CSharp;
-using HoneydewModels.Types;
+using HoneydewModels.Reference;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
+
+public class ParameterRelationVisitor : IModelVisitor<ClassModel>, IRelationVisitor
 {
-    public class ParameterRelationVisitor : IModelVisitor<IClassType>, IRelationVisitor
+    public string PrettyPrint()
     {
-        public string PrettyPrint()
+        return "Parameter Dependency";
+    }
+
+    public void Visit(ClassModel classModel)
+    {
+        var dependencies = GetDependencies(classModel);
+
+        classModel.Metrics.Add(new MetricModel
         {
-            return "Parameter Dependency";
-        }
+            ExtractorName = GetType().ToString(),
+            Value = dependencies,
+            ValueType = dependencies.GetType().ToString()
+        });
+    }
 
-        public void Visit(IClassType modelType)
+    public Dictionary<string, int> GetDependencies(ClassModel classModel)
+    {
+        var dependencies = new Dictionary<string, int>();
+
+        foreach (var methodType in classModel.Methods)
         {
-            if (modelType is not IMembersClassType membersClassType)
+            foreach (var parameterModel in methodType.Parameters)
             {
-                return;
-            }
-
-            var dependencies = GetDependencies(membersClassType);
-
-            membersClassType.Metrics.Add(new MetricModel
-            {
-                ExtractorName = GetType().ToString(),
-                Value = dependencies,
-                ValueType = dependencies.GetType().ToString()
-            });
-        }
-
-        public Dictionary<string, int> GetDependencies(IMembersClassType membersClassType)
-        {
-            var dependencies = new Dictionary<string, int>();
-
-            foreach (var methodType in membersClassType.Methods)
-            {
-                foreach (var parameterType in methodType.ParameterTypes)
+                var typeName = CSharpConstants.GetNonNullableName(parameterModel.Type.Name);
+                if (dependencies.ContainsKey(typeName))
                 {
-                    var typeName = CSharpConstants.GetNonNullableName(parameterType.Type.Name);
-                    if (dependencies.ContainsKey(typeName))
-                    {
-                        dependencies[typeName]++;
-                    }
-                    else
-                    {
-                        dependencies.Add(typeName, 1);
-                    }
+                    dependencies[typeName]++;
+                }
+                else
+                {
+                    dependencies.Add(typeName, 1);
                 }
             }
-
-            foreach (var constructorType in membersClassType.Constructors)
-            {
-                foreach (var parameterType in constructorType.ParameterTypes)
-                {
-                    var typeName = CSharpConstants.GetNonNullableName(parameterType.Type.Name);
-                    if (dependencies.ContainsKey(typeName))
-                    {
-                        dependencies[typeName]++;
-                    }
-                    else
-                    {
-                        dependencies.Add(typeName, 1);
-                    }
-                }
-            }
-
-            return dependencies;
         }
+
+        return dependencies;
     }
 }

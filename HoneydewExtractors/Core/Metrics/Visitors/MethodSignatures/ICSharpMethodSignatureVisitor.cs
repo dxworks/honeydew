@@ -1,10 +1,10 @@
 ﻿using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures
+namespace HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+
+public interface ICSharpMethodSignatureVisitor : IMethodSignatureVisitor,
+    IExtractionVisitor<InvocationExpressionSyntax, SemanticModel, IMethodSignatureType>
 {
-    public interface ICSharpMethodSignatureVisitor : IMethodSignatureVisitor,
-        IExtractionVisitor<InvocationExpressionSyntax, IMethodSignatureType>
-    {
-    }
 }

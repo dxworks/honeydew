@@ -1,80 +1,68 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
 using HoneydewExtractors.Core.Metrics.Visitors;
-using HoneydewModels.CSharp;
-using HoneydewModels.Types;
+using HoneydewModels.Reference;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
+
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
+
+public class ExternDataRelationVisitor : IModelVisitor<ClassModel>, IRelationVisitor
 {
-    public class ExternDataRelationVisitor : IModelVisitor<IClassType>, IRelationVisitor
+    public string PrettyPrint()
     {
-        public string PrettyPrint()
+        return "extData";
+    }
+
+    public void Visit(ClassModel classModel)
+    {
+        var dependencies = new Dictionary<string, int>();
+
+        foreach (var methodType in classModel.Methods)
         {
-            return "extData";
+            foreach (var accessedField in methodType.AccessedFields)
+            {
+                if (accessedField.Field.Class != classModel)
+                {
+                    AddDependency(accessedField.Field?.Class?.Name);
+                }
+            }
         }
 
-        public void Visit(IClassType modelType)
+        foreach (var propertyType in classModel.Properties)
         {
-            if (modelType is not IPropertyMembersClassType classTypeWithProperties)
+            foreach (var accessor in propertyType.Accessors)
+            {
+                foreach (var accessedField in accessor.AccessedFields)
+                {
+                    if (accessedField.Field.Class != classModel)
+                    {
+                        AddDependency(accessedField.Field?.Class?.Name);
+                    }
+                }
+            }
+        }
+
+        classModel.Metrics.Add(new MetricModel
+        {
+            ExtractorName = GetType().ToString(),
+            Value = dependencies,
+            ValueType = dependencies.GetType().ToString()
+        });
+
+        void AddDependency(string dependencyName)
+        {
+            if (string.IsNullOrEmpty(dependencyName))
             {
                 return;
             }
 
-            var dependencies = new Dictionary<string, int>();
-
-            foreach (var methodType in classTypeWithProperties.Methods)
+            if (dependencies.ContainsKey(dependencyName))
             {
-                foreach (var accessedField in methodType.AccessedFields)
-                {
-                    if (accessedField.ContainingTypeName != modelType.Name)
-                    {
-                        AddDependency(accessedField.ContainingTypeName);
-                    }
-                }
+                dependencies[dependencyName]++;
             }
-
-            foreach (var constructorType in classTypeWithProperties.Constructors)
+            else
             {
-                foreach (var accessedField in constructorType.AccessedFields)
-                {
-                    if (accessedField.ContainingTypeName != modelType.Name)
-                    {
-                        AddDependency(accessedField.ContainingTypeName);
-                    }
-                }
-            }
-
-            foreach (var propertyType in classTypeWithProperties.Properties)
-            {
-                foreach (var accessor in propertyType.Accessors)
-                {
-                    foreach (var accessedField in accessor.AccessedFields)
-                    {
-                        if (accessedField.ContainingTypeName != modelType.Name)
-                        {
-                            AddDependency(accessedField.ContainingTypeName);
-                        }
-                    }
-                }
-            }
-
-            classTypeWithProperties.Metrics.Add(new MetricModel
-            {
-                ExtractorName = GetType().ToString(),
-                Value = dependencies,
-                ValueType = dependencies.GetType().ToString()
-            });
-
-            void AddDependency(string dependencyName)
-            {
-                if (dependencies.ContainsKey(dependencyName))
-                {
-                    dependencies[dependencyName]++;
-                }
-                else
-                {
-                    dependencies.Add(dependencyName, 1);
-                }
+                dependencies.Add(dependencyName, 1);
             }
         }
     }

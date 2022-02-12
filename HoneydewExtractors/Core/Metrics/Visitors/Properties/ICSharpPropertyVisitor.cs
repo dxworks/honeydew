@@ -1,10 +1,10 @@
 ﻿using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.Core.Metrics.Visitors.Properties
+namespace HoneydewExtractors.Core.Metrics.Visitors.Properties;
+
+public interface ICSharpPropertyVisitor : IPropertyVisitor,
+    IExtractionVisitor<BasePropertyDeclarationSyntax, SemanticModel, IPropertyType>
 {
-    public interface ICSharpPropertyVisitor : IPropertyVisitor,
-        IExtractionVisitor<BasePropertyDeclarationSyntax, IPropertyType>
-    {
-    }
 }

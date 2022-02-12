@@ -2,53 +2,51 @@
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Utils;
 using HoneydewExtractors.Core.Metrics.Visitors;
-using HoneydewModels.CSharp;
-using HoneydewModels.Types;
+using HoneydewModels.Reference;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
+
+public class FieldsRelationVisitor : IModelVisitor<ClassModel>, IRelationVisitor
 {
-    public class FieldsRelationVisitor : IModelVisitor<IClassType>, IRelationVisitor
+    public string PrettyPrint()
     {
-        public string PrettyPrint()
-        {
-            return "Fields Dependency";
-        }
+        return "Fields Dependency";
+    }
 
-        public void Visit(IClassType modelType)
+    public void Visit(ClassModel classModel)
+    {
+        var dependencies = GetDependencies(classModel);
+
+        classModel.Metrics.Add(new MetricModel
         {
-            if (modelType is not IMembersClassType membersClassType)
+            ExtractorName = GetType().ToString(),
+            Value = dependencies,
+            ValueType = dependencies.GetType().ToString()
+        });
+    }
+
+    public Dictionary<string, int> GetDependencies(ClassModel classModel)
+    {
+        var dependencies = new Dictionary<string, int>();
+
+        foreach (var fieldModel in classModel.Fields)
+        {
+            if (fieldModel is PropertyModel)
             {
-                return;
+                continue;
             }
 
-            var dependencies = GetDependencies(membersClassType);
-
-            membersClassType.Metrics.Add(new MetricModel
+            var typeName = CSharpConstants.GetNonNullableName(fieldModel.Type.Name);
+            if (dependencies.ContainsKey(typeName))
             {
-                ExtractorName = GetType().ToString(),
-                Value = dependencies,
-                ValueType = dependencies.GetType().ToString()
-            });
-        }
-
-        public Dictionary<string, int> GetDependencies(IMembersClassType membersClassType)
-        {
-            var dependencies = new Dictionary<string, int>();
-
-            foreach (var fieldType in membersClassType.Fields)
-            {
-                var typeName = CSharpConstants.GetNonNullableName(fieldType.Type.Name);
-                if (dependencies.ContainsKey(typeName))
-                {
-                    dependencies[typeName]++;
-                }
-                else
-                {
-                    dependencies.Add(typeName, 1);
-                }
+                dependencies[typeName]++;
             }
-
-            return dependencies;
+            else
+            {
+                dependencies.Add(typeName, 1);
+            }
         }
+
+        return dependencies;
     }
 }

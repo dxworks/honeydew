@@ -13,136 +13,138 @@ using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common;
+
+public class CalledMethodSetterVisitor : CompositeVisitor, ICSharpMethodVisitor,
+    ICSharpConstructorVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor,
+    ICSharpArrowExpressionMethodVisitor, ICSharpDestructorVisitor
 {
-    public class CalledMethodSetterVisitor : CompositeVisitor, ICSharpMethodVisitor,
-        ICSharpConstructorVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor,
-        ICSharpArrowExpressionMethodVisitor, ICSharpDestructorVisitor
+    public CalledMethodSetterVisitor(IEnumerable<IMethodSignatureVisitor> visitors) : base(visitors)
     {
-        public CalledMethodSetterVisitor(IEnumerable<IMethodSignatureVisitor> visitors) : base(visitors)
-        {
-        }
+    }
 
-        public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
-        {
-            SetMethodCalls(syntaxNode, modelType);
+    public IMethodType Visit(MethodDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
+    {
+        SetMethodCalls(syntaxNode, semanticModel, modelType);
 
+        return modelType;
+    }
+
+    public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IConstructorType modelType)
+    {
+        SetMethodCalls(syntaxNode, semanticModel, modelType);
+
+        return modelType;
+    }
+
+    public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IDestructorType modelType)
+    {
+        SetMethodCalls(syntaxNode, semanticModel, modelType);
+
+        return modelType;
+    }
+
+    public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
+    {
+        SetMethodCalls(syntaxNode, semanticModel, modelType);
+
+        return modelType;
+    }
+
+    public IMethodType Visit(ArrowExpressionClauseSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
+    {
+        SetMethodCalls(syntaxNode, semanticModel, modelType);
+
+        return modelType;
+    }
+
+    public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode, SemanticModel semanticModel,
+        IMethodTypeWithLocalFunctions modelType)
+    {
+        if (syntaxNode.Body == null)
+        {
             return modelType;
         }
 
-        public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, IConstructorType modelType)
-        {
-            SetMethodCalls(syntaxNode, modelType);
+        var invocationExpressionSyntaxes =
+            syntaxNode.Body.ChildNodes().OfType<InvocationExpressionSyntax>().ToList();
 
-            return modelType;
+        foreach (var returnStatementSyntax in syntaxNode.Body.ChildNodes().OfType<ReturnStatementSyntax>())
+        {
+            invocationExpressionSyntaxes.AddRange(returnStatementSyntax.DescendantNodes()
+                .OfType<InvocationExpressionSyntax>());
         }
 
-        public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, IDestructorType modelType)
+        foreach (var awaitExpressionSyntax in syntaxNode.Body.ChildNodes().OfType<AwaitExpressionSyntax>())
         {
-            SetMethodCalls(syntaxNode, modelType);
-
-            return modelType;
+            invocationExpressionSyntaxes.AddRange(awaitExpressionSyntax.DescendantNodes()
+                .OfType<InvocationExpressionSyntax>());
         }
 
-        public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, IMethodType modelType)
+        foreach (var awaitExpressionSyntax in
+                 syntaxNode.Body.ChildNodes().OfType<LocalDeclarationStatementSyntax>())
         {
-            SetMethodCalls(syntaxNode, modelType);
-
-            return modelType;
+            invocationExpressionSyntaxes.AddRange(awaitExpressionSyntax.DescendantNodes()
+                .OfType<InvocationExpressionSyntax>());
         }
 
-        public IMethodType Visit(ArrowExpressionClauseSyntax syntaxNode, IMethodType modelType)
+        foreach (var invocationExpressionSyntax in invocationExpressionSyntaxes)
         {
-            SetMethodCalls(syntaxNode, modelType);
+            IMethodSignatureType methodModel = new MethodModel();
 
-            return modelType;
-        }
-
-        public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode,
-            IMethodTypeWithLocalFunctions modelType)
-        {
-            if (syntaxNode.Body == null)
+            foreach (var visitor in GetContainedVisitors())
             {
-                return modelType;
-            }
-
-            var invocationExpressionSyntaxes =
-                syntaxNode.Body.ChildNodes().OfType<InvocationExpressionSyntax>().ToList();
-
-            foreach (var returnStatementSyntax in syntaxNode.Body.ChildNodes().OfType<ReturnStatementSyntax>())
-            {
-                invocationExpressionSyntaxes.AddRange(returnStatementSyntax.DescendantNodes()
-                    .OfType<InvocationExpressionSyntax>());
-            }
-
-            foreach (var awaitExpressionSyntax in syntaxNode.Body.ChildNodes().OfType<AwaitExpressionSyntax>())
-            {
-                invocationExpressionSyntaxes.AddRange(awaitExpressionSyntax.DescendantNodes()
-                    .OfType<InvocationExpressionSyntax>());
-            }
-
-            foreach (var awaitExpressionSyntax in
-                syntaxNode.Body.ChildNodes().OfType<LocalDeclarationStatementSyntax>())
-            {
-                invocationExpressionSyntaxes.AddRange(awaitExpressionSyntax.DescendantNodes()
-                    .OfType<InvocationExpressionSyntax>());
-            }
-
-            foreach (var invocationExpressionSyntax in invocationExpressionSyntaxes)
-            {
-                IMethodSignatureType methodModel = new MethodModel();
-
-                foreach (var visitor in GetContainedVisitors())
+                try
                 {
-                    try
+                    if (visitor is ICSharpMethodSignatureVisitor extractionVisitor)
                     {
-                        if (visitor is ICSharpMethodSignatureVisitor extractionVisitor)
-                        {
-                            methodModel = extractionVisitor.Visit(invocationExpressionSyntax, methodModel);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log($"Could not extract from Local Function Called Method Visitor because {e}",
-                            LogLevels.Warning);
+                        methodModel = extractionVisitor.Visit(invocationExpressionSyntax, semanticModel, methodModel);
                     }
                 }
-
-                modelType.CalledMethods.Add(methodModel);
+                catch (Exception e)
+                {
+                    Logger.Log($"Could not extract from Local Function Called Method Visitor because {e}",
+                        LogLevels.Warning);
+                }
             }
 
-            return modelType;
+            modelType.CalledMethods.Add(methodModel);
         }
 
-        private void SetMethodCalls(SyntaxNode syntaxNode, ICallingMethodsType callingMethodsType)
+        return modelType;
+    }
+
+    private void SetMethodCalls(SyntaxNode syntaxNode, SemanticModel semanticModel,
+        ICallingMethodsType callingMethodsType)
+    {
+        foreach (var invocationExpressionSyntax in
+                 syntaxNode.DescendantNodes().OfType<InvocationExpressionSyntax>())
         {
-            foreach (var invocationExpressionSyntax in
-                syntaxNode.DescendantNodes().OfType<InvocationExpressionSyntax>())
+            if (invocationExpressionSyntax.GetParentDeclarationSyntax<LocalFunctionStatementSyntax>() != null)
             {
-                if (invocationExpressionSyntax.GetParentDeclarationSyntax<LocalFunctionStatementSyntax>() != null)
-                {
-                    continue;
-                }
-
-                IMethodSignatureType methodModel = new MethodModel();
-
-                foreach (var visitor in GetContainedVisitors())
-                {
-                    try
-                    {
-                        if (visitor is ICSharpMethodSignatureVisitor extractionVisitor)
-                        {
-                            methodModel = extractionVisitor.Visit(invocationExpressionSyntax, methodModel);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log($"Could not extract from Called Method Visitor because {e}", LogLevels.Warning);
-                    }
-                }
-
-                callingMethodsType.CalledMethods.Add(methodModel);
+                continue;
             }
+
+            IMethodSignatureType methodModel = new MethodModel();
+
+            foreach (var visitor in GetContainedVisitors())
+            {
+                try
+                {
+                    if (visitor is ICSharpMethodSignatureVisitor extractionVisitor)
+                    {
+                        methodModel = extractionVisitor.Visit(invocationExpressionSyntax, semanticModel, methodModel);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Log($"Could not extract from Called Method Visitor because {e}", LogLevels.Warning);
+                }
+            }
+
+            callingMethodsType.CalledMethods.Add(methodModel);
         }
     }
 }

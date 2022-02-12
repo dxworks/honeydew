@@ -2,53 +2,46 @@
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Utils;
 using HoneydewExtractors.Core.Metrics.Visitors;
-using HoneydewModels.CSharp;
-using HoneydewModels.Types;
+using HoneydewModels.Reference;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
+
+public class PropertiesRelationVisitor : IModelVisitor<ClassModel>, IRelationVisitor
 {
-    public class PropertiesRelationVisitor : IModelVisitor<IClassType>, IRelationVisitor
+    public string PrettyPrint()
     {
-        public string PrettyPrint()
-        {
-            return "Properties Dependency";
-        }
+        return "Properties Dependency";
+    }
 
-        public void Visit(IClassType modelType)
+    public void Visit(ClassModel classModel)
+    {
+        var dependencies = GetDependencies(classModel);
+
+        classModel.Metrics.Add(new MetricModel
         {
-            if (modelType is not IPropertyMembersClassType classTypeWithProperties)
+            ExtractorName = GetType().ToString(),
+            Value = dependencies,
+            ValueType = dependencies.GetType().ToString()
+        });
+    }
+
+    public Dictionary<string, int> GetDependencies(ClassModel classModel)
+    {
+        var dependencies = new Dictionary<string, int>();
+
+        foreach (var propertyType in classModel.Properties)
+        {
+            var typeName = CSharpConstants.GetNonNullableName(propertyType.Type.Name);
+            if (dependencies.ContainsKey(typeName))
             {
-                return;
+                dependencies[typeName]++;
             }
-
-            var dependencies = GetDependencies(classTypeWithProperties);
-
-            classTypeWithProperties.Metrics.Add(new MetricModel
+            else
             {
-                ExtractorName = GetType().ToString(),
-                Value = dependencies,
-                ValueType = dependencies.GetType().ToString()
-            });
-        }
-
-        public Dictionary<string, int> GetDependencies(IPropertyMembersClassType classTypeWithProperties)
-        {
-            var dependencies = new Dictionary<string, int>();
-
-            foreach (var propertyType in classTypeWithProperties.Properties)
-            {
-                var typeName = CSharpConstants.GetNonNullableName(propertyType.Type.Name);
-                if (dependencies.ContainsKey(typeName))
-                {
-                    dependencies[typeName]++;
-                }
-                else
-                {
-                    dependencies.Add(typeName, 1);
-                }
+                dependencies.Add(typeName, 1);
             }
-
-            return dependencies;
         }
+
+        return dependencies;
     }
 }

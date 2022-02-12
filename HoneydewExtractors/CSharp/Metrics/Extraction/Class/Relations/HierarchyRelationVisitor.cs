@@ -1,40 +1,38 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
 using HoneydewExtractors.Core.Metrics.Visitors;
-using HoneydewModels.CSharp;
-using HoneydewModels.Types;
+using HoneydewModels.Reference;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
+
+public class HierarchyRelationVisitor : IModelVisitor<ClassModel>, IRelationVisitor
 {
-    public class HierarchyRelationVisitor : IModelVisitor<IClassType>, IRelationVisitor
+    public string PrettyPrint()
     {
-        public string PrettyPrint()
-        {
-            return "hierarchy";
-        }
+        return "hierarchy";
+    }
 
-        public void Visit(IClassType modelType)
-        {
-            var dict = new Dictionary<string, int>();
+    public void Visit(ClassModel classModel)
+    {
+        var dict = new Dictionary<string, int>();
 
-            foreach (var modelTypeBaseType in modelType.BaseTypes)
+        foreach (var modelTypeBaseType in classModel.BaseTypes)
+        {
+            if (dict.ContainsKey(modelTypeBaseType.Type.Name))
             {
-                if (dict.ContainsKey(modelTypeBaseType.Type.Name))
-                {
-                    dict[modelTypeBaseType.Type.Name]++;
-                }
-                else
-                {
-                    dict.Add(modelTypeBaseType.Type.Name, 1);
-                }
+                dict[modelTypeBaseType.Type.Name]++;
             }
-
-            modelType.Metrics.Add(new MetricModel
+            else
             {
-                ExtractorName = GetType().ToString(),
-                Value = dict,
-                ValueType = dict.GetType().ToString()
-            });
+                dict.Add(modelTypeBaseType.Type.Name, 1);
+            }
         }
+
+        classModel.Metrics.Add(new MetricModel
+        {
+            ExtractorName = GetType().ToString(),
+            Value = dict,
+            ValueType = dict.GetType().ToString()
+        });
     }
 }

@@ -2,50 +2,47 @@
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class;
+
+public class IsAbstractClassVisitor : ICSharpClassVisitor
 {
-    public class IsAbstractClassVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
-        ICSharpClassVisitor
+    public void Accept(IVisitor visitor)
     {
-        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+    }
 
-        public void Accept(IVisitor visitor)
+    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    {
+        var isAbstract = false;
+
+        if (syntaxNode is InterfaceDeclarationSyntax)
         {
+            isAbstract = true;
         }
-
-        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
+        else
         {
-            var isAbstract = false;
-
-            if (syntaxNode is InterfaceDeclarationSyntax)
+            foreach (var m in syntaxNode.Modifiers)
             {
-                isAbstract = true;
-            }
-            else
-            {
-                foreach (var m in syntaxNode.Modifiers)
+                if (!CSharpExtractionHelperMethods.IsAbstractModifier(m.ValueText))
                 {
-                    if (!CSharpHelperMethods.IsAbstractModifier(m.ValueText))
-                    {
-                        continue;
-                    }
-
-                    isAbstract = true;
-
-                    break;
+                    continue;
                 }
+
+                isAbstract = true;
+
+                break;
             }
-
-            modelType.Metrics.Add(new MetricModel
-            {
-                Value = isAbstract,
-                ValueType = isAbstract.GetType().ToString(),
-                ExtractorName = GetType().ToString()
-            });
-
-            return modelType;
         }
+
+        modelType.Metrics.Add(new MetricModel
+        {
+            Value = isAbstract,
+            ValueType = isAbstract.GetType().ToString(),
+            ExtractorName = GetType().ToString()
+        });
+
+        return modelType;
     }
 }

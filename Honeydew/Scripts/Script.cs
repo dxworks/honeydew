@@ -5,7 +5,14 @@ namespace Honeydew.Scripts
 {
     public abstract class Script
     {
-        public abstract void Run(Dictionary<string, object> arguments);
+        public virtual void Run(Dictionary<string, object> arguments)
+        {
+        }
+
+        public virtual object RunForResult(Dictionary<string, object> arguments)
+        {
+            return null;
+        }
 
         protected static T VerifyArgument<T>(Dictionary<string, object> arguments, string argumentName)
         {

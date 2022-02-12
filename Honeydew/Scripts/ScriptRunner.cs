@@ -1,67 +1,113 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using HoneydewCore.Logging;
 
-namespace Honeydew.Scripts
-{
-    internal class ScriptRunner
-    {
-        private readonly Dictionary<string, object> _defaultArguments;
-        private readonly IProgressLogger _logger;
+namespace Honeydew.Scripts;
 
-        public ScriptRunner(IProgressLogger logger, Dictionary<string, object> defaultArguments)
+internal class ScriptRunner
+{
+    private readonly Dictionary<string, object> _defaultArguments;
+    private readonly IProgressLogger _logger;
+
+    public ScriptRunner(IProgressLogger logger, Dictionary<string, object> defaultArguments)
+    {
+        _logger = logger;
+        _defaultArguments = defaultArguments;
+    }
+
+    public void UpdateArgument(string key, object value)
+    {
+        if (_defaultArguments.ContainsKey(key))
         {
-            _logger = logger;
-            _defaultArguments = defaultArguments;
+            _defaultArguments[key] = value;
+        }
+    }
+
+    public object RunForResult(ScriptRuntime scriptRuntime)
+    {
+        var arguments = new Dictionary<string, object>();
+        foreach (var (key, value) in _defaultArguments)
+        {
+            arguments.Add(key, value);
         }
 
-        public void Run(List<ScriptRuntime> scriptRuntimes, bool changeDefaultArguments = false)
+        var (script, runtimeArguments) = scriptRuntime;
+
+        try
         {
-            var arguments = new Dictionary<string, object>();
-            foreach (var (key, value) in _defaultArguments)
+            if (runtimeArguments != null)
             {
-                arguments.Add(key, value);
-            }
-
-            foreach (var (script, runtimeArguments) in scriptRuntimes)
-            {
-                try
+                foreach (var (key, value) in runtimeArguments)
                 {
-                    if (runtimeArguments != null)
+                    if (arguments.ContainsKey(key))
                     {
-                        foreach (var (key, value) in runtimeArguments)
-                        {
-                            if (arguments.ContainsKey(key))
-                            {
-                                arguments[key] = value;
-                            }
-                            else
-                            {
-                                arguments.Add(key, value);
-                            }
-                        }
+                        arguments[key] = value;
                     }
-
-                    script.Run(arguments);
-
-                    if (!changeDefaultArguments)
+                    else
                     {
-                        continue;
-                    }
-
-                    foreach (var (key, value) in arguments)
-                    {
-                        if (_defaultArguments.ContainsKey(key))
-                        {
-                            _defaultArguments[key] = value;
-                        }
+                        arguments.Add(key, value);
                     }
                 }
-                catch (Exception e)
+            }
+
+            return script.RunForResult(arguments);
+        }
+        catch (Exception e)
+        {
+            _logger.Log($"Could not run script because {e}");
+        }
+
+        return null;
+    }
+
+    public void Run(bool runInParallel, List<ScriptRuntime> scriptRuntimes)
+    {
+        var arguments = new Dictionary<string, object>();
+        foreach (var (key, value) in _defaultArguments)
+        {
+            arguments.Add(key, value);
+        }
+
+        if (runInParallel)
+        {
+            Parallel.ForEach(scriptRuntimes, runtime => Run(arguments, runtime));
+        }
+        else
+        {
+            foreach (var runtime in scriptRuntimes)
+            {
+                Run(arguments, runtime);
+            }
+        }
+    }
+
+    private void Run(Dictionary<string, object> arguments, ScriptRuntime scriptRuntime)
+    {
+        var (script, runtimeArguments) = scriptRuntime;
+
+        try
+        {
+            if (runtimeArguments != null)
+            {
+                foreach (var (key, value) in runtimeArguments)
                 {
-                    _logger.Log($"Could not run script because {e}");
+                    if (arguments.ContainsKey(key))
+                    {
+                        arguments[key] = value;
+                    }
+                    else
+                    {
+                        arguments.Add(key, value);
+                    }
                 }
             }
+
+            script.Run(arguments);
+        }
+        catch (Exception e)
+        {
+            _logger.Log($"Could not run script because {e}");
         }
     }
 }

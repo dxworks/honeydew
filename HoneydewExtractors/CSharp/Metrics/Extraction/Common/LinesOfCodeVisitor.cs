@@ -7,91 +7,96 @@ using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common;
+
+public class LinesOfCodeVisitor : ICSharpPropertyVisitor, ICSharpMethodVisitor, ICSharpConstructorVisitor,
+    ICSharpClassVisitor, ICSharpCompilationUnitVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor,
+    ICSharpDestructorVisitor
 {
-    public class LinesOfCodeVisitor : ICSharpPropertyVisitor, ICSharpMethodVisitor, ICSharpConstructorVisitor,
-        ICSharpClassVisitor, ICSharpCompilationUnitVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor,
-        ICSharpDestructorVisitor
+    private readonly CSharpLinesOfCodeCounter _linesOfCodeCounter = new();
+    private bool _visited;
+
+    public IPropertyType Visit(BasePropertyDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IPropertyType modelType)
     {
-        private readonly CSharpLinesOfCodeCounter _linesOfCodeCounter = new();
-        private bool _visited;
+        modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
+        return modelType;
+    }
 
-        public IPropertyType Visit(BasePropertyDeclarationSyntax syntaxNode, IPropertyType modelType)
+    public IMethodType Visit(MethodDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
+    {
+        modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
+        return modelType;
+    }
+
+    public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IMethodType modelType)
+    {
+        modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
+        return modelType;
+    }
+
+    public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IConstructorType modelType)
+    {
+        modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
+        return modelType;
+    }
+
+    public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IDestructorType modelType)
+    {
+        modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
+        return modelType;
+    }
+
+    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    {
+        if (modelType is not IMembersClassType membersClassType)
         {
-            modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
             return modelType;
         }
 
-        public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
+        membersClassType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
+        return membersClassType;
+    }
+
+    public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode, SemanticModel semanticModel,
+        IMethodTypeWithLocalFunctions modelType)
+    {
+        modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
+        return modelType;
+    }
+
+    public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, SemanticModel semanticModel,
+        ICompilationUnitType modelType)
+    {
+        var linesOfCode = _linesOfCodeCounter.Count(syntaxNode.ToString());
+
+        if (syntaxNode.HasLeadingTrivia)
         {
-            modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
-            return modelType;
+            var loc = _linesOfCodeCounter.Count(syntaxNode.GetLeadingTrivia().ToString());
+            linesOfCode.SourceLines += loc.SourceLines;
+            linesOfCode.CommentedLines += loc.CommentedLines;
+            linesOfCode.EmptyLines += loc.EmptyLines;
         }
 
-        public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, IMethodType modelType)
+        modelType.Loc = linesOfCode;
+        return modelType;
+    }
+
+    public void Accept(IVisitor visitor)
+    {
+        if (_visited)
         {
-            modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
-            return modelType;
+            return;
         }
 
-        public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, IConstructorType modelType)
-        {
-            modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
-            return modelType;
-        }
-
-        public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, IDestructorType modelType)
-        {
-            modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
-            return modelType;
-        }
-
-        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
-        {
-            if (modelType is not IMembersClassType membersClassType)
-            {
-                return modelType;
-            }
-
-            membersClassType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
-            return membersClassType;
-        }
-
-        public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode,
-            IMethodTypeWithLocalFunctions modelType)
-        {
-            modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
-            return modelType;
-        }
-
-        public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, ICompilationUnitType modelType)
-        {
-            var linesOfCode = _linesOfCodeCounter.Count(syntaxNode.ToString());
-
-            if (syntaxNode.HasLeadingTrivia)
-            {
-                var loc = _linesOfCodeCounter.Count(syntaxNode.GetLeadingTrivia().ToString());
-                linesOfCode.SourceLines += loc.SourceLines;
-                linesOfCode.CommentedLines += loc.CommentedLines;
-                linesOfCode.EmptyLines += loc.EmptyLines;
-            }
-
-            modelType.Loc = linesOfCode;
-            return modelType;
-        }
-
-        public void Accept(IVisitor visitor)
-        {
-            if (_visited)
-            {
-                return;
-            }
-
-            _visited = true;
-            visitor.Visit(this);
-        }
+        _visited = true;
+        visitor.Visit(this);
     }
 }

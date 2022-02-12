@@ -1,10 +1,10 @@
 ﻿using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.Core.Metrics.Visitors.Parameters
+namespace HoneydewExtractors.Core.Metrics.Visitors.Parameters;
+
+public interface ICSharpGenericParameterVisitor : IGenericParameterVisitor,
+    IExtractionVisitor<TypeParameterSyntax, SemanticModel, IGenericParameterType>
 {
-    public interface ICSharpGenericParameterVisitor : IGenericParameterVisitor,
-        IExtractionVisitor<TypeParameterSyntax, IGenericParameterType>
-    {
-    }
 }

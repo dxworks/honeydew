@@ -19,35 +19,37 @@ public class GotoStatementVisitor : ICSharpMethodVisitor, ICSharpConstructorVisi
     {
     }
 
-    public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
+    public IMethodType Visit(MethodDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
     {
         modelType.Metrics.Add(CalculateGotoStatements(syntaxNode));
 
         return modelType;
     }
 
-    public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, IConstructorType modelType)
+    public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IConstructorType modelType)
     {
         modelType.Metrics.Add(CalculateGotoStatements(syntaxNode));
 
         return modelType;
     }
 
-    public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, IDestructorType modelType)
+    public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IDestructorType modelType)
     {
         modelType.Metrics.Add(CalculateGotoStatements(syntaxNode));
 
         return modelType;
     }
 
-    public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, IMethodType modelType)
+    public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
     {
         modelType.Metrics.Add(CalculateGotoStatements(syntaxNode));
 
         return modelType;
     }
 
-    public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode,
+    public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode, SemanticModel semanticModel,
         IMethodTypeWithLocalFunctions modelType)
     {
         if (syntaxNode.Body == null)
@@ -65,7 +67,7 @@ public class GotoStatementVisitor : ICSharpMethodVisitor, ICSharpConstructorVisi
             ValueType = nameof(Int32),
             Value = gotoStatementsCount
         });
-        
+
         return modelType;
     }
 

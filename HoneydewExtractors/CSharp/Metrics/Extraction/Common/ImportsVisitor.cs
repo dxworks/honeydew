@@ -9,18 +9,64 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common;
+
+public class ImportsVisitor : ICSharpCompilationUnitVisitor, ICSharpClassVisitor, ICSharpDelegateVisitor
 {
-    public class ImportsVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
-        ICSharpCompilationUnitVisitor, ICSharpClassVisitor, ICSharpDelegateVisitor
+    public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, SemanticModel semanticModel,
+        ICompilationUnitType modelType)
     {
-        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+        var usingSet = new HashSet<string>();
 
-        public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, ICompilationUnitType modelType)
+        foreach (var usingDirectiveSyntax in syntaxNode.DescendantNodes().OfType<UsingDirectiveSyntax>())
         {
-            var usingSet = new HashSet<string>();
+            var usingName = usingDirectiveSyntax.Name.ToString();
 
-            foreach (var usingDirectiveSyntax in syntaxNode.DescendantNodes().OfType<UsingDirectiveSyntax>())
+            if (usingSet.Contains(usingName))
+            {
+                continue;
+            }
+
+            usingSet.Add(usingName);
+
+            var usingModel = GetUsingModelFromUsingSyntax(usingDirectiveSyntax, semanticModel);
+            modelType.Imports.Add(usingModel);
+        }
+
+        return modelType;
+    }
+
+    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    {
+        foreach (var importType in ExtractParentImports(syntaxNode, semanticModel))
+        {
+            modelType.Imports.Add(importType);
+        }
+
+        return modelType;
+    }
+
+    public IDelegateType Visit(DelegateDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IDelegateType modelType)
+    {
+        foreach (var importType in ExtractParentImports(syntaxNode, semanticModel))
+        {
+            modelType.Imports.Add(importType);
+        }
+
+        return modelType;
+    }
+
+    private List<IImportType> ExtractParentImports(SyntaxNode syntaxNode, SemanticModel semanticModel)
+    {
+        var usingSet = new HashSet<string>();
+        var importTypes = new List<IImportType>();
+
+        var parent = syntaxNode.Parent;
+
+        while (parent != null)
+        {
+            foreach (var usingDirectiveSyntax in parent.ChildNodes().OfType<UsingDirectiveSyntax>())
             {
                 var usingName = usingDirectiveSyntax.Name.ToString();
 
@@ -30,87 +76,41 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
                 }
 
                 usingSet.Add(usingName);
-
-                var usingModel = GetUsingModelFromUsingSyntax(usingDirectiveSyntax);
-                modelType.Imports.Add(usingModel);
+                var usingModel = GetUsingModelFromUsingSyntax(usingDirectiveSyntax, semanticModel);
+                importTypes.Add(usingModel);
             }
 
-            return modelType;
+            parent = parent.Parent;
         }
 
-        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
+        return importTypes;
+    }
+
+    private UsingModel GetUsingModelFromUsingSyntax(UsingDirectiveSyntax usingDirectiveSyntax,
+        SemanticModel semanticModel)
+    {
+        var usingName = usingDirectiveSyntax.Name.ToString();
+        var isStatic = usingDirectiveSyntax.StaticKeyword.Value != null;
+        var alias = usingDirectiveSyntax.Alias == null ? "" : usingDirectiveSyntax.Alias.Name.ToString();
+        var aliasType = nameof(EAliasType.None);
+
+        if (!string.IsNullOrEmpty(alias))
         {
-            foreach (var importType in ExtractParentImports(syntaxNode))
-            {
-                modelType.Imports.Add(importType);
-            }
-
-            return modelType;
+            aliasType = CSharpExtractionHelperMethods.GetAliasTypeOfNamespace(usingDirectiveSyntax.Name,
+                semanticModel);
         }
 
-        public IDelegateType Visit(DelegateDeclarationSyntax syntaxNode, IDelegateType modelType)
+        var usingModel = new UsingModel
         {
-            foreach (var importType in ExtractParentImports(syntaxNode))
-            {
-                modelType.Imports.Add(importType);
-            }
+            Name = usingName,
+            IsStatic = isStatic,
+            Alias = alias,
+            AliasType = aliasType
+        };
+        return usingModel;
+    }
 
-            return modelType;
-        }
-
-        private List<IImportType> ExtractParentImports(SyntaxNode syntaxNode)
-        {
-            var usingSet = new HashSet<string>();
-            var importTypes = new List<IImportType>();
-
-            var parent = syntaxNode.Parent;
-
-            while (parent != null)
-            {
-                foreach (var usingDirectiveSyntax in parent.ChildNodes().OfType<UsingDirectiveSyntax>())
-                {
-                    var usingName = usingDirectiveSyntax.Name.ToString();
-
-                    if (usingSet.Contains(usingName))
-                    {
-                        continue;
-                    }
-
-                    usingSet.Add(usingName);
-                    var usingModel = GetUsingModelFromUsingSyntax(usingDirectiveSyntax);
-                    importTypes.Add(usingModel);
-                }
-
-                parent = parent.Parent;
-            }
-
-            return importTypes;
-        }
-
-        private UsingModel GetUsingModelFromUsingSyntax(UsingDirectiveSyntax usingDirectiveSyntax)
-        {
-            var usingName = usingDirectiveSyntax.Name.ToString();
-            var isStatic = usingDirectiveSyntax.StaticKeyword.Value != null;
-            var alias = usingDirectiveSyntax.Alias == null ? "" : usingDirectiveSyntax.Alias.Name.ToString();
-            var aliasType = nameof(EAliasType.None);
-
-            if (!string.IsNullOrEmpty(alias))
-            {
-                aliasType = CSharpHelperMethods.GetAliasTypeOfNamespace(usingDirectiveSyntax.Name);
-            }
-
-            var usingModel = new UsingModel
-            {
-                Name = usingName,
-                IsStatic = isStatic,
-                Alias = alias,
-                AliasType = aliasType
-            };
-            return usingModel;
-        }
-
-        public void Accept(IVisitor visitor)
-        {
-        }
+    public void Accept(IVisitor visitor)
+    {
     }
 }

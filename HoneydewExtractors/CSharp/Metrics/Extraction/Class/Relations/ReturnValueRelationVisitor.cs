@@ -2,46 +2,44 @@
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Utils;
 using HoneydewExtractors.Core.Metrics.Visitors;
-using HoneydewModels.CSharp;
-using HoneydewModels.Types;
+using HoneydewModels.Reference;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
+
+public class ReturnValueRelationVisitor : IModelVisitor<ClassModel>, IRelationVisitor
 {
-    public class ReturnValueRelationVisitor : IModelVisitor<IClassType>, IRelationVisitor
+    public string PrettyPrint()
     {
-        public string PrettyPrint()
-        {
-            return "returns";
-        }
+        return "returns";
+    }
 
-        public void Visit(IClassType modelType)
+    public void Visit(ClassModel classModel)
+    {
+        var dependencies = new Dictionary<string, int>();
+
+        foreach (var methodModel in classModel.Methods)
         {
-            if (modelType is not IMembersClassType membersClassType)
+            if (methodModel.ReturnValue == null)
             {
-                return;
+                continue;
             }
 
-            var dependencies = new Dictionary<string, int>();
-
-            foreach (var methodType in membersClassType.Methods)
+            var typeName = CSharpConstants.GetNonNullableName(methodModel.ReturnValue.Type.Name);
+            if (dependencies.ContainsKey(typeName))
             {
-                var typeName = CSharpConstants.GetNonNullableName(methodType.ReturnValue.Type.Name);
-                if (dependencies.ContainsKey(typeName))
-                {
-                    dependencies[typeName]++;
-                }
-                else
-                {
-                    dependencies.Add(typeName, 1);
-                }
+                dependencies[typeName]++;
             }
-
-            membersClassType.Metrics.Add(new MetricModel
+            else
             {
-                ExtractorName = GetType().ToString(),
-                Value = dependencies,
-                ValueType = dependencies.GetType().ToString()
-            });
+                dependencies.Add(typeName, 1);
+            }
         }
+
+        classModel.Metrics.Add(new MetricModel
+        {
+            ExtractorName = GetType().ToString(),
+            Value = dependencies,
+            ValueType = dependencies.GetType().ToString()
+        });
     }
 }

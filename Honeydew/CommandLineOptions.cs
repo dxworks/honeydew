@@ -25,5 +25,8 @@ namespace Honeydew
 
         [Option("voyager", Required = false, Default = false, HelpText = "Use Voyager Options. Export Raw Model")]
         public bool UseVoyager { get; set; }
+
+        [Option('p', " parallel", Required = false, Default = false, HelpText = "Parallel Extraction")]
+        public bool ParallelExtraction { get; set; }
     }
 }

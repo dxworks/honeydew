@@ -7,6 +7,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -18,7 +19,8 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit
         {
         }
 
-        public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, ICompilationUnitType modelType)
+        public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, SemanticModel semanticModel,
+            ICompilationUnitType modelType)
         {
             foreach (var baseTypeDeclarationSyntax in syntaxNode.DescendantNodes().OfType<BaseTypeDeclarationSyntax>())
             {
@@ -30,7 +32,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit
                     {
                         if (visitor is ICSharpClassVisitor extractionVisitor)
                         {
-                            classModel = extractionVisitor.Visit(baseTypeDeclarationSyntax, classModel);
+                            classModel = extractionVisitor.Visit(baseTypeDeclarationSyntax, semanticModel, classModel);
                         }
                     }
                     catch (Exception e)

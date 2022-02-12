@@ -12,70 +12,72 @@ using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common;
+
+public class GenericParameterSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICSharpDelegateVisitor,
+    ICSharpMethodVisitor, ICSharpLocalFunctionVisitor
 {
-    public class GenericParameterSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICSharpDelegateVisitor,
-        ICSharpMethodVisitor, ICSharpLocalFunctionVisitor
+    public GenericParameterSetterVisitor(IEnumerable<IGenericParameterVisitor> visitors) : base(visitors)
     {
-        public GenericParameterSetterVisitor(IEnumerable<IGenericParameterVisitor> visitors) : base(visitors)
+    }
+
+    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    {
+        ExtractParameterInfo(syntaxNode, semanticModel, modelType);
+
+        return modelType;
+    }
+
+    public IDelegateType Visit(DelegateDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IDelegateType modelType)
+    {
+        ExtractParameterInfo(syntaxNode, semanticModel, modelType);
+
+        return modelType;
+    }
+
+    public IMethodType Visit(MethodDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
+    {
+        ExtractParameterInfo(syntaxNode, semanticModel, modelType);
+
+        return modelType;
+    }
+
+    public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode, SemanticModel semanticModel,
+        IMethodTypeWithLocalFunctions modelType)
+    {
+        ExtractParameterInfo(syntaxNode, semanticModel, modelType);
+
+        return modelType;
+    }
+
+    private void ExtractParameterInfo(SyntaxNode syntaxNode, SemanticModel semanticModel,
+        ITypeWithGenericParameters modelType)
+    {
+        foreach (var typeParameterListSyntax in syntaxNode.ChildNodes().OfType<TypeParameterListSyntax>())
         {
-        }
-
-        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
-        {
-            ExtractParameterInfo(syntaxNode, modelType);
-
-            return modelType;
-        }
-
-        public IDelegateType Visit(DelegateDeclarationSyntax syntaxNode, IDelegateType modelType)
-        {
-            ExtractParameterInfo(syntaxNode, modelType);
-
-            return modelType;
-        }
-
-        public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
-        {
-            ExtractParameterInfo(syntaxNode, modelType);
-
-            return modelType;
-        }
-
-        public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode,
-            IMethodTypeWithLocalFunctions modelType)
-        {
-            ExtractParameterInfo(syntaxNode, modelType);
-
-            return modelType;
-        }
-
-        private void ExtractParameterInfo(SyntaxNode syntaxNode, ITypeWithGenericParameters modelType)
-        {
-            foreach (var typeParameterListSyntax in syntaxNode.ChildNodes().OfType<TypeParameterListSyntax>())
+            foreach (var typeParameterSyntax in typeParameterListSyntax.Parameters)
             {
-                foreach (var typeParameterSyntax in typeParameterListSyntax.Parameters)
-                {
-                    IGenericParameterType parameterModel = new GenericParameterModel();
+                IGenericParameterType parameterModel = new GenericParameterModel();
 
-                    foreach (var visitor in GetContainedVisitors())
+                foreach (var visitor in GetContainedVisitors())
+                {
+                    try
                     {
-                        try
+                        if (visitor is ICSharpGenericParameterVisitor extractionVisitor)
                         {
-                            if (visitor is ICSharpGenericParameterVisitor extractionVisitor)
-                            {
-                                parameterModel = extractionVisitor.Visit(typeParameterSyntax, parameterModel);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Log($"Could not extract from Generic Parameter Visitor because {e}",
-                                LogLevels.Warning);
+                            parameterModel =
+                                extractionVisitor.Visit(typeParameterSyntax, semanticModel, parameterModel);
                         }
                     }
-
-                    modelType.GenericParameters.Add(parameterModel);
+                    catch (Exception e)
+                    {
+                        Logger.Log($"Could not extract from Generic Parameter Visitor because {e}",
+                            LogLevels.Warning);
+                    }
                 }
+
+                modelType.GenericParameters.Add(parameterModel);
             }
         }
     }
