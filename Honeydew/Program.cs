@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using CommandLine;
-using DotNetGraph;
-using DotNetGraph.Edge;
-using DotNetGraph.Extensions;
-using DotNetGraph.Node;
 using Honeydew.Scripts;
 using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Writers.Exporters;
@@ -28,7 +23,6 @@ using HoneydewModels;
 using HoneydewModels.CSharp;
 using HoneydewModels.Exporters;
 using HoneydewModels.Importers;
-using File = System.IO.File;
 
 namespace Honeydew
 {

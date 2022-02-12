@@ -1,5 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
+using System.Text;
+using DotNetGraph.Edge;
+using DotNetGraph.SubGraph;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.ModelRepresentations;
 using HoneydewModels.Reference;
@@ -40,6 +44,9 @@ public class ExportRelationsBetweenSolutionsAndProjectsScripts : Script
 
         const string relationsFolder = "relations";
 
+        var relationsSummary = Path.Combine(outputPath, relationsFolder, $"{projectName}-summary.txt");
+        _textFileExporter.Export(relationsSummary, GetRelationsSummary(repositoryModel));
+
         var projectRelationsCsvPath = Path.Combine(outputPath, relationsFolder, $"{projectName}-project_relations.csv");
         _representationExporter.Export(projectRelationsCsvPath, GetProjectRelations(repositoryModel));
 
@@ -73,6 +80,46 @@ public class ExportRelationsBetweenSolutionsAndProjectsScripts : Script
             GetProjectRelationsClusteredBySolutionsDotFile(repositoryModel));
     }
 
+    private static string GetRelationsSummary(RepositoryModel repositoryModel)
+    {
+        var stringBuilder = new StringBuilder();
+
+        var solutionsSet = new HashSet<string>();
+        var projectsSet = new HashSet<string>();
+
+        stringBuilder.AppendLine("Solution Name Conflicts");
+
+        foreach (var solution in repositoryModel.Solutions)
+        {
+            var solutionName = Path.GetFileName(solution.FilePath);
+            if (solutionsSet.Contains(solutionName))
+            {
+                stringBuilder.AppendLine($"{solutionName} | {solution.FilePath}");
+            }
+            else
+            {
+                solutionsSet.Add(solutionName);
+            }
+        }
+
+        stringBuilder.AppendLine();
+        stringBuilder.AppendLine("Project Name Conflicts");
+
+        foreach (var project in repositoryModel.Projects)
+        {
+            if (projectsSet.Contains(project.Name))
+            {
+                stringBuilder.AppendLine($"{project} | {project.FilePath}");
+            }
+            else
+            {
+                projectsSet.Add(project.Name);
+            }
+        }
+
+        return stringBuilder.ToString();
+    }
+
     private static string GetProjectRelationsDotFile(RepositoryModel repositoryModel)
     {
         var graph = new Graph.Graph("Project Relations", true);
@@ -85,12 +132,18 @@ public class ExportRelationsBetweenSolutionsAndProjectsScripts : Script
             }
         }
 
-        return graph.GenerateDotFileContent();
+        return graph.GenerateDotFileContent(true);
     }
 
     private static string GetSolutionProjectRelationsDotFile(RepositoryModel repositoryModel)
     {
-        var graph = new Graph.Graph("Solution Project Relations", true);
+        var graph = new Graph.Graph("Solution Project Relations", true)
+        {
+            DefaultEdgeProperties =
+            {
+                ArrowHead = DotEdgeArrowType.Vee
+            }
+        };
 
         foreach (var solution in repositoryModel.Solutions)
         {
@@ -100,7 +153,13 @@ public class ExportRelationsBetweenSolutionsAndProjectsScripts : Script
             }
         }
 
-        return graph.GenerateDotFileContent();
+        // foreach (var dotNode in graph.Nodes.Where(node => node.Identifier.EndsWith(".sln")))
+        // {
+        //     dotNode.FillColor = Color.Wheat;
+        //     dotNode.Style = DotNodeStyle.Dashed;
+        // }
+
+        return graph.GenerateDotFileContent(true);
     }
 
     private static string GetSolutionProjectClustersDotFile(RepositoryModel repositoryModel)
@@ -116,7 +175,7 @@ public class ExportRelationsBetweenSolutionsAndProjectsScripts : Script
             }
         }
 
-        return graph.GenerateDotFileContent();
+        return graph.GenerateDotFileContent(true);
     }
 
     private static string GetSolutionProjectAllRelationsDotFile(RepositoryModel repositoryModel)
@@ -139,12 +198,19 @@ public class ExportRelationsBetweenSolutionsAndProjectsScripts : Script
             }
         }
 
-        return graph.GenerateDotFileContent();
+        return graph.GenerateDotFileContent(true);
     }
 
     private static string GetProjectRelationsClusteredBySolutionsDotFile(RepositoryModel repositoryModel)
     {
-        var graph = new Graph.Graph("Project Relations Clustered", true);
+        var graph = new Graph.Graph("Project Relations Clustered", true)
+        {
+            DefaultSubGraphProperties =
+            {
+                Color = Color.Coral,
+                Style = DotSubGraphStyle.Solid
+            }
+        };
 
         foreach (var solution in repositoryModel.Solutions)
         {
@@ -158,7 +224,7 @@ public class ExportRelationsBetweenSolutionsAndProjectsScripts : Script
             }
         }
 
-        return graph.GenerateDotFileContent();
+        return graph.GenerateDotFileContent(true);
     }
 
     private static RelationsRepresentation GetProjectRelations(RepositoryModel repositoryModel)

@@ -18,6 +18,10 @@ public class Graph
     private readonly IDictionary<string, DotSubGraph> _subGraphs = new Dictionary<string, DotSubGraph>();
     private readonly DotGraph _graph;
 
+    public IEnumerable<DotNode> Nodes => _nodes.Values;
+    public IEnumerable<DotEdge> Edges => _edges.Values;
+    public IEnumerable<DotSubGraph> SubGraphs => _subGraphs.Values;
+
     public Graph(string name, bool directed = false)
     {
         _graph = new DotGraph(name, directed);
@@ -86,6 +90,11 @@ public class Graph
     public DotEdge GetEdge(string leftNodeId, string rightNodeId)
     {
         return _edges[(leftNodeId, rightNodeId)];
+    }
+
+    public DotSubGraph GetSubGraph(string subGraphId)
+    {
+        return _subGraphs[subGraphId];
     }
 
     public void AddNodeToSubGraph(DotSubGraph subGraph, string nodeId, string nodeLabel = null)
