@@ -5,13 +5,13 @@ namespace HoneydewExtractors.Processors
 {
     public class JafaxChooseStrategy : IRelationsMetricChooseStrategy
     {
-        public bool Choose(Type type)
+        public bool Choose(String type)
         {
-            return type == typeof(ExternCallsRelationVisitor) ||
-                   type == typeof(ExternDataRelationVisitor) ||
-                   type == typeof(HierarchyRelationVisitor) ||
-                   type == typeof(ReturnValueRelationVisitor) ||
-                   type == typeof(DeclarationRelationVisitor);
+            return type == nameof(ExternCallsRelationVisitor) ||
+                   type == nameof(ExternDataRelationVisitor) ||
+                   type == nameof(HierarchyRelationVisitor) ||
+                   type == nameof(ReturnValueRelationVisitor) ||
+                   type == nameof(DeclarationRelationVisitor);
         }
     }
 }

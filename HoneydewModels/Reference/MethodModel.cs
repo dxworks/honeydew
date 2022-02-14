@@ -23,6 +23,8 @@ namespace HoneydewModels.Reference
         public IList<GenericParameterModel> GenericParameters { get; set; } = new List<GenericParameterModel>();
 
         public IList<MethodModel> CalledMethods { get; set; } = new List<MethodModel>();
+        
+        public IList<ExternalMethodCall> CalledExternalMethods { get; set; } = new List<ExternalMethodCall>();
 
         public IList<AccessedField> AccessedFields { get; set; } = new List<AccessedField>();
 

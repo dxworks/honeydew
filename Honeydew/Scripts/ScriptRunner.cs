@@ -41,7 +41,8 @@ namespace Honeydew.Scripts
                             }
                         }
                     }
-
+                    _logger.Log($"Running Script {script.GetType().Name}");
+                    
                     script.Run(arguments);
 
                     if (!changeDefaultArguments)

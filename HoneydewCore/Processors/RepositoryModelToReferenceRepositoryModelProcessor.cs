@@ -195,7 +195,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                                             Name = existingClassModel.Name,
                                             Namespace = existingClassModel.Namespace,
                                             GenericParameters = existingClassModel.GenericParameters,
-                                            Classes = { existingClassModel, model }
+                                            Classes = {existingClassModel, model}
                                         };
 
                                         existingClassModel.PartialClass = partialClass;
@@ -770,7 +770,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                         var methodModel = classModel.Methods[methodIndex];
                         var methodType = membersClassType.Methods[methodIndex];
 
-                        methodModel.CalledMethods = ConvertCalledMethods(methodType.CalledMethods);
+                        ConvertCalledMethods(methodType.CalledMethods, methodModel);
 
                         methodModel.AccessedFields = ConvertAccessFields(methodType.AccessedFields);
 
@@ -783,9 +783,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                     {
                         var constructorModel = classModel.Constructors[constructorIndex];
                         var constructorType = membersClassType.Constructors[constructorIndex];
-
-                        constructorModel.CalledMethods =
-                            ConvertCalledMethods(constructorType.CalledMethods);
+                        
+                        ConvertCalledMethods(constructorType.CalledMethods, constructorModel);
 
                         SetCalledMethodsForConstructorLocalFunctions(constructorModel, constructorType);
                     }
@@ -804,7 +803,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                             var accessor = propertyModel.Accessors[accessorIndex];
                             var accessorType = propertyType.Accessors[accessorIndex];
 
-                            accessor.CalledMethods = ConvertCalledMethods(accessorType.CalledMethods);
+                            ConvertCalledMethods(accessorType.CalledMethods, accessor);
 
                             accessor.AccessedFields = ConvertAccessFields(accessorType.AccessedFields);
 
@@ -813,16 +812,16 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                     }
                 }
 
-                IList<MethodModel> ConvertCalledMethods(IEnumerable<IMethodSignatureType> calledMethods)
+                void ConvertCalledMethods(IEnumerable<IMethodSignatureType> calledMethods, MethodModel methodModel)
                 {
-                    var calledMethodModels = new List<MethodModel>();
-
-                    foreach (var calledMethod in calledMethods)
+                    foreach (var (method, externalMethodCall) in calledMethods.Select(it =>
+                                 GetMethodReference(it, projectModel)))
                     {
-                        calledMethodModels.Add(GetMethodReference(calledMethod, projectModel));
+                        if (method != null)
+                            methodModel.CalledMethods.Add(method);
+                        if (externalMethodCall != null)
+                            methodModel.CalledExternalMethods.Add(externalMethodCall);
                     }
-
-                    return calledMethodModels;
                 }
 
                 IList<AccessedField> ConvertAccessFields(
@@ -863,7 +862,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
                 void SetCalledMethodsForMethodLocalFunctions(MethodModel methodModel, IMethodType methodType)
                 {
-                    methodModel.CalledMethods = ConvertCalledMethods(methodType.CalledMethods);
+                    ConvertCalledMethods(methodType.CalledMethods, methodModel);
 
                     for (var localFunctionIndex = 0;
                          localFunctionIndex < methodModel.LocalFunctions.Count;
@@ -877,7 +876,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                         var localFunction = methodModel.LocalFunctions[localFunctionIndex];
                         var localFunctionType = typeWithLocalFunctions.LocalFunctions[localFunctionIndex];
 
-                        localFunction.CalledMethods = ConvertCalledMethods(localFunctionType.CalledMethods);
+                        ConvertCalledMethods(localFunctionType.CalledMethods, localFunction);
 
                         for (var i = 0; i < localFunction.LocalFunctions.Count; i++)
                         {
@@ -890,7 +889,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                 void SetCalledMethodsForConstructorLocalFunctions(MethodModel constructorModel,
                     IConstructorType constructorType)
                 {
-                    constructorModel.CalledMethods = ConvertCalledMethods(constructorType.CalledMethods);
+                    ConvertCalledMethods(constructorType.CalledMethods, constructorModel);
 
 
                     for (var localFunctionIndex = 0;
@@ -905,7 +904,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                         var localFunction = constructorModel.LocalFunctions[localFunctionIndex];
                         var localFunctionType = typeWithLocalFunctions.LocalFunctions[localFunctionIndex];
 
-                        localFunction.CalledMethods = ConvertCalledMethods(localFunctionType.CalledMethods);
+                        ConvertCalledMethods(localFunctionType.CalledMethods, localFunction);
 
                         for (int i = 0; i < localFunction.LocalFunctions.Count; i++)
                         {
@@ -919,7 +918,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
     }
 
 
-    private MethodModel GetMethodReference(IMethodSignatureType methodSignatureType, ProjectModel projectModel)
+    private (MethodModel, ExternalMethodCall) GetMethodReference(IMethodSignatureType methodSignatureType,
+        ProjectModel projectModel)
     {
         var classModel =
             SearchEntityByName(methodSignatureType.ContainingTypeName, projectModel, false) as ClassModel;
@@ -959,7 +959,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
                 if (allParametersMatch)
                 {
-                    return methodModel;
+                    return (methodModel, null);
                 }
             }
         }
@@ -970,7 +970,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                 var entity = GetMethodReferenceFromLocalFunction(methodSignatureType, projectModel);
                 if (entity != null)
                 {
-                    return entity;
+                    return (entity, null);
                 }
             }
             catch
@@ -979,38 +979,11 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             }
         }
 
-        var createdMethodModel = new MethodModel
+        return (null, new ExternalMethodCall
         {
-            ContainingType = classModel,
-            Class = classModel,
             Name = methodSignatureType.Name,
-            MethodType = nameof(MethodType.Method),
-            Parameters = methodSignatureType.ParameterTypes.Select(p =>
-            {
-                var param = p as HoneydewModels.CSharp.ParameterModel;
-                var parameterModel = new ParameterModel
-                {
-                    Type = ConvertEntityType(p.Type, projectModel),
-                    IsNullable = p.IsNullable,
-                };
-                parameterModel.Attributes = ConvertAttributes(parameterModel, p.Attributes, projectModel);
-                if (param != null)
-                {
-                    parameterModel.Modifier = param.Modifier;
-                    parameterModel.DefaultValue = param.DefaultValue;
-                }
-
-                return parameterModel;
-            }).ToList()
-        };
-        foreach (var parameter in createdMethodModel.Parameters)
-        {
-            parameter.ContainingType = createdMethodModel;
-        }
-
-        classModel?.Methods.Add(createdMethodModel);
-
-        return createdMethodModel;
+            ContainingClass = methodSignatureType.ContainingTypeName
+        });
     }
 
     private MethodModel GetMethodReferenceFromLocalFunction(IMethodSignatureType methodSignatureType,
@@ -1021,24 +994,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
         ClassModel classModel;
         if (indexOfMethodParenthesis < 0)
         {
-            var indexOfAccessor = containingTypeName.LastIndexOf('.');
-            var indexOfPropertyName = containingTypeName.LastIndexOf('.', indexOfAccessor - 1);
-            var propertyName = containingTypeName[(indexOfPropertyName + 1)..indexOfAccessor];
-            var accessorName = containingTypeName[(indexOfAccessor + 1)..];
-            var classNameWithProperty = containingTypeName[..indexOfPropertyName];
-
-            classModel = SearchEntityByName(classNameWithProperty, projectModel, false) as ClassModel;
-
-            if (classModel == null)
-            {
-                return null;
-            }
-
-            var propertyModel = classModel.Properties.FirstOrDefault(p => p.Name == propertyName);
-            var accessorModel = propertyModel?.Accessors.FirstOrDefault(a => a.Name == accessorName);
-
-            return accessorModel?.LocalFunctions.FirstOrDefault(localFunction =>
-                localFunction.Name == methodSignatureType.Name);
+            return null;
         }
 
         var className = containingTypeName[..indexOfMethodParenthesis];

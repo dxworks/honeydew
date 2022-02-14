@@ -4,6 +4,7 @@ using System.Linq;
 using HoneydewCore.ModelRepresentations;
 using HoneydewCore.Processors;
 using HoneydewCore.Utils;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
 using HoneydewModels.CSharp;
 
 namespace HoneydewExtractors.Processors
@@ -19,6 +20,21 @@ namespace HoneydewExtractors.Processors
 
         public RelationsRepresentation Process(RepositoryModel repositoryModel)
         {
+            Dictionary<string, string> extractorDict = new Dictionary<string, string>
+            {
+                {nameof(DeclarationRelationVisitor), new DeclarationRelationVisitor().PrettyPrint()},
+                {nameof(ExceptionsThrownRelationVisitor), new ExceptionsThrownRelationVisitor().PrettyPrint()},
+                {nameof(ExternCallsRelationVisitor), new ExternCallsRelationVisitor().PrettyPrint()},
+                {nameof(ExternDataRelationVisitor), new ExternDataRelationVisitor().PrettyPrint()},
+                {nameof(FieldsRelationVisitor), new FieldsRelationVisitor().PrettyPrint()},
+                {nameof(HierarchyRelationVisitor), new HierarchyRelationVisitor().PrettyPrint()},
+                {nameof(LocalVariablesRelationVisitor), new LocalVariablesRelationVisitor().PrettyPrint()},
+                {nameof(ObjectCreationRelationVisitor), new ObjectCreationRelationVisitor().PrettyPrint()},
+                {nameof(ParameterRelationVisitor), new ParameterRelationVisitor().PrettyPrint()},
+                {nameof(PropertiesRelationVisitor), new PropertiesRelationVisitor().PrettyPrint()},
+                {nameof(ReturnValueRelationVisitor), new ReturnValueRelationVisitor().PrettyPrint()},
+            };
+            
             if (repositoryModel == null)
             {
                 return new RelationsRepresentation();
@@ -65,20 +81,11 @@ namespace HoneydewExtractors.Processors
                             {
                                 try
                                 {
-                                    var type = Type.GetType(metricModel.ExtractorName);
-                                    if (type == null)
+                                    if (!_metricChooseStrategy.Choose(metricModel.ExtractorName))
                                     {
                                         continue;
                                     }
 
-                                    if (!_metricChooseStrategy.Choose(type))
-                                    {
-                                        continue;
-                                    }
-
-                                    var instance = Activator.CreateInstance(type);
-                                    if (instance is IRelationVisitor relationVisitor)
-                                    {
                                         var dictionary = (Dictionary<string, int>)metricModel.Value;
                                         foreach (var (targetName, count) in dictionary)
                                         {
@@ -120,7 +127,7 @@ namespace HoneydewExtractors.Processors
 
                                             void AddToDependencyDictionary(string filePath)
                                             {
-                                                if (dependencyDictionary.TryGetValue(relationVisitor.PrettyPrint(),
+                                                if (dependencyDictionary.TryGetValue(extractorDict[metricModel.ExtractorName],
                                                     out var dependency))
                                                 {
                                                     if (dependency.ContainsKey(filePath))
@@ -134,7 +141,7 @@ namespace HoneydewExtractors.Processors
                                                 }
                                                 else
                                                 {
-                                                    dependencyDictionary.Add(relationVisitor.PrettyPrint(),
+                                                    dependencyDictionary.Add(extractorDict[metricModel.ExtractorName],
                                                         new Dictionary<string, int>
                                                         {
                                                             { filePath, count }
@@ -142,7 +149,6 @@ namespace HoneydewExtractors.Processors
                                                 }
                                             }
                                         }
-                                    }
                                 }
                                 catch (Exception)
                                 {
