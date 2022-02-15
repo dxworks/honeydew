@@ -103,6 +103,8 @@ internal class ScriptRunner
                 }
             }
 
+            _logger.Log($"Running Script {script.GetType().Name}");
+
             script.Run(arguments);
         }
         catch (Exception e)

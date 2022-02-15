@@ -165,10 +165,9 @@ public class ExportRelationsBetweenSolutionsAndProjectsScripts : Script
     private static string GetSolutionProjectClustersDotFile(RepositoryModel repositoryModel)
     {
         var graph = new Graph.Graph("Solution Project Relations", true);
-
         foreach (var solution in repositoryModel.Solutions)
         {
-            var subGraph = graph.AddSubGraph(Path.GetFileNameWithoutExtension(solution.FilePath));
+            var subGraph = graph.AddSubGraph($"cluster_{Path.GetFileNameWithoutExtension(solution.FilePath)}");
             foreach (var project in solution.Projects)
             {
                 graph.AddNodeToSubGraph(subGraph, project.Name);
@@ -208,13 +207,13 @@ public class ExportRelationsBetweenSolutionsAndProjectsScripts : Script
             DefaultSubGraphProperties =
             {
                 Color = Color.Coral,
-                Style = DotSubGraphStyle.Solid
+                Style = DotSubGraphStyle.Filled
             }
         };
 
         foreach (var solution in repositoryModel.Solutions)
         {
-            var subGraph = graph.AddSubGraph(Path.GetFileNameWithoutExtension(solution.FilePath));
+            var subGraph = graph.AddSubGraph($"cluster_{Path.GetFileNameWithoutExtension(solution.FilePath)}");
             foreach (var project in solution.Projects)
             {
                 foreach (var reference in project.ProjectReferences)

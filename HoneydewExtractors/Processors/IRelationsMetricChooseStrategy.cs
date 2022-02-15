@@ -1,9 +1,6 @@
-﻿using System;
+﻿namespace HoneydewExtractors.Processors;
 
-namespace HoneydewExtractors.Processors
+public interface IRelationsMetricChooseStrategy
 {
-    public interface IRelationsMetricChooseStrategy
-    {
-        bool Choose(Type type);
-    }
+    bool Choose(string type);
 }
