@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace HoneydewModels.Types
+namespace HoneydewModels.Types;
+
+public interface ICallingMethodsType : INamedType
 {
-    public interface ICallingMethodsType : IContainedType
-    {
-        public IList<IMethodSignatureType> CalledMethods { get; set; }
-    }
+    public IList<IMethodCallType> CalledMethods { get; set; }
 }

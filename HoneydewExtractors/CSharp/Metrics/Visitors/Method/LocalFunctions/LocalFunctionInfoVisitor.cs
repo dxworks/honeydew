@@ -4,11 +4,11 @@ using System.Linq;
 using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
-using HoneydewExtractors.CSharp.Metrics.Extraction;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static HoneydewExtractors.CSharp.Metrics.Extraction.CSharpExtractionHelperMethods;
 
 namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 
@@ -22,8 +22,8 @@ public class LocalFunctionInfoVisitor : CompositeVisitor, ICSharpLocalFunctionVi
         IMethodTypeWithLocalFunctions modelType)
     {
         var returnType =
-            CSharpExtractionHelperMethods.GetFullName(syntaxNode.ReturnType, semanticModel, out var isNullable);
-        var returnTypeModifier = CSharpExtractionHelperMethods.SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
+            GetFullName(syntaxNode.ReturnType, semanticModel, out var isNullable);
+        var returnTypeModifier = SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
 
         modelType.Name = syntaxNode.Identifier.ToString();
         modelType.ReturnValue = new ReturnValueModel
@@ -32,11 +32,10 @@ public class LocalFunctionInfoVisitor : CompositeVisitor, ICSharpLocalFunctionVi
             Modifier = returnTypeModifier,
             IsNullable = isNullable
         };
-        modelType.ContainingTypeName = CSharpExtractionHelperMethods.GetParentDeclaredType(syntaxNode, semanticModel);
         modelType.Modifier = syntaxNode.Modifiers.ToString();
 
         modelType.AccessModifier = "";
-        modelType.CyclomaticComplexity = CSharpExtractionHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
+        modelType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
 
         if (syntaxNode.Body == null)
         {

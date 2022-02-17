@@ -134,7 +134,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Attributes
             {
                 Assert.Equal(3, genericParameter.Attributes.Count);
 
-                Assert.Equal("parameter", genericParameter.Attributes[0].Target);
+                Assert.Equal("parameter", genericParameter.Attributes[0].TargetType);
                 Assert.Equal("System.ComponentModel.TypeConverterAttribute", genericParameter.Attributes[0].Name);
                 Assert.Equal("Namespace1.MyAttribute", genericParameter.Attributes[1].Name);
                 Assert.Equal("Extern", genericParameter.Attributes[2].Name);

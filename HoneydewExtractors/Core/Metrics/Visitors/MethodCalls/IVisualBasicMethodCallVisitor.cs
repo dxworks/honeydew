@@ -2,9 +2,9 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 
-namespace HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+namespace HoneydewExtractors.Core.Metrics.Visitors.MethodCalls;
 
-public interface IVisualBasicMethodSignatureVisitor : IMethodSignatureVisitor,
+public interface IVisualBasicMethodCallVisitor : IMethodCallVisitor,
     IExtractionVisitor<InvocationExpressionSyntax, SemanticModel, IMethodSignatureType>
 {
 }

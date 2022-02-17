@@ -37,12 +37,37 @@ public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICS
 
     public IMethodType Visit(MethodDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
     {
-        return ExtractAttributesFromMethod(syntaxNode, semanticModel, modelType);
+        foreach (var attributeType in ExtractAttributesFromMethod(syntaxNode, semanticModel))
+        {
+            if (attributeType.TargetType == "return")
+            {
+                modelType.ReturnValue.Attributes.Add(attributeType);
+            }
+            else
+            {
+                modelType.Attributes.Add(attributeType);
+            }
+        }
+
+        return modelType;
     }
 
-    public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
+    public IAccessorType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorType modelType)
     {
-        return ExtractAttributesFromMethod(syntaxNode, semanticModel, modelType);
+        foreach (var attributeType in ExtractAttributesFromMethod(syntaxNode, semanticModel))
+        {
+            if (attributeType.TargetType == "return")
+            {
+                modelType.ReturnValue.Attributes.Add(attributeType);
+            }
+            else
+            {
+                modelType.Attributes.Add(attributeType);
+            }
+        }
+
+        return modelType;
     }
 
     public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
@@ -127,23 +152,24 @@ public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICS
                     }
                 }
 
-                attributeModel.Target = target;
+                attributeModel.TargetType = target;
 
                 modelType.Attributes.Add(attributeModel);
             }
         }
     }
 
-    private IMethodType ExtractAttributesFromMethod(SyntaxNode syntaxNode, SemanticModel semanticModel,
-        IMethodType modelType)
+    private IEnumerable<IAttributeType> ExtractAttributesFromMethod(SyntaxNode syntaxNode, SemanticModel semanticModel)
     {
+        var attributes = new List<IAttributeType>();
+
         foreach (var attributeListSyntax in syntaxNode.ChildNodes().OfType<AttributeListSyntax>())
         {
             foreach (var attributeSyntax in attributeListSyntax.Attributes)
             {
                 IAttributeType attributeModel = new AttributeModel();
 
-                attributeModel.Target = "method";
+                attributeModel.TargetType = "method";
 
                 foreach (var visitor in GetContainedVisitors())
                 {
@@ -160,17 +186,10 @@ public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICS
                     }
                 }
 
-                if (attributeModel.Target == "return")
-                {
-                    modelType.ReturnValue.Attributes.Add(attributeModel);
-                }
-                else
-                {
-                    modelType.Attributes.Add(attributeModel);
-                }
+                attributes.Add(attributeModel);
             }
         }
 
-        return modelType;
+        return attributes;
     }
 }

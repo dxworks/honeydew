@@ -5,6 +5,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace HoneydewExtractors.Core.Metrics.Visitors.Methods;
 
 public interface ICSharpArrowExpressionMethodVisitor : IMethodVisitor,
-    IExtractionVisitor<ArrowExpressionClauseSyntax, SemanticModel, IMethodType>
+    IExtractionVisitor<ArrowExpressionClauseSyntax, SemanticModel, IAccessorType>
 {
 }

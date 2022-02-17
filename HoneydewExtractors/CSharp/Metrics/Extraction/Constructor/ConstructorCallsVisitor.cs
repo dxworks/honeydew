@@ -6,6 +6,7 @@ using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static HoneydewExtractors.CSharp.Metrics.Extraction.CSharpExtractionHelperMethods;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Constructor;
 
@@ -28,45 +29,42 @@ public class ConstructorCallsVisitor : ICSharpConstructorVisitor
         return modelType;
     }
 
-    private IMethodSignatureType ExtractInfoAboutConstructorCalls(ConstructorDeclarationSyntax syntax,
+    private static IMethodCallType ExtractInfoAboutConstructorCalls(ConstructorDeclarationSyntax syntaxNode,
         SemanticModel semanticModel)
     {
-        if (syntax.Initializer == null)
+        if (syntaxNode.Initializer == null)
         {
             return null;
         }
 
-        var containingClassName = "";
         var baseName = CSharpConstants.ObjectIdentifier;
 
-        if (syntax.Parent is BaseTypeDeclarationSyntax baseTypeDeclarationSyntax)
+        if (syntaxNode.Parent is BaseTypeDeclarationSyntax baseTypeDeclarationSyntax)
         {
-            containingClassName =
-                CSharpExtractionHelperMethods.GetFullName(baseTypeDeclarationSyntax, semanticModel).Name;
-            baseName = CSharpExtractionHelperMethods.GetBaseClassName(baseTypeDeclarationSyntax, semanticModel).Name;
+            baseName = GetBaseClassName(baseTypeDeclarationSyntax, semanticModel).Name;
         }
 
-        var methodName = syntax.Identifier.ToString();
-        if (syntax.Initializer.ThisOrBaseKeyword.ValueText == "base")
+        var methodName = syntaxNode.Identifier.ToString();
+        if (syntaxNode.Initializer.ThisOrBaseKeyword.ValueText == "base")
         {
-            containingClassName = baseName;
             methodName = baseName;
         }
 
         IList<IParameterType> parameterModels = new List<IParameterType>();
 
-        var methodSymbol = CSharpExtractionHelperMethods.GetMethodSymbol(syntax.Initializer, semanticModel);
+        var methodSymbol = GetMethodSymbol(syntaxNode.Initializer, semanticModel);
 
         if (methodSymbol != null)
         {
-            parameterModels = CSharpExtractionHelperMethods.GetParameters(methodSymbol);
+            parameterModels = GetParameters(methodSymbol);
             methodName = methodSymbol.ContainingType.Name;
         }
 
         return new MethodCallModel
         {
             Name = methodName,
-            ContainingTypeName = containingClassName,
+            DefinitionClassName = GetOriginalMethodDefinitionClassName(syntaxNode, semanticModel),
+            LocationClassName = GetActualMethodDefinitionClassName(syntaxNode, semanticModel),
             ParameterTypes = parameterModels
         };
     }

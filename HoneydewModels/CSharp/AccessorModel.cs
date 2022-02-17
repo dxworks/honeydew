@@ -3,9 +3,11 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp;
 
-public class DestructorModel : IDestructorType
+public class AccessorModel : IAccessorType
 {
     public string Name { get; set; }
+
+    public IReturnValueType ReturnValue { get; set; }
 
     public IList<IParameterType> ParameterTypes { get; set; } = new List<IParameterType>();
 
@@ -13,9 +15,9 @@ public class DestructorModel : IDestructorType
 
     public IList<AccessedField> AccessedFields { get; set; } = new List<AccessedField>();
 
-    public string AccessModifier { get; set; }
+    public string AccessModifier { get; set; } = "";
 
-    public string Modifier { get; set; }
+    public string Modifier { get; set; } = "";
 
     public int CyclomaticComplexity { get; set; }
 

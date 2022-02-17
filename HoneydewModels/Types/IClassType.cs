@@ -2,8 +2,13 @@
 
 namespace HoneydewModels.Types
 {
-    public interface IClassType : IContainedType, ITypeWithGenericParameters, ITypeWithModifiers, ITypeWithAttributes, ITypeWithMetrics
+    public interface IClassType : INamedType, ITypeWithGenericParameters, ITypeWithModifiers, ITypeWithAttributes,
+        ITypeWithMetrics
     {
+        public string ContainingNamespaceName { get; set; }
+
+        public string ContainingClassName { get; set; }
+
         public string ClassType { get; set; }
 
         public string FilePath { get; set; }

@@ -1,14 +1,17 @@
 ﻿using System.Collections.Generic;
 using HoneydewModels.Types;
 
-namespace HoneydewModels.CSharp
+namespace HoneydewModels.CSharp;
+
+public record MethodCallModel : IMethodCallType
 {
-    public record MethodCallModel : IMethodSignatureType
-    {
-        public string Name { get; set; }
+    public string Name { get; set; }
 
-        public string ContainingTypeName { get; set; }
+    public string DefinitionClassName { get; set; }
 
-        public IList<IParameterType> ParameterTypes { get; set; } = new List<IParameterType>();
-    }
+    public string LocationClassName { get; set; }
+
+    public IList<string> DefinitionMethodNames { get; set; } = new List<string>();
+
+    public IList<IParameterType> ParameterTypes { get; set; } = new List<IParameterType>();
 }

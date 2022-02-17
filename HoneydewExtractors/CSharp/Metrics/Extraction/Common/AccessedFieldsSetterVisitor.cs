@@ -45,14 +45,16 @@ public class AccessedFieldsSetterVisitor : CompositeVisitor, ICSharpMethodVisito
         return modelType;
     }
 
-    public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
+    public IAccessorType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorType modelType)
     {
         SetAccessedFields(syntaxNode, semanticModel, modelType);
 
         return modelType;
     }
 
-    public IMethodType Visit(ArrowExpressionClauseSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
+    public IAccessorType Visit(ArrowExpressionClauseSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorType modelType)
     {
         SetAccessedFields(syntaxNode, semanticModel, modelType);
 

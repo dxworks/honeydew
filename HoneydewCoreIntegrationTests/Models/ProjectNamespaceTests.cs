@@ -17,7 +17,11 @@ namespace HoneydewCoreIntegrationTests.Models
         [Fact]
         public void Add_ShouldAddNewClass_WhenClassIsFromDefaultNamespace()
         {
-            _sut.Add(new ClassModel { Name = "GlobalClass" });
+            _sut.Add(new ClassModel
+            {
+                Name = "GlobalClass",
+                ContainingNamespaceName = "",
+            });
 
             Assert.Equal("", _sut.Name);
             Assert.Equal(1, _sut.ClassNames.Count);
@@ -27,7 +31,11 @@ namespace HoneydewCoreIntegrationTests.Models
         [Fact]
         public void Add_ShouldAddNewClass_WhenANewClassModelIsAdded()
         {
-            _sut.Add(new ClassModel { Name = "Models.Class1" });
+            _sut.Add(new ClassModel
+            {
+                Name = "Models.Class1",
+                ContainingNamespaceName = "Models",
+            });
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(1, _sut.ClassNames.Count);
@@ -37,9 +45,21 @@ namespace HoneydewCoreIntegrationTests.Models
         [Fact]
         public void Add_ShouldAddNewClasses_WhenMultipleClassNamesAreAdded()
         {
-            _sut.Add(new ClassModel { Name = "Models.Class1" });
-            _sut.Add(new ClassModel { Name = "Models.Class2" });
-            _sut.Add(new ClassModel { Name = "Models.Class3" });
+            _sut.Add(new ClassModel
+            {
+                Name = "Models.Class1",
+                ContainingNamespaceName = "Models",
+            });
+            _sut.Add(new ClassModel
+            {
+                Name = "Models.Class2",
+                ContainingNamespaceName = "Models",
+            });
+            _sut.Add(new ClassModel
+            {
+                Name = "Models.Class3",
+                ContainingNamespaceName = "Models",
+            });
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(3, _sut.ClassNames.Count);
@@ -51,9 +71,21 @@ namespace HoneydewCoreIntegrationTests.Models
         [Fact]
         public void Add_ShouldAddNewClassOnce_WhenTheSameClassNamesAdded()
         {
-            _sut.Add(new ClassModel { Name = "Models.Class1" });
-            _sut.Add(new ClassModel { Name = "Models.Class2" });
-            _sut.Add(new ClassModel { Name = "Models.Class1" });
+            _sut.Add(new ClassModel
+            {
+                Name = "Models.Class1",
+                ContainingNamespaceName = "Models",
+            });
+            _sut.Add(new ClassModel
+            {
+                Name = "Models.Class2",
+                ContainingNamespaceName = "Models",
+            });
+            _sut.Add(new ClassModel
+            {
+                Name = "Models.Class1",
+                ContainingNamespaceName = "Models",
+            });
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(2, _sut.ClassNames.Count);
@@ -64,8 +96,16 @@ namespace HoneydewCoreIntegrationTests.Models
         [Fact]
         public void Add_ShouldNotAddClassOnce_WhenNamespaceIsDifferentInClass()
         {
-            _sut.Add(new ClassModel { Name = "Models.Class1" });
-            _sut.Add(new ClassModel { Name = "Models.Items.Class2" });
+            _sut.Add(new ClassModel
+            {
+                Name = "Models.Class1",
+                ContainingNamespaceName = "Models",
+            });
+            _sut.Add(new ClassModel
+            {
+                Name = "Models.Items.Class2",
+                ContainingNamespaceName = "Models.Items",
+            });
 
             Assert.Equal("Models", _sut.Name);
             Assert.Equal(1, _sut.ClassNames.Count);

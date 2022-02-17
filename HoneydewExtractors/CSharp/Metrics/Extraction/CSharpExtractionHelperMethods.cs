@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction;
 
-public static class CSharpExtractionHelperMethods
+public static partial class CSharpExtractionHelperMethods
 {
     public static IEntityType GetFullName(SyntaxNode syntaxNode, SemanticModel semanticModel, out bool isNullable)
     {
@@ -85,24 +85,20 @@ public static class CSharpExtractionHelperMethods
     public static MethodCallModel GetMethodCallModel(InvocationExpressionSyntax invocationExpressionSyntax,
         SemanticModel semanticModel)
     {
-        var calledMethodName = invocationExpressionSyntax.Expression.ToString();
-
-        var containingClassName = GetContainingType(invocationExpressionSyntax, semanticModel).Name;
-
-        return invocationExpressionSyntax.Expression switch
+        var methodName = invocationExpressionSyntax.Expression switch
         {
-            MemberAccessExpressionSyntax memberAccessExpressionSyntax => new MethodCallModel
-            {
-                Name = memberAccessExpressionSyntax.Name.ToString(),
-                ContainingTypeName = containingClassName,
-                ParameterTypes = GetParameters(invocationExpressionSyntax, semanticModel)
-            },
-            _ => new MethodCallModel
-            {
-                Name = calledMethodName,
-                ContainingTypeName = containingClassName,
-                ParameterTypes = GetParameters(invocationExpressionSyntax, semanticModel)
-            }
+            MemberAccessExpressionSyntax memberAccessExpressionSyntax => memberAccessExpressionSyntax.Name.ToString(),
+            _ => invocationExpressionSyntax.Expression.ToString()
+        };
+
+        return new MethodCallModel
+        {
+            Name = methodName,
+            DefinitionClassName = GetOriginalMethodDefinitionClassName(invocationExpressionSyntax, semanticModel),
+            LocationClassName = GetActualMethodDefinitionClassName(invocationExpressionSyntax, semanticModel),
+            ParameterTypes = GetParameters(invocationExpressionSyntax, semanticModel),
+            // todo
+            // CallLocationMethodNames = 
         };
     }
 
@@ -461,41 +457,6 @@ public static class CSharpExtractionHelperMethods
         return count;
     }
 
-    public static IEntityType GetAttributeContainingType(AttributeSyntax syntaxNode, SemanticModel semanticModel)
-    {
-        var accessorDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<AccessorDeclarationSyntax>();
-        if (accessorDeclarationSyntax != null)
-        {
-            return GetFullName(accessorDeclarationSyntax, semanticModel);
-        }
-
-        var propertyDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
-        if (propertyDeclarationSyntax != null)
-        {
-            return GetFullName(propertyDeclarationSyntax, semanticModel);
-        }
-
-        var baseMethodDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseMethodDeclarationSyntax>();
-        if (baseMethodDeclarationSyntax != null)
-        {
-            return GetFullName(baseMethodDeclarationSyntax, semanticModel);
-        }
-
-        var delegateDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<DelegateDeclarationSyntax>();
-        if (delegateDeclarationSyntax != null)
-        {
-            return GetFullName(delegateDeclarationSyntax, semanticModel);
-        }
-
-        var parentDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>();
-        if (parentDeclarationSyntax != null)
-        {
-            return GetFullName(parentDeclarationSyntax, semanticModel);
-        }
-
-        return CSharpFullNameProvider.CreateEntityTypeModel(syntaxNode.ToString());
-    }
-
     public static IEnumerable<IParameterType> GetParameters(AttributeSyntax attributeSyntax,
         SemanticModel semanticModel)
     {
@@ -580,7 +541,8 @@ public static class CSharpExtractionHelperMethods
             return new AccessedField
             {
                 Name = fieldSymbol.Name,
-                ContainingTypeName = fieldSymbol.ContainingType.ToString(),
+                DefinitionClassName = fieldSymbol.ContainingType.ToString(),
+                AccessLocationMethodName = fieldSymbol.ContainingType.ToString(),
                 Kind = GetAccessType(identifierNameSyntax),
             };
         }
@@ -590,7 +552,8 @@ public static class CSharpExtractionHelperMethods
             return new AccessedField
             {
                 Name = propertySymbol.Name,
-                ContainingTypeName = propertySymbol.ContainingType.ToString(),
+                DefinitionClassName = propertySymbol.ContainingType.ToString(),
+                AccessLocationMethodName = propertySymbol.ContainingType.ToString(),
                 Kind = GetAccessType(identifierNameSyntax),
             };
         }
@@ -605,7 +568,8 @@ public static class CSharpExtractionHelperMethods
             return new AccessedField
             {
                 Name = memberAccessExpressionSyntax.Name.ToString(),
-                ContainingTypeName = memberAccessExpressionSyntax.Expression.ToString(),
+                DefinitionClassName = memberAccessExpressionSyntax.Expression.ToString(),
+                AccessLocationMethodName = memberAccessExpressionSyntax.Expression.ToString(),
                 Kind = GetAccessType(memberAccessExpressionSyntax),
             };
         }

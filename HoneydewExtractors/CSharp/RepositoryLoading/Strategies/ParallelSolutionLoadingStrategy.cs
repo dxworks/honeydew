@@ -42,6 +42,7 @@ public class ParallelSolutionLoadingStrategy : ISolutionLoadingStrategy
         var dependencyGraph = solution.GetProjectDependencyGraph();
 
         var projectModels = new List<ProjectModel>();
+        var semaphore = new Semaphore(1, 1);
 
 
         var processedSolutionCount = 1;
@@ -52,7 +53,9 @@ public class ParallelSolutionLoadingStrategy : ISolutionLoadingStrategy
             if (project != null)
             {
                 var projectFilePath = ActualFilePathProvider.GetActualFilePath(project.FilePath);
+                semaphore.WaitOne();
                 solutionModel.ProjectsPaths.Add(projectFilePath);
+                semaphore.Release();
 
 
                 _logger.Log();
@@ -73,7 +76,9 @@ public class ParallelSolutionLoadingStrategy : ISolutionLoadingStrategy
                 {
                     if (projectModel != null)
                     {
+                        semaphore.WaitOne();
                         projectModels.Add(projectModel);
+                        semaphore.Release();
                     }
                     else
                     {

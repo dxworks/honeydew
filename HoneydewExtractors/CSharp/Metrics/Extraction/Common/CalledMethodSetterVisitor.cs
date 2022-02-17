@@ -5,8 +5,8 @@ using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Destructors;
+using HoneydewExtractors.Core.Metrics.Visitors.MethodCalls;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
-using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
@@ -19,7 +19,7 @@ public class CalledMethodSetterVisitor : CompositeVisitor, ICSharpMethodVisitor,
     ICSharpConstructorVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor,
     ICSharpArrowExpressionMethodVisitor, ICSharpDestructorVisitor
 {
-    public CalledMethodSetterVisitor(IEnumerable<IMethodSignatureVisitor> visitors) : base(visitors)
+    public CalledMethodSetterVisitor(IEnumerable<IMethodCallVisitor> visitors) : base(visitors)
     {
     }
 
@@ -46,14 +46,16 @@ public class CalledMethodSetterVisitor : CompositeVisitor, ICSharpMethodVisitor,
         return modelType;
     }
 
-    public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
+    public IAccessorType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorType modelType)
     {
         SetMethodCalls(syntaxNode, semanticModel, modelType);
 
         return modelType;
     }
 
-    public IMethodType Visit(ArrowExpressionClauseSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
+    public IAccessorType Visit(ArrowExpressionClauseSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorType modelType)
     {
         SetMethodCalls(syntaxNode, semanticModel, modelType);
 
@@ -92,15 +94,15 @@ public class CalledMethodSetterVisitor : CompositeVisitor, ICSharpMethodVisitor,
 
         foreach (var invocationExpressionSyntax in invocationExpressionSyntaxes)
         {
-            IMethodSignatureType methodModel = new MethodModel();
+            IMethodCallType methodCallModel = new MethodCallModel();
 
             foreach (var visitor in GetContainedVisitors())
             {
                 try
                 {
-                    if (visitor is ICSharpMethodSignatureVisitor extractionVisitor)
+                    if (visitor is ICSharpMethodCallVisitor extractionVisitor)
                     {
-                        methodModel = extractionVisitor.Visit(invocationExpressionSyntax, semanticModel, methodModel);
+                        methodCallModel = extractionVisitor.Visit(invocationExpressionSyntax, semanticModel, methodCallModel);
                     }
                 }
                 catch (Exception e)
@@ -110,7 +112,7 @@ public class CalledMethodSetterVisitor : CompositeVisitor, ICSharpMethodVisitor,
                 }
             }
 
-            modelType.CalledMethods.Add(methodModel);
+            modelType.CalledMethods.Add(methodCallModel);
         }
 
         return modelType;
@@ -127,15 +129,16 @@ public class CalledMethodSetterVisitor : CompositeVisitor, ICSharpMethodVisitor,
                 continue;
             }
 
-            IMethodSignatureType methodModel = new MethodModel();
+            IMethodCallType methodCallModel = new MethodCallModel();
 
             foreach (var visitor in GetContainedVisitors())
             {
                 try
                 {
-                    if (visitor is ICSharpMethodSignatureVisitor extractionVisitor)
+                    if (visitor is ICSharpMethodCallVisitor extractionVisitor)
                     {
-                        methodModel = extractionVisitor.Visit(invocationExpressionSyntax, semanticModel, methodModel);
+                        methodCallModel =
+                            extractionVisitor.Visit(invocationExpressionSyntax, semanticModel, methodCallModel);
                     }
                 }
                 catch (Exception e)
@@ -144,7 +147,7 @@ public class CalledMethodSetterVisitor : CompositeVisitor, ICSharpMethodVisitor,
                 }
             }
 
-            callingMethodsType.CalledMethods.Add(methodModel);
+            callingMethodsType.CalledMethods.Add(methodCallModel);
         }
     }
 }

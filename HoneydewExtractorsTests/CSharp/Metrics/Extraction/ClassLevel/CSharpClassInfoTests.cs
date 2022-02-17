@@ -83,11 +83,13 @@ public class CSharpClassInfoTests
         Assert.Equal("partial", classTypes[0].Modifier);
         Assert.Equal("private", classTypes[0].AccessModifier);
         Assert.Equal("Namespace1.C1", classTypes[0].Name);
-        Assert.Equal("Namespace1", classTypes[0].ContainingTypeName);
+        Assert.Equal("Namespace1", classTypes[0].ContainingNamespaceName);
+        Assert.Equal("", classTypes[0].ContainingClassName);
         
         Assert.Equal("partial", classTypes[1].Modifier);
         Assert.Equal("public", classTypes[1].AccessModifier);
         Assert.Equal("Namespace1.C1", classTypes[1].Name);
-        Assert.Equal("Namespace1", classTypes[1].ContainingTypeName);
+        Assert.Equal("Namespace1", classTypes[1].ContainingNamespaceName);
+        Assert.Equal("", classTypes[1].ContainingClassName);
     }
 }

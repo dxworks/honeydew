@@ -6,6 +6,7 @@ using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static HoneydewExtractors.CSharp.Metrics.Extraction.CSharpExtractionHelperMethods;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Field;
 
@@ -22,17 +23,12 @@ public class FieldInfoVisitor : ICSharpFieldVisitor
         var accessModifier = CSharpConstants.DefaultFieldAccessModifier;
         var modifier = allModifiers;
 
-        var containingClass = "";
-        if (syntaxNode.Parent is BaseTypeDeclarationSyntax classDeclarationSyntax)
-        {
-            containingClass = CSharpExtractionHelperMethods.GetFullName(classDeclarationSyntax, semanticModel, out _)
-                .Name;
-        }
+    
 
         CSharpConstants.SetModifiers(allModifiers, ref accessModifier, ref modifier);
 
         var typeName =
-            CSharpExtractionHelperMethods.GetFullName(syntaxNode.Declaration, semanticModel, out var isNullable);
+            GetFullName(syntaxNode.Declaration, semanticModel, out var isNullable);
 
         var isEvent = syntaxNode is EventFieldDeclarationSyntax;
 
@@ -46,7 +42,6 @@ public class FieldInfoVisitor : ICSharpFieldVisitor
                 IsEvent = isEvent,
                 Type = typeName,
                 Name = variable.Identifier.ToString(),
-                ContainingTypeName = containingClass,
                 IsNullable = isNullable
             });
         }

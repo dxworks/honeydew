@@ -33,8 +33,8 @@ public class LinesOfCodeVisitor : ICSharpPropertyVisitor, ICSharpMethodVisitor, 
         return modelType;
     }
 
-    public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
-        IMethodType modelType)
+    public IAccessorType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorType modelType)
     {
         modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
         return modelType;

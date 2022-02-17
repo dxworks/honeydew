@@ -4,6 +4,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static HoneydewExtractors.CSharp.Metrics.Extraction.CSharpExtractionHelperMethods;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 
@@ -20,11 +21,12 @@ public class BaseInfoClassVisitor : ICSharpClassVisitor
         CSharpConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier,
             ref modifier);
 
-        modelType.Name = CSharpExtractionHelperMethods.GetFullName(syntaxNode, semanticModel).Name;
+        modelType.Name = GetFullName(syntaxNode, semanticModel).Name;
         modelType.AccessModifier = accessModifier;
         modelType.Modifier = modifier;
         modelType.ClassType = syntaxNode.Kind().ToString().Replace("Declaration", "").ToLower();
-        modelType.ContainingTypeName = CSharpExtractionHelperMethods.GetParentDeclaredType(syntaxNode, semanticModel);
+        modelType.ContainingNamespaceName = GetContainingNamespaceName(syntaxNode, semanticModel);
+        modelType.ContainingClassName = GetContainingClassName(syntaxNode, semanticModel);
 
         return modelType;
     }

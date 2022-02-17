@@ -1,6 +1,5 @@
-﻿namespace HoneydewModels.Types
+﻿namespace HoneydewModels.Types;
+
+public interface IConstructorType : IMethodSkeletonType, ITypeWithLocalFunctions
 {
-    public interface IConstructorType : IMethodSkeletonType
-    {
-    }
 }

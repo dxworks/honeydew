@@ -1,6 +1,5 @@
-﻿namespace HoneydewModels.Types
+﻿namespace HoneydewModels.Types;
+
+public interface IMethodTypeWithLocalFunctions : IMethodType
 {
-    public interface IMethodTypeWithLocalFunctions : IMethodType, ITypeWithLocalFunctions
-    {
-    }
 }

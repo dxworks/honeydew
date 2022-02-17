@@ -2,47 +2,46 @@
 using System.Linq;
 using HoneydewModels.Types;
 
-namespace HoneydewModels.CSharp
+namespace HoneydewModels.CSharp;
+
+public record ProjectModel
 {
-    public record ProjectModel
+    public string Name { get; set; }
+
+    public string FilePath { get; set; }
+
+    public IList<string> ProjectReferences { get; set; } = new List<string>();
+
+    public IList<NamespaceModel> Namespaces { get; set; } = new List<NamespaceModel>();
+
+    public IList<ICompilationUnitType> CompilationUnits { get; set; } = new List<ICompilationUnitType>();
+
+    public ProjectModel()
     {
-        public string Name { get; set; }
+    }
 
-        public string FilePath { get; set; }
+    public ProjectModel(string name)
+    {
+        Name = name;
+    }
 
-        public IList<string> ProjectReferences { get; set; } = new List<string>();
+    public void Add(ICompilationUnitType compilationUnitType)
+    {
+        CompilationUnits.Add(compilationUnitType);
 
-        public IList<NamespaceModel> Namespaces { get; set; } = new List<NamespaceModel>();
-
-        public IList<ICompilationUnitType> CompilationUnits { get; set; } = new List<ICompilationUnitType>();
-
-        public ProjectModel()
+        foreach (var classType in compilationUnitType.ClassTypes)
         {
-        }
+            var namespaceModel = Namespaces.FirstOrDefault(model => model.Name == classType.ContainingNamespaceName);
 
-        public ProjectModel(string name)
-        {
-            Name = name;
-        }
-
-        public void Add(ICompilationUnitType compilationUnitType)
-        {
-            CompilationUnits.Add(compilationUnitType);
-
-            foreach (var classType in compilationUnitType.ClassTypes)
+            if (namespaceModel == null)
             {
-                var namespaceModel = Namespaces.FirstOrDefault(model => model.Name == classType.ContainingTypeName);
-
-                if (namespaceModel == null)
-                {
-                    var model = new NamespaceModel();
-                    model.Add(classType);
-                    Namespaces.Add(model);
-                }
-                else
-                {
-                    namespaceModel.Add(classType);
-                }
+                var model = new NamespaceModel();
+                model.Add(classType);
+                Namespaces.Add(model);
+            }
+            else
+            {
+                namespaceModel.Add(classType);
             }
         }
     }

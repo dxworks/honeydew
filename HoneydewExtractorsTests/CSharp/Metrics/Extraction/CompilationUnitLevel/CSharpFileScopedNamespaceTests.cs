@@ -54,6 +54,7 @@ public {classType} Foo {{ }}";
         Assert.Single(compilationUnit.ClassTypes);
         Assert.Equal("Namespace1.Foo", classModel.Name);
         Assert.Equal(classType, classModel.ClassType);
-        Assert.Equal("Namespace1", classModel.ContainingTypeName);
+        Assert.Equal("Namespace1", classModel.ContainingNamespaceName);
+        Assert.Equal("", classModel.ContainingClassName);
     }
 }

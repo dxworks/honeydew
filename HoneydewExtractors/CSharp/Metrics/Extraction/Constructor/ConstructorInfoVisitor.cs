@@ -4,6 +4,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static HoneydewExtractors.CSharp.Metrics.Extraction.CSharpExtractionHelperMethods;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Constructor;
 
@@ -15,12 +16,6 @@ public class ConstructorInfoVisitor : ICSharpConstructorVisitor
 
     public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, SemanticModel semanticModel, IConstructorType modelType)
     {
-        var containingClassName = "";
-        if (syntaxNode.Parent is BaseTypeDeclarationSyntax baseTypeDeclarationSyntax)
-        {
-            containingClassName = CSharpExtractionHelperMethods.GetFullName(baseTypeDeclarationSyntax, semanticModel).Name;
-        }
-
         GetModifiersForNode(syntaxNode, out var accessModifier, out var modifier);
 
         if (modifier == "static")
@@ -29,15 +24,14 @@ public class ConstructorInfoVisitor : ICSharpConstructorVisitor
         }
             
         modelType.Name = syntaxNode.Identifier.ToString();
-        modelType.ContainingTypeName = containingClassName;
         modelType.Modifier = modifier;
         modelType.AccessModifier = accessModifier;
-        modelType.CyclomaticComplexity = CSharpExtractionHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
+        modelType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
 
         return modelType;
     }
 
-    private void GetModifiersForNode(MemberDeclarationSyntax node, out string accessModifier, out string modifier)
+    private static void GetModifiersForNode(MemberDeclarationSyntax node, out string accessModifier, out string modifier)
     {
         var allModifiers = node.Modifiers.ToString();
 

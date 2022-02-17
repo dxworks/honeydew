@@ -42,7 +42,7 @@ public class GotoStatementVisitor : ICSharpMethodVisitor, ICSharpConstructorVisi
         return modelType;
     }
 
-    public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
+    public IAccessorType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel, IAccessorType modelType)
     {
         modelType.Metrics.Add(CalculateGotoStatements(syntaxNode));
 

@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace HoneydewModels.Types
+namespace HoneydewModels.Types;
+
+public interface IPropertyType : IFieldType, ITypeWithCyclomaticComplexity, ITypeWithLinesOfCode
 {
-    public interface IPropertyType : IFieldType, ITypeWithCyclomaticComplexity, ITypeWithLinesOfCode
-    {
-        public IList<IMethodType> Accessors { get; set; }
-    }
+    public IList<IAccessorType> Accessors { get; set; }
 }

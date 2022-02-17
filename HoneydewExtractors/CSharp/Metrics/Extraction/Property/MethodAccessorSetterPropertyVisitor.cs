@@ -28,7 +28,7 @@ public class MethodAccessorSetterPropertyVisitor : CompositeVisitor, ICSharpProp
                 return modelType;
             }
 
-            IMethodType methodModel = new MethodModel();
+            IAccessorType accessorModel = new AccessorModel();
 
             foreach (var visitor in GetContainedVisitors())
             {
@@ -36,8 +36,8 @@ public class MethodAccessorSetterPropertyVisitor : CompositeVisitor, ICSharpProp
                 {
                     if (visitor is ICSharpArrowExpressionMethodVisitor extractionVisitor)
                     {
-                        methodModel = extractionVisitor.Visit(propertyDeclarationSyntax.ExpressionBody,
-                            semanticModel, methodModel);
+                        accessorModel = extractionVisitor.Visit(propertyDeclarationSyntax.ExpressionBody,
+                            semanticModel, accessorModel);
                     }
                 }
                 catch (Exception e)
@@ -47,7 +47,7 @@ public class MethodAccessorSetterPropertyVisitor : CompositeVisitor, ICSharpProp
                 }
             }
 
-            modelType.Accessors.Add(methodModel);
+            modelType.Accessors.Add(accessorModel);
 
             return modelType;
         }
@@ -55,7 +55,7 @@ public class MethodAccessorSetterPropertyVisitor : CompositeVisitor, ICSharpProp
         // property has accessors
         foreach (var accessor in syntaxNode.AccessorList.Accessors)
         {
-            IMethodType methodModel = new MethodModel();
+            IAccessorType accessorModel = new AccessorModel();
 
             foreach (var visitor in GetContainedVisitors())
             {
@@ -63,7 +63,7 @@ public class MethodAccessorSetterPropertyVisitor : CompositeVisitor, ICSharpProp
                 {
                     if (visitor is ICSharpMethodAccessorVisitor extractionVisitor)
                     {
-                        methodModel = extractionVisitor.Visit(accessor, semanticModel, methodModel);
+                        accessorModel = extractionVisitor.Visit(accessor, semanticModel, accessorModel);
                     }
                 }
                 catch (Exception e)
@@ -72,7 +72,7 @@ public class MethodAccessorSetterPropertyVisitor : CompositeVisitor, ICSharpProp
                 }
             }
 
-            modelType.Accessors.Add(methodModel);
+            modelType.Accessors.Add(accessorModel);
         }
 
         return modelType;

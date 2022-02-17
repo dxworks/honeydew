@@ -5,6 +5,7 @@ using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static HoneydewExtractors.CSharp.Metrics.Extraction.CSharpExtractionHelperMethods;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Delegate;
 
@@ -22,11 +23,11 @@ public class BaseInfoDelegateVisitor : ICSharpDelegateVisitor
         CSharpConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier,
             ref modifier);
 
-        var returnType = CSharpExtractionHelperMethods.GetFullName(syntaxNode.ReturnType, semanticModel);
+        var returnType = GetFullName(syntaxNode.ReturnType, semanticModel);
 
-        var returnTypeModifier = CSharpExtractionHelperMethods.SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
+        var returnTypeModifier = SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
 
-        var name = CSharpExtractionHelperMethods.GetFullName(syntaxNode, semanticModel).Name;
+        var name = GetFullName(syntaxNode, semanticModel).Name;
         modelType.Name = name;
         modelType.AccessModifier = accessModifier;
         modelType.Modifier = modifier;
@@ -45,8 +46,8 @@ public class BaseInfoDelegateVisitor : ICSharpDelegateVisitor
                 Name = CSharpConstants.SystemDelegate
             }
         });
-        modelType.ContainingTypeName = name
-            .Replace(syntaxNode.Identifier.ToString(), "").Trim('.');
+        modelType.ContainingClassName = GetContainingClassName(syntaxNode, semanticModel);
+        modelType.ContainingNamespaceName = GetContainingNamespaceName(syntaxNode, semanticModel);
 
         return modelType;
     }

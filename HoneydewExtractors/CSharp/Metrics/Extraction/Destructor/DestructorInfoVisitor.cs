@@ -3,6 +3,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Destructors;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static HoneydewExtractors.CSharp.Metrics.Extraction.CSharpExtractionHelperMethods;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Destructor;
 
@@ -12,19 +13,13 @@ public class DestructorInfoVisitor : ICSharpDestructorVisitor
     {
     }
 
-    public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, SemanticModel semanticModel, IDestructorType modelType)
+    public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IDestructorType modelType)
     {
-        var containingClassName = "";
-        if (syntaxNode.Parent is BaseTypeDeclarationSyntax baseTypeDeclarationSyntax)
-        {
-            containingClassName = CSharpExtractionHelperMethods.GetFullName(baseTypeDeclarationSyntax, semanticModel).Name;
-        }
-
         modelType.Name = $"~{syntaxNode.Identifier.ToString()}";
-        modelType.ContainingTypeName = containingClassName;
         modelType.Modifier = "";
         modelType.AccessModifier = "";
-        modelType.CyclomaticComplexity = CSharpExtractionHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
+        modelType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
 
         return modelType;
     }

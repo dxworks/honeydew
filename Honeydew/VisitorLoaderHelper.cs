@@ -10,8 +10,8 @@ using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Destructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Fields;
 using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
+using HoneydewExtractors.Core.Metrics.Visitors.MethodCalls;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
-using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
 using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics.Extraction.AccessField;
@@ -45,7 +45,7 @@ namespace Honeydew
                 new AttributeInfoVisitor()
             });
 
-            var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<ICSharpMethodSignatureVisitor>
+            var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<ICSharpMethodCallVisitor>
             {
                 new MethodCallInfoVisitor()
             });

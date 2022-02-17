@@ -4,6 +4,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static HoneydewExtractors.CSharp.Metrics.Extraction.CSharpExtractionHelperMethods;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Property;
 
@@ -20,12 +21,7 @@ public class PropertyInfoVisitor : ICSharpPropertyVisitor
         var accessModifier = CSharpConstants.DefaultFieldAccessModifier;
         var modifier = allModifiers;
 
-        var containingClass = "";
         var classDeclarationSyntax = syntaxNode.Parent as BaseTypeDeclarationSyntax;
-        if (classDeclarationSyntax != null)
-        {
-            containingClass = CSharpExtractionHelperMethods.GetFullName(classDeclarationSyntax, semanticModel).Name;
-        }
 
         CSharpConstants.SetModifiers(allModifiers, ref accessModifier, ref modifier);
 
@@ -34,9 +30,9 @@ public class PropertyInfoVisitor : ICSharpPropertyVisitor
             modifier = CSharpConstants.AbstractIdentifier;
         }
 
-        var typeName = CSharpExtractionHelperMethods.GetFullName(syntaxNode.Type, semanticModel, out var isNullable);
+        var typeName = GetFullName(syntaxNode.Type, semanticModel, out var isNullable);
 
-        modifier = CSharpExtractionHelperMethods.SetTypeModifier(syntaxNode.Type.ToString(), modifier);
+        modifier = SetTypeModifier(syntaxNode.Type.ToString(), modifier);
 
         var isEvent = false;
         var name = "";
@@ -57,8 +53,7 @@ public class PropertyInfoVisitor : ICSharpPropertyVisitor
         modelType.IsEvent = isEvent;
         modelType.Type = typeName;
         modelType.Name = name;
-        modelType.ContainingTypeName = containingClass;
-        modelType.CyclomaticComplexity = CSharpExtractionHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
+        modelType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
         modelType.IsNullable = isNullable;
 
         return modelType;
