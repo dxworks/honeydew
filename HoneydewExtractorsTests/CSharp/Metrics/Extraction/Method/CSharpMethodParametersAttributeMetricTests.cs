@@ -83,7 +83,7 @@ public class CSharpMethodParametersAttributeMetricTests
             var attributeTypes = parameterType.Attributes;
 
             Assert.Equal(1, attributeTypes.Count);
-            Assert.Equal("parameter", attributeTypes[0].TargetType);
+            Assert.Equal("parameter", attributeTypes[0].Target);
             Assert.Equal("System.Diagnostics.CodeAnalysis.AllowNullAttribute", attributeTypes[0].Name);
             Assert.Empty(attributeTypes[0].ParameterTypes);
         }
@@ -108,7 +108,7 @@ public class CSharpMethodParametersAttributeMetricTests
             Assert.Equal(2, attributeTypes.Count);
             foreach (var attributeType in attributeTypes)
             {
-                Assert.Equal("parameter", attributeType.TargetType);
+                Assert.Equal("parameter", attributeType.Target);
             }
 
             var attribute1 = attributeTypes[0];
@@ -143,7 +143,7 @@ public class CSharpMethodParametersAttributeMetricTests
             {
                 foreach (var attribute in parameterType.Attributes)
                 {
-                    Assert.Equal("parameter", attribute.TargetType);
+                    Assert.Equal("parameter", attribute.Target);
                     Assert.Equal("MyNamespace.MyAttribute", attribute.Name);
                 }
             }
@@ -192,7 +192,7 @@ public class CSharpMethodParametersAttributeMetricTests
 
         var methodType3 = classType.Methods[2];
         Assert.Equal(1, methodType3.Attributes.Count);
-        Assert.Equal("method", methodType3.Attributes[0].TargetType);
+        Assert.Equal("method", methodType3.Attributes[0].Target);
         Assert.Equal("System.ObsoleteAttribute", methodType3.Attributes[0].Name);
 
         Assert.Empty(methodType3.ReturnValue.Attributes);
@@ -242,7 +242,7 @@ public class CSharpMethodParametersAttributeMetricTests
             {
                 foreach (var attribute in parameterType.Attributes)
                 {
-                    Assert.Equal("parameter", attribute.TargetType);
+                    Assert.Equal("parameter", attribute.Target);
                     Assert.Equal("ExternAttribute", attribute.Name);
                 }
             }
@@ -291,11 +291,11 @@ public class CSharpMethodParametersAttributeMetricTests
 
         var methodType3 = classType.Methods[2];
         Assert.Equal(1, methodType3.Attributes.Count);
-        Assert.Equal("method", methodType3.Attributes[0].TargetType);
+        Assert.Equal("method", methodType3.Attributes[0].Target);
         Assert.Equal("System.ObsoleteAttribute", methodType3.Attributes[0].Name);
 
         Assert.Equal(1, methodType3.ReturnValue.Attributes.Count);
-        Assert.Equal("return", methodType3.ReturnValue.Attributes[0].TargetType);
+        Assert.Equal("return", methodType3.ReturnValue.Attributes[0].Target);
         Assert.Equal("ExternAttribute", methodType3.ReturnValue.Attributes[0].Name);
 
         Assert.Equal(4, methodType3.ParameterTypes[0].Attributes.Count);

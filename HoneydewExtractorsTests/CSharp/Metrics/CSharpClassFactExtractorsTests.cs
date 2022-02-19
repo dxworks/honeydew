@@ -1048,4 +1048,32 @@ public class CSharpClassFactExtractorsTests
         Assert.True(classModel.Methods[0].ParameterTypes[0].IsNullable);
         Assert.True(classModel.Constructors[0].ParameterTypes[0].IsNullable);
     }
+
+
+    [Theory]
+    [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/ClassInfo/ClassWithNestedClasses.txt")]
+    public void Extract_ShouldHaveContainingClassNames_GivenNestedClasses(string fileContent)
+    {
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+        var classTypes = _sut.Extract(syntaxTree, semanticModel).ClassTypes;
+
+        Assert.Equal(5, classTypes.Count);
+
+        Assert.Equal("Namespace1", classTypes[0].ContainingNamespaceName);
+        Assert.Equal("", classTypes[0].ContainingClassName);
+
+        Assert.Equal("Namespace1", classTypes[1].ContainingNamespaceName);
+        Assert.Equal("Namespace1.Class1", classTypes[1].ContainingClassName);
+
+        Assert.Equal("Namespace1", classTypes[2].ContainingNamespaceName);
+        Assert.Equal("Namespace1.Class1.Class2", classTypes[2].ContainingClassName);
+
+        Assert.Equal("Namespace1", classTypes[3].ContainingNamespaceName);
+        Assert.Equal("Namespace1.Class1.Class2", classTypes[3].ContainingClassName);
+
+        Assert.Equal("Namespace1", classTypes[4].ContainingNamespaceName);
+        Assert.Equal("Namespace1.Class1.Class2.S1", classTypes[4].ContainingClassName);
+    }
 }

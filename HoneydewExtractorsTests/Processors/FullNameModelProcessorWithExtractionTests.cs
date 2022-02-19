@@ -6,7 +6,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Fields;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
-using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+using HoneydewExtractors.Core.Metrics.Visitors.MethodCalls;
 using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
@@ -45,7 +45,7 @@ namespace HoneydewExtractorsTests.Processors
                 _progressLoggerMock.Object, false);
 
             var compositeVisitor = new CompositeVisitor();
-            var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<IMethodSignatureVisitor>
+            var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<IMethodCallVisitor>
             {
                 new MethodCallInfoVisitor()
             });
@@ -255,7 +255,8 @@ namespace MyNamespace
             var utilClass =
                 (ClassModel)actualRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[2];
             Assert.Equal("Sqrt", utilClass.Methods[0].CalledMethods[0].Name);
-            Assert.Equal("System.Math", utilClass.Methods[0].CalledMethods[0].ContainingTypeName);
+            Assert.Equal("System.Math", utilClass.Methods[0].CalledMethods[0].LocationClassName);
+            Assert.Equal("System.Math", utilClass.Methods[0].CalledMethods[0].DefinitionClassName);
             Assert.Equal(1, utilClass.Methods[0].CalledMethods[0].ParameterTypes.Count);
             Assert.Equal("double", utilClass.Methods[0].CalledMethods[0].ParameterTypes[0].Type.Name);
 
@@ -274,17 +275,20 @@ namespace MyNamespace
             {
                 var radicalCall = methodModel.CalledMethods[0];
                 Assert.Equal("Radical", radicalCall.Name);
-                Assert.Equal("Utils.Util", radicalCall.ContainingTypeName);
+                Assert.Equal("Utils.Util", radicalCall.LocationClassName);
+                Assert.Equal("Utils.Util", radicalCall.DefinitionClassName);
                 Assert.Equal(1, radicalCall.ParameterTypes.Count);
 
                 var intCall = methodModel.CalledMethods[1];
                 Assert.Equal("Call", intCall.Name);
-                Assert.Equal("Utils.IntWrapper", intCall.ContainingTypeName);
+                Assert.Equal("Utils.IntWrapper", intCall.DefinitionClassName);
+                Assert.Equal("Utils.IntWrapper", intCall.LocationClassName);
                 Assert.Empty(intCall.ParameterTypes);
 
                 var stringCall = methodModel.CalledMethods[2];
                 Assert.Equal("Call", stringCall.Name);
-                Assert.Equal("Utils.StringWrapper", stringCall.ContainingTypeName);
+                Assert.Equal("Utils.StringWrapper", stringCall.DefinitionClassName);
+                Assert.Equal("Utils.StringWrapper", stringCall.LocationClassName);
                 Assert.Empty(stringCall.ParameterTypes);
             }
 
@@ -385,10 +389,12 @@ namespace MyCompany
             Assert.Equal(2, myClass.Methods[0].CalledMethods.Count);
 
             Assert.Equal("M", myClass.Methods[0].CalledMethods[0].Name);
-            Assert.Equal("PC.A", myClass.Methods[0].CalledMethods[0].ContainingTypeName);
+            Assert.Equal("PC.A", myClass.Methods[0].CalledMethods[0].DefinitionClassName);
+            Assert.Equal("PC.A", myClass.Methods[0].CalledMethods[0].LocationClassName);
 
             Assert.Equal("F", myClass.Methods[0].CalledMethods[1].Name);
-            Assert.Equal("MyCompany.Other.SomeClass", myClass.Methods[0].CalledMethods[1].ContainingTypeName);
+            Assert.Equal("MyCompany.Other.SomeClass", myClass.Methods[0].CalledMethods[1].DefinitionClassName);
+            Assert.Equal("MyCompany.Other.SomeClass", myClass.Methods[0].CalledMethods[1].LocationClassName);
         }
 
         [Fact]
@@ -481,11 +487,13 @@ namespace NameSpace3
             Assert.Equal(2, mainClass.Methods[0].CalledMethods.Count);
 
             Assert.Equal("ToString", mainClass.Methods[0].CalledMethods[0].Name);
-            Assert.Equal("NameSpace1.MyClass", mainClass.Methods[0].CalledMethods[0].ContainingTypeName);
+            Assert.Equal("NameSpace1.MyClass", mainClass.Methods[0].CalledMethods[0].DefinitionClassName);
+            Assert.Equal("NameSpace1.MyClass", mainClass.Methods[0].CalledMethods[0].LocationClassName);
             Assert.Empty(mainClass.Methods[0].CalledMethods[0].ParameterTypes);
 
             Assert.Equal("ToString", mainClass.Methods[0].CalledMethods[1].Name);
-            Assert.Equal("NameSpace2.MyClass<int>", mainClass.Methods[0].CalledMethods[1].ContainingTypeName);
+            Assert.Equal("NameSpace2.MyClass<int>", mainClass.Methods[0].CalledMethods[1].DefinitionClassName);
+            Assert.Equal("NameSpace2.MyClass<int>", mainClass.Methods[0].CalledMethods[1].LocationClassName);
             Assert.Empty(mainClass.Methods[0].CalledMethods[1].ParameterTypes);
         }
 
@@ -567,7 +575,8 @@ namespace MyNamespace
 
             Assert.Equal(1, myClass.Methods[0].CalledMethods.Count);
             Assert.Equal("Method", myClass.Methods[0].CalledMethods[0].Name);
-            Assert.Equal("Models.SomeModels.MyModel", myClass.Methods[0].CalledMethods[0].ContainingTypeName);
+            Assert.Equal("Models.SomeModels.MyModel", myClass.Methods[0].CalledMethods[0].DefinitionClassName);
+            Assert.Equal("Models.SomeModels.MyModel", myClass.Methods[0].CalledMethods[0].LocationClassName);
         }
 
 
@@ -631,7 +640,8 @@ namespace MyNamespace
 
             Assert.Equal(1, myClass.Methods[0].CalledMethods.Count);
             Assert.Equal("ToString", myClass.Methods[0].CalledMethods[0].Name);
-            Assert.Equal("System.Collections.Comparer", myClass.Methods[0].CalledMethods[0].ContainingTypeName);
+            Assert.Equal("object", myClass.Methods[0].CalledMethods[0].DefinitionClassName);
+            Assert.Equal("System.Collections.Comparer", myClass.Methods[0].CalledMethods[0].LocationClassName);
         }
 
         [Theory]

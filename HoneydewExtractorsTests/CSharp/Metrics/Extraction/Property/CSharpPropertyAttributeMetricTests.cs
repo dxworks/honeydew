@@ -86,7 +86,7 @@ public class CSharpPropertyAttributeMetricTests
             Assert.Equal(1, attributeTypes.Count);
             foreach (var attributeType in attributeTypes)
             {
-                Assert.Equal("property", attributeType.TargetType);
+                Assert.Equal("property", attributeType.Target);
                 Assert.Equal("System.ObsoleteAttribute", attributeType.Name);
                 Assert.Equal(1, attributeType.ParameterTypes.Count);
                 Assert.Equal("string?", attributeType.ParameterTypes[0].Type.Name);
@@ -116,7 +116,7 @@ public class CSharpPropertyAttributeMetricTests
 
             foreach (var attributeType in attributeTypes)
             {
-                Assert.Equal("property", attributeType.TargetType);
+                Assert.Equal("property", attributeType.Target);
                 Assert.Equal("System.SerializableAttribute", attributeType.Name);
                 Assert.Empty(attributeType.ParameterTypes);
             }
@@ -143,7 +143,7 @@ public class CSharpPropertyAttributeMetricTests
 
             foreach (var attributeType in attributeTypes)
             {
-                Assert.Equal("property", attributeType.TargetType);
+                Assert.Equal("property", attributeType.Target);
                 Assert.Equal("System.ObsoleteAttribute", attributeType.Name);
                 Assert.Equal(1, attributeType.ParameterTypes.Count);
                 Assert.Equal("string?", attributeType.ParameterTypes[0].Type.Name);
@@ -175,7 +175,7 @@ public class CSharpPropertyAttributeMetricTests
             Assert.Equal(3, attributeTypes.Count);
             foreach (var attribute in attributeTypes)
             {
-                Assert.Equal("property", attribute.TargetType);
+                Assert.Equal("property", attribute.Target);
             }
 
             var attribute1 = attributeTypes[0];
@@ -218,7 +218,7 @@ public class CSharpPropertyAttributeMetricTests
             Assert.Equal(4, fieldAttributes.Count);
             foreach (var attribute in fieldAttributes)
             {
-                Assert.Equal("property", attribute.TargetType);
+                Assert.Equal("property", attribute.Target);
                 Assert.Equal("MyNamespace.MyAttribute", attribute.Name);
             }
 
@@ -257,7 +257,7 @@ public class CSharpPropertyAttributeMetricTests
             Assert.Equal(5, propertyType.Attributes.Count);
             foreach (var attribute in propertyType.Attributes)
             {
-                Assert.Equal("property", attribute.TargetType);
+                Assert.Equal("property", attribute.Target);
             }
 
             var attribute1 = propertyType.Attributes[0];
@@ -312,7 +312,7 @@ public class CSharpPropertyAttributeMetricTests
 
                 foreach (var accessorAttribute in accessor.Attributes)
                 {
-                    Assert.Equal("method", accessorAttribute.TargetType);
+                    Assert.Equal("method", accessorAttribute.Target);
                 }
 
                 var attribute1 = accessor.Attributes[0];
@@ -357,7 +357,7 @@ public class CSharpPropertyAttributeMetricTests
 
                 foreach (var accessorAttribute in accessor.ReturnValue.Attributes)
                 {
-                    Assert.Equal("return", accessorAttribute.TargetType);
+                    Assert.Equal("return", accessorAttribute.Target);
                 }
 
                 var attribute1 = accessor.ReturnValue.Attributes[0];

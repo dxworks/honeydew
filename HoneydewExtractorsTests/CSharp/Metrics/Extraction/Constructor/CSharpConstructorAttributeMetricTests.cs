@@ -76,7 +76,7 @@ public class CSharpConstructorAttributeMetricTests
             var attributeTypes = constructorType.Attributes;
 
             Assert.Equal(1, attributeTypes.Count);
-            Assert.Equal("constructor", attributeTypes[0].TargetType);
+            Assert.Equal("constructor", attributeTypes[0].Target);
             Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
             Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
             Assert.Equal("string?", attributeTypes[0].ParameterTypes[0].Type.Name);
@@ -99,7 +99,7 @@ public class CSharpConstructorAttributeMetricTests
 
         var attributeTypes = classModel.Constructors[0].Attributes;
         Assert.Equal(1, attributeTypes.Count);
-        Assert.Equal("constructor", attributeTypes[0].TargetType);
+        Assert.Equal("constructor", attributeTypes[0].Target);
         Assert.Equal("System.SerializableAttribute", attributeTypes[0].Name);
         Assert.Empty(attributeTypes[0].ParameterTypes);
     }
@@ -119,7 +119,7 @@ public class CSharpConstructorAttributeMetricTests
 
         var attributeTypes = classModel.Constructors[0].Attributes;
         Assert.Equal(1, attributeTypes.Count);
-        Assert.Equal("constructor", attributeTypes[0].TargetType);
+        Assert.Equal("constructor", attributeTypes[0].Target);
         Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
         Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
         Assert.Equal("string?", attributeTypes[0].ParameterTypes[0].Type.Name);
@@ -149,7 +149,7 @@ public class CSharpConstructorAttributeMetricTests
             Assert.Equal(3, attributeTypes.Count);
             foreach (var attribute in attributeTypes)
             {
-                Assert.Equal("constructor", attribute.TargetType);
+                Assert.Equal("constructor", attribute.Target);
             }
 
             var attribute1 = attributeTypes[0];
@@ -191,7 +191,7 @@ public class CSharpConstructorAttributeMetricTests
             Assert.Equal(4, constructorTypeAttributes.Count);
             foreach (var attribute in constructorTypeAttributes)
             {
-                Assert.Equal("constructor", attribute.TargetType);
+                Assert.Equal("constructor", attribute.Target);
                 Assert.Equal("MyNamespace.MyAttribute", attribute.Name);
             }
 
@@ -229,7 +229,7 @@ public class CSharpConstructorAttributeMetricTests
             Assert.Equal(5, constructorType.Attributes.Count);
             foreach (var attribute in constructorType.Attributes)
             {
-                Assert.Equal("constructor", attribute.TargetType);
+                Assert.Equal("constructor", attribute.Target);
             }
 
             var attribute1 = constructorType.Attributes[0];

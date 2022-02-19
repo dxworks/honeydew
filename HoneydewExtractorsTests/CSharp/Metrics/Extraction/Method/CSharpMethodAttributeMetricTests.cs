@@ -76,7 +76,7 @@ public class CSharpMethodAttributeMetricTests
             var attributeTypes = methodType.Attributes;
 
             Assert.Equal(1, attributeTypes.Count);
-            Assert.Equal("method", attributeTypes[0].TargetType);
+            Assert.Equal("method", attributeTypes[0].Target);
             Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
             Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
             Assert.Equal("string?", attributeTypes[0].ParameterTypes[0].Type.Name);
@@ -101,7 +101,7 @@ public class CSharpMethodAttributeMetricTests
         {
             var attributeTypes = methodType.Attributes;
             Assert.Equal(1, attributeTypes.Count);
-            Assert.Equal("method", attributeTypes[0].TargetType);
+            Assert.Equal("method", attributeTypes[0].Target);
             Assert.Equal("System.SerializableAttribute", attributeTypes[0].Name);
             Assert.Empty(attributeTypes[0].ParameterTypes);
         }
@@ -124,7 +124,7 @@ public class CSharpMethodAttributeMetricTests
         {
             var attributeTypes = methodType.Attributes;
             Assert.Equal(1, attributeTypes.Count);
-            Assert.Equal("method", attributeTypes[0].TargetType);
+            Assert.Equal("method", attributeTypes[0].Target);
             Assert.Equal("System.ObsoleteAttribute", attributeTypes[0].Name);
             Assert.Equal(1, attributeTypes[0].ParameterTypes.Count);
             Assert.Equal("string?", attributeTypes[0].ParameterTypes[0].Type.Name);
@@ -155,7 +155,7 @@ public class CSharpMethodAttributeMetricTests
             Assert.Equal(3, attributeTypes.Count);
             foreach (var attribute in attributeTypes)
             {
-                Assert.Equal("method", attribute.TargetType);
+                Assert.Equal("method", attribute.Target);
             }
 
             var attribute1 = attributeTypes[0];
@@ -197,7 +197,7 @@ public class CSharpMethodAttributeMetricTests
             Assert.Equal(4, methodTypeAttributes.Count);
             foreach (var attribute in methodTypeAttributes)
             {
-                Assert.Equal("method", attribute.TargetType);
+                Assert.Equal("method", attribute.Target);
                 Assert.Equal("MyNamespace.MyAttribute", attribute.Name);
             }
 
@@ -236,7 +236,7 @@ public class CSharpMethodAttributeMetricTests
             Assert.Equal(5, methodType.Attributes.Count);
             foreach (var attribute in methodType.Attributes)
             {
-                Assert.Equal("method", attribute.TargetType);
+                Assert.Equal("method", attribute.Target);
             }
 
             var attribute1 = methodType.Attributes[0];

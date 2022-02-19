@@ -19,9 +19,9 @@ public record ClassModel : IPropertyMembersClassType
 
     public string Modifier { get; set; } = "";
 
-    public string ContainingNamespaceName { get; set; }
+    public string ContainingNamespaceName { get; set; } = "";
 
-    public string ContainingClassName { get; set; }
+    public string ContainingClassName { get; set; } = "";
 
     public IList<IBaseType> BaseTypes { get; set; } = new List<IBaseType>();
 

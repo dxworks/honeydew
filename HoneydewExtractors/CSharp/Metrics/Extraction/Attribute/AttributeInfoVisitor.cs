@@ -21,7 +21,7 @@ public class AttributeInfoVisitor : ICSharpAttributeVisitor
         var attributeTarget = GetAttributeTarget(syntaxNode);
         if (!string.IsNullOrEmpty(attributeTarget))
         {
-            modelType.TargetType = attributeTarget;
+            modelType.Target = attributeTarget;
         }
 
         foreach (var parameterType in GetParameters(syntaxNode, semanticModel))

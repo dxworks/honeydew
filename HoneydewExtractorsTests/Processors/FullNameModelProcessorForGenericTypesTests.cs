@@ -6,7 +6,7 @@ using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewExtractors.Core.Metrics.Visitors.Fields;
 using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
-using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+using HoneydewExtractors.Core.Metrics.Visitors.MethodCalls;
 using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewExtractors.CSharp.Metrics;
@@ -46,7 +46,7 @@ namespace HoneydewExtractorsTests.Processors
                 _progressLoggerMock.Object, false);
 
             var compositeVisitor = new CompositeVisitor();
-            var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<IMethodSignatureVisitor>
+            var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<ICSharpMethodCallVisitor>
             {
                 new MethodCallInfoVisitor()
             });
@@ -312,48 +312,6 @@ namespace NameSpace1
                 classType.Methods[0].LocalVariableTypes[0].Type.Name);
             Assert.Equal("System.Collections.Generic.List<OtherNamespace.Class1>",
                 classType.Methods[0].LocalVariableTypes[1].Type.Name);
-        }
-
-        [Theory]
-        [FileData("TestData/Processors/FullNameProcessor/GenericClass.txt")]
-        public void Process_ShouldReturnTheFullClassNamesOfContainingClass_WhenGivenClassModelsWithGenericTypes(
-            string fileContent)
-        {
-            var syntaxTree = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntaxTree);
-
-            var compilationUnitType3 = _extractor.Extract(syntaxTree, semanticModel);
-
-            var repositoryModel = new RepositoryModel();
-            var solutionModel = new SolutionModel();
-            var projectModel = new ProjectModel();
-
-            projectModel.Add(compilationUnitType3);
-
-            repositoryModel.Projects.Add(projectModel);
-            repositoryModel.Solutions.Add(solutionModel);
-
-            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(1, "Resolving Class Names"))
-                .Returns(_progressLoggerBarMock.Object);
-            _progressLoggerMock.Setup(logger =>
-                    logger.CreateProgressLogger(1, "Resolving Using Statements for Each Class"))
-                .Returns(_progressLoggerBarMock.Object);
-            _progressLoggerMock.Setup(logger =>
-                    logger.CreateProgressLogger(1, "Resolving Class Elements (Fields, Methods, Properties,...)"))
-                .Returns(_progressLoggerBarMock.Object);
-
-            var actualRepositoryModel = _sut.Process(repositoryModel);
-
-            var genericClass = (ClassModel)actualRepositoryModel.Projects[0].CompilationUnits[0].ClassTypes[0];
-            Assert.Equal("NameSpace1.MyClass<T, K>", genericClass.Name);
-
-            Assert.Equal("NameSpace1.MyClass<T, K>", genericClass.Methods[0].ContainingTypeName);
-            Assert.Equal("NameSpace1.MyClass<T, K>", genericClass.Constructors[0].ContainingTypeName);
-            Assert.Equal("NameSpace1.MyClass<T, K>", genericClass.Fields[0].ContainingTypeName);
-            Assert.Equal("NameSpace1.MyClass<T, K>", genericClass.Properties[0].ContainingTypeName);
-
-            Assert.Equal("NameSpace1.MyClass<T, K>.Method<R>(R)",
-                ((MethodModel)genericClass.Methods[0]).LocalFunctions[0].ContainingTypeName);
         }
     }
 }

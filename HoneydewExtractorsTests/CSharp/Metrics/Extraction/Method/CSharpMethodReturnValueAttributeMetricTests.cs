@@ -85,7 +85,7 @@ public class CSharpMethodReturnValueAttributeMetricTests
             var attributeTypes = methodType.ReturnValue.Attributes;
 
             Assert.Equal(1, attributeTypes.Count);
-            Assert.Equal("return", attributeTypes[0].TargetType);
+            Assert.Equal("return", attributeTypes[0].Target);
             Assert.Equal("System.Diagnostics.CodeAnalysis.NotNullAttribute", attributeTypes[0].Name);
             Assert.Empty(attributeTypes[0].ParameterTypes);
         }
@@ -110,7 +110,7 @@ public class CSharpMethodReturnValueAttributeMetricTests
             var methodTypeAttributes = methodType.ReturnValue.Attributes;
             foreach (var attribute in methodTypeAttributes)
             {
-                Assert.Equal("return", attribute.TargetType);
+                Assert.Equal("return", attribute.Target);
                 Assert.Equal("MyNamespace.MyAttribute", attribute.Name);
             }
         }
@@ -149,7 +149,7 @@ public class CSharpMethodReturnValueAttributeMetricTests
 
         var method3 = classType.Methods[2];
         Assert.Equal(1, method3.Attributes.Count);
-        Assert.Equal("method", method3.Attributes[0].TargetType);
+        Assert.Equal("method", method3.Attributes[0].Target);
         Assert.Equal("System.ObsoleteAttribute", method3.Attributes[0].Name);
 
         var method3ReturnValueAttributes = method3.ReturnValue.Attributes;
@@ -190,7 +190,7 @@ public class CSharpMethodReturnValueAttributeMetricTests
             var methodTypeAttributes = methodType.ReturnValue.Attributes;
             foreach (var attribute in methodTypeAttributes)
             {
-                Assert.Equal("return", attribute.TargetType);
+                Assert.Equal("return", attribute.Target);
                 Assert.Equal("ExternAttribute", attribute.Name);
             }
         }
@@ -229,7 +229,7 @@ public class CSharpMethodReturnValueAttributeMetricTests
 
         var method3 = classType.Methods[2];
         Assert.Equal(1, method3.Attributes.Count);
-        Assert.Equal("method", method3.Attributes[0].TargetType);
+        Assert.Equal("method", method3.Attributes[0].Target);
         Assert.Equal("ExternAttribute", method3.Attributes[0].Name);
 
         var method3ReturnValueAttributes = method3.ReturnValue.Attributes;

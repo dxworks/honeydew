@@ -39,7 +39,7 @@ public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICS
     {
         foreach (var attributeType in ExtractAttributesFromMethod(syntaxNode, semanticModel))
         {
-            if (attributeType.TargetType == "return")
+            if (attributeType.Target == "return")
             {
                 modelType.ReturnValue.Attributes.Add(attributeType);
             }
@@ -57,7 +57,7 @@ public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICS
     {
         foreach (var attributeType in ExtractAttributesFromMethod(syntaxNode, semanticModel))
         {
-            if (attributeType.TargetType == "return")
+            if (attributeType.Target == "return")
             {
                 modelType.ReturnValue.Attributes.Add(attributeType);
             }
@@ -152,7 +152,7 @@ public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICS
                     }
                 }
 
-                attributeModel.TargetType = target;
+                attributeModel.Target = target;
 
                 modelType.Attributes.Add(attributeModel);
             }
@@ -169,7 +169,7 @@ public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICS
             {
                 IAttributeType attributeModel = new AttributeModel();
 
-                attributeModel.TargetType = "method";
+                attributeModel.Target = "method";
 
                 foreach (var visitor in GetContainedVisitors())
                 {

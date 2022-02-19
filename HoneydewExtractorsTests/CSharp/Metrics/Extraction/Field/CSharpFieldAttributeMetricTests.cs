@@ -78,7 +78,7 @@ public class CSharpFieldAttributeMetricTests
 
             foreach (var attributeType in attributeTypes)
             {
-                Assert.Equal("field", attributeType.TargetType);
+                Assert.Equal("field", attributeType.Target);
                 Assert.Equal("System.ObsoleteAttribute", attributeType.Name);
                 Assert.Equal(1, attributeType.ParameterTypes.Count);
                 Assert.Equal("string?", attributeType.ParameterTypes[0].Type.Name);
@@ -108,7 +108,7 @@ public class CSharpFieldAttributeMetricTests
 
             foreach (var attributeType in attributeTypes)
             {
-                Assert.Equal("field", attributeType.TargetType);
+                Assert.Equal("field", attributeType.Target);
                 Assert.Equal("System.SerializableAttribute", attributeType.Name);
                 Assert.Empty(attributeType.ParameterTypes);
             }
@@ -135,7 +135,7 @@ public class CSharpFieldAttributeMetricTests
 
             foreach (var attributeType in attributeTypes)
             {
-                Assert.Equal("field", attributeType.TargetType);
+                Assert.Equal("field", attributeType.Target);
                 Assert.Equal("System.ObsoleteAttribute", attributeType.Name);
                 Assert.Equal(1, attributeType.ParameterTypes.Count);
                 Assert.Equal("string?", attributeType.ParameterTypes[0].Type.Name);
@@ -167,7 +167,7 @@ public class CSharpFieldAttributeMetricTests
             Assert.Equal(3, attributeTypes.Count);
             foreach (var attribute in attributeTypes)
             {
-                Assert.Equal("field", attribute.TargetType);
+                Assert.Equal("field", attribute.Target);
             }
 
             var attribute1 = attributeTypes[0];
@@ -212,7 +212,7 @@ public class CSharpFieldAttributeMetricTests
             Assert.Equal(4, fieldAttributes.Count);
             foreach (var attribute in fieldAttributes)
             {
-                Assert.Equal("field", attribute.TargetType);
+                Assert.Equal("field", attribute.Target);
                 Assert.Equal("MyNamespace.MyAttribute", attribute.Name);
             }
 
@@ -251,7 +251,7 @@ public class CSharpFieldAttributeMetricTests
             Assert.Equal(5, fieldType.Attributes.Count);
             foreach (var attribute in fieldType.Attributes)
             {
-                Assert.Equal("field", attribute.TargetType);
+                Assert.Equal("field", attribute.Target);
             }
 
             var attribute1 = fieldType.Attributes[0];

@@ -162,7 +162,7 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Equal("Project1.Models.Class1.InnerClass1.InnerClass2", compilationUnitModel.ClassTypes[2].Name);
         }
 
-        [Fact]
+        [Fact(Skip = "Obsolete class")]
         public void Process_ShouldReturnTheFullClassName_WhenGivenClassMethodsWithParameters()
         {
             var repositoryModel = new RepositoryModel();
@@ -176,11 +176,13 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        Name = "Project1.Models.Class1"
+                        Name = "Project1.Models.Class1",
+                        ContainingClassName = "Project1.Models",
                     },
                     new ClassModel
                     {
                         Name = "Project1.Models.Class2",
+                        ContainingClassName = "Project1.Models",
                         Constructors =
                         {
                             new ConstructorModel
@@ -260,6 +262,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Models.Class1",
+                        ContainingNamespaceName = "Models",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -275,6 +278,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Models.Class2",
+                        ContainingNamespaceName = "Models",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -290,6 +294,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Models.Class3",
+                        ContainingNamespaceName = "Models",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -305,6 +310,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Models.TheClass",
+                        ContainingNamespaceName = "Models",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -328,6 +334,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Models.Other.Class1",
+                        ContainingNamespaceName = "Models.Other",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -343,6 +350,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Models.Other.Class2",
+                        ContainingNamespaceName = "Models.Other",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -358,6 +366,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Models.Other.Class3",
+                        ContainingNamespaceName = "Models.Other",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -373,6 +382,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Models.Other.SuperClass",
+                        ContainingNamespaceName = "Models.Other",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -400,6 +410,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Models.AClass",
+                        ContainingNamespaceName = "Models",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -482,11 +493,13 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        Name = "Models.Interfaces.IInterface1"
+                        Name = "Models.Interfaces.IInterface1",
+                        ContainingNamespaceName = "Models.Interfaces",
                     },
                     new ClassModel
                     {
                         Name = "Models.Interfaces.IInterface2",
+                        ContainingNamespaceName = "Models.Interfaces",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -502,6 +515,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Models.Interfaces.IInterface3",
+                        ContainingNamespaceName = "Models.Interfaces",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -533,6 +547,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Models.Class1",
+                        ContainingNamespaceName = "Models",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -555,6 +570,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Class2",
+                        ContainingNamespaceName = "",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -577,6 +593,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Models.Class3",
+                        ContainingNamespaceName = "Models",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -615,6 +632,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Models.TheClass",
+                        ContainingNamespaceName = "Models",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -657,6 +675,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "MyNamespace.AInterface",
+                        ContainingNamespaceName = "MyNamespace",
                         Imports = new List<IImportType>
                         {
                             new UsingModel
@@ -727,113 +746,6 @@ namespace HoneydewExtractorsTests.Processors
         }
 
         [Fact]
-        public void Process_ShouldReturnTheFullNamesOfContainingClassNameOfMethods_WhenGivenClassModelsWithMethods()
-        {
-            var repositoryModel = new RepositoryModel();
-            var solutionModel = new SolutionModel();
-            var projectModel1 = new ProjectModel();
-
-
-            projectModel1.CompilationUnits.Add(new CompilationUnitModel
-            {
-                FilePath = "Project1.Models.Classes",
-                ClassTypes =
-                {
-                    new ClassModel
-                    {
-                        Name = "Project1.Models.Classes.Class1",
-                        Methods =
-                        {
-                            new MethodModel
-                            {
-                                ContainingTypeName = "Class1"
-                            },
-                            new MethodModel
-                            {
-                                ContainingTypeName = "Project1.Models.Classes.Class1"
-                            }
-                        }
-                    },
-                    new ClassModel
-                    {
-                        Name = "Project1.Models.Classes.Class2",
-                        Methods =
-                        {
-                            new MethodModel
-                            {
-                                ContainingTypeName = "Class2",
-                            }
-                        },
-                        Constructors =
-                        {
-                            new ConstructorModel
-                            {
-                                ContainingTypeName = "Class2"
-                            },
-                            new ConstructorModel
-                            {
-                                ContainingTypeName = "Project1.Models.Classes.Class2"
-                            }
-                        }
-                    },
-                    new ClassModel
-                    {
-                        Name = "Project1.Models.Classes.Class3",
-                        Constructors =
-                        {
-                            new ConstructorModel
-                            {
-                                ContainingTypeName = "Class3",
-                            }
-                        }
-                    }
-                }
-            });
-
-            repositoryModel.Projects.Add(projectModel1);
-            repositoryModel.Solutions.Add(solutionModel);
-
-            _progressLoggerMock.Setup(logger => logger.CreateProgressLogger(3, "Resolving Class Names"))
-                .Returns(_progressLoggerBarMock.Object);
-            _progressLoggerMock.Setup(logger =>
-                    logger.CreateProgressLogger(3, "Resolving Using Statements for Each Class"))
-                .Returns(_progressLoggerBarMock.Object);
-            _progressLoggerMock.Setup(logger =>
-                    logger.CreateProgressLogger(3, "Resolving Class Elements (Fields, Methods, Properties,...)"))
-                .Returns(_progressLoggerBarMock.Object);
-
-
-            var actualRepositoryModel = _sut.Process(repositoryModel);
-
-            var modelInterfacesNamespace =
-                actualRepositoryModel.Projects[0].CompilationUnits[0];
-
-            var classModel1 = (ClassModel)modelInterfacesNamespace.ClassTypes[0];
-            Assert.Empty(classModel1.Constructors);
-            Assert.Equal(2, classModel1.Methods.Count);
-            Assert.Equal("Project1.Models.Classes.Class1",
-                classModel1.Methods[0].ContainingTypeName);
-            Assert.Equal("Project1.Models.Classes.Class1",
-                classModel1.Methods[1].ContainingTypeName);
-
-            var classModel2 = (ClassModel)modelInterfacesNamespace.ClassTypes[1];
-            Assert.Equal(1, classModel2.Methods.Count);
-            Assert.Equal("Project1.Models.Classes.Class2",
-                classModel2.Methods[0].ContainingTypeName);
-            Assert.Equal(2, classModel2.Constructors.Count);
-            Assert.Equal("Project1.Models.Classes.Class2",
-                classModel2.Constructors[0].ContainingTypeName);
-            Assert.Equal("Project1.Models.Classes.Class2",
-                classModel2.Constructors[1].ContainingTypeName);
-
-            var classModel3 = (ClassModel)modelInterfacesNamespace.ClassTypes[2];
-            Assert.Empty(classModel3.Methods);
-            Assert.Equal(1, classModel3.Constructors.Count);
-            Assert.Equal("Project1.Models.Classes.Class3",
-                classModel3.Constructors[0].ContainingTypeName);
-        }
-
-        [Fact]
         public void
             Process_ShouldHaveFindClassInOtherProject_WhenGivenAClassThatCouldNotBeenFoundInCurrentProject()
         {
@@ -849,6 +761,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Models.SomeModel",
+                        ContainingNamespaceName = "Models",
                     }
                 }
             });
@@ -864,6 +777,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Services.Service",
+                        ContainingNamespaceName = "Services",
                         Fields =
                         {
                             new FieldModel
@@ -927,7 +841,8 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        Name = "Models.SomeModel"
+                        Name = "Models.SomeModel",
+                        ContainingNamespaceName = "Models",
                     }
                 }
             });
@@ -943,6 +858,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Services.Service",
+                        ContainingNamespaceName = "Services",
                     }
                 }
             });
@@ -960,6 +876,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "OtherSolutionNamespace.Controller",
+                        ContainingNamespaceName = "OtherSolutionNamespace",
                         Fields =
                         {
                             new FieldModel
@@ -1040,7 +957,8 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        Name = "Models.AmbiguousClass"
+                        Name = "Models.AmbiguousClass",
+                        ContainingNamespaceName = "Models",
                     }
                 }
             });
@@ -1052,7 +970,8 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        Name = "Services.AmbiguousClass"
+                        Name = "Services.AmbiguousClass",
+                        ContainingNamespaceName = "Services",
                     }
                 }
             });
@@ -1064,7 +983,8 @@ namespace HoneydewExtractorsTests.Processors
                 {
                     new ClassModel
                     {
-                        Name = "Controllers.AmbiguousClass"
+                        Name = "Controllers.AmbiguousClass",
+                        ContainingNamespaceName = "Controllers",
                     }
                 }
             });
@@ -1078,6 +998,7 @@ namespace HoneydewExtractorsTests.Processors
                     {
                         FilePath = "SomePath/SomeClass.cs",
                         Name = "SomeNamespace.SomeClass",
+                        ContainingNamespaceName = "SomeNamespace",
                         BaseTypes = new List<IBaseType>
                         {
                             new BaseTypeModel
@@ -1141,7 +1062,8 @@ namespace HoneydewExtractorsTests.Processors
                                 {
                                     new MethodCallModel
                                     {
-                                        ContainingTypeName = "AmbiguousClass",
+                                        LocationClassName = "AmbiguousClass",
+                                        DefinitionClassName = "AmbiguousClass",
                                         ParameterTypes =
                                         {
                                             new ParameterModel
@@ -1209,7 +1131,8 @@ namespace HoneydewExtractorsTests.Processors
             Assert.Equal("interface", someClassModel.BaseTypes[1].Kind);
             Assert.Equal("AmbiguousClass", someClassModel.Constructors[0].ParameterTypes[0].Type.Name);
             Assert.Equal("AmbiguousClass", someClassModel.Methods[0].ParameterTypes[0].Type.Name);
-            Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].ContainingTypeName);
+            Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].LocationClassName);
+            Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].DefinitionClassName);
             Assert.Equal("AmbiguousClass", someClassModel.Methods[0].CalledMethods[0].ParameterTypes[0].Type.Name);
             Assert.Equal("AmbiguousClass", someClassModel.Fields[0].Type.Name);
             var metricDependencies = ((Dictionary<string, int>)someClassModel.Metrics[0].Value);
@@ -1490,6 +1413,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Models.Class1",
+                        ContainingNamespaceName = "Models",
                         Properties =
                         {
                             new PropertyModel
@@ -1512,6 +1436,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Services.Class2",
+                        ContainingNamespaceName = "Services",
                         Properties =
                         {
                             new PropertyModel
@@ -1541,6 +1466,7 @@ namespace HoneydewExtractorsTests.Processors
                     new ClassModel
                     {
                         Name = "Controllers.Class4",
+                        ContainingNamespaceName = "Controllers",
                         Properties =
                         {
                             new PropertyModel

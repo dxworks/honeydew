@@ -139,14 +139,15 @@ namespace HoneydewExtractorsTests.Processors
                 .TryGetValue("Full.Path.Dependency2", out _));
         }
 
-        [Fact]
+        [Fact(Skip = "Obsolete Class")]
         public void GetFunction_ShouldReturnTheFullClassNames_WhenGivenClassNamesThatCanBeLocatedInSolution()
         {
             var solutionModel = new SolutionModel();
 
             ClassModel classModel1 = new()
             {
-                Name = "Models.Class1", FilePath = "path/Models/Class1.cs"
+                Name = "Models.Class1", FilePath = "path/Models/Class1.cs",
+                ContainingClassName = "Models",
             };
             classModel1.Metrics.Add(new MetricModel
             {
@@ -158,6 +159,7 @@ namespace HoneydewExtractorsTests.Processors
             ClassModel classModel2 = new()
             {
                 Name = "Services.Class2", FilePath = "path/Services/Class2.cs",
+                ContainingClassName = "Services",
                 Imports = new List<IImportType>
                 {
                     new UsingModel
@@ -179,6 +181,7 @@ namespace HoneydewExtractorsTests.Processors
             ClassModel classModel3 = new()
             {
                 Name = "Controllers.Class3", FilePath = "path/Controllers/Class3.cs",
+                ContainingNamespaceName = "Controllers",
                 Imports = new List<IImportType>
                 {
                     new UsingModel
@@ -205,6 +208,7 @@ namespace HoneydewExtractorsTests.Processors
             ClassModel classModel4 = new()
             {
                 Name = "Domain.Data.Class4", FilePath = "path/Domain/Data/Class4.cs",
+                ContainingNamespaceName = "Domain.Data",
                 Imports = new List<IImportType>
                 {
                     new UsingModel
@@ -230,7 +234,8 @@ namespace HoneydewExtractorsTests.Processors
 
             ClassModel classModel5 = new()
             {
-                Name = "Controllers.Class5", FilePath = "path/Controllers/Class5.cs"
+                Name = "Controllers.Class5", FilePath = "path/Controllers/Class5.cs",
+                ContainingNamespaceName = "Controllers"
             };
             classModel5.Metrics.Add(new MetricModel
             {

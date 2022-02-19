@@ -11,5 +11,5 @@ public class AttributeModel : IAttributeType
     
     public IList<IParameterType> ParameterTypes { get; set; } = new List<IParameterType>();
 
-    public string TargetType { get; set; }
+    public string Target { get; set; }
 }

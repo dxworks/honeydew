@@ -13,6 +13,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewExtractors.Processors
 {
+    [Obsolete("It's no longer used because of the new extraction")]
     public class FullNameModelProcessor : IProcessorFunction<RepositoryModel, RepositoryModel>
     {
         private readonly ILogger _logger;
@@ -57,7 +58,7 @@ namespace HoneydewExtractors.Processors
                         allClasses.Add(classModel);
 
                         AddClassModelToNamespaceGraph(classModel.Name, classModel.FilePath,
-                            classModel.ContainingTypeName);
+                            classModel.ContainingNamespaceName);
 
                         var tuple = Tuple.Create(projectModel, classModel);
                         if (_classFqns.TryGetValue(classModel.Name, out var list))
@@ -171,7 +172,8 @@ namespace HoneydewExtractors.Processors
 
             foreach (var possibleClass in possibleClasses)
             {
-                var imports = usingModels.Where(@using => @using.Name == possibleClass.ContainingTypeName).ToList();
+                var imports = usingModels.Where(@using => @using.Name == possibleClass.ContainingNamespaceName)
+                    .ToList();
 
                 switch (imports.Count)
                 {
@@ -278,7 +280,7 @@ namespace HoneydewExtractors.Processors
                             }
 
                             // var beforeName = usingModel.Name;
-                            usingModel.Name = FindNamespaceFullName(usingModel.Name, classType.ContainingTypeName,
+                            usingModel.Name = FindNamespaceFullName(usingModel.Name, classType.ContainingNamespaceName,
                                 classType.Imports);
                             // if (usingModel.Name == beforeName)
                             // {
@@ -342,7 +344,7 @@ namespace HoneydewExtractors.Processors
                     }
 
                     if (methodModel.ParameterTypes.Any(parameterModel =>
-                        parameterModel.Type != null && parameterModel.Type.Name.StartsWith(namespaceAccess)))
+                            parameterModel.Type != null && parameterModel.Type.Name.StartsWith(namespaceAccess)))
                     {
                         return true;
                     }
@@ -361,7 +363,7 @@ namespace HoneydewExtractors.Processors
                 foreach (var methodModel in constructorTypes)
                 {
                     if (methodModel.ParameterTypes.Any(parameterModel =>
-                        parameterModel.Type.Name.StartsWith(namespaceAccess)))
+                            parameterModel.Type.Name.StartsWith(namespaceAccess)))
                     {
                         return true;
                     }
@@ -375,18 +377,24 @@ namespace HoneydewExtractors.Processors
                 return false;
             }
 
-            bool IsAliasNamespaceSearchInCalledMethods(IEnumerable<IMethodSignatureType> calledMethods)
+            bool IsAliasNamespaceSearchInCalledMethods(IEnumerable<IMethodCallType> calledMethods)
             {
                 foreach (var calledMethod in calledMethods)
                 {
-                    if (!string.IsNullOrEmpty(calledMethod.ContainingTypeName) &&
-                        calledMethod.ContainingTypeName.StartsWith(namespaceAccess))
+                    if (!string.IsNullOrEmpty(calledMethod.LocationClassName) &&
+                        calledMethod.LocationClassName.StartsWith(namespaceAccess))
+                    {
+                        return true;
+                    }
+
+                    if (!string.IsNullOrEmpty(calledMethod.DefinitionClassName) &&
+                        calledMethod.DefinitionClassName.StartsWith(namespaceAccess))
                     {
                         return true;
                     }
 
                     if (calledMethod.ParameterTypes.Any(parameterModel =>
-                        parameterModel.Type.Name.StartsWith(namespaceAccess)))
+                            parameterModel.Type.Name.StartsWith(namespaceAccess)))
                     {
                         return true;
                     }
@@ -420,21 +428,19 @@ namespace HoneydewExtractors.Processors
 
                         foreach (var baseType in classType.BaseTypes)
                         {
-                            SetEntityTypeFullName(classType.ContainingTypeName, classType.Imports,
-                                classType.FilePath,
-                                baseType.Type, classLevelCache);
+                            SetEntityTypeFullName(classType.ContainingNamespaceName, classType.Imports,
+                                classType.FilePath, baseType.Type, classLevelCache);
                         }
 
-                        SetEntityAttributesFullName(repositoryModel, classType, classType.ContainingTypeName,
-                            projectModel,
-                            classType.Imports, classType.FilePath, classLevelCache);
+                        SetEntityAttributesFullName(repositoryModel, classType, classType.ContainingNamespaceName,
+                            projectModel, classType.Imports, classType.FilePath, classLevelCache);
 
-                        SetGenericParametersFullName(repositoryModel, classType, classType.ContainingTypeName,
+                        SetGenericParametersFullName(repositoryModel, classType, classType.ContainingNamespaceName,
                             projectModel, classType.Imports, classType.FilePath, classLevelCache);
 
                         if (classType is IPropertyMembersClassType classModel)
                         {
-                            var namespaceName = classModel.ContainingTypeName;
+                            var namespaceName = classModel.ContainingNamespaceName;
 
                             if (string.IsNullOrEmpty(namespaceName))
                             {
@@ -524,9 +530,6 @@ namespace HoneydewExtractors.Processors
             string namespaceName, ProjectModel projectModel, RepositoryModel repositoryModel,
             IList<IImportType> importTypes, ConcurrentDictionary<string, string> classLevelCache)
         {
-            methodSkeletonType.ContainingTypeName = FindClassFullName(methodSkeletonType.ContainingTypeName,
-                namespaceName, importTypes, classLevelCache, classFilePath);
-
             foreach (var parameterModel in methodSkeletonType.ParameterTypes)
             {
                 SetParameterFullName(repositoryModel, namespaceName, projectModel, importTypes,
@@ -586,9 +589,6 @@ namespace HoneydewExtractors.Processors
 
             attributeType.Name = FindClassFullName(attributeType.Name + suffix, namespaceName, importTypes,
                 classLevelCache, filePath);
-
-            attributeType.ContainingTypeName = FindClassFullName(attributeType.ContainingTypeName, namespaceName,
-                importTypes, classLevelCache, filePath);
 
             foreach (var parameterType in attributeType.ParameterTypes)
             {
@@ -699,7 +699,7 @@ namespace HoneydewExtractors.Processors
         }
 
         private void SetFullNameForCalledMethods(string classFilePath,
-            IEnumerable<IMethodSignatureType> methodModelCalledMethods, string namespaceName, ProjectModel projectModel,
+            IEnumerable<IMethodCallType> methodModelCalledMethods, string namespaceName, ProjectModel projectModel,
             RepositoryModel repositoryModel, IList<IImportType> importTypes,
             ConcurrentDictionary<string, string> classLevelCache)
         {
@@ -711,18 +711,27 @@ namespace HoneydewExtractors.Processors
                         classFilePath, parameterModel, classLevelCache);
                 }
 
-                calledMethod.ContainingTypeName = FindClassFullName(calledMethod.ContainingTypeName, namespaceName,
+                calledMethod.LocationClassName = FindClassFullName(calledMethod.LocationClassName, namespaceName,
+                    importTypes, classLevelCache, classFilePath);
+                calledMethod.DefinitionClassName = FindClassFullName(calledMethod.DefinitionClassName, namespaceName,
                     importTypes, classLevelCache, classFilePath);
 
-                var classModel = GetClassModelFullyQualified(calledMethod.ContainingTypeName, projectModel,
-                    repositoryModel);
+                var classModel =
+                    GetClassModelFullyQualified(calledMethod.LocationClassName, projectModel, repositoryModel);
 
                 // search for static import of a class
                 if (classModel == null)
                 {
-                    calledMethod.ContainingTypeName = SearchForMethodNameInStaticImports(
-                        calledMethod.ContainingTypeName, calledMethod.Name, calledMethod.ParameterTypes,
-                        projectModel,
+                    calledMethod.LocationClassName = SearchForMethodNameInStaticImports(calledMethod.LocationClassName,
+                        calledMethod.Name, calledMethod.ParameterTypes, projectModel, repositoryModel, importTypes);
+                }
+
+                classModel =
+                    GetClassModelFullyQualified(calledMethod.DefinitionClassName, projectModel, repositoryModel);
+                if (classModel == null)
+                {
+                    calledMethod.DefinitionClassName = SearchForMethodNameInStaticImports(
+                        calledMethod.DefinitionClassName, calledMethod.Name, calledMethod.ParameterTypes, projectModel,
                         repositoryModel, importTypes);
                 }
             }
@@ -1086,6 +1095,8 @@ namespace HoneydewExtractors.Processors
 
         private void AddClassModelToNamespaceGraph(string className, string classFilePath, string namespaceName)
         {
+            namespaceName ??= "";
+
             var namespaceNameParts = namespaceName.Split('.');
 
             NamespaceTree rootNamespaceTree;
