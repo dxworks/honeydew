@@ -17,126 +17,127 @@ using HoneydewModels.Types;
 using Moq;
 using Xunit;
 
-namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields
+namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields;
+
+public class PropertyAccessedFieldsTests
 {
-    public class PropertyAccessedFieldsTests
+    private readonly CSharpFactExtractor _factExtractor;
+    private readonly Mock<ILogger> _loggerMock = new();
+    private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+    private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
+
+    public PropertyAccessedFieldsTests()
     {
-        private readonly CSharpFactExtractor _factExtractor;
-        private readonly Mock<ILogger> _loggerMock = new();
-        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
-        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
+        var compositeVisitor = new CompositeVisitor();
 
-        public PropertyAccessedFieldsTests()
+        var accessedFieldsSetterVisitor = new AccessedFieldsSetterVisitor(new List<ICSharpAccessedFieldsVisitor>
         {
-            var compositeVisitor = new CompositeVisitor();
+            new AccessFieldVisitor()
+        });
 
-            var accessedFieldsSetterVisitor = new AccessedFieldsSetterVisitor(new List<ICSharpAccessedFieldsVisitor>
+        compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<IClassVisitor>
+        {
+            new BaseInfoClassVisitor(),
+            new PropertySetterClassVisitor(new List<ICSharpPropertyVisitor>
             {
-                new AccessFieldVisitor()
-            });
-
-            compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<IClassVisitor>
-            {
-                new BaseInfoClassVisitor(),
-                new PropertySetterClassVisitor(new List<ICSharpPropertyVisitor>
+                new PropertyInfoVisitor(),
+                new MethodAccessorSetterPropertyVisitor(new List<IMethodVisitor>
                 {
-                    new PropertyInfoVisitor(),
-                    new MethodAccessorSetterPropertyVisitor(new List<IMethodVisitor>
-                    {
-                        new MethodInfoVisitor(),
-                        accessedFieldsSetterVisitor
-                    })
+                    new MethodInfoVisitor(),
+                    accessedFieldsSetterVisitor
                 })
-            }));
+            })
+        }));
 
-            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+        compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(compositeVisitor);
-        }
+        _factExtractor = new CSharpFactExtractor(compositeVisitor);
+    }
 
-        [Theory]
-        [FileData(
-            "TestData/CSharp/Metrics/Extraction/AccessedFields/PropertyAccessedFields/PropertyAccessedNonStaticFieldAndPropertyFromOtherClass.txt")]
-        [FileData(
-            "TestData/CSharp/Metrics/Extraction/AccessedFields/PropertyAccessedFields/PropertyAccessedStaticFieldAndPropertyFromOtherClass.txt")]
-        public void
-            Extract_ShouldHaveAccessedFields_WhenGivenPropertyAccessorThatAccessesFieldsAndPropertiesFromOtherClass(
-                string fileContent)
+    [Theory]
+    [FileData(
+        "TestData/CSharp/Metrics/Extraction/AccessedFields/PropertyAccessedFields/PropertyAccessedNonStaticFieldAndPropertyFromOtherClass.txt")]
+    [FileData(
+        "TestData/CSharp/Metrics/Extraction/AccessedFields/PropertyAccessedFields/PropertyAccessedStaticFieldAndPropertyFromOtherClass.txt")]
+    public void
+        Extract_ShouldHaveAccessedFields_WhenGivenPropertyAccessorThatAccessesFieldsAndPropertiesFromOtherClass(
+            string fileContent)
+    {
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+        var classModel = (ClassModel)classTypes[0];
+        foreach (var propertyType in classModel.Properties)
         {
-            var syntaxTree = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntaxTree);
-            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
-
-            var classModel = (ClassModel)classTypes[0];
-            foreach (var propertyType in classModel.Properties)
+            foreach (var accessor in propertyType.Accessors)
             {
-                foreach (var accessor in propertyType.Accessors)
+                Assert.Equal(2, accessor.AccessedFields.Count);
+
+                Assert.Equal("Field1", accessor.AccessedFields[0].Name);
+                Assert.Equal("Property1", accessor.AccessedFields[1].Name);
+
+                foreach (var accessedField in accessor.AccessedFields)
                 {
-                    Assert.Equal(2, accessor.AccessedFields.Count);
-
-                    Assert.Equal("Field1", accessor.AccessedFields[0].Name);
-                    Assert.Equal("Property1", accessor.AccessedFields[1].Name);
-
-                    foreach (var accessedField in accessor.AccessedFields)
-                    {
-                        Assert.Equal(classTypes[1].Name, accessedField.ContainingTypeName);
-                    }
+                    Assert.Equal(classTypes[1].Name, accessedField.DefinitionClassName);
+                    Assert.Equal(classTypes[1].Name, accessedField.LocationClassName);
                 }
-            }
-
-            foreach (var accessedField in classModel.Properties[0].Accessors[0].AccessedFields)
-            {
-                Assert.Equal(AccessedField.AccessKind.Getter, accessedField.Kind);
-            }
-
-            foreach (var accessedField in classModel.Properties[0].Accessors[1].AccessedFields)
-            {
-                Assert.Equal(AccessedField.AccessKind.Setter, accessedField.Kind);
-            }
-
-            foreach (var accessedField in classModel.Properties[1].Accessors[0].AccessedFields)
-            {
-                Assert.Equal(AccessedField.AccessKind.Getter, accessedField.Kind);
-            }
-
-            foreach (var accessedField in classModel.Properties[1].Accessors[1].AccessedFields)
-            {
-                Assert.Equal(AccessedField.AccessKind.Setter, accessedField.Kind);
             }
         }
 
-        [Theory]
-        [FileData(
-            "TestData/CSharp/Metrics/Extraction/AccessedFields/PropertyAccessedFields/PropertyAccessedStaticFieldAndPropertyFromOtherClassArrowSyntax.txt")]
-        public void
-            Extract_ShouldHaveAccessedFields_WhenGivenPropertyArrowSyntaxThatAccessesFieldsAndPropertiesFromOtherClass(
-                string fileContent)
+        foreach (var accessedField in classModel.Properties[0].Accessors[0].AccessedFields)
         {
-            var syntaxTree = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntaxTree);
-            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+            Assert.Equal(AccessedField.AccessKind.Getter, accessedField.Kind);
+        }
 
-            var classModel = (ClassModel)classTypes[0];
-            foreach (var propertyType in classModel.Properties)
+        foreach (var accessedField in classModel.Properties[0].Accessors[1].AccessedFields)
+        {
+            Assert.Equal(AccessedField.AccessKind.Setter, accessedField.Kind);
+        }
+
+        foreach (var accessedField in classModel.Properties[1].Accessors[0].AccessedFields)
+        {
+            Assert.Equal(AccessedField.AccessKind.Getter, accessedField.Kind);
+        }
+
+        foreach (var accessedField in classModel.Properties[1].Accessors[1].AccessedFields)
+        {
+            Assert.Equal(AccessedField.AccessKind.Setter, accessedField.Kind);
+        }
+    }
+
+    [Theory]
+    [FileData(
+        "TestData/CSharp/Metrics/Extraction/AccessedFields/PropertyAccessedFields/PropertyAccessedStaticFieldAndPropertyFromOtherClassArrowSyntax.txt")]
+    public void
+        Extract_ShouldHaveAccessedFields_WhenGivenPropertyArrowSyntaxThatAccessesFieldsAndPropertiesFromOtherClass(
+            string fileContent)
+    {
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+        var classModel = (ClassModel)classTypes[0];
+        foreach (var propertyType in classModel.Properties)
+        {
+            foreach (var accessor in propertyType.Accessors)
             {
-                foreach (var accessor in propertyType.Accessors)
+                Assert.Equal(2, accessor.AccessedFields.Count);
+
+                Assert.Equal("Field1", accessor.AccessedFields[0].Name);
+                Assert.Equal("Property1", accessor.AccessedFields[1].Name);
+
+                foreach (var accessedField in accessor.AccessedFields)
                 {
-                    Assert.Equal(2, accessor.AccessedFields.Count);
-
-                    Assert.Equal("Field1", accessor.AccessedFields[0].Name);
-                    Assert.Equal("Property1", accessor.AccessedFields[1].Name);
-
-                    foreach (var accessedField in accessor.AccessedFields)
-                    {
-                        Assert.Equal(classTypes[1].Name, accessedField.ContainingTypeName);
-                    }
+                    Assert.Equal(classTypes[1].Name, accessedField.DefinitionClassName);
+                    Assert.Equal(classTypes[1].Name, accessedField.LocationClassName);
                 }
             }
+        }
 
-            foreach (var accessedField in classModel.Properties[0].Accessors[0].AccessedFields)
-            {
-                Assert.Equal(AccessedField.AccessKind.Getter, accessedField.Kind);
-            }
+        foreach (var accessedField in classModel.Properties[0].Accessors[0].AccessedFields)
+        {
+            Assert.Equal(AccessedField.AccessKind.Getter, accessedField.Kind);
         }
     }
 }

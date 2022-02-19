@@ -11,7 +11,7 @@ public record MethodCallModel : IMethodCallType
 
     public string LocationClassName { get; set; }
 
-    public IList<string> DefinitionMethodNames { get; set; } = new List<string>();
+    public IList<string> MethodDefinitionNames { get; set; } = new List<string>();
 
     public IList<IParameterType> ParameterTypes { get; set; } = new List<IParameterType>();
 }

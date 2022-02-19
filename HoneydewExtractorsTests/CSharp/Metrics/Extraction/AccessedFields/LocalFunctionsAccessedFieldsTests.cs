@@ -17,99 +17,99 @@ using HoneydewModels.Types;
 using Moq;
 using Xunit;
 
-namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields
+namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.AccessedFields;
+
+public class LocalFunctionsAccessedFieldsTests
 {
-    public class LocalFunctionsAccessedFieldsTests
+    private readonly CSharpFactExtractor _factExtractor;
+    private readonly Mock<ILogger> _loggerMock = new();
+    private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+    private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
+
+    public LocalFunctionsAccessedFieldsTests()
     {
-        private readonly CSharpFactExtractor _factExtractor;
-        private readonly Mock<ILogger> _loggerMock = new();
-        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
-        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
+        var compositeVisitor = new CompositeVisitor();
 
-        public LocalFunctionsAccessedFieldsTests()
+        var accessedFieldsSetterVisitor = new AccessedFieldsSetterVisitor(new List<ICSharpAccessedFieldsVisitor>
         {
-            var compositeVisitor = new CompositeVisitor();
+            new AccessFieldVisitor()
+        });
 
-            var accessedFieldsSetterVisitor = new AccessedFieldsSetterVisitor(new List<ICSharpAccessedFieldsVisitor>
+        compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<IClassVisitor>
+        {
+            new BaseInfoClassVisitor(),
+            new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
             {
-                new AccessFieldVisitor()
-            });
-
-            compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<IClassVisitor>
-            {
-                new BaseInfoClassVisitor(),
-                new MethodSetterClassVisitor(new List<ICSharpMethodVisitor>
+                new MethodInfoVisitor(),
+                new LocalFunctionsSetterClassVisitor(new List<ILocalFunctionVisitor>
                 {
-                    new MethodInfoVisitor(),
-                    new LocalFunctionsSetterClassVisitor(new List<ILocalFunctionVisitor>
+                    new LocalFunctionInfoVisitor(new List<ILocalFunctionVisitor>
                     {
-                        new LocalFunctionInfoVisitor(new List<ILocalFunctionVisitor>
-                        {
-                            accessedFieldsSetterVisitor
-                        }),
                         accessedFieldsSetterVisitor
                     }),
-                })
-            }));
+                    accessedFieldsSetterVisitor
+                }),
+            })
+        }));
 
-            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
+        compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            _factExtractor = new CSharpFactExtractor(compositeVisitor);
+        _factExtractor = new CSharpFactExtractor(compositeVisitor);
+    }
+
+    [Theory]
+    [FileData(
+        "TestData/CSharp/Metrics/Extraction/AccessedFields/LocalFunctionsAccessedFields/LocalFunctionsAccessedNonStaticFieldAndPropertyFromClass.txt")]
+    [FileData(
+        "TestData/CSharp/Metrics/Extraction/AccessedFields/LocalFunctionsAccessedFields/LocalFunctionsAccessedStaticFieldAndPropertyFromClass.txt")]
+    public void
+        Extract_ShouldHaveAccessedFields_WhenGivenPropertyAccessorThatAccessesFieldsAndPropertiesFromOtherClass(
+            string fileContent)
+    {
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+        var classModel = (ClassModel)classTypes[0];
+
+        var modelMethod1 = (MethodModel)classModel.Methods[0];
+        var modelMethod2 = (MethodModel)classModel.Methods[1];
+
+        var localFunctions = new[]
+        {
+            modelMethod1.LocalFunctions[0],
+            modelMethod1.LocalFunctions[0].LocalFunctions[0],
+            modelMethod1.LocalFunctions[0].LocalFunctions[0].LocalFunctions[0],
+
+            modelMethod2.LocalFunctions[0],
+            modelMethod2.LocalFunctions[0].LocalFunctions[0],
+            modelMethod2.LocalFunctions[0].LocalFunctions[0].LocalFunctions[0],
+        };
+
+        foreach (var localFunction in localFunctions)
+        {
+            Assert.Equal(2, localFunction.AccessedFields.Count);
+
+            Assert.Equal("Field1", localFunction.AccessedFields[0].Name);
+            Assert.Equal("Property1", localFunction.AccessedFields[1].Name);
+
+            foreach (var accessedField in localFunction.AccessedFields)
+            {
+                Assert.Equal(classModel.Name, accessedField.DefinitionClassName);
+                Assert.Equal(classModel.Name, accessedField.LocationClassName);
+            }
         }
 
-        [Theory]
-        [FileData(
-            "TestData/CSharp/Metrics/Extraction/AccessedFields/LocalFunctionsAccessedFields/LocalFunctionsAccessedNonStaticFieldAndPropertyFromClass.txt")]
-        [FileData(
-            "TestData/CSharp/Metrics/Extraction/AccessedFields/LocalFunctionsAccessedFields/LocalFunctionsAccessedStaticFieldAndPropertyFromClass.txt")]
-        public void
-            Extract_ShouldHaveAccessedFields_WhenGivenPropertyAccessorThatAccessesFieldsAndPropertiesFromOtherClass(
-                string fileContent)
+        for (var i = 0; i < 3; i++)
         {
-            var syntaxTree = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntaxTree);
-            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+            Assert.Equal(AccessedField.AccessKind.Getter, localFunctions[i].AccessedFields[0].Kind);
+            Assert.Equal(AccessedField.AccessKind.Getter, localFunctions[i].AccessedFields[1].Kind);
+        }
 
-            var classModel = (ClassModel)classTypes[0];
-
-            var modelMethod1 = (MethodModel)classModel.Methods[0];
-            var modelMethod2 = (MethodModel)classModel.Methods[1];
-
-            var localFunctions = new[]
-            {
-                modelMethod1.LocalFunctions[0],
-                modelMethod1.LocalFunctions[0].LocalFunctions[0],
-                modelMethod1.LocalFunctions[0].LocalFunctions[0].LocalFunctions[0],
-
-                modelMethod2.LocalFunctions[0],
-                modelMethod2.LocalFunctions[0].LocalFunctions[0],
-                modelMethod2.LocalFunctions[0].LocalFunctions[0].LocalFunctions[0],
-            };
-
-            foreach (var localFunction in localFunctions)
-            {
-                Assert.Equal(2, localFunction.AccessedFields.Count);
-
-                Assert.Equal("Field1", localFunction.AccessedFields[0].Name);
-                Assert.Equal("Property1", localFunction.AccessedFields[1].Name);
-
-                foreach (var accessedField in localFunction.AccessedFields)
-                {
-                    Assert.Equal(classModel.Name, accessedField.ContainingTypeName);
-                }
-            }
-
-            for (var i = 0; i < 3; i++)
-            {
-                Assert.Equal(AccessedField.AccessKind.Getter, localFunctions[i].AccessedFields[0].Kind);
-                Assert.Equal(AccessedField.AccessKind.Getter, localFunctions[i].AccessedFields[1].Kind);
-            }
-
-            for (var i = 3; i < localFunctions.Length; i++)
-            {
-                Assert.Equal(AccessedField.AccessKind.Setter, localFunctions[i].AccessedFields[0].Kind);
-                Assert.Equal(AccessedField.AccessKind.Setter, localFunctions[i].AccessedFields[1].Kind);
-            }
+        for (var i = 3; i < localFunctions.Length; i++)
+        {
+            Assert.Equal(AccessedField.AccessKind.Setter, localFunctions[i].AccessedFields[0].Kind);
+            Assert.Equal(AccessedField.AccessKind.Setter, localFunctions[i].AccessedFields[1].Kind);
         }
     }
 }

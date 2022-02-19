@@ -3,8 +3,8 @@ using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
-using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.MethodCalls;
+using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
@@ -128,7 +128,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("Function", intArgConstructor.CalledMethods[0].Name);
         Assert.Equal("TopLevel.Foo", intArgConstructor.CalledMethods[0].DefinitionClassName);
         Assert.Equal("TopLevel.Foo", intArgConstructor.CalledMethods[0].LocationClassName);
-        Assert.Empty(intArgConstructor.CalledMethods[0].DefinitionMethodNames);
+        Assert.Empty(intArgConstructor.CalledMethods[0].MethodDefinitionNames);
         Assert.Equal(1, intArgConstructor.CalledMethods[0].ParameterTypes.Count);
         var parameterModel1 = (ParameterModel)intArgConstructor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("int", parameterModel1.Type.Name);
@@ -139,7 +139,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("Compute", methodSignatureType.Name);
         Assert.Equal("TopLevel.Foo", methodSignatureType.DefinitionClassName);
         Assert.Equal("TopLevel.Foo", methodSignatureType.LocationClassName);
-        Assert.Empty(methodSignatureType.DefinitionMethodNames);
+        Assert.Empty(methodSignatureType.MethodDefinitionNames);
         Assert.Equal(1, methodSignatureType.ParameterTypes.Count);
         var parameterModel2 = (ParameterModel)methodSignatureType.ParameterTypes[0];
         Assert.Equal("int", parameterModel2.Type.Name);
@@ -183,7 +183,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("Method", methodModel.CalledMethods[0].Name);
         Assert.Equal("TopLevel.Foo", methodModel.CalledMethods[0].DefinitionClassName);
         Assert.Equal("TopLevel.Foo", methodModel.CalledMethods[0].LocationClassName);
-        Assert.Empty(methodModel.CalledMethods[0].DefinitionMethodNames);
+        Assert.Empty(methodModel.CalledMethods[0].MethodDefinitionNames);
         Assert.Equal(1, methodModel.CalledMethods[0].ParameterTypes.Count);
         var parameterModel = (ParameterModel)methodModel.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel.Modifier);
@@ -230,14 +230,14 @@ public class CSharpCalledMethodsTests
         Assert.Equal("OtherMethod", calledMethod1.Name);
         Assert.Equal("TopLevel.Bar", calledMethod1.DefinitionClassName);
         Assert.Equal("TopLevel.Bar", calledMethod1.LocationClassName);
-        Assert.Empty(calledMethod1.DefinitionMethodNames);
+        Assert.Empty(calledMethod1.MethodDefinitionNames);
         Assert.Empty(calledMethod1.ParameterTypes);
 
         var calledMethod2 = methodModelM.CalledMethods[1];
         Assert.Equal("Method", calledMethod2.Name);
         Assert.Equal("TopLevel.Foo", calledMethod2.DefinitionClassName);
         Assert.Equal("TopLevel.Foo", calledMethod2.LocationClassName);
-        Assert.Empty(calledMethod2.DefinitionMethodNames);
+        Assert.Empty(calledMethod2.MethodDefinitionNames);
         Assert.Equal(1, calledMethod2.ParameterTypes.Count);
         var calledMethod2Parameter = (ParameterModel)calledMethod2.ParameterTypes[0];
         Assert.Equal("", calledMethod2Parameter.Modifier);
@@ -248,7 +248,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("Parse", calledMethod3.Name);
         Assert.Equal("int", calledMethod3.DefinitionClassName);
         Assert.Equal("int", calledMethod3.LocationClassName);
-        Assert.Empty(calledMethod3.DefinitionMethodNames);
+        Assert.Empty(calledMethod3.MethodDefinitionNames);
         Assert.Equal(1, calledMethod3.ParameterTypes.Count);
         var calledMethod3Parameter = (ParameterModel)calledMethod3.ParameterTypes[0];
         Assert.Equal("", calledMethod3Parameter.Modifier);
@@ -284,7 +284,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("Method", calledMethod.Name);
         Assert.Equal("Foo", calledMethod.DefinitionClassName);
         Assert.Equal("Foo", calledMethod.LocationClassName);
-        Assert.Empty(calledMethod.DefinitionMethodNames);
+        Assert.Empty(calledMethod.MethodDefinitionNames);
         Assert.Equal(1, calledMethod.ParameterTypes.Count);
         var calledMethodParameter = (ParameterModel)calledMethod.ParameterTypes[0];
         Assert.Equal("", calledMethodParameter.Modifier);
@@ -334,7 +334,7 @@ public class CSharpCalledMethodsTests
             Assert.Equal("Other", calledMethod.Name);
             Assert.Equal("TopLevel.Bar", calledMethod.DefinitionClassName);
             Assert.Equal("TopLevel.Bar", calledMethod.LocationClassName);
-            Assert.Empty(calledMethod.DefinitionMethodNames);
+            Assert.Empty(calledMethod.MethodDefinitionNames);
             Assert.Equal(1, calledMethod.ParameterTypes.Count);
             var calledMethodParameter = (ParameterModel)calledMethod.ParameterTypes[0];
             Assert.Equal("", calledMethodParameter.Modifier);
@@ -389,7 +389,7 @@ public class CSharpCalledMethodsTests
             Assert.Equal("Other", calledMethod.Name);
             Assert.Equal("TopLevel.Bar", calledMethod.DefinitionClassName);
             Assert.Equal("TopLevel.Bar", calledMethod.LocationClassName);
-            Assert.Empty(calledMethod.DefinitionMethodNames);
+            Assert.Empty(calledMethod.MethodDefinitionNames);
             Assert.Equal(1, calledMethod.ParameterTypes.Count);
             var calledMethodParameter = (ParameterModel)calledMethod.ParameterTypes[0];
             Assert.Equal("", calledMethodParameter.Modifier);
@@ -440,7 +440,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("Other", calledMethod1.Name);
         Assert.Equal("TopLevel.Bar", calledMethod1.DefinitionClassName);
         Assert.Equal("TopLevel.Bar", calledMethod1.LocationClassName);
-        Assert.Empty(calledMethod1.DefinitionMethodNames);
+        Assert.Empty(calledMethod1.MethodDefinitionNames);
         Assert.Equal(1, calledMethod1.ParameterTypes.Count);
         var calledMethod1Parameter = (ParameterModel)calledMethod1.ParameterTypes[0];
         Assert.Equal("", calledMethod1Parameter.Modifier);
@@ -451,7 +451,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("Calc", calledMethod2.Name);
         Assert.Equal("TopLevel.Bar", calledMethod1.DefinitionClassName);
         Assert.Equal("TopLevel.Bar", calledMethod1.LocationClassName);
-        Assert.Empty(calledMethod1.DefinitionMethodNames);
+        Assert.Empty(calledMethod1.MethodDefinitionNames);
         Assert.Equal(1, calledMethod2.ParameterTypes.Count);
         var calledMethod2Parameter = (ParameterModel)calledMethod2.ParameterTypes[0];
         Assert.Equal("", calledMethod2Parameter.Modifier);
@@ -462,7 +462,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("Other", calledMethod3.Name);
         Assert.Equal("TopLevel.Bar", calledMethod1.DefinitionClassName);
         Assert.Equal("TopLevel.Bar", calledMethod1.LocationClassName);
-        Assert.Empty(calledMethod1.DefinitionMethodNames);
+        Assert.Empty(calledMethod1.MethodDefinitionNames);
         Assert.Equal(1, calledMethod3.ParameterTypes.Count);
         var calledMethod3Parameter = (ParameterModel)calledMethod3.ParameterTypes[0];
         Assert.Equal("", calledMethod3Parameter.Modifier);
@@ -473,7 +473,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("Calc", calledMethod4.Name);
         Assert.Equal("TopLevel.Bar", calledMethod1.DefinitionClassName);
         Assert.Equal("TopLevel.Bar", calledMethod1.LocationClassName);
-        Assert.Empty(calledMethod1.DefinitionMethodNames);
+        Assert.Empty(calledMethod1.MethodDefinitionNames);
         Assert.Equal(1, calledMethod4.ParameterTypes.Count);
         var calledMethod4Parameter = (ParameterModel)calledMethod4.ParameterTypes[0];
         Assert.Equal("", calledMethod4Parameter.Modifier);
@@ -539,35 +539,35 @@ public class CSharpCalledMethodsTests
         Assert.Equal("Trim", calledMethod0.Name);
         Assert.Equal("string", calledMethod0.DefinitionClassName);
         Assert.Equal("string", calledMethod0.LocationClassName);
-        Assert.Empty(calledMethod0.DefinitionMethodNames);
+        Assert.Empty(calledMethod0.MethodDefinitionNames);
         Assert.Empty(calledMethod0.ParameterTypes);
 
         var calledMethod1 = methodModelM.CalledMethods[1];
         Assert.Equal("GetName", calledMethod1.Name);
         Assert.Equal("TopLevel.Foo", calledMethod1.LocationClassName);
         Assert.Equal("TopLevel.Foo", calledMethod1.DefinitionClassName);
-        Assert.Empty(calledMethod1.DefinitionMethodNames);
+        Assert.Empty(calledMethod1.MethodDefinitionNames);
         Assert.Empty(calledMethod1.ParameterTypes);
 
         var calledMethod2 = methodModelM.CalledMethods[2];
         Assert.Equal("Build", calledMethod2.Name);
         Assert.Equal("TopLevel.Builder", calledMethod2.DefinitionClassName);
         Assert.Equal("TopLevel.Builder", calledMethod2.LocationClassName);
-        Assert.Empty(calledMethod2.DefinitionMethodNames);
+        Assert.Empty(calledMethod2.MethodDefinitionNames);
         Assert.Empty(calledMethod2.ParameterTypes);
 
         var calledMethod3 = methodModelM.CalledMethods[3];
         Assert.Equal("Set", calledMethod3.Name);
         Assert.Equal("TopLevel.Builder", calledMethod3.DefinitionClassName);
         Assert.Equal("TopLevel.Builder", calledMethod3.LocationClassName);
-        Assert.Empty(calledMethod3.DefinitionMethodNames);
+        Assert.Empty(calledMethod3.MethodDefinitionNames);
         Assert.Empty(calledMethod3.ParameterTypes);
 
         var calledMethod4 = methodModelM.CalledMethods[4];
         Assert.Equal("Create", calledMethod4.Name);
         Assert.Equal("TopLevel.Bar", calledMethod4.DefinitionClassName);
         Assert.Equal("TopLevel.Bar", calledMethod4.LocationClassName);
-        Assert.Empty(calledMethod4.DefinitionMethodNames);
+        Assert.Empty(calledMethod4.MethodDefinitionNames);
         Assert.Empty(calledMethod4.ParameterTypes);
     }
 
@@ -600,16 +600,16 @@ public class CSharpCalledMethodsTests
 
         var calledMethod0 = methodModelM.CalledMethods[0];
         Assert.Equal("ToList", calledMethod0.Name);
-        Assert.Equal("System.Collections.Generic.IEnumerable<string>", calledMethod0.DefinitionClassName);
+        Assert.Equal("System.Linq.Enumerable", calledMethod0.DefinitionClassName);
         Assert.Equal("System.Collections.Generic.IEnumerable<string>", calledMethod0.LocationClassName);
-        Assert.Empty(calledMethod0.DefinitionMethodNames);
+        Assert.Empty(calledMethod0.MethodDefinitionNames);
         Assert.Empty(calledMethod0.ParameterTypes);
 
         var calledMethod1 = methodModelM.CalledMethods[1];
         Assert.Equal("Select", calledMethod1.Name);
-        Assert.Equal("System.Collections.Generic.IEnumerable<string>", calledMethod1.DefinitionClassName);
+        Assert.Equal("System.Linq.Enumerable", calledMethod1.DefinitionClassName);
         Assert.Equal("System.Collections.Generic.IEnumerable<string>", calledMethod1.LocationClassName);
-        Assert.Empty(calledMethod1.DefinitionMethodNames);
+        Assert.Empty(calledMethod1.MethodDefinitionNames);
         Assert.Equal(1, calledMethod1.ParameterTypes.Count);
         var calledMethod1Parameter = (ParameterModel)calledMethod1.ParameterTypes[0];
         Assert.Equal("", calledMethod1Parameter.Modifier);
@@ -618,9 +618,9 @@ public class CSharpCalledMethodsTests
 
         var calledMethod2 = methodModelM.CalledMethods[2];
         Assert.Equal("Skip", calledMethod2.Name);
-        Assert.Equal("System.Collections.Generic.IEnumerable<string>", calledMethod2.DefinitionClassName);
+        Assert.Equal("System.Linq.Enumerable", calledMethod2.DefinitionClassName);
         Assert.Equal("System.Collections.Generic.IEnumerable<string>", calledMethod2.LocationClassName);
-        Assert.Empty(calledMethod2.DefinitionMethodNames);
+        Assert.Empty(calledMethod2.MethodDefinitionNames);
         Assert.Equal(1, calledMethod2.ParameterTypes.Count);
         var calledMethod2Parameter = (ParameterModel)calledMethod2.ParameterTypes[0];
         Assert.Equal("", calledMethod2Parameter.Modifier);
@@ -629,9 +629,9 @@ public class CSharpCalledMethodsTests
 
         var calledMethod3 = methodModelM.CalledMethods[3];
         Assert.Equal("Where", calledMethod3.Name);
-        Assert.Equal("System.Collections.Generic.List<string>", calledMethod3.DefinitionClassName);
+        Assert.Equal("System.Linq.Enumerable", calledMethod3.DefinitionClassName);
         Assert.Equal("System.Collections.Generic.List<string>", calledMethod3.LocationClassName);
-        Assert.Empty(calledMethod3.DefinitionMethodNames);
+        Assert.Empty(calledMethod3.MethodDefinitionNames);
         Assert.Equal(1, calledMethod3.ParameterTypes.Count);
         var calledMethod3Parameter = (ParameterModel)calledMethod3.ParameterTypes[0];
         Assert.Equal("", calledMethod3Parameter.Modifier);
@@ -642,7 +642,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("Trim", calledMethod4.Name);
         Assert.Equal("string", calledMethod4.DefinitionClassName);
         Assert.Equal("string", calledMethod4.LocationClassName);
-        Assert.Empty(calledMethod4.DefinitionMethodNames);
+        Assert.Empty(calledMethod4.MethodDefinitionNames);
         Assert.Empty(calledMethod4.ParameterTypes);
     }
 
@@ -683,7 +683,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TryGetValue", calledMethod0.Name);
         Assert.Equal("System.Collections.Generic.Dictionary<string, string>", calledMethod0.DefinitionClassName);
         Assert.Equal("System.Collections.Generic.Dictionary<string, string>", calledMethod0.LocationClassName);
-        Assert.Empty(calledMethod0.DefinitionMethodNames);
+        Assert.Empty(calledMethod0.MethodDefinitionNames);
 
         Assert.Equal(2, calledMethod0.ParameterTypes.Count);
 
@@ -735,7 +735,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TryGetValue", calledMethod0.Name);
         Assert.Equal("System.Collections.Generic.Dictionary<string, string>", calledMethod0.DefinitionClassName);
         Assert.Equal("System.Collections.Generic.Dictionary<string, string>", calledMethod0.LocationClassName);
-        Assert.Empty(calledMethod0.DefinitionMethodNames);
+        Assert.Empty(calledMethod0.MethodDefinitionNames);
 
         Assert.Equal(2, calledMethod0.ParameterTypes.Count);
 
@@ -774,7 +774,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("Method<int>", calledMethod0.Name);
         Assert.Equal("TopLevel.Bar", calledMethod0.DefinitionClassName);
         Assert.Equal("TopLevel.Bar", calledMethod0.LocationClassName);
-        Assert.Empty(calledMethod0.DefinitionMethodNames);
+        Assert.Empty(calledMethod0.MethodDefinitionNames);
         Assert.Equal(1, calledMethod0.ParameterTypes.Count);
         Assert.Equal("int", calledMethod0.ParameterTypes[0].Type.Name);
 
@@ -782,7 +782,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("Method", calledMethod1.Name);
         Assert.Equal("TopLevel.Bar", calledMethod1.DefinitionClassName);
         Assert.Equal("TopLevel.Bar", calledMethod1.LocationClassName);
-        Assert.Empty(calledMethod1.DefinitionMethodNames);
+        Assert.Empty(calledMethod1.MethodDefinitionNames);
         Assert.Equal(1, calledMethod1.ParameterTypes.Count);
         Assert.Equal("int", calledMethod1.ParameterTypes[0].Type.Name);
 
@@ -790,7 +790,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("Method<double>", calledMethod2.Name);
         Assert.Equal("TopLevel.Bar", calledMethod2.DefinitionClassName);
         Assert.Equal("TopLevel.Bar", calledMethod2.LocationClassName);
-        Assert.Empty(calledMethod2.DefinitionMethodNames);
+        Assert.Empty(calledMethod2.MethodDefinitionNames);
         Assert.Equal(1, calledMethod2.ParameterTypes.Count);
         Assert.Equal("double", calledMethod2.ParameterTypes[0].Type.Name);
     }
@@ -833,7 +833,7 @@ public class CSharpCalledMethodsTests
             Assert.Equal("nameof", methodType.CalledMethods[0].Name);
             Assert.Equal("", methodType.CalledMethods[0].DefinitionClassName);
             Assert.Equal("", methodType.CalledMethods[0].LocationClassName);
-            Assert.Empty(methodType.CalledMethods[0].DefinitionMethodNames);
+            Assert.Empty(methodType.CalledMethods[0].MethodDefinitionNames);
         }
     }
 

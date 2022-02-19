@@ -8,5 +8,5 @@ public interface IMethodCallType : IMethodSignatureType
     
     public string LocationClassName { get; set; } // derived class
     
-    public IList<string> DefinitionMethodNames { get; set; }
+    public IList<string> MethodDefinitionNames { get; set; }
 }

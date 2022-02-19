@@ -35,12 +35,7 @@ public static partial class CSharpExtractionHelperMethods
         return "";
     }
 
-    public static string GetContainingMethodName(SyntaxNode syntaxNode, SemanticModel semanticModel)
-    {
-        return "";
-    }
-
-    public static string GetOriginalMethodDefinitionClassName(SyntaxNode syntaxNode, SemanticModel semanticModel)
+    public static string GetDefinitionClassName(SyntaxNode syntaxNode, SemanticModel semanticModel)
     {
         var symbolInfo = semanticModel.GetSymbolInfo(syntaxNode);
         if (symbolInfo.Symbol != null)
@@ -61,6 +56,11 @@ public static partial class CSharpExtractionHelperMethods
                             return fieldSymbol.Type.Name;
                         }
 
+                        case ILocalSymbol localSymbol:
+                        {
+                            return localSymbol.Type.ToString();
+                        }
+
                         case { } symbol:
                         {
                             return symbol.ToString();
@@ -68,9 +68,16 @@ public static partial class CSharpExtractionHelperMethods
 
                         case null:
                         {
-                            if (memberAccessExpressionSyntax.Expression is IdentifierNameSyntax identifierNameSyntax)
+                            switch (memberAccessExpressionSyntax.Expression)
                             {
-                                return identifierNameSyntax.Identifier.ToString();
+                                case IdentifierNameSyntax identifierNameSyntax:
+                                {
+                                    return identifierNameSyntax.Identifier.ToString();
+                                }
+                                case ObjectCreationExpressionSyntax objectCreationExpressionSyntax:
+                                {
+                                    return objectCreationExpressionSyntax.Type.ToString();
+                                }
                             }
                         }
                             break;
@@ -102,13 +109,117 @@ public static partial class CSharpExtractionHelperMethods
                 }
             }
                 break;
+
+            default:
+            {
+            }
+                break;
         }
 
         return "";
     }
 
-    public static string GetActualMethodDefinitionClassName(SyntaxNode syntaxNode, SemanticModel semanticModel)
+    public static string GetLocationClassName(SyntaxNode syntaxNode, SemanticModel semanticModel)
     {
-        return GetOriginalMethodDefinitionClassName(syntaxNode, semanticModel);
+        switch (syntaxNode)
+        {
+            case InvocationExpressionSyntax invocationExpressionSyntax:
+            {
+                switch (invocationExpressionSyntax.Expression)
+                {
+                    case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
+                    {
+                        if (GetLocationClassNameFromMemberAccessExpressionSyntax(memberAccessExpressionSyntax,
+                                out var className))
+                        {
+                            return className;
+                        }
+                    }
+                        break;
+                }
+
+                break;
+            }
+
+            case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
+            {
+                if (GetLocationClassNameFromMemberAccessExpressionSyntax(memberAccessExpressionSyntax,
+                        out var className))
+                {
+                    return className;
+                }
+            }
+                break;
+
+            case IdentifierNameSyntax identifierNameSyntax:
+            {
+                var symbolInfo = semanticModel.GetSymbolInfo(identifierNameSyntax);
+
+                switch (symbolInfo.Symbol)
+                {
+                    case IMethodSymbol methodSymbol:
+                    {
+                        if (methodSymbol.ReceiverType != null)
+                        {
+                            return methodSymbol.ReceiverType.ToString();
+                        }
+                    }
+                        break;
+
+                    default:
+                    {
+                    }
+                        break;
+                }
+            }
+                break;
+
+            default:
+            {
+            }
+                break;
+        }
+
+        return GetDefinitionClassName(syntaxNode, semanticModel);
+
+        bool GetLocationClassNameFromMemberAccessExpressionSyntax(
+            MemberAccessExpressionSyntax memberAccessExpressionSyntax, out string className)
+        {
+            className = "";
+            var symbolInfo = semanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression);
+            switch (symbolInfo.Symbol)
+            {
+                case ILocalSymbol localSymbol:
+                {
+                    className = localSymbol.Type.ToString();
+                    return true;
+                }
+
+                case IFieldSymbol fieldSymbol:
+                {
+                    className = fieldSymbol.Type.ToString();
+                    return true;
+                }
+
+                case IPropertySymbol propertySymbol:
+                {
+                    className = propertySymbol.Type.ToString();
+                    return true;
+                }
+
+                case IMethodSymbol:
+                {
+                    className = GetLocationClassName(memberAccessExpressionSyntax.Name, semanticModel);
+                    return true;
+                }
+
+                default:
+                {
+                }
+                    break;
+            }
+
+            return false;
+        }
     }
 }

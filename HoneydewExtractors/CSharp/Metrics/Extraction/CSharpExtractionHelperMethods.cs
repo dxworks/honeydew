@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using HoneydewCore.Utils;
@@ -94,12 +95,60 @@ public static partial class CSharpExtractionHelperMethods
         return new MethodCallModel
         {
             Name = methodName,
-            DefinitionClassName = GetOriginalMethodDefinitionClassName(invocationExpressionSyntax, semanticModel),
-            LocationClassName = GetActualMethodDefinitionClassName(invocationExpressionSyntax, semanticModel),
+            DefinitionClassName = GetDefinitionClassName(invocationExpressionSyntax, semanticModel),
+            LocationClassName = GetLocationClassName(invocationExpressionSyntax, semanticModel),
             ParameterTypes = GetParameters(invocationExpressionSyntax, semanticModel),
-            // todo
-            // CallLocationMethodNames = 
+            MethodDefinitionNames = GetMethodDefinitionNames(invocationExpressionSyntax, semanticModel)
         };
+    }
+
+    private static IList<string> GetMethodDefinitionNames(ISymbol symbol)
+    {
+        var definitionNames = new List<string>();
+
+        var currentSymbol = symbol.ContainingSymbol;
+
+        while (currentSymbol is IMethodSymbol methodSymbol)
+        {
+            if (methodSymbol.AssociatedSymbol != null)
+            {
+                var associatedSymbolName = methodSymbol.AssociatedSymbol.Name;
+                var index = methodSymbol.Name.IndexOf($"_{associatedSymbolName}", StringComparison.Ordinal);
+                var methodName = methodSymbol.Name;
+                if (index >= 0)
+                {
+                    methodName = methodName.Remove(index);
+                }
+
+                definitionNames.Add(methodName);
+                definitionNames.Add(associatedSymbolName);
+            }
+            else
+            {
+                var signature =
+                    $"{methodSymbol.Name}({string.Join(", ", methodSymbol.Parameters.Select(p => p.Type.ToString()))})";
+
+                definitionNames.Add(signature);
+            }
+
+            currentSymbol = currentSymbol.ContainingSymbol;
+        }
+
+        definitionNames.Reverse();
+
+        return definitionNames;
+    }
+
+    private static IList<string> GetMethodDefinitionNames(InvocationExpressionSyntax invocationExpressionSyntax,
+        SemanticModel semanticModel)
+    {
+        var symbolInfo = semanticModel.GetSymbolInfo(invocationExpressionSyntax);
+        if (symbolInfo.Symbol != null)
+        {
+            return GetMethodDefinitionNames(symbolInfo.Symbol);
+        }
+
+        return new List<string>();
     }
 
     public static IList<IParameterType> GetParameters(IMethodSymbol methodSymbol)
@@ -178,44 +227,6 @@ public static partial class CSharpExtractionHelperMethods
             DefaultValue = defaultValue,
             IsNullable = isNullable
         };
-    }
-
-    public static string GetParentDeclaredType(SyntaxNode syntaxNode, SemanticModel semanticModel)
-    {
-        CSharpSyntaxNode declarationSyntax = syntaxNode.GetParentDeclarationSyntax<LocalFunctionStatementSyntax>();
-
-        declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<BaseMethodDeclarationSyntax>();
-
-        declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
-
-        declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<EventDeclarationSyntax>();
-
-        declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<DelegateDeclarationSyntax>();
-
-        declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>();
-
-        declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<NamespaceDeclarationSyntax>();
-
-        declarationSyntax ??= syntaxNode.GetParentDeclarationSyntax<FileScopedNamespaceDeclarationSyntax>();
-
-        if (declarationSyntax != null)
-        {
-            var declaredSymbol = semanticModel.GetDeclaredSymbol(declarationSyntax);
-            if (declaredSymbol == null)
-            {
-                return syntaxNode.ToString();
-            }
-
-            if (declarationSyntax is LocalFunctionStatementSyntax)
-            {
-                var parent = GetParentDeclaredType(declarationSyntax.Parent, semanticModel);
-                return $"{parent}.{declaredSymbol}";
-            }
-
-            return declaredSymbol.ToString();
-        }
-
-        return syntaxNode.ToString();
     }
 
     public static IEntityType GetContainingType(SyntaxNode syntaxNode, SemanticModel semanticModel)
@@ -536,24 +547,13 @@ public static partial class CSharpExtractionHelperMethods
 
         var symbolInfo = semanticModel.GetSymbolInfo(expressionSyntax);
 
-        if (symbolInfo.Symbol is IFieldSymbol fieldSymbol)
+        if (symbolInfo.Symbol is IFieldSymbol or IPropertySymbol)
         {
             return new AccessedField
             {
-                Name = fieldSymbol.Name,
-                DefinitionClassName = fieldSymbol.ContainingType.ToString(),
-                AccessLocationMethodName = fieldSymbol.ContainingType.ToString(),
-                Kind = GetAccessType(identifierNameSyntax),
-            };
-        }
-
-        if (symbolInfo.Symbol is IPropertySymbol propertySymbol)
-        {
-            return new AccessedField
-            {
-                Name = propertySymbol.Name,
-                DefinitionClassName = propertySymbol.ContainingType.ToString(),
-                AccessLocationMethodName = propertySymbol.ContainingType.ToString(),
+                Name = symbolInfo.Symbol.Name,
+                DefinitionClassName = symbolInfo.Symbol.ContainingType.ToString(),
+                LocationClassName = GetLocationClassName(expressionSyntax, semanticModel),
                 Kind = GetAccessType(identifierNameSyntax),
             };
         }
@@ -565,11 +565,12 @@ public static partial class CSharpExtractionHelperMethods
                 return null;
             }
 
+            var definitionClassName = memberAccessExpressionSyntax.Expression.ToString();
             return new AccessedField
             {
                 Name = memberAccessExpressionSyntax.Name.ToString(),
-                DefinitionClassName = memberAccessExpressionSyntax.Expression.ToString(),
-                AccessLocationMethodName = memberAccessExpressionSyntax.Expression.ToString(),
+                DefinitionClassName = definitionClassName,
+                LocationClassName = definitionClassName,
                 Kind = GetAccessType(memberAccessExpressionSyntax),
             };
         }

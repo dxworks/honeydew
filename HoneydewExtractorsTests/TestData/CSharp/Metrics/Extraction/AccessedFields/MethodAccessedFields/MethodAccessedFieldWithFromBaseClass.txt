@@ -1,0 +1,28 @@
+﻿namespace Namespace1;
+
+public class Base 
+{
+    public int Field;
+    
+    public double P {get;}    
+}
+
+public class Derived : Base 
+{
+    public float Prop {get;set;}
+    
+    public string S;
+}
+
+public class Class1
+{
+    private Derived d;
+    
+    public void Method1()
+    {
+        var x = d.Field;
+        var y = d.Prop;
+        var z = d.P;
+        var t = d.S;
+    }
+}

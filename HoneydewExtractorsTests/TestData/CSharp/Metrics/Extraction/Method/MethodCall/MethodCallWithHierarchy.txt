@@ -1,0 +1,32 @@
+﻿namespace Namespace1;
+
+public class Main
+{   
+    public void M()
+    {
+        Derived d = new Derived();
+        
+        d.MBase();
+        d.F();
+        d.Method();
+    }
+}
+
+public class Base 
+{
+    public virtual void MBase() { }
+    
+    public void Method() { }
+}
+
+public class Middle : Base
+{
+    public virtual void MBase() { }
+    
+    public void F() { }
+}
+
+public class Derived : Middle
+{    
+    public void Method() { }
+}

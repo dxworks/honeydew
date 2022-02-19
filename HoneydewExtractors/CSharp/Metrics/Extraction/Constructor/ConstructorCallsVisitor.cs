@@ -63,8 +63,8 @@ public class ConstructorCallsVisitor : ICSharpConstructorVisitor
         return new MethodCallModel
         {
             Name = methodName,
-            DefinitionClassName = GetOriginalMethodDefinitionClassName(syntaxNode, semanticModel),
-            LocationClassName = GetActualMethodDefinitionClassName(syntaxNode, semanticModel),
+            DefinitionClassName = GetDefinitionClassName(syntaxNode, semanticModel),
+            LocationClassName = GetLocationClassName(syntaxNode, semanticModel),
             ParameterTypes = parameterModels
         };
     }

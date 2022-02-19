@@ -929,4 +929,22 @@ public class CSharpPropertyInfoTests
         Assert.Equal("System.Func<string>", parameterModel2.Type.Name);
         Assert.Null(parameterModel2.DefaultValue);
     }
+
+    [Theory]
+    [FileData("TestData/CSharp/Metrics/Extraction/Method/MethodCall/MethodCallFromExternClass.txt")]
+    public void Extract_ShouldHaveNoMethodDefinitionNames_GivenExternClass(string fileContent)
+    {
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+        var propertyAccessor = ((ClassModel)classTypes[0]).Properties[0].Accessors[0];
+
+        Assert.Equal(1, propertyAccessor.CalledMethods.Count);
+
+        Assert.Equal("Method", propertyAccessor.CalledMethods[0].Name);
+        Assert.Equal("Extern", propertyAccessor.CalledMethods[0].DefinitionClassName);
+        Assert.Equal("Extern", propertyAccessor.CalledMethods[0].LocationClassName);
+        Assert.Empty(propertyAccessor.CalledMethods[0].MethodDefinitionNames);
+    }
 }

@@ -22,72 +22,53 @@ public class LocalFunctionsSetterClassVisitor : CompositeVisitor, ICSharpMethodV
 
     public IMethodType Visit(MethodDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
     {
-        if (modelType is not MethodModel methodModel)
+        if (syntaxNode.Body == null)
         {
             return modelType;
         }
 
-        if (syntaxNode.Body == null)
-        {
-            return methodModel;
-        }
+        SetLocalFunctionInfo(syntaxNode.Body, semanticModel, modelType);
 
-        SetLocalFunctionInfo(syntaxNode.Body, semanticModel, methodModel);
-
-        return methodModel;
+        return modelType;
     }
 
     public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
         IConstructorType modelType)
     {
-        if (modelType is not ConstructorModel constructorModel)
+        if (syntaxNode.Body == null)
         {
             return modelType;
         }
 
-        if (syntaxNode.Body == null)
-        {
-            return constructorModel;
-        }
+        SetLocalFunctionInfo(syntaxNode.Body, semanticModel, modelType);
 
-        SetLocalFunctionInfo(syntaxNode.Body, semanticModel, constructorModel);
-
-        return constructorModel;
+        return modelType;
     }
 
     public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
         IDestructorType modelType)
     {
-        if (modelType is not DestructorModel destructorModel)
+        if (syntaxNode.Body == null)
         {
             return modelType;
         }
 
-        if (syntaxNode.Body == null)
-        {
-            return destructorModel;
-        }
+        SetLocalFunctionInfo(syntaxNode.Body, semanticModel, modelType);
 
-        SetLocalFunctionInfo(syntaxNode.Body, semanticModel, destructorModel);
-
-        return destructorModel;
+        return modelType;
     }
 
-    public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
+    public IAccessorType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorType modelType)
     {
-        if (modelType is not MethodModel methodModel)
+        if (syntaxNode.Body == null)
         {
             return modelType;
         }
 
-        if (syntaxNode.Body == null)
-        {
-            return methodModel;
-        }
+        SetLocalFunctionInfo(syntaxNode.Body, semanticModel, modelType);
 
-        SetLocalFunctionInfo(syntaxNode.Body, semanticModel, methodModel);
-
-        return methodModel;
+        return modelType;
     }
 
     public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode, SemanticModel semanticModel,
