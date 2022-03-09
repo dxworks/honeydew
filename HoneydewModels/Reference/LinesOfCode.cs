@@ -1,11 +1,10 @@
-namespace HoneydewModels.Reference
+namespace HoneydewModels.Reference;
+
+public struct LinesOfCode
 {
-    public struct LinesOfCode
-    {
-        public int SourceLines { get; set; }
+    public int SourceLines { get; set; }
 
-        public int CommentedLines { get; set; }
+    public int CommentedLines { get; set; }
 
-        public int EmptyLines { get; set; }
-    }
+    public int EmptyLines { get; set; }
 }

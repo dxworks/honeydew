@@ -1,15 +1,14 @@
 using System.Collections.Generic;
 
-namespace HoneydewModels.Reference
+namespace HoneydewModels.Reference;
+
+public class GenericParameterModel : ReferenceEntity
 {
-    public class GenericParameterModel : ReferenceEntity
-    {
-        public string Name { get; set; }
+    public string Name { get; set; }
 
-        public string Modifier { get; set; }
+    public GenericParameterModifier Modifier { get; set; } = GenericParameterModifier.None;
 
-        public IList<EntityType> Constraints { get; set; } = new List<EntityType>();
+    public IList<EntityType> Constraints { get; set; } = new List<EntityType>();
 
-        public IList<AttributeModel> Attributes { get; set; } = new List<AttributeModel>();
-    }
+    public IList<AttributeModel> Attributes { get; set; } = new List<AttributeModel>();
 }

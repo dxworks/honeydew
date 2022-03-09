@@ -1,43 +1,67 @@
 using System.Collections.Generic;
+using System.Linq;
 
-namespace HoneydewModels.Reference
+namespace HoneydewModels.Reference;
+
+public class MethodModel : ReferenceEntity
 {
-    public class MethodModel : ReferenceEntity
-    {
-        public string Name { get; set; }
+    public string Name { get; set; }
 
-        public ClassModel Class { get; set; }
+    public EntityModel Entity { get; set; }
 
-        public string MethodType { get; set; }
+    public MethodType Type { get; set; }
 
-        public ReferenceEntity ContainingType { get; set; }
+    public MethodModel? ContainingMethod { get; set; }
 
-        public string Modifier { get; set; } = "";
+    public PropertyModel? ContainingProperty { get; set; }
 
-        public string AccessModifier { get; set; }
+    public AccessModifier AccessModifier { get; set; }
 
-        public ReturnValueModel ReturnValue { get; set; }
+    public string Modifier { get; set; }
 
-        public IList<ParameterModel> Parameters { get; set; } = new List<ParameterModel>();
+    public IList<Modifier> Modifiers { get; set; } = new List<Modifier>();
 
-        public IList<GenericParameterModel> GenericParameters { get; set; } = new List<GenericParameterModel>();
+    public ReturnValueModel? ReturnValue { get; set; }
 
-        public IList<MethodModel> CalledMethods { get; set; } = new List<MethodModel>();
-        
-        public IList<ExternalMethodCall> CalledExternalMethods { get; set; } = new List<ExternalMethodCall>();
+    public IList<ParameterModel> Parameters { get; set; } = new List<ParameterModel>();
 
-        public IList<AccessedField> AccessedFields { get; set; } = new List<AccessedField>();
+    public IList<GenericParameterModel> GenericParameters { get; set; } = new List<GenericParameterModel>();
 
-        public IList<AttributeModel> Attributes { get; set; } = new List<AttributeModel>();
+    public IList<MethodCall> OutgoingCalls { get; set; } = new List<MethodCall>();
 
-        public IList<MethodModel> LocalFunctions { get; set; } = new List<MethodModel>();
+    public IList<MethodCall> IncomingCalls { get; set; } = new List<MethodCall>();
 
-        public IList<LocalVariableModel> LocalVariables { get; set; } = new List<LocalVariableModel>();
+    public IList<FieldAccess> FieldAccesses { get; set; } = new List<FieldAccess>();
 
-        public LinesOfCode Loc { get; set; }
+    public IEnumerable<MethodCall> ExternalOutgoingCalls =>
+        _externalOutgoingCalls ??= OutgoingCalls.Where(call => call.Caller is { Entity.IsExternal: true });
 
-        public int CyclomaticComplexity { get; set; }
+    public IEnumerable<MethodCall> InternalOutgoingCalls =>
+        _internalOutgoingCalls ??= OutgoingCalls.Where(call => call.Caller is { Entity.IsInternal: true });
 
-        public IList<MetricModel> Metrics { get; init; } = new List<MetricModel>();
-    }
+    public IEnumerable<FieldAccess> ExternalFieldAccesses =>
+        _externalFieldAccesses ??= FieldAccesses.Where(call => call.Caller is { Entity.IsExternal: true });
+
+    public IEnumerable<FieldAccess> InternalFieldAccesses =>
+        _internalFieldAccesses ??= FieldAccesses.Where(call => call.Caller is { Entity.IsInternal: true });
+
+    public IList<AttributeModel> Attributes { get; set; } = new List<AttributeModel>();
+
+    public IList<MethodModel> LocalFunctions { get; set; } = new List<MethodModel>();
+
+    public IList<LocalVariableModel> LocalVariables { get; set; } = new List<LocalVariableModel>();
+
+    public LinesOfCode LinesOfCode { get; set; }
+
+    public int CyclomaticComplexity { get; set; }
+
+    public IDictionary<string, int> Metrics { get; set; } = new Dictionary<string, int>();
+
+    private IEnumerable<MethodCall> _externalOutgoingCalls;
+
+    private IEnumerable<MethodCall> _internalOutgoingCalls;
+
+    private IEnumerable<FieldAccess> _externalFieldAccesses;
+
+    private IEnumerable<FieldAccess> _internalFieldAccesses;
 }

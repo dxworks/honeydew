@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 
-namespace HoneydewModels.Reference
+namespace HoneydewModels.Reference;
+
+public class SolutionModel : ReferenceEntity
 {
-    public class SolutionModel : ReferenceEntity
-    {
-        public string FilePath { get; set; }
+    public string FilePath { get; set; }
 
-        public IList<ProjectModel> Projects { get; set; } = new List<ProjectModel>();
+    public IList<ProjectModel> Projects { get; set; } = new List<ProjectModel>();
 
-        public RepositoryModel Repository { get; init; }
-    }
+    public RepositoryModel Repository { get; init; }
 }

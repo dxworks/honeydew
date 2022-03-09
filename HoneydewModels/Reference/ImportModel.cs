@@ -1,13 +1,14 @@
-namespace HoneydewModels.Reference
+namespace HoneydewModels.Reference;
+
+public class ImportModel : ReferenceEntity
 {
-    public class ImportModel : ReferenceEntity
-    {
-        public string Name { get; set; }
+    public NamespaceModel? Namespace { get; set; }
 
-        public bool IsStatic { get; init; }
+    public EntityModel? Entity { get; set; }
 
-        public string Alias { get; init; } = "";
+    public bool IsStatic { get; init; }
 
-        public string AliasType { get; set; } = "";
-    }
+    public string Alias { get; init; } = "";
+
+    public AliasType AliasType { get; set; } = AliasType.None;
 }

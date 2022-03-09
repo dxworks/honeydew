@@ -1,11 +1,11 @@
-﻿namespace HoneydewModels.Reference
+﻿namespace HoneydewModels.Reference;
+
+public enum MethodType
 {
-    public enum MethodType
-    {
-        Method,
-        Constructor,
-        Destructor,
-        Extension,
-        LocalFunction,
-    }
+    Method,
+    Constructor,
+    Destructor,
+    Extension,
+    LocalFunction,
+    Accessor,
 }

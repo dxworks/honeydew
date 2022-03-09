@@ -1,26 +1,18 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace HoneydewModels.Reference;
 
-public class ClassModel : EntityModel
+public class InterfaceModel : EntityModel
 {
-    public ClassType Type { get; set; }
-
     public bool IsPartial => Modifiers.Contains(Reference.Modifier.Partial);
 
-    public IList<ClassModel> Partials { get; set; } = new List<ClassModel>();
+    public IList<InterfaceModel> Partials { get; set; } = new List<InterfaceModel>();
 
     public IList<GenericParameterModel> GenericParameters { get; set; } = new List<GenericParameterModel>();
 
     public IList<EntityType> BaseTypes { get; set; } = new List<EntityType>();
 
-    public IList<FieldModel> Fields { get; set; } = new List<FieldModel>();
-
     public IList<PropertyModel> Properties { get; set; } = new List<PropertyModel>();
 
     public IList<MethodModel> Methods { get; set; } = new List<MethodModel>();
-
-    public IList<MethodModel> Constructors { get; set; } = new List<MethodModel>();
-
-    public MethodModel? Destructor { get; set; }
 }

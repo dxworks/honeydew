@@ -1,13 +1,10 @@
 ﻿using HoneydewModels.Types;
 
-namespace HoneydewModels.CSharp
+namespace HoneydewModels.CSharp;
+
+public class EntityTypeModel : IEntityType
 {
-    public class EntityTypeModel : IEntityType
-    {
-        public string Name { get; set; }
+    public string Name { get; set; }
 
-        public GenericType FullType { get; set; }
-
-        public bool IsExtern { get; set; } = false;
-    }
+    public GenericType FullType { get; set; }
 }

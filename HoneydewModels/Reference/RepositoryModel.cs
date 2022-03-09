@@ -14,20 +14,15 @@ public class RepositoryModel : ReferenceEntity
 
     public IList<ClassModel> CreatedClasses { get; set; } = new List<ClassModel>();
 
-    public IEnumerable<ClassOption> GetEnumerable()
+    public IEnumerable<EntityModel> GetEnumerable()
     {
         foreach (var projectModel in Projects)
         {
-            foreach (var compilationUnitType in projectModel.Files)
+            foreach (var fileModel in projectModel.Files)
             {
-                foreach (var classType in compilationUnitType.Classes)
+                foreach (var entity in fileModel.Entities)
                 {
-                    yield return new ClassOption.Class(classType);
-                }
-
-                foreach (var delegateModel in compilationUnitType.Delegates)
-                {
-                    yield return new ClassOption.Delegate(delegateModel);
+                    yield return entity;
                 }
             }
         }
