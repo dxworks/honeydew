@@ -6,8 +6,8 @@ public class JafaxChooseStrategy : IRelationsMetricChooseStrategy
 {
     public bool Choose(string type)
     {
-        return type is nameof(ExternCallsRelationVisitor) or nameof(ExternDataRelationVisitor)
-            or nameof(HierarchyRelationVisitor) or nameof(ReturnValueRelationVisitor)
-            or nameof(DeclarationRelationVisitor);
+        return type is ExternCallsRelationVisitor.ExtCallsMetricName or ExternDataRelationVisitor.ExtDataMetricName
+            or HierarchyRelationVisitor.HierarchyMetricName or ReturnValueRelationVisitor.ReturnsMetricName
+            or DeclarationRelationVisitor.DeclarationsMetricName;
     }
 }

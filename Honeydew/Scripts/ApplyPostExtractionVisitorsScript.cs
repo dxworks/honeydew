@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
+using Honeydew.PostExtraction.ReferenceRelations;
 using HoneydewCore.Logging;
-using HoneydewExtractors.Core.Metrics.Visitors;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
-using HoneydewModels.Reference;
+using HoneydewScriptBeePlugin.Models;
 
 namespace Honeydew.Scripts;
 
@@ -41,33 +40,32 @@ public class ApplyPostExtractionVisitorsScript : Script
         _progressLogger.Log("Applying Post Extraction Metrics");
 
 
-        var propertiesRelationVisitor = new PropertiesRelationVisitor();
-        var fieldsRelationVisitor = new FieldsRelationVisitor();
-        var parameterRelationVisitor = new ParameterRelationVisitor();
-        var localVariablesRelationVisitor = new LocalVariablesRelationVisitor();
+        IAddStrategy addStrategy = new AddNameStrategy();
+        
+        var propertiesRelationVisitor = new PropertiesRelationVisitor(addStrategy);
+        var fieldsRelationVisitor = new FieldsRelationVisitor(addStrategy);
+        var parameterRelationVisitor = new ParameterRelationVisitor(addStrategy);
+        var localVariablesRelationVisitor = new LocalVariablesRelationVisitor(addStrategy);
 
-        var modelVisitors = new List<IModelVisitor<ClassModel>>
+        var modelVisitors = new List<IReferenceModelVisitor>
         {
             propertiesRelationVisitor,
             fieldsRelationVisitor,
             parameterRelationVisitor,
             localVariablesRelationVisitor,
 
-            new ExternCallsRelationVisitor(),
-            new ExternDataRelationVisitor(),
-            new HierarchyRelationVisitor(),
-            new ReturnValueRelationVisitor(),
-            new DeclarationRelationVisitor(localVariablesRelationVisitor, parameterRelationVisitor,
-                fieldsRelationVisitor, propertiesRelationVisitor),
+            new ExternCallsRelationVisitor(addStrategy),
+            new ExternDataRelationVisitor(addStrategy),
+            new HierarchyRelationVisitor(addStrategy),
+            new ReturnValueRelationVisitor(addStrategy),
+            new DeclarationRelationVisitor(localVariablesRelationVisitor, parameterRelationVisitor, fieldsRelationVisitor, propertiesRelationVisitor)
         };
 
-        foreach (var classOption in repositoryModel.GetEnumerable())
+        foreach (var entityModel in repositoryModel.GetEnumerable())
         {
-            if (classOption is not ClassOption.Class(var classModel)) continue;
-
             foreach (var visitor in modelVisitors)
             {
-                visitor.Visit(classModel);
+                visitor.Visit(entityModel);
             }
         }
 

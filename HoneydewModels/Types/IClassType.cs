@@ -3,7 +3,7 @@
 namespace HoneydewModels.Types
 {
     public interface IClassType : INamedType, ITypeWithGenericParameters, ITypeWithModifiers, ITypeWithAttributes,
-        ITypeWithMetrics
+        ITypeWithMetrics, ITypeWithLinesOfCode
     {
         public string ContainingNamespaceName { get; set; }
 

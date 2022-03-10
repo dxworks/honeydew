@@ -8,16 +8,16 @@ internal static class RelationVisitorPrettyPrint
 {
     public static readonly Dictionary<string, string> PrettyPrint = new()
     {
-        { nameof(DeclarationRelationVisitor), new DeclarationRelationVisitor().PrettyPrint() },
-        { nameof(ExceptionsThrownRelationVisitor), new ExceptionsThrownRelationVisitor().PrettyPrint() },
-        { nameof(ExternCallsRelationVisitor), new ExternCallsRelationVisitor().PrettyPrint() },
-        { nameof(ExternDataRelationVisitor), new ExternDataRelationVisitor().PrettyPrint() },
-        { nameof(FieldsRelationVisitor), new FieldsRelationVisitor().PrettyPrint() },
-        { nameof(HierarchyRelationVisitor), new HierarchyRelationVisitor().PrettyPrint() },
-        { nameof(LocalVariablesRelationVisitor), new LocalVariablesRelationVisitor().PrettyPrint() },
-        { nameof(ObjectCreationRelationVisitor), new ObjectCreationRelationVisitor().PrettyPrint() },
-        { nameof(ParameterRelationVisitor), new ParameterRelationVisitor().PrettyPrint() },
-        { nameof(PropertiesRelationVisitor), new PropertiesRelationVisitor().PrettyPrint() },
-        { nameof(ReturnValueRelationVisitor), new ReturnValueRelationVisitor().PrettyPrint() },
+        { nameof(DeclarationRelationVisitor), DeclarationRelationVisitor.DeclarationsMetricName },
+        { nameof(ExceptionsThrownRelationVisitor), ExceptionsThrownRelationVisitor.ExceptionsThrownDependencyMetricName },
+        { nameof(ExternCallsRelationVisitor), ExternCallsRelationVisitor.ExtCallsMetricName },
+        { nameof(ExternDataRelationVisitor), ExternDataRelationVisitor.ExtDataMetricName },
+        { nameof(FieldsRelationVisitor), FieldsRelationVisitor.FieldsDependencyMetricName },
+        { nameof(HierarchyRelationVisitor), HierarchyRelationVisitor.HierarchyMetricName },
+        { nameof(LocalVariablesRelationVisitor), LocalVariablesRelationVisitor.LocalVariablesDependencyMetricName },
+        { nameof(ObjectCreationRelationVisitor), ObjectCreationRelationVisitor.ObjectCreationDependencyMetricName },
+        { nameof(ParameterRelationVisitor), ParameterRelationVisitor.ParameterDependencyMetricName },
+        { nameof(PropertiesRelationVisitor), PropertiesRelationVisitor.PropertiesDependencyMetricName },
+        { nameof(ReturnValueRelationVisitor), ReturnValueRelationVisitor.ReturnsMetricName },
     };
 }

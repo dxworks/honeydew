@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using HoneydewCore.Processors;
+using Honeydew.Processors;
 using HoneydewModels.Exporters;
-using HoneydewModels.Reference;
+using HoneydewScriptBeePlugin.Models;
 
 namespace Honeydew.Scripts
 {

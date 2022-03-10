@@ -31,5 +31,7 @@ public record DelegateModel : IDelegateType
 
     public IReturnValueType ReturnValue { get; set; }
 
+    public LinesOfCode Loc { get; set; }
+
     public IList<MetricModel> Metrics { get; init; } = new List<MetricModel>();
 }

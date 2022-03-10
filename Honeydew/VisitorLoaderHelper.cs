@@ -36,7 +36,7 @@ namespace Honeydew;
 
 internal static class VisitorLoaderHelper
 {
-    public static ICompositeVisitor LoadVisitors(IRelationMetricHolder relationMetricHolder, ILogger logger)
+    public static ICompositeVisitor LoadVisitors(ILogger logger)
     {
         var linesOfCodeVisitor = new LinesOfCodeVisitor();
 
@@ -178,8 +178,8 @@ internal static class VisitorLoaderHelper
             genericParameterSetterVisitor,
 
             // metrics visitor
-            new ExceptionsThrownRelationVisitor(relationMetricHolder),
-            new ObjectCreationRelationVisitor(relationMetricHolder),
+            new ExceptionsThrownRelationVisitor(),
+            new ObjectCreationRelationVisitor(),
         };
 
         var delegateVisitors = new List<ICSharpDelegateVisitor>

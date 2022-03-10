@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.ModelRepresentations;
-using HoneydewModels.Reference;
+using HoneydewScriptBeePlugin.Models;
 
 namespace Honeydew.Scripts;
 
@@ -25,7 +25,7 @@ public class ClassRelationScript : Script
         var relationsRepresentation = new RelationsRepresentation();
 
         var relations = repositoryModel.Projects.SelectMany(project => project.Files)
-            .SelectMany(file => file.Classes).SelectMany(classModel => ExtCallsRelations(classModel)
+            .SelectMany(file => file.Entities).SelectMany(entityModel => ExtCallsRelations(entityModel)
                 .Concat(new List<Relation>())
             );
 
@@ -36,15 +36,31 @@ public class ClassRelationScript : Script
 
         _representationExporter.Export(Path.Combine(outputPath, outputName), relationsRepresentation);
 
-        IEnumerable<Relation> ExtCallsRelations(ClassModel classModel)
+        IEnumerable<Relation> ExtCallsRelations(EntityModel entityModel)
         {
-            return classModel.Methods.SelectMany(method => method.CalledMethods)
-                .Where(method => method.Class != null)
-                .GroupBy(method => method.Class.Name)
-                .Where(grouping => classModel.Name != grouping.Key)
+            var methods = entityModel switch
+            {
+                ClassModel classModel => classModel.Methods
+                    .Concat(classModel.Properties.SelectMany(property => property.Accessors))
+                    .Concat(classModel.Constructors)
+                    .Concat(classModel.Destructor == null
+                        ? new List<MethodModel>()
+                        : new List<MethodModel>
+                        {
+                            classModel.Destructor
+                        }),
+                InterfaceModel interfaceModel => interfaceModel.Methods
+                    .Concat(interfaceModel.Properties.SelectMany(property => property.Accessors)),
+                _ => new List<MethodModel>()
+            };
+
+            return methods.SelectMany(method => method.OutgoingCalls)
+                .Where(method => method.Caller is { Entity: { } })
+                .GroupBy(method => method.Caller.Entity.Name)
+                .Where(grouping => entityModel.Name != grouping.Key)
                 .Select(grouping => new Relation
                 {
-                    Source = classModel.Name,
+                    Source = entityModel.Name,
                     Target = grouping.Key,
                     Type = "extCalls",
                     Strength = grouping.Count()

@@ -6,7 +6,7 @@ using DotNetGraph.Edge;
 using DotNetGraph.SubGraph;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.ModelRepresentations;
-using HoneydewModels.Reference;
+using HoneydewScriptBeePlugin.Models;
 
 namespace Honeydew.Scripts;
 

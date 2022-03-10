@@ -14,7 +14,7 @@ public class ClassModel : EntityModel
 
     public IList<FieldModel> Fields { get; set; } = new List<FieldModel>();
 
-    public IList<PropertyModel> Properties { get; set; } = new List<PropertyModel>();
+    public new IList<PropertyModel> Properties { get; set; } = new List<PropertyModel>();
 
     public IList<MethodModel> Methods { get; set; } = new List<MethodModel>();
 

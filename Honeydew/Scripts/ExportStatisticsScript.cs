@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using HoneydewModels.Exporters;
-using HoneydewModels.Reference;
+using HoneydewScriptBeePlugin.Models;
 
 namespace Honeydew.Scripts;
 
@@ -37,6 +37,8 @@ public class ExportStatisticsScript : Script
         var fileCount = 0;
         var classCount = 0;
         var delegateCount = 0;
+        var interfaceCount = 0;
+        var enumCount = 0;
         var sourceCodeLines = 0L;
 
         foreach (var projectModel in repositoryModel.Projects)
@@ -46,9 +48,24 @@ public class ExportStatisticsScript : Script
                 fileCount++;
                 sourceCodeLines += compilationUnit.Loc.SourceLines;
 
-                classCount += compilationUnit.Classes.Count;
-
-                delegateCount += compilationUnit.Delegates.Count;
+                foreach (var entityModel in compilationUnit.Entities)
+                {
+                    switch (entityModel)
+                    {
+                        case ClassModel:
+                            classCount++;
+                            break;
+                        case DelegateModel:
+                            delegateCount++;
+                            break;
+                        case EnumModel:
+                            enumCount++;
+                            break;
+                        case InterfaceModel:
+                            interfaceCount++;
+                            break;
+                    }
+                }
             }
         }
 
@@ -60,6 +77,8 @@ public class ExportStatisticsScript : Script
             Files = fileCount,
             Classes = classCount,
             Delegates = delegateCount,
+            Interfaces = interfaceCount,
+            Enums = enumCount,
             SourceCodeLines = sourceCodeLines
         });
     }
