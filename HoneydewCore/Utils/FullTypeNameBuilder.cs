@@ -3,129 +3,128 @@ using System.Collections.Generic;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 
-namespace HoneydewCore.Utils
-{
-    public class FullTypeNameBuilder
-    {
-        public EntityTypeModel CreateEntityTypeModel(string name, bool isExternType = false)
-        {
-            try
-            {
-                return new EntityTypeModel
-                {
-                    Name = name,
-                    FullType = GetFullType(name),
-                    IsExtern = isExternType
-                };
-            }
-            catch (Exception)
-            {
-                return new EntityTypeModel
-                {
-                    Name = name,
-                    FullType = new GenericType
-                    {
-                        Name = name
-                    },
-                    IsExtern = isExternType
-                };
-            }
-        }
+namespace HoneydewCore.Utils;
 
-        private GenericType GetFullType(string name)
+public class FullTypeNameBuilder
+{
+    public EntityTypeModel CreateEntityTypeModel(string name, bool isExternType = false)
+    {
+        try
         {
-            if (string.IsNullOrEmpty(name))
+            return new EntityTypeModel
             {
-                return new GenericType
+                Name = name,
+                FullType = GetFullType(name),
+                IsExtern = isExternType
+            };
+        }
+        catch (Exception)
+        {
+            return new EntityTypeModel
+            {
+                Name = name,
+                FullType = new GenericType
                 {
                     Name = name
-                };
-            }
+                },
+                IsExtern = isExternType
+            };
+        }
+    }
 
+    private GenericType GetFullType(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return new GenericType
+            {
+                Name = name
+            };
+        }
+
+        var isNullable = false;
+
+        if (name.EndsWith('?'))
+        {
+            isNullable = true;
+            name = name[..^1];
+        }
+
+        ReadOnlySpan<char> span = name;
+
+        var fullType = GetFullType(span);
+        fullType.IsNullable = isNullable;
+
+        return fullType;
+    }
+
+    private GenericType GetFullType(ReadOnlySpan<char> name)
+    {
+        if (!name.Contains('<'))
+        {
+            var trimmedName = name.ToString().Trim();
             var isNullable = false;
-
-            if (name.EndsWith('?'))
+            if (trimmedName.EndsWith('?'))
             {
                 isNullable = true;
-                name = name[..^1];
+                trimmedName = trimmedName[..^1];
             }
 
-            ReadOnlySpan<char> span = name;
-
-            var fullType = GetFullType(span);
-            fullType.IsNullable = isNullable;
-
-            return fullType;
+            return new GenericType
+            {
+                Name = trimmedName,
+                IsNullable = isNullable
+            };
         }
 
-        private GenericType GetFullType(ReadOnlySpan<char> name)
+        var genericType = new GenericType
         {
-            if (!name.Contains('<'))
+            IsNullable = name[^1] == '?'
+        };
+
+        var genericStart = name.IndexOf('<');
+        var genericEnd = name.LastIndexOf('>');
+
+        genericType.Name = name[..genericStart].ToString().Trim();
+
+
+        var commaIndices = new List<int>
+        {
+            genericStart
+        };
+
+        var angleBracketCount = 0;
+
+        for (var i = genericStart + 1; i < genericEnd; i++)
+        {
+            switch (name[i])
             {
-                var trimmedName = name.ToString().Trim();
-                var isNullable = false;
-                if (trimmedName.EndsWith('?'))
+                case '<':
+                    angleBracketCount++;
+                    break;
+                case '>':
+                    angleBracketCount--;
+                    break;
+                case ',':
                 {
-                    isNullable = true;
-                    trimmedName = trimmedName[..^1];
-                }
-
-                return new GenericType
-                {
-                    Name = trimmedName,
-                    IsNullable = isNullable
-                };
-            }
-
-            var genericType = new GenericType
-            {
-                IsNullable = name[^1] == '?'
-            };
-
-            var genericStart = name.IndexOf('<');
-            var genericEnd = name.LastIndexOf('>');
-
-            genericType.Name = name[..genericStart].ToString().Trim();
-
-
-            var commaIndices = new List<int>
-            {
-                genericStart
-            };
-
-            var angleBracketCount = 0;
-
-            for (var i = genericStart + 1; i < genericEnd; i++)
-            {
-                switch (name[i])
-                {
-                    case '<':
-                        angleBracketCount++;
-                        break;
-                    case '>':
-                        angleBracketCount--;
-                        break;
-                    case ',':
+                    if (angleBracketCount == 0)
                     {
-                        if (angleBracketCount == 0)
-                        {
-                            commaIndices.Add(i);
-                        }
-
-                        break;
+                        commaIndices.Add(i);
                     }
+
+                    break;
                 }
             }
-
-            commaIndices.Add(genericEnd);
-
-            for (var i = 0; i < commaIndices.Count - 1; i++)
-            {
-                var part = name.Slice(commaIndices[i] + 1, commaIndices[i + 1] - commaIndices[i] - 1);
-                genericType.ContainedTypes.Add(GetFullType(part));
-            }
-
-            return genericType;
         }
+
+        commaIndices.Add(genericEnd);
+
+        for (var i = 0; i < commaIndices.Count - 1; i++)
+        {
+            var part = name.Slice(commaIndices[i] + 1, commaIndices[i + 1] - commaIndices[i] - 1);
+            genericType.ContainedTypes.Add(GetFullType(part));
+        }
+
+        return genericType;
     }
 }

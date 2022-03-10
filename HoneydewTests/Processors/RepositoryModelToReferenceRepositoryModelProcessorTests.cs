@@ -549,7 +549,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
         Assert.Null(referenceProcessMethodModel.Parameters[0].DefaultValue);
         Assert.Equal(2, referenceProcessMethodModel.OutgoingCalls.Count);
         Assert.Equal(referenceCreateMethodModel, referenceProcessMethodModel.OutgoingCalls[0].Called);
-        Assert.Equal(referenceConvertMethodModel2, referenceProcessMethodModel.OutgoingCalls[1].Called);  
+        Assert.Equal(referenceConvertMethodModel2, referenceProcessMethodModel.OutgoingCalls[1].Called);
         Assert.Equal(referenceProcessMethodModel, referenceProcessMethodModel.OutgoingCalls[0].Caller);
         Assert.Equal(referenceProcessMethodModel, referenceProcessMethodModel.OutgoingCalls[1].Caller);
 
@@ -856,11 +856,11 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
         var allCreatedReferences = referenceRepositoryModel.CreatedClasses;
         Assert.Equal(2, allCreatedReferences.Count);
 
-        var objectClassModel = allCreatedReferences[0];
-        var intClassModel = allCreatedReferences[1];
+        var objectClassModel = allCreatedReferences.FirstOrDefault(c => c.Name == "object")!;
+        var intClassModel = allCreatedReferences.FirstOrDefault(c => c.Name == "int")!;
 
-        Assert.Equal("int", intClassModel.Name);
-        Assert.Equal("object", objectClassModel.Name);
+        Assert.NotNull(intClassModel);
+        Assert.NotNull(objectClassModel);
 
         var projectModel1 = referenceRepositoryModel.Projects[0];
 

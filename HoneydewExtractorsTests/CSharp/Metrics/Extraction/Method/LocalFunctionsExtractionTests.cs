@@ -237,15 +237,15 @@ public class LocalFunctionsExtractionTests
         {
             Assert.Equal("", function.Modifier);
             Assert.Equal("", function.AccessModifier);
-
-            foreach (var calledMethod in function.CalledMethods)
-            {
-                Assert.Equal("Namespace1.Class1", calledMethod.DefinitionClassName);
-                Assert.Equal("Namespace1.Class1", calledMethod.LocationClassName);
-                Assert.Equal("Method(int, int, int)", calledMethod.MethodDefinitionNames[0]);
-            }
         }
-
+        foreach (var calledMethod in method.CalledMethods)
+        {
+            Assert.Equal("Namespace1.Class1", calledMethod.DefinitionClassName);
+            Assert.Equal("Namespace1.Class1", calledMethod.LocationClassName);
+            Assert.Equal("Method(int, int, int)", calledMethod.MethodDefinitionNames[0]);
+        }
+        
+        
         Assert.Equal(8, method.CalledMethods.Count);
 
 

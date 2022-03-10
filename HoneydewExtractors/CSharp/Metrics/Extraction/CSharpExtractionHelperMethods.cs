@@ -110,11 +110,24 @@ public static partial class CSharpExtractionHelperMethods
 
         while (currentSymbol is IMethodSymbol methodSymbol)
         {
+            var containingSymbol =
+                methodSymbol.ContainingSymbol == null ? "" : methodSymbol.ContainingSymbol.ToString();
+            var containingNamespace = methodSymbol.ContainingNamespace == null
+                ? ""
+                : methodSymbol.ContainingNamespace.ToString();
+            var symbolName = containingSymbol.Replace(containingNamespace, "").Trim('.');
+            var methodSymbolName = methodSymbol.MethodKind switch
+            {
+                MethodKind.Constructor => symbolName,
+                MethodKind.Destructor => $"~{symbolName}",
+                _ => methodSymbol.Name
+            };
+
             if (methodSymbol.AssociatedSymbol != null)
             {
                 var associatedSymbolName = methodSymbol.AssociatedSymbol.Name;
-                var index = methodSymbol.Name.IndexOf($"_{associatedSymbolName}", StringComparison.Ordinal);
-                var methodName = methodSymbol.Name;
+                var index = methodSymbolName.IndexOf($"_{associatedSymbolName}", StringComparison.Ordinal);
+                var methodName = methodSymbolName;
                 if (index >= 0)
                 {
                     methodName = methodName.Remove(index);
@@ -126,7 +139,7 @@ public static partial class CSharpExtractionHelperMethods
             else
             {
                 var signature =
-                    $"{methodSymbol.Name}({string.Join(", ", methodSymbol.Parameters.Select(p => p.Type.ToString()))})";
+                    $"{methodSymbolName}({string.Join(", ", methodSymbol.Parameters.Select(p => p.Type.ToString()))})";
 
                 definitionNames.Add(signature);
             }

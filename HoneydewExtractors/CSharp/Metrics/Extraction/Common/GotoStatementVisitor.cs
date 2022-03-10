@@ -42,7 +42,8 @@ public class GotoStatementVisitor : ICSharpMethodVisitor, ICSharpConstructorVisi
         return modelType;
     }
 
-    public IAccessorType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel, IAccessorType modelType)
+    public IAccessorType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorType modelType)
     {
         modelType.Metrics.Add(CalculateGotoStatements(syntaxNode));
 
@@ -62,11 +63,12 @@ public class GotoStatementVisitor : ICSharpMethodVisitor, ICSharpConstructorVisi
             .OfType<GotoStatementSyntax>().Count();
 
         modelType.Metrics.Add(new MetricModel
-        {
-            ExtractorName = nameof(GotoStatementVisitor),
-            ValueType = nameof(Int32),
-            Value = gotoStatementsCount
-        });
+        (
+            "GotoStatementsCount",
+            nameof(GotoStatementVisitor),
+            nameof(Int32),
+            gotoStatementsCount
+        ));
 
         return modelType;
     }
@@ -78,10 +80,11 @@ public class GotoStatementVisitor : ICSharpMethodVisitor, ICSharpConstructorVisi
             .OfType<GotoStatementSyntax>().Count();
 
         return new MetricModel
-        {
-            ExtractorName = nameof(GotoStatementVisitor),
-            ValueType = nameof(Int32),
-            Value = gotoStatementsCount
-        };
+        (
+            "GotoStatementsCount",
+            nameof(GotoStatementVisitor),
+            nameof(Int32),
+            gotoStatementsCount
+        );
     }
 }
