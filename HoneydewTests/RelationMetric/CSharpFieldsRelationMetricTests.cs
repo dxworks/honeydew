@@ -1,20 +1,19 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
-using HoneydewCore.Processors;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Fields;
 using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Field;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
+using HoneydewScriptBeePlugin.Loaders;
 using Moq;
 using Xunit;
 
-namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
+namespace HoneydewTests.RelationMetric;
 
 public class CSharpFieldsRelationVisitorTests
 {

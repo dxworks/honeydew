@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using HoneydewCore.Logging;
-using HoneydewCore.Processors;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -21,10 +19,15 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Field;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
 using HoneydewModels.CSharp;
+using HoneydewScriptBeePlugin.Loaders;
+using HoneydewScriptBeePlugin.Models;
 using Moq;
 using Xunit;
+using ClassModel = HoneydewScriptBeePlugin.Models.ClassModel;
+using ProjectModel = HoneydewModels.CSharp.ProjectModel;
+using RepositoryModel = HoneydewModels.CSharp.RepositoryModel;
 
-namespace HoneydewCoreIntegrationTests.Processors;
+namespace HoneydewTests.Processors;
 
 public class RepositoryModelToReferenceRepositoryModelProcessorPartialClassesTests
 {
@@ -92,22 +95,30 @@ public class RepositoryModelToReferenceRepositoryModelProcessorPartialClassesTes
 
         var referenceSolutionModel = _sut.Process(repositoryModel);
 
-        var partialClassModel = referenceSolutionModel.Projects[0].Files[0].Classes[0].PartialClass;
+        var partialClassModel1 =
+            referenceSolutionModel.Projects[0].Files[0].Entities[0] as ClassModel;
+        var partialClassModel2 =
+            referenceSolutionModel.Projects[0].Files[1].Entities[0] as ClassModel;
 
-        Assert.NotNull(partialClassModel);
-        Assert.Equal(partialClassModel, referenceSolutionModel.Projects[0].Files[1].Classes[0].PartialClass);
-        Assert.Equal(2, partialClassModel.Classes.Count);
-        Assert.Equal("PartialClasses.C1", partialClassModel.Name);
-        Assert.Empty(partialClassModel.GenericParameters);
-        Assert.Equal("PartialClasses", partialClassModel.Namespace.Name);
-        Assert.Equal("class", partialClassModel.ClassType);
-
-        foreach (var classModel in partialClassModel.Classes)
-        {
-            Assert.Equal("PartialClasses.C1", classModel.Name);
-            Assert.Equal("PartialClasses", classModel.Namespace.Name);
-            Assert.Equal("partial", classModel.Modifier);
-        }
+        Assert.NotNull(partialClassModel1);
+        Assert.NotNull(partialClassModel2);
+        Assert.Equal(partialClassModel1, partialClassModel2);
+        Assert.Equal(1, partialClassModel1!.Partials.Count);
+        Assert.Equal(1, partialClassModel2!.Partials.Count);
+        Assert.Equal("PartialClasses.C1", partialClassModel1.Name);
+        Assert.Equal("PartialClasses.C1", partialClassModel2.Name);
+        Assert.Empty(partialClassModel1.GenericParameters);
+        Assert.Empty(partialClassModel2.GenericParameters);
+        Assert.Equal("PartialClasses", partialClassModel1.Namespace.Name);
+        Assert.Equal("PartialClasses", partialClassModel2.Namespace.Name);
+        Assert.Equal(ClassType.Class, partialClassModel1.Type);
+        Assert.Equal(ClassType.Class, partialClassModel2.Type);
+        Assert.True(partialClassModel1.IsPartial);
+        Assert.True(partialClassModel2.IsPartial);
+        Assert.Contains(Modifier.Partial, partialClassModel1.Modifiers);
+        Assert.Contains(Modifier.Partial, partialClassModel2.Modifiers);
+        Assert.Equal("partial", partialClassModel1.Modifier);
+        Assert.Equal("partial", partialClassModel2.Modifier);
     }
 
     [Theory]
@@ -120,19 +131,29 @@ public class RepositoryModelToReferenceRepositoryModelProcessorPartialClassesTes
 
         var referenceSolutionModel = _sut.Process(repositoryModel);
 
-        var partialClassModel = referenceSolutionModel.Projects[0].Files[0].Classes[0].PartialClass;
+        var partialClassModel1 = referenceSolutionModel.Projects[0].Files[0].Entities[0] as ClassModel;
+        var partialClassModel2 = referenceSolutionModel.Projects[0].Files[0].Entities[0] as ClassModel;
 
-        Assert.NotNull(partialClassModel);
-        Assert.Equal(2, partialClassModel.Classes.Count);
+        Assert.NotNull(partialClassModel1);
+        Assert.NotNull(partialClassModel2);
 
-        Assert.Equal(4, partialClassModel.Methods.Count());
-        Assert.NotNull(partialClassModel.Destructor);
-        Assert.Single(partialClassModel.Constructors);
-        Assert.Single(partialClassModel.Attributes);
-        Assert.Equal(8, partialClassModel.Fields.Count());
-        Assert.Equal(4, partialClassModel.Properties.Count());
-        Assert.Equal(2, partialClassModel.BaseTypes.Count());
-        Assert.Equal(5, partialClassModel.Imports.Count());
+        Assert.Equal(2, partialClassModel1!.Methods.Count);
+        Assert.NotNull(partialClassModel1.Destructor);
+        Assert.Empty(partialClassModel1.Constructors);
+        Assert.Single(partialClassModel1.Attributes);
+        Assert.Equal(1, partialClassModel1.Fields.Count);
+        Assert.Equal(2, partialClassModel1.Properties.Count);
+        Assert.Single(partialClassModel1.BaseTypes);
+        Assert.Equal(3, partialClassModel1.Imports.Count);
+
+        Assert.Equal(3, partialClassModel2!.Methods.Count);
+        Assert.Null(partialClassModel2.Destructor);
+        Assert.Single(partialClassModel2.Constructors);
+        Assert.Empty(partialClassModel2.Attributes);
+        Assert.Equal(3, partialClassModel2.Fields.Count);
+        Assert.Equal(2, partialClassModel2.Properties.Count);
+        Assert.Single(partialClassModel1.BaseTypes);
+        Assert.Equal(2, partialClassModel2.Imports.Count);
     }
 
     private RepositoryModel LoadPartialClassesInRepositoryModel(string fileContent1, string fileContent2)

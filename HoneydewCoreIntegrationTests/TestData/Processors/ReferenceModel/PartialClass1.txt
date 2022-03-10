@@ -17,4 +17,6 @@ partial class C1 : IInterface
     ~C1() { }
     
     public int Method() {return 0;}
+    
+    public partial void PMethod(int x);
 }

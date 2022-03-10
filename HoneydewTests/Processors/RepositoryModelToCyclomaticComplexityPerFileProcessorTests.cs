@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.Processors;
-using HoneydewModels.Reference;
+using Honeydew.Processors;
+using HoneydewScriptBeePlugin.Models;
 using Xunit;
 
-namespace HoneydewCoreIntegrationTests.Processors;
+namespace HoneydewTests.Processors;
 
 public class RepositoryModelToCyclomaticComplexityPerFileProcessorTests
 {
@@ -48,11 +48,11 @@ public class RepositoryModelToCyclomaticComplexityPerFileProcessorTests
                     {
                         Name = "System.Int32"
                     },
-                    AccessModifier = "public",
+                    AccessModifier = AccessModifier.Public,
                 }
             }
         };
-        compilationUnitModel.Classes.Add(classModel);
+        compilationUnitModel.Entities.Add(classModel);
         projectModel.Files.Add(compilationUnitModel);
         repositoryModel.Solutions.Add(solutionModel);
         repositoryModel.Projects.Add(projectModel);
@@ -91,7 +91,7 @@ public class RepositoryModelToCyclomaticComplexityPerFileProcessorTests
                 }
             }
         };
-        compilationUnitModel.Classes.Add(classModel);
+        compilationUnitModel.Entities.Add(classModel);
         projectModel.Files.Add(compilationUnitModel);
         repositoryModel.Projects.Add(projectModel);
         repositoryModel.Solutions.Add(solutionModel);
@@ -146,8 +146,8 @@ public class RepositoryModelToCyclomaticComplexityPerFileProcessorTests
             }
         };
 
-        compilationUnitModel.Classes.Add(classModel1);
-        compilationUnitModel.Classes.Add(classModel2);
+        compilationUnitModel.Entities.Add(classModel1);
+        compilationUnitModel.Entities.Add(classModel2);
         projectModel.Files.Add(compilationUnitModel);
         repositoryModel.Projects.Add(projectModel);
         repositoryModel.Solutions.Add(solutionModel);
@@ -203,7 +203,7 @@ public class RepositoryModelToCyclomaticComplexityPerFileProcessorTests
             }
         };
 
-        compilationUnitModel.Classes.Add(classModel1);
+        compilationUnitModel.Entities.Add(classModel1);
         projectModel.Files.Add(compilationUnitModel);
         repositoryModel.Projects.Add(projectModel);
         repositoryModel.Solutions.Add(solutionModel);
@@ -275,13 +275,13 @@ public class RepositoryModelToCyclomaticComplexityPerFileProcessorTests
                 {
                     CyclomaticComplexity = 1,
                     ReturnValue = null,
-                    MethodType = nameof(MethodType.Constructor),
+                    Type = MethodType.Constructor,
                 }
             }
         };
 
-        compilationUnitModel.Classes.Add(classModel1);
-        compilationUnitModel.Classes.Add(classModel2);
+        compilationUnitModel.Entities.Add(classModel1);
+        compilationUnitModel.Entities.Add(classModel2);
         projectModel.Files.Add(compilationUnitModel);
         repositoryModel.Projects.Add(projectModel);
         repositoryModel.Solutions.Add(solutionModel);

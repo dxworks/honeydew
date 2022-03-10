@@ -26,6 +26,30 @@
             int x = LocalFunction1();
         }
         
+        ~Class1()
+        {
+            int LocalFunction1()
+            {
+                var x = LocalFunction2(7);
+            
+                return 0;
+                
+                int LocalFunction2(int a)
+                {
+                    int LocalFunction3(int x,int y)
+                    {
+                        return x+y;
+                    }
+                
+                    int y = LocalFunction3(7,1);
+                    
+                    return a;
+                }
+            }
+            
+            int x = LocalFunction1();
+        }
+        
         public void Method()
         {
            int LocalFunction1()

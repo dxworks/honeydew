@@ -16,5 +16,9 @@ namespace PartialClasses
         public C1(int x) {}
         
         public void Print() {}
+        
+        public void Print2() {}
+        
+        public partial void PMethod(int x) { }        
     }
 }
