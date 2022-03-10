@@ -7,6 +7,7 @@ using HoneydewScriptBeePlugin.Models;
 using static HoneydewScriptBeePlugin.Loaders.MetricAdder;
 using AttributeModel = HoneydewScriptBeePlugin.Models.AttributeModel;
 using ClassModel = HoneydewScriptBeePlugin.Models.ClassModel;
+using EnumModel = HoneydewScriptBeePlugin.Models.EnumModel;
 using DelegateModel = HoneydewModels.CSharp.DelegateModel;
 using FieldModel = HoneydewScriptBeePlugin.Models.FieldModel;
 using GenericParameterModel = HoneydewScriptBeePlugin.Models.GenericParameterModel;
@@ -137,6 +138,34 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                         }
                             break;
 
+                        case HoneydewModels.CSharp.EnumModel enumModel:
+                        {
+                            var model = new EnumModel
+                            {
+                                Name = enumModel.Name,
+                                FilePath = enumModel.FilePath,
+                                Modifier = enumModel.Modifier,
+                                AccessModifier = ConvertAccessModifier(enumModel.AccessModifier),
+                                Modifiers = ConvertModifierToModifierList(enumModel.Modifier),
+                                File = fileModel,
+                                Namespace = namespaceModel,
+                                IsInternal = true,
+                                IsExternal = false,
+                                IsPrimitive = false,
+                                LinesOfCode = ConvertLoc(enumModel.Loc),
+                                Labels = enumModel.Labels,
+                                Type = enumModel.Type,
+                            };
+                            namespaceModel.Entities.Add(model);
+                            fileModel.Entities.Add(model);
+
+                            _entityModels.Add((referenceProjectModel, enumModel.Name, 0), new List<EntityModel>
+                            {
+                                model
+                            });
+                        }
+                            break;
+
                         case HoneydewModels.CSharp.ClassModel classModel:
                         {
                             EntityModel entityModel = classModel.ClassType switch
@@ -154,22 +183,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                                     IsExternal = false,
                                     IsPrimitive = false,
                                     LinesOfCode = ConvertLoc(classModel.Loc),
-                                },
-                                "enum" => new EnumModel
-                                {
-                                    Name = classModel.Name,
-                                    FilePath = classModel.FilePath,
-                                    Modifier = classModel.Modifier,
-                                    AccessModifier = ConvertAccessModifier(classModel.AccessModifier),
-                                    Modifiers = ConvertModifierToModifierList(classModel.Modifier),
-                                    File = fileModel,
-                                    Namespace = namespaceModel,
-                                    IsInternal = true,
-                                    IsExternal = false,
-                                    IsPrimitive = false,
-                                    LinesOfCode = ConvertLoc(classModel.Loc),
-                                    // todo Labels 
-                                    // todo Type
                                 },
                                 _ => new ClassModel
                                 {
@@ -244,10 +257,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             foreach (var namespaceName in presentNamespacesSet)
             {
                 var namespaceModel = namespaceTreeHandler.GetOrAdd(namespaceName);
-                if (namespaceModel == null)
-                {
-                    continue;
-                }
 
                 var replaced = false;
                 for (var i = 0; i < referenceProjectModel.Namespaces.Count; i++)
@@ -1156,7 +1165,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             Entity = createdClassModel,
             Parameters = methodCallType.ParameterTypes.Select(parameter => new ParameterModel
             {
-                TypeName = parameter.Type?.Name,
+                TypeName = parameter.Type?.Name ?? "",
                 Type = ConvertEntityType(parameter.Type, projectModel),
             }).ToList()
         };
@@ -1292,7 +1301,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
         {
             var parameterModel = new ParameterModel
             {
-                TypeName = parameterType.Type?.Name,
+                TypeName = parameterType.Type?.Name ?? "",
                 Type = ConvertEntityType(parameterType.Type, projectModel),
                 Attributes = ConvertAttributes(parameterType.Attributes, projectModel),
             };

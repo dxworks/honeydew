@@ -12,7 +12,7 @@ internal class NamespaceTreeHandler
         return _rootNamespaces.Select(pair => pair.Value).ToList();
     }
 
-    public NamespaceModel? GetOrAdd(string namespaceName)
+    public NamespaceModel GetOrAdd(string namespaceName)
     {
         var nameParts = namespaceName.Split('.');
 

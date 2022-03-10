@@ -1,10 +1,18 @@
 ﻿using System.Collections.Generic;
+using HoneydewCore.Utils;
 using HoneydewScriptBeePlugin.Models;
 
 namespace Honeydew.PostExtraction.ReferenceRelations;
 
 public class AddGenericNamesStrategy : IAddStrategy
 {
+    private readonly bool _ignorePrimitives;
+
+    public AddGenericNamesStrategy(bool ignorePrimitives)
+    {
+        _ignorePrimitives = ignorePrimitives;
+    }
+
     public void AddDependency(IDictionary<string, int> dependencies, EntityType type)
     {
         switch (type.Entity)
@@ -26,9 +34,18 @@ public class AddGenericNamesStrategy : IAddStrategy
         }
     }
 
-    private static void AddDependency(IDictionary<string, int> dependencies, string dependencyName)
+    private void AddDependency(IDictionary<string, int> dependencies, string dependencyName)
     {
         dependencyName = dependencyName.Trim('?');
+
+        if (_ignorePrimitives)
+        {
+            if (CSharpConstants.IsPrimitive(dependencyName) || CSharpConstants.IsPrimitiveArray(dependencyName))
+            {
+                return;
+            }
+        }
+
         if (dependencies.ContainsKey(dependencyName))
         {
             dependencies[dependencyName]++;

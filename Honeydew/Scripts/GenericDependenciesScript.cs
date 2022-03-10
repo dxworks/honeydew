@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Honeydew.PostExtraction.ReferenceRelations;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.ModelRepresentations;
-using HoneydewCore.Utils;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Class.ReferenceRelations;
-using HoneydewModels.Reference;
+using HoneydewScriptBeePlugin.Models;
 
 namespace Honeydew.Scripts;
 
@@ -24,9 +23,6 @@ namespace Honeydew.Scripts;
 ///     <item>
 ///         <description>addStrategy</description>
 ///     </item>
-///     <item>
-///         <description>ignorePrimitives</description>
-///     </item>
 /// </list>
 /// </summary>
 public class GenericDependenciesScript : Script
@@ -44,7 +40,6 @@ public class GenericDependenciesScript : Script
         var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel");
         var outputName = VerifyArgument<string>(arguments, "genericDependenciesOutputName");
         var addStrategy = VerifyArgument<IAddStrategy>(arguments, "addStrategy");
-        var ignorePrimitives = VerifyArgument<bool>(arguments, "ignorePrimitives");
 
         var relationsRepresentation = new RelationsRepresentation();
 
@@ -53,7 +48,8 @@ public class GenericDependenciesScript : Script
             new DeclarationRelationVisitor(
                 new LocalVariablesRelationVisitor(addStrategy),
                 new ParameterRelationVisitor(addStrategy),
-                new FieldsAndPropertiesRelationVisitor(addStrategy)),
+                new FieldsRelationVisitor(addStrategy),
+                new PropertiesRelationVisitor(addStrategy)),
             new ReturnValueRelationVisitor(addStrategy),
             new ExternCallsRelationVisitor(addStrategy),
             new ExternDataRelationVisitor(addStrategy),
@@ -66,24 +62,27 @@ public class GenericDependenciesScript : Script
         {
             foreach (var file in project.Files)
             {
-                foreach (var classModel in file.Classes)
+                foreach (var entityModel in file.Entities)
                 {
                     foreach (var visitor in visitors)
                     {
-                        var dependencies = visitor.Visit(classModel);
-                        var relationEnumerable = dependencies.Where(pair => pair.Key != classModel.Name);
-                        if (ignorePrimitives)
+                        visitor.Visit(entityModel);
+                    }
+
+                    foreach (var (metricName, value) in entityModel.GetProperties())
+                    {
+                        if (value is not Dictionary<string, int> dictionary)
                         {
-                            relationEnumerable = relationEnumerable.Where(pair =>
-                                !CSharpConstants.IsPrimitive(pair.Key) &&
-                                !CSharpConstants.IsPrimitiveArray(pair.Key));
+                            continue;
                         }
 
+                        var relationEnumerable = dictionary.Where(pair => pair.Key != entityModel.Name);
+                        
                         relations.AddRange(relationEnumerable.Select(targetCountPair => new Relation
                         {
-                            Source = classModel.Name,
+                            Source = entityModel.Name,
                             Target = targetCountPair.Key,
-                            Type = visitor.PrettyPrint(),
+                            Type = metricName,
                             Strength = targetCountPair.Value
                         }));
                     }
