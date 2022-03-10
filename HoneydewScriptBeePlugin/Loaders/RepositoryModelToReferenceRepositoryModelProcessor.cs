@@ -4,6 +4,7 @@ using HoneydewCore.Utils;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using HoneydewScriptBeePlugin.Models;
+using static HoneydewScriptBeePlugin.Loaders.MetricAdder;
 using AttributeModel = HoneydewScriptBeePlugin.Models.AttributeModel;
 using ClassModel = HoneydewScriptBeePlugin.Models.ClassModel;
 using DelegateModel = HoneydewModels.CSharp.DelegateModel;
@@ -39,7 +40,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
         {
             return new Models.RepositoryModel();
         }
-        
+
         var repositoryModel = new Models.RepositoryModel
         {
             Version = inputRepositoryModel.Version
@@ -92,20 +93,18 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
             foreach (var compilationUnitType in projectModel.CompilationUnits)
             {
-                var referenceCompilationUnit = new FileModel
+                var fileModel = new FileModel
                 {
                     FilePath = compilationUnitType.FilePath,
                     Project = referenceProjectModel,
                     Loc = ConvertLoc(compilationUnitType.Loc),
-                    Metrics = ConvertMetrics(compilationUnitType)
                 };
+                AddMetrics(fileModel, compilationUnitType);
 
-                referenceProjectModel.Files.Add(referenceCompilationUnit);
+                referenceProjectModel.Files.Add(fileModel);
 
                 foreach (var classType in compilationUnitType.ClassTypes)
                 {
-                    var metrics = ConvertMetrics(classType);
-
                     var namespaceModel = namespaceTreeHandler.GetOrAdd(classType.ContainingNamespaceName);
                     presentNamespacesSet.Add(classType.ContainingNamespaceName);
 
@@ -120,16 +119,16 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                                 Modifier = delegateModel.Modifier,
                                 AccessModifier = ConvertAccessModifier(delegateModel.AccessModifier),
                                 Modifiers = ConvertModifierToModifierList(delegateModel.Modifier),
-                                File = referenceCompilationUnit,
+                                File = fileModel,
                                 Namespace = namespaceModel,
-                                Metrics = metrics,
                                 IsInternal = true,
-                                LinesOfCode = ConvertLoc(delegateModel.Loc)
-                                // todo add the rest of the metrics
+                                IsExternal = false,
+                                IsPrimitive = false,
+                                LinesOfCode = ConvertLoc(delegateModel.Loc),
                             };
 
                             namespaceModel.Entities.Add(model);
-                            referenceCompilationUnit.Entities.Add(model);
+                            fileModel.Entities.Add(model);
 
                             _entityModels.Add((referenceProjectModel, delegateModel.Name, 0), new List<EntityModel>
                             {
@@ -137,72 +136,62 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                             });
                         }
                             break;
+
                         case HoneydewModels.CSharp.ClassModel classModel:
                         {
-                            EntityModel entityModel;
-
-                            switch (classModel.ClassType)
+                            EntityModel entityModel = classModel.ClassType switch
                             {
-                                case "interface":
+                                "interface" => new InterfaceModel
                                 {
-                                    entityModel = new InterfaceModel
-                                    {
-                                        Name = classModel.Name,
-                                        FilePath = classModel.FilePath,
-                                        Modifier = classModel.Modifier,
-                                        AccessModifier = ConvertAccessModifier(classModel.AccessModifier),
-                                        Modifiers = ConvertModifierToModifierList(classModel.Modifier),
-                                        File = referenceCompilationUnit,
-                                        Namespace = namespaceModel,
-                                        IsInternal = true,
-                                        LinesOfCode = ConvertLoc(classModel.Loc),
-                                        Metrics = metrics,
-                                    };
+                                    Name = classModel.Name,
+                                    FilePath = classModel.FilePath,
+                                    Modifier = classModel.Modifier,
+                                    AccessModifier = ConvertAccessModifier(classModel.AccessModifier),
+                                    Modifiers = ConvertModifierToModifierList(classModel.Modifier),
+                                    File = fileModel,
+                                    Namespace = namespaceModel,
+                                    IsInternal = true,
+                                    IsExternal = false,
+                                    IsPrimitive = false,
+                                    LinesOfCode = ConvertLoc(classModel.Loc),
+                                },
+                                "enum" => new EnumModel
+                                {
+                                    Name = classModel.Name,
+                                    FilePath = classModel.FilePath,
+                                    Modifier = classModel.Modifier,
+                                    AccessModifier = ConvertAccessModifier(classModel.AccessModifier),
+                                    Modifiers = ConvertModifierToModifierList(classModel.Modifier),
+                                    File = fileModel,
+                                    Namespace = namespaceModel,
+                                    IsInternal = true,
+                                    IsExternal = false,
+                                    IsPrimitive = false,
+                                    LinesOfCode = ConvertLoc(classModel.Loc),
+                                    // todo Labels 
+                                    // todo Type
+                                },
+                                _ => new ClassModel
+                                {
+                                    Name = classModel.Name,
+                                    FilePath = classModel.FilePath,
+                                    Type = ConvertClassType(classModel.ClassType),
+                                    Modifier = classModel.Modifier,
+                                    AccessModifier = ConvertAccessModifier(classModel.AccessModifier),
+                                    Modifiers = ConvertModifierToModifierList(classModel.Modifier),
+                                    File = fileModel,
+                                    Namespace = namespaceModel,
+                                    IsInternal = true,
+                                    IsExternal = false,
+                                    IsPrimitive = false,
+                                    LinesOfCode = ConvertLoc(classModel.Loc),
                                 }
-                                    break;
+                            };
 
-                                case "enum":
-                                {
-                                    entityModel = new EnumModel
-                                    {
-                                        Name = classModel.Name,
-                                        FilePath = classModel.FilePath,
-                                        Modifier = classModel.Modifier,
-                                        AccessModifier = ConvertAccessModifier(classModel.AccessModifier),
-                                        Modifiers = ConvertModifierToModifierList(classModel.Modifier),
-                                        File = referenceCompilationUnit,
-                                        Namespace = namespaceModel,
-                                        IsInternal = true,
-                                        LinesOfCode = ConvertLoc(classModel.Loc),
-                                        Metrics = metrics,
-                                        // todo Labels 
-                                        // todo Type
-                                    };
-                                }
-                                    break;
-
-                                default:
-                                {
-                                    entityModel = new ClassModel
-                                    {
-                                        Name = classModel.Name,
-                                        FilePath = classModel.FilePath,
-                                        Type = ConvertClassType(classModel.ClassType),
-                                        Modifier = classModel.Modifier,
-                                        AccessModifier = ConvertAccessModifier(classModel.AccessModifier),
-                                        Modifiers = ConvertModifierToModifierList(classModel.Modifier),
-                                        File = referenceCompilationUnit,
-                                        Namespace = namespaceModel,
-                                        IsInternal = true,
-                                        LinesOfCode = ConvertLoc(classModel.Loc),
-                                        Metrics = metrics,
-                                    };
-                                }
-                                    break;
-                            }
+                            AddMetrics(entityModel, classType);
 
                             namespaceModel.Entities.Add(entityModel);
-                            referenceCompilationUnit.Entities.Add(entityModel);
+                            fileModel.Entities.Add(entityModel);
 
                             if (_entityModels.TryGetValue(
                                     (referenceProjectModel, entityModel.Name, classModel.GenericParameters.Count),
@@ -255,6 +244,10 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             foreach (var namespaceName in presentNamespacesSet)
             {
                 var namespaceModel = namespaceTreeHandler.GetOrAdd(namespaceName);
+                if (namespaceModel == null)
+                {
+                    continue;
+                }
 
                 var replaced = false;
                 for (var i = 0; i < referenceProjectModel.Namespaces.Count; i++)
@@ -295,6 +288,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
         }
     }
 
+
     private static LinesOfCode ConvertLoc(HoneydewModels.LinesOfCode linesOfCode)
     {
         return new LinesOfCode
@@ -303,14 +297,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             CommentedLines = linesOfCode.CommentedLines,
             EmptyLines = linesOfCode.EmptyLines
         };
-    }
-
-    // todo other metrics
-    private static IDictionary<string, int> ConvertMetrics(ITypeWithMetrics typeWithMetrics)
-    {
-        return typeWithMetrics.Metrics
-            .Where(metric => metric.ValueType is "int" or "System.Int32") // todo check if ValueType is numeric
-            .ToDictionary(metric => metric.Name, metric => (int)metric.Value);
     }
 
     private static ClassType ConvertClassType(string classType)
@@ -623,14 +609,14 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             AccessModifier = ConvertAccessModifier(propertyType.AccessModifier),
             Modifiers = ConvertModifierToModifierList(propertyType.Modifier),
             IsEvent = propertyType.IsEvent,
-            Metrics = ConvertMetrics(propertyType),
             LinesOfCode = ConvertLoc(propertyType.Loc),
             CyclomaticComplexity = propertyType.CyclomaticComplexity,
             Type = ConvertEntityType(propertyType.Type, projectModel),
-            Attributes = ConvertAttributes(propertyType.Attributes, projectModel)
+            Attributes = ConvertAttributes(propertyType.Attributes, projectModel),
             // todo accesses
-            // todo other metrics
         };
+
+        AddMetrics(model, propertyType);
         model.Accessors = propertyType.Accessors
             .Select(accessor => ConvertAccessor(entityModel, model, accessor, projectModel))
             .ToList();
@@ -650,10 +636,9 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             IsEvent = fieldType.IsEvent,
             Type = ConvertEntityType(fieldType.Type, projectModel),
             Attributes = ConvertAttributes(fieldType.Attributes, projectModel),
-            Metrics = ConvertMetrics(fieldType),
             // todo accesses
-            // todo other metrics
         };
+        AddMetrics(model, fieldType);
 
         return model;
     }
@@ -673,7 +658,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             Modifiers = ConvertModifierToModifierList(constructorType.Modifier),
             LinesOfCode = ConvertLoc(constructorType.Loc),
             CyclomaticComplexity = constructorType.CyclomaticComplexity,
-            Metrics = ConvertMetrics(constructorType),
             Attributes = ConvertAttributes(constructorType.Attributes, projectModel),
             Parameters = ConvertParameters(constructorType.ParameterTypes, projectModel),
             LocalVariables = ConvertLocalVariables(constructorType.LocalVariableTypes, projectModel),
@@ -681,12 +665,13 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             GenericParameters = new List<GenericParameterModel>(),
         };
 
+        AddMetrics(model, constructorType);
         model.LocalFunctions = ConvertLocalFunctions(parentClass, model, constructorType.LocalFunctions, projectModel);
 
         return model;
     }
 
-    private MethodModel? ConvertDestructor(ClassModel parentClass, IDestructorType destructorType,
+    private MethodModel? ConvertDestructor(ClassModel parentClass, IDestructorType? destructorType,
         ProjectModel projectModel)
     {
         if (destructorType == null)
@@ -706,7 +691,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             Modifiers = ConvertModifierToModifierList(destructorType.Modifier),
             LinesOfCode = ConvertLoc(destructorType.Loc),
             CyclomaticComplexity = destructorType.CyclomaticComplexity,
-            Metrics = ConvertMetrics(destructorType),
             Attributes = ConvertAttributes(destructorType.Attributes, projectModel),
             Parameters = ConvertParameters(destructorType.ParameterTypes, projectModel),
             LocalVariables = ConvertLocalVariables(destructorType.LocalVariableTypes, projectModel),
@@ -714,6 +698,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             GenericParameters = new List<GenericParameterModel>(),
         };
 
+        AddMetrics(model, destructorType);
         model.LocalFunctions = ConvertLocalFunctions(parentClass, model, destructorType.LocalFunctions, projectModel);
 
         return model;
@@ -734,12 +719,13 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             Modifiers = ConvertModifierToModifierList(methodType.Modifier),
             GenericParameters = ConvertGenericParameters(methodType.GenericParameters, projectModel),
             CyclomaticComplexity = methodType.CyclomaticComplexity,
-            Metrics = ConvertMetrics(methodType),
             Attributes = ConvertAttributes(methodType.Attributes, projectModel),
             ReturnValue = ConvertReturnValue(methodType.ReturnValue, projectModel),
             Parameters = ConvertParameters(methodType.ParameterTypes, projectModel),
             LocalVariables = ConvertLocalVariables(methodType.LocalVariableTypes, projectModel),
         };
+
+        AddMetrics(model, methodType);
 
         if (methodType.ParameterTypes.Count > 0 && model.Parameters[0].Modifier == ParameterModifier.This)
         {
@@ -767,13 +753,13 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             Modifiers = ConvertModifierToModifierList(accessorType.Modifier),
             GenericParameters = new List<GenericParameterModel>(),
             CyclomaticComplexity = accessorType.CyclomaticComplexity,
-            Metrics = ConvertMetrics(accessorType),
             Attributes = ConvertAttributes(accessorType.Attributes, projectModel),
             ReturnValue = ConvertReturnValue(accessorType.ReturnValue, projectModel),
             Parameters = ConvertParameters(accessorType.ParameterTypes, projectModel),
             LocalVariables = ConvertLocalVariables(accessorType.LocalVariableTypes, projectModel),
         };
 
+        AddMetrics(model, accessorType);
         model.LocalFunctions = ConvertLocalFunctions(entity, model, accessorType.LocalFunctions, projectModel);
 
         return model;
@@ -927,9 +913,13 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                     }
                 }
 
-                void ConvertFieldAccesses(IEnumerable<AccessedField> accessedFields,
-                    MethodModel methodModel)
+                void ConvertFieldAccesses(IEnumerable<AccessedField> accessedFields, MethodModel? methodModel)
                 {
+                    if (methodModel == null)
+                    {
+                        return;
+                    }
+
                     foreach (var accessedField in accessedFields)
                     {
                         methodModel.FieldAccesses.Add(new FieldAccess
