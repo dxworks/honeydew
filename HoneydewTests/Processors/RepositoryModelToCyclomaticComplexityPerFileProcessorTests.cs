@@ -240,7 +240,7 @@ public class RepositoryModelToCyclomaticComplexityPerFileProcessorTests
         var solutionModel = new SolutionModel();
         var projectModel = new ProjectModel();
         var compilationUnitModel = new FileModel();
-        var classModel1 = new ClassModel
+        var classModel1 = new InterfaceModel
         {
             FilePath = "path1",
             Methods = new List<MethodModel>
@@ -258,9 +258,9 @@ public class RepositoryModelToCyclomaticComplexityPerFileProcessorTests
         var classModel2 = new ClassModel
         {
             FilePath = "path2",
-            Fields = new List<FieldModel>
+            Properties = new List<PropertyModel>
             {
-                new PropertyModel
+                new()
                 {
                     CyclomaticComplexity = 1
                 }
@@ -271,13 +271,16 @@ public class RepositoryModelToCyclomaticComplexityPerFileProcessorTests
                 {
                     CyclomaticComplexity = 6
                 },
+            },
+            Constructors = new List<MethodModel>
+            {
                 new()
                 {
                     CyclomaticComplexity = 1,
                     ReturnValue = null,
                     Type = MethodType.Constructor,
                 }
-            }
+            } 
         };
 
         compilationUnitModel.Entities.Add(classModel1);
@@ -310,6 +313,7 @@ public class RepositoryModelToCyclomaticComplexityPerFileProcessorTests
         Assert.Equal("metric.atc", representation.File.Concerns[4].Tag);
         Assert.Equal("1", representation.File.Concerns[4].Strength);
 
+        
         Assert.Equal("path2", representation.File.Concerns[5].Entity);
         Assert.Equal("metric.maxCyclo", representation.File.Concerns[5].Tag);
         Assert.Equal("6", representation.File.Concerns[5].Strength);
@@ -324,7 +328,7 @@ public class RepositoryModelToCyclomaticComplexityPerFileProcessorTests
 
         Assert.Equal("path2", representation.File.Concerns[8].Entity);
         Assert.Equal("metric.sumCyclo", representation.File.Concerns[8].Tag);
-        Assert.Equal("9", representation.File.Concerns[8].Strength);
+        Assert.Equal("8", representation.File.Concerns[8].Strength);
 
         Assert.Equal("path2", representation.File.Concerns[9].Entity);
         Assert.Equal("metric.atc", representation.File.Concerns[9].Tag);

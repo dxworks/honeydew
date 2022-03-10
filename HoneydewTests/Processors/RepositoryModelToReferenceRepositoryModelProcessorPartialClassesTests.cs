@@ -95,16 +95,15 @@ public class RepositoryModelToReferenceRepositoryModelProcessorPartialClassesTes
 
         var referenceSolutionModel = _sut.Process(repositoryModel);
 
-        var partialClassModel1 =
-            referenceSolutionModel.Projects[0].Files[0].Entities[0] as ClassModel;
-        var partialClassModel2 =
-            referenceSolutionModel.Projects[0].Files[1].Entities[0] as ClassModel;
+        var partialClassModel1 = referenceSolutionModel.Projects[0].Files[0].Entities[0] as ClassModel;
+        var partialClassModel2 = referenceSolutionModel.Projects[0].Files[1].Entities[0] as ClassModel;
 
         Assert.NotNull(partialClassModel1);
         Assert.NotNull(partialClassModel2);
-        Assert.Equal(partialClassModel1, partialClassModel2);
         Assert.Equal(1, partialClassModel1!.Partials.Count);
         Assert.Equal(1, partialClassModel2!.Partials.Count);
+        Assert.Equal(partialClassModel1.Partials[0], partialClassModel2);
+        Assert.Equal(partialClassModel2.Partials[0], partialClassModel1);
         Assert.Equal("PartialClasses.C1", partialClassModel1.Name);
         Assert.Equal("PartialClasses.C1", partialClassModel2.Name);
         Assert.Empty(partialClassModel1.GenericParameters);
@@ -132,7 +131,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorPartialClassesTes
         var referenceSolutionModel = _sut.Process(repositoryModel);
 
         var partialClassModel1 = referenceSolutionModel.Projects[0].Files[0].Entities[0] as ClassModel;
-        var partialClassModel2 = referenceSolutionModel.Projects[0].Files[0].Entities[0] as ClassModel;
+        var partialClassModel2 = referenceSolutionModel.Projects[0].Files[1].Entities[0] as ClassModel;
 
         Assert.NotNull(partialClassModel1);
         Assert.NotNull(partialClassModel2);

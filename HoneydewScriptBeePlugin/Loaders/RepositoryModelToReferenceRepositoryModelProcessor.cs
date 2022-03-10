@@ -1332,15 +1332,20 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
     private EntityType ConvertEntityType(IEntityType type, ProjectModel projectModel)
     {
         var entityModel =
-            SearchEntityByName(type.FullType.Name, type.FullType.ContainedTypes.Count, projectModel).FirstOrDefault() ??
-            CreateClassModel(type.Name);
+            type.FullType == null
+                ? SearchEntityByName(type.Name, projectModel).FirstOrDefault()
+                : SearchEntityByName(type.FullType.Name, type.FullType.ContainedTypes.Count, projectModel)
+                      .FirstOrDefault() ??
+                  CreateClassModel(type.Name);
 
         var entityType = new EntityType
         {
             Name = type.Name.TrimEnd('?'),
             Entity = entityModel,
-            IsNullable = type.FullType.IsNullable,
-            GenericTypes = ConvertGeneric(type.FullType.ContainedTypes, projectModel),
+            IsNullable = type.FullType?.IsNullable ?? type.Name.EndsWith('?'),
+            GenericTypes = type.FullType == null
+                ? new List<EntityType>()
+                : ConvertGeneric(type.FullType.ContainedTypes, projectModel),
         };
 
         return entityType;
