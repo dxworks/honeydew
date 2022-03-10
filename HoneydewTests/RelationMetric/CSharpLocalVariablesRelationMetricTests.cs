@@ -30,13 +30,12 @@ public class CSharpLocalVariablesRelationVisitorTests
     private readonly LocalVariablesRelationVisitor _sut;
     private readonly CSharpFactExtractor _factExtractor;
     private readonly Mock<ILogger> _loggerMock = new();
-    private readonly Mock<IAddStrategy> _addStrategyMock = new();
     private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
     private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
     public CSharpLocalVariablesRelationVisitorTests()
     {
-        _sut = new LocalVariablesRelationVisitor(_addStrategyMock.Object);
+        _sut = new LocalVariablesRelationVisitor(new AddNameStrategy());
 
         var compositeVisitor = new CompositeVisitor();
         var localVariablesTypeSetterVisitor = new LocalVariablesTypeSetterVisitor(new List<ILocalVariablesVisitor>
@@ -112,7 +111,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         _sut.Visit(classModel);
 
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["LocalVariablesDependency"] as Dictionary<string, int>)!;
 
         Assert.Empty(dependencies);
     }
@@ -146,7 +145,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         _sut.Visit(classModel);
 
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["LocalVariablesDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(3, dependencies["int"]);
@@ -182,7 +181,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         _sut.Visit(classModel);
 
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["LocalVariablesDependency"] as Dictionary<string, int>)!;
 
         Assert.Empty(dependencies);
     }
@@ -215,7 +214,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         _sut.Visit(classModel);
 
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["LocalVariablesDependency"] as Dictionary<string, int>)!;
 
         Assert.Empty(dependencies);
     }
@@ -249,7 +248,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         _sut.Visit(classModel);
 
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["LocalVariablesDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(2, dependencies.Count);
         Assert.Equal(2, dependencies["CSharpMetricExtractor"]);
@@ -285,7 +284,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         _sut.Visit(classModel);
 
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["LocalVariablesDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(1, dependencies["CSharpMetricExtractor"]);
@@ -323,7 +322,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         _sut.Visit(classModel);
 
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["LocalVariablesDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(2, dependencies.Count);
         Assert.Equal(1, dependencies["CSharpMetricExtractor"]);
@@ -362,7 +361,7 @@ public class CSharpLocalVariablesRelationVisitorTests
 
 
         Assert.Empty(classModel1.Metrics);
-        var dependencies1 = (classModel1["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies1 = (classModel1["LocalVariablesDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(2, dependencies1.Count);
         Assert.Equal(1, dependencies1["CSharpMetricExtractor"]);
@@ -370,7 +369,7 @@ public class CSharpLocalVariablesRelationVisitorTests
 
 
         Assert.Empty(classModel2.Metrics);
-        var dependencies2 = (classModel2["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies2 = (classModel2["LocalVariablesDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(3, dependencies2.Count);
         Assert.Equal(1, dependencies2["CSharpMetricExtractor"]);

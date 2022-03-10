@@ -39,7 +39,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
         [Fact]
         public void PrettyPrint_ShouldReturnReturnValueDependency()
         {
-            Assert.Equal("Exceptions Thrown Dependency", _sut.PrettyPrint());
+            Assert.Equal("ExceptionsThrownDependency", _sut.MetricName());
         }
 
         [Fact]

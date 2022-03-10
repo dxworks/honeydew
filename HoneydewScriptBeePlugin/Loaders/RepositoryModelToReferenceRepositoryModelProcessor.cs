@@ -301,7 +301,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
     private static ClassType ConvertClassType(string classType)
     {
-        return Enum.TryParse<ClassType>(classType, out var result)
+        return Enum.TryParse<ClassType>(classType, true, out var result)
             ? result
             : ClassType.Class;
     }
@@ -318,14 +318,14 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
     private static Modifier ConvertModifier(string modifier)
     {
-        return Enum.TryParse<Modifier>(modifier, out var result)
+        return Enum.TryParse<Modifier>(modifier, true, out var result)
             ? result
             : Modifier.None;
     }
 
     private static AccessModifier ConvertAccessModifier(string accessModifier)
     {
-        return Enum.TryParse<AccessModifier>(accessModifier, out var result)
+        return Enum.TryParse<AccessModifier>(accessModifier, true, out var result)
             ? result
             : AccessModifier.None;
     }
@@ -460,7 +460,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
         AliasType ConvertAliasType(string type)
         {
-            return Enum.TryParse<AliasType>(type, out var result)
+            return Enum.TryParse<AliasType>(type, true, out var result)
                 ? result
                 : AliasType.None;
         }
@@ -1154,7 +1154,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
         return methodModel;
     }
 
-    private static MethodModel GetMethodReferenceFromLocalFunction(IMethodCallType methodCallType,
+    private static MethodModel? GetMethodReferenceFromLocalFunction(IMethodCallType methodCallType,
         ClassModel classModel)
     {
         if (methodCallType.MethodDefinitionNames.Count == 0)
@@ -1266,7 +1266,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
     private static AttributeTarget ConvertAttributeTarget(string target)
     {
-        return Enum.TryParse<AttributeTarget>(target, out var result)
+        return Enum.TryParse<AttributeTarget>(target, true, out var result)
             ? result
             : AttributeTarget.None;
     }
@@ -1299,7 +1299,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
     private static ParameterModifier ConvertParameterModifier(string modifier)
     {
-        return Enum.TryParse<ParameterModifier>(modifier, out var result)
+        return Enum.TryParse<ParameterModifier>(modifier, true, out var result)
             ? result
             : ParameterModifier.None;
     }
@@ -1319,7 +1319,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
     private static GenericParameterModifier ConvertGenericParameterModifier(string modifier)
     {
-        return Enum.TryParse<GenericParameterModifier>(modifier, out var result)
+        return Enum.TryParse<GenericParameterModifier>(modifier, true, out var result)
             ? result
             : GenericParameterModifier.None;
     }

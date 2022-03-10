@@ -21,13 +21,12 @@ public class CSharpFieldsRelationVisitorTests
     private readonly FieldsRelationVisitor _sut;
     private readonly CSharpFactExtractor _factExtractor;
     private readonly Mock<ILogger> _loggerMock = new();
-    private readonly Mock<IAddStrategy> _addStrategyMock = new();
     private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
     private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
     public CSharpFieldsRelationVisitorTests()
     {
-        _sut = new FieldsRelationVisitor(_addStrategyMock.Object);
+        _sut = new FieldsRelationVisitor(new AddNameStrategy());
 
         var compositeVisitor = new CompositeVisitor();
 
@@ -90,7 +89,7 @@ public class CSharpFieldsRelationVisitorTests
         _sut.Visit(classModel);
         
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["FieldsDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(2, dependencies["int"]);
@@ -138,7 +137,7 @@ public class CSharpFieldsRelationVisitorTests
         _sut.Visit(classModel);
 
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["FieldsDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(2, dependencies.Count);
         Assert.Equal(1, dependencies["System.Func<int>"]);
@@ -190,7 +189,7 @@ public class CSharpFieldsRelationVisitorTests
         _sut.Visit(classModel);
 
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["FieldsDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(2, dependencies.Count);
         Assert.Equal(2, dependencies["CSharpMetricExtractor"]);
@@ -241,7 +240,7 @@ public class CSharpFieldsRelationVisitorTests
         _sut.Visit(classModel);
 
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["FieldsDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(1, dependencies["System.Func<CSharpMetricExtractor>"]);

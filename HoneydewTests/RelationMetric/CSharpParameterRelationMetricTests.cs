@@ -26,13 +26,12 @@ public class CSharpParameterRelationMetricTests
     private readonly ParameterRelationVisitor _sut;
     private readonly CSharpFactExtractor _factExtractor;
     private readonly Mock<ILogger> _loggerMock = new();
-    private readonly Mock<IAddStrategy> _addStrategyMock = new();
     private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
     private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
     public CSharpParameterRelationMetricTests()
     {
-        _sut = new ParameterRelationVisitor(_addStrategyMock.Object);
+        _sut = new ParameterRelationVisitor(new AddNameStrategy());
 
         var compositeVisitor = new CompositeVisitor();
 

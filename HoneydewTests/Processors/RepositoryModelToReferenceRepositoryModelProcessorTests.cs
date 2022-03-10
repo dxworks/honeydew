@@ -184,7 +184,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
                                     {
                                         new MetricModel
                                         (
-                                            Value: 15,
+                                            Value: 32,
                                             ExtractorName: "SomeExtractor",
                                             ValueType: "int",
                                             Name: "MetricName"
@@ -239,7 +239,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
         Assert.Equal(compilationUnitModel1, referenceClassModel2.File);
         Assert.Equal(1, referenceClassModel2.Metrics.Count);
         Assert.Equal(1, referenceClassModel2.Metrics.Count);
-        Assert.Equal(14, referenceClassModel2.Metrics["MetricName"]);
+        Assert.Equal(32, referenceClassModel2.Metrics["MetricName"]);
 
         var referenceNamespaceModel2 = projectModel1.Files[1];
         Assert.Equal("Project1.Models", referenceNamespaceModel2.FilePath);

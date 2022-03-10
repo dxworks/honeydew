@@ -21,13 +21,12 @@ public class CSharpReturnValueRelationMetricTests
     private readonly ReturnValueRelationVisitor _sut;
     private readonly CSharpFactExtractor _factExtractor;
     private readonly Mock<ILogger> _loggerMock = new();
-    private readonly Mock<IAddStrategy> _adderStrategyMock = new();
     private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
     private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
     public CSharpReturnValueRelationMetricTests()
     {
-        _sut = new ReturnValueRelationVisitor(_adderStrategyMock.Object);
+        _sut = new ReturnValueRelationVisitor(new AddNameStrategy());
 
         var compositeVisitor = new CompositeVisitor();
 
@@ -72,7 +71,7 @@ public class CSharpReturnValueRelationMetricTests
         _sut.Visit(classModel);
 
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["returns"] as Dictionary<string, int>)!;
 
         Assert.Single(dependencies);
         Assert.Equal(2, dependencies["void"]);
@@ -107,7 +106,7 @@ public class CSharpReturnValueRelationMetricTests
         _sut.Visit(classModel);
 
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["returns"] as Dictionary<string, int>)!;
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(2, dependencies["int"]);
@@ -144,7 +143,7 @@ public class CSharpReturnValueRelationMetricTests
         _sut.Visit(classModel);
 
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["returns"] as Dictionary<string, int>)!;
 
         Assert.Equal(4, dependencies.Count);
         Assert.Equal(1, dependencies["int"]);
@@ -183,7 +182,7 @@ public class CSharpReturnValueRelationMetricTests
         _sut.Visit(classModel);
 
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["returns"] as Dictionary<string, int>)!;
 
         Assert.Equal(2, dependencies.Count);
         Assert.Equal(2, dependencies["CSharpMetricExtractor"]);
@@ -219,7 +218,7 @@ public class CSharpReturnValueRelationMetricTests
         _sut.Visit(classModel);
 
         Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
+        var dependencies = (classModel["returns"] as Dictionary<string, int>)!;
 
         Assert.Equal(2, dependencies.Count);
         Assert.Equal(1, dependencies["CSharpMetricExtractor"]);
