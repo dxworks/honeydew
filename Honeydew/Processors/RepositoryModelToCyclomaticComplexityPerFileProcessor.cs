@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.ModelRepresentations;
-using HoneydewModels.Reference;
+using HoneydewCore.Processors;
+using HoneydewScriptBeePlugin.Models;
 
-namespace HoneydewCore.Processors;
+namespace Honeydew.Processors;
 
 public class
     RepositoryModelToCyclomaticComplexityPerFileProcessor : IProcessorFunction<RepositoryModel,
@@ -63,7 +64,7 @@ public class
         return representation;
     }
 
-    private static void CalculateCycloComponents(List<ClassModel> classModels, out int maxCyclo, out int minCyclo,
+    private static void CalculateCycloComponents(List<EntityModel> entityModels, out int maxCyclo, out int minCyclo,
         out int avgCyclo, out int sumCyclo, out int atc)
     {
         var maxCyclomatic = 1;
@@ -78,7 +79,7 @@ public class
         sumCyclo = 0;
         atc = 0;
 
-        if (classModels.Count <= 0)
+        if (entityModels.Count <= 0)
         {
             minCyclo = 0;
             maxCyclo = 0;
@@ -87,21 +88,44 @@ public class
 
         var atcSum = 0;
 
-        foreach (var classModel in classModels)
+        foreach (var entityModel in entityModels)
         {
-            foreach (var methodModel in classModel.Methods)
+            switch (entityModel)
             {
-                UpdateVariables(methodModel.CyclomaticComplexity);
-            }
+                case ClassModel classModel:
+                    foreach (var methodModel in classModel.Methods)
+                    {
+                        UpdateVariables(methodModel.CyclomaticComplexity);
+                    }
 
-            foreach (var constructorModel in classModel.Constructors)
-            {
-                UpdateVariables(constructorModel.CyclomaticComplexity);
-            }
+                    foreach (var constructorModel in classModel.Constructors)
+                    {
+                        UpdateVariables(constructorModel.CyclomaticComplexity);
+                    }
 
-            foreach (var propertyModel in classModel.Properties)
-            {
-                UpdateVariables(propertyModel.CyclomaticComplexity);
+                    if (classModel.Destructor != null)
+                    {
+                        UpdateVariables(classModel.Destructor.CyclomaticComplexity);
+                    }
+
+                    foreach (var propertyModel in classModel.Properties)
+                    {
+                        UpdateVariables(propertyModel.CyclomaticComplexity);
+                    }
+
+                    break;
+                case InterfaceModel interfaceModel:
+                    foreach (var methodModel in interfaceModel.Methods)
+                    {
+                        UpdateVariables(methodModel.CyclomaticComplexity);
+                    }
+
+                    foreach (var propertyModel in interfaceModel.Properties)
+                    {
+                        UpdateVariables(propertyModel.CyclomaticComplexity);
+                    }
+
+                    break;
             }
         }
 
@@ -138,28 +162,22 @@ public class
         }
     }
 
-    private static Dictionary<string, List<ClassModel>> GroupClassesByFilePath(RepositoryModel repositoryModel)
+    private static Dictionary<string, List<EntityModel>> GroupClassesByFilePath(RepositoryModel repositoryModel)
     {
-        var classModelDictionary = new Dictionary<string, List<ClassModel>>();
+        var classModelDictionary = new Dictionary<string, List<EntityModel>>();
 
-        foreach (var classOption in repositoryModel.GetEnumerable())
+        foreach (var entityModel in repositoryModel.GetEnumerable())
         {
-            switch (classOption)
+            if (classModelDictionary.TryGetValue(entityModel.FilePath, out var entityModels))
             {
-                case ClassOption.Class(var classModel):
-                    if (classModelDictionary.TryGetValue(classModel.FilePath, out var classModels))
-                    {
-                        classModels.Add(classModel);
-                    }
-                    else
-                    {
-                        classModelDictionary.Add(classModel.FilePath, new List<ClassModel>
-                        {
-                            classModel
-                        });
-                    }
-
-                    break;
+                entityModels.Add(entityModel);
+            }
+            else
+            {
+                classModelDictionary.Add(entityModel.FilePath, new List<EntityModel>
+                {
+                    entityModel
+                });
             }
         }
 

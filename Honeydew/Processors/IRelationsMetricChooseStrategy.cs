@@ -1,4 +1,4 @@
-﻿namespace HoneydewExtractors.Processors;
+﻿namespace Honeydew.Processors;
 
 public interface IRelationsMetricChooseStrategy
 {
