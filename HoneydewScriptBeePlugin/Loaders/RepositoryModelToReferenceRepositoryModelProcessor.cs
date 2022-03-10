@@ -932,8 +932,13 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                     }
                 }
 
-                void ConvertOutgoingCalls(MethodModel methodModel, ICallingMethodsType methodType)
+                void ConvertOutgoingCalls(MethodModel? methodModel, ICallingMethodsType methodType)
                 {
+                    if (methodModel == null)
+                    {
+                        return;
+                    }
+
                     ConvertCalledMethods(methodType.CalledMethods, methodModel);
 
                     for (var localFunctionIndex = 0;
@@ -975,10 +980,17 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
         }
     }
 
-    private static MethodModel GetMethodReferenceByName(ClassModel classModel, string methodName,
+    private static MethodModel? GetMethodReferenceByName(ClassModel classModel, string methodName,
         int genericParameterCount, IList<IParameterType> parameterTypes)
     {
-        foreach (var methodModel in classModel.Methods)
+        var methods = classModel.Methods
+            .Concat(classModel.Constructors).ToList();
+        if (classModel.Destructor != null)
+        {
+            methods.Add(classModel.Destructor);
+        }
+
+        foreach (var methodModel in methods)
         {
             if (methodModel.Name != methodName)
             {
@@ -1332,11 +1344,11 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
     private EntityType ConvertEntityType(IEntityType type, ProjectModel projectModel)
     {
         var entityModel =
-            type.FullType == null
+            (type.FullType == null
                 ? SearchEntityByName(type.Name, projectModel).FirstOrDefault()
                 : SearchEntityByName(type.FullType.Name, type.FullType.ContainedTypes.Count, projectModel)
-                      .FirstOrDefault() ??
-                  CreateClassModel(type.Name);
+                    .FirstOrDefault()
+            ) ?? CreateClassModel(type.Name);
 
         var entityType = new EntityType
         {
@@ -1401,7 +1413,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             Name = entityName,
             IsInternal = false,
             GenericParameters = genericParameters,
-            // namespace ?
+            // namespace ? todo ask someone
         };
         var isPrimitive = CSharpConstants.IsPrimitive(classModel.Name);
         classModel.IsPrimitive = isPrimitive;

@@ -217,11 +217,15 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
         Assert.Equal(ParameterModifier.None, methodFunction1.Parameters[1].Modifier);
         Assert.Null(methodFunction1.Parameters[1].DefaultValue);
         Assert.Equal(5, methodFunction1.OutgoingCalls.Count);
-        Assert.Equal(methodFunction3, methodFunction1.OutgoingCalls[0].Caller);
-        Assert.Equal(methodFunction3, methodFunction1.OutgoingCalls[1].Caller);
-        Assert.Equal(methodFunction2, methodFunction1.OutgoingCalls[2].Caller);
-        Assert.Equal(methodFunction2, methodFunction1.OutgoingCalls[3].Caller);
-        Assert.Equal(methodPrint2, methodFunction1.OutgoingCalls[4].Caller);
+        Assert.Equal(methodFunction3, methodFunction1.OutgoingCalls[0].Called);
+        Assert.Equal(methodFunction3, methodFunction1.OutgoingCalls[1].Called);
+        Assert.Equal(methodFunction2, methodFunction1.OutgoingCalls[2].Called);
+        Assert.Equal(methodFunction2, methodFunction1.OutgoingCalls[3].Called);
+        Assert.Equal(methodPrint2, methodFunction1.OutgoingCalls[4].Called);
+        foreach (var methodCall in methodFunction1.OutgoingCalls)
+        {
+            Assert.Equal(methodFunction1, methodCall.Caller);
+        }
 
         Assert.Equal("Function2", methodFunction2.Name);
         Assert.Equal(referenceMyClass, methodFunction2.Entity);
@@ -233,7 +237,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
         Assert.Equal(ParameterModifier.None, methodFunction2.Parameters[0].Modifier);
         Assert.Null(methodFunction2.Parameters[0].DefaultValue);
         Assert.Equal(1, methodFunction2.OutgoingCalls.Count);
-        Assert.Equal(parseMethodModel, methodFunction2.OutgoingCalls[0].Caller);
+        Assert.Equal(parseMethodModel, methodFunction2.OutgoingCalls[0].Called);
+        Assert.Equal(methodFunction2, methodFunction2.OutgoingCalls[0].Caller);
 
         Assert.Equal("Function3", methodFunction3.Name);
         Assert.Equal(referenceMyClass, methodFunction3.Entity);
@@ -245,7 +250,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
         Assert.Equal(ParameterModifier.None, methodFunction3.Parameters[0].Modifier);
         Assert.Null(methodFunction3.Parameters[0].DefaultValue);
         Assert.Equal(1, methodFunction3.OutgoingCalls.Count);
-        Assert.Equal(toStringMethodModel, methodFunction3.OutgoingCalls[0].Caller);
+        Assert.Equal(toStringMethodModel, methodFunction3.OutgoingCalls[0].Called);
+        Assert.Equal(methodFunction3, methodFunction3.OutgoingCalls[0].Caller);
 
         Assert.Equal("Print", methodPrint1.Name);
         Assert.Equal(referenceMyClass, methodPrint1.Entity);
@@ -268,6 +274,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
         Assert.Equal(ParameterModifier.None, methodPrint2.Parameters[0].Modifier);
         Assert.Null(methodPrint2.Parameters[0].DefaultValue);
         Assert.Equal(1, methodPrint2.OutgoingCalls.Count);
+        Assert.Equal(methodPrint2, methodPrint2.OutgoingCalls[0].Called);
         Assert.Equal(methodPrint2, methodPrint2.OutgoingCalls[0].Caller);
     }
 
@@ -357,10 +364,14 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
         Assert.Equal(voidClassModel, printNoArg.ReturnValue!.Type.Entity);
         Assert.Empty(printNoArg.Parameters);
         Assert.Equal(4, printNoArg.OutgoingCalls.Count);
-        Assert.Equal(printInt, printNoArg.OutgoingCalls[0].Caller);
-        Assert.Equal(printLong, printNoArg.OutgoingCalls[1].Caller);
-        Assert.Equal(printShort, printNoArg.OutgoingCalls[2].Caller);
-        Assert.Equal(printByte, printNoArg.OutgoingCalls[3].Caller);
+        Assert.Equal(printInt, printNoArg.OutgoingCalls[0].Called);
+        Assert.Equal(printLong, printNoArg.OutgoingCalls[1].Called);
+        Assert.Equal(printShort, printNoArg.OutgoingCalls[2].Called);
+        Assert.Equal(printByte, printNoArg.OutgoingCalls[3].Called);
+        foreach (var methodCall in printNoArg.OutgoingCalls)
+        {
+            Assert.Equal(printNoArg, methodCall.Caller);
+        }
 
         Assert.Equal("Print", printInt.Name);
         Assert.Equal(referenceMyClass, printInt.Entity);
@@ -600,9 +611,9 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
         Assert.Empty(baseClass.Constructors[0].IncomingCalls);
         Assert.Equal(baseClass, baseClass.Constructors[0].Entity);
         Assert.Empty(baseClass.Constructors[0].Parameters);
-        Assert.Equal(1, baseClass.Methods.Count);
+        Assert.Empty(baseClass.Methods);
         Assert.Equal(1, baseClass.Constructors.Count);
-        Assert.Equal(MethodType.Constructor, baseClass.Methods[0].Type);
+        Assert.Equal(MethodType.Constructor, baseClass.Constructors[0].Type);
         Assert.Empty(baseClass.Metrics);
         Assert.Equal(1, baseClass.Fields.Count);
 
@@ -689,7 +700,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
 
         foreach (var calledMethod in callMethod1.OutgoingCalls)
         {
-            Assert.Equal(callMethod0, calledMethod.Caller);
+            Assert.Equal(callMethod0, calledMethod.Called);
+            Assert.Equal(callMethod1, calledMethod.Caller);
         }
     }
 
@@ -730,7 +742,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
 
         Assert.Equal(classModel, methodModel.Entity);
         Assert.Equal(1, methodModel.OutgoingCalls.Count);
-        Assert.Equal(methodModelLocalFunction, methodModel.OutgoingCalls[0].Caller);
+        Assert.Equal(methodModelLocalFunction, methodModel.OutgoingCalls[0].Called);
+        Assert.Equal(methodModel, methodModel.OutgoingCalls[0].Caller);
         Assert.Equal(methodModel, methodModelLocalFunction.ContainingMethod);
         Assert.Equal(1, methodModel.LocalFunctions.Count);
         AssertLocalFunctions(methodModelLocalFunction);
@@ -739,7 +752,9 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
         var constructorModelLocalFunction = constructorModel.LocalFunctions[0];
         Assert.Equal(classModel, constructorModel.Entity);
         Assert.Equal(1, constructorModel.OutgoingCalls.Count);
-        Assert.Equal(constructorModelLocalFunction, constructorModel.OutgoingCalls[0].Caller);
+        Assert.Equal(1, constructorModel.LocalFunctions.Count);
+        Assert.Equal(constructorModel, constructorModel.OutgoingCalls[0].Caller);
+        Assert.Equal(constructorModelLocalFunction, constructorModel.OutgoingCalls[0].Called);
         Assert.Equal(constructorModel, constructorModelLocalFunction.ContainingMethod);
         Assert.Equal(1, constructorModel.LocalFunctions.Count);
         AssertLocalFunctions(constructorModelLocalFunction);
@@ -748,7 +763,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
         var destructorModelLocalFunction = destructorModel!.LocalFunctions[0];
         Assert.Equal(classModel, destructorModel.Entity);
         Assert.Equal(1, destructorModel.OutgoingCalls.Count);
-        Assert.Equal(destructorModelLocalFunction, destructorModel.OutgoingCalls[0].Caller);
+        Assert.Equal(destructorModelLocalFunction, destructorModel.OutgoingCalls[0].Called);
+        Assert.Equal(destructorModel, destructorModel.OutgoingCalls[0].Caller);
         Assert.Equal(destructorModel, destructorModelLocalFunction.ContainingMethod);
         Assert.Equal(1, destructorModel.LocalFunctions.Count);
         AssertLocalFunctions(destructorModelLocalFunction);
@@ -758,7 +774,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
         var getAccessorModelLocalFunction = getAccessor.LocalFunctions[0];
         Assert.Equal(propertyModel, getAccessor.ContainingProperty);
         Assert.Equal(1, getAccessor.OutgoingCalls.Count);
-        Assert.Equal(getAccessorModelLocalFunction, getAccessor.OutgoingCalls[0].Caller);
+        Assert.Equal(getAccessorModelLocalFunction, getAccessor.OutgoingCalls[0].Called);
+        Assert.Equal(getAccessor, getAccessor.OutgoingCalls[0].Caller);
         Assert.Equal(getAccessor, getAccessorModelLocalFunction.ContainingMethod);
         Assert.Equal(1, getAccessor.LocalFunctions.Count);
         AssertLocalFunctions(getAccessorModelLocalFunction);
@@ -767,7 +784,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
         var setAccessorModelLocalFunction = setAccessor.LocalFunctions[0];
         Assert.Equal(propertyModel, setAccessor.ContainingProperty);
         Assert.Equal(1, destructorModel.OutgoingCalls.Count);
-        Assert.Equal(destructorModelLocalFunction, destructorModel.OutgoingCalls[0].Caller);
+        Assert.Equal(destructorModelLocalFunction, destructorModel.OutgoingCalls[0].Called);
+        Assert.Equal(destructorModel, destructorModel.OutgoingCalls[0].Caller);
         Assert.Equal(setAccessor, setAccessorModelLocalFunction.ContainingMethod);
         Assert.Equal(1, destructorModel.LocalFunctions.Count);
         AssertLocalFunctions(setAccessorModelLocalFunction);
@@ -778,14 +796,16 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
             Assert.Equal(1, localFunction1.OutgoingCalls.Count);
 
             var localFunction2 = localFunction1.LocalFunctions[0];
-            Assert.Equal(localFunction2, localFunction1.OutgoingCalls[0].Caller);
+            Assert.Equal(localFunction2, localFunction1.OutgoingCalls[0].Called);
+            Assert.Equal(localFunction1, localFunction1.OutgoingCalls[0].Caller);
             Assert.Equal(1, localFunction1.LocalFunctions.Count);
             Assert.Equal("LocalFunction2", localFunction2.Name);
             Assert.Equal(localFunction1, localFunction2.ContainingMethod);
             Assert.Equal(1, localFunction2.OutgoingCalls.Count);
 
             var localFunction3 = localFunction2.LocalFunctions[0];
-            Assert.Equal(localFunction3, localFunction2.OutgoingCalls[0].Caller);
+            Assert.Equal(localFunction3, localFunction2.OutgoingCalls[0].Called);
+            Assert.Equal(localFunction2, localFunction2.OutgoingCalls[0].Caller);
             Assert.Equal(1, localFunction2.LocalFunctions.Count);
             Assert.Equal("LocalFunction3", localFunction3.Name);
             Assert.Equal(localFunction2, localFunction3.ContainingMethod);

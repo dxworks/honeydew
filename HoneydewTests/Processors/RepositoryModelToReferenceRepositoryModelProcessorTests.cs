@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -519,7 +520,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
         Assert.Equal(ParameterModifier.None, referenceConvertMethodModel1.Parameters[0].Modifier);
         Assert.Null(referenceConvertMethodModel1.Parameters[0].DefaultValue);
         Assert.Equal(1, referenceConvertMethodModel1.OutgoingCalls.Count);
-        Assert.Equal(referenceCreateMethodModel, referenceConvertMethodModel1.OutgoingCalls[0].Caller);
+        Assert.Equal(referenceCreateMethodModel, referenceConvertMethodModel1.OutgoingCalls[0].Called);
+        Assert.Equal(referenceConvertMethodModel1, referenceConvertMethodModel1.OutgoingCalls[0].Caller);
 
         Assert.Equal("Convert", referenceConvertMethodModel2.Name);
         Assert.Equal(referenceClassCreateService, referenceConvertMethodModel2.Entity);
@@ -532,7 +534,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
         Assert.Equal(ParameterModifier.None, referenceConvertMethodModel2.Parameters[0].Modifier);
         Assert.Null(referenceConvertMethodModel2.Parameters[0].DefaultValue);
         Assert.Equal(1, referenceConvertMethodModel2.OutgoingCalls.Count);
-        Assert.Equal(referenceConvertMethodModel1, referenceConvertMethodModel2.OutgoingCalls[0].Caller);
+        Assert.Equal(referenceConvertMethodModel1, referenceConvertMethodModel2.OutgoingCalls[0].Called);
+        Assert.Equal(referenceConvertMethodModel2, referenceConvertMethodModel2.OutgoingCalls[0].Caller);
 
         Assert.Equal("Process", referenceProcessMethodModel.Name);
         Assert.Equal(referenceClassCreateService, referenceProcessMethodModel.Entity);
@@ -545,8 +548,10 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
         Assert.Equal(ParameterModifier.None, referenceProcessMethodModel.Parameters[0].Modifier);
         Assert.Null(referenceProcessMethodModel.Parameters[0].DefaultValue);
         Assert.Equal(2, referenceProcessMethodModel.OutgoingCalls.Count);
-        Assert.Equal(referenceCreateMethodModel, referenceProcessMethodModel.OutgoingCalls[0].Caller);
-        Assert.Equal(referenceConvertMethodModel2, referenceProcessMethodModel.OutgoingCalls[1].Caller);
+        Assert.Equal(referenceCreateMethodModel, referenceProcessMethodModel.OutgoingCalls[0].Called);
+        Assert.Equal(referenceConvertMethodModel2, referenceProcessMethodModel.OutgoingCalls[1].Called);  
+        Assert.Equal(referenceProcessMethodModel, referenceProcessMethodModel.OutgoingCalls[0].Caller);
+        Assert.Equal(referenceProcessMethodModel, referenceProcessMethodModel.OutgoingCalls[1].Caller);
 
 
         Assert.Equal("Project1.Models", referenceNamespaceModels.FilePath);
@@ -625,17 +630,17 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
         var allCreatedReferences = referenceSolutionModel.CreatedClasses;
         Assert.Equal(5, allCreatedReferences.Count);
 
-        var objectClassModel = allCreatedReferences[0];
-        var floatClassModel = allCreatedReferences[1];
-        var intClassModel = allCreatedReferences[2];
-        var stringClassModel = allCreatedReferences[3];
-        var voidClassModel = allCreatedReferences[4];
+        var floatClassModel = allCreatedReferences.FirstOrDefault(c => c.Name == "float")!;
+        var voidClassModel = allCreatedReferences.FirstOrDefault(c => c.Name == "void")!;
+        var objectClassModel = allCreatedReferences.FirstOrDefault(c => c.Name == "object")!;
+        var intClassModel = allCreatedReferences.FirstOrDefault(c => c.Name == "int")!;
+        var stringClassModel = allCreatedReferences.FirstOrDefault(c => c.Name == "string")!;
 
-        Assert.Equal("int", intClassModel.Name);
-        Assert.Equal("object", objectClassModel.Name);
-        Assert.Equal("string", stringClassModel.Name);
-        Assert.Equal("float", floatClassModel.Name);
-        Assert.Equal("void", voidClassModel.Name);
+        Assert.NotNull(intClassModel);
+        Assert.NotNull(objectClassModel);
+        Assert.NotNull(stringClassModel);
+        Assert.NotNull(floatClassModel);
+        Assert.NotNull(voidClassModel);
 
         var intParseMethodReference = intClassModel.Methods[0];
         var intToStringReferenceMethod = intClassModel.Methods[1];
@@ -682,11 +687,15 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
         Assert.Equal(ParameterModifier.None, methodFunction1.Parameters[1].Modifier);
         Assert.Null(methodFunction1.Parameters[1].DefaultValue);
         Assert.Equal(5, methodFunction1.OutgoingCalls.Count);
-        Assert.Equal(methodFunction3, methodFunction1.OutgoingCalls[0].Caller);
-        Assert.Equal(methodFunction3, methodFunction1.OutgoingCalls[1].Caller);
-        Assert.Equal(methodFunction2, methodFunction1.OutgoingCalls[2].Caller);
-        Assert.Equal(methodFunction2, methodFunction1.OutgoingCalls[3].Caller);
-        Assert.Equal(methodPrint2, methodFunction1.OutgoingCalls[4].Caller);
+        Assert.Equal(methodFunction3, methodFunction1.OutgoingCalls[0].Called);
+        Assert.Equal(methodFunction3, methodFunction1.OutgoingCalls[1].Called);
+        Assert.Equal(methodFunction2, methodFunction1.OutgoingCalls[2].Called);
+        Assert.Equal(methodFunction2, methodFunction1.OutgoingCalls[3].Called);
+        Assert.Equal(methodPrint2, methodFunction1.OutgoingCalls[4].Called);
+        foreach (var methodCall in methodFunction1.OutgoingCalls)
+        {
+            Assert.Equal(methodFunction1, methodCall.Caller);
+        }
 
         Assert.Equal("Function2", methodFunction2.Name);
         Assert.Equal(referenceMyClass, methodFunction2.Entity);
@@ -699,7 +708,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
         Assert.Equal(ParameterModifier.None, methodFunction2.Parameters[0].Modifier);
         Assert.Null(methodFunction2.Parameters[0].DefaultValue);
         Assert.Equal(1, methodFunction2.OutgoingCalls.Count);
-        Assert.Equal(intParseMethodReference, methodFunction2.OutgoingCalls[0].Caller);
+        Assert.Equal(intParseMethodReference, methodFunction2.OutgoingCalls[0].Called);
+        Assert.Equal(methodFunction2, methodFunction2.OutgoingCalls[0].Caller);
 
         Assert.Equal("Function3", methodFunction3.Name);
         Assert.Equal(referenceMyClass, methodFunction3.Entity);
@@ -712,7 +722,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
         Assert.Equal(ParameterModifier.None, methodFunction3.Parameters[0].Modifier);
         Assert.Null(methodFunction3.Parameters[0].DefaultValue);
         Assert.Equal(1, methodFunction3.OutgoingCalls.Count);
-        Assert.Equal(intToStringReferenceMethod, methodFunction3.OutgoingCalls[0].Caller);
+        Assert.Equal(intToStringReferenceMethod, methodFunction3.OutgoingCalls[0].Called);
+        Assert.Equal(methodFunction3, methodFunction3.OutgoingCalls[0].Caller);
 
         Assert.Equal("Print", methodPrint1.Name);
         Assert.Equal(referenceMyClass, methodPrint1.Entity);
@@ -737,6 +748,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
         Assert.Equal(ParameterModifier.None, methodPrint2.Parameters[0].Modifier);
         Assert.Null(methodPrint2.Parameters[0].DefaultValue);
         Assert.Equal(1, methodPrint2.OutgoingCalls.Count);
+        Assert.Equal(methodPrint2, methodPrint2.OutgoingCalls[0].Called);
         Assert.Equal(methodPrint2, methodPrint2.OutgoingCalls[0].Caller);
     }
 
