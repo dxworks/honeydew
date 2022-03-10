@@ -30,12 +30,13 @@ public class CSharpLocalVariablesRelationVisitorTests
     private readonly LocalVariablesRelationVisitor _sut;
     private readonly CSharpFactExtractor _factExtractor;
     private readonly Mock<ILogger> _loggerMock = new();
+    private readonly Mock<IAddStrategy> _addStrategyMock = new();
     private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
     private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
     public CSharpLocalVariablesRelationVisitorTests()
     {
-        _sut = new LocalVariablesRelationVisitor();
+        _sut = new LocalVariablesRelationVisitor(_addStrategyMock.Object);
 
         var compositeVisitor = new CompositeVisitor();
         var localVariablesTypeSetterVisitor = new LocalVariablesTypeSetterVisitor(new List<ILocalVariablesVisitor>
@@ -83,12 +84,6 @@ public class CSharpLocalVariablesRelationVisitorTests
         _factExtractor = new CSharpFactExtractor(compositeVisitor);
     }
 
-    [Fact]
-    public void PrettyPrint_ShouldReturnLocalVariablesDependency()
-    {
-        Assert.Equal("Local Variables Dependency", _sut.PrettyPrint());
-    }
-
     [Theory]
     [FileData("TestData/CSharp/Metrics/Extraction/Relations/ClassWithTwoFunctions.txt")]
     public void Extract_ShouldHaveNoLocalVariables_WhenClassHasMethodsThatDontUseLocalVariables(
@@ -111,20 +106,15 @@ public class CSharpLocalVariablesRelationVisitorTests
                 }
             }
         });
-        var classModel = repositoryModel.Projects[0].Files[0].Classes[0];
+        var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
         _sut.Visit(classModel);
 
+        Assert.Empty(classModel.Metrics);
+        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
 
-        Assert.Equal(1, classModel.Metrics.Count);
-        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
-            classModel.Metrics[0].ExtractorName);
-        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-            classModel.Metrics[0].ValueType);
-
-        var dictionary = (Dictionary<string, int>)classModel.Metrics[0].Value;
-        Assert.Empty(dictionary);
+        Assert.Empty(dependencies);
     }
 
     [Theory]
@@ -150,19 +140,13 @@ public class CSharpLocalVariablesRelationVisitorTests
                 }
             }
         });
-        var classModel = repositoryModel.Projects[0].Files[0].Classes[0];
+        var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
         _sut.Visit(classModel);
 
-
-        Assert.Equal(1, classModel.Metrics.Count);
-        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
-            classModel.Metrics[0].ExtractorName);
-        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-            classModel.Metrics[0].ValueType);
-
-        var dependencies = (Dictionary<string, int>)classModel.Metrics[0].Value;
+        Assert.Empty(classModel.Metrics);
+        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(3, dependencies["int"]);
@@ -192,20 +176,15 @@ public class CSharpLocalVariablesRelationVisitorTests
                 }
             }
         });
-        var classModel = repositoryModel.Projects[0].Files[0].Classes[0];
+        var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
         _sut.Visit(classModel);
 
+        Assert.Empty(classModel.Metrics);
+        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
 
-        Assert.Equal(1, classModel.Metrics.Count);
-        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
-            classModel.Metrics[0].ExtractorName);
-        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-            classModel.Metrics[0].ValueType);
-
-        var dictionary = (Dictionary<string, int>)classModel.Metrics[0].Value;
-        Assert.Empty(dictionary);
+        Assert.Empty(dependencies);
     }
 
     [Theory]
@@ -230,20 +209,15 @@ public class CSharpLocalVariablesRelationVisitorTests
                 }
             }
         });
-        var classModel = repositoryModel.Projects[0].Files[0].Classes[0];
+        var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
         _sut.Visit(classModel);
 
+        Assert.Empty(classModel.Metrics);
+        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
 
-        Assert.Equal(1, classModel.Metrics.Count);
-        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
-            classModel.Metrics[0].ExtractorName);
-        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-            classModel.Metrics[0].ValueType);
-
-        var dictionary = (Dictionary<string, int>)classModel.Metrics[0].Value;
-        Assert.Empty(dictionary);
+        Assert.Empty(dependencies);
     }
 
     [Theory]
@@ -269,19 +243,13 @@ public class CSharpLocalVariablesRelationVisitorTests
                 }
             }
         });
-        var classModel = repositoryModel.Projects[0].Files[0].Classes[0];
+        var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
         _sut.Visit(classModel);
 
-
-        Assert.Equal(1, classModel.Metrics.Count);
-        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
-            classModel.Metrics[0].ExtractorName);
-        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-            classModel.Metrics[0].ValueType);
-
-        var dependencies = (Dictionary<string, int>)classModel.Metrics[0].Value;
+        Assert.Empty(classModel.Metrics);
+        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(2, dependencies.Count);
         Assert.Equal(2, dependencies["CSharpMetricExtractor"]);
@@ -311,19 +279,13 @@ public class CSharpLocalVariablesRelationVisitorTests
                 }
             }
         });
-        var classModel = repositoryModel.Projects[0].Files[0].Classes[0];
+        var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
         _sut.Visit(classModel);
 
-
-        Assert.Equal(1, classModel.Metrics.Count);
-        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
-            classModel.Metrics[0].ExtractorName);
-        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-            classModel.Metrics[0].ValueType);
-
-        var dependencies = (Dictionary<string, int>)classModel.Metrics[0].Value;
+        Assert.Empty(classModel.Metrics);
+        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(1, dependencies["CSharpMetricExtractor"]);
@@ -355,19 +317,13 @@ public class CSharpLocalVariablesRelationVisitorTests
                 }
             }
         });
-        var classModel = repositoryModel.Projects[0].Files[0].Classes[0];
+        var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
         _sut.Visit(classModel);
 
-
-        Assert.Equal(1, classModel.Metrics.Count);
-        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
-            classModel.Metrics[0].ExtractorName);
-        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-            classModel.Metrics[0].ValueType);
-
-        var dependencies = (Dictionary<string, int>)classModel.Metrics[0].Value;
+        Assert.Empty(classModel.Metrics);
+        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(2, dependencies.Count);
         Assert.Equal(1, dependencies["CSharpMetricExtractor"]);
@@ -397,36 +353,24 @@ public class CSharpLocalVariablesRelationVisitorTests
                 }
             }
         });
-        var classModel1 = repositoryModel.Projects[0].Files[0].Classes[0];
-        var classModel2 = repositoryModel.Projects[0].Files[0].Classes[1];
+        var classModel1 = repositoryModel.Projects[0].Files[0].Entities[0];
+        var classModel2 = repositoryModel.Projects[0].Files[0].Entities[1];
 
 
         _sut.Visit(classModel1);
         _sut.Visit(classModel2);
 
 
-        Assert.Equal(2, repositoryModel.Projects[0].Files[0].Classes.Count);
-
-        Assert.Equal(1, classModel1.Metrics.Count);
-        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
-            classModel1.Metrics[0].ExtractorName);
-        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-            classModel1.Metrics[0].ValueType);
-
-        var dependencies1 = (Dictionary<string, int>)classModel1.Metrics[0].Value;
+        Assert.Empty(classModel1.Metrics);
+        var dependencies1 = (classModel1["ParameterDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(2, dependencies1.Count);
         Assert.Equal(1, dependencies1["CSharpMetricExtractor"]);
         Assert.Equal(1, dependencies1["int"]);
 
 
-        Assert.Equal(1, classModel2.Metrics.Count);
-        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.LocalVariablesRelationVisitor",
-            classModel2.Metrics[0].ExtractorName);
-        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-            classModel2.Metrics[0].ValueType);
-
-        var dependencies2 = (Dictionary<string, int>)classModel2.Metrics[0].Value;
+        Assert.Empty(classModel2.Metrics);
+        var dependencies2 = (classModel2["ParameterDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(3, dependencies2.Count);
         Assert.Equal(1, dependencies2["CSharpMetricExtractor"]);

@@ -182,13 +182,13 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
                                     ContainingNamespaceName = "Project1.Services",
                                     Metrics = new List<MetricModel>
                                     {
-                                        new()
-                                        {
-                                            Value = 15,
-                                            ExtractorName = "SomeExtractor",
-                                            ValueType = "int",
-                                            Name = "MetricName",
-                                        }
+                                        new MetricModel
+                                        (
+                                            Value: 15,
+                                            ExtractorName: "SomeExtractor",
+                                            ValueType: "int",
+                                            Name: "MetricName"
+                                        )
                                     }
                                 }
                             }
@@ -853,11 +853,13 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
         var projectModel1 = referenceRepositoryModel.Projects[0];
 
         var referenceNamespaceServices = projectModel1.Files[0];
-        var referenceClassCreateService = referenceNamespaceServices.Entities[0] as HoneydewScriptBeePlugin.Models.ClassModel;
+        var referenceClassCreateService =
+            referenceNamespaceServices.Entities[0] as HoneydewScriptBeePlugin.Models.ClassModel;
 
         var referenceNamespaceModels = projectModel1.Files[1];
         var referenceClassMyModel = referenceNamespaceModels.Entities[0] as HoneydewScriptBeePlugin.Models.ClassModel;
-        var referenceClassOtherModel = referenceNamespaceModels.Entities[1] as HoneydewScriptBeePlugin.Models.ClassModel;
+        var referenceClassOtherModel =
+            referenceNamespaceModels.Entities[1] as HoneydewScriptBeePlugin.Models.ClassModel;
 
         Assert.NotNull(referenceClassCreateService);
         Assert.Equal("Project1.Services.CreateService", referenceClassCreateService!.Name);

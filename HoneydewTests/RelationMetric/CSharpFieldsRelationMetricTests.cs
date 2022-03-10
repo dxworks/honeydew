@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Honeydew.PostExtraction.ReferenceRelations;
 using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -20,12 +21,13 @@ public class CSharpFieldsRelationVisitorTests
     private readonly FieldsRelationVisitor _sut;
     private readonly CSharpFactExtractor _factExtractor;
     private readonly Mock<ILogger> _loggerMock = new();
+    private readonly Mock<IAddStrategy> _addStrategyMock = new();
     private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
     private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
     public CSharpFieldsRelationVisitorTests()
     {
-        _sut = new FieldsRelationVisitor();
+        _sut = new FieldsRelationVisitor(_addStrategyMock.Object);
 
         var compositeVisitor = new CompositeVisitor();
 
@@ -41,12 +43,6 @@ public class CSharpFieldsRelationVisitorTests
         compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
         _factExtractor = new CSharpFactExtractor(compositeVisitor);
-    }
-
-    [Fact]
-    public void PrettyPrint_ShouldReturnReturnValueDependency()
-    {
-        Assert.Equal("Fields Dependency", _sut.PrettyPrint());
     }
 
     [Theory]
@@ -88,19 +84,13 @@ public class CSharpFieldsRelationVisitorTests
                 }
             }
         });
-        var classModel = repositoryModel.Projects[0].Files[0].Classes[0];
+        var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
         _sut.Visit(classModel);
-
-
-        Assert.Equal(1, classModel.Metrics.Count);
-        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.FieldsRelationVisitor",
-            classModel.Metrics[0].ExtractorName);
-        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-            classModel.Metrics[0].ValueType);
-
-        var dependencies = (Dictionary<string, int>)classModel.Metrics[0].Value;
+        
+        Assert.Empty(classModel.Metrics);
+        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(2, dependencies["int"]);
@@ -142,19 +132,13 @@ public class CSharpFieldsRelationVisitorTests
                 }
             }
         });
-        var classModel = repositoryModel.Projects[0].Files[0].Classes[0];
+        var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
         _sut.Visit(classModel);
 
-
-        Assert.Equal(1, classModel.Metrics.Count);
-        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.FieldsRelationVisitor",
-            classModel.Metrics[0].ExtractorName);
-        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-            classModel.Metrics[0].ValueType);
-
-        var dependencies = (Dictionary<string, int>)classModel.Metrics[0].Value;
+        Assert.Empty(classModel.Metrics);
+        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(2, dependencies.Count);
         Assert.Equal(1, dependencies["System.Func<int>"]);
@@ -200,19 +184,13 @@ public class CSharpFieldsRelationVisitorTests
                 }
             }
         });
-        var classModel = repositoryModel.Projects[0].Files[0].Classes[0];
+        var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
         _sut.Visit(classModel);
 
-
-        Assert.Equal(1, classModel.Metrics.Count);
-        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.FieldsRelationVisitor",
-            classModel.Metrics[0].ExtractorName);
-        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-            classModel.Metrics[0].ValueType);
-
-        var dependencies = (Dictionary<string, int>)classModel.Metrics[0].Value;
+        Assert.Empty(classModel.Metrics);
+        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(2, dependencies.Count);
         Assert.Equal(2, dependencies["CSharpMetricExtractor"]);
@@ -257,19 +235,13 @@ public class CSharpFieldsRelationVisitorTests
                 }
             }
         });
-        var classModel = repositoryModel.Projects[0].Files[0].Classes[0];
+        var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
         _sut.Visit(classModel);
 
-
-        Assert.Equal(1, classModel.Metrics.Count);
-        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.FieldsRelationVisitor",
-            classModel.Metrics[0].ExtractorName);
-        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-            classModel.Metrics[0].ValueType);
-
-        var dependencies = (Dictionary<string, int>)classModel.Metrics[0].Value;
+        Assert.Empty(classModel.Metrics);
+        var dependencies = (classModel["ParameterDependency"] as Dictionary<string, int>)!;
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(1, dependencies["System.Func<CSharpMetricExtractor>"]);
