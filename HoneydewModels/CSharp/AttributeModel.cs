@@ -3,7 +3,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp;
 
-public class AttributeModel : IAttributeType
+public record AttributeModel : IAttributeType
 {
     public string Name { get; set; }
 

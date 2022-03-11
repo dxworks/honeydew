@@ -23,7 +23,8 @@ public class LocalVariableInfoVisitor : ICSharpLocalVariablesVisitor
             return modelType;
         }
 
-        IEntityType localVariableType =
+        modelType.Name = syntaxNode.Identifier.ToString();
+        var localVariableType =
             CSharpExtractionHelperMethods.GetFullName(variableDeclarationSyntax.Type, semanticModel,
                 out var isNullable);
         var fullName = localVariableType.Name;

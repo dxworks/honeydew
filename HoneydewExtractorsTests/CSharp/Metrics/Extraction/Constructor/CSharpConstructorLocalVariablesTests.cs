@@ -60,9 +60,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
             foreach (var constructorType in classModel.Constructors)
             {
                 Assert.Equal(4, constructorType.LocalVariableTypes.Count);
+                Assert.Equal("sum", constructorType.LocalVariableTypes[0].Name);
                 Assert.Equal("int", constructorType.LocalVariableTypes[0].Type.Name);
+                Assert.Equal("min", constructorType.LocalVariableTypes[1].Name);
                 Assert.Equal("int", constructorType.LocalVariableTypes[1].Type.Name);
+                Assert.Equal("max", constructorType.LocalVariableTypes[2].Name);
                 Assert.Equal("int", constructorType.LocalVariableTypes[2].Type.Name);
+                Assert.Equal("s", constructorType.LocalVariableTypes[3].Name);
                 Assert.Equal("string", constructorType.LocalVariableTypes[3].Type.Name);
             }
         }
@@ -114,6 +118,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
                     Assert.Equal("ExternClass", localVariableType.Type.Name);
                 }
             }
+
+            Assert.Equal("c", classModel.Constructors[0].LocalVariableTypes[0].Name);
+            Assert.Equal("c2", classModel.Constructors[0].LocalVariableTypes[1].Name);
+            Assert.Equal("c3", classModel.Constructors[0].LocalVariableTypes[2].Name);
+
+            Assert.Equal("c", classModel.Constructors[1].LocalVariableTypes[0].Name);
+            Assert.Equal("class1", classModel.Constructors[1].LocalVariableTypes[1].Name);
+            Assert.Equal("class2", classModel.Constructors[1].LocalVariableTypes[2].Name);
         }
 
         [Theory]
@@ -134,6 +146,12 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Constructor
                 Assert.Equal("int[]", constructorType.LocalVariableTypes[0].Type.Name);
                 Assert.Equal("Namespace1.Class2[]", constructorType.LocalVariableTypes[1].Type.Name);
                 Assert.Equal("ExternClass[]", constructorType.LocalVariableTypes[2].Type.Name);
+
+                for (var i = 0; i < constructorType.LocalVariableTypes.Count; i++)
+                {
+                    Assert.Equal($"array{(i == 0 ? "" : (i + 1).ToString())}",
+                        constructorType.LocalVariableTypes[i].Name);
+                }
             }
         }
     }

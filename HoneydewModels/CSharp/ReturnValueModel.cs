@@ -1,16 +1,15 @@
 ﻿using System.Collections.Generic;
 using HoneydewModels.Types;
 
-namespace HoneydewModels.CSharp
+namespace HoneydewModels.CSharp;
+
+public record ReturnValueModel : IReturnValueType
 {
-    public record ReturnValueModel : IReturnValueType
-    {
-        public IEntityType Type { get; set; }
+    public IEntityType Type { get; set; }
 
-        public string Modifier { get; set; } = "";
+    public string Modifier { get; set; } = "";
 
-        public bool IsNullable { get; set; }
+    public bool IsNullable { get; set; }
 
-        public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
-    }
+    public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
 }

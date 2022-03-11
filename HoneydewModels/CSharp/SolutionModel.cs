@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace HoneydewModels.CSharp
-{
-    public record SolutionModel
-    {
-        public string FilePath { get; set; }
+namespace HoneydewModels.CSharp;
 
-        public IList<string> ProjectsPaths { get; set; } = new List<string>();
-    }
+public record SolutionModel
+{
+    public string FilePath { get; set; }
+
+    public IList<string> ProjectsPaths { get; set; } = new List<string>();
 }

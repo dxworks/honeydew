@@ -2,7 +2,7 @@
 
 namespace HoneydewModels.CSharp;
 
-public class EntityTypeModel : IEntityType
+public record EntityTypeModel : IEntityType
 {
     public string Name { get; set; }
 

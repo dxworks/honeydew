@@ -14,4 +14,6 @@ public record MethodCallModel : IMethodCallType
     public IList<string> MethodDefinitionNames { get; set; } = new List<string>();
 
     public IList<IParameterType> ParameterTypes { get; set; } = new List<IParameterType>();
+
+    public IList<IEntityType> GenericParameters { get; set; } = new List<IEntityType>();
 }

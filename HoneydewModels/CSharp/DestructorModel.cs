@@ -3,7 +3,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp;
 
-public class DestructorModel : IDestructorType
+public record DestructorModel : IDestructorType
 {
     public string Name { get; set; }
 

@@ -3,7 +3,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp;
 
-public class ConstructorModel : IConstructorType
+public record ConstructorModel : IConstructorType
 {
     public string Name { get; set; }
 

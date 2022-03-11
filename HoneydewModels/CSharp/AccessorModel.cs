@@ -3,7 +3,7 @@ using HoneydewModels.Types;
 
 namespace HoneydewModels.CSharp;
 
-public class AccessorModel : IAccessorType
+public record AccessorModel : IAccessorType
 {
     public string Name { get; set; }
 
