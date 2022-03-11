@@ -5,9 +5,9 @@ namespace HoneydewExtractors.Processors
 {
     public class HoneydewChooseStrategy : IRelationsMetricChooseStrategy
     {
-        public bool Choose(String type)
+        public bool Choose(string type)
         {
-            return type != nameof(ExternCallsRelationVisitor) && type != nameof(ExternDataRelationVisitor);
+            return type != typeof(ExternCallsRelationVisitor).FullName && type != typeof(ExternDataRelationVisitor).FullName;
         }
     }
 }

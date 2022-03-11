@@ -22,19 +22,19 @@ namespace HoneydewExtractors.Processors
         {
             Dictionary<string, string> extractorDict = new Dictionary<string, string>
             {
-                {nameof(DeclarationRelationVisitor), new DeclarationRelationVisitor().PrettyPrint()},
-                {nameof(ExceptionsThrownRelationVisitor), new ExceptionsThrownRelationVisitor().PrettyPrint()},
-                {nameof(ExternCallsRelationVisitor), new ExternCallsRelationVisitor().PrettyPrint()},
-                {nameof(ExternDataRelationVisitor), new ExternDataRelationVisitor().PrettyPrint()},
-                {nameof(FieldsRelationVisitor), new FieldsRelationVisitor().PrettyPrint()},
-                {nameof(HierarchyRelationVisitor), new HierarchyRelationVisitor().PrettyPrint()},
-                {nameof(LocalVariablesRelationVisitor), new LocalVariablesRelationVisitor().PrettyPrint()},
-                {nameof(ObjectCreationRelationVisitor), new ObjectCreationRelationVisitor().PrettyPrint()},
-                {nameof(ParameterRelationVisitor), new ParameterRelationVisitor().PrettyPrint()},
-                {nameof(PropertiesRelationVisitor), new PropertiesRelationVisitor().PrettyPrint()},
-                {nameof(ReturnValueRelationVisitor), new ReturnValueRelationVisitor().PrettyPrint()},
+                { typeof(DeclarationRelationVisitor).FullName, new DeclarationRelationVisitor().PrettyPrint() },
+                { typeof(ExceptionsThrownRelationVisitor).FullName, new ExceptionsThrownRelationVisitor().PrettyPrint() },
+                { typeof(ExternCallsRelationVisitor).FullName, new ExternCallsRelationVisitor().PrettyPrint() },
+                { typeof(ExternDataRelationVisitor).FullName, new ExternDataRelationVisitor().PrettyPrint() },
+                { typeof(FieldsRelationVisitor).FullName, new FieldsRelationVisitor().PrettyPrint() },
+                { typeof(HierarchyRelationVisitor).FullName, new HierarchyRelationVisitor().PrettyPrint() },
+                { typeof(LocalVariablesRelationVisitor).FullName, new LocalVariablesRelationVisitor().PrettyPrint() },
+                { typeof(ObjectCreationRelationVisitor).FullName, new ObjectCreationRelationVisitor().PrettyPrint() },
+                { typeof(ParameterRelationVisitor).FullName, new ParameterRelationVisitor().PrettyPrint() },
+                { typeof(PropertiesRelationVisitor).FullName, new PropertiesRelationVisitor().PrettyPrint() },
+                { typeof(ReturnValueRelationVisitor).FullName, new ReturnValueRelationVisitor().PrettyPrint() },
             };
-            
+
             if (repositoryModel == null)
             {
                 return new RelationsRepresentation();
@@ -86,69 +86,76 @@ namespace HoneydewExtractors.Processors
                                         continue;
                                     }
 
-                                        var dictionary = (Dictionary<string, int>)metricModel.Value;
-                                        foreach (var (targetName, count) in dictionary)
+                                    var type = Type.GetType(metricModel.ValueType);
+                                    if (type != typeof(Dictionary<string, int>))
+                                    {
+                                        continue;
+                                    }
+
+                                    var dictionary = (Dictionary<string, int>)metricModel.Value;
+                                    foreach (var (targetName, count) in dictionary)
+                                    {
+                                        if (CSharpConstants.IsPrimitive(targetName))
                                         {
-                                            if (CSharpConstants.IsPrimitive(targetName))
+                                            continue;
+                                        }
+
+                                        if (!classFilePaths.TryGetValue(targetName, out var possibleClasses))
+                                        {
+                                            continue;
+                                        }
+
+
+                                        if (possibleClasses.Count == 1)
+                                        {
+                                            AddToDependencyDictionary(possibleClasses[0]);
+                                        }
+                                        else
+                                        {
+                                            var added = false;
+                                            foreach (var possibleClass in possibleClasses)
+                                            {
+                                                if (possibleClass.Contains(projectModel.FilePath))
+                                                {
+                                                    AddToDependencyDictionary(possibleClass);
+                                                    added = true;
+                                                    break;
+                                                }
+                                            }
+
+                                            if (added)
                                             {
                                                 continue;
                                             }
 
-                                            if (!classFilePaths.TryGetValue(targetName, out var possibleClasses))
-                                            {
-                                                continue;
-                                            }
+                                            AddToDependencyDictionary(possibleClasses[0]);
+                                        }
 
-
-                                            if (possibleClasses.Count == 1)
-                                            {
-                                                AddToDependencyDictionary(possibleClasses[0]);
-                                            }
-                                            else
-                                            {
-                                                var added = false;
-                                                foreach (var possibleClass in possibleClasses)
-                                                {
-                                                    if (possibleClass.Contains(projectModel.FilePath))
-                                                    {
-                                                        AddToDependencyDictionary(possibleClass);
-                                                        added = true;
-                                                        break;
-                                                    }
-                                                }
-
-                                                if (added)
-                                                {
-                                                    continue;
-                                                }
-
-                                                AddToDependencyDictionary(possibleClasses[0]);
-                                            }
-
-                                            void AddToDependencyDictionary(string filePath)
-                                            {
-                                                if (dependencyDictionary.TryGetValue(extractorDict[metricModel.ExtractorName],
+                                        void AddToDependencyDictionary(string filePath)
+                                        {
+                                            if (dependencyDictionary.TryGetValue(
+                                                    extractorDict[metricModel.ExtractorName],
                                                     out var dependency))
+                                            {
+                                                if (dependency.ContainsKey(filePath))
                                                 {
-                                                    if (dependency.ContainsKey(filePath))
-                                                    {
-                                                        dependency[filePath] += count;
-                                                    }
-                                                    else
-                                                    {
-                                                        dependency.Add(filePath, count);
-                                                    }
+                                                    dependency[filePath] += count;
                                                 }
                                                 else
                                                 {
-                                                    dependencyDictionary.Add(extractorDict[metricModel.ExtractorName],
-                                                        new Dictionary<string, int>
-                                                        {
-                                                            { filePath, count }
-                                                        });
+                                                    dependency.Add(filePath, count);
                                                 }
                                             }
+                                            else
+                                            {
+                                                dependencyDictionary.Add(extractorDict[metricModel.ExtractorName],
+                                                    new Dictionary<string, int>
+                                                    {
+                                                        { filePath, count }
+                                                    });
+                                            }
                                         }
+                                    }
                                 }
                                 catch (Exception)
                                 {

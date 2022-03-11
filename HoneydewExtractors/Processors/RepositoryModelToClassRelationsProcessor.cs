@@ -21,17 +21,20 @@ namespace HoneydewExtractors.Processors
         {
             Dictionary<string, string> extractorDict = new Dictionary<string, string>
             {
-                {nameof(DeclarationRelationVisitor), new DeclarationRelationVisitor().PrettyPrint()},
-                {nameof(ExceptionsThrownRelationVisitor), new ExceptionsThrownRelationVisitor().PrettyPrint()},
-                {nameof(ExternCallsRelationVisitor), new ExternCallsRelationVisitor().PrettyPrint()},
-                {nameof(ExternDataRelationVisitor), new ExternDataRelationVisitor().PrettyPrint()},
-                {nameof(FieldsRelationVisitor), new FieldsRelationVisitor().PrettyPrint()},
-                {nameof(HierarchyRelationVisitor), new HierarchyRelationVisitor().PrettyPrint()},
-                {nameof(LocalVariablesRelationVisitor), new LocalVariablesRelationVisitor().PrettyPrint()},
-                {nameof(ObjectCreationRelationVisitor), new ObjectCreationRelationVisitor().PrettyPrint()},
-                {nameof(ParameterRelationVisitor), new ParameterRelationVisitor().PrettyPrint()},
-                {nameof(PropertiesRelationVisitor), new PropertiesRelationVisitor().PrettyPrint()},
-                {nameof(ReturnValueRelationVisitor), new ReturnValueRelationVisitor().PrettyPrint()},
+                { typeof(DeclarationRelationVisitor).FullName, new DeclarationRelationVisitor().PrettyPrint() },
+                {
+                    typeof(ExceptionsThrownRelationVisitor).FullName,
+                    new ExceptionsThrownRelationVisitor().PrettyPrint()
+                },
+                { typeof(ExternCallsRelationVisitor).FullName, new ExternCallsRelationVisitor().PrettyPrint() },
+                { typeof(ExternDataRelationVisitor).FullName, new ExternDataRelationVisitor().PrettyPrint() },
+                { typeof(FieldsRelationVisitor).FullName, new FieldsRelationVisitor().PrettyPrint() },
+                { typeof(HierarchyRelationVisitor).FullName, new HierarchyRelationVisitor().PrettyPrint() },
+                { typeof(LocalVariablesRelationVisitor).FullName, new LocalVariablesRelationVisitor().PrettyPrint() },
+                { typeof(ObjectCreationRelationVisitor).FullName, new ObjectCreationRelationVisitor().PrettyPrint() },
+                { typeof(ParameterRelationVisitor).FullName, new ParameterRelationVisitor().PrettyPrint() },
+                { typeof(PropertiesRelationVisitor).FullName, new PropertiesRelationVisitor().PrettyPrint() },
+                { typeof(ReturnValueRelationVisitor).FullName, new ReturnValueRelationVisitor().PrettyPrint() },
             };
 
             if (repositoryModel == null)
@@ -52,13 +55,14 @@ namespace HoneydewExtractors.Processors
                             continue;
                         }
 
-                        var dictionary = (Dictionary<string, int>) metricModel.Value;
+                        var dictionary = (Dictionary<string, int>)metricModel.Value;
                         foreach (var (targetName, count) in dictionary)
                         {
                             if (CSharpConstants.IsPrimitive(targetName))
                             {
                                 continue;
                             }
+
                             classRelationsRepresentation.Add(classType.Name, targetName,
                                 extractorDict[metricModel.ExtractorName],
                                 count);

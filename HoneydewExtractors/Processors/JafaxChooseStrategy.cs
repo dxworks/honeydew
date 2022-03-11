@@ -1,17 +1,16 @@
-﻿using System;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
+﻿using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
 
 namespace HoneydewExtractors.Processors
 {
     public class JafaxChooseStrategy : IRelationsMetricChooseStrategy
     {
-        public bool Choose(String type)
+        public bool Choose(string type)
         {
-            return type == nameof(ExternCallsRelationVisitor) ||
-                   type == nameof(ExternDataRelationVisitor) ||
-                   type == nameof(HierarchyRelationVisitor) ||
-                   type == nameof(ReturnValueRelationVisitor) ||
-                   type == nameof(DeclarationRelationVisitor);
+            return type == typeof(ExternCallsRelationVisitor).FullName ||
+                   type == typeof(ExternDataRelationVisitor).FullName ||
+                   type == typeof(HierarchyRelationVisitor).FullName ||
+                   type == typeof(ReturnValueRelationVisitor).FullName ||
+                   type == typeof(DeclarationRelationVisitor).FullName;
         }
     }
 }
