@@ -4,5 +4,5 @@ public class EnumModel : EntityModel
 {
     public string Type { get; set; }
 
-    public IDictionary<string, int> Labels { get; set; } = new Dictionary<string, int>();
+    public IList<EnumLabelModel> Labels { get; set; } = new List<EnumLabelModel>();
 }

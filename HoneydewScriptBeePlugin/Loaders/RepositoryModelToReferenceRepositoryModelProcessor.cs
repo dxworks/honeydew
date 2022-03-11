@@ -7,8 +7,8 @@ using HoneydewScriptBeePlugin.Models;
 using static HoneydewScriptBeePlugin.Loaders.MetricAdder;
 using AttributeModel = HoneydewScriptBeePlugin.Models.AttributeModel;
 using ClassModel = HoneydewScriptBeePlugin.Models.ClassModel;
-using EnumModel = HoneydewScriptBeePlugin.Models.EnumModel;
 using DelegateModel = HoneydewModels.CSharp.DelegateModel;
+using EnumModel = HoneydewModels.CSharp.EnumModel;
 using FieldModel = HoneydewScriptBeePlugin.Models.FieldModel;
 using GenericParameterModel = HoneydewScriptBeePlugin.Models.GenericParameterModel;
 using LocalVariableModel = HoneydewScriptBeePlugin.Models.LocalVariableModel;
@@ -52,8 +52,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
         PopulateProjectWithProjectReferences(inputRepositoryModel, repositoryModel);
 
         PopulateWithEntityReferences(inputRepositoryModel, repositoryModel);
-
-        PopulateModelWithMethodsConstructorsPropertiesAndFields(inputRepositoryModel, repositoryModel);
 
         PopulateModelWithMethodReferencesAndFieldAccesses(inputRepositoryModel, repositoryModel);
 
@@ -100,7 +98,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                     Project = referenceProjectModel,
                     Loc = ConvertLoc(compilationUnitType.Loc),
                 };
-                AddMetrics(fileModel, compilationUnitType);
 
                 referenceProjectModel.Files.Add(fileModel);
 
@@ -138,9 +135,9 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                         }
                             break;
 
-                        case HoneydewModels.CSharp.EnumModel enumModel:
+                        case EnumModel enumModel:
                         {
-                            var model = new EnumModel
+                            var model = new Models.EnumModel
                             {
                                 Name = enumModel.Name,
                                 FilePath = enumModel.FilePath,
@@ -153,7 +150,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                                 IsExternal = false,
                                 IsPrimitive = false,
                                 LinesOfCode = ConvertLoc(enumModel.Loc),
-                                Labels = enumModel.Labels,
                                 Type = enumModel.Type,
                             };
                             namespaceModel.Entities.Add(model);
@@ -200,8 +196,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                                     LinesOfCode = ConvertLoc(classModel.Loc),
                                 }
                             };
-
-                            AddMetrics(entityModel, classType);
 
                             namespaceModel.Entities.Add(entityModel);
                             fileModel.Entities.Add(entityModel);
@@ -383,6 +377,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                 var file = projectModel.Files[compilationUnitIndex];
                 var compilationUnitType = repositoryModel.Projects[projectIndex].CompilationUnits[compilationUnitIndex];
 
+                AddMetrics(file, compilationUnitType);
+
                 file.Imports = compilationUnitType.Imports.Select(import => ConvertImportType(import, projectModel))
                     .ToList();
 
@@ -395,29 +391,60 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                         .ToList();
                     entityModel.Attributes = ConvertAttributes(classType.Attributes, projectModel);
 
+                    AddMetrics(entityModel, classType);
+
                     switch (entityModel)
                     {
-                        case ClassModel classModel:
+                        case ClassModel classModel when classType is HoneydewModels.CSharp.ClassModel membersClassType:
                         {
-                            classModel.GenericParameters =
-                                ConvertGenericParameters(classType.GenericParameters, projectModel);
+                            if (classType is ITypeWithGenericParameters typeWithGenericParameters)
+                            {
+                                classModel.GenericParameters =
+                                    ConvertGenericParameters(typeWithGenericParameters.GenericParameters, projectModel);
+                            }
 
                             foreach (var baseType in classType.BaseTypes)
                             {
                                 classModel.BaseTypes.Add(ConvertEntityType(baseType.Type, projectModel));
                             }
 
+                            classModel.Methods = PopulateWithMethodModels(classModel, membersClassType.Methods)
+                                .ToList();
+                            classModel.Constructors = membersClassType.Constructors
+                                .Select(constructorType =>
+                                    ConvertConstructor(classModel, constructorType, projectModel))
+                                .ToList();
+                            classModel.Destructor =
+                                ConvertDestructor(classModel, membersClassType.Destructor, projectModel);
+
+                            classModel.Fields = membersClassType.Fields
+                                .Select(fieldType => ConvertField(classModel, fieldType, projectModel))
+                                .ToList();
+
+                            classModel.Properties =
+                                PopulateWithPropertyModels(classModel, membersClassType.Properties).ToList();
+
                             break;
                         }
-                        case InterfaceModel interfaceModel:
+                        case InterfaceModel interfaceModel
+                            when classType is HoneydewModels.CSharp.ClassModel interfaceType:
                         {
-                            interfaceModel.GenericParameters =
-                                ConvertGenericParameters(classType.GenericParameters, projectModel);
+                            if (classType is ITypeWithGenericParameters typeWithGenericParameters)
+                            {
+                                interfaceModel.GenericParameters =
+                                    ConvertGenericParameters(typeWithGenericParameters.GenericParameters, projectModel);
+                            }
 
                             foreach (var baseType in classType.BaseTypes)
                             {
                                 interfaceModel.BaseTypes.Add(ConvertEntityType(baseType.Type, projectModel));
                             }
+
+                            interfaceModel.Methods =
+                                PopulateWithMethodModels(interfaceModel, interfaceType.Methods).ToList();
+
+                            interfaceModel.Properties =
+                                PopulateWithPropertyModels(interfaceModel, interfaceType.Properties).ToList();
 
                             break;
                         }
@@ -429,15 +456,44 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                                 ConvertParameters(delegateType.ParameterTypes, projectModel);
                             delegateModel.ReturnValue =
                                 ConvertReturnValue(delegateType.ReturnValue, projectModel);
-                            delegateModel.GenericParameters =
-                                ConvertGenericParameters(classType.GenericParameters, projectModel);
+
+                            if (classType is ITypeWithGenericParameters typeWithGenericParameters)
+                            {
+                                delegateModel.GenericParameters =
+                                    ConvertGenericParameters(typeWithGenericParameters.GenericParameters, projectModel);
+                            }
 
                             break;
                         }
+                        case Models.EnumModel enumModel when classType is EnumModel enumType:
+                            enumModel.Labels = ConvertEnumLabels(enumType.Labels, projectModel).ToList();
+                            break;
                     }
                 }
             }
+
+            IEnumerable<MethodModel> PopulateWithMethodModels(EntityModel parentEntity,
+                IEnumerable<IMethodType> methodModels)
+            {
+                return methodModels.Select(methodType => ConvertMethod(parentEntity, null, methodType, projectModel));
+            }
+
+            IEnumerable<PropertyModel> PopulateWithPropertyModels(EntityModel entityModel,
+                IEnumerable<IPropertyType> properties)
+            {
+                return properties.Select(propertyType => ConvertProperty(entityModel, propertyType, projectModel));
+            }
         }
+    }
+
+    private IEnumerable<EnumLabelModel> ConvertEnumLabels(IEnumerable<IEnumLabelType> enumLabels,
+        ProjectModel projectModel)
+    {
+        return enumLabels.Select(label => new EnumLabelModel
+        {
+            Name = label.Name,
+            Attributes = ConvertAttributes(label.Attributes, projectModel),
+        });
     }
 
     private ReturnValueModel ConvertReturnValue(IReturnValueType returnValueType, ProjectModel projectModel)
@@ -490,8 +546,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             .FirstOrDefault(model => model.FullName == namespaceName);
     }
 
-    #endregion
-
     private IEnumerable<EntityModel> SearchEntityByName(string entityName, int genericParameterCount,
         ProjectModel projectModel)
     {
@@ -523,88 +577,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
         var entityTypeModel = _fullTypeNameBuilder.CreateEntityTypeModel(entityName);
         return SearchEntityByName(entityTypeModel.FullType.Name, entityTypeModel.FullType.ContainedTypes.Count,
             projectModel);
-    }
-
-    #region Methods Constructors Properties Fields
-
-    private void PopulateModelWithMethodsConstructorsPropertiesAndFields(RepositoryModel repositoryModel,
-        Models.RepositoryModel referenceRepositoryModel)
-    {
-        for (var projectIndex = 0; projectIndex < referenceRepositoryModel.Projects.Count; projectIndex++)
-        {
-            var projectModel = referenceRepositoryModel.Projects[projectIndex];
-            for (var compilationUnitIndex = 0;
-                 compilationUnitIndex < projectModel.Files.Count;
-                 compilationUnitIndex++)
-            {
-                var compilationUnit = projectModel.Files[compilationUnitIndex];
-                var compilationUnitType = repositoryModel.Projects[projectIndex]
-                    .CompilationUnits[compilationUnitIndex];
-
-                foreach (var entityModel in compilationUnit.Entities)
-                {
-                    var classType = compilationUnitType.ClassTypes.FirstOrDefault(c => c.Name == entityModel.Name);
-
-                    if (classType is not IMembersClassType membersClassType)
-                    {
-                        continue;
-                    }
-
-                    switch (entityModel)
-                    {
-                        case ClassModel classModel:
-                            classModel.Methods = PopulateWithMethodModels(classModel, membersClassType.Methods)
-                                .ToList();
-                            classModel.Constructors = membersClassType.Constructors
-                                .Select(constructorType =>
-                                    ConvertConstructor(classModel, constructorType, projectModel))
-                                .ToList();
-                            classModel.Destructor =
-                                ConvertDestructor(classModel, membersClassType.Destructor, projectModel);
-
-                            classModel.Fields = membersClassType.Fields
-                                .Select(fieldType => ConvertField(classModel, fieldType, projectModel))
-                                .ToList();
-                            break;
-
-                        case InterfaceModel interfaceModel:
-                            interfaceModel.Methods =
-                                PopulateWithMethodModels(interfaceModel, membersClassType.Methods).ToList();
-                            break;
-                    }
-
-                    if (classType is not IPropertyMembersClassType propertyMembersClassType)
-                    {
-                        continue;
-                    }
-
-                    switch (entityModel)
-                    {
-                        case ClassModel classModel:
-                            classModel.Properties =
-                                PopulateWithPropertyModels(classModel, propertyMembersClassType.Properties).ToList();
-                            break;
-                        case InterfaceModel interfaceModel:
-                            interfaceModel.Properties =
-                                PopulateWithPropertyModels(interfaceModel, propertyMembersClassType.Properties)
-                                    .ToList();
-                            break;
-                    }
-                }
-            }
-
-            IEnumerable<MethodModel> PopulateWithMethodModels(EntityModel parentEntity,
-                IEnumerable<IMethodType> methodModels)
-            {
-                return methodModels.Select(methodType => ConvertMethod(parentEntity, null, methodType, projectModel));
-            }
-
-            IEnumerable<PropertyModel> PopulateWithPropertyModels(EntityModel entityModel,
-                IEnumerable<IPropertyType> properties)
-            {
-                return properties.Select(propertyType => ConvertProperty(entityModel, propertyType, projectModel));
-            }
-        }
     }
 
     private PropertyModel ConvertProperty(EntityModel entityModel, IPropertyType propertyType,
@@ -1254,7 +1226,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
         for (var i = indexOfLocalFunctionChain; i < methodCallType.MethodDefinitionNames.Count; i++)
         {
-            // todo
+            // todo check for generic parameters in method name
             var localFunctionName = methodCallType.MethodDefinitionNames[i];
             var nextLocalFunction = methodModelToSearchLocalFunctions.LocalFunctions.FirstOrDefault(function =>
                 localFunctionName.StartsWith(function.Name));
