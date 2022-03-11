@@ -18,13 +18,9 @@ public class ConstructorSetterClassVisitor : CompositeVisitor, ICSharpClassVisit
     {
     }
 
-    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IMembersClassType modelType)
     {
-        if (modelType is not IMembersClassType membersClassType)
-        {
-            return modelType;
-        }
-
         foreach (var constructorDeclarationSyntax in syntaxNode.DescendantNodes()
                      .OfType<ConstructorDeclarationSyntax>())
         {
@@ -46,9 +42,9 @@ public class ConstructorSetterClassVisitor : CompositeVisitor, ICSharpClassVisit
                 }
             }
 
-            membersClassType.Constructors.Add(constructorModel);
+            modelType.Constructors.Add(constructorModel);
         }
 
-        return membersClassType;
+        return modelType;
     }
 }

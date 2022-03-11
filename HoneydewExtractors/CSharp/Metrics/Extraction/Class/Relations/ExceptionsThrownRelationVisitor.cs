@@ -17,7 +17,7 @@ public class ExceptionsThrownRelationVisitor : ICSharpClassVisitor
     {
     }
 
-    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMembersClassType modelType)
     {
         var dictionary = AddDependencies(syntaxNode, semanticModel);
 

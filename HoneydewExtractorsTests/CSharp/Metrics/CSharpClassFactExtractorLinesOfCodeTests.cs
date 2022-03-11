@@ -58,6 +58,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
                     })
                 })
             }));
+            compositeVisitor.Add(new EnumSetterCompilationUnitVisitor(new List<ICSharpEnumVisitor>
+            {
+                linesOfCodeVisitor,
+            }));
+            compositeVisitor.Add(new DelegateSetterCompilationUnitVisitor(new List<IDelegateVisitor>
+            {
+                linesOfCodeVisitor
+            }));
 
             compositeVisitor.Add(linesOfCodeVisitor);
 
@@ -123,6 +131,69 @@ namespace HoneydewExtractorsTests.CSharp.Metrics
             Assert.Equal(3, classModel.Properties[0].Loc.SourceLines);
             Assert.Equal(1, classModel.Properties[0].Loc.CommentedLines);
             Assert.Equal(5, classModel.Properties[0].Loc.EmptyLines);
+        }
+
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/EnumWithComments.txt")]
+        public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithEnum(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _sut.Extract(syntaxTree, semanticModel);
+
+            var classModels = compilationUnit.ClassTypes;
+
+            Assert.Equal(8, compilationUnit.Loc.SourceLines);
+            Assert.Equal(8, compilationUnit.Loc.EmptyLines);
+            Assert.Equal(2, compilationUnit.Loc.CommentedLines);
+
+            var classModel = (EnumModel)classModels[0];
+            Assert.Equal(5, classModel.Loc.SourceLines);
+            Assert.Equal(5, classModel.Loc.EmptyLines);
+            Assert.Equal(1, classModel.Loc.CommentedLines);
+        }
+        
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/DelegateOnOneLine.txt")]
+        public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithDelegateOnOneLine(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _sut.Extract(syntaxTree, semanticModel);
+
+            var classModels = compilationUnit.ClassTypes;
+
+            Assert.Equal(2, compilationUnit.Loc.SourceLines);
+            Assert.Equal(3, compilationUnit.Loc.EmptyLines);
+            Assert.Equal(1, compilationUnit.Loc.CommentedLines);
+
+            var classModel = (DelegateModel)classModels[0];
+            Assert.Equal(1, classModel.Loc.SourceLines);
+            Assert.Equal(0, classModel.Loc.EmptyLines);
+            Assert.Equal(0, classModel.Loc.CommentedLines);
+        }
+
+        [Theory]
+        [FileData("TestData/CSharp/Metrics/CSharpLinesOfCode/DelegateOnMultipleLines.txt")]
+        public void Extract_ShouldHaveLinesOfCode_WhenProvidedWithDelegateOnMultipleLines(string fileContent)
+        {
+            var syntaxTree = _syntacticModelCreator.Create(fileContent);
+            var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+            var compilationUnit = _sut.Extract(syntaxTree, semanticModel);
+
+            var classModels = compilationUnit.ClassTypes;
+
+            Assert.Equal(5, compilationUnit.Loc.SourceLines);
+            Assert.Equal(3, compilationUnit.Loc.EmptyLines);
+            Assert.Equal(1, compilationUnit.Loc.CommentedLines);
+
+            var classModel = (DelegateModel)classModels[0];
+            Assert.Equal(4, classModel.Loc.SourceLines);
+            Assert.Equal(1, classModel.Loc.EmptyLines);
+            Assert.Equal(0, classModel.Loc.CommentedLines);
         }
 
         [Theory]

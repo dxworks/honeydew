@@ -17,13 +17,8 @@ public class FieldSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
     {
     }
 
-    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMembersClassType modelType)
     {
-        if (modelType is not IMembersClassType membersClassType)
-        {
-            return modelType;
-        }
-
         foreach (var baseFieldDeclarationSyntax in
                  syntaxNode.DescendantNodes().OfType<BaseFieldDeclarationSyntax>())
         {
@@ -46,10 +41,10 @@ public class FieldSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
 
             foreach (var fieldType in fieldTypes)
             {
-                membersClassType.Fields.Add(fieldType);
+                modelType.Fields.Add(fieldType);
             }
         }
 
-        return membersClassType;
+        return modelType;
     }
 }

@@ -1,0 +1,10 @@
+﻿namespace Namespace1;
+
+public enum Class1 : uint
+{
+    [System.Obsolete("Message")]
+    Label1,
+   
+    [System.Obsolete]
+    AX,
+}

@@ -2,7 +2,7 @@
 
 namespace HoneydewModels.Types;
 
-public interface IMembersClassType : IClassType, ITypeWithDestructor
+public interface IMembersClassType : IClassType, ITypeWithDestructor, ITypeWithGenericParameters
 {
     public IList<IFieldType> Fields { get; init; }
 

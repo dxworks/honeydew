@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
-using HoneydewCore.ModelRepresentations;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.AccessedFields;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
@@ -23,6 +22,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Constructor;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Delegate;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Destructor;
+using HoneydewExtractors.CSharp.Metrics.Extraction.Enum;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Field;
 using HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
@@ -163,6 +163,8 @@ internal static class VisitorLoaderHelper
             attributeSetterVisitor,
         };
 
+        var importsVisitor = new ImportsVisitor();
+        
         var classVisitors = new List<ICSharpClassVisitor>
         {
             new BaseInfoClassVisitor(),
@@ -172,7 +174,7 @@ internal static class VisitorLoaderHelper
             new DestructorSetterClassVisitor(destructorVisitors),
             new FieldSetterClassVisitor(fieldVisitors),
             new PropertySetterClassVisitor(propertyVisitors),
-            new ImportsVisitor(),
+            importsVisitor,
             linesOfCodeVisitor,
             attributeSetterVisitor,
             genericParameterSetterVisitor,
@@ -185,16 +187,32 @@ internal static class VisitorLoaderHelper
         var delegateVisitors = new List<ICSharpDelegateVisitor>
         {
             new BaseInfoDelegateVisitor(),
-            new ImportsVisitor(),
+            importsVisitor,
             attributeSetterVisitor,
             parameterSetterVisitor,
             genericParameterSetterVisitor,
+            linesOfCodeVisitor,
         };
+        
+        var enumVisitors = new List<IEnumVisitor>
+        {
+            new BaseInfoEnumVisitor(),
+            new EnumLabelsSetterVisitor(new List<IEnumLabelVisitor>
+            {
+                new BasicEnumLabelInfoVisitor(),
+                attributeSetterVisitor,
+            }),
+            importsVisitor,
+            attributeSetterVisitor,
+            linesOfCodeVisitor,
+        };
+        
         var compilationUnitVisitors = new List<ICSharpCompilationUnitVisitor>
         {
             new ClassSetterCompilationUnitVisitor(classVisitors),
             new DelegateSetterCompilationUnitVisitor(delegateVisitors),
-            new ImportsVisitor(),
+            new EnumSetterCompilationUnitVisitor(enumVisitors),
+            importsVisitor,
             linesOfCodeVisitor,
         };
 

@@ -6,5 +6,5 @@ public interface IEnumType : IClassType
 {
     public string Type { get; set; }
 
-    public IDictionary<string, int> Labels { get; set; }
+    public IList<IEnumLabelType> Labels { get; set; }
 }

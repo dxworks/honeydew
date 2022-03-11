@@ -1,0 +1,9 @@
+﻿namespace Namespace1
+{
+    [System.Obsolete("Message")]
+    public enum Class1 : short
+    {
+        Label1 = 0,
+        A2,
+    }
+}

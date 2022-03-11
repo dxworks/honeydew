@@ -18,13 +18,9 @@ public class DestructorSetterClassVisitor : CompositeVisitor, ICSharpClassVisito
     {
     }
 
-    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IMembersClassType modelType)
     {
-        if (modelType is not IMembersClassType membersClassType)
-        {
-            return modelType;
-        }
-
         foreach (var destructorDeclarationSyntax in syntaxNode.DescendantNodes()
                      .OfType<DestructorDeclarationSyntax>())
         {
@@ -46,9 +42,9 @@ public class DestructorSetterClassVisitor : CompositeVisitor, ICSharpClassVisito
                 }
             }
 
-            membersClassType.Destructor = destructorType;
+            modelType.Destructor = destructorType;
         }
 
-        return membersClassType;
+        return modelType;
     }
 }

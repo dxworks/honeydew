@@ -1,0 +1,11 @@
+﻿namespace Enums;
+
+public enum MyEnum 
+{
+    A,
+    B,
+    C=2,
+    D=2,
+    E=5,
+    F
+}

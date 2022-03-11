@@ -21,7 +21,8 @@ public class GenericParameterSetterVisitor : CompositeVisitor, ICSharpClassVisit
     {
     }
 
-    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IMembersClassType modelType)
     {
         ExtractParameterInfo(syntaxNode, semanticModel, modelType);
 

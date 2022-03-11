@@ -18,13 +18,9 @@ public class MethodSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
     {
     }
 
-    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IMembersClassType modelType)
     {
-        if (modelType is not IMembersClassType membersClassType)
-        {
-            return modelType;
-        }
-
         foreach (var methodDeclarationSyntax in syntaxNode.DescendantNodes().OfType<MethodDeclarationSyntax>())
         {
             IMethodType methodModel = new MethodModel();
@@ -44,9 +40,9 @@ public class MethodSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
                 }
             }
 
-            membersClassType.Methods.Add(methodModel);
+            modelType.Methods.Add(methodModel);
         }
 
-        return membersClassType;
+        return modelType;
     }
 }

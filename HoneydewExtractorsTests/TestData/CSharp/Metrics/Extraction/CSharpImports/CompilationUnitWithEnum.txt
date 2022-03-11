@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+
+namespace TopLevel;
+
+public enum Foo
+{
+    Label1,
+    Label2 = 2,
+    Label2_1 = Label1,
+}

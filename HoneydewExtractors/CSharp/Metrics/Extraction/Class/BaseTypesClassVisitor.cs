@@ -13,7 +13,7 @@ public class BaseTypesClassVisitor : ICSharpClassVisitor
     {
     }
 
-    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMembersClassType modelType)
     {
         switch (syntaxNode)
         {
@@ -31,29 +31,13 @@ public class BaseTypesClassVisitor : ICSharpClassVisitor
             }
                 break;
 
-            case EnumDeclarationSyntax:
-            {
-                modelType.BaseTypes.Add(new BaseTypeModel
-                {
-                    Type = new EntityTypeModel
-                    {
-                        Name = "System.Enum",
-                        FullType = new GenericType
-                        {
-                            Name = "System.Enum"
-                        }
-                    },
-                    Kind = "class"
-                });
-            }
-                break;
             default:
             {
                 modelType.BaseTypes.Add(new BaseTypeModel
                 {
                     Type = CSharpExtractionHelperMethods.GetBaseClassName(syntaxNode, semanticModel),
                     Kind = "class"
-                });
+                }); // todo test if basetype has just class not interfaces
 
                 foreach (var baseInterface in CSharpExtractionHelperMethods.GetBaseInterfaces(syntaxNode, semanticModel))
                 {

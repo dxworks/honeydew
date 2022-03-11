@@ -43,7 +43,6 @@ public class CSharpClassAttributeMetricTests
     [InlineData("interface")]
     [InlineData("record")]
     [InlineData("struct")]
-    [InlineData("enum")]
     public void Extract_ShouldExtractAttribute_WhenProvidedDifferentClassType(string classType)
     {
         var fileContent = $@"namespace Namespace1
@@ -57,7 +56,7 @@ public class CSharpClassAttributeMetricTests
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
         Assert.Equal(1, classTypes[0].Attributes.Count);
-        Assert.Equal("class", classTypes[0].Attributes[0].Target);
+        Assert.Equal("type", classTypes[0].Attributes[0].Target);
         Assert.Equal("System.ObsoleteAttribute", classTypes[0].Attributes[0].Name);
         Assert.Equal(1, classTypes[0].Attributes[0].ParameterTypes.Count);
         Assert.Equal("string?", classTypes[0].Attributes[0].ParameterTypes[0].Type.Name);
@@ -66,8 +65,7 @@ public class CSharpClassAttributeMetricTests
     }
 
     [Theory]
-    [FileData(
-        "TestData/CSharp/Metrics/Extraction/ClassLevel/Attributes/ClassWithOneAttributeWithNoParams.txt")]
+    [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/Attributes/ClassWithOneAttributeWithNoParams.txt")]
     public void Extract_ShouldExtractAttribute_WhenProvidedWithOneAttributeWithNoParams(string fileContent)
     {
         var syntaxTree = _syntacticModelCreator.Create(fileContent);
@@ -75,7 +73,7 @@ public class CSharpClassAttributeMetricTests
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
         Assert.Equal(1, classTypes[0].Attributes.Count);
-        Assert.Equal("class", classTypes[0].Attributes[0].Target);
+        Assert.Equal("type", classTypes[0].Attributes[0].Target);
         Assert.Equal("System.SerializableAttribute", classTypes[0].Attributes[0].Name);
         Assert.Empty(classTypes[0].Attributes[0].ParameterTypes);
     }
@@ -90,7 +88,7 @@ public class CSharpClassAttributeMetricTests
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
         Assert.Equal(1, classTypes[0].Attributes.Count);
-        Assert.Equal("class", classTypes[0].Attributes[0].Target);
+        Assert.Equal("type", classTypes[0].Attributes[0].Target);
         Assert.Equal("System.ObsoleteAttribute", classTypes[0].Attributes[0].Name);
         Assert.Equal(1, classTypes[0].Attributes[0].ParameterTypes.Count);
         Assert.Equal("string?", classTypes[0].Attributes[0].ParameterTypes[0].Type.Name);
@@ -113,7 +111,7 @@ public class CSharpClassAttributeMetricTests
         Assert.Equal(3, classTypes[0].Attributes.Count);
         foreach (var attribute in classTypes[0].Attributes)
         {
-            Assert.Equal("class", attribute.Target);
+            Assert.Equal("type", attribute.Target);
         }
 
         var attribute1 = classTypes[0].Attributes[0];
@@ -148,7 +146,7 @@ public class CSharpClassAttributeMetricTests
         Assert.Equal(4, classType.Attributes.Count);
         foreach (var attribute in classType.Attributes)
         {
-            Assert.Equal("class", attribute.Target);
+            Assert.Equal("type", attribute.Target);
             Assert.Equal("MyNamespace.MyAttribute", attribute.Name);
         }
 
@@ -181,7 +179,7 @@ public class CSharpClassAttributeMetricTests
         Assert.Equal(5, classType.Attributes.Count);
         foreach (var attribute in classType.Attributes)
         {
-            Assert.Equal("class", attribute.Target);
+            Assert.Equal("type", attribute.Target);
         }
 
         var attribute1 = classType.Attributes[0];

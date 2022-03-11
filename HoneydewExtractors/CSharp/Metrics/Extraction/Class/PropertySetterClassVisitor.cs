@@ -18,7 +18,7 @@ public class PropertySetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
     {
     }
 
-    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMembersClassType modelType)
     {
         if (modelType is not IPropertyMembersClassType propertyMembersClassType)
         {

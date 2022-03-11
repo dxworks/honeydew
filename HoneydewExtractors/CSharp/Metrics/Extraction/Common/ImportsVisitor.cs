@@ -11,7 +11,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common;
 
-public class ImportsVisitor : ICSharpCompilationUnitVisitor, ICSharpClassVisitor, ICSharpDelegateVisitor
+public class ImportsVisitor : ICSharpCompilationUnitVisitor, ICSharpClassVisitor, ICSharpDelegateVisitor,
+    ICSharpEnumVisitor
 {
     public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, SemanticModel semanticModel,
         ICompilationUnitType modelType)
@@ -36,7 +37,7 @@ public class ImportsVisitor : ICSharpCompilationUnitVisitor, ICSharpClassVisitor
         return modelType;
     }
 
-    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMembersClassType modelType)
     {
         foreach (var importType in ExtractParentImports(syntaxNode, semanticModel))
         {
@@ -48,6 +49,16 @@ public class ImportsVisitor : ICSharpCompilationUnitVisitor, ICSharpClassVisitor
 
     public IDelegateType Visit(DelegateDeclarationSyntax syntaxNode, SemanticModel semanticModel,
         IDelegateType modelType)
+    {
+        foreach (var importType in ExtractParentImports(syntaxNode, semanticModel))
+        {
+            modelType.Imports.Add(importType);
+        }
+
+        return modelType;
+    }
+
+    public IEnumType Visit(EnumDeclarationSyntax syntaxNode, SemanticModel semanticModel, IEnumType modelType)
     {
         foreach (var importType in ExtractParentImports(syntaxNode, semanticModel))
         {

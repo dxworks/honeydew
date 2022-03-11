@@ -15,7 +15,7 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common;
 
 public class LinesOfCodeVisitor : ICSharpPropertyVisitor, ICSharpMethodVisitor, ICSharpConstructorVisitor,
     ICSharpClassVisitor, ICSharpCompilationUnitVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor,
-    ICSharpDestructorVisitor, ICSharpDelegateVisitor
+    ICSharpDestructorVisitor, ICSharpDelegateVisitor, ICSharpEnumVisitor
 {
     private readonly CSharpLinesOfCodeCounter _linesOfCodeCounter = new();
     private bool _visited;
@@ -54,7 +54,7 @@ public class LinesOfCodeVisitor : ICSharpPropertyVisitor, ICSharpMethodVisitor, 
         return modelType;
     }
 
-    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMembersClassType modelType)
     {
         modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
         return modelType;
@@ -62,6 +62,12 @@ public class LinesOfCodeVisitor : ICSharpPropertyVisitor, ICSharpMethodVisitor, 
 
     public IDelegateType Visit(DelegateDeclarationSyntax syntaxNode, SemanticModel semanticModel,
         IDelegateType modelType)
+    {
+        modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
+        return modelType;
+    }
+
+    public IEnumType Visit(EnumDeclarationSyntax syntaxNode, SemanticModel semanticModel, IEnumType modelType)
     {
         modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
         return modelType;

@@ -14,7 +14,7 @@ public class BaseInfoClassVisitor : ICSharpClassVisitor
     {
     }
 
-    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMembersClassType modelType)
     {
         var accessModifier = CSharpConstants.DefaultClassAccessModifier;
         var modifier = "";

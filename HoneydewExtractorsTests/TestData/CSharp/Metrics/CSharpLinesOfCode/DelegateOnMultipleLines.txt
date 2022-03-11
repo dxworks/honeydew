@@ -1,0 +1,8 @@
+﻿namespace MyDelegates;
+
+// this is a delegate
+public // 
+    delegate void D
+    
+    (int x /* param */,
+    float g);

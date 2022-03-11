@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
@@ -19,18 +18,19 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common;
 
-[Obfuscation]
 public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICSharpDelegateVisitor,
     ICSharpMethodVisitor, ICSharpConstructorVisitor, ICSharpFieldVisitor, ICSharpPropertyVisitor,
-    ICSharpParameterVisitor, ICSharpMethodAccessorVisitor, ICSharpGenericParameterVisitor, ICSharpDestructorVisitor
+    ICSharpParameterVisitor, ICSharpMethodAccessorVisitor, ICSharpGenericParameterVisitor, ICSharpDestructorVisitor,
+    ICSharpEnumVisitor, ICSharpEnumLabelVisitor
 {
     public AttributeSetterVisitor(IEnumerable<IAttributeVisitor> visitors) : base(visitors)
     {
     }
 
-    public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IClassType modelType)
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IMembersClassType modelType)
     {
-        ExtractAttributes(syntaxNode, semanticModel, modelType, "class");
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "type");
 
         return modelType;
     }
@@ -73,7 +73,7 @@ public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICS
     public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
         IConstructorType modelType)
     {
-        ExtractAttributes(syntaxNode, semanticModel, modelType, "constructor");
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "method");
 
         return modelType;
     }
@@ -108,14 +108,29 @@ public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICS
     public IDelegateType Visit(DelegateDeclarationSyntax syntaxNode, SemanticModel semanticModel,
         IDelegateType modelType)
     {
-        ExtractAttributes(syntaxNode, semanticModel, modelType, "delegate");
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "type");
+
+        return modelType;
+    }
+
+    public IEnumType Visit(EnumDeclarationSyntax syntaxNode, SemanticModel semanticModel, IEnumType modelType)
+    {
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "type");
+
+        return modelType;
+    }
+
+    public IEnumLabelType Visit(EnumMemberDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IEnumLabelType modelType)
+    {
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "field");
 
         return modelType;
     }
 
     public IParameterType Visit(ParameterSyntax syntaxNode, SemanticModel semanticModel, IParameterType modelType)
     {
-        ExtractAttributes(syntaxNode, semanticModel, modelType, "parameter");
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "param");
 
         return modelType;
     }
@@ -123,7 +138,7 @@ public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICS
     public IGenericParameterType Visit(TypeParameterSyntax syntaxNode, SemanticModel semanticModel,
         IGenericParameterType modelType)
     {
-        ExtractAttributes(syntaxNode, semanticModel, modelType, "parameter");
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "param");
 
         return modelType;
     }

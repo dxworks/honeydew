@@ -131,7 +131,6 @@ public class CSharpClassFactExtractorsTests
     [InlineData("interface")]
     [InlineData("record")]
     [InlineData("struct")]
-    [InlineData("enum")]
     public void Extract_ShouldSetClassNameAndNamespace_WhenParsingTextWithOneEntity(string entityType)
     {
         var fileContent = $@"        

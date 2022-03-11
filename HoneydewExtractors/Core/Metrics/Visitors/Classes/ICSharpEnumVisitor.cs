@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HoneydewExtractors.Core.Metrics.Visitors.Classes;
 
-public interface ICSharpClassVisitor : IClassVisitor,
-    ICSharpExtractionVisitor<TypeDeclarationSyntax, SemanticModel, IMembersClassType>
+public interface ICSharpEnumVisitor : IEnumVisitor,
+    ICSharpExtractionVisitor<EnumDeclarationSyntax, SemanticModel, IEnumType>
 {
 }

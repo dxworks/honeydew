@@ -22,9 +22,9 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit
         public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, SemanticModel semanticModel,
             ICompilationUnitType modelType)
         {
-            foreach (var baseTypeDeclarationSyntax in syntaxNode.DescendantNodes().OfType<BaseTypeDeclarationSyntax>())
+            foreach (var baseTypeDeclarationSyntax in syntaxNode.DescendantNodes().OfType<TypeDeclarationSyntax>())
             {
-                IClassType classModel = new ClassModel();
+                IMembersClassType classModel = new ClassModel();
 
                 foreach (var visitor in GetContainedVisitors())
                 {

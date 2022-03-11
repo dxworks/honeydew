@@ -35,7 +35,6 @@ public class CSharpFileScopedNamespaceTests
     [InlineData("class")]
     [InlineData("record")]
     [InlineData("struct")]
-    [InlineData("enum")]
     [InlineData("interface")]
     public void Extract_ShouldHaveClassType_WhenGivenFileScopedNamespace(string classType)
     {

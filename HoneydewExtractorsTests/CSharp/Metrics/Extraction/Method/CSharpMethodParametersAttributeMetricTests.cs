@@ -83,7 +83,7 @@ public class CSharpMethodParametersAttributeMetricTests
             var attributeTypes = parameterType.Attributes;
 
             Assert.Equal(1, attributeTypes.Count);
-            Assert.Equal("parameter", attributeTypes[0].Target);
+            Assert.Equal("param", attributeTypes[0].Target);
             Assert.Equal("System.Diagnostics.CodeAnalysis.AllowNullAttribute", attributeTypes[0].Name);
             Assert.Empty(attributeTypes[0].ParameterTypes);
         }
@@ -108,7 +108,7 @@ public class CSharpMethodParametersAttributeMetricTests
             Assert.Equal(2, attributeTypes.Count);
             foreach (var attributeType in attributeTypes)
             {
-                Assert.Equal("parameter", attributeType.Target);
+                Assert.Equal("param", attributeType.Target);
             }
 
             var attribute1 = attributeTypes[0];
@@ -143,7 +143,7 @@ public class CSharpMethodParametersAttributeMetricTests
             {
                 foreach (var attribute in parameterType.Attributes)
                 {
-                    Assert.Equal("parameter", attribute.Target);
+                    Assert.Equal("param", attribute.Target);
                     Assert.Equal("MyNamespace.MyAttribute", attribute.Name);
                 }
             }
@@ -242,7 +242,7 @@ public class CSharpMethodParametersAttributeMetricTests
             {
                 foreach (var attribute in parameterType.Attributes)
                 {
-                    Assert.Equal("parameter", attribute.Target);
+                    Assert.Equal("param", attribute.Target);
                     Assert.Equal("ExternAttribute", attribute.Name);
                 }
             }
