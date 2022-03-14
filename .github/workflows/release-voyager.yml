@@ -105,4 +105,13 @@ jobs:
           body: ""
           prerelease: false
           draft: false
+          fail_on_unmatched_files: true
+          generate_release_notes: true
           files: honeydew.zip
+
+      - name: Trigger Repository Dispatch Voyager Full Instrument Build
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          repository: dxworks/voyager
+          token: ${{ secrets.GH_TOKEN }}
+          event-type: instrument-release

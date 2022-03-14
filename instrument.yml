@@ -1,4 +1,4 @@
-name: Honeydew
+name: honeydew
 
 results:
   - dir: ${instrument}/results

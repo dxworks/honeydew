@@ -151,6 +151,7 @@ jobs:
           prerelease: false
           draft: false
           fail_on_unmatched_files: true
+          generate_release_notes: true
           files: |
             ./honeydew-win.zip/honeydew-win.zip
             ./honeydew-linux.zip/honeydew-linux.zip
