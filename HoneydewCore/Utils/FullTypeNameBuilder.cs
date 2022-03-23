@@ -5,9 +5,9 @@ using HoneydewModels.Types;
 
 namespace HoneydewCore.Utils;
 
-public class FullTypeNameBuilder
+public static class FullTypeNameBuilder
 {
-    public EntityTypeModel CreateEntityTypeModel(string name, bool isExternType = false)
+    public static EntityTypeModel CreateEntityTypeModel(string name, bool isExternType = false)
     {
         try
         {
@@ -32,7 +32,7 @@ public class FullTypeNameBuilder
         }
     }
 
-    private GenericType GetFullType(string name)
+    private static GenericType GetFullType(string name)
     {
         if (string.IsNullOrEmpty(name))
         {
@@ -58,7 +58,7 @@ public class FullTypeNameBuilder
         return fullType;
     }
 
-    private GenericType GetFullType(ReadOnlySpan<char> name)
+    private static GenericType GetFullType(ReadOnlySpan<char> name)
     {
         if (!name.Contains('<'))
         {

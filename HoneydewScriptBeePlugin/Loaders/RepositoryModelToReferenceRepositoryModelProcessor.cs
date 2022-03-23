@@ -33,8 +33,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
         _entityModels =
             new ConcurrentDictionary<(ProjectModel, string className, int genericParameterCount), IList<EntityModel>>();
 
-    private readonly FullTypeNameBuilder _fullTypeNameBuilder = new();
-
     public Models.RepositoryModel Process(RepositoryModel? inputRepositoryModel)
     {
         if (inputRepositoryModel == null)
@@ -516,24 +514,25 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             Alias = importType.Alias,
             IsStatic = importType.IsStatic,
             AliasType = aliasType,
-            Entity = aliasType == AliasType.Class
+            Entity = aliasType == AliasType.Class || importType.IsStatic
                 ? SearchEntityByName(importType.Name, projectModel).FirstOrDefault() ??
                   CreateClassModel(importType.Name)
                 : null,
-            Namespace = aliasType == AliasType.Namespace ? SearchNamespaceByName(importType.Name, projectModel) : null,
+            Namespace = aliasType is AliasType.Namespace or AliasType.None
+                ? SearchNamespaceByName(importType.Name, projectModel)
+                : null,
         };
+    }
 
-        AliasType ConvertAliasType(string type)
-        {
-            return Enum.TryParse<AliasType>(type, true, out var result)
-                ? result
-                : AliasType.None;
-        }
+    private static AliasType ConvertAliasType(string type)
+    {
+        return Enum.TryParse<AliasType>(type, true, out var result)
+            ? result
+            : AliasType.None;
     }
 
     private static NamespaceModel? SearchNamespaceByName(string namespaceName, ProjectModel projectModel)
     {
-        // todo check if condition is enough or should search in children too
         var namespaceModel = projectModel.Namespaces.FirstOrDefault(model => model.FullName == namespaceName);
 
         if (namespaceModel != null)
@@ -554,14 +553,20 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             return new List<EntityModel>();
         }
 
+        if (_generatedTypes.TryGetValue((entityName, genericParameterCount), out var generatedType))
+        {
+            return new List<EntityModel> { generatedType };
+        }
+
         if (_entityModels.TryGetValue((projectModel, entityName, genericParameterCount), out var entityModels))
         {
             return entityModels;
         }
 
-        if (_generatedTypes.TryGetValue((entityName, genericParameterCount), out var generatedType))
+        if (projectModel.ProjectReferences.Any(reference =>
+                _entityModels.TryGetValue((reference, entityName, genericParameterCount), out entityModels)))
         {
-            return new List<EntityModel> { generatedType };
+            return entityModels ?? new List<EntityModel>();
         }
 
         return new List<EntityModel>();
@@ -574,7 +579,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             return new List<EntityModel>();
         }
 
-        var entityTypeModel = _fullTypeNameBuilder.CreateEntityTypeModel(entityName);
+        var entityTypeModel = FullTypeNameBuilder.CreateEntityTypeModel(entityName);
         return SearchEntityByName(entityTypeModel.FullType.Name, entityTypeModel.FullType.ContainedTypes.Count,
             projectModel);
     }
@@ -594,7 +599,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             CyclomaticComplexity = propertyType.CyclomaticComplexity,
             Type = ConvertEntityType(propertyType.Type, projectModel),
             Attributes = ConvertAttributes(propertyType.Attributes, projectModel),
-            // todo accesses
         };
 
         AddMetrics(model, propertyType);
@@ -617,7 +621,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             IsEvent = fieldType.IsEvent,
             Type = ConvertEntityType(fieldType.Type, projectModel),
             Attributes = ConvertAttributes(fieldType.Attributes, projectModel),
-            // todo accesses
         };
         AddMetrics(model, fieldType);
 
@@ -903,13 +906,15 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
                     foreach (var accessedField in accessedFields)
                     {
-                        methodModel.FieldAccesses.Add(new FieldAccess
+                        var fieldAccess = new FieldAccess
                         {
                             Field = GetFieldReference(accessedField, projectModel),
                             Caller = methodModel,
                             AccessEntityType = ConvertEntityType(accessedField.LocationClassName, projectModel),
                             AccessKind = ConvertAccessKind(accessedField.Kind),
-                        });
+                        };
+                        methodModel.FieldAccesses.Add(fieldAccess);
+                        fieldAccess.Field.Accesses.Add(fieldAccess);
                     }
                 }
 
@@ -953,7 +958,10 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                             Caller = methodModel,
                             Called = GetMethodReference(calledMethod, projectModel),
                             CalledEnitityType = ConvertEntityType(calledMethod.LocationClassName, projectModel),
-                            // todo
+                            GenericParameters = calledMethod.GenericParameters.Select(parameter =>
+                                ConvertEntityType(parameter, projectModel)).ToList(),
+                            ConcreteParameters = ConvertParameters(calledMethod.ParameterTypes, projectModel)
+                                .Select(p => p.Type).ToList()
                         });
                     }
                 }
@@ -985,7 +993,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
             if (methodModel.GenericParameters.Count != genericParameterCount)
             {
-                // todo ???
+                continue;
             }
 
             var allParametersMatch = true;
@@ -1029,6 +1037,13 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             {
                 return fieldReference;
             }
+
+            fieldReference =
+                locationClassModel.Properties.FirstOrDefault(property => property.Name == accessedField.Name);
+            if (fieldReference != null)
+            {
+                return fieldReference;
+            }
         }
 
         var definitionClassModelPossibilities = SearchEntityByName(accessedField.DefinitionClassName, projectModel)
@@ -1038,6 +1053,13 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
         foreach (var definitionClassModel in definitionClassModelPossibilities)
         {
             var fieldReference = definitionClassModel.Fields.FirstOrDefault(field => field.Name == accessedField.Name);
+            if (fieldReference != null)
+            {
+                return fieldReference;
+            }
+
+            fieldReference =
+                definitionClassModel.Properties.FirstOrDefault(property => property.Name == accessedField.Name);
             if (fieldReference != null)
             {
                 return fieldReference;
@@ -1135,11 +1157,13 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             Name = methodCallType.Name,
             GenericParameters = genericParameters,
             Entity = createdClassModel,
-            Parameters = methodCallType.ParameterTypes.Select(parameter => new ParameterModel
-            {
-                TypeName = parameter.Type?.Name ?? "",
-                Type = ConvertEntityType(parameter.Type, projectModel),
-            }).ToList()
+            Parameters = methodCallType.ParameterTypes
+                .Where(parameter => parameter.Type != null)
+                .Select(parameter => new ParameterModel
+                {
+                    TypeName = parameter.Type.Name ?? "",
+                    Type = ConvertEntityType(parameter.Type, projectModel),
+                }).ToList()
         };
 
         createdClassModel.Methods.Add(methodModel);
@@ -1226,16 +1250,22 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
         for (var i = indexOfLocalFunctionChain; i < methodCallType.MethodDefinitionNames.Count; i++)
         {
-            // todo check for generic parameters in method name
-            var localFunctionName = methodCallType.MethodDefinitionNames[i];
+            var localFunctionName = GetFunctionNameWithoutGeneric(methodCallType.MethodDefinitionNames[i]);
             var nextLocalFunction = methodModelToSearchLocalFunctions.LocalFunctions.FirstOrDefault(function =>
-                localFunctionName.StartsWith(function.Name));
+                localFunctionName.StartsWith(GetFunctionNameWithoutGeneric(function.Name)));
             if (nextLocalFunction == null)
             {
                 return null;
             }
 
             methodModelToSearchLocalFunctions = nextLocalFunction;
+        }
+
+        string GetFunctionNameWithoutGeneric(string name)
+        {
+            var indexOfAngleBracket = name.IndexOf('<');
+
+            return indexOfAngleBracket >= 0 ? name[..indexOfAngleBracket] : name;
         }
 
         return methodModelToSearchLocalFunctions.LocalFunctions.FirstOrDefault(function =>
@@ -1252,7 +1282,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                 Type = ConvertEntityType(attributeType.Type, projectModel),
                 Target = ConvertAttributeTarget(attributeType.Target),
                 Parameters = ConvertParameters(attributeType.ParameterTypes, projectModel),
-                // todo Generic Concrete Generic Parameters
             })
             .ToList();
     }
@@ -1271,9 +1300,14 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
         foreach (var parameterType in parameterTypes)
         {
+            if (parameterType.Type == null)
+            {
+                continue;
+            }
+
             var parameterModel = new ParameterModel
             {
-                TypeName = parameterType.Type?.Name ?? "",
+                TypeName = parameterType.Type.Name ?? "",
                 Type = ConvertEntityType(parameterType.Type, projectModel),
                 Attributes = ConvertAttributes(parameterType.Attributes, projectModel),
             };
@@ -1319,7 +1353,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
     private EntityType ConvertEntityType(string typeName, ProjectModel projectModel)
     {
-        return ConvertEntityType(_fullTypeNameBuilder.CreateEntityTypeModel(typeName), projectModel);
+        return ConvertEntityType(FullTypeNameBuilder.CreateEntityTypeModel(typeName), projectModel);
     }
 
     private EntityType ConvertEntityType(IEntityType type, ProjectModel projectModel)
@@ -1370,12 +1404,16 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
     private ClassModel CreateClassModel(string className)
     {
-        var entityTypeModel = _fullTypeNameBuilder.CreateEntityTypeModel(className);
+        var entityTypeModel = FullTypeNameBuilder.CreateEntityTypeModel(className);
 
         var entityName = entityTypeModel.FullType.Name;
         var genericParameterCount = entityTypeModel.FullType.ContainedTypes.Count;
-        if (_generatedTypes.TryGetValue((entityName, genericParameterCount),
-                out var classModel))
+        if (_generatedTypes.TryGetValue((entityName, genericParameterCount), out var classModel))
+        {
+            return classModel;
+        }
+
+        if (_generatedTypes.TryGetValue((className, genericParameterCount), out classModel))
         {
             return classModel;
         }
@@ -1400,7 +1438,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
         classModel.IsPrimitive = isPrimitive;
         classModel.IsExternal = !isPrimitive;
 
-        _generatedTypes.Add((className, genericParameterCount), classModel);
+        _generatedTypes.Add((entityName, genericParameterCount), classModel);
 
         return classModel;
     }

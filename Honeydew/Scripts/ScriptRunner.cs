@@ -55,7 +55,7 @@ internal class ScriptRunner
         }
         catch (Exception e)
         {
-            _logger.Log($"Could not run script because {e}");
+            _logger.Log($"Could not run script {script.GetType().Name} because {e}");
         }
 
         return null;
@@ -109,7 +109,7 @@ internal class ScriptRunner
         }
         catch (Exception e)
         {
-            _logger.Log($"Could not run script because {e}");
+            _logger.Log($"Could not run script {script.GetType().Name} because {e}");
         }
     }
 }

@@ -54,11 +54,11 @@ public class MethodModel : ReferenceEntity
 
     public IDictionary<string, int> Metrics { get; set; } = new Dictionary<string, int>();
 
-    private IEnumerable<MethodCall> _externalOutgoingCalls;
+    private IEnumerable<MethodCall>? _externalOutgoingCalls;
 
-    private IEnumerable<MethodCall> _internalOutgoingCalls;
+    private IEnumerable<MethodCall>? _internalOutgoingCalls;
 
-    private IEnumerable<FieldAccess> _externalFieldAccesses;
+    private IEnumerable<FieldAccess>? _externalFieldAccesses;
 
-    private IEnumerable<FieldAccess> _internalFieldAccesses;
+    private IEnumerable<FieldAccess>? _internalFieldAccesses;
 }

@@ -37,86 +37,102 @@ public static partial class CSharpExtractionHelperMethods
 
     public static string GetDefinitionClassName(SyntaxNode syntaxNode, SemanticModel semanticModel)
     {
-        var symbolInfo = semanticModel.GetSymbolInfo(syntaxNode);
-        if (symbolInfo.Symbol != null)
+        while (true)
         {
-            return symbolInfo.Symbol.ContainingType.ToString();
-        }
-
-        switch (syntaxNode)
-        {
-            case InvocationExpressionSyntax invocationExpressionSyntax:
+            var symbolInfo = semanticModel.GetSymbolInfo(syntaxNode);
+            if (symbolInfo.Symbol != null)
             {
-                if (invocationExpressionSyntax.Expression is MemberAccessExpressionSyntax memberAccessExpressionSyntax)
+                return symbolInfo.Symbol.ContainingType.ToString();
+            }
+
+            switch (syntaxNode)
+            {
+                case InvocationExpressionSyntax invocationExpressionSyntax:
                 {
-                    switch (semanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression).Symbol)
+                    if (invocationExpressionSyntax.Expression is MemberAccessExpressionSyntax
+                        memberAccessExpressionSyntax)
                     {
-                        case IFieldSymbol fieldSymbol:
+                        switch (semanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression).Symbol)
                         {
-                            return fieldSymbol.Type.Name;
-                        }
-
-                        case ILocalSymbol localSymbol:
-                        {
-                            return localSymbol.Type.ToString();
-                        }
-
-                        case { } symbol:
-                        {
-                            return symbol.ToString();
-                        }
-
-                        case null:
-                        {
-                            switch (memberAccessExpressionSyntax.Expression)
+                            case IFieldSymbol fieldSymbol:
                             {
-                                case IdentifierNameSyntax identifierNameSyntax:
+                                return fieldSymbol.Type.Name;
+                            }
+
+                            case ILocalSymbol localSymbol:
+                            {
+                                return localSymbol.Type.ToString();
+                            }
+
+                            case { } symbol:
+                            {
+                                return symbol.ToString();
+                            }
+
+                            case null:
+                            {
+                                switch (memberAccessExpressionSyntax.Expression)
                                 {
-                                    return identifierNameSyntax.Identifier.ToString();
-                                }
-                                case ObjectCreationExpressionSyntax objectCreationExpressionSyntax:
-                                {
-                                    return objectCreationExpressionSyntax.Type.ToString();
+                                    case IdentifierNameSyntax identifierNameSyntax:
+                                    {
+                                        return identifierNameSyntax.Identifier.ToString();
+                                    }
+                                    case ObjectCreationExpressionSyntax objectCreationExpressionSyntax:
+                                    {
+                                        return objectCreationExpressionSyntax.Type.ToString();
+                                    }
                                 }
                             }
+                                break;
                         }
-                            break;
                     }
                 }
-            }
-                break;
+                    break;
 
-            case ConstructorDeclarationSyntax constructorDeclarationSyntax:
-            {
-                if (constructorDeclarationSyntax.Initializer != null)
+                case ConstructorDeclarationSyntax constructorDeclarationSyntax:
                 {
-                    var initializerSymbolInfo = semanticModel.GetSymbolInfo(constructorDeclarationSyntax.Initializer);
-                    if (initializerSymbolInfo.Symbol != null)
+                    if (constructorDeclarationSyntax.Initializer != null)
                     {
-                        return initializerSymbolInfo.Symbol.ContainingType.ToString();
-                    }
-
-                    if (constructorDeclarationSyntax.Initializer.ThisOrBaseKeyword.Text ==
-                        CSharpConstants.BaseClassIdentifier)
-                    {
-                        var baseTypeDeclarationSyntax =
-                            syntaxNode.GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>();
-                        if (baseTypeDeclarationSyntax is { BaseList.Types.Count: > 0 })
+                        var initializerSymbolInfo =
+                            semanticModel.GetSymbolInfo(constructorDeclarationSyntax.Initializer);
+                        if (initializerSymbolInfo.Symbol != null)
                         {
-                            return baseTypeDeclarationSyntax.BaseList.Types[0].Type.ToString();
+                            return initializerSymbolInfo.Symbol.ContainingType.ToString();
+                        }
+
+                        if (constructorDeclarationSyntax.Initializer.ThisOrBaseKeyword.Text ==
+                            CSharpConstants.BaseClassIdentifier)
+                        {
+                            var baseTypeDeclarationSyntax =
+                                syntaxNode.GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>();
+                            if (baseTypeDeclarationSyntax is { BaseList.Types.Count: > 0 })
+                            {
+                                return baseTypeDeclarationSyntax.BaseList.Types[0].Type.ToString();
+                            }
                         }
                     }
                 }
-            }
-                break;
+                    break;
 
-            default:
-            {
+                case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
+                {
+                    syntaxNode = memberAccessExpressionSyntax.Expression;
+                    continue;
+                }
+
+                case IdentifierNameSyntax identifierNameSyntax:
+                {
+                    return identifierNameSyntax.Identifier.ToString();
+                }
+
+                default:
+                {
+                }
+                    break;
             }
-                break;
+
+            return "";
         }
-
-        return "";
     }
 
     public static string GetLocationClassName(SyntaxNode syntaxNode, SemanticModel semanticModel)

@@ -65,8 +65,8 @@ public class GotoStatementVisitor : ICSharpMethodVisitor, ICSharpConstructorVisi
         modelType.Metrics.Add(new MetricModel
         (
             "GotoStatementsCount",
-            nameof(GotoStatementVisitor),
-            nameof(Int32),
+            typeof(GotoStatementVisitor).FullName,
+            typeof(int).FullName,
             gotoStatementsCount
         ));
 
@@ -82,8 +82,8 @@ public class GotoStatementVisitor : ICSharpMethodVisitor, ICSharpConstructorVisi
         return new MetricModel
         (
             "GotoStatementsCount",
-            nameof(GotoStatementVisitor),
-            nameof(Int32),
+            typeof(GotoStatementVisitor).FullName,
+            typeof(int).FullName,
             gotoStatementsCount
         );
     }

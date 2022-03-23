@@ -12,8 +12,6 @@ namespace HoneydewExtractors.CSharp.Metrics.Extraction;
 
 internal static class CSharpFullNameProvider
 {
-    private static readonly FullTypeNameBuilder FullTypeNameBuilder = new();
-
     public static IEntityType GetFullName(SyntaxNode syntaxNode, SemanticModel semanticModel, out bool isNullable)
     {
         var name = syntaxNode.ToString();

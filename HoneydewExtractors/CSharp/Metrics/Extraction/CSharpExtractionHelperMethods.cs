@@ -98,8 +98,24 @@ public static partial class CSharpExtractionHelperMethods
             DefinitionClassName = GetDefinitionClassName(invocationExpressionSyntax, semanticModel),
             LocationClassName = GetLocationClassName(invocationExpressionSyntax, semanticModel),
             ParameterTypes = GetParameters(invocationExpressionSyntax, semanticModel),
-            MethodDefinitionNames = GetMethodDefinitionNames(invocationExpressionSyntax, semanticModel)
+            MethodDefinitionNames = GetMethodDefinitionNames(invocationExpressionSyntax, semanticModel),
+            GenericParameters = GetGenericParameters(invocationExpressionSyntax, semanticModel),
         };
+    }
+
+    private static IList<IEntityType> GetGenericParameters(InvocationExpressionSyntax invocationExpressionSyntax,
+        SemanticModel semanticModel)
+    {
+        var methodSymbol = GetMethodSymbol(invocationExpressionSyntax, semanticModel);
+        if (methodSymbol != null)
+        {
+            return methodSymbol.TypeParameters
+                .Select(parameter => FullTypeNameBuilder.CreateEntityTypeModel(parameter.Name))
+                .Cast<IEntityType>()
+                .ToList();
+        }
+
+        return new List<IEntityType>();
     }
 
     private static IList<string> GetMethodDefinitionNames(ISymbol symbol)
@@ -565,7 +581,7 @@ public static partial class CSharpExtractionHelperMethods
             return new AccessedField
             {
                 Name = symbolInfo.Symbol.Name,
-                DefinitionClassName = symbolInfo.Symbol.ContainingType.ToString(),
+                DefinitionClassName = GetDefinitionClassName(expressionSyntax, semanticModel),
                 LocationClassName = GetLocationClassName(expressionSyntax, semanticModel),
                 Kind = GetAccessType(identifierNameSyntax),
             };
@@ -578,7 +594,7 @@ public static partial class CSharpExtractionHelperMethods
                 return null;
             }
 
-            var definitionClassName = memberAccessExpressionSyntax.Expression.ToString();
+            var definitionClassName = GetDefinitionClassName(memberAccessExpressionSyntax, semanticModel);
             return new AccessedField
             {
                 Name = memberAccessExpressionSyntax.Name.ToString(),

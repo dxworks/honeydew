@@ -168,6 +168,11 @@ public class
 
         foreach (var entityModel in repositoryModel.GetEnumerable())
         {
+            if (string.IsNullOrEmpty(entityModel.FilePath))
+            {
+                continue;
+            }
+
             if (classModelDictionary.TryGetValue(entityModel.FilePath, out var entityModels))
             {
                 entityModels.Add(entityModel);

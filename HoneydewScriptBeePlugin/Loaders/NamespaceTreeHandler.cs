@@ -30,7 +30,8 @@ internal class NamespaceTreeHandler
                 lastNamespace = rootNamespace.ChildNamespaces.FirstOrDefault(n => n.Name == nameParts[currentIndex]);
                 if (lastNamespace == null)
                 {
-                    var childNamespace = CreateChildNamespaces(nameParts, new StringBuilder(nameParts[0]), currentIndex);
+                    var childNamespace =
+                        CreateChildNamespaces(nameParts, new StringBuilder(nameParts[0]), currentIndex);
                     childNamespace.Parent = rootNamespace;
                     rootNamespace.ChildNamespaces.Add(childNamespace);
 
@@ -56,7 +57,7 @@ internal class NamespaceTreeHandler
         {
             lastNamespace = lastNamespace.ChildNamespaces[0];
         }
-            
+
         return lastNamespace;
     }
 

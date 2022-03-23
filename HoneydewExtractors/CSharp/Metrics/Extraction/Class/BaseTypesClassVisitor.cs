@@ -37,7 +37,7 @@ public class BaseTypesClassVisitor : ICSharpClassVisitor
                 {
                     Type = CSharpExtractionHelperMethods.GetBaseClassName(syntaxNode, semanticModel),
                     Kind = "class"
-                }); // todo test if basetype has just class not interfaces
+                });
 
                 foreach (var baseInterface in CSharpExtractionHelperMethods.GetBaseInterfaces(syntaxNode, semanticModel))
                 {
