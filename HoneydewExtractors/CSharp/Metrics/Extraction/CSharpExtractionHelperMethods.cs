@@ -606,14 +606,16 @@ public static partial class CSharpExtractionHelperMethods
 
         return null;
 
-        AccessedField.AccessKind GetAccessType(SyntaxNode syntax)
+       
+    }
+    
+    private static AccessedField.AccessKind GetAccessType(SyntaxNode syntax)
+    {
+        if (syntax?.Parent is AssignmentExpressionSyntax)
         {
-            if (syntax?.Parent is AssignmentExpressionSyntax)
-            {
-                return AccessedField.AccessKind.Setter;
-            }
-
-            return AccessedField.AccessKind.Getter;
+            return AccessedField.AccessKind.Setter;
         }
+
+        return AccessedField.AccessKind.Getter;
     }
 }

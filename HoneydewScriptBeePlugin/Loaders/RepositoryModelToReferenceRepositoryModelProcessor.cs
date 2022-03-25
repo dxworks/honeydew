@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using HoneydewCore.Logging;
 using HoneydewCore.Processors;
 using HoneydewCore.Utils;
 using HoneydewModels.CSharp;
@@ -26,12 +27,24 @@ namespace HoneydewScriptBeePlugin.Loaders;
 public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunction<RepositoryModel,
     Models.RepositoryModel>
 {
+    private readonly ILogger _logger;
+    private readonly IProgressLogger _progressLogger;
+
     private readonly IDictionary<(string className, int genericParameterCount), ClassModel> _generatedTypes =
-        new ConcurrentDictionary<( string className, int genericParameterCount), ClassModel>();
+        new ConcurrentDictionary<(string className, int genericParameterCount), ClassModel>();
+
+    private readonly IDictionary<string, NamespaceModel> _generatedNamespaces =
+        new ConcurrentDictionary<string, NamespaceModel>();
 
     private readonly IDictionary<(ProjectModel, string className, int genericParameterCount), IList<EntityModel>>
         _entityModels =
             new ConcurrentDictionary<(ProjectModel, string className, int genericParameterCount), IList<EntityModel>>();
+
+    public RepositoryModelToReferenceRepositoryModelProcessor(ILogger logger, IProgressLogger progressLogger)
+    {
+        _logger = logger;
+        _progressLogger = progressLogger;
+    }
 
     public Models.RepositoryModel Process(RepositoryModel? inputRepositoryModel)
     {
@@ -40,20 +53,27 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             return new Models.RepositoryModel();
         }
 
+        Log("ReferenceModel - Updating Model Version");
+
         var repositoryModel = new Models.RepositoryModel
         {
             Version = inputRepositoryModel.Version
         };
 
+        Log("ReferenceModel - Populating Solutions, Projects and File Models");
         PopulateModelWithSolutionProjectNamespacesCompilationUnitsAndClasses(inputRepositoryModel, repositoryModel);
 
+        Log("ReferenceModel - Populating Project References");
         PopulateProjectWithProjectReferences(inputRepositoryModel, repositoryModel);
 
+        Log("ReferenceModel - Populating Entity References");
         PopulateWithEntityReferences(inputRepositoryModel, repositoryModel);
 
+        Log("ReferenceModel - Populating Method Calls and Field Accesses");
         PopulateModelWithMethodReferencesAndFieldAccesses(inputRepositoryModel, repositoryModel);
 
         repositoryModel.CreatedClasses = _generatedTypes.Select(pair => pair.Value).ToList();
+        repositoryModel.CreatedNamespaces = _generatedNamespaces.Select(pair => pair.Value).ToList();
 
         return repositoryModel;
     }
@@ -67,6 +87,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
         foreach (var solutionModel in repositoryModel.Solutions)
         {
+            Log($"ReferenceModel - Populating Solution {solutionModel.FilePath}");
             var referenceSolutionModel = new SolutionModel
             {
                 FilePath = solutionModel.FilePath,
@@ -77,6 +98,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
         foreach (var projectModel in repositoryModel.Projects)
         {
+            Log($"ReferenceModel - Populating Project {projectModel.FilePath}");
             var presentNamespacesSet = new HashSet<string>();
 
             var referenceProjectModel = new ProjectModel
@@ -90,6 +112,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
             foreach (var compilationUnitType in projectModel.CompilationUnits)
             {
+                Log($"ReferenceModel - Populating File {compilationUnitType.FilePath}");
                 var fileModel = new FileModel
                 {
                     FilePath = compilationUnitType.FilePath,
@@ -335,16 +358,16 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
     #region Project References
 
-    private static void PopulateProjectWithProjectReferences(RepositoryModel repositoryModel,
+    private void PopulateProjectWithProjectReferences(RepositoryModel repositoryModel,
         Models.RepositoryModel referenceRepositoryModel)
     {
         var allProjects = referenceRepositoryModel.Solutions.SelectMany(model => model.Projects).ToList();
 
-        for (var projectIndex = 0;
-             projectIndex < repositoryModel.Projects.Count;
-             projectIndex++)
+        for (var projectIndex = 0; projectIndex < repositoryModel.Projects.Count; projectIndex++)
         {
             var projectModel = referenceRepositoryModel.Projects[projectIndex];
+            Log($"ReferenceModel - Setting Project References for {projectModel.FilePath}");
+
             foreach (var projectReference in repositoryModel.Projects[projectIndex].ProjectReferences)
             {
                 var project = allProjects.FirstOrDefault(project => project.FilePath == projectReference);
@@ -384,6 +407,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                 {
                     var entityModel = file.Entities[classTypeIndex];
                     var classType = compilationUnitType.ClassTypes[classTypeIndex];
+
+                    Log($"ReferenceModel - Populating Entity References for {entityModel.FilePath}");
 
                     entityModel.Imports = classType.Imports.Select(import => ConvertImportType(import, projectModel))
                         .ToList();
@@ -518,7 +543,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                 ? SearchEntityByName(importType.Name, projectModel).FirstOrDefault() ??
                   CreateClassModel(importType.Name)
                 : null,
-            Namespace = aliasType is AliasType.Namespace or AliasType.None
+            Namespace = !importType.IsStatic && aliasType is AliasType.Namespace or AliasType.None
                 ? SearchNamespaceByName(importType.Name, projectModel)
                 : null,
         };
@@ -531,18 +556,38 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             : AliasType.None;
     }
 
-    private static NamespaceModel? SearchNamespaceByName(string namespaceName, ProjectModel projectModel)
+    private NamespaceModel SearchNamespaceByName(string namespaceName, ProjectModel projectModel)
     {
-        var namespaceModel = projectModel.Namespaces.FirstOrDefault(model => model.FullName == namespaceName);
+        if (_generatedNamespaces.TryGetValue(namespaceName, out var namespaceModel))
+        {
+            return namespaceModel;
+        }
+
+        namespaceModel = projectModel.Namespaces.FirstOrDefault(model => model.FullName == namespaceName);
 
         if (namespaceModel != null)
         {
             return namespaceModel;
         }
 
-        return projectModel.ProjectReferences
+        namespaceModel = projectModel.ProjectReferences
             .SelectMany(project => project.Namespaces)
             .FirstOrDefault(model => model.FullName == namespaceName);
+
+        if (namespaceModel != null)
+        {
+            return namespaceModel;
+        }
+
+        namespaceModel = new NamespaceModel
+        {
+            FullName = namespaceName,
+            Name = namespaceName,
+        };
+
+        _generatedNamespaces.Add(namespaceName, namespaceModel);
+
+        return namespaceModel;
     }
 
     private IEnumerable<EntityModel> SearchEntityByName(string entityName, int genericParameterCount,
@@ -799,6 +844,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                     {
                         continue;
                     }
+
+                    Log($"ReferenceModel - Populating Method Calls and Field Accesses for {classType.FilePath}");
 
                     switch (entityModel)
                     {
@@ -1441,5 +1488,11 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
         _generatedTypes.Add((entityName, genericParameterCount), classModel);
 
         return classModel;
+    }
+
+    private void Log(string message)
+    {
+        _logger.Log(message);
+        _progressLogger.Log(message);
     }
 }

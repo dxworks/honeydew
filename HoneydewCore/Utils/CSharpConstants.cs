@@ -55,6 +55,11 @@ public static class CSharpConstants
 
     public static bool IsPrimitive(string type)
     {
+        if (string.IsNullOrEmpty(type))
+        {
+            return true;
+        }
+
         type = type.TrimEnd('?');
 
         type = ConvertSystemTypeToPrimitiveType(type);

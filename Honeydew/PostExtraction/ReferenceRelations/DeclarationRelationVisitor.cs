@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewScriptBeePlugin;
 using HoneydewScriptBeePlugin.Models;
 
 namespace Honeydew.PostExtraction.ReferenceRelations;
@@ -29,21 +30,70 @@ public class DeclarationRelationVisitor : IReferenceModelVisitor
             return;
         }
 
-        entityModel[DeclarationsMetricName] = Visit(entityModel);
-    }
+        if (!entityModel.HasProperty(ParameterRelationVisitor.ParameterDependencyMetricName))
+        {
+            _parameterRelationVisitor?.Visit(entityModel);
+        }
 
-    private Dictionary<string, int> Visit(EntityModel entityModel)
-    {
+        if (!entityModel.HasProperty(FieldsRelationVisitor.FieldsDependencyMetricName))
+        {
+            _fieldsRelationVisitor?.Visit(entityModel);
+        }
+
+        if (!entityModel.HasProperty(PropertiesRelationVisitor.PropertiesDependencyMetricName))
+        {
+            _propertiesRelationVisitor?.Visit(entityModel);
+        }
+
+        if (!entityModel.HasProperty(LocalVariablesRelationVisitor.LocalVariablesDependencyMetricName))
+        {
+            _localVariablesRelationVisitor?.Visit(entityModel);
+        }
+
         var dependencies = new Dictionary<string, int>();
 
-        _parameterRelationVisitor?.Visit(entityModel);
+        if (entityModel.HasProperty(ParameterRelationVisitor.ParameterDependencyMetricName) &&
+            entityModel[ParameterRelationVisitor.ParameterDependencyMetricName] is Dictionary<string, int>
+                parameterDependencies)
+        {
+            AddDependencies(dependencies, parameterDependencies);
+        }
 
-        _fieldsRelationVisitor?.Visit(entityModel);
+        if (entityModel.HasProperty(FieldsRelationVisitor.FieldsDependencyMetricName) &&
+            entityModel[FieldsRelationVisitor.FieldsDependencyMetricName] is Dictionary<string, int> fieldsDependencies)
+        {
+            AddDependencies(dependencies, fieldsDependencies);
+        }
 
-        _propertiesRelationVisitor?.Visit(entityModel);
+        if (entityModel.HasProperty(PropertiesRelationVisitor.PropertiesDependencyMetricName) &&
+            entityModel[PropertiesRelationVisitor.PropertiesDependencyMetricName] is Dictionary<string, int>
+                propertiesDependencies)
+        {
+            AddDependencies(dependencies, propertiesDependencies);
+        }
 
-        _localVariablesRelationVisitor?.Visit(entityModel);
+        if (entityModel.HasProperty(LocalVariablesRelationVisitor.LocalVariablesDependencyMetricName) &&
+            entityModel[LocalVariablesRelationVisitor.LocalVariablesDependencyMetricName] is Dictionary<string, int>
+                localVariablesDependencies)
+        {
+            AddDependencies(dependencies, localVariablesDependencies);
+        }
 
-        return dependencies;
+        entityModel[DeclarationsMetricName] = dependencies;
+    }
+
+    private static void AddDependencies(IDictionary<string, int> dependencies, Dictionary<string, int> dependencyNames)
+    {
+        foreach (var (dependencyName, count) in dependencyNames)
+        {
+            if (dependencies.ContainsKey(dependencyName))
+            {
+                dependencies[dependencyName] += count;
+            }
+            else
+            {
+                dependencies.Add(dependencyName, count);
+            }
+        }
     }
 }

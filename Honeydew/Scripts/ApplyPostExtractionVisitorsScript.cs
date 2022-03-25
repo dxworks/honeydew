@@ -41,7 +41,7 @@ public class ApplyPostExtractionVisitorsScript : Script
 
 
         IAddStrategy addStrategy = new AddNameStrategy();
-        
+
         var propertiesRelationVisitor = new PropertiesRelationVisitor(addStrategy);
         var fieldsRelationVisitor = new FieldsRelationVisitor(addStrategy);
         var parameterRelationVisitor = new ParameterRelationVisitor(addStrategy);
@@ -58,7 +58,8 @@ public class ApplyPostExtractionVisitorsScript : Script
             new ExternDataRelationVisitor(addStrategy),
             new HierarchyRelationVisitor(addStrategy),
             new ReturnValueRelationVisitor(addStrategy),
-            new DeclarationRelationVisitor(localVariablesRelationVisitor, parameterRelationVisitor, fieldsRelationVisitor, propertiesRelationVisitor)
+            new DeclarationRelationVisitor(localVariablesRelationVisitor, parameterRelationVisitor,
+                fieldsRelationVisitor, propertiesRelationVisitor)
         };
 
         foreach (var entityModel in repositoryModel.GetEnumerable())

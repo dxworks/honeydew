@@ -152,7 +152,7 @@ public class AccessedFieldsSetterVisitor : CompositeVisitor, ICSharpMethodVisito
                 }
             }
 
-            if (shouldIgnoreIdentifierBecauseIsNotField)
+            if (shouldIgnoreIdentifierBecauseIsNotField || string.IsNullOrEmpty(accessedField?.Name))
             {
                 continue;
             }

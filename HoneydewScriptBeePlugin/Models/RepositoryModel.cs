@@ -12,6 +12,8 @@ public class RepositoryModel : ReferenceEntity
 
     public IList<ClassModel> CreatedClasses { get; set; } = new List<ClassModel>();
 
+    public IList<NamespaceModel> CreatedNamespaces { get; set; } = new List<NamespaceModel>();
+
     public IEnumerable<EntityModel> GetEnumerable()
     {
         foreach (var projectModel in Projects)

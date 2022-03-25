@@ -39,123 +39,88 @@ public class SpektrumExportScript : Script
             repositoryModel.Solutions.Select(solution =>
                 new Solution(solution.FilePath, solution.Projects.Select(project => project.FilePath).ToHashSet()));
 
-        var callersDictionary = new Dictionary<string, ISet<string>>();
-
-        foreach (var methodModel in repositoryModel.Projects.SelectMany(project =>
-                     project.Files.SelectMany(file =>
-                         file.Entities.SelectMany(entityModel =>
-                         {
-                             return entityModel switch
-                             {
-                                 ClassModel classModel => classModel.Methods
-                                     .Concat(classModel.Properties.SelectMany(p => p.Accessors))
-                                     .Concat(classModel.Constructors)
-                                     .Concat(classModel.Destructor == null
-                                         ? new List<MethodModel>()
-                                         : new List<MethodModel>
-                                         {
-                                             classModel.Destructor
-                                         }),
-                                 InterfaceModel interfaceModel => interfaceModel.Methods.Concat(
-                                     interfaceModel.Properties.SelectMany(p => p.Accessors)),
-                                 _ => new List<MethodModel>()
-                             };
-                         }))))
-        {
-            var methodId = GenerateMethodId(methodModel);
-
-            foreach (var calledMethod in methodModel.OutgoingCalls)
-            {
-                var calledMethodId = GenerateMethodId(calledMethod);
-
-                if (callersDictionary.TryGetValue(calledMethodId, out var list))
-                {
-                    list.Add(methodId);
-                }
-                else
-                {
-                    callersDictionary.Add(calledMethodId, new HashSet<string>() { methodId });
-                }
-            }
-        }
-
-        var projects = repositoryModel.Projects.Select(project => new Project(
-            name: project.Name, path: project.FilePath,
-            externalReferences: project.ExternalProjectReferences,
-            projectReferences: project.ProjectReferences.Select(@ref => @ref.Name).ToHashSet(),
-            files: project.Files.Select(file => new File(ExtractFileName(file.FilePath), file.FilePath,
-                    file.Entities.GroupBy(@class => @class.Namespace.FullName)
-                        .Select(grouping => new Namespace(grouping.Key,
-                            grouping.Where(entityModel => entityModel is ClassModel or InterfaceModel).Select(
-                                    entityModel =>
-                                    {
-                                        var classType = "";
-                                        IList<MethodModel> methods = new List<MethodModel>();
-                                        IList<PropertyModel> properties = new List<PropertyModel>();
-
-                                        if (entityModel is ClassModel classModel)
+        var projects = repositoryModel.Projects
+            .Where(project => !string.IsNullOrEmpty(project.FilePath))
+            .Select(project => new Project(
+                name: project.Name, path: project.FilePath,
+                externalReferences: project.ExternalProjectReferences,
+                projectReferences: project.ProjectReferences.Select(@ref => @ref.Name).ToHashSet(),
+                files: project.Files.Select(file => new File(ExtractFileName(file.FilePath), file.FilePath,
+                        file.Entities.GroupBy(@class => @class.Namespace.FullName)
+                            .Select(grouping => new Namespace(grouping.Key,
+                                grouping.Where(entityModel => entityModel is ClassModel or InterfaceModel).Select(
+                                        entityModel =>
                                         {
-                                            classType = classModel.Type.ToString();
-                                            methods = classModel.Methods
-                                                .Concat(classModel.Constructors).ToList();
-                                            if (classModel.Destructor != null)
+                                            var classType = "";
+                                            IList<MethodModel> methods = new List<MethodModel>();
+                                            IList<PropertyModel> properties = new List<PropertyModel>();
+
+                                            if (entityModel is ClassModel classModel)
                                             {
-                                                methods.Add(classModel.Destructor);
+                                                classType = classModel.Type.ToString();
+                                                methods = classModel.Methods
+                                                    .Concat(classModel.Constructors).ToList();
+                                                if (classModel.Destructor != null)
+                                                {
+                                                    methods.Add(classModel.Destructor);
+                                                }
+
+                                                properties = classModel.Properties;
+                                            }
+                                            else if (entityModel is InterfaceModel interfaceModel)
+                                            {
+                                                classType = "interface";
+                                                methods = interfaceModel.Methods;
+                                                properties = interfaceModel.Properties;
                                             }
 
-                                            properties = classModel.Properties;
-                                        }
-                                        else if (entityModel is InterfaceModel interfaceModel)
-                                        {
-                                            classType = "interface";
-                                            methods = interfaceModel.Methods;
-                                            properties = interfaceModel.Properties;
-                                        }
 
-
-                                        return new Class(
-                                            name: entityModel.Name,
-                                            usingStatements: entityModel.Imports.Select(i =>
-                                                i.Entity == null ? i.Namespace?.Name : i.Entity.Name).ToHashSet(),
-                                            type: classType,
-                                            attributes: entityModel.Attributes.Select(a => a.Type.Entity.Name)
-                                                .ToHashSet(),
-                                            usedClasses: GetUsedClasses(entityModel),
-                                            methods: methods.Select(method =>
-                                                    new Method(name: GenerateMethodName(method),
-                                                        type: method.Type.ToString(),
-                                                        attributes: method.Attributes.Select(a => a.Type.Entity.Name)
-                                                            .ToHashSet(),
-                                                        modifiers: method.Modifier.Split(' ')
-                                                            .Concat(new[] { method.AccessModifier.ToString() })
-                                                            .Where(modifier => !string.IsNullOrWhiteSpace(modifier))
-                                                            .ToHashSet(),
-                                                        callers: method.IncomingCalls.Select(GenerateMethodId)
-                                                            .ToHashSet(), //GetCallers(callersDictionary, method),
-                                                        calledMethods: method.OutgoingCalls.Select(GenerateMethodId)
-                                                            .ToHashSet()))
-                                                .Concat(properties.SelectMany(prop =>
-                                                    prop.Accessors.Select(accessor =>
-                                                        new Method(name: GenerateMethodName(accessor),
-                                                            type: GetAccessorType(accessor),
-                                                            attributes: accessor.Attributes
+                                            return new Class(
+                                                name: entityModel.Name,
+                                                usingStatements: entityModel.Imports.Select(i =>
+                                                        i.Entity == null ? i.Namespace?.FullName : i.Entity.Name)
+                                                    .Where(i => i is not null).ToHashSet(),
+                                                type: classType,
+                                                attributes: entityModel.Attributes.Select(a => a.Type.Entity.Name)
+                                                    .ToHashSet(),
+                                                usedClasses: GetUsedClasses(entityModel),
+                                                methods: methods.Select(method =>
+                                                        new Method(name: GenerateMethodName(method),
+                                                            type: method.Type.ToString(),
+                                                            attributes: method.Attributes
                                                                 .Select(a => a.Type.Entity.Name)
                                                                 .ToHashSet(),
-                                                            modifiers: accessor.Modifier.Split(' ')
-                                                                .Concat(new[] { accessor.AccessModifier.ToString() })
+                                                            modifiers: method.Modifier.Split(' ')
+                                                                .Concat(new[] { method.AccessModifier.ToString() })
+                                                                .Where(modifier => !string.IsNullOrWhiteSpace(modifier))
                                                                 .ToHashSet(),
-                                                            callers: accessor.IncomingCalls.Select(GenerateMethodId)
-                                                                .ToHashSet(), // GetCallers(callersDictionary, accessor),
-                                                            calledMethods: accessor.OutgoingCalls
-                                                                .Select(GenerateMethodId)
-                                                                .ToHashSet()
-                                                        ))))
-                                                .ToHashSet());
-                                    })
-                                .ToHashSet()))
-                        .ToHashSet()))
-                .ToHashSet()
-        ));
+                                                            callers: method.IncomingCalls.Select(GenerateMethodId)
+                                                                .ToHashSet(), //GetCallers(callersDictionary, method),
+                                                            calledMethods: method.OutgoingCalls.Select(GenerateMethodId)
+                                                                .ToHashSet()))
+                                                    .Concat(properties.SelectMany(prop =>
+                                                        prop.Accessors.Select(accessor =>
+                                                            new Method(name: GenerateMethodName(accessor),
+                                                                type: GetAccessorType(accessor),
+                                                                attributes: accessor.Attributes
+                                                                    .Select(a => a.Type.Entity.Name)
+                                                                    .ToHashSet(),
+                                                                modifiers: accessor.Modifier.Split(' ')
+                                                                    .Concat(new[]
+                                                                        { accessor.AccessModifier.ToString() })
+                                                                    .ToHashSet(),
+                                                                callers: accessor.IncomingCalls.Select(GenerateMethodId)
+                                                                    .ToHashSet(), // GetCallers(callersDictionary, accessor),
+                                                                calledMethods: accessor.OutgoingCalls
+                                                                    .Select(GenerateMethodId)
+                                                                    .ToHashSet()
+                                                            ))))
+                                                    .ToHashSet());
+                                        })
+                                    .ToHashSet()))
+                            .ToHashSet()))
+                    .ToHashSet()
+            ));
 
         var root = new { solutions, projects };
         _repositoryExporter.Export(Path.Combine(outputPath, outputName), root);
@@ -166,14 +131,6 @@ public class SpektrumExportScript : Script
         return $"{methodModel.Name}#{string.Join(',', methodModel.Parameters.Select(p => p.Type.Name))}";
     }
 
-    private static ISet<string> GetCallers(IDictionary<string, ISet<string>> callersDictionary,
-        MethodModel methodModel)
-    {
-        return !callersDictionary.TryGetValue(GenerateMethodId(methodModel), out var callers)
-            ? new HashSet<string>()
-            : callers;
-    }
-
     private static string GetAccessorType(MethodModel accessor)
     {
         return accessor.Name;
@@ -181,7 +138,7 @@ public class SpektrumExportScript : Script
 
     private static string GenerateMethodId(MethodCall methodCall)
     {
-        return GenerateMethodId(methodCall.Caller);
+        return GenerateMethodId(methodCall.Called);
     }
 
     private static string GenerateMethodId(MethodModel methodModel)

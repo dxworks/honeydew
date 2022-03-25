@@ -24,16 +24,27 @@ internal class NamespaceTreeHandler
                 return rootNamespace;
             }
 
-            lastNamespace = null;
+            lastNamespace = rootNamespace;
             for (var currentIndex = 1; currentIndex < nameParts.Length; currentIndex++)
             {
-                lastNamespace = rootNamespace.ChildNamespaces.FirstOrDefault(n => n.Name == nameParts[currentIndex]);
-                if (lastNamespace == null)
+                var nextNamespace =
+                    lastNamespace.ChildNamespaces.FirstOrDefault(n => n.Name == nameParts[currentIndex]);
+                if (nextNamespace == null)
                 {
-                    var childNamespace =
-                        CreateChildNamespaces(nameParts, new StringBuilder(nameParts[0]), currentIndex);
-                    childNamespace.Parent = rootNamespace;
-                    rootNamespace.ChildNamespaces.Add(childNamespace);
+                    var stringBuilder = new StringBuilder();
+                    for (var i = 0; i < currentIndex; i++)
+                    {
+                        stringBuilder.Append(nameParts[i]);
+                        if (i != currentIndex - 1)
+                        {
+                            stringBuilder.Append('.');
+                        }
+                    }
+
+                    var childNamespace = CreateChildNamespaces(nameParts, stringBuilder, currentIndex);
+
+                    childNamespace.Parent = lastNamespace;
+                    lastNamespace.ChildNamespaces.Add(childNamespace);
 
                     lastNamespace = childNamespace;
                     while (lastNamespace.ChildNamespaces.Count == 1)
@@ -43,6 +54,8 @@ internal class NamespaceTreeHandler
 
                     return lastNamespace;
                 }
+
+                lastNamespace = nextNamespace;
             }
 
             return lastNamespace;

@@ -155,7 +155,16 @@ await result.MapResult(async options =>
         repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
     }
 
-    var referenceRepositoryModel = new RepositoryModelToReferenceRepositoryModelProcessor().Process(repositoryModel);
+    logger.Log();
+    logger.Log("Converting to Reference Model");
+    progressLogger.Log();
+    progressLogger.Log("Converting to Reference Model");
+
+    var referenceRepositoryModel =
+        new RepositoryModelToReferenceRepositoryModelProcessor(logger, progressLogger).Process(repositoryModel);
+
+    logger.Log("Done Converting Model");
+    progressLogger.Log("Done Converting Model");
 
     var scriptRunner = new ScriptRunner(progressLogger, new Dictionary<string, object>
     {
@@ -208,7 +217,10 @@ static void RunScripts(ScriptRunner scriptRunner, JsonModelExporter jsonModelExp
     var newReferenceRepositoryModel =
         scriptRunner.RunForResult(new ScriptRuntime(new ApplyPostExtractionVisitorsScript(logger, progressLogger)));
 
-    scriptRunner.UpdateArgument("referenceRepositoryModel", newReferenceRepositoryModel);
+    if (newReferenceRepositoryModel != null)
+    {
+        scriptRunner.UpdateArgument("referenceRepositoryModel", newReferenceRepositoryModel);
+    }
 
     scriptRunner.Run(false, new List<ScriptRuntime>
     {
