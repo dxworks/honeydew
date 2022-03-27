@@ -90,12 +90,14 @@ public class SpektrumExportScript : Script
                                                             attributes: method.Attributes
                                                                 .Select(a => a.Type.Entity.Name)
                                                                 .ToHashSet(),
-                                                            modifiers: method.Modifier.Split(' ')
+                                                            modifiers: method.Modifiers
+                                                                .Select(modifier => modifier.ToString())
                                                                 .Concat(new[] { method.AccessModifier.ToString() })
                                                                 .Where(modifier => !string.IsNullOrWhiteSpace(modifier))
+                                                                .Select(modifier => modifier.ToLower())
                                                                 .ToHashSet(),
                                                             callers: method.IncomingCalls.Select(GenerateMethodId)
-                                                                .ToHashSet(), //GetCallers(callersDictionary, method),
+                                                                .ToHashSet(),
                                                             calledMethods: method.OutgoingCalls.Select(GenerateMethodId)
                                                                 .ToHashSet()))
                                                     .Concat(properties.SelectMany(prop =>
@@ -105,12 +107,14 @@ public class SpektrumExportScript : Script
                                                                 attributes: accessor.Attributes
                                                                     .Select(a => a.Type.Entity.Name)
                                                                     .ToHashSet(),
-                                                                modifiers: accessor.Modifier.Split(' ')
+                                                                modifiers: accessor.Modifiers
+                                                                    .Select(modifier => modifier.ToString())
                                                                     .Concat(new[]
                                                                         { accessor.AccessModifier.ToString() })
+                                                                    .Select(modifier => modifier.ToLower())
                                                                     .ToHashSet(),
                                                                 callers: accessor.IncomingCalls.Select(GenerateMethodId)
-                                                                    .ToHashSet(), // GetCallers(callersDictionary, accessor),
+                                                                    .ToHashSet(),
                                                                 calledMethods: accessor.OutgoingCalls
                                                                     .Select(GenerateMethodId)
                                                                     .ToHashSet()

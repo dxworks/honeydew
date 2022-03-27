@@ -47,7 +47,7 @@ public class ApplyPostExtractionVisitorsScript : Script
         var parameterRelationVisitor = new ParameterRelationVisitor(addStrategy);
         var localVariablesRelationVisitor = new LocalVariablesRelationVisitor(addStrategy);
 
-        var modelVisitors = new List<IReferenceModelVisitor>
+        var modelVisitors = new List<IEntityModelVisitor>
         {
             propertiesRelationVisitor,
             fieldsRelationVisitor,
@@ -58,7 +58,7 @@ public class ApplyPostExtractionVisitorsScript : Script
             new ExternDataRelationVisitor(addStrategy),
             new HierarchyRelationVisitor(addStrategy),
             new ReturnValueRelationVisitor(addStrategy),
-            new DeclarationRelationVisitor(localVariablesRelationVisitor, parameterRelationVisitor,
+            new DeclarationRelationVisitor(addStrategy, localVariablesRelationVisitor, parameterRelationVisitor,
                 fieldsRelationVisitor, propertiesRelationVisitor)
         };
 
@@ -66,7 +66,7 @@ public class ApplyPostExtractionVisitorsScript : Script
         {
             foreach (var visitor in modelVisitors)
             {
-                visitor.Visit(entityModel);
+                entityModel[visitor.Name] = visitor.Visit(entityModel);
             }
         }
 

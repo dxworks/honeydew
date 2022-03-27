@@ -3,7 +3,7 @@ using HoneydewScriptBeePlugin.Models;
 
 namespace Honeydew.PostExtraction.ReferenceRelations;
 
-public class HierarchyRelationVisitor : IReferenceModelVisitor
+public class HierarchyRelationVisitor : IEntityModelVisitor
 {
     public const string HierarchyMetricName = "hierarchy";
 
@@ -14,17 +14,9 @@ public class HierarchyRelationVisitor : IReferenceModelVisitor
         _addStrategy = addStrategy;
     }
 
-    public void Visit(ReferenceEntity referenceEntity)
-    {
-        if (referenceEntity is not EntityModel entityModel)
-        {
-            return;
-        }
+    public string Name => HierarchyMetricName;
 
-        entityModel[HierarchyMetricName] = Visit(entityModel);
-    }
-    
-    private Dictionary<string, int> Visit(EntityModel entityModel)
+    public IDictionary<string, int> Visit(EntityModel entityModel)
     {
         var dependencies = new Dictionary<string, int>();
 

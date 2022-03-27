@@ -3,7 +3,7 @@ using HoneydewScriptBeePlugin.Models;
 
 namespace Honeydew.PostExtraction.ReferenceRelations;
 
-public class ParameterRelationVisitor : IReferenceModelVisitor
+public class ParameterRelationVisitor : IEntityModelVisitor
 {
     public const string ParameterDependencyMetricName = "ParameterDependency";
 
@@ -14,17 +14,9 @@ public class ParameterRelationVisitor : IReferenceModelVisitor
         _addStrategy = addStrategy;
     }
 
-    public void Visit(ReferenceEntity referenceEntity)
-    {
-        if (referenceEntity is not EntityModel entityModel)
-        {
-            return;
-        }
+    public string Name => ParameterDependencyMetricName;
 
-        entityModel[ParameterDependencyMetricName] = Visit(entityModel);
-    }
-    
-    private Dictionary<string, int> Visit(EntityModel entityModel)
+    public IDictionary<string, int> Visit(EntityModel entityModel)
     {
         var dependencies = new Dictionary<string, int>();
 

@@ -43,9 +43,10 @@ public class GenericDependenciesScript : Script
 
         var relationsRepresentation = new RelationsRepresentation();
 
-        var visitors = new List<IReferenceModelVisitor>
+        var visitors = new List<IEntityModelVisitor>
         {
             new DeclarationRelationVisitor(
+                addStrategy,
                 new LocalVariablesRelationVisitor(addStrategy),
                 new ParameterRelationVisitor(addStrategy),
                 new FieldsRelationVisitor(addStrategy),
@@ -66,23 +67,15 @@ public class GenericDependenciesScript : Script
                 {
                     foreach (var visitor in visitors)
                     {
-                        visitor.Visit(entityModel);
-                    }
-
-                    foreach (var (metricName, value) in entityModel.GetProperties())
-                    {
-                        if (value is not Dictionary<string, int> dictionary)
-                        {
-                            continue;
-                        }
+                        var dictionary = visitor.Visit(entityModel);
 
                         var relationEnumerable = dictionary.Where(pair => pair.Key != entityModel.Name);
-                        
+
                         relations.AddRange(relationEnumerable.Select(targetCountPair => new Relation
                         {
                             Source = entityModel.Name,
                             Target = targetCountPair.Key,
-                            Type = metricName,
+                            Type = visitor.Name,
                             Strength = targetCountPair.Value
                         }));
                     }

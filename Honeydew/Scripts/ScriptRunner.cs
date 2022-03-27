@@ -7,47 +7,29 @@ namespace Honeydew.Scripts;
 
 internal class ScriptRunner
 {
-    private readonly Dictionary<string, object> _defaultArguments;
     private readonly IProgressLogger _logger;
 
-    public ScriptRunner(IProgressLogger logger, Dictionary<string, object> defaultArguments)
+    public ScriptRunner(IProgressLogger logger)
     {
         _logger = logger;
-        _defaultArguments = defaultArguments;
-    }
-
-    public void UpdateArgument(string key, object value)
-    {
-        if (_defaultArguments.ContainsKey(key))
-        {
-            _defaultArguments[key] = value;
-        }
     }
 
     public object RunForResult(ScriptRuntime scriptRuntime)
     {
-        var arguments = new Dictionary<string, object>();
-        foreach (var (key, value) in _defaultArguments)
-        {
-            arguments.Add(key, value);
-        }
-
-        var (script, runtimeArguments) = scriptRuntime;
+        var (script, arguments) = scriptRuntime;
+        arguments ??= new Dictionary<string, object>();
 
         try
         {
-            if (runtimeArguments != null)
+            foreach (var (key, value) in arguments)
             {
-                foreach (var (key, value) in runtimeArguments)
+                if (arguments.ContainsKey(key))
                 {
-                    if (arguments.ContainsKey(key))
-                    {
-                        arguments[key] = value;
-                    }
-                    else
-                    {
-                        arguments.Add(key, value);
-                    }
+                    arguments[key] = value;
+                }
+                else
+                {
+                    arguments.Add(key, value);
                 }
             }
 
@@ -63,43 +45,35 @@ internal class ScriptRunner
 
     public void Run(bool runInParallel, List<ScriptRuntime> scriptRuntimes)
     {
-        var arguments = new Dictionary<string, object>();
-        foreach (var (key, value) in _defaultArguments)
-        {
-            arguments.Add(key, value);
-        }
-
         if (runInParallel)
         {
-            Parallel.ForEach(scriptRuntimes, runtime => Run(arguments, runtime));
+            Parallel.ForEach(scriptRuntimes, Run);
         }
         else
         {
             foreach (var runtime in scriptRuntimes)
             {
-                Run(arguments, runtime);
+                Run(runtime);
             }
         }
     }
 
-    private void Run(Dictionary<string, object> arguments, ScriptRuntime scriptRuntime)
+    private void Run(ScriptRuntime scriptRuntime)
     {
-        var (script, runtimeArguments) = scriptRuntime;
+        var (script, arguments) = scriptRuntime;
+        arguments ??= new Dictionary<string, object>();   
 
         try
         {
-            if (runtimeArguments != null)
+            foreach (var (key, value) in arguments)
             {
-                foreach (var (key, value) in runtimeArguments)
+                if (arguments.ContainsKey(key))
                 {
-                    if (arguments.ContainsKey(key))
-                    {
-                        arguments[key] = value;
-                    }
-                    else
-                    {
-                        arguments.Add(key, value);
-                    }
+                    arguments[key] = value;
+                }
+                else
+                {
+                    arguments.Add(key, value);
                 }
             }
 

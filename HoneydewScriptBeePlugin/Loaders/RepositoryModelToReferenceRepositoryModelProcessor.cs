@@ -996,20 +996,23 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
                     }
                 }
 
-                void ConvertCalledMethods(IEnumerable<IMethodCallType> calledMethods, MethodModel methodModel)
+                void ConvertCalledMethods(IEnumerable<IMethodCallType> calledMethods, MethodModel callerMethodModel)
                 {
                     foreach (var calledMethod in calledMethods)
                     {
-                        methodModel.OutgoingCalls.Add(new MethodCall
+                        var calledMethodReference = GetMethodReference(calledMethod, projectModel);
+                        callerMethodModel.OutgoingCalls.Add(new MethodCall
                         {
-                            Caller = methodModel,
-                            Called = GetMethodReference(calledMethod, projectModel),
+                            Caller = callerMethodModel,
+                            Called = calledMethodReference,
                             CalledEnitityType = ConvertEntityType(calledMethod.LocationClassName, projectModel),
                             GenericParameters = calledMethod.GenericParameters.Select(parameter =>
                                 ConvertEntityType(parameter, projectModel)).ToList(),
                             ConcreteParameters = ConvertParameters(calledMethod.ParameterTypes, projectModel)
                                 .Select(p => p.Type).ToList()
                         });
+
+                        calledMethodReference.IncomingCalls.Add(callerMethodModel);
                     }
                 }
             }

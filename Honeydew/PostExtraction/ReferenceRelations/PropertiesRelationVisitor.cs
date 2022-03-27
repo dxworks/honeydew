@@ -3,7 +3,7 @@ using HoneydewScriptBeePlugin.Models;
 
 namespace Honeydew.PostExtraction.ReferenceRelations;
 
-public class PropertiesRelationVisitor : IReferenceModelVisitor
+public class PropertiesRelationVisitor : IEntityModelVisitor
 {
     public const string PropertiesDependencyMetricName = "PropertiesDependency";
 
@@ -14,13 +14,10 @@ public class PropertiesRelationVisitor : IReferenceModelVisitor
         _addStrategy = addStrategy;
     }
 
-    public void Visit(ReferenceEntity referenceEntity)
+    public string Name => PropertiesDependencyMetricName;
+
+    public IDictionary<string, int> Visit(EntityModel entityModel)
     {
-        if (referenceEntity is not EntityModel entityModel)
-        {
-            return;
-        }
-        
         var dependencies = new Dictionary<string, int>();
 
         var properties = entityModel switch
@@ -35,6 +32,6 @@ public class PropertiesRelationVisitor : IReferenceModelVisitor
             _addStrategy.AddDependency(dependencies, propertyType.Type);
         }
 
-        entityModel[PropertiesDependencyMetricName] = dependencies;
+        return dependencies;
     }
 }

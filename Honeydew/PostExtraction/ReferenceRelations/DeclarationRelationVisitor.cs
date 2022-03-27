@@ -4,31 +4,33 @@ using HoneydewScriptBeePlugin.Models;
 
 namespace Honeydew.PostExtraction.ReferenceRelations;
 
-public class DeclarationRelationVisitor : IReferenceModelVisitor
+public class DeclarationRelationVisitor : IEntityModelVisitor
 {
     public const string DeclarationsMetricName = "declarations";
 
+    private readonly IAddStrategy _addStrategy;
     private readonly LocalVariablesRelationVisitor _localVariablesRelationVisitor;
     private readonly ParameterRelationVisitor _parameterRelationVisitor;
     private readonly FieldsRelationVisitor _fieldsRelationVisitor;
     private readonly PropertiesRelationVisitor _propertiesRelationVisitor;
 
-    public DeclarationRelationVisitor(LocalVariablesRelationVisitor localVariablesRelationVisitor,
+    public DeclarationRelationVisitor(IAddStrategy addStrategy,
+        LocalVariablesRelationVisitor localVariablesRelationVisitor,
         ParameterRelationVisitor parameterRelationVisitor, FieldsRelationVisitor fieldsRelationVisitor,
         PropertiesRelationVisitor propertiesRelationVisitor)
     {
+        _addStrategy = addStrategy;
         _localVariablesRelationVisitor = localVariablesRelationVisitor;
         _parameterRelationVisitor = parameterRelationVisitor;
         _fieldsRelationVisitor = fieldsRelationVisitor;
         _propertiesRelationVisitor = propertiesRelationVisitor;
     }
 
-    public void Visit(ReferenceEntity referenceEntity)
+    public string Name => DeclarationsMetricName;
+
+    public IDictionary<string, int> Visit(EntityModel entityModel)
     {
-        if (referenceEntity is not EntityModel entityModel)
-        {
-            return;
-        }
+        var dependencies = new Dictionary<string, int>();
 
         if (!entityModel.HasProperty(ParameterRelationVisitor.ParameterDependencyMetricName))
         {
@@ -49,8 +51,6 @@ public class DeclarationRelationVisitor : IReferenceModelVisitor
         {
             _localVariablesRelationVisitor?.Visit(entityModel);
         }
-
-        var dependencies = new Dictionary<string, int>();
 
         if (entityModel.HasProperty(ParameterRelationVisitor.ParameterDependencyMetricName) &&
             entityModel[ParameterRelationVisitor.ParameterDependencyMetricName] is Dictionary<string, int>
@@ -79,21 +79,14 @@ public class DeclarationRelationVisitor : IReferenceModelVisitor
             AddDependencies(dependencies, localVariablesDependencies);
         }
 
-        entityModel[DeclarationsMetricName] = dependencies;
+        return dependencies;
     }
 
-    private static void AddDependencies(IDictionary<string, int> dependencies, Dictionary<string, int> dependencyNames)
+    private void AddDependencies(IDictionary<string, int> dependencies, Dictionary<string, int> dependencyNames)
     {
         foreach (var (dependencyName, count) in dependencyNames)
         {
-            if (dependencies.ContainsKey(dependencyName))
-            {
-                dependencies[dependencyName] += count;
-            }
-            else
-            {
-                dependencies.Add(dependencyName, count);
-            }
+            _addStrategy.AddDependency(dependencies, dependencyName, count);
         }
     }
 }

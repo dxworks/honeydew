@@ -33,7 +33,7 @@ await result.MapResult(async options =>
     var missingFilesLogger =
         new SerilogLogger($"{defaultPathForAllRepresentations}/missing_files_logs.txt");
 
-    var logFilePath = $"{defaultPathForAllRepresentations}/logs.txt";
+    const string logFilePath = $"{defaultPathForAllRepresentations}/logs.txt";
     var logger = new SerilogLogger(logFilePath);
     var disableProgressBars = options.DisableProgressBars || options.UseVoyager;
     IProgressLogger progressLogger =
@@ -118,14 +118,15 @@ await result.MapResult(async options =>
     logger.Log("Exporting Raw Model");
     progressLogger.Log("Exporting Raw Model");
 
-    new ScriptRunner(progressLogger, new Dictionary<string, object>
+    var defaultArguments = new Dictionary<string, object>
     {
         { "outputPath", defaultPathForAllRepresentations },
         { "repositoryModel", repositoryModel },
         { "rawJsonOutputName", $"{projectName}-raw.json" },
-    }).Run(false, new List<ScriptRuntime>
+    };
+    new ScriptRunner(progressLogger).Run(false, new List<ScriptRuntime>
     {
-        new(new ExportRawModelScript(new JsonModelExporter())),
+        new(new ExportRawModelScript(new JsonModelExporter()), defaultArguments),
     });
 
     if (options.UseVoyager)
@@ -166,7 +167,7 @@ await result.MapResult(async options =>
     logger.Log("Done Converting Model");
     progressLogger.Log("Done Converting Model");
 
-    var scriptRunner = new ScriptRunner(progressLogger, new Dictionary<string, object>
+    defaultArguments = new Dictionary<string, object>
     {
         { "outputPath", defaultPathForAllRepresentations },
         { "referenceRepositoryModel", referenceRepositoryModel },
@@ -175,7 +176,8 @@ await result.MapResult(async options =>
         { "cycloOutputName", $"{projectName}-cyclomatic.json" },
         { "statisticsFileOutputName", $"{projectName}-stats.json" },
         { "projectName", projectName },
-    });
+    };
+    var scriptRunner = new ScriptRunner(progressLogger);
 
     var csvRelationsRepresentationExporter = new CsvRelationsRepresentationExporter
     {
@@ -187,8 +189,8 @@ await result.MapResult(async options =>
 
     var jsonModelExporter = new JsonModelExporter();
 
-    RunScripts(scriptRunner, jsonModelExporter, csvRelationsRepresentationExporter, logger, progressLogger, projectName,
-        options.ParallelExtraction);
+    RunScripts(scriptRunner, defaultArguments, jsonModelExporter, csvRelationsRepresentationExporter, logger,
+        progressLogger, projectName, options.ParallelExtraction);
 
     logger.Log();
     logger.Log("Extraction Complete!");
@@ -208,63 +210,65 @@ static string GetProjectName(string inputPath)
     return Path.GetFileNameWithoutExtension(inputPath);
 }
 
-static void RunScripts(ScriptRunner scriptRunner, JsonModelExporter jsonModelExporter,
-    CsvRelationsRepresentationExporter csvRelationsRepresentationExporter, ILogger logger,
-    IProgressLogger progressLogger, string projectName, bool runInParallel)
+static void RunScripts(ScriptRunner scriptRunner, Dictionary<string, object> defaultArguments,
+    JsonModelExporter jsonModelExporter, CsvRelationsRepresentationExporter csvRelationsRepresentationExporter,
+    ILogger logger, IProgressLogger progressLogger, string projectName, bool runInParallel)
 {
-    var exportFileRelationsScript = new ExportFileRelationsScript(csvRelationsRepresentationExporter);
-
     var newReferenceRepositoryModel =
-        scriptRunner.RunForResult(new ScriptRuntime(new ApplyPostExtractionVisitorsScript(logger, progressLogger)));
+        scriptRunner.RunForResult(new ScriptRuntime(new ApplyPostExtractionVisitorsScript(logger, progressLogger),
+            defaultArguments));
 
     if (newReferenceRepositoryModel != null)
     {
-        scriptRunner.UpdateArgument("referenceRepositoryModel", newReferenceRepositoryModel);
+        defaultArguments["referenceRepositoryModel"] = newReferenceRepositoryModel;
     }
 
     scriptRunner.Run(false, new List<ScriptRuntime>
     {
-        new(exportFileRelationsScript, new Dictionary<string, object>
-        {
-            { "fileRelationsOutputName", $"{projectName}-structural_relations_all.csv" },
-            { "fileRelationsStrategy", new HoneydewChooseStrategy() },
-            { "fileRelationsHeaders", null },
-        }),
-        new(exportFileRelationsScript, new Dictionary<string, object>
-        {
-            { "fileRelationsOutputName", $"{projectName}-structural_relations.csv" },
-            { "fileRelationsStrategy", new JafaxChooseStrategy() },
+        new(new ExportFileRelationsScript(csvRelationsRepresentationExporter), CreateArgumentsDictionary(
+            defaultArguments, new Dictionary<string, object>
             {
-                "fileRelationsHeaders", new List<string>
+                { "fileRelationsOutputName", $"{projectName}-structural_relations_all.csv" },
+                { "fileRelationsStrategy", new HoneydewChooseStrategy() },
+                { "fileRelationsHeaders", null },
+            })),
+        new(new ExportFileRelationsScript(csvRelationsRepresentationExporter), CreateArgumentsDictionary(
+            defaultArguments, new Dictionary<string, object>
+            {
+                { "fileRelationsOutputName", $"{projectName}-structural_relations.csv" },
+                { "fileRelationsStrategy", new JafaxChooseStrategy() },
                 {
-                    "extCalls",
-                    "extData",
-                    "hierarchy",
-                    "returns",
-                    "declarations",
-                    "extDataStrict",
-                }
-            },
-        }),
+                    "fileRelationsHeaders", new List<string>
+                    {
+                        "extCalls",
+                        "extData",
+                        "hierarchy",
+                        "returns",
+                        "declarations",
+                        "extDataStrict",
+                    }
+                },
+            })),
     });
 
     scriptRunner.Run(runInParallel, new List<ScriptRuntime>
     {
-        new(new ExportCyclomaticComplexityPerFileScript(jsonModelExporter)),
-        new(new ExportClassRelationsScript(csvRelationsRepresentationExporter)),
-        new(new ExportStatisticsScript(jsonModelExporter)),
-        new(new ClassRelationScript(csvRelationsRepresentationExporter)),
+        new(new ExportCyclomaticComplexityPerFileScript(jsonModelExporter), defaultArguments),
+        new(new ExportClassRelationsScript(csvRelationsRepresentationExporter), defaultArguments),
+        new(new ExportStatisticsScript(jsonModelExporter), defaultArguments),
         new(new ExportRelationsBetweenSolutionsAndProjectsScripts(new CsvRelationsRepresentationExporter(),
-            new TextFileExporter())),
-        new(new GenericDependenciesScript(csvRelationsRepresentationExporter), new Dictionary<string, object>
-        {
-            { "genericDependenciesOutputName", $"{projectName}-generic_relations.csv" },
-            { "addStrategy", new AddGenericNamesStrategy(true) },
-        }),
-        new(new SpektrumExportScript(jsonModelExporter), new Dictionary<string, object>
-        {
-            { "spektrumOutputName", $"{projectName}-spektrum.json" },
-        }),
+            new TextFileExporter()), defaultArguments),
+        new(new GenericDependenciesScript(csvRelationsRepresentationExporter), CreateArgumentsDictionary(
+            defaultArguments, new Dictionary<string, object>
+            {
+                { "genericDependenciesOutputName", $"{projectName}-generic_relations.csv" },
+                { "addStrategy", new AddGenericNamesStrategy(true) },
+            })),
+        new(new SpektrumExportScript(jsonModelExporter), CreateArgumentsDictionary(defaultArguments,
+            new Dictionary<string, object>
+            {
+                { "spektrumOutputName", $"{projectName}-spektrum.json" },
+            })),
     });
 }
 
@@ -299,4 +303,16 @@ static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger 
     var repositoryModel = await repositoryLoader.Load(inputPath);
 
     return repositoryModel;
+}
+
+static Dictionary<string, object> CreateArgumentsDictionary(IDictionary<string, object> source,
+    Dictionary<string, object> additionalArguments)
+{
+    var result = new Dictionary<string, object>(source);
+    foreach (var (key, value) in additionalArguments)
+    {
+        result[key] = value;
+    }
+
+    return result;
 }

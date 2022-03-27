@@ -14,7 +14,7 @@ public class MethodModel : ReferenceEntity
 
     public AccessModifier AccessModifier { get; set; }
 
-    public string Modifier { get; set; }
+    public string Modifier { get; set; } = "";
 
     public IList<Modifier> Modifiers { get; set; } = new List<Modifier>();
 
@@ -26,7 +26,7 @@ public class MethodModel : ReferenceEntity
 
     public IList<MethodCall> OutgoingCalls { get; set; } = new List<MethodCall>();
 
-    public IList<MethodCall> IncomingCalls { get; set; } = new List<MethodCall>();
+    public IList<MethodModel> IncomingCalls { get; set; } = new List<MethodModel>();
 
     public IList<FieldAccess> FieldAccesses { get; set; } = new List<FieldAccess>();
 

@@ -4,7 +4,7 @@ using HoneydewScriptBeePlugin.Models;
 
 namespace Honeydew.PostExtraction.ReferenceRelations;
 
-public class AddGenericNamesStrategy : IAddStrategy
+public class AddGenericNamesStrategy : AddNameStrategy
 {
     private readonly bool _ignorePrimitives;
 
@@ -13,18 +13,18 @@ public class AddGenericNamesStrategy : IAddStrategy
         _ignorePrimitives = ignorePrimitives;
     }
 
-    public void AddDependency(IDictionary<string, int> dependencies, EntityType type)
+    public override void AddDependency(IDictionary<string, int> dependencies, EntityType type)
     {
         switch (type.Entity)
         {
             case ClassModel classModel:
-                AddDependency(dependencies, classModel.Name);
+                AddDependency(dependencies, classModel.Name, 1);
                 break;
             case DelegateModel delegateModel:
-                AddDependency(dependencies, delegateModel.Name);
+                AddDependency(dependencies, delegateModel.Name, 1);
                 break;
             case InterfaceModel interfaceModel:
-                AddDependency(dependencies, interfaceModel.Name);
+                AddDependency(dependencies, interfaceModel.Name, 1);
                 break;
         }
 
@@ -34,25 +34,16 @@ public class AddGenericNamesStrategy : IAddStrategy
         }
     }
 
-    private void AddDependency(IDictionary<string, int> dependencies, string dependencyName)
+    public override void AddDependency(IDictionary<string, int> dependencies, string typeName, int count)
     {
-        dependencyName = dependencyName.Trim('?');
-
         if (_ignorePrimitives)
         {
-            if (CSharpConstants.IsPrimitive(dependencyName) || CSharpConstants.IsPrimitiveArray(dependencyName))
+            if (CSharpConstants.IsPrimitive(typeName) || CSharpConstants.IsPrimitiveArray(typeName))
             {
                 return;
             }
         }
 
-        if (dependencies.ContainsKey(dependencyName))
-        {
-            dependencies[dependencyName]++;
-        }
-        else
-        {
-            dependencies.Add(dependencyName, 1);
-        }
+        base.AddDependency(dependencies, typeName, count);
     }
 }

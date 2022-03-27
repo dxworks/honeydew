@@ -3,7 +3,7 @@ using HoneydewScriptBeePlugin.Models;
 
 namespace Honeydew.PostExtraction.ReferenceRelations;
 
-public class LocalVariablesRelationVisitor : IReferenceModelVisitor
+public class LocalVariablesRelationVisitor : IEntityModelVisitor
 {
     public const string LocalVariablesDependencyMetricName = "LocalVariablesDependency";
 
@@ -14,17 +14,9 @@ public class LocalVariablesRelationVisitor : IReferenceModelVisitor
         _addStrategy = addStrategy;
     }
 
-    public void Visit(ReferenceEntity referenceEntity)
-    {
-        if (referenceEntity is not EntityModel entityModel)
-        {
-            return;
-        }
+    public string Name => LocalVariablesDependencyMetricName;
 
-        entityModel[LocalVariablesDependencyMetricName] = Visit(entityModel);
-    }
-
-    private Dictionary<string, int> Visit(EntityModel entityModel)
+    public IDictionary<string, int> Visit(EntityModel entityModel)
     {
         var dependencies = new Dictionary<string, int>();
 
