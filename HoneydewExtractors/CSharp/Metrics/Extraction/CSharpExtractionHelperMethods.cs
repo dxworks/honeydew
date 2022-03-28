@@ -605,8 +605,6 @@ public static partial class CSharpExtractionHelperMethods
         }
 
         return null;
-
-       
     }
     
     private static AccessedField.AccessKind GetAccessType(SyntaxNode syntax)

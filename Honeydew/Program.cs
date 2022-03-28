@@ -17,7 +17,6 @@ using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.RepositoryLoading;
 using HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead;
 using HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead;
-using HoneydewExtractors.CSharp.RepositoryLoading.Strategies;
 using HoneydewModels;
 using HoneydewModels.CSharp;
 using HoneydewModels.Exporters;
@@ -26,16 +25,18 @@ using HoneydewScriptBeePlugin.Loaders;
 
 const string defaultPathForAllRepresentations = "results";
 
-var result = Parser.Default.ParseArguments<CommandLineOptions>(args);
+var result = Parser.Default.ParseArguments<ExtractOptions, LoadOptions>(args);
 
 await result.MapResult(async options =>
 {
-    var missingFilesLogger =
-        new SerilogLogger($"{defaultPathForAllRepresentations}/missing_files_logs.txt");
+    var missingFilesLogger = new SerilogLogger($"{defaultPathForAllRepresentations}/missing_files_logs.txt");
 
     const string logFilePath = $"{defaultPathForAllRepresentations}/logs.txt";
     var logger = new SerilogLogger(logFilePath);
-    var disableProgressBars = options.DisableProgressBars || options.UseVoyager;
+
+    var commandLineOptions = (CommandLineOptions)options;
+    var disableProgressBars = commandLineOptions.DisableProgressBars;
+
     IProgressLogger progressLogger =
         disableProgressBars ? new NoBarsProgressLogger() : new ProgressLogger();
 
@@ -62,7 +63,7 @@ await result.MapResult(async options =>
     }
 
 
-    logger.Log($"Input Path {options.InputFilePath}");
+    logger.Log($"Input Path {commandLineOptions.InputFilePath}");
     logger.Log();
 
     logger.Log($"Log will be stored at {logFilePath}");
@@ -80,127 +81,133 @@ await result.MapResult(async options =>
         progressLogger.Log();
     }
 
-    var inputPath = options.InputFilePath;
+    var inputPath = commandLineOptions.InputFilePath;
 
-    var projectName = options.ProjectName;
+    var projectName = commandLineOptions.ProjectName;
     if (string.IsNullOrEmpty(projectName))
     {
         projectName = GetProjectName(inputPath);
     }
 
-    RepositoryModel repositoryModel;
-    switch (options.Command)
+    switch (options)
     {
-        case "load":
+        case ExtractOptions extractOptions:
         {
+            var repositoryModel = await ExtractModel(logger, progressLogger, missingFilesLogger, inputPath,
+                extractOptions.ParallelExtraction);
+
+            repositoryModel.Version = honeydewVersion;
+
+            logger.Log();
+            logger.Log("Extraction Complete!");
+            logger.Log();
+            logger.Log($"Output will be found at {Path.GetFullPath(defaultPathForAllRepresentations)}");
+
+            progressLogger.Log();
+            progressLogger.Log("Extraction Complete!");
+            progressLogger.Log();
+            progressLogger.Log($"Output will be found at {Path.GetFullPath(defaultPathForAllRepresentations)}");
+
+            if (!extractOptions.DisablePathTrimming)
+            {
+                try
+                {
+                    logger.Log();
+                    logger.Log("Trimming File Paths");
+                    progressLogger.Log();
+                    progressLogger.Log("Trimming File Paths");
+
+                    repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
+                }
+                catch (Exception e)
+                {
+                    logger.Log();
+                    logger.Log($"Could not trim file paths because {e}");
+                    progressLogger.Log();
+                    progressLogger.Log($"Could not trim file paths because {e}");
+                }
+            }
+
+            logger.Log("Exporting Raw Model");
+            progressLogger.Log("Exporting Raw Model");
+
+            new ScriptRunner(progressLogger).Run(false, new List<ScriptRuntime>
+            {
+                new(new ExportRawModelScript(new JsonModelExporter()), new Dictionary<string, object>
+                {
+                    { "outputPath", defaultPathForAllRepresentations },
+                    { "repositoryModel", repositoryModel },
+                    { "rawJsonOutputName", $"{projectName}-raw.json" },
+                }),
+            });
+        }
+            break;
+
+        case LoadOptions loadOptions:
+        {
+            logger.Log($"Loading model from file {inputPath}");
+            logger.Log();
             progressLogger.Log($"Loading model from file {inputPath}");
             progressLogger.Log();
-            repositoryModel = await LoadModel(logger, inputPath);
+            var repositoryModel = await LoadModel(logger, inputPath);
+
+            logger.Log($"Found model of version {repositoryModel.Version}. Changing version to {honeydewVersion}");
+            logger.Log();
+            progressLogger.Log(
+                $"Found model of version {repositoryModel.Version}. Changing version to {honeydewVersion}");
+            progressLogger.Log();
+
+            repositoryModel.Version = honeydewVersion;
+
+
+            logger.Log();
+            logger.Log("Converting to Reference Model");
+            progressLogger.Log();
+            progressLogger.Log("Converting to Reference Model");
+
+            var referenceRepositoryModel =
+                new RepositoryModelToReferenceRepositoryModelProcessor(logger, progressLogger).Process(repositoryModel);
+
+            logger.Log("Done Converting Model");
+            progressLogger.Log("Done Converting Model");
+
+            var defaultArguments = new Dictionary<string, object>
+            {
+                { "outputPath", defaultPathForAllRepresentations },
+                { "referenceRepositoryModel", referenceRepositoryModel },
+                { "rawJsonOutputName", $"{projectName}-raw.json" },
+                { "classRelationsOutputName", $"{projectName}-class_relations.csv" },
+                { "cycloOutputName", $"{projectName}-cyclomatic.json" },
+                { "statisticsFileOutputName", $"{projectName}-stats.json" },
+                { "projectName", projectName },
+            };
+            var scriptRunner = new ScriptRunner(progressLogger);
+
+            var csvRelationsRepresentationExporter = new CsvRelationsRepresentationExporter
+            {
+                ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
+                {
+                    new("all", ExportUtils.CsvSumPerLine)
+                }
+            };
+
+            var jsonModelExporter = new JsonModelExporter();
+
+            RunScripts(scriptRunner, defaultArguments, jsonModelExporter, csvRelationsRepresentationExporter, logger,
+                progressLogger, projectName, loadOptions.ParallelRunning);
+
+            logger.Log();
+            logger.Log("Extraction Complete!");
+            logger.Log();
+            logger.Log($"Output will be found at {Path.GetFullPath(defaultPathForAllRepresentations)}");
+
+            progressLogger.Log();
+            progressLogger.Log("Extraction Complete!");
+            progressLogger.Log();
+            progressLogger.Log($"Output will be found at {Path.GetFullPath(defaultPathForAllRepresentations)}");
         }
             break;
-
-        case "extract":
-        {
-            repositoryModel = await ExtractModel(logger, progressLogger, missingFilesLogger, inputPath,
-                options.ParallelExtraction);
-        }
-            break;
-
-        default:
-        {
-            await Console.Error.WriteLineAsync("Invalid Command! Please use extract or load");
-            return;
-        }
     }
-
-    repositoryModel.Version = honeydewVersion;
-
-    logger.Log("Exporting Raw Model");
-    progressLogger.Log("Exporting Raw Model");
-
-    var defaultArguments = new Dictionary<string, object>
-    {
-        { "outputPath", defaultPathForAllRepresentations },
-        { "repositoryModel", repositoryModel },
-        { "rawJsonOutputName", $"{projectName}-raw.json" },
-    };
-    new ScriptRunner(progressLogger).Run(false, new List<ScriptRuntime>
-    {
-        new(new ExportRawModelScript(new JsonModelExporter()), defaultArguments),
-    });
-
-    if (options.UseVoyager)
-    {
-        logger.Log();
-        logger.Log("Extraction Complete!");
-        logger.Log();
-        logger.Log($"Output will be found at {Path.GetFullPath(defaultPathForAllRepresentations)}");
-
-        progressLogger.Log();
-        progressLogger.Log("Extraction Complete!");
-        progressLogger.Log();
-        progressLogger.Log($"Output will be found at {Path.GetFullPath(defaultPathForAllRepresentations)}");
-
-        logger.CloseAndFlush();
-
-        return;
-    }
-
-    if (!options.DisablePathTrimming)
-    {
-        logger.Log();
-        logger.Log("Trimming File Paths");
-        progressLogger.Log();
-        progressLogger.Log("Trimming File Paths");
-
-        repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
-    }
-
-    logger.Log();
-    logger.Log("Converting to Reference Model");
-    progressLogger.Log();
-    progressLogger.Log("Converting to Reference Model");
-
-    var referenceRepositoryModel =
-        new RepositoryModelToReferenceRepositoryModelProcessor(logger, progressLogger).Process(repositoryModel);
-
-    logger.Log("Done Converting Model");
-    progressLogger.Log("Done Converting Model");
-
-    defaultArguments = new Dictionary<string, object>
-    {
-        { "outputPath", defaultPathForAllRepresentations },
-        { "referenceRepositoryModel", referenceRepositoryModel },
-        { "rawJsonOutputName", $"{projectName}-raw.json" },
-        { "classRelationsOutputName", $"{projectName}-class_relations.csv" },
-        { "cycloOutputName", $"{projectName}-cyclomatic.json" },
-        { "statisticsFileOutputName", $"{projectName}-stats.json" },
-        { "projectName", projectName },
-    };
-    var scriptRunner = new ScriptRunner(progressLogger);
-
-    var csvRelationsRepresentationExporter = new CsvRelationsRepresentationExporter
-    {
-        ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
-        {
-            new("all", ExportUtils.CsvSumPerLine)
-        }
-    };
-
-    var jsonModelExporter = new JsonModelExporter();
-
-    RunScripts(scriptRunner, defaultArguments, jsonModelExporter, csvRelationsRepresentationExporter, logger,
-        progressLogger, projectName, options.ParallelExtraction);
-
-    logger.Log();
-    logger.Log("Extraction Complete!");
-    logger.Log();
-    logger.Log($"Output will be found at {Path.GetFullPath(defaultPathForAllRepresentations)}");
-
-    progressLogger.Log();
-    progressLogger.Log("Extraction Complete!");
-    progressLogger.Log();
-    progressLogger.Log($"Output will be found at {Path.GetFullPath(defaultPathForAllRepresentations)}");
 
     logger.CloseAndFlush();
 }, _ => Task.FromResult("Some Error Occurred"));
@@ -287,19 +294,9 @@ static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger 
     var solutionProvider = new MsBuildSolutionProvider();
     var projectProvider = new MsBuildProjectProvider();
 
-    var cSharpCompilationMaker = new CSharpCompilationMaker();
-    IProjectLoadingStrategy projectLoadingStrategy = parallelExtraction
-        ? new ParallelProjectLoadingStrategy(logger, cSharpCompilationMaker)
-        : new BasicProjectLoadingStrategy(logger, cSharpCompilationMaker);
-
-    ISolutionLoadingStrategy solutionLoadingStrategy = parallelExtraction
-        ? new ParallelSolutionLoadingStrategy(logger, projectLoadingStrategy, progressLogger)
-        : new BasicSolutionLoadingStrategy(logger, projectLoadingStrategy, progressLogger);
-
-    var repositoryLoader = new CSharpRepositoryLoader(solutionProvider, projectProvider, projectLoadingStrategy,
-        solutionLoadingStrategy, logger, progressLogger, missingFilesLogger,
-        new FactExtractorCreator(VisitorLoaderHelper.LoadVisitors(logger)),
-        cSharpCompilationMaker, parallelExtraction);
+    var repositoryLoader = new CSharpRepositoryLoader(solutionProvider, projectProvider, logger, progressLogger,
+        missingFilesLogger, new FactExtractorCreator(VisitorLoaderHelper.LoadVisitors(logger)),
+        new CSharpCompilationMaker(), parallelExtraction);
     var repositoryModel = await repositoryLoader.Load(inputPath);
 
     return repositoryModel;
