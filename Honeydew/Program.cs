@@ -8,7 +8,6 @@ using Honeydew;
 using Honeydew.PostExtraction.ReferenceRelations;
 using Honeydew.Processors;
 using Honeydew.Scripts;
-using HoneydewCore.IO.Readers;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Logging;
 using HoneydewCore.Processors;
@@ -149,7 +148,11 @@ await result.MapResult(async options =>
             logger.Log();
             progressLogger.Log($"Loading model from file {inputPath}");
             progressLogger.Log();
-            var repositoryModel = await LoadModel(logger, inputPath);
+            var repositoryModel = await LoadModel(logger, progressLogger, inputPath);
+            if (repositoryModel == null)
+            {
+                break;
+            }
 
             logger.Log($"Found model of version {repositoryModel.Version}. Changing version to {honeydewVersion}");
             logger.Log();
@@ -279,11 +282,11 @@ static void RunScripts(ScriptRunner scriptRunner, Dictionary<string, object> def
     });
 }
 
-static async Task<RepositoryModel> LoadModel(ILogger logger, string inputPath)
+static async Task<RepositoryModel> LoadModel(ILogger logger, IProgressLogger progressLogger, string inputPath)
 {
-    // Load repository model from path
-    IRepositoryLoader<RepositoryModel> repositoryLoader =
-        new RawCSharpFileRepositoryLoader(logger, new JsonModelImporter<RepositoryModel>(new ConverterList()));
+    var repositoryLoader =
+        new RawFileRepositoryLoader(logger, progressLogger,
+            new JsonModelImporter<RepositoryModel>(new ConverterList()));
     var repositoryModel = await repositoryLoader.Load(inputPath);
     return repositoryModel;
 }
@@ -294,7 +297,7 @@ static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger 
     var solutionProvider = new MsBuildSolutionProvider();
     var projectProvider = new MsBuildProjectProvider();
 
-    var repositoryLoader = new CSharpRepositoryLoader(solutionProvider, projectProvider, logger, progressLogger,
+    var repositoryLoader = new RepositoryExtractor(solutionProvider, projectProvider, logger, progressLogger,
         missingFilesLogger, new FactExtractorCreator(VisitorLoaderHelper.LoadVisitors(logger)),
         new CSharpCompilationMaker(), parallelExtraction);
     var repositoryModel = await repositoryLoader.Load(inputPath);

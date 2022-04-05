@@ -9,4 +9,4 @@ commands:
     unix: if [[ "$OSTYPE" == "darwin"* ]]; then chmod +x ./bin/osx/Honeydew && ./bin/osx/Honeydew extract "${repo}" ${options}; else chmod +x ./bin/linux/Honeydew && ./bin/linux/Honeydew extract "${repo}" ${options}; fi
 
 parameters:
-  options: "--voyager"
+  options: "--no-progress-bars"

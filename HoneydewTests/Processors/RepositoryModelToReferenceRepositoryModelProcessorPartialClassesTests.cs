@@ -35,12 +35,13 @@ public class RepositoryModelToReferenceRepositoryModelProcessorPartialClassesTes
 
     private readonly CSharpFactExtractor _extractor;
     private readonly Mock<ILogger> _loggerMock = new();
+    private readonly Mock<IProgressLogger> _progressLoggerMock = new();
     private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
     private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
     public RepositoryModelToReferenceRepositoryModelProcessorPartialClassesTests()
     {
-        _sut = new RepositoryModelToReferenceRepositoryModelProcessor();
+        _sut = new RepositoryModelToReferenceRepositoryModelProcessor(_loggerMock.Object, _progressLoggerMock.Object);
 
         var compositeVisitor = new CompositeVisitor();
 

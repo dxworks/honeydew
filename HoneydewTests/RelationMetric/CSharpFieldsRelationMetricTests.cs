@@ -21,6 +21,7 @@ public class CSharpFieldsRelationVisitorTests
     private readonly FieldsRelationVisitor _sut;
     private readonly CSharpFactExtractor _factExtractor;
     private readonly Mock<ILogger> _loggerMock = new();
+    private readonly Mock<IProgressLogger> _progressLoggerMock = new();
     private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
     private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
@@ -69,7 +70,8 @@ public class CSharpFieldsRelationVisitorTests
         var syntaxTree = _syntacticModelCreator.Create(fileContent);
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var compilationUnitType = _factExtractor.Extract(syntaxTree, semanticModel);
-        RepositoryModelToReferenceRepositoryModelProcessor processor = new();
+        RepositoryModelToReferenceRepositoryModelProcessor processor = new(_loggerMock.Object,
+            _progressLoggerMock.Object);
         var repositoryModel = processor.Process(new RepositoryModel
         {
             Projects =
@@ -86,10 +88,7 @@ public class CSharpFieldsRelationVisitorTests
         var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
-        _sut.Visit(classModel);
-        
-        Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["FieldsDependency"] as Dictionary<string, int>)!;
+        var dependencies = _sut.Visit(classModel);
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(2, dependencies["int"]);
@@ -117,7 +116,8 @@ public class CSharpFieldsRelationVisitorTests
         var syntaxTree = _syntacticModelCreator.Create(fileContent);
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var compilationUnitType = _factExtractor.Extract(syntaxTree, semanticModel);
-        RepositoryModelToReferenceRepositoryModelProcessor processor = new();
+        RepositoryModelToReferenceRepositoryModelProcessor processor = new(_loggerMock.Object,
+            _progressLoggerMock.Object);
         var repositoryModel = processor.Process(new RepositoryModel
         {
             Projects =
@@ -134,10 +134,7 @@ public class CSharpFieldsRelationVisitorTests
         var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
-        _sut.Visit(classModel);
-
-        Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["FieldsDependency"] as Dictionary<string, int>)!;
+        var dependencies = _sut.Visit(classModel);
 
         Assert.Equal(2, dependencies.Count);
         Assert.Equal(1, dependencies["System.Func<int>"]);
@@ -169,7 +166,8 @@ public class CSharpFieldsRelationVisitorTests
         var syntaxTree = _syntacticModelCreator.Create(fileContent);
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var compilationUnitType = _factExtractor.Extract(syntaxTree, semanticModel);
-        RepositoryModelToReferenceRepositoryModelProcessor processor = new();
+        RepositoryModelToReferenceRepositoryModelProcessor processor = new(_loggerMock.Object,
+            _progressLoggerMock.Object);
         var repositoryModel = processor.Process(new RepositoryModel
         {
             Projects =
@@ -186,10 +184,7 @@ public class CSharpFieldsRelationVisitorTests
         var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
-        _sut.Visit(classModel);
-
-        Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["FieldsDependency"] as Dictionary<string, int>)!;
+        var dependencies = _sut.Visit(classModel);
 
         Assert.Equal(2, dependencies.Count);
         Assert.Equal(2, dependencies["CSharpMetricExtractor"]);
@@ -220,7 +215,8 @@ public class CSharpFieldsRelationVisitorTests
         var syntaxTree = _syntacticModelCreator.Create(fileContent);
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var compilationUnitType = _factExtractor.Extract(syntaxTree, semanticModel);
-        RepositoryModelToReferenceRepositoryModelProcessor processor = new();
+        RepositoryModelToReferenceRepositoryModelProcessor processor = new(_loggerMock.Object,
+            _progressLoggerMock.Object);
         var repositoryModel = processor.Process(new RepositoryModel
         {
             Projects =
@@ -237,10 +233,7 @@ public class CSharpFieldsRelationVisitorTests
         var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
-        _sut.Visit(classModel);
-
-        Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["FieldsDependency"] as Dictionary<string, int>)!;
+        var dependencies = _sut.Visit(classModel);
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(1, dependencies["System.Func<CSharpMetricExtractor>"]);

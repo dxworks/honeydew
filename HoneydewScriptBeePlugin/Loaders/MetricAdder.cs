@@ -58,7 +58,7 @@ public static class MetricAdder
         {
             if (CSharpConstants.IsNumericType(metricModel.ValueType))
             {
-                methodModel.Metrics[metricModel.Name] = (int)metricModel.Value;
+                methodModel.Metrics[metricModel.Name] = (int)(long)metricModel.Value;
             }
             else
             {

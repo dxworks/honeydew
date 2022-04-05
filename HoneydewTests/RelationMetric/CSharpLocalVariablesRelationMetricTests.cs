@@ -30,6 +30,7 @@ public class CSharpLocalVariablesRelationVisitorTests
     private readonly LocalVariablesRelationVisitor _sut;
     private readonly CSharpFactExtractor _factExtractor;
     private readonly Mock<ILogger> _loggerMock = new();
+    private readonly Mock<IProgressLogger> _progressLoggerMock = new();
     private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
     private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
@@ -91,7 +92,8 @@ public class CSharpLocalVariablesRelationVisitorTests
         var syntaxTree = _syntacticModelCreator.Create(fileContent);
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var compilationUnitType = _factExtractor.Extract(syntaxTree, semanticModel);
-        RepositoryModelToReferenceRepositoryModelProcessor processor = new();
+        RepositoryModelToReferenceRepositoryModelProcessor processor = new(_loggerMock.Object,
+            _progressLoggerMock.Object);
         var repositoryModel = processor.Process(new RepositoryModel
         {
             Projects =
@@ -108,10 +110,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
-        _sut.Visit(classModel);
-
-        Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["LocalVariablesDependency"] as Dictionary<string, int>)!;
+        var dependencies = _sut.Visit(classModel);
 
         Assert.Empty(dependencies);
     }
@@ -125,7 +124,8 @@ public class CSharpLocalVariablesRelationVisitorTests
         var syntaxTree = _syntacticModelCreator.Create(fileContent);
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var compilationUnitType = _factExtractor.Extract(syntaxTree, semanticModel);
-        RepositoryModelToReferenceRepositoryModelProcessor processor = new();
+        RepositoryModelToReferenceRepositoryModelProcessor processor = new(_loggerMock.Object,
+            _progressLoggerMock.Object);
         var repositoryModel = processor.Process(new RepositoryModel
         {
             Projects =
@@ -142,10 +142,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
-        _sut.Visit(classModel);
-
-        Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["LocalVariablesDependency"] as Dictionary<string, int>)!;
+        var dependencies = _sut.Visit(classModel);
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(3, dependencies["int"]);
@@ -161,7 +158,8 @@ public class CSharpLocalVariablesRelationVisitorTests
         var syntaxTree = _syntacticModelCreator.Create(fileContent);
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var compilationUnitType = _factExtractor.Extract(syntaxTree, semanticModel);
-        RepositoryModelToReferenceRepositoryModelProcessor processor = new();
+        RepositoryModelToReferenceRepositoryModelProcessor processor = new(_loggerMock.Object,
+            _progressLoggerMock.Object);
         var repositoryModel = processor.Process(new RepositoryModel
         {
             Projects =
@@ -178,10 +176,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
-        _sut.Visit(classModel);
-
-        Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["LocalVariablesDependency"] as Dictionary<string, int>)!;
+        var dependencies = _sut.Visit(classModel);
 
         Assert.Empty(dependencies);
     }
@@ -194,7 +189,8 @@ public class CSharpLocalVariablesRelationVisitorTests
         var syntaxTree = _syntacticModelCreator.Create(fileContent);
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var compilationUnitType = _factExtractor.Extract(syntaxTree, semanticModel);
-        RepositoryModelToReferenceRepositoryModelProcessor processor = new();
+        RepositoryModelToReferenceRepositoryModelProcessor processor = new(_loggerMock.Object,
+            _progressLoggerMock.Object);
         var repositoryModel = processor.Process(new RepositoryModel
         {
             Projects =
@@ -211,10 +207,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
-        _sut.Visit(classModel);
-
-        Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["LocalVariablesDependency"] as Dictionary<string, int>)!;
+        var dependencies = _sut.Visit(classModel);
 
         Assert.Empty(dependencies);
     }
@@ -228,7 +221,8 @@ public class CSharpLocalVariablesRelationVisitorTests
         var syntaxTree = _syntacticModelCreator.Create(fileContent);
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var compilationUnitType = _factExtractor.Extract(syntaxTree, semanticModel);
-        RepositoryModelToReferenceRepositoryModelProcessor processor = new();
+        RepositoryModelToReferenceRepositoryModelProcessor processor = new(_loggerMock.Object,
+            _progressLoggerMock.Object);
         var repositoryModel = processor.Process(new RepositoryModel
         {
             Projects =
@@ -245,10 +239,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
-        _sut.Visit(classModel);
-
-        Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["LocalVariablesDependency"] as Dictionary<string, int>)!;
+        var dependencies = _sut.Visit(classModel);
 
         Assert.Equal(2, dependencies.Count);
         Assert.Equal(2, dependencies["CSharpMetricExtractor"]);
@@ -264,7 +255,8 @@ public class CSharpLocalVariablesRelationVisitorTests
         var syntaxTree = _syntacticModelCreator.Create(fileContent);
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var compilationUnitType = _factExtractor.Extract(syntaxTree, semanticModel);
-        RepositoryModelToReferenceRepositoryModelProcessor processor = new();
+        RepositoryModelToReferenceRepositoryModelProcessor processor = new(_loggerMock.Object,
+            _progressLoggerMock.Object);
         var repositoryModel = processor.Process(new RepositoryModel
         {
             Projects =
@@ -281,10 +273,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
-        _sut.Visit(classModel);
-
-        Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["LocalVariablesDependency"] as Dictionary<string, int>)!;
+        var dependencies = _sut.Visit(classModel);
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(1, dependencies["CSharpMetricExtractor"]);
@@ -302,7 +291,8 @@ public class CSharpLocalVariablesRelationVisitorTests
         var syntaxTree = _syntacticModelCreator.Create(fileContent);
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var compilationUnitType = _factExtractor.Extract(syntaxTree, semanticModel);
-        RepositoryModelToReferenceRepositoryModelProcessor processor = new();
+        RepositoryModelToReferenceRepositoryModelProcessor processor = new(_loggerMock.Object,
+            _progressLoggerMock.Object);
         var repositoryModel = processor.Process(new RepositoryModel
         {
             Projects =
@@ -319,10 +309,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         var classModel = repositoryModel.Projects[0].Files[0].Entities[0];
 
 
-        _sut.Visit(classModel);
-
-        Assert.Empty(classModel.Metrics);
-        var dependencies = (classModel["LocalVariablesDependency"] as Dictionary<string, int>)!;
+        var dependencies = _sut.Visit(classModel);
 
         Assert.Equal(2, dependencies.Count);
         Assert.Equal(1, dependencies["CSharpMetricExtractor"]);
@@ -338,7 +325,8 @@ public class CSharpLocalVariablesRelationVisitorTests
         var syntaxTree = _syntacticModelCreator.Create(fileContent);
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var compilationUnitType = _factExtractor.Extract(syntaxTree, semanticModel);
-        RepositoryModelToReferenceRepositoryModelProcessor processor = new();
+        RepositoryModelToReferenceRepositoryModelProcessor processor = new(_loggerMock.Object,
+            _progressLoggerMock.Object);
         var repositoryModel = processor.Process(new RepositoryModel
         {
             Projects =
@@ -356,21 +344,13 @@ public class CSharpLocalVariablesRelationVisitorTests
         var classModel2 = repositoryModel.Projects[0].Files[0].Entities[1];
 
 
-        _sut.Visit(classModel1);
-        _sut.Visit(classModel2);
-
-
-        Assert.Empty(classModel1.Metrics);
-        var dependencies1 = (classModel1["LocalVariablesDependency"] as Dictionary<string, int>)!;
-
+        var dependencies1 = _sut.Visit(classModel1);
         Assert.Equal(2, dependencies1.Count);
         Assert.Equal(1, dependencies1["CSharpMetricExtractor"]);
         Assert.Equal(1, dependencies1["int"]);
 
 
-        Assert.Empty(classModel2.Metrics);
-        var dependencies2 = (classModel2["LocalVariablesDependency"] as Dictionary<string, int>)!;
-
+        var dependencies2 = _sut.Visit(classModel2);
         Assert.Equal(3, dependencies2.Count);
         Assert.Equal(1, dependencies2["CSharpMetricExtractor"]);
         Assert.Equal(5, dependencies2["int"]);

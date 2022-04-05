@@ -33,13 +33,15 @@ namespace HoneydewTests.Processors;
 
 public class RepositoryModelToReferenceRepositoryModelProcessorTests
 {
+    private readonly Mock<ILogger> _loggerMock = new();
+    private readonly Mock<IProgressLogger> _progressLoggerMock = new();
     private readonly RepositoryModelToReferenceRepositoryModelProcessor _sut;
     private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
     private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
     public RepositoryModelToReferenceRepositoryModelProcessorTests()
     {
-        _sut = new RepositoryModelToReferenceRepositoryModelProcessor();
+        _sut = new RepositoryModelToReferenceRepositoryModelProcessor(_loggerMock.Object, _progressLoggerMock.Object);
     }
 
     [Fact]
