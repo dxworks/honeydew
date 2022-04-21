@@ -9,6 +9,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\HoneydewModels\HoneydewModels.csproj" />
+        <ProjectReference Include="..\Honeydew.Models.CSharp\Honeydew.Models.CSharp.csproj" />
+        <ProjectReference Include="..\Honeydew.Models\Honeydew.Models.csproj" />
     </ItemGroup>
 </Project>

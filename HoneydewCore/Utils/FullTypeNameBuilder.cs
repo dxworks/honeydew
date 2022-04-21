@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using HoneydewModels.CSharp;
-using HoneydewModels.Types;
+using Honeydew.Models.CSharp;
+using Honeydew.Models.Types;
 
 namespace HoneydewCore.Utils;
 

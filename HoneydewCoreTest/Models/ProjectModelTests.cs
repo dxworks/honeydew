@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using HoneydewModels;
-using HoneydewModels.CSharp;
-using HoneydewModels.Types;
+using Honeydew.Models;
+using Honeydew.Models.Types;
+using Honeydew.Models.CSharp;
 using Xunit;
 
 namespace HoneydewCoreTest.Models

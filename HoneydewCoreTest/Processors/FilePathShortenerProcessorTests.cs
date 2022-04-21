@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
+using Honeydew.Models;
+using Honeydew.Models.CSharp;
 using HoneydewCore.IO;
 using HoneydewCore.Processors;
-using HoneydewModels;
-using HoneydewModels.CSharp;
 using Moq;
 using Xunit;
 
