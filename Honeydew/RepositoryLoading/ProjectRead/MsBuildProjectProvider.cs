@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
@@ -8,7 +9,7 @@ namespace Honeydew.RepositoryLoading.ProjectRead;
 
 public class MsBuildProjectProvider : IProjectProvider
 {
-    public Task<Project> GetProject(string path)
+    public Task<Project> GetProject(string path, CancellationToken cancellationToken)
     {
         if (!MSBuildLocator.IsRegistered)
         {
@@ -24,7 +25,7 @@ public class MsBuildProjectProvider : IProjectProvider
 
         try
         {
-            return msBuildWorkspace.OpenProjectAsync(path);
+            return msBuildWorkspace.OpenProjectAsync(path, cancellationToken: cancellationToken);
         }
         catch (Exception)
         {

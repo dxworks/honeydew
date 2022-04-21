@@ -26,11 +26,12 @@ public class ProjectExtractor
         FactExtractor = factExtractor;
     }
 
-    public async Task<ProjectModel?> Extract(string filePath, IProjectProvider projectProvider, CancellationToken cancellationToken)
+    public async Task<ProjectModel?> Extract(string filePath, IProjectProvider projectProvider,
+        CancellationToken cancellationToken)
     {
         try
         {
-            var project = await projectProvider.GetProject(filePath);
+            var project = await projectProvider.GetProject(filePath, cancellationToken);
 
             return await Extract(project, cancellationToken);
         }

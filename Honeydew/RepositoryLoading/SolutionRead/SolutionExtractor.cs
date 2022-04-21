@@ -36,7 +36,7 @@ public class SolutionExtractor
 
         try
         {
-            var solution = await GetSolution(path);
+            var solution = await GetSolution(path, cancellationToken);
             _logger.Log($"Found {solution.Projects.Count()} Projects in solution {path}");
 
             SolutionModel solutionModel = new()
@@ -130,7 +130,7 @@ public class SolutionExtractor
         return null;
     }
 
-    private static Task<Solution> GetSolution(string path)
+    private static Task<Solution> GetSolution(string path, CancellationToken cancellationToken)
     {
         if (!MSBuildLocator.IsRegistered)
         {
@@ -144,6 +144,6 @@ public class SolutionExtractor
             throw new ProjectWithErrorsException();
         }
 
-        return msBuildWorkspace.OpenSolutionAsync(path);
+        return msBuildWorkspace.OpenSolutionAsync(path, cancellationToken: cancellationToken);
     }
 }
