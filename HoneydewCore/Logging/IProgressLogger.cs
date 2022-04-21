@@ -4,7 +4,7 @@ namespace HoneydewCore.Logging
 {
     public interface IProgressLogger
     {
-        void Log(object value);
+        void Log(string value);
         void Log();
 
         void CreateProgressBars(IEnumerable<string> progressBarNames);

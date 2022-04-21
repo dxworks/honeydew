@@ -34,9 +34,9 @@ using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 
 namespace Honeydew;
 
-internal static class VisitorLoaderHelper
+internal static partial class VisitorLoaderHelper
 {
-    public static ICompositeVisitor LoadVisitors(ILogger logger)
+    public static ICompositeVisitor LoadCSharpVisitors(ILogger logger)
     {
         var linesOfCodeVisitor = new LinesOfCodeVisitor();
 
@@ -164,7 +164,7 @@ internal static class VisitorLoaderHelper
         };
 
         var importsVisitor = new ImportsVisitor();
-        
+
         var classVisitors = new List<ICSharpClassVisitor>
         {
             new BaseInfoClassVisitor(),
@@ -193,7 +193,7 @@ internal static class VisitorLoaderHelper
             genericParameterSetterVisitor,
             linesOfCodeVisitor,
         };
-        
+
         var enumVisitors = new List<IEnumVisitor>
         {
             new BaseInfoEnumVisitor(),
@@ -206,7 +206,7 @@ internal static class VisitorLoaderHelper
             attributeSetterVisitor,
             linesOfCodeVisitor,
         };
-        
+
         var compilationUnitVisitors = new List<ICSharpCompilationUnitVisitor>
         {
             new ClassSetterCompilationUnitVisitor(classVisitors),

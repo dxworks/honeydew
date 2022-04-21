@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace HoneydewExtractors.CSharp.RepositoryLoading.Strategies
+namespace Honeydew.RepositoryLoading.Strategies
 {
     internal static class ActualFilePathProvider
     {

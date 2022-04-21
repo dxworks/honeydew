@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using HoneydewModels.CSharp;
+using HoneydewModels;
 
-namespace HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead;
+namespace Honeydew.RepositoryLoading.SolutionRead;
 
 public record SolutionLoadingResult(SolutionModel Solution, List<ProjectModel> ProjectModels);

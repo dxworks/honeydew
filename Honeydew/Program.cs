@@ -2,22 +2,20 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using CommandLine;
 using Honeydew;
 using Honeydew.PostExtraction.ReferenceRelations;
 using Honeydew.Processors;
+using Honeydew.RepositoryLoading;
+using Honeydew.RepositoryLoading.Strategies;
 using Honeydew.Scripts;
 using HoneydewCore.IO.Writers.Exporters;
 using HoneydewCore.Logging;
 using HoneydewCore.Processors;
-using HoneydewExtractors.Core;
 using HoneydewExtractors.CSharp.Metrics;
-using HoneydewExtractors.CSharp.RepositoryLoading;
-using HoneydewExtractors.CSharp.RepositoryLoading.ProjectRead;
-using HoneydewExtractors.CSharp.RepositoryLoading.SolutionRead;
 using HoneydewModels;
-using HoneydewModels.CSharp;
 using HoneydewModels.Exporters;
 using HoneydewModels.Importers;
 using HoneydewScriptBeePlugin.Loaders;
@@ -88,12 +86,25 @@ await result.MapResult(async options =>
         projectName = GetProjectName(inputPath);
     }
 
+    var cancellationTokenSource = new CancellationTokenSource();
+    Console.CancelKeyPress += (_, eventArgs) =>
+    {
+        cancellationTokenSource.Cancel();
+        eventArgs.Cancel = true;
+    };
+
     switch (options)
     {
         case ExtractOptions extractOptions:
         {
+            if (extractOptions.ParallelExtraction)
+            {
+                logger.Log("Parallel Extracting Enabled");
+                progressLogger.Log("Parallel Extracting Enabled");
+            }
+
             var repositoryModel = await ExtractModel(logger, progressLogger, missingFilesLogger, inputPath,
-                extractOptions.ParallelExtraction);
+                extractOptions.ParallelExtraction, cancellationTokenSource.Token);
 
             repositoryModel.Version = honeydewVersion;
 
@@ -139,6 +150,9 @@ await result.MapResult(async options =>
                     { "rawJsonOutputName", $"{projectName}-raw.json" },
                 }),
             });
+
+            logger.Log("Finished Exporting");
+            progressLogger.Log("Finished Exporting!");
         }
             break;
 
@@ -148,7 +162,7 @@ await result.MapResult(async options =>
             logger.Log();
             progressLogger.Log($"Loading model from file {inputPath}");
             progressLogger.Log();
-            var repositoryModel = await LoadModel(logger, progressLogger, inputPath);
+            var repositoryModel = await LoadModel(logger, progressLogger, inputPath, cancellationTokenSource.Token);
             if (repositoryModel == null)
             {
                 break;
@@ -282,25 +296,23 @@ static void RunScripts(ScriptRunner scriptRunner, Dictionary<string, object> def
     });
 }
 
-static async Task<RepositoryModel> LoadModel(ILogger logger, IProgressLogger progressLogger, string inputPath)
+static async Task<RepositoryModel> LoadModel(ILogger logger, IProgressLogger progressLogger, string inputPath,
+    CancellationToken cancellationToken)
 {
-    var repositoryLoader =
-        new RawFileRepositoryLoader(logger, progressLogger,
-            new JsonModelImporter<RepositoryModel>(new ConverterList()));
-    var repositoryModel = await repositoryLoader.Load(inputPath);
+    var repositoryLoader = new RawFileRepositoryLoader(logger, progressLogger,
+        new JsonModelImporter<RepositoryModel>(new ConverterList()));
+    var repositoryModel = await repositoryLoader.Load(inputPath, cancellationToken);
     return repositoryModel;
 }
 
 static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger progressLogger,
-    ILogger missingFilesLogger, string inputPath, bool parallelExtraction)
+    ILogger missingFilesLogger, string inputPath, bool parallelExtraction, CancellationToken cancellationToken)
 {
-    var solutionProvider = new MsBuildSolutionProvider();
-    var projectProvider = new MsBuildProjectProvider();
-
-    var repositoryLoader = new RepositoryExtractor(solutionProvider, projectProvider, logger, progressLogger,
-        missingFilesLogger, new FactExtractorCreator(VisitorLoaderHelper.LoadVisitors(logger)),
-        new CSharpCompilationMaker(), parallelExtraction);
-    var repositoryModel = await repositoryLoader.Load(inputPath);
+    var repositoryLoader = new RepositoryExtractor(logger, progressLogger, missingFilesLogger,
+        new CSharpCompilationMaker(),
+        new ProjectExtractorFactory(logger, progressLogger, GetProjectLoadingStrategy(logger, parallelExtraction)),
+        parallelExtraction);
+    var repositoryModel = await repositoryLoader.Load(inputPath, cancellationToken);
 
     return repositoryModel;
 }
@@ -315,4 +327,11 @@ static Dictionary<string, object> CreateArgumentsDictionary(IDictionary<string, 
     }
 
     return result;
+}
+
+static IProjectLoadingStrategy GetProjectLoadingStrategy(ILogger logger, bool parallelExtraction)
+{
+    return parallelExtraction
+        ? new ParallelProjectLoadingStrategy(logger)
+        : new BasicProjectLoadingStrategy(logger);
 }

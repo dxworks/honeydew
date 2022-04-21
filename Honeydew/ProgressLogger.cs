@@ -9,7 +9,7 @@ namespace Honeydew
     {
         private readonly Dictionary<string, IProgressBar> _progressBars = new();
 
-        public void Log(object value)
+        public void Log(string value)
         {
             Console.WriteLine(value);
         }
