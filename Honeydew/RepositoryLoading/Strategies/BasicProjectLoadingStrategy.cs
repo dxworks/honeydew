@@ -41,7 +41,6 @@ public class BasicProjectLoadingStrategy : IProjectLoadingStrategy
 
         var i = 1;
         var documentCount = project.Documents.Count();
-        var semaphore = new Semaphore(0, 1);
 
         foreach (var syntaxTree in compilation.SyntaxTrees)
         {
@@ -64,9 +63,7 @@ public class BasicProjectLoadingStrategy : IProjectLoadingStrategy
                     classModel.FilePath = syntaxTreeFilePath;
                 }
 
-                semaphore.WaitOne();
                 projectModel.Add(compilationUnitType);
-                semaphore.Release();
             }
             catch (Exception e)
             {
