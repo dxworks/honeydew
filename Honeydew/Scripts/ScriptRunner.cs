@@ -1,68 +1,89 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using HoneydewCore.Logging;
 
-namespace Honeydew.Scripts
-{
-    internal class ScriptRunner
-    {
-        private readonly Dictionary<string, object> _defaultArguments;
-        private readonly IProgressLogger _logger;
+namespace Honeydew.Scripts;
 
-        public ScriptRunner(IProgressLogger logger, Dictionary<string, object> defaultArguments)
+internal class ScriptRunner
+{
+    private readonly IProgressLogger _logger;
+
+    public ScriptRunner(IProgressLogger logger)
+    {
+        _logger = logger;
+    }
+
+    public object RunForResult(ScriptRuntime scriptRuntime)
+    {
+        var (script, arguments) = scriptRuntime;
+        arguments ??= new Dictionary<string, object>();
+
+        try
         {
-            _logger = logger;
-            _defaultArguments = defaultArguments;
+            foreach (var (key, value) in arguments)
+            {
+                if (arguments.ContainsKey(key))
+                {
+                    arguments[key] = value;
+                }
+                else
+                {
+                    arguments.Add(key, value);
+                }
+            }
+
+            return script.RunForResult(arguments);
+        }
+        catch (Exception e)
+        {
+            _logger.Log($"Could not run script {script.GetType().Name} because {e}");
         }
 
-        public void Run(List<ScriptRuntime> scriptRuntimes, bool changeDefaultArguments = false)
+        return null;
+    }
+
+    public void Run(bool runInParallel, List<ScriptRuntime> scriptRuntimes)
+    {
+        if (runInParallel)
         {
-            var arguments = new Dictionary<string, object>();
-            foreach (var (key, value) in _defaultArguments)
+            Parallel.ForEach(scriptRuntimes, Run);
+        }
+        else
+        {
+            foreach (var runtime in scriptRuntimes)
             {
-                arguments.Add(key, value);
+                Run(runtime);
             }
+        }
+    }
 
-            foreach (var (script, runtimeArguments) in scriptRuntimes)
+    private void Run(ScriptRuntime scriptRuntime)
+    {
+        var (script, arguments) = scriptRuntime;
+        arguments ??= new Dictionary<string, object>();   
+
+        try
+        {
+            foreach (var (key, value) in arguments)
             {
-                try
+                if (arguments.ContainsKey(key))
                 {
-                    if (runtimeArguments != null)
-                    {
-                        foreach (var (key, value) in runtimeArguments)
-                        {
-                            if (arguments.ContainsKey(key))
-                            {
-                                arguments[key] = value;
-                            }
-                            else
-                            {
-                                arguments.Add(key, value);
-                            }
-                        }
-                    }
-                    _logger.Log($"Running Script {script.GetType().Name}");
-                    
-                    script.Run(arguments);
-
-                    if (!changeDefaultArguments)
-                    {
-                        continue;
-                    }
-
-                    foreach (var (key, value) in arguments)
-                    {
-                        if (_defaultArguments.ContainsKey(key))
-                        {
-                            _defaultArguments[key] = value;
-                        }
-                    }
+                    arguments[key] = value;
                 }
-                catch (Exception e)
+                else
                 {
-                    _logger.Log($"Could not run script because {e}");
+                    arguments.Add(key, value);
                 }
             }
+
+            _logger.Log($"Running Script {script.GetType().Name}");
+
+            script.Run(arguments);
+        }
+        catch (Exception e)
+        {
+            _logger.Log($"Could not run script {script.GetType().Name} because {e}");
         }
     }
 }

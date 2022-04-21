@@ -1,0 +1,17 @@
+﻿using System;
+using HoneydewCore.Extractors;
+
+// here is the namespace
+namespace Enums;
+
+public enum MyEnum
+{
+
+    // some values
+    A,
+    
+    B = 2,
+    X,Y,
+    
+    Z /* this is Z */ 
+}

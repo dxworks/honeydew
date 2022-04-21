@@ -16,6 +16,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
 using HoneydewModels.CSharp;
+using HoneydewModels.Types;
 using Moq;
 using Xunit;
 
@@ -127,14 +128,14 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Attributes
                 methodModel.GenericParameters[0],
                 methodModel.LocalFunctions[0].GenericParameters[0],
                 methodModel.LocalFunctions[0].LocalFunctions[0].GenericParameters[0],
-                classTypes[2].GenericParameters[0],
+                (classTypes[2] as ITypeWithGenericParameters)?.GenericParameters[0],
             };
 
             foreach (var genericParameter in genericParameters)
             {
                 Assert.Equal(3, genericParameter.Attributes.Count);
 
-                Assert.Equal("parameter", genericParameter.Attributes[0].Target);
+                Assert.Equal("param", genericParameter.Attributes[0].Target);
                 Assert.Equal("System.ComponentModel.TypeConverterAttribute", genericParameter.Attributes[0].Name);
                 Assert.Equal("Namespace1.MyAttribute", genericParameter.Attributes[1].Name);
                 Assert.Equal("Extern", genericParameter.Attributes[2].Name);

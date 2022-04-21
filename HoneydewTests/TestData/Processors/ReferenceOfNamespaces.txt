@@ -1,0 +1,32 @@
+﻿namespace Namespace1
+{
+    using Namespace2.SubNamespace;
+    using static Namespace3.N1.N2.MyClass3;
+    using Class2 = Namespace2.SubNamespace.MyClass2;
+
+    class MyClass
+    {
+        private MyClass2 _myClass2;
+        private Class2 _class2;
+
+        void Function()
+        {
+            
+        }
+    }
+    
+}
+
+namespace Namespace2.SubNamespace
+{
+    public class MyClass2
+    {   
+    }
+}
+
+namespace Namespace3.N1.N2
+{
+    public static class MyClass3
+    {   
+    }
+}

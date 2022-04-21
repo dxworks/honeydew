@@ -1,34 +1,26 @@
 ﻿using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Destructors;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static HoneydewExtractors.CSharp.Metrics.Extraction.CSharpExtractionHelperMethods;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Destructor
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Destructor;
+
+public class DestructorInfoVisitor : ICSharpDestructorVisitor
 {
-    public class DestructorInfoVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
-        ICSharpDestructorVisitor
+    public void Accept(IVisitor visitor)
     {
-        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+    }
 
-        public void Accept(IVisitor visitor)
-        {
-        }
+    public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IDestructorType modelType)
+    {
+        modelType.Name = $"~{syntaxNode.Identifier.ToString()}";
+        modelType.Modifier = "";
+        modelType.AccessModifier = "";
+        modelType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
 
-        public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, IDestructorType modelType)
-        {
-            var containingClassName = "";
-            if (syntaxNode.Parent is BaseTypeDeclarationSyntax baseTypeDeclarationSyntax)
-            {
-                containingClassName = CSharpHelperMethods.GetFullName(baseTypeDeclarationSyntax).Name;
-            }
-
-            modelType.Name = $"~{syntaxNode.Identifier.ToString()}";
-            modelType.ContainingTypeName = containingClassName;
-            modelType.Modifier = "";
-            modelType.AccessModifier = "";
-            modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
-
-            return modelType;
-        }
+        return modelType;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HoneydewModels;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 using Xunit;
@@ -21,7 +22,11 @@ namespace HoneydewCoreTest.Models
             {
                 ClassTypes = new List<IClassType>
                 {
-                    new ClassModel { Name = "Models.Class" }
+                    new ClassModel
+                    {
+                        Name = "Models.Class",
+                        ContainingNamespaceName = "Models",
+                    }
                 }
             });
 
@@ -36,7 +41,11 @@ namespace HoneydewCoreTest.Models
             {
                 ClassTypes = new List<IClassType>
                 {
-                    new ClassModel { Name = "GlobalClass" }
+                    new ClassModel
+                    {
+                        Name = "GlobalClass",
+                        ContainingNamespaceName = "",
+                    }
                 }
             });
 
@@ -51,7 +60,11 @@ namespace HoneydewCoreTest.Models
             {
                 ClassTypes = new List<IClassType>
                 {
-                    new ClassModel { Name = "Models.M1" }
+                    new ClassModel
+                    {
+                        Name = "Models.M1",
+                        ContainingNamespaceName = "Models",
+                    }
                 }
             });
 
@@ -59,7 +72,11 @@ namespace HoneydewCoreTest.Models
             {
                 ClassTypes = new List<IClassType>
                 {
-                    new ClassModel { Name = "Models.Domain.M2" }
+                    new ClassModel
+                    {
+                        Name = "Models.Domain.M2",
+                        ContainingNamespaceName = "Models.Domain",
+                    }
                 }
             });
 
@@ -67,7 +84,11 @@ namespace HoneydewCoreTest.Models
             {
                 ClassTypes = new List<IClassType>
                 {
-                    new ClassModel { Name = "Items.I1" }
+                    new ClassModel
+                    {
+                        Name = "Items.I1",
+                        ContainingNamespaceName = "Items",
+                    }
                 }
             });
 
@@ -75,7 +96,11 @@ namespace HoneydewCoreTest.Models
             {
                 ClassTypes = new List<IClassType>
                 {
-                    new ClassModel { Name = "Services.S1" }
+                    new ClassModel
+                    {
+                        Name = "Services.S1",
+                        ContainingNamespaceName = "Services",
+                    }
                 }
             });
 
@@ -93,14 +118,22 @@ namespace HoneydewCoreTest.Models
             {
                 ClassTypes = new List<IClassType>
                 {
-                    new ClassModel { Name = "Models.M1" }
+                    new ClassModel
+                    {
+                        Name = "Models.M1",
+                        ContainingNamespaceName = "Models",
+                    }
                 }
             });
             _sut.Add(new CompilationUnitModel
             {
                 ClassTypes = new List<IClassType>
                 {
-                    new ClassModel { Name = "Models.M2" }
+                    new ClassModel
+                    {
+                        Name = "Models.M2",
+                        ContainingNamespaceName = "Models",
+                    }
                 }
             });
 
@@ -115,8 +148,16 @@ namespace HoneydewCoreTest.Models
             {
                 ClassTypes = new List<IClassType>
                 {
-                    new ClassModel { Name = "Models.M1" },
-                    new ClassModel { Name = "Models.M2" }
+                    new ClassModel
+                    {
+                        Name = "Models.M1",
+                        ContainingNamespaceName = "Models",
+                    },
+                    new ClassModel
+                    {
+                        Name = "Models.M2",
+                        ContainingNamespaceName = "Models",
+                    }
                 }
             });
 

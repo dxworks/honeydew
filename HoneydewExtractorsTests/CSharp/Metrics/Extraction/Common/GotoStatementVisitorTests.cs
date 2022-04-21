@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
@@ -159,8 +158,8 @@ public class GotoStatementVisitorTests
     private static void TestGotoStatementInMetrics(IList<MetricModel> metrics)
     {
         Assert.Single(metrics);
-        Assert.Equal(nameof(GotoStatementVisitor), metrics[0].ExtractorName);
-        Assert.Equal(nameof(Int32), metrics[0].ValueType);
+        Assert.Equal(typeof(GotoStatementVisitor).FullName, metrics[0].ExtractorName);
+        Assert.Equal(typeof(int).FullName, metrics[0].ValueType);
         Assert.Equal(3, (int)metrics[0].Value);
     }
 }

@@ -6,7 +6,7 @@ namespace Honeydew
 {
     public class NoBarsProgressLogger : IProgressLogger
     {
-        public void Log(object value)
+        public void Log(string value)
         {
             Console.WriteLine(value);
         }

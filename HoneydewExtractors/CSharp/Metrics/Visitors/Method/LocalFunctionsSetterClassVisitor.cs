@@ -11,120 +11,104 @@ using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method
+namespace HoneydewExtractors.CSharp.Metrics.Visitors.Method;
+
+public class LocalFunctionsSetterClassVisitor : CompositeVisitor, ICSharpMethodVisitor, ICSharpConstructorVisitor,
+    ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor, ICSharpDestructorVisitor
 {
-    public class LocalFunctionsSetterClassVisitor : CompositeVisitor, ICSharpMethodVisitor, ICSharpConstructorVisitor,
-        ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor, ICSharpDestructorVisitor
+    public LocalFunctionsSetterClassVisitor(IEnumerable<ILocalFunctionVisitor> visitors) : base(visitors)
     {
-        public LocalFunctionsSetterClassVisitor(IEnumerable<ILocalFunctionVisitor> visitors) : base(visitors)
+    }
+
+    public IMethodType Visit(MethodDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
+    {
+        if (syntaxNode.Body == null)
         {
-        }
-
-        public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
-        {
-            if (modelType is not MethodModel methodModel)
-            {
-                return modelType;
-            }
-
-            if (syntaxNode.Body == null)
-            {
-                return methodModel;
-            }
-
-            SetLocalFunctionInfo(syntaxNode.Body, methodModel);
-
-            return methodModel;
-        }
-
-        public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, IConstructorType modelType)
-        {
-            if (modelType is not ConstructorModel constructorModel)
-            {
-                return modelType;
-            }
-
-            if (syntaxNode.Body == null)
-            {
-                return constructorModel;
-            }
-
-            SetLocalFunctionInfo(syntaxNode.Body, constructorModel);
-
-            return constructorModel;
-        }
-
-        public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, IDestructorType modelType)
-        {
-            if (modelType is not DestructorModel destructorModel)
-            {
-                return modelType;
-            }
-
-            if (syntaxNode.Body == null)
-            {
-                return destructorModel;
-            }
-
-            SetLocalFunctionInfo(syntaxNode.Body, destructorModel);
-
-            return destructorModel;
-        }
-
-        public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, IMethodType modelType)
-        {
-            if (modelType is not MethodModel methodModel)
-            {
-                return modelType;
-            }
-
-            if (syntaxNode.Body == null)
-            {
-                return methodModel;
-            }
-
-            SetLocalFunctionInfo(syntaxNode.Body, methodModel);
-
-            return methodModel;
-        }
-
-        public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode,
-            IMethodTypeWithLocalFunctions modelType)
-        {
-            if (syntaxNode.Body == null)
-            {
-                return modelType;
-            }
-
-            SetLocalFunctionInfo(syntaxNode.Body, modelType);
-
             return modelType;
         }
 
-        private void SetLocalFunctionInfo(SyntaxNode syntaxNode, ITypeWithLocalFunctions typeWithLocalFunctions)
-        {
-            foreach (var localFunctionStatementSyntax in
-                     syntaxNode.ChildNodes().OfType<LocalFunctionStatementSyntax>())
-            {
-                IMethodTypeWithLocalFunctions localFunction = new MethodModel();
+        SetLocalFunctionInfo(syntaxNode.Body, semanticModel, modelType);
 
-                foreach (var visitor in GetContainedVisitors())
+        return modelType;
+    }
+
+    public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IConstructorType modelType)
+    {
+        if (syntaxNode.Body == null)
+        {
+            return modelType;
+        }
+
+        SetLocalFunctionInfo(syntaxNode.Body, semanticModel, modelType);
+
+        return modelType;
+    }
+
+    public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IDestructorType modelType)
+    {
+        if (syntaxNode.Body == null)
+        {
+            return modelType;
+        }
+
+        SetLocalFunctionInfo(syntaxNode.Body, semanticModel, modelType);
+
+        return modelType;
+    }
+
+    public IAccessorType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorType modelType)
+    {
+        if (syntaxNode.Body == null)
+        {
+            return modelType;
+        }
+
+        SetLocalFunctionInfo(syntaxNode.Body, semanticModel, modelType);
+
+        return modelType;
+    }
+
+    public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode, SemanticModel semanticModel,
+        IMethodTypeWithLocalFunctions modelType)
+    {
+        if (syntaxNode.Body == null)
+        {
+            return modelType;
+        }
+
+        SetLocalFunctionInfo(syntaxNode.Body, semanticModel, modelType);
+
+        return modelType;
+    }
+
+    private void SetLocalFunctionInfo(SyntaxNode syntaxNode, SemanticModel semanticModel,
+        ITypeWithLocalFunctions typeWithLocalFunctions)
+    {
+        foreach (var localFunctionStatementSyntax in
+                 syntaxNode.ChildNodes().OfType<LocalFunctionStatementSyntax>())
+        {
+            IMethodTypeWithLocalFunctions localFunction = new MethodModel();
+
+            foreach (var visitor in GetContainedVisitors())
+            {
+                try
                 {
-                    try
+                    if (visitor is ICSharpLocalFunctionVisitor extractionVisitor)
                     {
-                        if (visitor is ICSharpLocalFunctionVisitor extractionVisitor)
-                        {
-                            localFunction = extractionVisitor.Visit(localFunctionStatementSyntax, localFunction);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log($"Could not extract from Local Function Visitor because {e}", LogLevels.Warning);
+                        localFunction =
+                            extractionVisitor.Visit(localFunctionStatementSyntax, semanticModel, localFunction);
                     }
                 }
-
-                typeWithLocalFunctions.LocalFunctions.Add(localFunction);
+                catch (Exception e)
+                {
+                    Logger.Log($"Could not extract from Local Function Visitor because {e}", LogLevels.Warning);
+                }
             }
+
+            typeWithLocalFunctions.LocalFunctions.Add(localFunction);
         }
     }
 }

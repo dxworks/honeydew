@@ -9,6 +9,7 @@
     <ItemGroup>
         <ProjectReference Include="..\HoneydewCore\HoneydewCore.csproj" />
         <ProjectReference Include="..\HoneydewExtractors\HoneydewExtractors.csproj" />
+        <ProjectReference Include="..\HoneydewScriptBeePlugin\HoneydewScriptBeePlugin.csproj" />
     </ItemGroup>
 
     <ItemGroup>

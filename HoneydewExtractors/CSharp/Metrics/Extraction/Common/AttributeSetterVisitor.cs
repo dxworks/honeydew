@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using HoneydewCore.Logging;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
@@ -17,152 +16,195 @@ using HoneydewModels.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Common;
+
+public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICSharpDelegateVisitor,
+    ICSharpMethodVisitor, ICSharpConstructorVisitor, ICSharpFieldVisitor, ICSharpPropertyVisitor,
+    ICSharpParameterVisitor, ICSharpMethodAccessorVisitor, ICSharpGenericParameterVisitor, ICSharpDestructorVisitor,
+    ICSharpEnumVisitor, ICSharpEnumLabelVisitor
 {
-    [Obfuscation]
-    public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICSharpDelegateVisitor,
-        ICSharpMethodVisitor, ICSharpConstructorVisitor, ICSharpFieldVisitor, ICSharpPropertyVisitor,
-        ICSharpParameterVisitor, ICSharpMethodAccessorVisitor, ICSharpGenericParameterVisitor, ICSharpDestructorVisitor
+    public AttributeSetterVisitor(IEnumerable<IAttributeVisitor> visitors) : base(visitors)
     {
-        public AttributeSetterVisitor(IEnumerable<IAttributeVisitor> visitors) : base(visitors)
+    }
+
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IMembersClassType modelType)
+    {
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "type");
+
+        return modelType;
+    }
+
+    public IMethodType Visit(MethodDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
+    {
+        foreach (var attributeType in ExtractAttributesFromMethod(syntaxNode, semanticModel))
         {
-        }
-
-        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
-        {
-            ExtractAttributes(syntaxNode, modelType, "class");
-
-            return modelType;
-        }
-
-        public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
-        {
-            return ExtractAttributesFromMethod(syntaxNode, modelType);
-        }
-
-        public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, IMethodType modelType)
-        {
-            return ExtractAttributesFromMethod(syntaxNode, modelType);
-        }
-
-        public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, IConstructorType modelType)
-        {
-            ExtractAttributes(syntaxNode, modelType, "constructor");
-
-            return modelType;
-        }
-
-        public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, IDestructorType modelType)
-        {
-            ExtractAttributes(syntaxNode, modelType, "method");
-
-            return modelType;        }
-
-        public IList<IFieldType> Visit(BaseFieldDeclarationSyntax syntaxNode, IList<IFieldType> modelType)
-        {
-            foreach (var fieldType in modelType)
+            if (attributeType.Target == "return")
             {
-                ExtractAttributes(syntaxNode, fieldType, "field");
+                modelType.ReturnValue.Attributes.Add(attributeType);
             }
-
-            return modelType;
-        }
-
-        public IPropertyType Visit(BasePropertyDeclarationSyntax syntaxNode, IPropertyType modelType)
-        {
-            ExtractAttributes(syntaxNode, modelType, "property");
-
-            return modelType;
-        }
-
-        public IDelegateType Visit(DelegateDeclarationSyntax syntaxNode, IDelegateType modelType)
-        {
-            ExtractAttributes(syntaxNode, modelType, "delegate");
-
-            return modelType;
-        }
-
-        public IParameterType Visit(ParameterSyntax syntaxNode, IParameterType modelType)
-        {
-            ExtractAttributes(syntaxNode, modelType, "parameter");
-
-            return modelType;
-        }
-
-        public IGenericParameterType Visit(TypeParameterSyntax syntaxNode, IGenericParameterType modelType)
-        {
-            ExtractAttributes(syntaxNode, modelType, "parameter");
-
-            return modelType;
-        }
-
-        private void ExtractAttributes(SyntaxNode syntaxNode, ITypeWithAttributes modelType, string target)
-        {
-            foreach (var attributeListSyntax in syntaxNode.ChildNodes().OfType<AttributeListSyntax>())
+            else
             {
-                foreach (var attributeSyntax in attributeListSyntax.Attributes)
+                modelType.Attributes.Add(attributeType);
+            }
+        }
+
+        return modelType;
+    }
+
+    public IAccessorType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorType modelType)
+    {
+        foreach (var attributeType in ExtractAttributesFromMethod(syntaxNode, semanticModel))
+        {
+            if (attributeType.Target == "return")
+            {
+                modelType.ReturnValue.Attributes.Add(attributeType);
+            }
+            else
+            {
+                modelType.Attributes.Add(attributeType);
+            }
+        }
+
+        return modelType;
+    }
+
+    public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IConstructorType modelType)
+    {
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "method");
+
+        return modelType;
+    }
+
+    public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IDestructorType modelType)
+    {
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "method");
+
+        return modelType;
+    }
+
+    public IList<IFieldType> Visit(BaseFieldDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IList<IFieldType> modelType)
+    {
+        foreach (var fieldType in modelType)
+        {
+            ExtractAttributes(syntaxNode, semanticModel, fieldType, "field");
+        }
+
+        return modelType;
+    }
+
+    public IPropertyType Visit(BasePropertyDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IPropertyType modelType)
+    {
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "property");
+
+        return modelType;
+    }
+
+    public IDelegateType Visit(DelegateDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IDelegateType modelType)
+    {
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "type");
+
+        return modelType;
+    }
+
+    public IEnumType Visit(EnumDeclarationSyntax syntaxNode, SemanticModel semanticModel, IEnumType modelType)
+    {
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "type");
+
+        return modelType;
+    }
+
+    public IEnumLabelType Visit(EnumMemberDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IEnumLabelType modelType)
+    {
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "field");
+
+        return modelType;
+    }
+
+    public IParameterType Visit(ParameterSyntax syntaxNode, SemanticModel semanticModel, IParameterType modelType)
+    {
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "param");
+
+        return modelType;
+    }
+
+    public IGenericParameterType Visit(TypeParameterSyntax syntaxNode, SemanticModel semanticModel,
+        IGenericParameterType modelType)
+    {
+        ExtractAttributes(syntaxNode, semanticModel, modelType, "param");
+
+        return modelType;
+    }
+
+    private void ExtractAttributes(SyntaxNode syntaxNode, SemanticModel semanticModel, ITypeWithAttributes modelType,
+        string target)
+    {
+        foreach (var attributeListSyntax in syntaxNode.ChildNodes().OfType<AttributeListSyntax>())
+        {
+            foreach (var attributeSyntax in attributeListSyntax.Attributes)
+            {
+                IAttributeType attributeModel = new AttributeModel();
+
+                foreach (var visitor in GetContainedVisitors())
                 {
-                    IAttributeType attributeModel = new AttributeModel();
-
-                    foreach (var visitor in GetContainedVisitors())
+                    try
                     {
-                        try
+                        if (visitor is ICSharpAttributeVisitor extractionVisitor)
                         {
-                            if (visitor is ICSharpAttributeVisitor extractionVisitor)
-                            {
-                                attributeModel = extractionVisitor.Visit(attributeSyntax, attributeModel);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Log($"Could not extract from Attribute Visitor because {e}", LogLevels.Warning);
+                            attributeModel = extractionVisitor.Visit(attributeSyntax, semanticModel, attributeModel);
                         }
                     }
-
-                    attributeModel.Target = target;
-
-                    modelType.Attributes.Add(attributeModel);
+                    catch (Exception e)
+                    {
+                        Logger.Log($"Could not extract from Attribute Visitor because {e}", LogLevels.Warning);
+                    }
                 }
+
+                attributeModel.Target = target;
+
+                modelType.Attributes.Add(attributeModel);
             }
         }
+    }
 
-        private IMethodType ExtractAttributesFromMethod(SyntaxNode syntaxNode, IMethodType modelType)
+    private IEnumerable<IAttributeType> ExtractAttributesFromMethod(SyntaxNode syntaxNode, SemanticModel semanticModel)
+    {
+        var attributes = new List<IAttributeType>();
+
+        foreach (var attributeListSyntax in syntaxNode.ChildNodes().OfType<AttributeListSyntax>())
         {
-            foreach (var attributeListSyntax in syntaxNode.ChildNodes().OfType<AttributeListSyntax>())
+            foreach (var attributeSyntax in attributeListSyntax.Attributes)
             {
-                foreach (var attributeSyntax in attributeListSyntax.Attributes)
+                IAttributeType attributeModel = new AttributeModel();
+
+                attributeModel.Target = "method";
+
+                foreach (var visitor in GetContainedVisitors())
                 {
-                    IAttributeType attributeModel = new AttributeModel();
-
-                    attributeModel.Target = "method";
-
-                    foreach (var visitor in GetContainedVisitors())
+                    try
                     {
-                        try
+                        if (visitor is ICSharpAttributeVisitor extractionVisitor)
                         {
-                            if (visitor is ICSharpAttributeVisitor extractionVisitor)
-                            {
-                                attributeModel = extractionVisitor.Visit(attributeSyntax, attributeModel);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Log($"Could not extract from Attribute Visitor because {e}", LogLevels.Warning);
+                            attributeModel = extractionVisitor.Visit(attributeSyntax, semanticModel, attributeModel);
                         }
                     }
-
-                    if (attributeModel.Target == "return")
+                    catch (Exception e)
                     {
-                        modelType.ReturnValue.Attributes.Add(attributeModel);
-                    }
-                    else
-                    {
-                        modelType.Attributes.Add(attributeModel);
+                        Logger.Log($"Could not extract from Attribute Visitor because {e}", LogLevels.Warning);
                     }
                 }
-            }
 
-            return modelType;
+                attributes.Add(attributeModel);
+            }
         }
+
+        return attributes;
     }
 }

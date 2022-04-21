@@ -1,9 +1,0 @@
-namespace App
-{                                       
-    enum MyClass
-    {                                           
-        A,
-        B = 20,
-        C
-    }
-}

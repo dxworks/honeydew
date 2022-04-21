@@ -1,25 +1,27 @@
 ﻿using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 
-namespace HoneydewModels.Converters
+namespace HoneydewModels.Converters;
+
+public class CSharpClassTypeConverter : ITypeConverter<IClassType>
 {
-    public class CSharpClassTypeConverter : ITypeConverter<IClassType>
+    IClassType ITypeConverter<IClassType>.Convert(string type)
     {
-        IClassType ITypeConverter<IClassType>.Convert(string type)
+        return type switch
         {
-            return type == "delegate" ? new DelegateModel() : new ClassModel();
-        }
+            "delegate" => new DelegateModel(),
+            "enum" => new EnumModel(),
+            _ => new ClassModel()
+        };
+    }
 
-        public IClassType Convert(object value)
+    public IClassType Convert(object value)
+    {
+        return value switch
         {
-            {
-                if (value is DelegateModel delegateModel)
-                {
-                    return delegateModel;
-                }
-
-                return (ClassModel)value;
-            }
-        }
+            DelegateModel delegateModel => delegateModel,
+            EnumModel enumModel => enumModel,
+            _ => (ClassModel)value
+        };
     }
 }

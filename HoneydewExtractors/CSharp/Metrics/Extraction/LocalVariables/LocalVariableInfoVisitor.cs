@@ -3,115 +3,123 @@ using HoneydewCore.Utils;
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables
-{
-    public class LocalVariableInfoVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
-        ICSharpLocalVariablesVisitor
-    {
-        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables;
 
-        public void Accept(IVisitor visitor)
+public class LocalVariableInfoVisitor : ICSharpLocalVariablesVisitor
+{
+    public void Accept(IVisitor visitor)
+    {
+    }
+
+    public ILocalVariableType Visit(VariableDeclaratorSyntax syntaxNode, SemanticModel semanticModel,
+        ILocalVariableType modelType)
+    {
+        var variableDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<VariableDeclarationSyntax>();
+        if (variableDeclarationSyntax == null)
         {
+            return modelType;
         }
 
-        public ILocalVariableType Visit(VariableDeclaratorSyntax syntaxNode, ILocalVariableType modelType)
+        modelType.Name = syntaxNode.Identifier.ToString();
+        var localVariableType =
+            CSharpExtractionHelperMethods.GetFullName(variableDeclarationSyntax.Type, semanticModel,
+                out var isNullable);
+        var fullName = localVariableType.Name;
+
+        var modifier = CSharpExtractionHelperMethods.SetTypeModifier(variableDeclarationSyntax.Type.ToString(), "");
+        modelType.Modifier = modifier;
+
+        if (!string.IsNullOrEmpty(modifier) && fullName.Contains(modifier))
         {
-            var variableDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<VariableDeclarationSyntax>();
-            if (variableDeclarationSyntax == null)
+            fullName = fullName.Replace(modifier, "").Trim();
+        }
+
+        if (fullName == CSharpConstants.VarIdentifier)
+        {
+            fullName = CSharpExtractionHelperMethods
+                .GetFullName(variableDeclarationSyntax, semanticModel, out isNullable).Name;
+            if (fullName != CSharpConstants.VarIdentifier)
             {
-                return modelType;
+                localVariableType.Name = fullName;
             }
-
-            IEntityType localVariableType =
-                CSharpHelperMethods.GetFullName(variableDeclarationSyntax.Type, out var isNullable);
-            var fullName = localVariableType.Name;
-
-            var modifier = CSharpHelperMethods.SetTypeModifier(variableDeclarationSyntax.Type.ToString(), "");
-            modelType.Modifier = modifier;
-
-            if (!string.IsNullOrEmpty(modifier) && fullName.Contains(modifier))
+            else
             {
-                fullName = fullName.Replace(modifier, "").Trim();
-            }
-
-            if (fullName == CSharpConstants.VarIdentifier)
-            {
-                fullName = CSharpHelperMethods.GetFullName(variableDeclarationSyntax, out isNullable).Name;
-                if (fullName != CSharpConstants.VarIdentifier)
+                foreach (var declarationVariable in variableDeclarationSyntax.Variables)
                 {
-                    localVariableType.Name = fullName;
-                }
-                else
-                {
-                    foreach (var declarationVariable in variableDeclarationSyntax.Variables)
-                    {
-                        if (declarationVariable.Initializer is
+                    if (declarationVariable.Initializer is
                         {
                             Value: ObjectCreationExpressionSyntax
                             objectCreationExpressionSyntax
                         })
+                    {
+                        localVariableType =
+                            CSharpExtractionHelperMethods.GetFullName(objectCreationExpressionSyntax.Type,
+                                semanticModel, out isNullable);
+                    }
+                    else if (declarationVariable.Initializer != null)
+                    {
+                        var memberAccessExpressionSyntax = declarationVariable.Initializer.ChildNodes()
+                            .OfType<MemberAccessExpressionSyntax>().SingleOrDefault();
+                        if (memberAccessExpressionSyntax != null)
                         {
                             localVariableType =
-                                CSharpHelperMethods.GetFullName(objectCreationExpressionSyntax.Type, out isNullable);
+                                CSharpExtractionHelperMethods.GetFullName(memberAccessExpressionSyntax.Name,
+                                    semanticModel, out isNullable);
+                            if (localVariableType.Name == memberAccessExpressionSyntax.Name.ToString())
+                            {
+                                localVariableType.Name = "";
+                                localVariableType.FullType.Name = "";
+                            }
                         }
-                        else if (declarationVariable.Initializer != null)
+                        else
                         {
-                            var memberAccessExpressionSyntax = declarationVariable.Initializer.ChildNodes()
-                                .OfType<MemberAccessExpressionSyntax>().SingleOrDefault();
-                            if (memberAccessExpressionSyntax != null)
-                            {
-                                localVariableType = CSharpHelperMethods.GetFullName(memberAccessExpressionSyntax.Name,
-                                    out isNullable);
-                                if (localVariableType.Name == memberAccessExpressionSyntax.Name.ToString())
-                                {
-                                    localVariableType.Name = "";
-                                    localVariableType.FullType.Name = "";
-                                }
-                            }
-                            else
-                            {
-                                localVariableType =
-                                    CSharpHelperMethods.GetFullName(declarationVariable.Initializer.Value,
-                                        out isNullable);
-                            }
+                            localVariableType =
+                                CSharpExtractionHelperMethods.GetFullName(declarationVariable.Initializer.Value,
+                                    semanticModel, out isNullable);
                         }
                     }
                 }
             }
-
-            modelType.Type = localVariableType;
-            modelType.IsNullable = isNullable;
-
-            return modelType;
         }
 
-        public ILocalVariableType Visit(DeclarationPatternSyntax syntaxNode, ILocalVariableType modelType)
-        {
-            modelType.Type = CSharpHelperMethods.GetFullName(syntaxNode.Type, out var isNullable);
-            modelType.IsNullable = isNullable;
-            return modelType;
-        }
+        modelType.Type = localVariableType;
+        modelType.IsNullable = isNullable;
 
-        public ILocalVariableType Visit(ForEachStatementSyntax syntaxNode, ILocalVariableType modelType)
-        {
-            modelType.Type = CSharpHelperMethods.GetFullName(syntaxNode.Type, out var isNullable);
+        return modelType;
+    }
 
-            if (modelType.Type.Name == CSharpConstants.VarIdentifier)
+    public ILocalVariableType Visit(DeclarationPatternSyntax syntaxNode, SemanticModel semanticModel,
+        ILocalVariableType modelType)
+    {
+        modelType.Type =
+            CSharpExtractionHelperMethods.GetFullName(syntaxNode.Type, semanticModel, out var isNullable);
+        modelType.IsNullable = isNullable;
+        return modelType;
+    }
+
+    public ILocalVariableType Visit(ForEachStatementSyntax syntaxNode, SemanticModel semanticModel,
+        ILocalVariableType modelType)
+    {
+        modelType.Type =
+            CSharpExtractionHelperMethods.GetFullName(syntaxNode.Type, semanticModel, out var isNullable);
+
+        if (modelType.Type.Name == CSharpConstants.VarIdentifier)
+        {
+            var entityType =
+                CSharpExtractionHelperMethods.GetFullName(syntaxNode.Expression, semanticModel, out isNullable);
+            if (entityType.FullType.ContainedTypes.Count > 0)
             {
-                var entityType = CSharpHelperMethods.GetFullName(syntaxNode.Expression, out isNullable);
-                if (entityType.FullType.ContainedTypes.Count > 0)
-                {
-                    var genericType = entityType.FullType.ContainedTypes[0];
-                    modelType.Type.Name = genericType.Name;
-                    modelType.Type.FullType = genericType;
-                }
+                var genericType = entityType.FullType.ContainedTypes[0];
+                modelType.Type.Name = genericType.Name;
+                modelType.Type.FullType = genericType;
             }
-
-            modelType.IsNullable = isNullable;
-
-            return modelType;
         }
+
+        modelType.IsNullable = isNullable;
+
+        return modelType;
     }
 }

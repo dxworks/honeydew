@@ -1,7 +1,6 @@
-﻿namespace HoneydewModels.Types
+﻿namespace HoneydewModels.Types;
+
+public interface IDelegateType : IClassType, IMethodSignatureType, ITypeWithGenericParameters 
 {
-    public interface IDelegateType : IClassType, IMethodSignatureType
-    {
-        public IReturnValueType ReturnValue { get; set; }
-    }
+    public IReturnValueType ReturnValue { get; set; }
 }

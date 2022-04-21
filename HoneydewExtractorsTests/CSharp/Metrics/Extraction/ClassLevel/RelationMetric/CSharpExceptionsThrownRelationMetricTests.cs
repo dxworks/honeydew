@@ -9,43 +9,34 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using Moq;
 using Xunit;
 
-namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric
+namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationMetric;
+
+public class CSharpExceptionsThrownRelationMetricTests
 {
-    public class CSharpExceptionsThrownRelationMetricTests
+    private readonly CSharpFactExtractor _factExtractor;
+    private readonly Mock<ILogger> _loggerMock = new();
+    private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+    private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
+
+    public CSharpExceptionsThrownRelationMetricTests()
     {
-        private readonly CSharpFactExtractor _factExtractor;
-        private readonly ExceptionsThrownRelationVisitor _sut;
-        private readonly Mock<ILogger> _loggerMock = new();
-        private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
-        private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
+        var compositeVisitor = new CompositeVisitor();
 
-        public CSharpExceptionsThrownRelationMetricTests()
+        compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
         {
-            _sut = new ExceptionsThrownRelationVisitor(new RelationMetricHolder());
+            new BaseInfoClassVisitor(),
+            new ExceptionsThrownRelationVisitor(),
+        }));
 
-            var compositeVisitor = new CompositeVisitor();
+        compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
 
-            compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(new List<ICSharpClassVisitor>
-            {
-                new BaseInfoClassVisitor(),
-                _sut
-            }));
+        _factExtractor = new CSharpFactExtractor(compositeVisitor);
+    }
 
-            compositeVisitor.Accept(new LoggerSetterVisitor(_loggerMock.Object));
-
-            _factExtractor = new CSharpFactExtractor(compositeVisitor);
-        }
-
-        [Fact]
-        public void PrettyPrint_ShouldReturnReturnValueDependency()
-        {
-            Assert.Equal("Exceptions Thrown Dependency", _sut.PrettyPrint());
-        }
-
-        [Fact]
-        public void Extract_ShouldHaveNoExceptionsThrown_WhenProvidedWithClassThatDoesntThrowExceptions()
-        {
-            const string fileContent = @"using System;
+    [Fact]
+    public void Extract_ShouldHaveNoExceptionsThrown_WhenProvidedWithClassThatDoesntThrowExceptions()
+    {
+        const string fileContent = @"using System;
                                      namespace App
                                      {                
                                          class C {}
@@ -74,22 +65,22 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.ClassLevel.RelationM
                                          }
                                      }";
 
-                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntaxTree);
-            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-            Assert.Equal(1, classTypes[1].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
-                classTypes[1].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-                classTypes[1].Metrics[0].ValueType);
-            Assert.Empty((IDictionary<string, int>)classTypes[1].Metrics[0].Value);
-        }
+        Assert.Equal(1, classTypes[1].Metrics.Count);
+        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
+            classTypes[1].Metrics[0].ExtractorName);
+        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            classTypes[1].Metrics[0].ValueType);
+        Assert.Empty((IDictionary<string, int>)classTypes[1].Metrics[0].Value);
+    }
 
-        [Fact]
-        public void Extract_ShouldHaveSystemExceptionsThrown_WhenProvidedWithClassThatThrowsSystemExceptions()
-        {
-            const string fileContent = @"using System;
+    [Fact]
+    public void Extract_ShouldHaveSystemExceptionsThrown_WhenProvidedWithClassThatThrowsSystemExceptions()
+    {
+        const string fileContent = @"using System;
 namespace Throw2
 {
     public class NumberGenerator
@@ -120,29 +111,29 @@ namespace Throw2
     }
 }";
 
-                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntaxTree);
-            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-            Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
-                classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-                classTypes[0].Metrics[0].ValueType);
+        Assert.Equal(1, classTypes[0].Metrics.Count);
+        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
+            classTypes[0].Metrics[0].ExtractorName);
+        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
+        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
 
-            Assert.Equal(3, dependencies.Count);
-            Assert.Equal(1, dependencies["System.ArgumentNullException"]);
-            Assert.Equal(1, dependencies["System.ArgumentException"]);
-            Assert.Equal(1, dependencies["System.IndexOutOfRangeException"]);
-        }
+        Assert.Equal(3, dependencies.Count);
+        Assert.Equal(1, dependencies["System.ArgumentNullException"]);
+        Assert.Equal(1, dependencies["System.ArgumentException"]);
+        Assert.Equal(1, dependencies["System.IndexOutOfRangeException"]);
+    }
 
 
-        [Fact]
-        public void Extract_ShouldHaveExceptionsThrown_WhenProvidedWithClassThatThrowsCustomExceptions()
-        {
-            const string fileContent = @"using System;
+    [Fact]
+    public void Extract_ShouldHaveExceptionsThrown_WhenProvidedWithClassThatThrowsCustomExceptions()
+    {
+        const string fileContent = @"using System;
 namespace Throwing
 {
     class MyArgumentNullException : Exception { }
@@ -180,28 +171,28 @@ namespace Throwing
     }
 }";
 
-                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntaxTree);
-            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-            Assert.Equal(1, classTypes[3].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
-                classTypes[3].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-                classTypes[3].Metrics[0].ValueType);
+        Assert.Equal(1, classTypes[3].Metrics.Count);
+        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
+            classTypes[3].Metrics[0].ExtractorName);
+        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            classTypes[3].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>)classTypes[3].Metrics[0].Value;
+        var dependencies = (IDictionary<string, int>)classTypes[3].Metrics[0].Value;
 
-            Assert.Equal(3, dependencies.Count);
-            Assert.Equal(1, dependencies["Throwing.MyArgumentNullException"]);
-            Assert.Equal(1, dependencies["Throwing.MyArgumentException"]);
-            Assert.Equal(1, dependencies["Throwing.MyIndexOutOfRangeException"]);
-        }
+        Assert.Equal(3, dependencies.Count);
+        Assert.Equal(1, dependencies["Throwing.MyArgumentNullException"]);
+        Assert.Equal(1, dependencies["Throwing.MyArgumentException"]);
+        Assert.Equal(1, dependencies["Throwing.MyIndexOutOfRangeException"]);
+    }
 
-        [Fact]
-        public void Extract_ShouldHaveExceptionsThrown_WhenProvidedWithClassThatRethrowsExplicitExceptions()
-        {
-            const string fileContent = @"namespace Throwing
+    [Fact]
+    public void Extract_ShouldHaveExceptionsThrown_WhenProvidedWithClassThatRethrowsExplicitExceptions()
+    {
+        const string fileContent = @"namespace Throwing
 {
     using System;
 
@@ -240,27 +231,27 @@ namespace Throwing
     }
 }";
 
-                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntaxTree);
-            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-            Assert.Equal(1, classTypes[1].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
-                classTypes[1].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-                classTypes[1].Metrics[0].ValueType);
+        Assert.Equal(1, classTypes[1].Metrics.Count);
+        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
+            classTypes[1].Metrics[0].ExtractorName);
+        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            classTypes[1].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>)classTypes[1].Metrics[0].Value;
+        var dependencies = (IDictionary<string, int>)classTypes[1].Metrics[0].Value;
 
-            Assert.Equal(2, dependencies.Count);
-            Assert.Equal(2, dependencies["Throwing.MyArgumentException"]);
-            Assert.Equal(1, dependencies["System.NullReferenceException"]);
-        }
+        Assert.Equal(2, dependencies.Count);
+        Assert.Equal(2, dependencies["Throwing.MyArgumentException"]);
+        Assert.Equal(1, dependencies["System.NullReferenceException"]);
+    }
 
-        [Fact]
-        public void Extract_ShouldHaveExceptionsThrown_WhenProvidedWithClassThatRethrowsImplicitExceptions()
-        {
-            const string fileContent = @"using System;
+    [Fact]
+    public void Extract_ShouldHaveExceptionsThrown_WhenProvidedWithClassThatRethrowsImplicitExceptions()
+    {
+        const string fileContent = @"using System;
 namespace Throwing
 {
     public class NumberGenerator
@@ -290,28 +281,28 @@ namespace Throwing
     }
 }";
 
-                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntaxTree);
-            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-            Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
-                classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-                classTypes[0].Metrics[0].ValueType);
+        Assert.Equal(1, classTypes[0].Metrics.Count);
+        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
+            classTypes[0].Metrics[0].ExtractorName);
+        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
+        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
 
-            Assert.Equal(2, dependencies.Count);
-            Assert.Equal(1, dependencies["System.IndexOutOfRangeException"]);
-            Assert.Equal(1, dependencies["System.NullReferenceException"]);
-        }
+        Assert.Equal(2, dependencies.Count);
+        Assert.Equal(1, dependencies["System.IndexOutOfRangeException"]);
+        Assert.Equal(1, dependencies["System.NullReferenceException"]);
+    }
 
-        [Fact]
-        public void
-            Extract_ShouldHaveExceptionsThrown_WhenProvidedWithClassThatTrowsExceptionsUsingVariablesParametersFieldsPropertiesAndMethodCalls()
-        {
-            const string fileContent = @"using System;
+    [Fact]
+    public void
+        Extract_ShouldHaveExceptionsThrown_WhenProvidedWithClassThatTrowsExceptionsUsingVariablesParametersFieldsPropertiesAndMethodCalls()
+    {
+        const string fileContent = @"using System;
 namespace Throwing
 {
     class MyException : Exception
@@ -352,30 +343,30 @@ namespace Throwing
     }
 }";
 
-                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntaxTree);
-            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-            Assert.Equal(1, classTypes[1].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
-                classTypes[1].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-                classTypes[1].Metrics[0].ValueType);
+        Assert.Equal(1, classTypes[1].Metrics.Count);
+        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
+            classTypes[1].Metrics[0].ExtractorName);
+        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            classTypes[1].Metrics[0].ValueType);
 
-            var dependencies = (IDictionary<string, int>)classTypes[1].Metrics[0].Value;
+        var dependencies = (IDictionary<string, int>)classTypes[1].Metrics[0].Value;
 
-            Assert.Equal(5, dependencies.Count);
-            Assert.Equal(1, dependencies["System.IndexOutOfRangeException"]);
-            Assert.Equal(1, dependencies["System.NullReferenceException"]);
-            Assert.Equal(1, dependencies["System.Exception"]);
-            Assert.Equal(1, dependencies["System.NotSupportedException"]);
-            Assert.Equal(2, dependencies["Throwing.MyException"]);
-        }
+        Assert.Equal(5, dependencies.Count);
+        Assert.Equal(1, dependencies["System.IndexOutOfRangeException"]);
+        Assert.Equal(1, dependencies["System.NullReferenceException"]);
+        Assert.Equal(1, dependencies["System.Exception"]);
+        Assert.Equal(1, dependencies["System.NotSupportedException"]);
+        Assert.Equal(2, dependencies["Throwing.MyException"]);
+    }
 
-        [Fact]
-        public void Extract_ShouldHaveExternalExceptionsThrown_WhenProvidedWithClassThatTrowsExternalExceptions()
-        {
-            const string fileContent = @"
+    [Fact]
+    public void Extract_ShouldHaveExternalExceptionsThrown_WhenProvidedWithClassThatTrowsExternalExceptions()
+    {
+        const string fileContent = @"
 namespace Throwing
 {
     public class NumberGenerator
@@ -423,26 +414,26 @@ namespace Throwing
     }
 }";
 
-                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntaxTree);
-            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-            Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
-                classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-                classTypes[0].Metrics[0].ValueType);
+        Assert.Equal(1, classTypes[0].Metrics.Count);
+        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
+            classTypes[0].Metrics[0].ExtractorName);
+        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
+        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
 
-            Assert.Single(dependencies);
-            Assert.Equal(8, dependencies["ExternException"]);
-        }
+        Assert.Single(dependencies);
+        Assert.Equal(8, dependencies["ExternException"]);
+    }
 
-        [Fact]
-        public void Extract_ShouldHaveExceptionsThrown_WhenProvidedWithConditionalOperatorWithThrowException()
-        {
-            const string fileContent = @"using System;
+    [Fact]
+    public void Extract_ShouldHaveExceptionsThrown_WhenProvidedWithConditionalOperatorWithThrowException()
+    {
+        const string fileContent = @"using System;
 namespace Throwing
 {
     public class NumberGenerator
@@ -459,26 +450,26 @@ namespace Throwing
     }
 }";
 
-                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntaxTree);
-            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-            Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
-                classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-                classTypes[0].Metrics[0].ValueType);
+        Assert.Equal(1, classTypes[0].Metrics.Count);
+        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
+            classTypes[0].Metrics[0].ExtractorName);
+        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
+        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
 
-            Assert.Single(dependencies);
-            Assert.Equal(1, dependencies["System.ArgumentException"]);
-        }
+        Assert.Single(dependencies);
+        Assert.Equal(1, dependencies["System.ArgumentException"]);
+    }
 
-        [Fact]
-        public void Extract_ShouldHaveExceptionsThrown_WhenProvidedWithNullCoalescingOperatorWithThrowException()
-        {
-            const string fileContent = @"using System;
+    [Fact]
+    public void Extract_ShouldHaveExceptionsThrown_WhenProvidedWithNullCoalescingOperatorWithThrowException()
+    {
+        const string fileContent = @"using System;
 namespace Throwing
 {
     public class NumberGenerator
@@ -492,26 +483,26 @@ namespace Throwing
     }
 }";
 
-                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntaxTree);
-            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-            Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
-                classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-                classTypes[0].Metrics[0].ValueType);
+        Assert.Equal(1, classTypes[0].Metrics.Count);
+        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
+            classTypes[0].Metrics[0].ExtractorName);
+        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
+        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
 
-            Assert.Single(dependencies);
-            Assert.Equal(1, dependencies["System.ArgumentNullException"]);
-        }
+        Assert.Single(dependencies);
+        Assert.Equal(1, dependencies["System.ArgumentNullException"]);
+    }
 
-        [Fact]
-        public void Extract_ShouldHaveExceptionsThrown_WhenProvidedWithLambdaThathrowsException()
-        {
-            const string fileContent = @"using System;
+    [Fact]
+    public void Extract_ShouldHaveExceptionsThrown_WhenProvidedWithLambdaThathrowsException()
+    {
+        const string fileContent = @"using System;
 namespace Throwing
 {
     public class NumberGenerator
@@ -524,20 +515,19 @@ namespace Throwing
     }
 }";
 
-                      var syntaxTree = _syntacticModelCreator.Create(fileContent);
-            var semanticModel = _semanticModelCreator.Create(syntaxTree);
-            var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-            Assert.Equal(1, classTypes[0].Metrics.Count);
-            Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
-                classTypes[0].Metrics[0].ExtractorName);
-            Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
-                classTypes[0].Metrics[0].ValueType);
+        Assert.Equal(1, classTypes[0].Metrics.Count);
+        Assert.Equal("HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations.ExceptionsThrownRelationVisitor",
+            classTypes[0].Metrics[0].ExtractorName);
+        Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
+            classTypes[0].Metrics[0].ValueType);
 
-            var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
+        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
 
-            Assert.Single(dependencies);
-            Assert.Equal(1, dependencies["System.InvalidCastException"]);
-        }
+        Assert.Single(dependencies);
+        Assert.Equal(1, dependencies["System.InvalidCastException"]);
     }
 }

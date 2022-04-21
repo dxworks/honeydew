@@ -7,47 +7,44 @@ using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Destructors;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class;
+
+public class DestructorSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
 {
-    public class DestructorSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
+    public DestructorSetterClassVisitor(IEnumerable<IDestructorVisitor> visitors) : base(visitors)
     {
-        public DestructorSetterClassVisitor(IEnumerable<IDestructorVisitor> visitors) : base(visitors)
+    }
+
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IMembersClassType modelType)
+    {
+        foreach (var destructorDeclarationSyntax in syntaxNode.DescendantNodes()
+                     .OfType<DestructorDeclarationSyntax>())
         {
-        }
+            IDestructorType destructorType = new DestructorModel();
 
-        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
-        {
-            if (modelType is not IMembersClassType membersClassType)
+            foreach (var visitor in GetContainedVisitors())
             {
-                return modelType;
-            }
-
-            foreach (var destructorDeclarationSyntax in syntaxNode.DescendantNodes()
-                         .OfType<DestructorDeclarationSyntax>())
-            {
-                IDestructorType destructorType = new DestructorModel();
-
-                foreach (var visitor in GetContainedVisitors())
+                try
                 {
-                    try
+                    if (visitor is ICSharpDestructorVisitor extractionVisitor)
                     {
-                        if (visitor is ICSharpDestructorVisitor extractionVisitor)
-                        {
-                            destructorType = extractionVisitor.Visit(destructorDeclarationSyntax, destructorType);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log($"Could not extract from Destructor Visitor because {e}", LogLevels.Warning);
+                        destructorType = extractionVisitor.Visit(destructorDeclarationSyntax, semanticModel,
+                            destructorType);
                     }
                 }
-
-                membersClassType.Destructor = destructorType;
+                catch (Exception e)
+                {
+                    Logger.Log($"Could not extract from Destructor Visitor because {e}", LogLevels.Warning);
+                }
             }
 
-            return membersClassType;
+            modelType.Destructor = destructorType;
         }
+
+        return modelType;
     }
 }

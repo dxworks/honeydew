@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace HoneydewModels.Types
+namespace HoneydewModels.Types;
+
+public interface IPropertyMembersClassType : IMembersClassType
 {
-    public interface IPropertyMembersClassType : IMembersClassType
-    {
-        public IList<IPropertyType> Properties { get; set; }
-    }
+    public IList<IPropertyType> Properties { get; set; }
 }

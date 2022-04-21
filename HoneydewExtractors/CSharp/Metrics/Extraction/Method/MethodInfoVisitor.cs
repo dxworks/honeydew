@@ -1,115 +1,116 @@
-﻿using HoneydewCore.Utils;
-using HoneydewExtractors.Core.Metrics.Visitors;
+﻿using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static HoneydewCore.Utils.CSharpConstants;
+using static HoneydewExtractors.CSharp.Metrics.Extraction.CSharpExtractionHelperMethods;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Method
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Method;
+
+public class MethodInfoVisitor : ICSharpMethodVisitor, ICSharpMethodAccessorVisitor, ICSharpArrowExpressionMethodVisitor
 {
-    public class MethodInfoVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
-        ICSharpMethodVisitor, ICSharpMethodAccessorVisitor, ICSharpArrowExpressionMethodVisitor
+    public void Accept(IVisitor visitor)
     {
-        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+    }
 
-        public void Accept(IVisitor visitor)
+    public IMethodType Visit(MethodDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
+    {
+        var isInterface = syntaxNode.GetParentDeclarationSyntax<InterfaceDeclarationSyntax>() != null;
+        var accessModifier = isInterface
+            ? DefaultInterfaceMethodAccessModifier
+            : DefaultClassMethodAccessModifier;
+        var modifier = isInterface
+            ? DefaultInterfaceMethodModifier
+            : syntaxNode.Modifiers.ToString();
+
+        SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier, ref modifier);
+
+        var returnType = GetFullName(syntaxNode.ReturnType, semanticModel, out var isNullable);
+
+        var returnTypeModifier = SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
+
+
+        modelType.Name = syntaxNode.Identifier.ToString();
+        modelType.ReturnValue = new ReturnValueModel
         {
-        }
+            Type = returnType,
+            Modifier = returnTypeModifier,
+            IsNullable = isNullable
+        };
+        modelType.Modifier = modifier;
+        modelType.AccessModifier = accessModifier;
+        modelType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
 
-        public IMethodType Visit(MethodDeclarationSyntax syntaxNode, IMethodType modelType)
+        return modelType;
+    }
+
+    public IAccessorType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorType modelType)
+    {
+        var accessModifier = "public";
+        var modifier = syntaxNode.Modifiers.ToString();
+
+        SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier, ref modifier);
+        var keyword = syntaxNode.Keyword.ToString();
+
+        IEntityType returnType = new EntityTypeModel
         {
-            var isInterface = syntaxNode.GetParentDeclarationSyntax<InterfaceDeclarationSyntax>() != null;
-            var accessModifier = isInterface
-                ? CSharpConstants.DefaultInterfaceMethodAccessModifier
-                : CSharpConstants.DefaultClassMethodAccessModifier;
-            var modifier = isInterface
-                ? CSharpConstants.DefaultInterfaceMethodModifier
-                : syntaxNode.Modifiers.ToString();
+            Name = "void"
+        };
+        var isNullable = false;
 
-            CSharpConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier, ref modifier);
-
-            var returnType = CSharpHelperMethods.GetFullName(syntaxNode.ReturnType, out var isNullable);
-
-            var returnTypeModifier = CSharpHelperMethods.SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
-
-
-            modelType.Name = syntaxNode.Identifier.ToString();
-            modelType.ReturnValue = new ReturnValueModel
-            {
-                Type = returnType,
-                Modifier = returnTypeModifier,
-                IsNullable = isNullable
-            };
-            modelType.ContainingTypeName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);
-            modelType.Modifier = modifier;
-            modelType.AccessModifier = accessModifier;
-            modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
-
-            return modelType;
-        }
-
-        public IMethodType Visit(AccessorDeclarationSyntax syntaxNode, IMethodType modelType)
+        if (keyword == "get")
         {
-            var accessModifier = "public";
-            var modifier = syntaxNode.Modifiers.ToString();
-
-            CSharpConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier, ref modifier);
-            var keyword = syntaxNode.Keyword.ToString();
-
-            IEntityType returnType = new EntityTypeModel
-            {
-                Name = "void"
-            };
-            var isNullable = false;
-
-            if (keyword == "get")
-            {
-                var basePropertyDeclarationSyntax =
-                    syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
-                if (basePropertyDeclarationSyntax != null)
-                {
-                    returnType = CSharpHelperMethods.GetFullName(basePropertyDeclarationSyntax.Type, out isNullable);
-                }
-            }
-
-            modelType.Name = keyword;
-            modelType.ReturnValue = new ReturnValueModel
-            {
-                Type = returnType,
-                IsNullable = isNullable
-            };
-            modelType.ContainingTypeName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);
-            modelType.Modifier = modifier;
-            modelType.AccessModifier = accessModifier;
-            modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
-
-            return modelType;
-        }
-
-        public IMethodType Visit(ArrowExpressionClauseSyntax syntaxNode, IMethodType modelType)
-        {
-            IEntityType returnType = new EntityTypeModel
-            {
-                Name = "void"
-            };
-            var isNullable = false;
-            var basePropertyDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
+            var basePropertyDeclarationSyntax =
+                syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
             if (basePropertyDeclarationSyntax != null)
             {
-                returnType = CSharpHelperMethods.GetFullName(basePropertyDeclarationSyntax.Type, out isNullable);
+                returnType =
+                    GetFullName(basePropertyDeclarationSyntax.Type, semanticModel,
+                        out isNullable);
             }
-
-            modelType.Name = "get";
-            modelType.AccessModifier = "public";
-            modelType.ContainingTypeName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);
-            modelType.ReturnValue = new ReturnValueModel
-            {
-                Type = returnType,
-                IsNullable = isNullable
-            };
-            modelType.CyclomaticComplexity = CSharpHelperMethods.CalculateCyclomaticComplexity(syntaxNode);
-
-            return modelType;
         }
+
+        modelType.Name = keyword;
+        modelType.ReturnValue = new ReturnValueModel
+        {
+            Type = returnType,
+            IsNullable = isNullable
+        };
+        modelType.Modifier = modifier;
+        modelType.AccessModifier = accessModifier;
+        modelType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
+
+        return modelType;
+    }
+
+    public IAccessorType Visit(ArrowExpressionClauseSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorType modelType)
+    {
+        IEntityType returnType = new EntityTypeModel
+        {
+            Name = "void"
+        };
+        var isNullable = false;
+        var basePropertyDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
+        if (basePropertyDeclarationSyntax != null)
+        {
+            returnType =
+                GetFullName(basePropertyDeclarationSyntax.Type, semanticModel,
+                    out isNullable);
+        }
+
+        modelType.Name = "get";
+        modelType.AccessModifier = "public";
+        modelType.ReturnValue = new ReturnValueModel
+        {
+            Type = returnType,
+            IsNullable = isNullable
+        };
+        modelType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
+
+        return modelType;
     }
 }

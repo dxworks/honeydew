@@ -107,24 +107,6 @@ public class CSharpBaseClassMetricTests
     }
 
     [Theory]
-    [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/SimpleEnum.txt")]
-    public void Extract_ShouldHaveEnumBaseClass_WhenProvidedWithEnum(string fileContent)
-    {
-        var syntaxTree = _syntacticModelCreator.Create(fileContent);
-        var semanticModel = _semanticModelCreator.Create(syntaxTree);
-        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
-
-        Assert.Equal(1, classTypes.Count);
-
-        var classModel = classTypes[0];
-
-        Assert.Equal("App.MyClass", classModel.Name);
-        Assert.Equal(1, classModel.BaseTypes.Count);
-        Assert.Equal("System.Enum", classModel.BaseTypes[0].Type.Name);
-        Assert.Equal("class", classModel.BaseTypes[0].Kind);
-    }
-
-    [Theory]
     [FileData("TestData/CSharp/Metrics/Extraction/ClassLevel/BaseClassInfo/ClassThatExtendsExternClasses.txt")]
     public void Extract_ShouldHaveBaseClassIMetric_WhenClassExtendsIMetricInterface(string fileContent)
     {

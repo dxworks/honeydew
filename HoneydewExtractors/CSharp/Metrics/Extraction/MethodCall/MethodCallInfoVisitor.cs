@@ -1,23 +1,21 @@
 ﻿using HoneydewExtractors.Core.Metrics.Visitors;
-using HoneydewExtractors.Core.Metrics.Visitors.MethodSignatures;
+using HoneydewExtractors.Core.Metrics.Visitors.MethodCalls;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.MethodCall
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.MethodCall;
+
+public class MethodCallInfoVisitor : ICSharpMethodCallVisitor
 {
-    public class MethodCallInfoVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
-        ICSharpMethodSignatureVisitor
+    public void Accept(IVisitor visitor)
     {
-        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+    }
 
-        public void Accept(IVisitor visitor)
-        {
-        }
-
-        public IMethodSignatureType Visit(InvocationExpressionSyntax syntaxNode, IMethodSignatureType modelType)
-        {
-            var methodCallModel = CSharpHelperMethods.GetMethodCallModel(syntaxNode);
-            return methodCallModel;
-        }
+    public IMethodCallType Visit(InvocationExpressionSyntax syntaxNode, SemanticModel semanticModel,
+        IMethodCallType modelType)
+    {
+        var methodCallModel = CSharpExtractionHelperMethods.GetMethodCallModel(syntaxNode, semanticModel);
+        return methodCallModel;
     }
 }

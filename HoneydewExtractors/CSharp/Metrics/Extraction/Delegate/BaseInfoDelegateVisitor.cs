@@ -3,53 +3,52 @@ using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static HoneydewExtractors.CSharp.Metrics.Extraction.CSharpExtractionHelperMethods;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Delegate
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Delegate;
+
+public class BaseInfoDelegateVisitor : ICSharpDelegateVisitor
 {
-    public class BaseInfoDelegateVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
-        ICSharpDelegateVisitor
+    public void Accept(IVisitor visitor)
     {
-        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+    }
 
-        public void Accept(IVisitor visitor)
+    public IDelegateType Visit(DelegateDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IDelegateType modelType)
+    {
+        var accessModifier = CSharpConstants.DefaultClassAccessModifier;
+        var modifier = "";
+        CSharpConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier,
+            ref modifier);
+
+        var returnType = GetFullName(syntaxNode.ReturnType, semanticModel);
+
+        var returnTypeModifier = SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
+
+        var name = GetFullName(syntaxNode, semanticModel).Name;
+        modelType.Name = name;
+        modelType.AccessModifier = accessModifier;
+        modelType.Modifier = modifier;
+        modelType.ReturnValue = new ReturnValueModel
         {
-        }
+            Type = returnType,
+            Modifier = returnTypeModifier
+        };
 
-        public IDelegateType Visit(DelegateDeclarationSyntax syntaxNode, IDelegateType modelType)
+        modelType.ClassType = CSharpConstants.DelegateIdentifier;
+        modelType.BaseTypes.Add(new BaseTypeModel
         {
-            var accessModifier = CSharpConstants.DefaultClassAccessModifier;
-            var modifier = "";
-            CSharpConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier,
-                ref modifier);
-
-            var returnType = CSharpHelperMethods.GetFullName(syntaxNode.ReturnType);
-
-            var returnTypeModifier = CSharpHelperMethods.SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
-
-            var name = CSharpHelperMethods.GetFullName(syntaxNode).Name;
-            modelType.Name = name;
-            modelType.AccessModifier = accessModifier;
-            modelType.Modifier = modifier;
-            modelType.ReturnValue = new ReturnValueModel
+            Kind = CSharpConstants.ClassIdentifier,
+            Type = new EntityTypeModel
             {
-                Type = returnType,
-                Modifier = returnTypeModifier
-            };
+                Name = CSharpConstants.SystemDelegate
+            }
+        });
+        modelType.ContainingClassName = GetContainingClassName(syntaxNode, semanticModel);
+        modelType.ContainingNamespaceName = GetContainingNamespaceName(syntaxNode, semanticModel);
 
-            modelType.ClassType = CSharpConstants.DelegateIdentifier;
-            modelType.BaseTypes.Add(new BaseTypeModel
-            {
-                Kind = CSharpConstants.ClassIdentifier,
-                Type = new EntityTypeModel
-                {
-                    Name = CSharpConstants.SystemDelegate
-                }
-            });
-            modelType.ContainingTypeName = name
-                .Replace(syntaxNode.Identifier.ToString(), "").Trim('.');
-
-            return modelType;
-        }
+        return modelType;
     }
 }

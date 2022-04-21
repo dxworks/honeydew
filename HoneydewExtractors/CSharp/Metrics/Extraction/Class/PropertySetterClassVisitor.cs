@@ -7,47 +7,48 @@ using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Properties;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class;
+
+public class PropertySetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
 {
-    public class PropertySetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
+    public PropertySetterClassVisitor(IEnumerable<IPropertyVisitor> visitors) : base(visitors)
     {
-        public PropertySetterClassVisitor(IEnumerable<IPropertyVisitor> visitors) : base(visitors)
+    }
+
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMembersClassType modelType)
+    {
+        if (modelType is not IPropertyMembersClassType propertyMembersClassType)
         {
+            return modelType;
         }
 
-        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
+        foreach (var basePropertyDeclarationSyntax in syntaxNode.DescendantNodes()
+                     .OfType<BasePropertyDeclarationSyntax>())
         {
-            if (modelType is not IPropertyMembersClassType propertyMembersClassType)
-            {
-                return modelType;
-            }
+            IPropertyType propertyModel = new PropertyModel();
 
-            foreach (var basePropertyDeclarationSyntax in syntaxNode.DescendantNodes()
-                .OfType<BasePropertyDeclarationSyntax>())
+            foreach (var visitor in GetContainedVisitors())
             {
-                IPropertyType propertyModel = new PropertyModel();
-
-                foreach (var visitor in GetContainedVisitors())
+                try
                 {
-                    try
+                    if (visitor is ICSharpPropertyVisitor extractionVisitor)
                     {
-                        if (visitor is ICSharpPropertyVisitor extractionVisitor)
-                        {
-                            propertyModel = extractionVisitor.Visit(basePropertyDeclarationSyntax, propertyModel);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log($"Could not extract from Property Visitor because {e}", LogLevels.Warning);
+                        propertyModel =
+                            extractionVisitor.Visit(basePropertyDeclarationSyntax, semanticModel, propertyModel);
                     }
                 }
-
-                propertyMembersClassType.Properties.Add(propertyModel);
+                catch (Exception e)
+                {
+                    Logger.Log($"Could not extract from Property Visitor because {e}", LogLevels.Warning);
+                }
             }
 
-            return propertyMembersClassType;
+            propertyMembersClassType.Properties.Add(propertyModel);
         }
+
+        return propertyMembersClassType;
     }
 }

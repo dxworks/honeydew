@@ -1,0 +1,21 @@
+﻿namespace Namespace1;
+
+public class Main
+{
+    public void M()
+    {
+        Extern d = new Derived();
+        
+        d.Method();
+    }
+    
+    public int P
+    {
+        get 
+        {
+            new Extern().Method();
+        
+            return 0;
+        }
+    }
+}

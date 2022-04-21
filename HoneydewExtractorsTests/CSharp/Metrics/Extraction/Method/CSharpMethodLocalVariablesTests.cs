@@ -71,9 +71,13 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             foreach (var methodType in classModel.Methods)
             {
                 Assert.Equal(4, methodType.LocalVariableTypes.Count);
+                Assert.Equal("sum", methodType.LocalVariableTypes[0].Name);
                 Assert.Equal("int", methodType.LocalVariableTypes[0].Type.Name);
+                Assert.Equal("min", methodType.LocalVariableTypes[1].Name);
                 Assert.Equal("int", methodType.LocalVariableTypes[1].Type.Name);
+                Assert.Equal("max", methodType.LocalVariableTypes[2].Name);
                 Assert.Equal("int", methodType.LocalVariableTypes[2].Type.Name);
+                Assert.Equal("s", methodType.LocalVariableTypes[3].Name);
                 Assert.Equal("string", methodType.LocalVariableTypes[3].Type.Name);
             }
         }
@@ -93,15 +97,22 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             foreach (var methodType in classModel.Methods)
             {
                 Assert.Equal(5, methodType.LocalVariableTypes.Count);
+                Assert.Equal("parent", methodType.LocalVariableTypes[0].Name);
                 Assert.Equal("Namespace1.Parent", methodType.LocalVariableTypes[0].Type.Name);
+                Assert.Equal("class3", methodType.LocalVariableTypes[3].Name);
                 Assert.Equal("Namespace1.Class2", methodType.LocalVariableTypes[3].Type.Name);
+                Assert.Equal("class4", methodType.LocalVariableTypes[4].Name);
                 Assert.Equal("Namespace1.Class3", methodType.LocalVariableTypes[4].Type.Name);
             }
 
+            Assert.Equal("class1", classModel.Methods[0].LocalVariableTypes[1].Name);
             Assert.Equal("Namespace1.Parent", classModel.Methods[0].LocalVariableTypes[1].Type.Name);
+            Assert.Equal("class2", classModel.Methods[0].LocalVariableTypes[2].Name);
             Assert.Equal("Namespace1.Parent", classModel.Methods[0].LocalVariableTypes[2].Type.Name);
 
+            Assert.Equal("class1", classModel.Methods[1].LocalVariableTypes[1].Name);
             Assert.Equal("Namespace1.Class2", classModel.Methods[1].LocalVariableTypes[1].Type.Name);
+            Assert.Equal("class2", classModel.Methods[1].LocalVariableTypes[2].Name);
             Assert.Equal("Namespace1.Class3", classModel.Methods[1].LocalVariableTypes[2].Type.Name);
         }
 
@@ -120,6 +131,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             foreach (var methodType in classModel.Methods)
             {
                 Assert.Equal(1, methodType.LocalVariableTypes.Count);
+                Assert.Equal("type", methodType.LocalVariableTypes[0].Name);
                 Assert.Equal("System.Type", methodType.LocalVariableTypes[0].Type.Name);
             }
         }
@@ -141,6 +153,7 @@ namespace HoneydewExtractorsTests.CSharp.Metrics.Extraction.Method
             foreach (var methodType in classModel.Methods)
             {
                 Assert.Equal(1, methodType.LocalVariableTypes.Count);
+                Assert.Equal("type", methodType.LocalVariableTypes[0].Name);
                 Assert.Equal("string", methodType.LocalVariableTypes[0].Type.Name);
             }
         }

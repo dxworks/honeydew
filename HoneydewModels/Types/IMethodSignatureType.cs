@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace HoneydewModels.Types
+namespace HoneydewModels.Types;
+
+public interface IMethodSignatureType : INamedType
 {
-    public interface IMethodSignatureType : IContainedType
-    {
-        public IList<IParameterType> ParameterTypes { get; set; }
-    }
+    public IList<IParameterType> ParameterTypes { get; set; }
 }

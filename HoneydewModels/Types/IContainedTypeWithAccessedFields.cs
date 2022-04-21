@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace HoneydewModels.Types
+namespace HoneydewModels.Types;
+
+public interface IContainedTypeWithAccessedFields : INamedType
 {
-    public interface IContainedTypeWithAccessedFields : IContainedType
-    {
-        public IList<AccessedField> AccessedFields { get; set; }
-    }
+    public IList<AccessedField> AccessedFields { get; set; }
 }

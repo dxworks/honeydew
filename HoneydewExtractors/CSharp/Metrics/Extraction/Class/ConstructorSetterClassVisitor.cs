@@ -7,47 +7,44 @@ using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class;
+
+public class ConstructorSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
 {
-    public class ConstructorSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
+    public ConstructorSetterClassVisitor(IEnumerable<IConstructorVisitor> visitors) : base(visitors)
     {
-        public ConstructorSetterClassVisitor(IEnumerable<IConstructorVisitor> visitors) : base(visitors)
+    }
+
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IMembersClassType modelType)
+    {
+        foreach (var constructorDeclarationSyntax in syntaxNode.DescendantNodes()
+                     .OfType<ConstructorDeclarationSyntax>())
         {
-        }
+            IConstructorType constructorModel = new ConstructorModel();
 
-        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
-        {
-            if (modelType is not IMembersClassType membersClassType)
+            foreach (var visitor in GetContainedVisitors())
             {
-                return modelType;
-            }
-
-            foreach (var constructorDeclarationSyntax in syntaxNode.DescendantNodes()
-                .OfType<ConstructorDeclarationSyntax>())
-            {
-                IConstructorType constructorModel = new ConstructorModel();
-
-                foreach (var visitor in GetContainedVisitors())
+                try
                 {
-                    try
+                    if (visitor is ICSharpConstructorVisitor extractionVisitor)
                     {
-                        if (visitor is ICSharpConstructorVisitor extractionVisitor)
-                        {
-                            constructorModel = extractionVisitor.Visit(constructorDeclarationSyntax, constructorModel);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log($"Could not extract from Constructor Visitor because {e}", LogLevels.Warning);
+                        constructorModel = extractionVisitor.Visit(constructorDeclarationSyntax, semanticModel,
+                            constructorModel);
                     }
                 }
-
-                membersClassType.Constructors.Add(constructorModel);
+                catch (Exception e)
+                {
+                    Logger.Log($"Could not extract from Constructor Visitor because {e}", LogLevels.Warning);
+                }
             }
 
-            return membersClassType;
+            modelType.Constructors.Add(constructorModel);
         }
+
+        return modelType;
     }
 }

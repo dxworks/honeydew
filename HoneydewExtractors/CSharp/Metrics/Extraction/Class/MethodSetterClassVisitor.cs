@@ -7,46 +7,42 @@ using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.Methods;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class;
+
+public class MethodSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
 {
-    public class MethodSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
+    public MethodSetterClassVisitor(IEnumerable<IMethodVisitor> visitors) : base(visitors)
     {
-        public MethodSetterClassVisitor(IEnumerable<IMethodVisitor> visitors) : base(visitors)
+    }
+
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IMembersClassType modelType)
+    {
+        foreach (var methodDeclarationSyntax in syntaxNode.DescendantNodes().OfType<MethodDeclarationSyntax>())
         {
-        }
+            IMethodType methodModel = new MethodModel();
 
-        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
-        {
-            if (modelType is not IMembersClassType membersClassType)
+            foreach (var visitor in GetContainedVisitors())
             {
-                return modelType;
-            }
-
-            foreach (var methodDeclarationSyntax in syntaxNode.DescendantNodes().OfType<MethodDeclarationSyntax>())
-            {
-                IMethodType methodModel = new MethodModel();
-
-                foreach (var visitor in GetContainedVisitors())
+                try
                 {
-                    try
+                    if (visitor is ICSharpMethodVisitor extractionVisitor)
                     {
-                        if (visitor is ICSharpMethodVisitor extractionVisitor)
-                        {
-                            methodModel = extractionVisitor.Visit(methodDeclarationSyntax, methodModel);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log($"Could not extract from Method Visitor because {e}", LogLevels.Warning);
+                        methodModel = extractionVisitor.Visit(methodDeclarationSyntax, semanticModel, methodModel);
                     }
                 }
-
-                membersClassType.Methods.Add(methodModel);
+                catch (Exception e)
+                {
+                    Logger.Log($"Could not extract from Method Visitor because {e}", LogLevels.Warning);
+                }
             }
 
-            return membersClassType;
+            modelType.Methods.Add(methodModel);
         }
+
+        return modelType;
     }
 }

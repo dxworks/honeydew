@@ -7,42 +7,44 @@ using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
 using HoneydewModels.CSharp;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
+
+public class DelegateSetterCompilationUnitVisitor : CompositeVisitor, ICSharpCompilationUnitVisitor
 {
-    public class DelegateSetterCompilationUnitVisitor : CompositeVisitor, ICSharpCompilationUnitVisitor
+    public DelegateSetterCompilationUnitVisitor(IEnumerable<IDelegateVisitor> visitors) : base(visitors)
     {
-        public DelegateSetterCompilationUnitVisitor(IEnumerable<IDelegateVisitor> visitors) : base(visitors)
-        {
-        }
+    }
 
-        public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, ICompilationUnitType modelType)
+    public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, SemanticModel semanticModel,
+        ICompilationUnitType modelType)
+    {
+        foreach (var delegateDeclarationSyntax in syntaxNode.DescendantNodes().OfType<DelegateDeclarationSyntax>())
         {
-            foreach (var delegateDeclarationSyntax in syntaxNode.DescendantNodes().OfType<DelegateDeclarationSyntax>())
+            IDelegateType delegateModel = new DelegateModel();
+
+            foreach (var visitor in GetContainedVisitors())
             {
-                IDelegateType delegateModel = new DelegateModel();
-
-                foreach (var visitor in GetContainedVisitors())
+                try
                 {
-                    try
+                    if (visitor is ICSharpDelegateVisitor extractionVisitor)
                     {
-                        if (visitor is ICSharpDelegateVisitor extractionVisitor)
-                        {
-                            delegateModel = extractionVisitor.Visit(delegateDeclarationSyntax, delegateModel);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log($"Could not extract from Delegate Visitor because {e}", LogLevels.Warning);
+                        delegateModel =
+                            extractionVisitor.Visit(delegateDeclarationSyntax, semanticModel, delegateModel);
                     }
                 }
-
-                modelType.ClassTypes.Add(delegateModel);
+                catch (Exception e)
+                {
+                    Logger.Log($"Could not extract from Delegate Visitor because {e}", LogLevels.Warning);
+                }
             }
 
-            return modelType;
+            modelType.ClassTypes.Add(delegateModel);
         }
+
+        return modelType;
     }
 }

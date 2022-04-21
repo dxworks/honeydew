@@ -7,7 +7,7 @@ Honeydew is a tool that extracts facts from a C# Solution or C# Project
 For extracting information about a solution or project use the following command:
 
 ```
-.\Honeydew extract <input_path> [--no-progress-bars] [--no-trim-paths] [--voyager] [-n|--project-name <name>]
+.\Honeydew extract <input_path> [-n|--project-name <name>] [--no-progress-bars] [--no-trim-paths] [-p|--parallel] [--voyager]
 ```
 
 If `input_path` is a path to a solution file (.sln), Honeydew will extract facts from that solution file
@@ -21,6 +21,12 @@ The output files will be placed in a folder named `results`
 
 ### Options
 
+- `-n` or `--project-name`
+
+  The flag must be followed by a string. This flag is used to set the project name. If not present, the project name
+  will be deduced from the `<input_path>`. The project name is used to name the output files
+
+
 - `--no-progress-bars`
 
   If present, then all the messages will be printed in the console. Otherwise, output will contain progress bars for a
@@ -32,26 +38,31 @@ The output files will be placed in a folder named `results`
   If present, Honeydew will not trim the File Paths present in the created model
 
 
-- `--voyager`
+- `-p` or `--parallel`
 
+  If present, Honeydew will make the extraction in parallel where possible
+
+- `--voyager`
+  *Obsolete*  
   If present, Honeydew will extract the model and export it raw in a json file. The post extraction metrics will not be
   used. The extraction will run as if the `--no-progress-bars` flag was set.
 
-
-- `-n` or `--project-name`
-
-  The flag must be followed by a string. This flag is used to set the project name. If not present, the project name
-  will be deduced from the `<input_path>`. The project name is used to name the output files
 
 ## Load Model from file
 
 For loading a model from a json file
 
 ```
-.\Honeydew load <path_to_json_model> [--no-progress-bars] [--no-trim-paths] [--voyager] [-n|--project-name <name>]
+.\Honeydew load <path_to_json_model> [-n|--project-name <name>] [--no-progress-bars] [-p|--parallel]
 ```
 
 ### Options
+
+- `-n` or `--project-name`
+
+  The flag must be followed by a string. This flag is used to set the project name. If not present, the project name
+  will be deduced from the `<path_to_json_model>`. The project name is used to name the output files
+
 
 - `--no-progress-bars`
 
@@ -59,21 +70,10 @@ For loading a model from a json file
   better visualisation of the progress
 
 
-- `--no-trim-paths`
+- `-p` or `--parallel`
 
-  If present, Honeydew will not trim the File Paths present in the created model
+  If present, Honeydew will run scripts in parallel where possible
 
-
-- `--voyager`
-
-  If present, Honeydew will extract the model and export it raw in a json file. The post extraction metrics will not be
-  used. The extraction will run as if the `--no-progress-bars` flag was set.
-
-
-- `-n` or `--project-name`
-
-  The flag must be followed by a string. This flag is used to set the project name. If not present, the project name
-  will be deduced from the `<path_to_json_model>`. The project name is used to name the output files
 
 ## Build Project
 

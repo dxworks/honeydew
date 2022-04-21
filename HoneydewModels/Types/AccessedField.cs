@@ -1,17 +1,18 @@
-﻿namespace HoneydewModels.Types
+﻿namespace HoneydewModels.Types;
+
+public record AccessedField : INamedType
 {
-    public record AccessedField : IContainedType
+    public string Name { get; set; }
+
+    public string DefinitionClassName { get; set; } // base
+
+    public string LocationClassName { get; set; } // derived
+
+    public AccessKind Kind { get; set; }
+
+    public enum AccessKind
     {
-        public string Name { get; set; }
-
-        public string ContainingTypeName { get; set; }
-
-        public AccessKind Kind { get; set; }
-
-        public enum AccessKind
-        {
-            Getter,
-            Setter,
-        }
+        Getter,
+        Setter,
     }
 }

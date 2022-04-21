@@ -1,78 +1,110 @@
-﻿using System.Linq;
-using HoneydewCore.ModelRepresentations;
+﻿using System.Collections.Generic;
+using System.Linq;
 using HoneydewCore.Utils;
+using HoneydewExtractors.Core.Metrics.Visitors;
+using HoneydewExtractors.Core.Metrics.Visitors.Classes;
+using HoneydewModels.CSharp;
+using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
+
+public class ObjectCreationRelationVisitor : ICSharpClassVisitor
 {
-    public class ObjectCreationRelationVisitor : RelationVisitor
+    public const string ObjectCreationDependencyMetricName = "ObjectCreationDependency";
+
+    public void Accept(IVisitor visitor)
     {
-        public ObjectCreationRelationVisitor()
+    }
+
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMembersClassType modelType)
+    {
+        var dictionary = AddDependencies(syntaxNode, semanticModel);
+
+        modelType.Metrics.Add(new MetricModel(
+            ObjectCreationDependencyMetricName,
+            GetType().ToString(),
+            dictionary.GetType().ToString(),
+            dictionary
+        ));
+
+        return modelType;
+    }
+
+    private static IDictionary<string, int> AddDependencies(BaseTypeDeclarationSyntax syntaxNode,
+        SemanticModel semanticModel)
+    {
+        var dictionary = new Dictionary<string, int>();
+
+        foreach (var objectCreationExpressionSyntax in syntaxNode.DescendantNodes()
+                     .OfType<ObjectCreationExpressionSyntax>())
         {
+            var dependencyName = CSharpExtractionHelperMethods
+                .GetFullName(objectCreationExpressionSyntax.Type, semanticModel).Name;
+            if (dependencyName != CSharpConstants.VarIdentifier)
+            {
+                AddDependency(dictionary, dependencyName);
+            }
         }
 
-        public ObjectCreationRelationVisitor(IRelationMetricHolder metricHolder) : base(metricHolder)
+        foreach (var implicitObjectCreationExpressionSyntax in syntaxNode.DescendantNodes()
+                     .OfType<ImplicitObjectCreationExpressionSyntax>())
         {
+            var dependencyName = CSharpExtractionHelperMethods
+                .GetFullName(implicitObjectCreationExpressionSyntax, semanticModel).Name;
+            if (dependencyName != CSharpConstants.VarIdentifier)
+            {
+                AddDependency(dictionary, dependencyName);
+            }
         }
 
-        public override string PrettyPrint()
+        foreach (var arrayCreationExpressionSyntax in syntaxNode.DescendantNodes()
+                     .OfType<ArrayCreationExpressionSyntax>())
         {
-            return "Object Creation Dependency";
+            var dependencyName = CSharpExtractionHelperMethods
+                .GetFullName(arrayCreationExpressionSyntax.Type, semanticModel).Name;
+            if (dependencyName != CSharpConstants.VarIdentifier)
+            {
+                AddDependency(dictionary, dependencyName);
+            }
         }
 
-        protected override void AddDependencies(string className, BaseTypeDeclarationSyntax syntaxNode)
+        foreach (var implicitArrayCreationExpressionSyntax in syntaxNode.DescendantNodes()
+                     .OfType<ImplicitArrayCreationExpressionSyntax>())
         {
-            foreach (var objectCreationExpressionSyntax in syntaxNode.DescendantNodes()
-                .OfType<ObjectCreationExpressionSyntax>())
+            var dependencyName = CSharpExtractionHelperMethods
+                .GetFullName(implicitArrayCreationExpressionSyntax, semanticModel).Name;
+            if (dependencyName != CSharpConstants.VarIdentifier)
             {
-                var dependencyName = CSharpHelperMethods.GetFullName(objectCreationExpressionSyntax.Type).Name;
-                if (dependencyName != CSharpConstants.VarIdentifier)
-                {
-                    MetricHolder.Add(className, dependencyName, this);
-                }
+                AddDependency(dictionary, dependencyName);
             }
+        }
 
-            foreach (var implicitObjectCreationExpressionSyntax in syntaxNode.DescendantNodes()
-                .OfType<ImplicitObjectCreationExpressionSyntax>())
+        foreach (var expressionSyntax in syntaxNode.DescendantNodes().OfType<InitializerExpressionSyntax>()
+                     .Where(syntax => syntax.Parent is EqualsValueClauseSyntax)
+                     .Select(syntax => syntax.Parent))
+        {
+            var dependencyName = CSharpExtractionHelperMethods.GetContainingType(expressionSyntax, semanticModel).Name;
+            if (dependencyName != CSharpConstants.VarIdentifier)
             {
-                var dependencyName = CSharpHelperMethods.GetFullName(implicitObjectCreationExpressionSyntax).Name;
-                if (dependencyName != CSharpConstants.VarIdentifier)
-                {
-                    MetricHolder.Add(className, dependencyName, this);
-                }
+                AddDependency(dictionary, dependencyName);
             }
+        }
 
-            foreach (var arrayCreationExpressionSyntax in syntaxNode.DescendantNodes()
-                .OfType<ArrayCreationExpressionSyntax>())
-            {
-                var dependencyName = CSharpHelperMethods.GetFullName(arrayCreationExpressionSyntax.Type).Name;
-                if (dependencyName != CSharpConstants.VarIdentifier)
-                {
-                    MetricHolder.Add(className,
-                        dependencyName, this);
-                }
-            }
+        return dictionary;
+    }
 
-            foreach (var implicitArrayCreationExpressionSyntax in syntaxNode.DescendantNodes()
-                .OfType<ImplicitArrayCreationExpressionSyntax>())
-            {
-                var dependencyName = CSharpHelperMethods.GetFullName(implicitArrayCreationExpressionSyntax).Name;
-                if (dependencyName != CSharpConstants.VarIdentifier)
-                {
-                    MetricHolder.Add(className, dependencyName, this);
-                }
-            }
-
-            foreach (var expressionSyntax in syntaxNode.DescendantNodes().OfType<InitializerExpressionSyntax>()
-                .Where(syntax => syntax.Parent is EqualsValueClauseSyntax)
-                .Select(syntax => syntax.Parent))
-            {
-                var dependencyName = CSharpHelperMethods.GetContainingType(expressionSyntax).Name;
-                if (dependencyName != CSharpConstants.VarIdentifier)
-                {
-                    MetricHolder.Add(className, dependencyName, this);
-                }
-            }
+    private static void AddDependency(IDictionary<string, int> dependencies, string dependencyName)
+    {
+        dependencyName = dependencyName.Trim('?');
+        if (dependencies.ContainsKey(dependencyName))
+        {
+            dependencies[dependencyName]++;
+        }
+        else
+        {
+            dependencies.Add(dependencyName, 1);
         }
     }
 }

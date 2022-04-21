@@ -1,7 +1,6 @@
-﻿namespace HoneydewExtractors.Core.Metrics.Visitors
+﻿namespace HoneydewExtractors.Core.Metrics.Visitors;
+
+public interface IExtractionVisitor<in TSyntaxNode, in TSemanticModel, TModelType> : ITypeVisitor
 {
-    public interface IExtractionVisitor<in TSyntaxNode, TModelType> : ITypeVisitor
-    {
-        TModelType Visit(TSyntaxNode syntaxNode, TModelType modelType);
-    }
+    TModelType Visit(TSyntaxNode syntaxNode, TSemanticModel semanticModel, TModelType modelType);
 }

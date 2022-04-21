@@ -2,33 +2,32 @@
 using HoneydewExtractors.Core.Metrics.Visitors;
 using HoneydewExtractors.Core.Metrics.Visitors.Classes;
 using HoneydewModels.Types;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static HoneydewExtractors.CSharp.Metrics.Extraction.CSharpExtractionHelperMethods;
 
-namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class
+namespace HoneydewExtractors.CSharp.Metrics.Extraction.Class;
+
+public class BaseInfoClassVisitor : ICSharpClassVisitor
 {
-    public class BaseInfoClassVisitor : IRequireCSharpExtractionHelperMethodsVisitor,
-        ICSharpClassVisitor
+    public void Accept(IVisitor visitor)
     {
-        public CSharpExtractionHelperMethods CSharpHelperMethods { get; set; }
+    }
 
-        public void Accept(IVisitor visitor)
-        {
-        }
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMembersClassType modelType)
+    {
+        var accessModifier = CSharpConstants.DefaultClassAccessModifier;
+        var modifier = "";
+        CSharpConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier,
+            ref modifier);
 
-        public IClassType Visit(BaseTypeDeclarationSyntax syntaxNode, IClassType modelType)
-        {
-            var accessModifier = CSharpConstants.DefaultClassAccessModifier;
-            var modifier = "";
-            CSharpConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier,
-                ref modifier);
+        modelType.Name = GetFullName(syntaxNode, semanticModel).Name;
+        modelType.AccessModifier = accessModifier;
+        modelType.Modifier = modifier;
+        modelType.ClassType = syntaxNode.Kind().ToString().Replace("Declaration", "").ToLower();
+        modelType.ContainingNamespaceName = GetContainingNamespaceName(syntaxNode, semanticModel);
+        modelType.ContainingClassName = GetContainingClassName(syntaxNode, semanticModel);
 
-            modelType.Name = CSharpHelperMethods.GetFullName(syntaxNode).Name;
-            modelType.AccessModifier = accessModifier;
-            modelType.Modifier = modifier;
-            modelType.ClassType = syntaxNode.Kind().ToString().Replace("Declaration", "").ToLower();
-            modelType.ContainingTypeName = CSharpHelperMethods.GetParentDeclaredType(syntaxNode);
-
-            return modelType;
-        }
+        return modelType;
     }
 }

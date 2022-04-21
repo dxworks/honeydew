@@ -1,0 +1,16 @@
+﻿namespace Enums;
+
+public class Class1
+{
+    public enum MyEnum : long 
+    {
+        A,
+        B,
+        C
+    }
+    
+    public class Class2
+    {
+        public enum Enum1 : byte {}
+    }
+}
