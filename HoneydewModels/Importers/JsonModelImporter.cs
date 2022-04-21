@@ -1,32 +1,28 @@
 ﻿using System.IO;
+using System.Threading;
 using Newtonsoft.Json;
 
-namespace HoneydewModels.Importers
+namespace HoneydewModels.Importers;
+
+public class JsonModelImporter<TModel>
 {
-    public class JsonModelImporter<TModel>
+    private readonly IConverterList _converterList;
+
+    public JsonModelImporter(IConverterList converterList)
     {
-        private readonly IConverterList _converterList;
+        _converterList = converterList;
+    }
 
-        public JsonModelImporter(IConverterList converterList)
+    public TModel Import(string filePath, CancellationToken cancellationToken)
+    {
+        using var streamReader = File.OpenText(filePath);
+        var serializer = new JsonSerializer();
+        foreach (var converter in _converterList.GetConverters())
         {
-            _converterList = converterList;
+            serializer.Converters.Add(converter);
         }
 
-        public TModel Import(string filePath)
-        {
-            using (var streamReader = File.OpenText(filePath))
-            {
-                var serializer = new JsonSerializer();
-                foreach (var converter in _converterList.GetConverters())
-                {
-                    serializer.Converters.Add(converter);
-                }
-
-                using (var jsonTextReader = new JsonTextReader(streamReader))
-                {
-                    return serializer.Deserialize<TModel>(jsonTextReader);
-                }
-            }
-        }
+        using var jsonTextReader = new JsonTextReader(streamReader);
+        return serializer.Deserialize<TModel>(jsonTextReader);
     }
 }

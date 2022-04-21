@@ -24,10 +24,10 @@ using FieldModel = HoneydewModels.CSharp.FieldModel;
 using MethodModel = HoneydewModels.CSharp.MethodModel;
 using NamespaceModel = HoneydewModels.CSharp.NamespaceModel;
 using ParameterModel = HoneydewModels.CSharp.ParameterModel;
-using ProjectModel = HoneydewModels.CSharp.ProjectModel;
-using RepositoryModel = HoneydewModels.CSharp.RepositoryModel;
+using ProjectModel = HoneydewModels.ProjectModel;
+using RepositoryModel = HoneydewModels.RepositoryModel;
 using ReturnValueModel = HoneydewModels.CSharp.ReturnValueModel;
-using SolutionModel = HoneydewModels.CSharp.SolutionModel;
+using SolutionModel = HoneydewModels.SolutionModel;
 
 namespace HoneydewTests.Processors;
 

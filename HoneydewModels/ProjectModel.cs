@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using HoneydewModels.CSharp;
 using HoneydewModels.Types;
 
-namespace HoneydewModels.CSharp;
+namespace HoneydewModels;
 
 public record ProjectModel
 {
+    public string Language { get; set; }
+
     public string Name { get; set; }
 
     public string FilePath { get; set; }
@@ -15,15 +18,6 @@ public record ProjectModel
     public IList<NamespaceModel> Namespaces { get; set; } = new List<NamespaceModel>();
 
     public IList<ICompilationUnitType> CompilationUnits { get; set; } = new List<ICompilationUnitType>();
-
-    public ProjectModel()
-    {
-    }
-
-    public ProjectModel(string name)
-    {
-        Name = name;
-    }
 
     public void Add(ICompilationUnitType compilationUnitType)
     {

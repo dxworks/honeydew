@@ -30,8 +30,8 @@ using Moq;
 using Xunit;
 using ClassModel = HoneydewScriptBeePlugin.Models.ClassModel;
 using MethodModel = HoneydewScriptBeePlugin.Models.MethodModel;
-using ProjectModel = HoneydewModels.CSharp.ProjectModel;
-using RepositoryModel = HoneydewModels.CSharp.RepositoryModel;
+using ProjectModel = HoneydewModels.ProjectModel;
+using RepositoryModel = HoneydewModels.RepositoryModel;
 
 namespace HoneydewTests.Processors;
 

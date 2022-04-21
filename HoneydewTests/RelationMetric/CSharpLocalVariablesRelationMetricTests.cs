@@ -17,7 +17,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
 using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
-using HoneydewModels.CSharp;
+using HoneydewModels;
 using HoneydewModels.Types;
 using HoneydewScriptBeePlugin.Loaders;
 using Moq;
@@ -98,7 +98,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -130,7 +130,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -164,7 +164,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -195,7 +195,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -227,7 +227,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -261,7 +261,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -297,7 +297,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -331,7 +331,7 @@ public class CSharpLocalVariablesRelationVisitorTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {

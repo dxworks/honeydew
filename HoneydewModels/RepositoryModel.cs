@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace HoneydewModels.CSharp;
+namespace HoneydewModels;
 
-public class RepositoryModel : IRepositoryModel
+public class RepositoryModel
 {
     public string Version { get; set; }
 

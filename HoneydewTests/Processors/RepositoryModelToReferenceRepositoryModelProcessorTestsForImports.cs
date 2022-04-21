@@ -6,6 +6,7 @@ using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Common;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
+using HoneydewModels;
 using HoneydewModels.CSharp;
 using HoneydewScriptBeePlugin.Loaders;
 using Moq;

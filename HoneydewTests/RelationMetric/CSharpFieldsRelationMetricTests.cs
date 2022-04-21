@@ -8,7 +8,7 @@ using HoneydewExtractors.CSharp.Metrics;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
 using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Field;
-using HoneydewModels.CSharp;
+using HoneydewModels;
 using HoneydewModels.Types;
 using HoneydewScriptBeePlugin.Loaders;
 using Moq;
@@ -76,7 +76,7 @@ public class CSharpFieldsRelationVisitorTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -122,7 +122,7 @@ public class CSharpFieldsRelationVisitorTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -172,7 +172,7 @@ public class CSharpFieldsRelationVisitorTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -221,7 +221,7 @@ public class CSharpFieldsRelationVisitorTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {

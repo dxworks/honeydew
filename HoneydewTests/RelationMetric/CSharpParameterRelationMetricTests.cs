@@ -13,7 +13,7 @@ using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Constructor;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
 using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
-using HoneydewModels.CSharp;
+using HoneydewModels;
 using HoneydewModels.Types;
 using HoneydewScriptBeePlugin.Loaders;
 using Moq;
@@ -73,7 +73,7 @@ public class CSharpParameterRelationMetricTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -104,7 +104,7 @@ public class CSharpParameterRelationMetricTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -136,7 +136,7 @@ public class CSharpParameterRelationMetricTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -171,7 +171,7 @@ public class CSharpParameterRelationMetricTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -206,7 +206,7 @@ public class CSharpParameterRelationMetricTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -240,7 +240,7 @@ public class CSharpParameterRelationMetricTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {
@@ -275,7 +275,7 @@ public class CSharpParameterRelationMetricTests
         {
             Projects =
             {
-                new ProjectModel("")
+                new ProjectModel
                 {
                     CompilationUnits = new List<ICompilationUnitType>
                     {

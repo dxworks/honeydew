@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using HoneydewCore.IO;
 using HoneydewCore.Processors;
+using HoneydewModels;
 using HoneydewModels.CSharp;
 using Moq;
 using Xunit;

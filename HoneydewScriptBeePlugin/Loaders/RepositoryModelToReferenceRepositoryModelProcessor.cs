@@ -16,11 +16,9 @@ using LocalVariableModel = HoneydewScriptBeePlugin.Models.LocalVariableModel;
 using MethodModel = HoneydewScriptBeePlugin.Models.MethodModel;
 using NamespaceModel = HoneydewScriptBeePlugin.Models.NamespaceModel;
 using ParameterModel = HoneydewScriptBeePlugin.Models.ParameterModel;
-using ProjectModel = HoneydewScriptBeePlugin.Models.ProjectModel;
 using PropertyModel = HoneydewScriptBeePlugin.Models.PropertyModel;
-using RepositoryModel = HoneydewModels.CSharp.RepositoryModel;
+using RepositoryModel = HoneydewModels.RepositoryModel;
 using ReturnValueModel = HoneydewScriptBeePlugin.Models.ReturnValueModel;
-using SolutionModel = HoneydewScriptBeePlugin.Models.SolutionModel;
 
 namespace HoneydewScriptBeePlugin.Loaders;
 

@@ -42,6 +42,11 @@ public static partial class CSharpExtractionHelperMethods
             var symbolInfo = semanticModel.GetSymbolInfo(syntaxNode);
             if (symbolInfo.Symbol != null)
             {
+                if (symbolInfo.Symbol.ContainingType is null)
+                {
+                    return symbolInfo.Symbol.ToString();
+                }
+
                 return symbolInfo.Symbol.ContainingType.ToString();
             }
 
