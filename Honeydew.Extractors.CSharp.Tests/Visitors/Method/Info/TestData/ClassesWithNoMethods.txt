@@ -1,0 +1,8 @@
+﻿using System;
+     
+namespace TopLevel
+{
+    public class Foo { public int f; string g; }
+    
+    public record Bar { Boolean a; string g; int x; float b; }                                        
+}

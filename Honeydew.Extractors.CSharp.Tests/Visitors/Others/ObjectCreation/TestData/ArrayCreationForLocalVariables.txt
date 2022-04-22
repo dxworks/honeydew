@@ -1,0 +1,27 @@
+﻿using System;
+
+namespace App
+{                            
+    class MyClass
+    {                                          
+        private string _v ;
+         
+        public int Val { get; set; }
+                                             
+        public void Method(ExternClass c, bool b)
+        {
+            double d = 2.5;
+            var vd = 5.1;
+                                                 
+            c.Call(new[] {_v});
+            c.Call(new[] {d, vd});
+            c.Call(new[] {Val});
+            c.Call(new[] {b, Method()});
+        }
+
+        public bool Method()
+        {
+            return false;
+        }
+    }
+}

@@ -1,0 +1,13 @@
+﻿using System;
+
+namespace Throwing
+{
+    public class NumberGenerator
+    {
+        public void Method()
+        {
+            DateTime ToDateTime(IFormatProvider provider) =>
+                throw new InvalidCastException("Conversion to a DateTime is not supported.");
+        }
+    }
+}

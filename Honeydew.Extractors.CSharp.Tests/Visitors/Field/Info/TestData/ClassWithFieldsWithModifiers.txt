@@ -1,0 +1,21 @@
+﻿using System;
+using HoneydewCore.Extractors;
+
+namespace TopLevel
+{
+    public class Foo
+    {
+        readonly int A = 12;
+        volatile float X;
+        static string Y = "";
+
+        void f()
+        {
+        }
+
+        public string g(int a)
+        {
+            return "Value";
+        }
+    }
+}

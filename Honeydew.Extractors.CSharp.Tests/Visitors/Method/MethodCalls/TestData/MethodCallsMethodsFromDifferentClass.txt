@@ -1,0 +1,22 @@
+﻿using System;
+using HoneydewCore.Extractors;
+
+namespace TopLevel
+{
+    public class Foo 
+    {
+        public void Method(int a) 
+        {
+        }
+    }
+
+     public class Bar
+     {
+        private Foo _foo;
+
+        void M()
+        {
+            _foo.Method(2);    
+        }
+     }                                  
+}

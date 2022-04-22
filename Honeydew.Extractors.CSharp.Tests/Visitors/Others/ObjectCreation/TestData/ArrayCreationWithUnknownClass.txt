@@ -1,0 +1,15 @@
+﻿using System;
+
+namespace App
+{                            
+    class Class1{}
+    class MyClass
+    {                                          
+        public void Method(ExternClass c)
+        {
+            c.Call(new[] {new Class1()});
+            c.Call(new[] {new Class1(), new Class1()});
+            c.Call(new[] {new Class1(), "Text"});                                                                                                
+        }
+    }
+}

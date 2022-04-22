@@ -1,0 +1,23 @@
+﻿using System;
+using HoneydewCore.Extractors;
+
+namespace TopLevel
+{
+    public class Foo
+    {
+        public Foo() : this(2) { }
+        
+        public Foo(int a):this(a, 6) { }
+        
+        public Foo(int a, int b) { }
+    }
+
+    public class Bar : Foo
+    {
+        public Bar() : base(2) { }
+        
+        public Bar(int a) : base() {  }
+        
+        public Bar(string a,in int b=52) : this() { }
+    }                                   
+}

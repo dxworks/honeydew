@@ -1,0 +1,23 @@
+using System;
+
+namespace Namespace1
+{
+    public class Class1
+    {
+        public void Method(Parent p)
+        {
+            string type = nameof(ETypes.T2);           
+        }
+
+        public void MethodWithVar(Parent p)
+        {
+            var type = nameof(ETypes.T1);
+        }
+    }
+    
+    public enum ETypes 
+    {
+        T1,
+        T2
+    }
+}

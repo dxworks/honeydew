@@ -1,0 +1,38 @@
+﻿using System;
+
+namespace Throwing
+{
+    class MyArgumentNullException : Exception { }
+    
+    class MyArgumentException : Exception { }
+    
+    class MyIndexOutOfRangeException : Exception { }
+    
+    
+    public class NumberGenerator
+    {
+        int[] numbers = {2, 4, 6, 8, 10, 12, 14, 16, 18, 20};
+
+        public int GetNumber(string indexString)
+        {
+            if (string.IsNullOrEmpty(indexString))
+            {
+                throw new MyArgumentNullException();
+            }
+
+            var index = int.Parse(indexString);
+            
+            if (index == 2)
+            {
+                throw new MyArgumentException();
+            }
+            
+            if (index < 0 || index >= numbers.Length)
+            {
+                throw new MyIndexOutOfRangeException();
+            }
+
+            return numbers[index];
+        }
+    }
+}

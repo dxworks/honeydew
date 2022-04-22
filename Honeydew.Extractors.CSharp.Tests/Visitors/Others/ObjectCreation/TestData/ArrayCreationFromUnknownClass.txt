@@ -1,0 +1,35 @@
+﻿using System;
+
+namespace App
+{                                       
+    class MyClass
+    {
+        private ExternClass[] _c = new ExternClass[] { };
+        private ExternClass[] _c2 = { };
+
+        public ExternClass[] MyC { get; set; } = new[] {new ExternClass(), new ExternClass()};
+        public ExternClass[] MyC3 { get; set; } = {new ExternClass(), new ExternClass()};
+
+        public ExternClass[] ComputedC => new[]
+        {
+            new ExternClass()
+        };
+
+        public ExternClass[] MyC2
+        {
+            get { return new ExternClass[] {new ExternClass()}; }
+        }
+
+        public MyClass()
+        {
+            var cs = new ExternClass[2] {new ExternClass(), new ExternClass()};
+            ExternClass[] c = {new ExternClass()};
+        }
+
+        public ExternClass[] Method()
+        {
+            var c = new ExternClass[]{new ExternClass()};
+            return c;
+        }
+    }
+}

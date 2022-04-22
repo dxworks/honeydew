@@ -1,0 +1,35 @@
+﻿using System;
+
+namespace App
+{                                       
+    class MyClass
+    {
+        private string[] _c = new string[] { };
+        private int[] _c2 = { };
+
+        public string[] MyC { get; set; } = new[] {"value", "other"};
+        public int[] MyC3 { get; set; } = {2, 51};
+
+        public double[] ComputedC => new[]
+        {
+            2.0
+        };
+
+        public string[] MyC2
+        {
+            get { return new string[] {"Hallo"}; }
+        }
+
+        public MyClass()
+        {
+            var cs = new int[2] {6,12};
+            double[] c = {2.0};
+        }
+
+        public bool[] Method()
+        {
+            var c = new bool[]{false};
+            return c;
+        }
+    }
+}

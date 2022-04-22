@@ -1,0 +1,29 @@
+﻿using System;
+
+namespace App
+{                
+    class C {}
+                       
+    class MyClass
+    {                                           
+        private C _c = new C();
+        private C _c2 = new();
+
+        public C MyC {get;set;} = new C();
+        public C ComputedC => new();
+        public C MyC2
+        {
+            get { return new C(); }
+        }
+
+        public MyClass() {
+            new C();
+            C c = new();
+        }
+
+        public C Method() {
+            var c = new C();
+            return c;
+        }
+    }
+}

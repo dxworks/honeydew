@@ -1,0 +1,6 @@
+﻿namespace Namespace1
+{
+    public class Class1<T> : BaseType<T>  { }
+
+    public interface BaseType<T>{}
+}

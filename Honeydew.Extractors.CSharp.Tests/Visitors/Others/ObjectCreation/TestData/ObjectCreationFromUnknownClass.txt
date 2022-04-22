@@ -1,0 +1,27 @@
+﻿using System;
+
+namespace App
+{                                       
+    class MyClass
+    {                                           
+        private ExternClass _c = new ExternClass();
+        private ExternClass _c2 = new();
+
+        public ExternClass MyC {get;set;} = new ExternClass();
+        public ExternClass ComputedC => new();
+        public ExternClass MyC2
+        {
+            get { return new ExternClass(); }
+        }
+
+        public MyClass() {
+            new ExternClass();
+            ExternClass c = new ExternClass();
+        }
+
+        public ExternClass Method() {
+            var c = new ExternClass();
+            return c;
+        }
+    }
+}

@@ -1,0 +1,37 @@
+﻿using System;
+using HoneydewCore.Extractors;
+
+namespace TopLevel
+{
+    public class Foo
+    {
+        public void Print()
+        {
+            var a=12;
+            F(ref a);
+            int b;
+            K(out b);
+            Z(2);
+        }
+                                             
+        public int F(ref int a)
+        {
+            var b = a;
+            a = 5;
+            return b;
+        }
+
+        private int K(out int a)
+        {
+            var c = 6;
+            a = 2;
+            return c;
+        }
+                                             
+        private int Z(in int a)
+        {
+            var c = a;
+            return c*2;
+        }
+    }                                   
+}

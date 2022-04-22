@@ -1,0 +1,23 @@
+﻿using System;
+
+namespace TopLevel
+{
+    public class Foo 
+    {
+        public static void Method(int a) 
+        {
+        }
+    }
+    
+    public class Bar
+    {
+        private static void OtherMethod(){}
+    
+        void M()
+        {
+            OtherMethod();
+            Foo.Method(2);    
+            int.Parse("5");
+        }
+    }                                  
+}

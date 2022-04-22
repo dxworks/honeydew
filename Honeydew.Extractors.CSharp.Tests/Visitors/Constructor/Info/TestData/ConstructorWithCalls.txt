@@ -1,0 +1,11 @@
+﻿using System;
+
+namespace TopLevel
+{
+    public class Bar : Foo
+    {
+        public Bar() : base(2) { }
+        
+        public Bar(int a) : base() {  }
+    }                                   
+}

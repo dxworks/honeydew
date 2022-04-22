@@ -1,0 +1,16 @@
+﻿using System;
+using HoneydewCore.Extractors;
+
+namespace TopLevel
+{
+    public class Foo 
+    {
+        public Foo(int a) 
+        {           
+            Function(Compute(a));                                
+        }
+        private void Function(int a) {}
+    
+        public int Compute(int a) {return 2*a;}  
+    }                                        
+}

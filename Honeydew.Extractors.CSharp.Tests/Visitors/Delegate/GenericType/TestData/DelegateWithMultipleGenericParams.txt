@@ -1,0 +1,4 @@
+﻿namespace Namespace1
+{
+    public delegate T Delegate1<T,R,K>(R r, K k1, K k2);
+}

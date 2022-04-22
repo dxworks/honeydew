@@ -1,0 +1,46 @@
+﻿namespace Throwing
+{
+    public class NumberGenerator
+    {
+        private readonly ExternException _nullReference = new();
+
+        public ExternException IndexOutOfRange { get; set; }
+
+        public void GetNumber(double number, ExternException exception)
+        {
+            ExternException myException = new ExternException();
+            var myVarException = new ExternException();
+            switch (number)
+            {
+                case < 0:
+                    throw exception;
+                case < 2:
+                    throw _nullReference;
+                case < 5:
+                    throw IndexOutOfRange;
+                case < 6:
+                    throw myException;
+                case <7:
+                    throw myVarException;
+                case < 8:
+                    throw new ExternException();
+                default:
+                    throw GetException();
+            }
+
+            try 
+            {
+                OtherClass.Call();
+            }
+            catch (ExternException)
+            {
+                throw;
+            }
+        }
+
+        public ExternException GetException()
+        {
+            return new();
+        }
+    }
+}

@@ -1,0 +1,26 @@
+﻿using System;
+
+namespace TopLevel
+{           
+    public class Bar
+    {
+        void Other(System.Action<int> a)
+        {
+        }
+
+        void Other(Func<int> a)
+        {
+        }
+        void Method()
+        {
+            Other(i => { Calc(i);});
+
+            Other(() => Calc(2));
+        }
+
+        private int Calc(int a)
+        {
+            return a * 2;
+        }
+    }                                       
+}

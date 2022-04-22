@@ -1,0 +1,29 @@
+﻿using System;
+
+namespace TopLevel
+{    
+    public class Bar
+    {
+        void Other(System.Action<int> a)
+        {
+        }
+    
+        void Method()
+        {
+            Other(i => { });
+                                                    
+            Other(i =>
+            {
+                i++;
+            });
+                                                    
+            Other(delegate(int i) {  });
+            Other(A);
+        }
+    
+        private void A(int obj)
+        {
+            throw new System.NotImplementedException();
+        }
+    }                                      
+}
