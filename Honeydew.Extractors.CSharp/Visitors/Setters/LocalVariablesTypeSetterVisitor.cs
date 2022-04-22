@@ -12,7 +12,8 @@ namespace Honeydew.Extractors.CSharp.Visitors.Setters;
 public class LocalVariablesTypeSetterVisitor : CompositeVisitor, ICSharpMethodVisitor, ICSharpConstructorVisitor,
     ICSharpMethodAccessorVisitor, ICSharpLocalFunctionVisitor, ICSharpDestructorVisitor
 {
-    public LocalVariablesTypeSetterVisitor(IEnumerable<ILocalVariablesVisitor> visitors) : base(visitors)
+    public LocalVariablesTypeSetterVisitor(ILogger logger, IEnumerable<ILocalVariablesVisitor> visitors) : base(logger,
+        visitors)
     {
     }
 

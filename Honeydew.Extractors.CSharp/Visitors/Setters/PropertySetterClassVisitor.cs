@@ -9,11 +9,12 @@ namespace Honeydew.Extractors.CSharp.Visitors.Setters;
 
 public class PropertySetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
 {
-    public PropertySetterClassVisitor(IEnumerable<IPropertyVisitor> visitors) : base(visitors)
+    public PropertySetterClassVisitor(ILogger logger, IEnumerable<IPropertyVisitor> visitors) : base(logger, visitors)
     {
     }
 
-    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMembersClassType modelType)
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IMembersClassType modelType)
     {
         if (modelType is not IPropertyMembersClassType propertyMembersClassType)
         {

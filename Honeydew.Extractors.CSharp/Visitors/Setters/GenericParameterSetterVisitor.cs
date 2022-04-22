@@ -10,7 +10,8 @@ namespace Honeydew.Extractors.CSharp.Visitors.Setters;
 public class GenericParameterSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICSharpDelegateVisitor,
     ICSharpMethodVisitor, ICSharpLocalFunctionVisitor
 {
-    public GenericParameterSetterVisitor(IEnumerable<IGenericParameterVisitor> visitors) : base(visitors)
+    public GenericParameterSetterVisitor(ILogger logger, IEnumerable<IGenericParameterVisitor> visitors) : base(logger,
+        visitors)
     {
     }
 

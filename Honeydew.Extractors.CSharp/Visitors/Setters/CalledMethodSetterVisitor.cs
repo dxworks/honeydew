@@ -12,7 +12,7 @@ public class CalledMethodSetterVisitor : CompositeVisitor, ICSharpMethodVisitor,
     ICSharpConstructorVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor,
     ICSharpArrowExpressionMethodVisitor, ICSharpDestructorVisitor
 {
-    public CalledMethodSetterVisitor(IEnumerable<IMethodCallVisitor> visitors) : base(visitors)
+    public CalledMethodSetterVisitor(ILogger logger, IEnumerable<IMethodCallVisitor> visitors) : base(logger, visitors)
     {
     }
 

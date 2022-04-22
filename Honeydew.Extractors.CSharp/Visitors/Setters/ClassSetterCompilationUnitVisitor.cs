@@ -6,40 +6,40 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Honeydew.Extractors.CSharp.Visitors.Setters
+namespace Honeydew.Extractors.CSharp.Visitors.Setters;
+
+public class ClassSetterCompilationUnitVisitor : CompositeVisitor, ICSharpCompilationUnitVisitor
 {
-    public class ClassSetterCompilationUnitVisitor : CompositeVisitor, ICSharpCompilationUnitVisitor
+    public ClassSetterCompilationUnitVisitor(ILogger logger, IEnumerable<IClassVisitor> visitors) : base(logger,
+        visitors)
     {
-        public ClassSetterCompilationUnitVisitor(IEnumerable<IClassVisitor> visitors) : base(visitors)
-        {
-        }
+    }
 
-        public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, SemanticModel semanticModel,
-            ICompilationUnitType modelType)
+    public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, SemanticModel semanticModel,
+        ICompilationUnitType modelType)
+    {
+        foreach (var baseTypeDeclarationSyntax in syntaxNode.DescendantNodes().OfType<TypeDeclarationSyntax>())
         {
-            foreach (var baseTypeDeclarationSyntax in syntaxNode.DescendantNodes().OfType<TypeDeclarationSyntax>())
+            IMembersClassType classModel = new ClassModel();
+
+            foreach (var visitor in GetContainedVisitors())
             {
-                IMembersClassType classModel = new ClassModel();
-
-                foreach (var visitor in GetContainedVisitors())
+                try
                 {
-                    try
+                    if (visitor is ICSharpClassVisitor extractionVisitor)
                     {
-                        if (visitor is ICSharpClassVisitor extractionVisitor)
-                        {
-                            classModel = extractionVisitor.Visit(baseTypeDeclarationSyntax, semanticModel, classModel);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log($"Could not extract from Class Visitor because {e}", LogLevels.Warning);
+                        classModel = extractionVisitor.Visit(baseTypeDeclarationSyntax, semanticModel, classModel);
                     }
                 }
-
-                modelType.ClassTypes.Add(classModel);
+                catch (Exception e)
+                {
+                    Logger.Log($"Could not extract from Class Visitor because {e}", LogLevels.Warning);
+                }
             }
 
-            return modelType;
+            modelType.ClassTypes.Add(classModel);
         }
+
+        return modelType;
     }
 }

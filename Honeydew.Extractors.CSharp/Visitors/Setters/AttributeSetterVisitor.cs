@@ -12,7 +12,7 @@ public class AttributeSetterVisitor : CompositeVisitor, ICSharpClassVisitor, ICS
     ICSharpParameterVisitor, ICSharpMethodAccessorVisitor, ICSharpGenericParameterVisitor, ICSharpDestructorVisitor,
     ICSharpEnumVisitor, ICSharpEnumLabelVisitor
 {
-    public AttributeSetterVisitor(IEnumerable<IAttributeVisitor> visitors) : base(visitors)
+    public AttributeSetterVisitor(ILogger logger, IEnumerable<IAttributeVisitor> visitors) : base(logger, visitors)
     {
     }
 

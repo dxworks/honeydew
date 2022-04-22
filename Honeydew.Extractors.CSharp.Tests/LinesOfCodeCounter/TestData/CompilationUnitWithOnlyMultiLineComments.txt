@@ -1,0 +1,18 @@
+﻿/*using System;
+namespace TopLevel
+{
+    public class File
+    {*/
+/*        private int _f;
+        public int Field
+        {
+            get { return Calc(_f); }
+        }
+*/
+/*        
+        public int Calc(int a)
+        {
+           return a*2;
+        }       
+    }                                        
+}*/

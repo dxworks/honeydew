@@ -8,11 +8,12 @@ namespace Honeydew.Extractors.CSharp.Visitors.Setters;
 
 public class FieldSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
 {
-    public FieldSetterClassVisitor(IEnumerable<IFieldVisitor> visitors) : base(visitors)
+    public FieldSetterClassVisitor(ILogger logger, IEnumerable<IFieldVisitor> visitors) : base(logger, visitors)
     {
     }
 
-    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMembersClassType modelType)
+    public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IMembersClassType modelType)
     {
         foreach (var baseFieldDeclarationSyntax in
                  syntaxNode.DescendantNodes().OfType<BaseFieldDeclarationSyntax>())

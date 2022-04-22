@@ -1,0 +1,4 @@
+﻿namespace MyDelegates
+{
+    public delegate void Delegate1(out int c, in string a, char x = 'a');
+}

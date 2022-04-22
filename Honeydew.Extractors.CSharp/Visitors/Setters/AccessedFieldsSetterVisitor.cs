@@ -11,7 +11,8 @@ public class AccessedFieldsSetterVisitor : CompositeVisitor, ICSharpMethodVisito
     ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor, ICSharpArrowExpressionMethodVisitor,
     ICSharpDestructorVisitor
 {
-    public AccessedFieldsSetterVisitor(IEnumerable<IAccessedFieldsVisitor> visitors) : base(visitors)
+    public AccessedFieldsSetterVisitor(ILogger logger, IEnumerable<IAccessedFieldsVisitor> visitors) : base(logger,
+        visitors)
     {
     }
 

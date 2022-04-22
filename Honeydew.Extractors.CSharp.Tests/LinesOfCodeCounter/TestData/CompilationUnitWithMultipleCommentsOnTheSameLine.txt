@@ -1,0 +1,11 @@
+﻿namespace TopLevel {
+    public class File3 {        
+        public int Calc(int a) {
+
+            /* */ /* */ /* comment
+
+            // */ int x=5; // /* comment
+            // /*                                   
+        }
+    }                                 
+}

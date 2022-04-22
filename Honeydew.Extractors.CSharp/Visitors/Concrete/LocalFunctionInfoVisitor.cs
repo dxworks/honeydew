@@ -10,7 +10,8 @@ namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
 public class LocalFunctionInfoVisitor : CompositeVisitor, ICSharpLocalFunctionVisitor
 {
-    public LocalFunctionInfoVisitor(IEnumerable<ILocalFunctionVisitor> visitors) : base(visitors)
+    public LocalFunctionInfoVisitor(ILogger logger, IEnumerable<ILocalFunctionVisitor> visitors) : base(logger,
+        visitors)
     {
     }
 

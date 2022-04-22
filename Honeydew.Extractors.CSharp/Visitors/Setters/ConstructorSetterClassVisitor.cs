@@ -9,7 +9,8 @@ namespace Honeydew.Extractors.CSharp.Visitors.Setters;
 
 public class ConstructorSetterClassVisitor : CompositeVisitor, ICSharpClassVisitor
 {
-    public ConstructorSetterClassVisitor(IEnumerable<IConstructorVisitor> visitors) : base(visitors)
+    public ConstructorSetterClassVisitor(ILogger logger, IEnumerable<IConstructorVisitor> visitors) : base(logger,
+        visitors)
     {
     }
 

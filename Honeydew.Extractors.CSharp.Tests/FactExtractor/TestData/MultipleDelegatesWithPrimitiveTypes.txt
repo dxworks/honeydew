@@ -1,0 +1,8 @@
+﻿namespace MyDelegates
+{
+    public delegate void Delegate1();
+
+    public delegate void Delegate2(string a);
+
+    public delegate int Delegate3(double b, char c);
+}

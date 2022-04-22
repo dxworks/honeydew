@@ -9,7 +9,7 @@ namespace Honeydew.Extractors.CSharp.Visitors.Setters;
 
 public class EnumLabelsSetterVisitor : CompositeVisitor, ICSharpEnumVisitor
 {
-    public EnumLabelsSetterVisitor(IEnumerable<IEnumLabelVisitor> visitors) : base(visitors)
+    public EnumLabelsSetterVisitor(ILogger logger, IEnumerable<IEnumLabelVisitor> visitors) : base(logger, visitors)
     {
     }
 

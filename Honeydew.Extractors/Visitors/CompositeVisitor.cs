@@ -14,7 +14,7 @@ public class CompositeVisitor : ICompositeVisitor
         Logger = logger;
     }
 
-    protected CompositeVisitor(IEnumerable<ITypeVisitor> visitors)
+    protected CompositeVisitor(ILogger logger, IEnumerable<ITypeVisitor> visitors) : this(logger)
     {
         if (visitors == null)
         {
