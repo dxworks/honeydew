@@ -1,7 +1,7 @@
 ﻿using System;
-using HoneydewModels;
+using Honeydew.Models;
 
-namespace HoneydewExtractors.Core.Metrics.Extraction;
+namespace Honeydew.Extractors.Metrics;
 
 public abstract class LinesOfCodeCounter : ILinesOfCodeCounter
 {
@@ -124,7 +124,7 @@ public abstract class LinesOfCodeCounter : ILinesOfCodeCounter
         };
     }
 
-    private bool IsLineEmpty(string line)
+    private static bool IsLineEmpty(string line)
     {
         return string.IsNullOrWhiteSpace(line) || line.Trim() is "{" or "}";
     }
