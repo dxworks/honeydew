@@ -1,5 +1,5 @@
 ﻿namespace Honeydew.Extractors.Visitors;
 
-public interface ITypeVisitor
+public interface ITypeVisitor<TModelType>
 {
 }

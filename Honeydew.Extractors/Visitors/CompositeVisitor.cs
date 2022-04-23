@@ -1,21 +1,17 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.Logging;
+using Honeydew.Models;
 
 namespace Honeydew.Extractors.Visitors;
 
-public class CompositeVisitor : ICompositeVisitor
+public abstract class CompositeVisitor<TType>
 {
-    protected readonly ILogger Logger;
+    protected readonly ILogger CompositeLogger;
 
-    private readonly ISet<ITypeVisitor> _visitors = new HashSet<ITypeVisitor>();
+    private readonly HashSet<ITypeVisitor<TType>> _visitors = new();
 
-    public CompositeVisitor(ILogger logger)
+    protected CompositeVisitor(ILogger compositeLogger, IEnumerable<ITypeVisitor<TType>> visitors)
     {
-        Logger = logger;
-    }
-
-    protected CompositeVisitor(ILogger logger, IEnumerable<ITypeVisitor> visitors) : this(logger)
-    {
+        CompositeLogger = compositeLogger;
         if (visitors == null)
         {
             return;
@@ -27,12 +23,7 @@ public class CompositeVisitor : ICompositeVisitor
         }
     }
 
-    public void Add(ITypeVisitor visitor)
-    {
-        _visitors.Add(visitor);
-    }
-
-    public IEnumerable<ITypeVisitor> GetContainedVisitors()
+    public IEnumerable<ITypeVisitor<TType>> GetContainedVisitors()
     {
         return _visitors;
     }
