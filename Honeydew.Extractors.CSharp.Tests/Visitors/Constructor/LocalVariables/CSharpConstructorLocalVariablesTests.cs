@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using Honeydew.Extractors.CSharp.Visitors;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
+using Honeydew.Models;
 using Honeydew.Models.CSharp;
-using HoneydewCore.Logging;
+using Honeydew.Models.Types;
 using Moq;
 using Xunit;
 
@@ -19,20 +19,25 @@ public class CSharpConstructorLocalVariablesTests
 
     public CSharpConstructorLocalVariablesTests()
     {
-        var compositeVisitor = new CompositeVisitor(_loggerMock.Object);
-
-        compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(_loggerMock.Object, new List<IClassVisitor>
-        {
-            new BaseInfoClassVisitor(),
-            new ConstructorSetterClassVisitor(_loggerMock.Object, new List<ICSharpConstructorVisitor>
+        var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<ICompilationUnitType>>
             {
-                new ConstructorInfoVisitor(),
-                new LocalVariablesTypeSetterVisitor(_loggerMock.Object, new List<ILocalVariablesVisitor>
-                {
-                    new LocalVariableInfoVisitor()
-                })
-            })
-        }));
+                new CSharpClassSetterCompilationUnitVisitor(_loggerMock.Object,
+                    new List<ITypeVisitor<IMembersClassType>>
+                    {
+                        new BaseInfoClassVisitor(),
+                        new CSharpConstructorSetterClassVisitor(_loggerMock.Object,
+                            new List<ITypeVisitor<IConstructorType>>
+                            {
+                                new ConstructorInfoVisitor(),
+                                new CSharpLocalVariablesTypeSetterVisitor(_loggerMock.Object,
+                                    new List<ITypeVisitor<ILocalVariableType>>
+                                    {
+                                        new LocalVariableInfoVisitor()
+                                    })
+                            })
+                    })
+            });
 
         _factExtractor = new CSharpFactExtractor(compositeVisitor);
     }

@@ -1,4 +1,4 @@
-﻿using Honeydew.Extractors.CSharp.Visitors;
+﻿using Honeydew.Extractors.Visitors;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -6,7 +6,7 @@ using static Honeydew.Extractors.CSharp.Visitors.Utils.CSharpExtractionHelperMet
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class DestructorInfoVisitor : ICSharpDestructorVisitor
+public class DestructorInfoVisitor : IExtractionVisitor<DestructorDeclarationSyntax, SemanticModel, IDestructorType>
 {
     public IDestructorType Visit(DestructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
         IDestructorType modelType)

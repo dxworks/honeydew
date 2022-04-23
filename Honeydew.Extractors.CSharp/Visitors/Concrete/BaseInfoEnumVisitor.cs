@@ -1,14 +1,14 @@
-﻿using Honeydew.Extractors.CSharp.Visitors;
+﻿using Honeydew.Extractors.CSharp.Utils;
+using Honeydew.Extractors.Visitors;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
-using HoneydewCore.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Honeydew.Extractors.CSharp.Visitors.Utils.CSharpExtractionHelperMethods;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class BaseInfoEnumVisitor : ICSharpEnumVisitor
+public class BaseInfoEnumVisitor : IExtractionVisitor<EnumDeclarationSyntax, SemanticModel, IEnumType>
 {
     public IEnumType Visit(EnumDeclarationSyntax syntaxNode, SemanticModel semanticModel, IEnumType modelType)
     {

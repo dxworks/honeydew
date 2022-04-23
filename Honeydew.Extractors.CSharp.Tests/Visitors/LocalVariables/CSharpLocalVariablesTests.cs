@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using Honeydew.Extractors.CSharp.Visitors;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
+using Honeydew.Models;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
-using HoneydewCore.Logging;
 using Moq;
 using Xunit;
 
@@ -20,36 +19,41 @@ public class CSharpLocalVariablesTests
 
     public CSharpLocalVariablesTests()
     {
-        var compositeVisitor = new CompositeVisitor(_loggerMock.Object);
-
-        var localVariablesTypeSetterVisitor = new LocalVariablesTypeSetterVisitor(_loggerMock.Object,
-            new List<ILocalVariablesVisitor>
+        var localVariablesTypeSetterVisitor = new CSharpLocalVariablesTypeSetterVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<ILocalVariableType>>
             {
                 new LocalVariableInfoVisitor()
             });
-        compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(_loggerMock.Object, new List<ICSharpClassVisitor>
-        {
-            new BaseInfoClassVisitor(),
-            new MethodSetterClassVisitor(_loggerMock.Object, new List<IMethodVisitor>
+        var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<ICompilationUnitType>>
             {
-                new MethodInfoVisitor(),
-                localVariablesTypeSetterVisitor
-            }),
-            new ConstructorSetterClassVisitor(_loggerMock.Object, new List<IConstructorVisitor>
-            {
-                new ConstructorInfoVisitor(),
-                localVariablesTypeSetterVisitor
-            }),
-            new PropertySetterClassVisitor(_loggerMock.Object, new List<IPropertyVisitor>
-            {
-                new PropertyInfoVisitor(),
-                new MethodAccessorSetterPropertyVisitor(_loggerMock.Object, new List<IMethodVisitor>
-                {
-                    new MethodInfoVisitor(),
-                    localVariablesTypeSetterVisitor
-                })
-            })
-        }));
+                new CSharpClassSetterCompilationUnitVisitor(_loggerMock.Object,
+                    new List<ITypeVisitor<IMembersClassType>>
+                    {
+                        new BaseInfoClassVisitor(),
+                        new CSharpMethodSetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
+                        {
+                            new MethodInfoVisitor(),
+                            localVariablesTypeSetterVisitor
+                        }),
+                        new CSharpConstructorSetterClassVisitor(_loggerMock.Object,
+                            new List<ITypeVisitor<IConstructorType>>
+                            {
+                                new ConstructorInfoVisitor(),
+                                localVariablesTypeSetterVisitor
+                            }),
+                        new CSharpPropertySetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IPropertyType>>
+                        {
+                            new PropertyInfoVisitor(),
+                            new CSharpAccessorMethodSetterPropertyVisitor(_loggerMock.Object,
+                                new List<ITypeVisitor<IAccessorMethodType>>
+                                {
+                                    new MethodInfoVisitor(),
+                                    localVariablesTypeSetterVisitor
+                                })
+                        })
+                    })
+            });
 
         _factExtractor = new CSharpFactExtractor(compositeVisitor);
     }

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using Honeydew.Extractors.CSharp.Visitors;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
+using Honeydew.Models;
 using Honeydew.Models.CSharp;
-using HoneydewCore.Logging;
+using Honeydew.Models.Types;
 using Moq;
 using Xunit;
 
@@ -20,46 +20,52 @@ public class CSharpClassFactExtractorLinesOfCodeTests
     public CSharpClassFactExtractorLinesOfCodeTests()
     {
         var linesOfCodeVisitor = new LinesOfCodeVisitor();
-        var compositeVisitor = new CompositeVisitor(_loggerMock.Object);
-
-        compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(_loggerMock.Object, new List<ICSharpClassVisitor>
-        {
-            linesOfCodeVisitor,
-            new ConstructorSetterClassVisitor(_loggerMock.Object, new List<ICSharpConstructorVisitor>
+        var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<ICompilationUnitType>>
             {
-                linesOfCodeVisitor
-            }),
-            new MethodSetterClassVisitor(_loggerMock.Object, new List<ICSharpMethodVisitor>
-            {
-                linesOfCodeVisitor,
-                new LocalFunctionsSetterClassVisitor(_loggerMock.Object, new List<ICSharpLocalFunctionVisitor>
+                new CSharpClassSetterCompilationUnitVisitor(_loggerMock.Object,
+                    new List<ITypeVisitor<IMembersClassType>>
+                    {
+                        linesOfCodeVisitor,
+                        new CSharpConstructorSetterClassVisitor(_loggerMock.Object,
+                            new List<ITypeVisitor<IConstructorType>>
+                            {
+                                linesOfCodeVisitor
+                            }),
+                        new CSharpMethodSetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
+                        {
+                            linesOfCodeVisitor,
+                            new CSharpLocalFunctionsSetterClassVisitor(_loggerMock.Object,
+                                new List<ITypeVisitor<IMethodTypeWithLocalFunctions>>
+                                {
+                                    linesOfCodeVisitor,
+                                    new LocalFunctionInfoVisitor(_loggerMock.Object,
+                                        new List<ITypeVisitor<IMethodTypeWithLocalFunctions>>
+                                        {
+                                            linesOfCodeVisitor
+                                        }),
+                                })
+                        }),
+                        new CSharpPropertySetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IPropertyType>>
+                        {
+                            linesOfCodeVisitor,
+                            new CSharpAccessorMethodSetterPropertyVisitor(_loggerMock.Object,
+                                new List<ITypeVisitor<IAccessorMethodType>>
+                                {
+                                    linesOfCodeVisitor
+                                })
+                        })
+                    }),
+                new CSharpEnumSetterCompilationUnitVisitor(_loggerMock.Object, new List<ITypeVisitor<IEnumType>>
                 {
                     linesOfCodeVisitor,
-                    new LocalFunctionInfoVisitor(_loggerMock.Object, new List<ILocalFunctionVisitor>
-                    {
-                        linesOfCodeVisitor
-                    }),
-                })
-            }),
-            new PropertySetterClassVisitor(_loggerMock.Object, new List<ICSharpPropertyVisitor>
-            {
-                linesOfCodeVisitor,
-                new MethodAccessorSetterPropertyVisitor(_loggerMock.Object, new List<IMethodVisitor>
+                }),
+                new CSharpDelegateSetterCompilationUnitVisitor(_loggerMock.Object, new List<ITypeVisitor<IDelegateType>>
                 {
                     linesOfCodeVisitor
-                })
-            })
-        }));
-        compositeVisitor.Add(new EnumSetterCompilationUnitVisitor(_loggerMock.Object, new List<ICSharpEnumVisitor>
-        {
-            linesOfCodeVisitor,
-        }));
-        compositeVisitor.Add(new DelegateSetterCompilationUnitVisitor(_loggerMock.Object, new List<IDelegateVisitor>
-        {
-            linesOfCodeVisitor
-        }));
-
-        compositeVisitor.Add(linesOfCodeVisitor);
+                }),
+                linesOfCodeVisitor
+            });
 
         _sut = new CSharpFactExtractor(compositeVisitor);
     }

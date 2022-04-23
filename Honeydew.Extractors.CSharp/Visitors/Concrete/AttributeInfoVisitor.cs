@@ -1,11 +1,12 @@
-﻿using Honeydew.Models.Types;
+﻿using Honeydew.Extractors.Visitors;
+using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Honeydew.Extractors.CSharp.Visitors.Utils.CSharpExtractionHelperMethods;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class AttributeInfoVisitor : ICSharpAttributeVisitor
+public class AttributeInfoVisitor : IExtractionVisitor<AttributeSyntax, SemanticModel, IAttributeType>
 {
     public IAttributeType Visit(AttributeSyntax syntaxNode, SemanticModel semanticModel, IAttributeType modelType)
     {

@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Honeydew.Extractors.CSharp.Visitors;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
+using Honeydew.Models;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
-using HoneydewCore.Logging;
 using Moq;
 using Xunit;
 
@@ -21,25 +20,28 @@ public class CSharpClassImportsMetricTests
 
     public CSharpClassImportsMetricTests()
     {
-        var compositeVisitor = new CompositeVisitor(_loggerMock.Object);
-
         var importsVisitor = new ImportsVisitor();
-        compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(_loggerMock.Object, new List<ICSharpClassVisitor>
-        {
-            new BaseInfoClassVisitor(),
-            importsVisitor
-        }));
-        compositeVisitor.Add(new DelegateSetterCompilationUnitVisitor(_loggerMock.Object,
-            new List<ICSharpDelegateVisitor>
+
+        var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<ICompilationUnitType>>
             {
-                new BaseInfoDelegateVisitor(),
-                importsVisitor
-            }));
-        compositeVisitor.Add(new EnumSetterCompilationUnitVisitor(_loggerMock.Object, new List<ICSharpEnumVisitor>
-        {
-            new BaseInfoEnumVisitor(),
-            importsVisitor,
-        }));
+                new CSharpClassSetterCompilationUnitVisitor(_loggerMock.Object,
+                    new List<ITypeVisitor<IMembersClassType>>
+                    {
+                        new BaseInfoClassVisitor(),
+                        importsVisitor
+                    }),
+                new CSharpDelegateSetterCompilationUnitVisitor(_loggerMock.Object, new List<ITypeVisitor<IDelegateType>>
+                {
+                    new BaseInfoDelegateVisitor(),
+                    importsVisitor
+                }),
+                new CSharpEnumSetterCompilationUnitVisitor(_loggerMock.Object, new List<ITypeVisitor<IEnumType>>
+                {
+                    new BaseInfoEnumVisitor(),
+                    importsVisitor
+                })
+            });
 
         _factExtractor = new CSharpFactExtractor(compositeVisitor);
     }

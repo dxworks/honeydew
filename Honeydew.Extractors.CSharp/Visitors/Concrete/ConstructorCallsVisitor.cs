@@ -1,13 +1,14 @@
-﻿using Honeydew.Models.CSharp;
+﻿using Honeydew.Extractors.CSharp.Utils;
+using Honeydew.Extractors.Visitors;
+using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
-using HoneydewCore.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Honeydew.Extractors.CSharp.Visitors.Utils.CSharpExtractionHelperMethods;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class ConstructorCallsVisitor : ICSharpConstructorVisitor
+public class ConstructorCallsVisitor : IExtractionVisitor<ConstructorDeclarationSyntax, SemanticModel, IConstructorType>
 {
     public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
         IConstructorType modelType)

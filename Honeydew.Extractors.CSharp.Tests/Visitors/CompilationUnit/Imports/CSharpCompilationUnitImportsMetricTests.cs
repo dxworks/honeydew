@@ -1,9 +1,11 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
+using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
+using Honeydew.Models;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
-using HoneydewCore.Logging;
 using Moq;
 using Xunit;
 
@@ -18,9 +20,11 @@ public class CSharpCompilationUnitImportsMetricTests
 
     public CSharpCompilationUnitImportsMetricTests()
     {
-        var compositeVisitor = new CompositeVisitor(_loggerMock.Object);
-
-        compositeVisitor.Add(new ImportsVisitor());
+        var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<ICompilationUnitType>>
+            {
+                new ImportsVisitor()
+            });
 
         _factExtractor = new CSharpFactExtractor(compositeVisitor);
     }

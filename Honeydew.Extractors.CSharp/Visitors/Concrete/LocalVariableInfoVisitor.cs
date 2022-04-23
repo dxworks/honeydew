@@ -1,14 +1,17 @@
-﻿using Honeydew.Extractors.CSharp.Visitors;
+﻿using Honeydew.Extractors.CSharp.Utils;
 using Honeydew.Extractors.CSharp.Visitors.Utils;
+using Honeydew.Extractors.Visitors;
 using Honeydew.Models.Types;
-using HoneydewCore.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Honeydew.Extractors.CSharp.Visitors.Utils.CSharpExtractionHelperMethods;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class LocalVariableInfoVisitor : ICSharpLocalVariablesVisitor
+public class LocalVariableInfoVisitor :
+    IExtractionVisitor<VariableDeclaratorSyntax, SemanticModel, ILocalVariableType>,
+    IExtractionVisitor<DeclarationPatternSyntax, SemanticModel, ILocalVariableType>,
+    IExtractionVisitor<ForEachStatementSyntax, SemanticModel, ILocalVariableType>
 {
     public ILocalVariableType Visit(VariableDeclaratorSyntax syntaxNode, SemanticModel semanticModel,
         ILocalVariableType modelType)

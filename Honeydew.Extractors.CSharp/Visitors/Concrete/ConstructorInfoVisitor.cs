@@ -1,14 +1,16 @@
-﻿using Honeydew.Models.Types;
-using HoneydewCore.Utils;
+﻿using Honeydew.Extractors.CSharp.Utils;
+using Honeydew.Extractors.Visitors;
+using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Honeydew.Extractors.CSharp.Visitors.Utils.CSharpExtractionHelperMethods;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class ConstructorInfoVisitor : ICSharpConstructorVisitor
+public class ConstructorInfoVisitor : IExtractionVisitor<ConstructorDeclarationSyntax, SemanticModel, IConstructorType>
 {
-    public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, SemanticModel semanticModel, IConstructorType modelType)
+    public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IConstructorType modelType)
     {
         GetModifiersForNode(syntaxNode, out var accessModifier, out var modifier);
 
@@ -16,7 +18,7 @@ public class ConstructorInfoVisitor : ICSharpConstructorVisitor
         {
             accessModifier = "";
         }
-            
+
         modelType.Name = syntaxNode.Identifier.ToString();
         modelType.Modifier = modifier;
         modelType.AccessModifier = accessModifier;
@@ -25,7 +27,8 @@ public class ConstructorInfoVisitor : ICSharpConstructorVisitor
         return modelType;
     }
 
-    private static void GetModifiersForNode(MemberDeclarationSyntax node, out string accessModifier, out string modifier)
+    private static void GetModifiersForNode(MemberDeclarationSyntax node, out string accessModifier,
+        out string modifier)
     {
         var allModifiers = node.Modifiers.ToString();
 

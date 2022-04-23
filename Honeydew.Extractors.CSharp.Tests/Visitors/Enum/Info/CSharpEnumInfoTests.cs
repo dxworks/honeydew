@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using Honeydew.Extractors.CSharp.Visitors;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
+using Honeydew.Models;
 using Honeydew.Models.CSharp;
-using HoneydewCore.Logging;
+using Honeydew.Models.Types;
 using Moq;
 using Xunit;
 
@@ -19,16 +19,19 @@ public class CSharpEnumInfoTests
 
     public CSharpEnumInfoTests()
     {
-        var compositeVisitor = new CompositeVisitor(_loggerMock.Object);
-
-        compositeVisitor.Add(new EnumSetterCompilationUnitVisitor(_loggerMock.Object, new List<ICSharpEnumVisitor>
-        {
-            new BaseInfoEnumVisitor(),
-            new EnumLabelsSetterVisitor(_loggerMock.Object, new List<IEnumLabelVisitor>
+        var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<ICompilationUnitType>>
             {
-                new BasicEnumLabelInfoVisitor(),
-            }),
-        }));
+                new CSharpEnumSetterCompilationUnitVisitor(_loggerMock.Object, new List<ITypeVisitor<IEnumType>>
+                {
+                    new BaseInfoEnumVisitor(),
+                    new CSharpEnumLabelsSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IEnumLabelType>>
+                    {
+                        new BasicEnumLabelInfoVisitor()
+                    })
+                })
+            });
+
 
         _factExtractor = new CSharpFactExtractor(compositeVisitor);
     }

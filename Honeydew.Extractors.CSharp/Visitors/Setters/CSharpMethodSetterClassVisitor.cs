@@ -1,0 +1,28 @@
+﻿using Honeydew.Extractors.Visitors;
+using Honeydew.Extractors.Visitors.Setters;
+using Honeydew.Models;
+using Honeydew.Models.CSharp;
+using Honeydew.Models.Types;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+namespace Honeydew.Extractors.CSharp.Visitors.Setters;
+
+public class CSharpMethodSetterClassVisitor :
+    CompositeVisitor<IMethodType>,
+    IMethodSetterClassVisitor<TypeDeclarationSyntax, SemanticModel, MethodDeclarationSyntax>
+{
+    public CSharpMethodSetterClassVisitor(ILogger compositeLogger, IEnumerable<ITypeVisitor<IMethodType>> visitors) :
+        base(compositeLogger, visitors)
+    {
+    }
+
+    public ILogger Logger => CompositeLogger;
+
+    public IMethodType CreateWrappedType() => new MethodModel();
+
+    public IEnumerable<MethodDeclarationSyntax> GetWrappedSyntaxNodes(TypeDeclarationSyntax syntaxNode)
+    {
+        return syntaxNode.DescendantNodes().OfType<MethodDeclarationSyntax>();
+    }
+}

@@ -1,11 +1,12 @@
 ﻿using Honeydew.Extractors.CSharp.Visitors.Utils;
+using Honeydew.Extractors.Visitors;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class GenericParameterInfoVisitor : ICSharpGenericParameterVisitor
+public class GenericParameterInfoVisitor : IExtractionVisitor<TypeParameterSyntax, SemanticModel, IGenericParameterType>
 {
     public IGenericParameterType Visit(TypeParameterSyntax syntaxNode, SemanticModel semanticModel,
         IGenericParameterType modelType)
@@ -18,7 +19,8 @@ public class GenericParameterInfoVisitor : ICSharpGenericParameterVisitor
         return modelType;
     }
 
-    private void ExtractConstraints(TypeParameterSyntax syntaxNode, SemanticModel semanticModel, IGenericParameterType modelType)
+    private void ExtractConstraints(TypeParameterSyntax syntaxNode, SemanticModel semanticModel,
+        IGenericParameterType modelType)
     {
         var constraintsSyntaxes = new List<TypeParameterConstraintSyntax>();
 

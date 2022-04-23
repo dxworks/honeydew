@@ -1,16 +1,19 @@
-﻿using Honeydew.Models.CSharp;
+﻿using Honeydew.Extractors.CSharp.Visitors.Utils;
+using Honeydew.Extractors.Visitors;
+using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using CSharpExtractionHelperMethods = Honeydew.Extractors.CSharp.Visitors.Utils.CSharpExtractionHelperMethods;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class ImportsVisitor : ICSharpCompilationUnitVisitor, ICSharpClassVisitor, ICSharpDelegateVisitor,
-    ICSharpEnumVisitor
+public class ImportsVisitor :
+    IExtractionVisitor<CompilationUnitSyntax, SemanticModel, ICompilationUnitType>,
+    IExtractionVisitor<TypeDeclarationSyntax, SemanticModel, IMembersClassType>,
+    IExtractionVisitor<DelegateDeclarationSyntax, SemanticModel, IDelegateType>,
+    IExtractionVisitor<EnumDeclarationSyntax, SemanticModel, IEnumType>
 {
-    public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, SemanticModel semanticModel,
+    public ICompilationUnitType Visit(CompilationUnitSyntax syntaxNode, SemanticModel semanticModel,
         ICompilationUnitType modelType)
     {
         var usingSet = new HashSet<string>();

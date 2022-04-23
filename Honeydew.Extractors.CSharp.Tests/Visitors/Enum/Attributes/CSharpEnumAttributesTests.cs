@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using Honeydew.Extractors.CSharp.Visitors;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
+using Honeydew.Models;
 using Honeydew.Models.CSharp;
-using HoneydewCore.Logging;
+using Honeydew.Models.Types;
 using Moq;
 using Xunit;
 
@@ -19,22 +19,26 @@ public class CSharpEnumAttributesTests
 
     public CSharpEnumAttributesTests()
     {
-        var compositeVisitor = new CompositeVisitor(_loggerMock.Object);
-
-        var attributeSetterVisitor = new AttributeSetterVisitor(_loggerMock.Object, new List<IAttributeVisitor>
-        {
-            new AttributeInfoVisitor()
-        });
-        compositeVisitor.Add(new EnumSetterCompilationUnitVisitor(_loggerMock.Object, new List<ICSharpEnumVisitor>
-        {
-            new BaseInfoEnumVisitor(),
-            new EnumLabelsSetterVisitor(_loggerMock.Object, new List<IEnumLabelVisitor>
+        var attributeSetterVisitor = new CSharpAttributeSetterVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<IAttributeType>>
             {
-                new BasicEnumLabelInfoVisitor(),
-                attributeSetterVisitor,
-            }),
-            attributeSetterVisitor,
-        }));
+                new AttributeInfoVisitor()
+            });
+
+        var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<ICompilationUnitType>>
+            {
+                new CSharpEnumSetterCompilationUnitVisitor(_loggerMock.Object, new List<ITypeVisitor<IEnumType>>
+                {
+                    new BaseInfoEnumVisitor(),
+                    new CSharpEnumLabelsSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IEnumLabelType>>
+                    {
+                        new BasicEnumLabelInfoVisitor(),
+                        attributeSetterVisitor,
+                    }),
+                    attributeSetterVisitor,
+                })
+            });
 
         _factExtractor = new CSharpFactExtractor(compositeVisitor);
     }

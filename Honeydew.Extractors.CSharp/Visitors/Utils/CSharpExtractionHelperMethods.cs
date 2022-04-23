@@ -1,7 +1,7 @@
 ﻿using System.Text;
+using Honeydew.Extractors.CSharp.Utils;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
-using HoneydewCore.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -68,7 +68,7 @@ public static partial class CSharpExtractionHelperMethods
         return CSharpFullNameProvider.CreateEntityTypeModel(CSharpConstants.ObjectIdentifier);
     }
 
-    public static IMethodSymbol GetMethodSymbol(CSharpSyntaxNode expressionSyntax, SemanticModel semanticModel)
+    public static IMethodSymbol? GetMethodSymbol(CSharpSyntaxNode expressionSyntax, SemanticModel semanticModel)
     {
         var symbolInfo = semanticModel.GetSymbolInfo(expressionSyntax);
         var symbol = symbolInfo.Symbol;

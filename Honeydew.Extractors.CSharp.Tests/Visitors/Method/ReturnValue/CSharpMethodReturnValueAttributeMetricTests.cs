@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using Honeydew.Extractors.CSharp.Visitors;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
+using Honeydew.Models;
 using Honeydew.Models.CSharp;
-using HoneydewCore.Logging;
+using Honeydew.Models.Types;
 using Moq;
 using Xunit;
 
@@ -19,20 +19,23 @@ public class CSharpMethodReturnValueAttributeMetricTests
 
     public CSharpMethodReturnValueAttributeMetricTests()
     {
-        var compositeVisitor = new CompositeVisitor(_loggerMock.Object);
-
-        compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(_loggerMock.Object, new List<IClassVisitor>
-        {
-            new BaseInfoClassVisitor(),
-            new MethodSetterClassVisitor(_loggerMock.Object, new List<ICSharpMethodVisitor>
+        var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<ICompilationUnitType>>
             {
-                new MethodInfoVisitor(),
-                new AttributeSetterVisitor(_loggerMock.Object, new List<IAttributeVisitor>
-                {
-                    new AttributeInfoVisitor()
-                })
-            })
-        }));
+                new CSharpClassSetterCompilationUnitVisitor(_loggerMock.Object,
+                    new List<ITypeVisitor<IMembersClassType>>
+                    {
+                        new BaseInfoClassVisitor(),
+                        new CSharpMethodSetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
+                        {
+                            new MethodInfoVisitor(),
+                            new CSharpAttributeSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IAttributeType>>
+                            {
+                                new AttributeInfoVisitor()
+                            })
+                        })
+                    })
+            });
 
         _factExtractor = new CSharpFactExtractor(compositeVisitor);
     }

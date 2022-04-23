@@ -2,7 +2,8 @@
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
-using HoneydewCore.Logging;
+using Honeydew.Models;
+using Honeydew.Models.Types;
 using Moq;
 using Xunit;
 
@@ -17,12 +18,15 @@ public class CSharpFileScopedNamespaceTests
 
     public CSharpFileScopedNamespaceTests()
     {
-        var compositeVisitor = new CompositeVisitor(_loggerMock.Object);
-
-        compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(_loggerMock.Object, new List<IClassVisitor>
-        {
-            new BaseInfoClassVisitor(),
-        }));
+        var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<ICompilationUnitType>>
+            {
+                new CSharpClassSetterCompilationUnitVisitor(_loggerMock.Object,
+                    new List<ITypeVisitor<IMembersClassType>>
+                    {
+                        new BaseInfoClassVisitor(),
+                    })
+            });
 
         _factExtractor = new CSharpFactExtractor(compositeVisitor);
     }

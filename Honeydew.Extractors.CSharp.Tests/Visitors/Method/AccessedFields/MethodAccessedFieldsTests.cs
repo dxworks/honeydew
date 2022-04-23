@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using Honeydew.Extractors.CSharp.Visitors;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
+using Honeydew.Models;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
-using HoneydewCore.Logging;
 using Moq;
 using Xunit;
 
@@ -20,23 +19,26 @@ public class MethodAccessedFieldsTests
 
     public MethodAccessedFieldsTests()
     {
-        var compositeVisitor = new CompositeVisitor(_loggerMock.Object);
-
-        var accessedFieldsSetterVisitor = new AccessedFieldsSetterVisitor(_loggerMock.Object,
-            new List<ICSharpAccessedFieldsVisitor>
+        var accessedFieldsSetterVisitor = new CSharpAccessedFieldsSetterVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<AccessedField>>
             {
                 new AccessFieldVisitor()
             });
 
-        compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(_loggerMock.Object, new List<ICSharpClassVisitor>
-        {
-            new BaseInfoClassVisitor(),
-            new MethodSetterClassVisitor(_loggerMock.Object, new List<ICSharpMethodVisitor>
+        var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<ICompilationUnitType>>
             {
-                new MethodInfoVisitor(),
-                accessedFieldsSetterVisitor
-            }),
-        }));
+                new CSharpClassSetterCompilationUnitVisitor(_loggerMock.Object,
+                    new List<ITypeVisitor<IMembersClassType>>
+                    {
+                        new BaseInfoClassVisitor(),
+                        new CSharpMethodSetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
+                        {
+                            new MethodInfoVisitor(),
+                            accessedFieldsSetterVisitor
+                        }),
+                    })
+            });
 
         _factExtractor = new CSharpFactExtractor(compositeVisitor);
     }

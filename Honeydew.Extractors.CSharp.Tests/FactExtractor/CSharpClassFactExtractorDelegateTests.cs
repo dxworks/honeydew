@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using Honeydew.Extractors.CSharp.Visitors;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
+using Honeydew.Models;
 using Honeydew.Models.CSharp;
-using HoneydewCore.Logging;
+using Honeydew.Models.Types;
 using Moq;
 using Xunit;
 
@@ -19,17 +19,18 @@ public class CSharpClassFactExtractorDelegateTests
 
     public CSharpClassFactExtractorDelegateTests()
     {
-        var compositeVisitor = new CompositeVisitor(_loggerMock.Object);
-
-        compositeVisitor.Add(new DelegateSetterCompilationUnitVisitor(_loggerMock.Object,
-            new List<ICSharpDelegateVisitor>
+        var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<ICompilationUnitType>>
             {
-                new BaseInfoDelegateVisitor(),
-                new ParameterSetterVisitor(_loggerMock.Object, new List<IParameterVisitor>
+                new CSharpDelegateSetterCompilationUnitVisitor(_loggerMock.Object, new List<ITypeVisitor<IDelegateType>>
                 {
-                    new ParameterInfoVisitor()
+                    new BaseInfoDelegateVisitor(),
+                    new CSharpParameterSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IParameterType>>
+                    {
+                        new ParameterInfoVisitor()
+                    })
                 })
-            }));
+            });
 
         _sut = new CSharpFactExtractor(compositeVisitor);
     }

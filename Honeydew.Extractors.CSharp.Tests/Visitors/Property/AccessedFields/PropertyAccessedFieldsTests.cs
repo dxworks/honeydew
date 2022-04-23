@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using Honeydew.Extractors.CSharp.Visitors;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
+using Honeydew.Models;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
-using HoneydewCore.Logging;
 using Moq;
 using Xunit;
 
@@ -20,27 +19,30 @@ public class PropertyAccessedFieldsTests
 
     public PropertyAccessedFieldsTests()
     {
-        var compositeVisitor = new CompositeVisitor(_loggerMock.Object);
-
-        var accessedFieldsSetterVisitor = new AccessedFieldsSetterVisitor(_loggerMock.Object,
-            new List<ICSharpAccessedFieldsVisitor>
+        var accessedFieldsSetterVisitor = new CSharpAccessedFieldsSetterVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<AccessedField>>
             {
                 new AccessFieldVisitor()
             });
-
-        compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(_loggerMock.Object, new List<IClassVisitor>
-        {
-            new BaseInfoClassVisitor(),
-            new PropertySetterClassVisitor(_loggerMock.Object, new List<ICSharpPropertyVisitor>
+        var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<ICompilationUnitType>>
             {
-                new PropertyInfoVisitor(),
-                new MethodAccessorSetterPropertyVisitor(_loggerMock.Object, new List<IMethodVisitor>
-                {
-                    new MethodInfoVisitor(),
-                    accessedFieldsSetterVisitor
-                })
-            })
-        }));
+                new CSharpClassSetterCompilationUnitVisitor(_loggerMock.Object,
+                    new List<ITypeVisitor<IMembersClassType>>
+                    {
+                        new BaseInfoClassVisitor(),
+                        new CSharpPropertySetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IPropertyType>>
+                        {
+                            new PropertyInfoVisitor(),
+                            new CSharpAccessorMethodSetterPropertyVisitor(_loggerMock.Object,
+                                new List<ITypeVisitor<IAccessorMethodType>>
+                                {
+                                    new MethodInfoVisitor(),
+                                    accessedFieldsSetterVisitor
+                                })
+                        })
+                    })
+            });
 
         _factExtractor = new CSharpFactExtractor(compositeVisitor);
     }

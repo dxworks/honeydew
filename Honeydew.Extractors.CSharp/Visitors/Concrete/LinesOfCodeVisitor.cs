@@ -1,13 +1,20 @@
-﻿using Honeydew.Models.Types;
+﻿using Honeydew.Extractors.Visitors;
+using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class LinesOfCodeVisitor : ICSharpPropertyVisitor, ICSharpMethodVisitor, ICSharpConstructorVisitor,
-    ICSharpClassVisitor, ICSharpCompilationUnitVisitor, ICSharpLocalFunctionVisitor, ICSharpMethodAccessorVisitor,
-    ICSharpDestructorVisitor, ICSharpDelegateVisitor, ICSharpEnumVisitor
+public class LinesOfCodeVisitor : IExtractionVisitor<BasePropertyDeclarationSyntax, SemanticModel, IPropertyType>,
+    IExtractionVisitor<MethodDeclarationSyntax, SemanticModel, IMethodType>,
+    IExtractionVisitor<AccessorDeclarationSyntax, SemanticModel, IAccessorMethodType>,
+    IExtractionVisitor<ConstructorDeclarationSyntax, SemanticModel, IConstructorType>,
+    IExtractionVisitor<DestructorDeclarationSyntax, SemanticModel, IDestructorType>,
+    IExtractionVisitor<TypeDeclarationSyntax, SemanticModel, IMembersClassType>,
+    IExtractionVisitor<DelegateDeclarationSyntax, SemanticModel, IDelegateType>,
+    IExtractionVisitor<EnumDeclarationSyntax, SemanticModel, IEnumType>,
+    IExtractionVisitor<LocalFunctionStatementSyntax, SemanticModel, IMethodTypeWithLocalFunctions>,
+    IExtractionVisitor<CompilationUnitSyntax, SemanticModel, ICompilationUnitType>
 {
     private readonly CSharpLinesOfCodeCounter _linesOfCodeCounter = new();
 
@@ -24,11 +31,11 @@ public class LinesOfCodeVisitor : ICSharpPropertyVisitor, ICSharpMethodVisitor, 
         return modelType;
     }
 
-    public IAccessorType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
-        IAccessorType modelType)
+    public IAccessorMethodType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorMethodType modelMethodType)
     {
-        modelType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
-        return modelType;
+        modelMethodType.Loc = _linesOfCodeCounter.Count(syntaxNode.ToString());
+        return modelMethodType;
     }
 
     public IConstructorType Visit(ConstructorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
@@ -72,7 +79,7 @@ public class LinesOfCodeVisitor : ICSharpPropertyVisitor, ICSharpMethodVisitor, 
         return modelType;
     }
 
-    public ICompilationUnitType Visit(CSharpSyntaxNode syntaxNode, SemanticModel semanticModel,
+    public ICompilationUnitType Visit(CompilationUnitSyntax syntaxNode, SemanticModel semanticModel,
         ICompilationUnitType modelType)
     {
         var linesOfCode = _linesOfCodeCounter.Count(syntaxNode.ToString());

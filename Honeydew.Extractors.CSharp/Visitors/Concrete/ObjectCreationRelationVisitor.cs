@@ -1,12 +1,13 @@
-﻿using Honeydew.Models.Types;
-using HoneydewCore.Utils;
+﻿using Honeydew.Extractors.CSharp.Utils;
+using Honeydew.Extractors.CSharp.Visitors.Utils;
+using Honeydew.Extractors.Visitors;
+using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using CSharpExtractionHelperMethods = Honeydew.Extractors.CSharp.Visitors.Utils.CSharpExtractionHelperMethods;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class ObjectCreationRelationVisitor : ICSharpClassVisitor
+public class ObjectCreationRelationVisitor : IExtractionVisitor<TypeDeclarationSyntax, SemanticModel, IMembersClassType>
 {
     public const string ObjectCreationDependencyMetricName = "ObjectCreationDependency";
 

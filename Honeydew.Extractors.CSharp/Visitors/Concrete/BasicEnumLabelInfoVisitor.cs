@@ -1,11 +1,11 @@
-﻿using Honeydew.Extractors.CSharp.Visitors;
+﻿using Honeydew.Extractors.Visitors;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class BasicEnumLabelInfoVisitor : ICSharpEnumLabelVisitor
+public class BasicEnumLabelInfoVisitor : IExtractionVisitor<EnumMemberDeclarationSyntax, SemanticModel, IEnumLabelType>
 {
     public IEnumLabelType Visit(EnumMemberDeclarationSyntax syntaxNode, SemanticModel semanticModel,
         IEnumLabelType modelType)

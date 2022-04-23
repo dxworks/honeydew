@@ -1,5 +1,4 @@
-﻿using Honeydew.Extractors.CSharp.Visitors;
-using Honeydew.Extractors.Visitors;
+﻿using Honeydew.Extractors.Visitors;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
@@ -10,9 +9,9 @@ namespace Honeydew.Extractors.CSharp;
 
 public class CSharpFactExtractor : IFactExtractor
 {
-    private readonly ICompositeVisitor _compositeVisitor;
+    private readonly CompositeVisitor<ICompilationUnitType> _compositeVisitor;
 
-    public CSharpFactExtractor(ICompositeVisitor compositeVisitor)
+    public CSharpFactExtractor(CompositeVisitor<ICompilationUnitType> compositeVisitor)
     {
         _compositeVisitor = compositeVisitor;
     }
@@ -25,7 +24,8 @@ public class CSharpFactExtractor : IFactExtractor
 
         foreach (var visitor in _compositeVisitor.GetContainedVisitors())
         {
-            if (visitor is ICSharpCompilationUnitVisitor compilationUnitVisitor)
+            if (visitor is IExtractionVisitor<CompilationUnitSyntax, SemanticModel, ICompilationUnitType>
+                compilationUnitVisitor)
             {
                 compilationUnitModel =
                     compilationUnitVisitor.Visit(compilationUnitSyntaxTree, semanticModel, compilationUnitModel);

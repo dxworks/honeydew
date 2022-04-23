@@ -1,12 +1,16 @@
 ﻿using Honeydew.Extractors.CSharp.Visitors.Utils;
+using Honeydew.Extractors.Visitors;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class GotoStatementVisitor : ICSharpMethodVisitor, ICSharpConstructorVisitor, ICSharpDestructorVisitor,
-    ICSharpMethodAccessorVisitor, ICSharpLocalFunctionVisitor
+public class GotoStatementVisitor : IExtractionVisitor<MethodDeclarationSyntax, SemanticModel, IMethodType>,
+    IExtractionVisitor<ConstructorDeclarationSyntax, SemanticModel, IConstructorType>,
+    IExtractionVisitor<DestructorDeclarationSyntax, SemanticModel, IDestructorType>,
+    IExtractionVisitor<AccessorDeclarationSyntax, SemanticModel, IAccessorMethodType>,
+    IExtractionVisitor<LocalFunctionStatementSyntax, SemanticModel, IMethodTypeWithLocalFunctions>
 {
     public IMethodType Visit(MethodDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
     {
@@ -31,12 +35,12 @@ public class GotoStatementVisitor : ICSharpMethodVisitor, ICSharpConstructorVisi
         return modelType;
     }
 
-    public IAccessorType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
-        IAccessorType modelType)
+    public IAccessorMethodType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorMethodType modelMethodType)
     {
-        modelType.Metrics.Add(CalculateGotoStatements(syntaxNode));
+        modelMethodType.Metrics.Add(CalculateGotoStatements(syntaxNode));
 
-        return modelType;
+        return modelMethodType;
     }
 
     public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode, SemanticModel semanticModel,

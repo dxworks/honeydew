@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using Honeydew.Extractors.CSharp.Visitors;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
+using Honeydew.Models;
 using Honeydew.Models.CSharp;
-using HoneydewCore.Logging;
+using Honeydew.Models.Types;
 using Moq;
 using Xunit;
 
@@ -19,26 +19,31 @@ public class CSharpMethodParametersAttributeMetricTests
 
     public CSharpMethodParametersAttributeMetricTests()
     {
-        var compositeVisitor = new CompositeVisitor(_loggerMock.Object);
-
-        var attributeSetterVisitor = new AttributeSetterVisitor(_loggerMock.Object, new List<IAttributeVisitor>
-        {
-            new AttributeInfoVisitor()
-        });
-        compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(_loggerMock.Object, new List<IClassVisitor>
-        {
-            new BaseInfoClassVisitor(),
-            new MethodSetterClassVisitor(_loggerMock.Object, new List<ICSharpMethodVisitor>
+        var attributeSetterVisitor = new CSharpAttributeSetterVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<IAttributeType>>
             {
-                new MethodInfoVisitor(),
-                attributeSetterVisitor,
-                new ParameterSetterVisitor(_loggerMock.Object, new List<IParameterVisitor>
-                {
-                    new ParameterInfoVisitor(),
-                    attributeSetterVisitor
-                })
-            })
-        }));
+                new AttributeInfoVisitor()
+            });
+
+        var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<ICompilationUnitType>>
+            {
+                new CSharpClassSetterCompilationUnitVisitor(_loggerMock.Object,
+                    new List<ITypeVisitor<IMembersClassType>>
+                    {
+                        new BaseInfoClassVisitor(),
+                        new CSharpMethodSetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
+                        {
+                            new MethodInfoVisitor(),
+                            attributeSetterVisitor,
+                            new CSharpParameterSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IParameterType>>
+                            {
+                                new ParameterInfoVisitor(),
+                                attributeSetterVisitor
+                            })
+                        })
+                    })
+            });
 
         _factExtractor = new CSharpFactExtractor(compositeVisitor);
     }

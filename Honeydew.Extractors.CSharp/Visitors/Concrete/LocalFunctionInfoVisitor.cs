@@ -1,17 +1,18 @@
 ﻿using Honeydew.Extractors.Visitors;
+using Honeydew.Models;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
-using HoneydewCore.Logging;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Honeydew.Extractors.CSharp.Visitors.Utils.CSharpExtractionHelperMethods;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class LocalFunctionInfoVisitor : CompositeVisitor, ICSharpLocalFunctionVisitor
+public class LocalFunctionInfoVisitor : CompositeVisitor<IMethodTypeWithLocalFunctions>,
+    IExtractionVisitor<LocalFunctionStatementSyntax, SemanticModel, IMethodTypeWithLocalFunctions>
 {
-    public LocalFunctionInfoVisitor(ILogger logger, IEnumerable<ILocalFunctionVisitor> visitors) : base(logger,
-        visitors)
+    public LocalFunctionInfoVisitor(ILogger compositeLogger,
+        IEnumerable<ITypeVisitor<IMethodTypeWithLocalFunctions>> visitors) : base(compositeLogger, visitors)
     {
     }
 
@@ -47,7 +48,8 @@ public class LocalFunctionInfoVisitor : CompositeVisitor, ICSharpLocalFunctionVi
             {
                 try
                 {
-                    if (visitor is ICSharpLocalFunctionVisitor extractionVisitor)
+                    if (visitor is IExtractionVisitor<LocalFunctionStatementSyntax, SemanticModel,
+                            IMethodTypeWithLocalFunctions> extractionVisitor)
                     {
                         localFunction =
                             extractionVisitor.Visit(localFunctionStatementSyntax, semanticModel, localFunction);
@@ -55,7 +57,8 @@ public class LocalFunctionInfoVisitor : CompositeVisitor, ICSharpLocalFunctionVi
                 }
                 catch (Exception e)
                 {
-                    Logger.Log($"Could not extract from Local Function Info Visitor because {e}", LogLevels.Warning);
+                    CompositeLogger.Log($"Could not extract from Local Function Info Visitor because {e}",
+                        LogLevels.Warning);
                 }
             }
 

@@ -1,12 +1,13 @@
-﻿using Honeydew.Models.Types;
-using HoneydewCore.Utils;
+﻿using Honeydew.Extractors.CSharp.Utils;
+using Honeydew.Extractors.Visitors;
+using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Honeydew.Extractors.CSharp.Visitors.Utils.CSharpExtractionHelperMethods;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class BaseInfoClassVisitor : ICSharpClassVisitor
+public class BaseInfoClassVisitor : IExtractionVisitor<TypeDeclarationSyntax, SemanticModel, IMembersClassType>
 {
     public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel,
         IMembersClassType modelType)

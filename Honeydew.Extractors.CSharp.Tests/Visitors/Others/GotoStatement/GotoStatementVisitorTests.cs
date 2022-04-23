@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using Honeydew.Extractors.CSharp.Visitors;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
+using Honeydew.Models;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
-using HoneydewCore.Logging;
 using Moq;
 using Xunit;
 
@@ -20,50 +19,56 @@ public class GotoStatementVisitorTests
 
     public GotoStatementVisitorTests()
     {
-        var compositeVisitor = new CompositeVisitor(_loggerMock.Object);
-
         var gotoStatementVisitor = new GotoStatementVisitor();
-        var localFunctionsSetterClassVisitor = new LocalFunctionsSetterClassVisitor(_loggerMock.Object,
-            new List<ICSharpLocalFunctionVisitor>
+        var localFunctionsSetterClassVisitor = new CSharpLocalFunctionsSetterClassVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<IMethodTypeWithLocalFunctions>>
             {
-                new LocalFunctionInfoVisitor(_loggerMock.Object, new List<ICSharpLocalFunctionVisitor>
+                new LocalFunctionInfoVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodTypeWithLocalFunctions>>
                 {
                     gotoStatementVisitor
                 }),
                 gotoStatementVisitor
             });
 
-        compositeVisitor.Add(new ClassSetterCompilationUnitVisitor(_loggerMock.Object, new List<IClassVisitor>
-        {
-            new BaseInfoClassVisitor(),
-            new ConstructorSetterClassVisitor(_loggerMock.Object, new List<ICSharpConstructorVisitor>
+        var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<ICompilationUnitType>>
             {
-                new ConstructorInfoVisitor(),
-                gotoStatementVisitor,
-                localFunctionsSetterClassVisitor,
-            }),
-            new MethodSetterClassVisitor(_loggerMock.Object, new List<IMethodVisitor>
-            {
-                new MethodInfoVisitor(),
-                gotoStatementVisitor,
-                localFunctionsSetterClassVisitor,
-            }),
-            new DestructorSetterClassVisitor(_loggerMock.Object, new List<IDestructorVisitor>
-            {
-                new DestructorInfoVisitor(),
-                gotoStatementVisitor,
-            }),
-            new PropertySetterClassVisitor(_loggerMock.Object, new List<IPropertyVisitor>
-            {
-                new PropertyInfoVisitor(),
-                new MethodAccessorSetterPropertyVisitor(_loggerMock.Object, new List<ICSharpMethodAccessorVisitor>
-                {
-                    new MethodInfoVisitor(),
-                    gotoStatementVisitor,
-                    localFunctionsSetterClassVisitor,
-                })
-            })
-        }));
+                new CSharpClassSetterCompilationUnitVisitor(_loggerMock.Object,
+                    new List<ITypeVisitor<IMembersClassType>>
+                    {
+                        new BaseInfoClassVisitor(),
+                        new CSharpConstructorSetterClassVisitor(_loggerMock.Object,
+                            new List<ITypeVisitor<IConstructorType>>
+                            {
+                                new ConstructorInfoVisitor(),
+                                gotoStatementVisitor,
+                                localFunctionsSetterClassVisitor,
+                            }),
+                        new CSharpMethodSetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
+                        {
+                            new MethodInfoVisitor(),
+                            gotoStatementVisitor,
+                            localFunctionsSetterClassVisitor,
+                        }),
+                        new CSharpDestructorSetterClassVisitor(_loggerMock.Object,
+                            new List<ITypeVisitor<IDestructorType>>
+                            {
+                                new DestructorInfoVisitor(),
+                                gotoStatementVisitor,
+                            }),
+                        new CSharpPropertySetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IPropertyType>>
+                        {
+                            new PropertyInfoVisitor(),
+                            new CSharpAccessorMethodSetterPropertyVisitor(_loggerMock.Object,
+                                new List<ITypeVisitor<IAccessorMethodType>>
+                                {
+                                    new MethodInfoVisitor(),
+                                    gotoStatementVisitor,
+                                    localFunctionsSetterClassVisitor,
+                                })
+                        })
+                    })
+            });
 
         _factExtractor = new CSharpFactExtractor(compositeVisitor);
     }

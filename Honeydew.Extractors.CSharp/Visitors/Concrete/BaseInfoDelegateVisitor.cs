@@ -1,14 +1,14 @@
-﻿using Honeydew.Extractors.CSharp.Visitors;
+﻿using Honeydew.Extractors.CSharp.Utils;
+using Honeydew.Extractors.Visitors;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
-using HoneydewCore.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Honeydew.Extractors.CSharp.Visitors.Utils.CSharpExtractionHelperMethods;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class BaseInfoDelegateVisitor : ICSharpDelegateVisitor
+public class BaseInfoDelegateVisitor : IExtractionVisitor<DelegateDeclarationSyntax, SemanticModel, IDelegateType>
 {
     public IDelegateType Visit(DelegateDeclarationSyntax syntaxNode, SemanticModel semanticModel,
         IDelegateType modelType)

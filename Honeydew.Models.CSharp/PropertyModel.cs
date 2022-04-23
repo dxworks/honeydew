@@ -19,7 +19,7 @@ public record PropertyModel : IPropertyType
 
     public bool IsNullable { get; set; }
 
-    public IList<IAccessorType> Accessors { get; set; } = new List<IAccessorType>();
+    public IList<IAccessorMethodType> Accessors { get; set; } = new List<IAccessorMethodType>();
 
     public LinesOfCode Loc { get; set; }
 

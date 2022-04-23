@@ -1,14 +1,18 @@
 ﻿using Honeydew.Extractors.CSharp.Visitors.Utils;
+using Honeydew.Extractors.Visitors;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static HoneydewCore.Utils.CSharpConstants;
+using static Honeydew.Extractors.CSharp.Utils.CSharpConstants;
 using static Honeydew.Extractors.CSharp.Visitors.Utils.CSharpExtractionHelperMethods;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class MethodInfoVisitor : ICSharpMethodVisitor, ICSharpMethodAccessorVisitor, ICSharpArrowExpressionMethodVisitor
+public class MethodInfoVisitor :
+    IExtractionVisitor<MethodDeclarationSyntax, SemanticModel, IMethodType>,
+    IExtractionVisitor<AccessorDeclarationSyntax, SemanticModel, IAccessorMethodType>,
+    IExtractionVisitor<ArrowExpressionClauseSyntax, SemanticModel, IAccessorMethodType>
 {
     public IMethodType Visit(MethodDeclarationSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
     {
@@ -41,8 +45,8 @@ public class MethodInfoVisitor : ICSharpMethodVisitor, ICSharpMethodAccessorVisi
         return modelType;
     }
 
-    public IAccessorType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
-        IAccessorType modelType)
+    public IAccessorMethodType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorMethodType modelMethodType)
     {
         var accessModifier = "public";
         var modifier = syntaxNode.Modifiers.ToString();
@@ -68,21 +72,21 @@ public class MethodInfoVisitor : ICSharpMethodVisitor, ICSharpMethodAccessorVisi
             }
         }
 
-        modelType.Name = keyword;
-        modelType.ReturnValue = new ReturnValueModel
+        modelMethodType.Name = keyword;
+        modelMethodType.ReturnValue = new ReturnValueModel
         {
             Type = returnType,
             IsNullable = isNullable
         };
-        modelType.Modifier = modifier;
-        modelType.AccessModifier = accessModifier;
-        modelType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
+        modelMethodType.Modifier = modifier;
+        modelMethodType.AccessModifier = accessModifier;
+        modelMethodType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
 
-        return modelType;
+        return modelMethodType;
     }
 
-    public IAccessorType Visit(ArrowExpressionClauseSyntax syntaxNode, SemanticModel semanticModel,
-        IAccessorType modelType)
+    public IAccessorMethodType Visit(ArrowExpressionClauseSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorMethodType modelMethodType)
     {
         IEntityType returnType = new EntityTypeModel
         {
@@ -97,15 +101,15 @@ public class MethodInfoVisitor : ICSharpMethodVisitor, ICSharpMethodAccessorVisi
                     out isNullable);
         }
 
-        modelType.Name = "get";
-        modelType.AccessModifier = "public";
-        modelType.ReturnValue = new ReturnValueModel
+        modelMethodType.Name = "get";
+        modelMethodType.AccessModifier = "public";
+        modelMethodType.ReturnValue = new ReturnValueModel
         {
             Type = returnType,
             IsNullable = isNullable
         };
-        modelType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
+        modelMethodType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
 
-        return modelType;
+        return modelMethodType;
     }
 }

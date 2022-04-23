@@ -1,11 +1,13 @@
-﻿using Honeydew.Models.Types;
+﻿using Honeydew.Extractors.CSharp.Visitors.Utils;
+using Honeydew.Extractors.Visitors;
+using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using CSharpExtractionHelperMethods = Honeydew.Extractors.CSharp.Visitors.Utils.CSharpExtractionHelperMethods;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 
-public class ExceptionsThrownRelationVisitor : ICSharpClassVisitor
+public class
+    ExceptionsThrownRelationVisitor : IExtractionVisitor<TypeDeclarationSyntax, SemanticModel, IMembersClassType>
 {
     public const string ExceptionsThrownDependencyMetricName = "ExceptionsThrownDependency";
 
