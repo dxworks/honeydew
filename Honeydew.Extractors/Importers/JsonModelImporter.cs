@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Honeydew.Models;
+using Newtonsoft.Json;
 
-namespace Honeydew.Models.Importers;
+namespace Honeydew.Extractors.Importers;
 
 public class JsonModelImporter<TModel>
 {

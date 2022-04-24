@@ -1,4 +1,4 @@
-﻿namespace Honeydew.Utils;
+﻿namespace Honeydew.Extractors;
 
 public static class TaskUtils
 {

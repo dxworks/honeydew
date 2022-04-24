@@ -1,4 +1,4 @@
-﻿namespace Honeydew.Models.Converters;
+﻿namespace Honeydew.Extractors.Converters;
 
 public interface ITypeConverter<out TInterfaceType>
 {

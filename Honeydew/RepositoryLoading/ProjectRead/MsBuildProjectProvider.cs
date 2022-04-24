@@ -1,4 +1,6 @@
-﻿using Microsoft.Build.Locator;
+﻿using Honeydew.Extractors;
+using Honeydew.Extractors.Load;
+using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 

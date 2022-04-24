@@ -4,11 +4,11 @@ using Honeydew.Extractors.Visitors;
 using Honeydew.Logging;
 using Honeydew.Models.Types;
 
-namespace Honeydew;
+namespace Honeydew.Extraction;
 
-internal static class VisitorLoaderHelper
+internal static class CSharpExtractionVisitors
 {
-    public static CompositeVisitor<ICompilationUnitType> LoadCSharpVisitors(ILogger logger)
+    public static CompositeVisitor<ICompilationUnitType> GetVisitors(ILogger logger)
     {
         var linesOfCodeVisitor = new LinesOfCodeVisitor();
 

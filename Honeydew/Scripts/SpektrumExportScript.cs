@@ -1,4 +1,4 @@
-﻿using Honeydew.Models.Exporters;
+﻿using Honeydew.Extractors.Exporters;
 using Honeydew.ScriptBeePlugin.Models;
 
 namespace Honeydew.Scripts;

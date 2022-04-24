@@ -1,11 +1,10 @@
-﻿using Honeydew.Models.Converters;
-using Honeydew.Models.Types;
+﻿using Honeydew.Models.Types;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Honeydew.Utils;
+namespace Honeydew.Extractors.Converters;
 
-internal class ClassTypeConverter : JsonConverter
+public class ClassTypeConverter : JsonConverter
 {
     private readonly ITypeConverter<IClassType> _typeConverter;
 

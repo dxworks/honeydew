@@ -1,4 +1,5 @@
-﻿using Honeydew.Extractors.CSharp;
+﻿using Honeydew.Extraction;
+using Honeydew.Extractors.CSharp;
 using Honeydew.RepositoryLoading.ProjectRead;
 using Honeydew.RepositoryLoading.Strategies;
 using Honeydew.Logging;
@@ -26,7 +27,7 @@ public class ProjectExtractorFactory
         return projectLanguage switch
         {
             CSharp => new ProjectExtractor(_logger, _progressLogger, _projectLoadingStrategy,
-                new CSharpFactExtractor(VisitorLoaderHelper.LoadCSharpVisitors(_logger))),
+                new CSharpFactExtractor(CSharpExtractionVisitors.GetVisitors(_logger)), new MsBuildProjectProvider()),
             _ => null
         };
     }

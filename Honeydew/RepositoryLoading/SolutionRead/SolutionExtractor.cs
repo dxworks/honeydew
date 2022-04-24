@@ -1,4 +1,6 @@
-﻿using Honeydew.Logging;
+﻿using Honeydew.Extractors;
+using Honeydew.Extractors.Load;
+using Honeydew.Logging;
 using Honeydew.Models;
 using Honeydew.RepositoryLoading.ProjectRead;
 using Honeydew.RepositoryLoading.Strategies;
@@ -8,7 +10,7 @@ using Microsoft.CodeAnalysis.MSBuild;
 
 namespace Honeydew.RepositoryLoading.SolutionRead;
 
-public class SolutionExtractor
+public class SolutionExtractor : ISolutionExtractor
 {
     private readonly ILogger _logger;
     private readonly IProgressLogger _progressLogger;

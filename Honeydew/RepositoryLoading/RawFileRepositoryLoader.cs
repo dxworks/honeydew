@@ -1,5 +1,5 @@
-﻿using Honeydew.Logging;
-using Honeydew.Models.Importers;
+﻿using Honeydew.Extractors.Importers;
+using Honeydew.Logging;
 using Honeydew.Models;
 
 namespace Honeydew.RepositoryLoading;

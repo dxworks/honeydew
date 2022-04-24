@@ -2,7 +2,7 @@
 
 namespace Honeydew.Extractors.Visitors.Setters;
 
-public interface ILocalVariablesTypeSetterVisitor<in TSyntaxNode, TSemanticNode, TLocalVariableSyntaxNode,
+public interface ILocalVariablesTypeSetterVisitor<in TSyntaxNode, in TSemanticNode, TLocalVariableSyntaxNode,
     TTypeWithLocalVariables> :
     ISetterVisitor<TSyntaxNode, TSemanticNode, TTypeWithLocalVariables, TLocalVariableSyntaxNode, ILocalVariableType>
     where TTypeWithLocalVariables : ITypeWithLocalVariables

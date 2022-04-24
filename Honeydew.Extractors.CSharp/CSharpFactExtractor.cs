@@ -10,6 +10,8 @@ namespace Honeydew.Extractors.CSharp;
 public class CSharpFactExtractor : IFactExtractor
 {
     private readonly CompositeVisitor<ICompilationUnitType> _compositeVisitor;
+    private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
+    private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
     public CSharpFactExtractor(CompositeVisitor<ICompilationUnitType> compositeVisitor)
     {
@@ -33,6 +35,15 @@ public class CSharpFactExtractor : IFactExtractor
         }
 
         return compilationUnitModel;
+    }
+
+    public async Task<ICompilationUnitType> Extract(string filePath, CancellationToken cancellationToken)
+    {
+        var fileContent = await File.ReadAllTextAsync(filePath, cancellationToken);
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+
+        return Extract(syntaxTree, semanticModel);
     }
 
     private static CompilationUnitSyntax GetCompilationUnitSyntaxTree(SyntaxTree tree)

@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace Honeydew.RepositoryLoading.ProjectRead;
+namespace Honeydew.Extractors.Load;
 
 public interface IProjectProvider
 {

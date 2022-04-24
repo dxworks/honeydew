@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-
-namespace Honeydew.Models;
+﻿namespace Honeydew.Models;
 
 public class RepositoryModel
 {
-    public string Version { get; set; }
+    public string Version { get; set; } = "";
 
     public IList<SolutionModel> Solutions { get; set; } = new List<SolutionModel>();
 

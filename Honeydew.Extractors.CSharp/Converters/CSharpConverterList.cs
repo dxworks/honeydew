@@ -1,10 +1,10 @@
-﻿using Honeydew.Models;
-using Honeydew.Models.Converters;
+﻿using Honeydew.Extractors.Converters;
+using Honeydew.Models;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Newtonsoft.Json;
 
-namespace Honeydew.Utils;
+namespace Honeydew.Extractors.CSharp.Converters;
 
 public class CSharpConverterList : IConverterList
 {

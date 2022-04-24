@@ -1,15 +1,19 @@
 ﻿using System.Reflection;
 using CommandLine;
 using Honeydew;
+using Honeydew.Extraction;
 using Honeydew.Extractors.CSharp;
+using Honeydew.Extractors.CSharp.Converters;
+using Honeydew.Extractors.Exporters;
+using Honeydew.Extractors.Importers;
+using Honeydew.Extractors.Load;
 using Honeydew.IO.Writers.Exporters;
 using Honeydew.Logging;
 using Honeydew.Models;
-using Honeydew.Models.Exporters;
-using Honeydew.Models.Importers;
 using Honeydew.PostExtraction.ReferenceRelations;
 using Honeydew.Processors;
 using Honeydew.RepositoryLoading;
+using Honeydew.RepositoryLoading.SolutionRead;
 using Honeydew.RepositoryLoading.Strategies;
 using Honeydew.ScriptBeePlugin.Loaders;
 using Honeydew.Scripts;
@@ -304,10 +308,29 @@ static async Task<RepositoryModel?> LoadModel(ILogger logger, IProgressLogger pr
 static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger progressLogger,
     ILogger missingFilesLogger, string inputPath, bool parallelExtraction, CancellationToken cancellationToken)
 {
-    var repositoryLoader = new RepositoryExtractor(logger, progressLogger, missingFilesLogger,
-        new CSharpCompilationMaker(),
-        new ProjectExtractorFactory(logger, progressLogger, GetProjectLoadingStrategy(logger, parallelExtraction)),
-        parallelExtraction);
+    var projectLoadingStrategy = GetProjectLoadingStrategy(logger, parallelExtraction);
+
+    var projectExtractorFactory = new ProjectExtractorFactory(logger, progressLogger, projectLoadingStrategy);
+
+
+    var csharpProjectExtractor = projectExtractorFactory.GetProjectExtractor(ProjectExtractorFactory.CSharp)!;
+    var solutionExtractor = new SolutionExtractor(logger, progressLogger, projectExtractorFactory,
+        new ActualFilePathProvider(logger));
+
+    var solutionSchemas = new List<SolutionSchema>
+    {
+        new(".sln", solutionExtractor, new List<ProjectSchema>
+        {
+            new(".csproj", csharpProjectExtractor, new List<FileSchema>
+            {
+                new(".cs", new CSharpFactExtractor(CSharpExtractionVisitors.GetVisitors(logger))),
+            })
+        })
+    };
+
+    var repositoryLoader =
+        new RepositoryExtractor(solutionSchemas, logger, progressLogger, missingFilesLogger, parallelExtraction);
+
     var repositoryModel = await repositoryLoader.Load(inputPath, cancellationToken);
 
     return repositoryModel;

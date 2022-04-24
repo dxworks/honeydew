@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Honeydew.Models.Exporters;
+namespace Honeydew.Extractors.Exporters;
 
 public class JsonModelExporter
 {

@@ -4,17 +4,20 @@ namespace Honeydew.Models;
 
 public record ProjectModel
 {
-    public string Language { get; set; }
+    public string Language { get; set; } = "";
 
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
 
-    public string FilePath { get; set; }
+    public string FilePath { get; set; } = "";
 
     public IList<string> ProjectReferences { get; set; } = new List<string>();
 
     public IList<NamespaceModel> Namespaces { get; set; } = new List<NamespaceModel>();
 
     public IList<ICompilationUnitType> CompilationUnits { get; set; } = new List<ICompilationUnitType>();
+
+    public IDictionary<string, Dictionary<string, string>> Metadata =
+        new Dictionary<string, Dictionary<string, string>>();
 
     public void Add(ICompilationUnitType compilationUnitType)
     {
