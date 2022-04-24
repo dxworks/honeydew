@@ -12,6 +12,11 @@ public class ParameterInfoVisitor : IExtractionVisitor<ParameterSyntax, Semantic
     public IParameterType Visit(ParameterSyntax syntaxNode, SemanticModel semanticModel, IParameterType modelType)
     {
         var parameterInfo = CSharpExtractionHelperMethods.ExtractInfoAboutParameter(syntaxNode, semanticModel);
+        if (parameterInfo is null)
+        {
+            return modelType;
+        }
+
         modelType.Type = parameterInfo.Type;
         modelType.IsNullable = parameterInfo.IsNullable;
 

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Honeydew.Extractors.CSharp.Visitors.Concrete;
+﻿using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
 using Honeydew.Logging;
@@ -170,7 +169,7 @@ internal static class VisitorLoaderHelper
 
             // metrics visitor
             new ExceptionsThrownRelationVisitor(),
-            new ObjectCreationRelationVisitor(),
+            new ObjectCreationRelationVisitor(logger),
         };
 
         var delegateVisitors = new List<ITypeVisitor<IDelegateType>>

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Honeydew.Logging;
+﻿using Honeydew.Logging;
 using Honeydew.Models.Importers;
 using Honeydew.Models;
 
@@ -21,14 +18,14 @@ public class RawFileRepositoryLoader
         _progressLogger = progressLogger;
     }
 
-    public Task<RepositoryModel?> Load(string path, CancellationToken cancellationToken)
+    public async Task<RepositoryModel?> Load(string path, CancellationToken cancellationToken)
     {
         _logger.Log($"Opening File at {path}");
         _progressLogger.Log($"Opening File at {path}");
 
         try
         {
-            var repositoryModel = _jsonModelImporter.Import(path, cancellationToken);
+            var repositoryModel = await _jsonModelImporter.Import(path, cancellationToken);
 
             if (repositoryModel == null)
             {
@@ -38,7 +35,7 @@ public class RawFileRepositoryLoader
             _logger.Log("Model Loaded");
             _progressLogger.Log("Model Loaded");
 
-            return Task.FromResult(repositoryModel);
+            return repositoryModel;
         }
         catch (Exception e)
         {

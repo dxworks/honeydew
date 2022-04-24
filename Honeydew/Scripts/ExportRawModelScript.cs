@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using Honeydew.Models;
+﻿using Honeydew.Models;
 using Honeydew.Models.Exporters;
 
 namespace Honeydew.Scripts;
@@ -22,17 +20,17 @@ namespace Honeydew.Scripts;
 public class ExportRawModelScript : Script
 {
     private readonly JsonModelExporter _repositoryExporter;
-        
+
     public ExportRawModelScript(JsonModelExporter repositoryExporter)
     {
         _repositoryExporter = repositoryExporter;
     }
 
-    public override void Run(Dictionary<string, object> arguments)
+    public override void Run(Dictionary<string, object?> arguments)
     {
-        var outputPath = VerifyArgument<string>(arguments, "outputPath");
-        var outputName = VerifyArgument<string>(arguments, "rawJsonOutputName");
-        var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "repositoryModel");
+        var outputPath = VerifyArgument<string>(arguments, "outputPath")!;
+        var outputName = VerifyArgument<string>(arguments, "rawJsonOutputName")!;
+        var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "repositoryModel")!;
 
         _repositoryExporter.Export(Path.Combine(outputPath, outputName), repositoryModel);
     }

@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Threading;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Honeydew.Models.Importers;
 
@@ -13,7 +11,7 @@ public class JsonModelImporter<TModel>
         _converterList = converterList;
     }
 
-    public TModel Import(string filePath, CancellationToken cancellationToken)
+    public async Task<TModel?> Import(string filePath, CancellationToken cancellationToken)
     {
         using var streamReader = File.OpenText(filePath);
         var serializer = new JsonSerializer();
@@ -23,6 +21,8 @@ public class JsonModelImporter<TModel>
         }
 
         using var jsonTextReader = new JsonTextReader(streamReader);
-        return serializer.Deserialize<TModel>(jsonTextReader);
+        var result = await Task.Run(() => serializer.Deserialize<TModel>(jsonTextReader), cancellationToken);
+
+        return result;
     }
 }

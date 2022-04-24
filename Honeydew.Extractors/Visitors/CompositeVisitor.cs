@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Honeydew.Logging;
+﻿using Honeydew.Logging;
 
 namespace Honeydew.Extractors.Visitors;
 
@@ -12,10 +11,6 @@ public abstract class CompositeVisitor<TType>
     protected CompositeVisitor(ILogger compositeLogger, IEnumerable<ITypeVisitor<TType>> visitors)
     {
         CompositeLogger = compositeLogger;
-        if (visitors == null)
-        {
-            return;
-        }
 
         foreach (var visitor in visitors)
         {

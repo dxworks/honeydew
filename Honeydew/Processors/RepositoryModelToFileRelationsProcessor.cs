@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Honeydew.ModelRepresentations;
+﻿using Honeydew.ModelRepresentations;
 using Honeydew.Models.CSharp;
 using Honeydew.ScriptBeePlugin.Models;
 using ClassModel = Honeydew.ScriptBeePlugin.Models.ClassModel;
@@ -18,7 +15,7 @@ public class RepositoryModelToFileRelationsProcessor
         _metricChooseStrategy = metricChooseStrategy;
     }
 
-    public RelationsRepresentation Process(RepositoryModel repositoryModel)
+    public RelationsRepresentation Process(RepositoryModel? repositoryModel)
     {
         if (repositoryModel == null)
         {

@@ -92,9 +92,9 @@ public static partial class CSharpExtractionHelperMethods
         {
             Name = methodName,
             DefinitionClassName =
-                CSharpExtractionHelperMethods.GetDefinitionClassName(invocationExpressionSyntax, semanticModel),
+                GetDefinitionClassName(invocationExpressionSyntax, semanticModel),
             LocationClassName =
-                CSharpExtractionHelperMethods.GetLocationClassName(invocationExpressionSyntax, semanticModel),
+                GetLocationClassName(invocationExpressionSyntax, semanticModel),
             ParameterTypes = GetParameters(invocationExpressionSyntax, semanticModel),
             MethodDefinitionNames = GetMethodDefinitionNames(invocationExpressionSyntax, semanticModel),
             GenericParameters = GetGenericParameters(invocationExpressionSyntax, semanticModel),
@@ -125,10 +125,10 @@ public static partial class CSharpExtractionHelperMethods
         while (currentSymbol is IMethodSymbol methodSymbol)
         {
             var containingSymbol =
-                methodSymbol.ContainingSymbol == null ? "" : methodSymbol.ContainingSymbol.ToString();
+                methodSymbol.ContainingSymbol == null ? "" : methodSymbol.ContainingSymbol.ToString() ?? "";
             var containingNamespace = methodSymbol.ContainingNamespace == null
                 ? ""
-                : methodSymbol.ContainingNamespace.ToString();
+                : methodSymbol.ContainingNamespace.ToString() ?? "";
             var symbolName = containingSymbol.Replace(containingNamespace, "").Trim('.');
             var methodSymbolName = methodSymbol.MethodKind switch
             {
@@ -201,7 +201,7 @@ public static partial class CSharpExtractionHelperMethods
                 modifier = "this";
             }
 
-            string defaultValue = null;
+            string? defaultValue = null;
             if (parameter.HasExplicitDefaultValue)
             {
                 defaultValue = parameter.ExplicitDefaultValue == null
@@ -235,12 +235,17 @@ public static partial class CSharpExtractionHelperMethods
         };
     }
 
-    public static ParameterModel ExtractInfoAboutParameter(BaseParameterSyntax baseParameterSyntax,
+    public static ParameterModel? ExtractInfoAboutParameter(BaseParameterSyntax baseParameterSyntax,
         SemanticModel semanticModel)
     {
+        if (baseParameterSyntax.Type is null)
+        {
+            return null;
+        }
+        
         var parameterType = GetFullName(baseParameterSyntax.Type, semanticModel, out var isNullable);
 
-        string defaultValue = null;
+        string? defaultValue = null;
 
         if (baseParameterSyntax is ParameterSyntax parameterSyntax)
         {
@@ -423,12 +428,7 @@ public static partial class CSharpExtractionHelperMethods
         return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
     }
 
-    public static bool IsAbstractModifier(string modifier)
-    {
-        return CSharpConstants.AbstractIdentifier == modifier;
-    }
-
-    private static int CalculateCyclomaticComplexity(ExpressionSyntax conditionExpressionSyntax)
+    private static int CalculateCyclomaticComplexity(ExpressionSyntax? conditionExpressionSyntax)
     {
         if (conditionExpressionSyntax == null)
         {
@@ -577,63 +577,5 @@ public static partial class CSharpExtractionHelperMethods
         }
 
         return attributeListSyntax.Target.Identifier.ToString().TrimEnd(':');
-    }
-
-    public static AccessedField GetAccessField(ExpressionSyntax identifierNameSyntax, SemanticModel semanticModel)
-    {
-        var expressionSyntax = identifierNameSyntax;
-        if (expressionSyntax == null)
-        {
-            return null;
-        }
-
-        if (identifierNameSyntax is ElementAccessExpressionSyntax elementAccessExpressionSyntax)
-        {
-            expressionSyntax = elementAccessExpressionSyntax.Expression;
-        }
-
-        var symbolInfo = semanticModel.GetSymbolInfo(expressionSyntax);
-
-        if (symbolInfo.Symbol is IFieldSymbol or IPropertySymbol)
-        {
-            return new AccessedField
-            {
-                Name = symbolInfo.Symbol.Name,
-                DefinitionClassName =
-                    CSharpExtractionHelperMethods.GetDefinitionClassName(expressionSyntax, semanticModel),
-                LocationClassName = CSharpExtractionHelperMethods.GetLocationClassName(expressionSyntax, semanticModel),
-                Kind = GetAccessType(identifierNameSyntax),
-            };
-        }
-
-        if (expressionSyntax is MemberAccessExpressionSyntax memberAccessExpressionSyntax)
-        {
-            if (memberAccessExpressionSyntax.Parent is InvocationExpressionSyntax)
-            {
-                return null;
-            }
-
-            var definitionClassName =
-                CSharpExtractionHelperMethods.GetDefinitionClassName(memberAccessExpressionSyntax, semanticModel);
-            return new AccessedField
-            {
-                Name = memberAccessExpressionSyntax.Name.ToString(),
-                DefinitionClassName = definitionClassName,
-                LocationClassName = definitionClassName,
-                Kind = GetAccessType(memberAccessExpressionSyntax),
-            };
-        }
-
-        return null;
-    }
-
-    private static AccessedField.AccessKind GetAccessType(SyntaxNode syntax)
-    {
-        if (syntax?.Parent is AssignmentExpressionSyntax)
-        {
-            return AccessedField.AccessKind.Setter;
-        }
-
-        return AccessedField.AccessKind.Getter;
     }
 }

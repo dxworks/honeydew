@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Honeydew.IO.Writers.Exporters;
+﻿using Honeydew.IO.Writers.Exporters;
 using Honeydew.ModelRepresentations;
 using Honeydew.PostExtraction.ReferenceRelations;
 using Honeydew.ScriptBeePlugin.Models;
@@ -34,12 +31,12 @@ public class GenericDependenciesScript : Script
         _representationExporter = representationExporter;
     }
 
-    public override void Run(Dictionary<string, object> arguments)
+    public override void Run(Dictionary<string, object?> arguments)
     {
-        var outputPath = VerifyArgument<string>(arguments, "outputPath");
-        var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel");
-        var outputName = VerifyArgument<string>(arguments, "genericDependenciesOutputName");
-        var addStrategy = VerifyArgument<IAddStrategy>(arguments, "addStrategy");
+        var outputPath = VerifyArgument<string>(arguments, "outputPath")!;
+        var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel")!;
+        var outputName = VerifyArgument<string>(arguments, "genericDependenciesOutputName")!;
+        var addStrategy = VerifyArgument<IAddStrategy>(arguments, "addStrategy")!;
 
         var relationsRepresentation = new RelationsRepresentation();
 
@@ -71,13 +68,8 @@ public class GenericDependenciesScript : Script
 
                         var relationEnumerable = dictionary.Where(pair => pair.Key != entityModel.Name);
 
-                        relations.AddRange(relationEnumerable.Select(targetCountPair => new Relation
-                        {
-                            Source = entityModel.Name,
-                            Target = targetCountPair.Key,
-                            Type = visitor.Name,
-                            Strength = targetCountPair.Value
-                        }));
+                        relations.AddRange(relationEnumerable.Select(targetCountPair =>
+                            new Relation(entityModel.Name, targetCountPair.Key, visitor.Name, targetCountPair.Value)));
                     }
                 }
             }

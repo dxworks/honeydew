@@ -1,5 +1,4 @@
-﻿using System;
-using Honeydew.Models;
+﻿using Honeydew.Models;
 
 namespace Honeydew.Extractors;
 

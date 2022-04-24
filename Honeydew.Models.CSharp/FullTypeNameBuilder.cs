@@ -4,8 +4,10 @@ namespace Honeydew.Models.CSharp;
 
 public static class FullTypeNameBuilder
 {
-    public static EntityTypeModel CreateEntityTypeModel(string name, bool isExternType = false)
+    public static EntityTypeModel CreateEntityTypeModel(string? name, bool isExternType = false)
     {
+        name ??= "";
+
         try
         {
             return new EntityTypeModel

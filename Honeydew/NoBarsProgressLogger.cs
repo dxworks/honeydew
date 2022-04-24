@@ -1,32 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using Honeydew.Logging;
+﻿using Honeydew.Logging;
 
-namespace Honeydew
+namespace Honeydew;
+
+public class NoBarsProgressLogger : IProgressLogger
 {
-    public class NoBarsProgressLogger : IProgressLogger
+    public void Log(string value)
     {
-        public void Log(string value)
-        {
-            Console.WriteLine(value);
-        }
+        Console.WriteLine(value);
+    }
 
-        public void Log()
-        {
-            Console.WriteLine();
-        }
+    public void Log()
+    {
+        Console.WriteLine();
+    }
 
-        public void CreateProgressBars(IEnumerable<string> progressBarNames)
-        {
-        }
+    public void CreateProgressBars(IEnumerable<string> progressBarNames)
+    {
+    }
 
-        public IProgressLoggerBar CreateProgressLogger(int totalCount, string text)
-        {
-            return new EmptyProgressLoggerBar(text);
-        }
+    public IProgressLoggerBar CreateProgressLogger(int totalCount, string text)
+    {
+        return new EmptyProgressLoggerBar(text);
+    }
 
-        public void StopProgressBar(string solutionPath)
-        {
-        }
+    public void StopProgressBar(string solutionPath)
+    {
     }
 }

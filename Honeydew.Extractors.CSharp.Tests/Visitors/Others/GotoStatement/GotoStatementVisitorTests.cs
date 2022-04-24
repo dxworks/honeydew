@@ -141,7 +141,7 @@ public class GotoStatementVisitorTests
         var methodModel = (MethodModel)classModel.Methods[0];
 
         Assert.Single(methodModel.Metrics);
-        Assert.Equal(0, (int)methodModel.Metrics[0].Value);
+        Assert.Equal(0, (int)methodModel.Metrics[0].Value!);
 
         TestGotoStatementInMetrics(methodModel.LocalFunctions[0].Metrics);
         TestGotoStatementInMetrics(methodModel.LocalFunctions[0].LocalFunctions[0].Metrics);
@@ -152,6 +152,6 @@ public class GotoStatementVisitorTests
         Assert.Single(metrics);
         Assert.Equal(typeof(GotoStatementVisitor).FullName, metrics[0].ExtractorName);
         Assert.Equal(typeof(int).FullName, metrics[0].ValueType);
-        Assert.Equal(3, (int)metrics[0].Value);
+        Assert.Equal(3, (int)metrics[0].Value!);
     }
 }

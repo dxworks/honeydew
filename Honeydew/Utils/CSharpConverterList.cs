@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Honeydew.Models;
+﻿using Honeydew.Models;
 using Honeydew.Models.Converters;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;

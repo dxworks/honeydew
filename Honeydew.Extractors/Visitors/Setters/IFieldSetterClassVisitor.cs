@@ -2,10 +2,10 @@
 
 namespace Honeydew.Extractors.Visitors.Setters;
 
-public interface IFieldSetterClassVisitor<in TSyntaxNode, TSemanticModel, TFieldSyntaxNode> :
-    ISetterVisitor<TSyntaxNode, TSemanticModel, IMembersClassType, TFieldSyntaxNode, IFieldType>
+public interface IFieldSetterClassVisitor<in TSyntaxNode, in TSemanticModel, TFieldSyntaxNode> :
+    ISetterVisitor<TSyntaxNode, TSemanticModel, IMembersClassType, TFieldSyntaxNode, IFieldType?>
 {
-    string ISetterVisitor<TSyntaxNode, TSemanticModel, IMembersClassType, TFieldSyntaxNode, IFieldType>.Name()
+    string ISetterVisitor<TSyntaxNode, TSemanticModel, IMembersClassType, TFieldSyntaxNode, IFieldType?>.Name()
     {
         return "Field";
     }

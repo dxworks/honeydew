@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-using Honeydew.ModelRepresentations;
+﻿using Honeydew.ModelRepresentations;
 using Honeydew.ScriptBeePlugin.Models;
 
 namespace Honeydew.Processors;
 
 public class RepositoryModelToCyclomaticComplexityPerFileProcessor
 {
-    public CyclomaticComplexityPerFileRepresentation Process(RepositoryModel repositoryModel)
+    public CyclomaticComplexityPerFileRepresentation Process(RepositoryModel? repositoryModel)
     {
         var representation = new CyclomaticComplexityPerFileRepresentation();
 
@@ -22,40 +21,15 @@ public class RepositoryModelToCyclomaticComplexityPerFileProcessor
             CalculateCycloComponents(classModels, out var maxCyclo, out var minCyclo, out var avgCyclo,
                 out var sumCyclo, out var atc);
 
-            representation.AddConcern(new Concern
-            {
-                Entity = filePath,
-                Tag = "metric.maxCyclo",
-                Strength = maxCyclo.ToString()
-            });
+            representation.AddConcern(new Concern(filePath, "metric.maxCyclo", maxCyclo.ToString()));
 
-            representation.AddConcern(new Concern
-            {
-                Entity = filePath,
-                Tag = "metric.minCyclo",
-                Strength = minCyclo.ToString()
-            });
+            representation.AddConcern(new Concern(filePath, "metric.minCyclo", minCyclo.ToString()));
 
-            representation.AddConcern(new Concern
-            {
-                Entity = filePath,
-                Tag = "metric.avgCyclo",
-                Strength = avgCyclo.ToString()
-            });
+            representation.AddConcern(new Concern(filePath, "metric.avgCyclo", avgCyclo.ToString()));
 
-            representation.AddConcern(new Concern
-            {
-                Entity = filePath,
-                Tag = "metric.sumCyclo",
-                Strength = sumCyclo.ToString()
-            });
+            representation.AddConcern(new Concern(filePath, "metric.sumCyclo", sumCyclo.ToString()));
 
-            representation.AddConcern(new Concern
-            {
-                Entity = filePath,
-                Tag = "metric.atc",
-                Strength = atc.ToString()
-            });
+            representation.AddConcern(new Concern(filePath, "metric.atc", atc.ToString()));
         }
 
         return representation;

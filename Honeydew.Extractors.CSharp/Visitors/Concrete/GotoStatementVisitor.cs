@@ -58,8 +58,8 @@ public class GotoStatementVisitor : IExtractionVisitor<MethodDeclarationSyntax, 
         modelType.Metrics.Add(new MetricModel
         (
             "GotoStatementsCount",
-            typeof(GotoStatementVisitor).FullName,
-            typeof(int).FullName,
+            typeof(GotoStatementVisitor).FullName ?? nameof(GotoStatementVisitor),
+            typeof(int).FullName ?? nameof(Int32),
             gotoStatementsCount
         ));
 
@@ -75,8 +75,8 @@ public class GotoStatementVisitor : IExtractionVisitor<MethodDeclarationSyntax, 
         return new MetricModel
         (
             "GotoStatementsCount",
-            typeof(GotoStatementVisitor).FullName,
-            typeof(int).FullName,
+            typeof(GotoStatementVisitor).FullName ?? nameof(GotoStatementVisitor),
+            typeof(int).FullName ?? nameof(Int32),
             gotoStatementsCount
         );
     }

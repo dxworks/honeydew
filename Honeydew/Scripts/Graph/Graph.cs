@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using DotNetGraph;
+﻿using DotNetGraph;
 using DotNetGraph.Edge;
 using DotNetGraph.Extensions;
 using DotNetGraph.Node;
@@ -32,7 +31,7 @@ public class Graph
         return _graph.Compile(indented);
     }
 
-    public DotNode AddNode(string nodeId, string label = null)
+    public DotNode AddNode(string nodeId, string? label = null)
     {
         if (_nodes.TryGetValue(nodeId, out var node))
         {
@@ -47,7 +46,7 @@ public class Graph
         return node;
     }
 
-    public DotEdge AddEdge(string leftNodeId, string rightNodeId, string label = null)
+    public DotEdge AddEdge(string leftNodeId, string rightNodeId, string? label = null)
     {
         if (_edges.TryGetValue((leftNodeId, rightNodeId), out var edge))
         {
@@ -62,7 +61,7 @@ public class Graph
         return edge;
     }
 
-    public DotSubGraph AddSubGraph(string subGraphName, string label = null)
+    public DotSubGraph AddSubGraph(string subGraphName, string? label = null)
     {
         if (_subGraphs.TryGetValue(subGraphName, out var subGraph))
         {
@@ -97,7 +96,7 @@ public class Graph
         return _subGraphs[subGraphId];
     }
 
-    public void AddNodeToSubGraph(DotSubGraph subGraph, string nodeId, string nodeLabel = null)
+    public void AddNodeToSubGraph(DotSubGraph subGraph, string nodeId, string? nodeLabel = null)
     {
         var node = CreateNode(nodeId, nodeLabel);
         subGraph.Elements.Add(node);
@@ -105,7 +104,7 @@ public class Graph
         _nodes.TryAdd(nodeId, node);
     }
 
-    public void AddEdgeToSubGraph(DotSubGraph subGraph, string leftNodeId, string rightNodeId, string label = null)
+    public void AddEdgeToSubGraph(DotSubGraph subGraph, string leftNodeId, string rightNodeId, string? label = null)
     {
         var edge = CreateEdge(leftNodeId, rightNodeId, label);
         subGraph.Elements.Add(edge);
@@ -113,7 +112,7 @@ public class Graph
         _edges.TryAdd((leftNodeId, rightNodeId), edge);
     }
 
-    private DotNode CreateNode(string nodeId, string label = null)
+    private DotNode CreateNode(string nodeId, string? label = null)
     {
         return new DotNode(nodeId)
         {
@@ -129,7 +128,7 @@ public class Graph
         };
     }
 
-    private DotEdge CreateEdge(string leftNodeId, string rightNodeId, string label = null)
+    private DotEdge CreateEdge(string leftNodeId, string rightNodeId, string? label = null)
     {
         var leftNode = AddNode(leftNodeId);
         var rightNode = AddNode(rightNodeId);

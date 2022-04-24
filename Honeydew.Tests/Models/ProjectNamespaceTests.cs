@@ -124,7 +124,7 @@ public class ProjectNamespaceTests
         (
             "MetricName",
             "MetricExtractor",
-            typeof(int).FullName,
+            typeof(int).FullName ?? nameof(System.Int32),
             0
         ));
 
@@ -148,7 +148,7 @@ public class ProjectNamespaceTests
                 }
             },
             ExtractorName: "BaseTypesExtractor",
-            ValueType: typeof(List<IBaseType>).FullName,
+            ValueType: typeof(List<IBaseType>).FullName ?? nameof(List<IBaseType>),
             Name: "MetricName2"
         ));
 
@@ -163,7 +163,7 @@ public class ProjectNamespaceTests
         (
             Value: 0,
             ExtractorName: "MetricExtractor",
-            ValueType: typeof(int).FullName,
+            ValueType: typeof(int).FullName ?? nameof(System.Int32),
             Name: "MetricName"
         ));
         classModel3.Metrics.Add(new MetricModel
@@ -188,7 +188,7 @@ public class ProjectNamespaceTests
                 }
             },
             ExtractorName: "BaseTypesExtractor",
-            ValueType: typeof(List<IBaseType>).FullName,
+            ValueType: typeof(List<IBaseType>).FullName ?? nameof(List<IBaseType>),
             Name: "MetricName3"
         ));
 

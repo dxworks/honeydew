@@ -1,17 +1,16 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Honeydew.Models.Converters;
 
 public class ModelJsonConverter<TInterfaceModel, TConcreteModel> : JsonConverter
     where TConcreteModel : TInterfaceModel
 {
-    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
     {
         serializer.Serialize(writer, value);
     }
 
-    public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
+    public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue,
         JsonSerializer serializer)
     {
         return serializer.Deserialize(reader, typeof(TConcreteModel));

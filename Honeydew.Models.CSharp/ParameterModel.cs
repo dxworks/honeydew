@@ -8,7 +8,7 @@ public record ParameterModel : IParameterType
 
     public string Modifier { get; set; } = "";
 
-    public string DefaultValue { get; set; }
+    public string? DefaultValue { get; set; }
 
     public bool IsNullable { get; set; }
 

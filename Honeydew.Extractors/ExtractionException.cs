@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Honeydew.Extractors;
+﻿namespace Honeydew.Extractors;
 
 public class ExtractionException : Exception
 {

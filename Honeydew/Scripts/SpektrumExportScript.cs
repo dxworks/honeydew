@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Honeydew.Models.Exporters;
+﻿using Honeydew.Models.Exporters;
 using Honeydew.ScriptBeePlugin.Models;
 
 namespace Honeydew.Scripts;
@@ -29,11 +26,11 @@ public class SpektrumExportScript : Script
         _repositoryExporter = repositoryExporter;
     }
 
-    public override void Run(Dictionary<string, object> arguments)
+    public override void Run(Dictionary<string, object?> arguments)
     {
-        var outputPath = VerifyArgument<string>(arguments, "outputPath");
-        var outputName = VerifyArgument<string>(arguments, "spektrumOutputName");
-        var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel");
+        var outputPath = VerifyArgument<string>(arguments, "outputPath")!;
+        var outputName = VerifyArgument<string>(arguments, "spektrumOutputName")!;
+        var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel")!;
 
         var solutions =
             repositoryModel.Solutions.Select(solution =>
@@ -79,7 +76,7 @@ public class SpektrumExportScript : Script
                                                 name: entityModel.Name,
                                                 usingStatements: entityModel.Imports.Select(i =>
                                                         i.Entity == null ? i.Namespace?.FullName : i.Entity.Name)
-                                                    .Where(i => i is not null).ToHashSet(),
+                                                    .Where(i => i is not null).ToHashSet()!,
                                                 type: classType,
                                                 attributes: entityModel.Attributes.Select(a => a.Type.Entity.Name)
                                                     .ToHashSet(),
@@ -197,9 +194,9 @@ public class SpektrumExportScript : Script
     }
 
 
-    private static IEnumerable<string> GetGenericNames(EntityType genericType)
+    private static IEnumerable<string> GetGenericNames(EntityType? genericType)
     {
-        if (genericType == null)
+        if (genericType is null)
         {
             return new List<string>();
         }

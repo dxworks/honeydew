@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Honeydew.Extractors.CSharp.Visitors;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
@@ -26,7 +25,7 @@ public class CSharpObjectCreationRelationMetricTests
                     new List<ITypeVisitor<IMembersClassType>>
                     {
                         new BaseInfoClassVisitor(),
-                        new ObjectCreationRelationVisitor(),
+                        new ObjectCreationRelationVisitor(_loggerMock.Object),
                     })
             });
 
@@ -47,7 +46,7 @@ public class CSharpObjectCreationRelationMetricTests
         Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
             classTypes[1].Metrics[0].ValueType);
 
-        var dependencies = (IDictionary<string, int>)classTypes[1].Metrics[0].Value;
+        var dependencies = (IDictionary<string, int>)classTypes[1].Metrics[0].Value!;
 
         Assert.Equal(1, dependencies.Count);
         Assert.Equal(8, dependencies["App.C"]);
@@ -67,7 +66,7 @@ public class CSharpObjectCreationRelationMetricTests
         Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
             classTypes[1].Metrics[0].ValueType);
 
-        var dependencies = (IDictionary<string, int>)classTypes[1].Metrics[0].Value;
+        var dependencies = (IDictionary<string, int>)classTypes[1].Metrics[0].Value!;
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(8, dependencies["App.C[]"]);
@@ -90,7 +89,7 @@ public class CSharpObjectCreationRelationMetricTests
         Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
             classTypes[0].Metrics[0].ValueType);
 
-        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
+        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value!;
 
         Assert.Single(dependencies);
         Assert.Equal(8, dependencies["ExternClass"]);
@@ -110,7 +109,7 @@ public class CSharpObjectCreationRelationMetricTests
         Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
             classTypes[0].Metrics[0].ValueType);
 
-        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
+        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value!;
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(8, dependencies["ExternClass[]"]);
@@ -132,7 +131,7 @@ public class CSharpObjectCreationRelationMetricTests
         Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
             classTypes[0].Metrics[0].ValueType);
 
-        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
+        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value!;
 
         Assert.Equal(5, dependencies.Count);
         Assert.Equal(3, dependencies["string[]"]);
@@ -157,7 +156,7 @@ public class CSharpObjectCreationRelationMetricTests
         Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
             classTypes[0].Metrics[0].ValueType);
 
-        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
+        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value!;
 
         Assert.Equal(6, dependencies.Count);
         Assert.Equal(1, dependencies["string[]"]);
@@ -184,7 +183,7 @@ public class CSharpObjectCreationRelationMetricTests
         Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
             classTypes[0].Metrics[0].ValueType);
 
-        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value;
+        var dependencies = (Dictionary<string, int>)classTypes[0].Metrics[0].Value!;
 
         Assert.Equal(4, dependencies.Count);
         Assert.Equal(1, dependencies["string[]"]);
@@ -208,7 +207,7 @@ public class CSharpObjectCreationRelationMetricTests
         Assert.Equal("System.Collections.Generic.Dictionary`2[System.String,System.Int32]",
             classTypes[1].Metrics[0].ValueType);
 
-        var dependencies = (IDictionary<string, int>)classTypes[1].Metrics[0].Value;
+        var dependencies = (IDictionary<string, int>)classTypes[1].Metrics[0].Value!;
 
         Assert.Equal(3, dependencies.Count);
         Assert.Equal(4, dependencies["App.Class1"]);

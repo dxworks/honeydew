@@ -211,12 +211,21 @@ internal static class CSharpFullNameProvider
             }
                 break;
 
-            case ThrowStatementSyntax declarationSyntax:
+            case ThrowStatementSyntax throwStatementSyntax:
             {
-                var parentDeclarationSyntax = declarationSyntax.GetParentDeclarationSyntax<CatchClauseSyntax>();
-                var catchDeclarationSyntax = parentDeclarationSyntax.Declaration;
-                return GetFullName(catchDeclarationSyntax?.Type ?? declarationSyntax.Expression, semanticModel,
-                    out isNullable);
+                var parentDeclarationSyntax = throwStatementSyntax.GetParentDeclarationSyntax<CatchClauseSyntax>();
+                if (parentDeclarationSyntax is not null)
+                {
+                    var catchDeclarationSyntax = parentDeclarationSyntax.Declaration;
+                    var declarationSyntax = catchDeclarationSyntax?.Type ?? throwStatementSyntax.Expression;
+
+                    if (declarationSyntax is not null)
+                    {
+                        return GetFullName(declarationSyntax, semanticModel, out isNullable);
+                    }
+                }
+
+                break;
             }
 
             default:
@@ -230,12 +239,12 @@ internal static class CSharpFullNameProvider
         return CreateEntityTypeModel(name, isExtern);
     }
 
-    public static IEntityType CreateEntityTypeModel(string name, bool isExternType = false)
+    public static IEntityType CreateEntityTypeModel(string? name, bool isExternType = false)
     {
         return FullTypeNameBuilder.CreateEntityTypeModel(name, isExternType);
     }
 
-    private static string ReconstructFullName(GenericType genericType)
+    private static string ReconstructFullName(GenericType? genericType)
     {
         if (genericType == null)
         {
@@ -268,7 +277,7 @@ internal static class CSharpFullNameProvider
         return stringBuilder.ToString();
     }
 
-    private static IEntityType GetFullName(ISymbol symbolInfo, bool isExternType, ref bool isNullable)
+    private static IEntityType GetFullName(ISymbol? symbolInfo, bool isExternType, ref bool isNullable)
     {
         if (symbolInfo == null)
         {

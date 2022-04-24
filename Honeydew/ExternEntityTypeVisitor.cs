@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Honeydew.Logging;
+﻿using Honeydew.Logging;
 using Honeydew.Models.Types;
 
 namespace Honeydew;

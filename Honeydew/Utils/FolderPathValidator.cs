@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace Honeydew.Utils;
+﻿namespace Honeydew.Utils;
 
 public class FolderPathValidator : IFolderPathValidator
 {

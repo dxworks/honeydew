@@ -90,20 +90,14 @@ public class CSharpAccessedFieldsSetterVisitor :
         return possibleMemberAccessExpressions;
     }
 
-    private static List<ExpressionSyntax> GetPossibleAccessFields(List<SyntaxNode> descendantNodes)
+    private static IEnumerable<ExpressionSyntax> GetPossibleAccessFields(List<SyntaxNode> descendantNodes)
     {
-        var possibleMemberAccessExpressions = descendantNodes
-            .OfType<MemberAccessExpressionSyntax>().Cast<ExpressionSyntax>().ToList();
-
-        possibleMemberAccessExpressions = possibleMemberAccessExpressions.Concat(descendantNodes
-            .OfType<VariableDeclaratorSyntax>()
-            .Select(syntax => syntax.Initializer?.Value)).ToList();
-
-        possibleMemberAccessExpressions = possibleMemberAccessExpressions.Concat(descendantNodes
-            .OfType<AssignmentExpressionSyntax>()
-            .SelectMany(syntax => new List<ExpressionSyntax> { syntax.Left, syntax.Right })).ToList();
-
-        possibleMemberAccessExpressions = possibleMemberAccessExpressions.Distinct().ToList();
-        return possibleMemberAccessExpressions;
+        return
+            descendantNodes.OfType<MemberAccessExpressionSyntax>()
+                .Concat(descendantNodes.OfType<VariableDeclaratorSyntax>().Select(syntax => syntax.Initializer?.Value))
+                .Concat(descendantNodes.OfType<AssignmentExpressionSyntax>()
+                    .SelectMany(syntax => new List<ExpressionSyntax> { syntax.Left, syntax.Right }))
+                .Distinct()
+                .OfType<ExpressionSyntax>();
     }
 }

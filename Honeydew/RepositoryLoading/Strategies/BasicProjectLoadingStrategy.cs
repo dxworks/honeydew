@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Honeydew.Extractors;
+﻿using Honeydew.Extractors;
 using Honeydew.Logging;
 using Honeydew.Models;
 using Microsoft.CodeAnalysis;
@@ -12,16 +8,18 @@ namespace Honeydew.RepositoryLoading.Strategies;
 public class BasicProjectLoadingStrategy : IProjectLoadingStrategy
 {
     private readonly ILogger _logger;
+    private readonly ActualFilePathProvider _actualFilePathProvider;
 
-    public BasicProjectLoadingStrategy(ILogger logger)
+    public BasicProjectLoadingStrategy(ILogger logger, ActualFilePathProvider actualFilePathProvider)
     {
         _logger = logger;
+        _actualFilePathProvider = actualFilePathProvider;
     }
 
     public async Task<ProjectModel> Load(Project project, IFactExtractor factExtractor,
         CancellationToken cancellationToken)
     {
-        var projectFilePath = ActualFilePathProvider.GetActualFilePath(project.FilePath);
+        var projectFilePath = _actualFilePathProvider.GetActualFilePath(project.FilePath);
         var projectModel = new ProjectModel
         {
             Name = project.Name,
@@ -36,7 +34,7 @@ public class BasicProjectLoadingStrategy : IProjectLoadingStrategy
             _logger.Log();
             _logger.Log($"Could not get compilation from {projectFilePath} !", LogLevels.Warning);
 
-            return null;
+            return projectModel;
         }
 
         var i = 1;
@@ -44,7 +42,7 @@ public class BasicProjectLoadingStrategy : IProjectLoadingStrategy
 
         foreach (var syntaxTree in compilation.SyntaxTrees)
         {
-            var syntaxTreeFilePath = ActualFilePathProvider.GetActualFilePath(syntaxTree.FilePath);
+            var syntaxTreeFilePath = _actualFilePathProvider.GetActualFilePath(syntaxTree.FilePath);
             try
             {
                 _logger.Log($"Extracting facts from {syntaxTreeFilePath} ({i}/{documentCount})...");

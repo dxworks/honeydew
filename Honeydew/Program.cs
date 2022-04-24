@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 using CommandLine;
 using Honeydew;
 using Honeydew.Extractors.CSharp;
@@ -144,7 +139,7 @@ await result.MapResult(async options =>
 
             new ScriptRunner(progressLogger).Run(false, new List<ScriptRuntime>
             {
-                new(new ExportRawModelScript(new JsonModelExporter()), new Dictionary<string, object>
+                new(new ExportRawModelScript(new JsonModelExporter()), new Dictionary<string, object?>
                 {
                     { "outputPath", defaultPathForAllRepresentations },
                     { "repositoryModel", repositoryModel },
@@ -189,7 +184,7 @@ await result.MapResult(async options =>
             logger.Log("Done Converting Model");
             progressLogger.Log("Done Converting Model");
 
-            var defaultArguments = new Dictionary<string, object>
+            var defaultArguments = new Dictionary<string, object?>
             {
                 { "outputPath", defaultPathForAllRepresentations },
                 { "referenceRepositoryModel", referenceRepositoryModel },
@@ -201,7 +196,7 @@ await result.MapResult(async options =>
             };
             var scriptRunner = new ScriptRunner(progressLogger);
 
-            var csvRelationsRepresentationExporter = new CsvRelationsRepresentationExporter
+            var csvRelationsRepresentationExporter = new CsvRelationsRepresentationExporter(logger)
             {
                 ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
                 {
@@ -235,7 +230,7 @@ static string GetProjectName(string inputPath)
     return Path.GetFileNameWithoutExtension(inputPath);
 }
 
-static void RunScripts(ScriptRunner scriptRunner, Dictionary<string, object> defaultArguments,
+static void RunScripts(ScriptRunner scriptRunner, Dictionary<string, object?> defaultArguments,
     JsonModelExporter jsonModelExporter, CsvRelationsRepresentationExporter csvRelationsRepresentationExporter,
     ILogger logger, IProgressLogger progressLogger, string projectName, bool runInParallel)
 {
@@ -251,14 +246,14 @@ static void RunScripts(ScriptRunner scriptRunner, Dictionary<string, object> def
     scriptRunner.Run(false, new List<ScriptRuntime>
     {
         new(new ExportFileRelationsScript(csvRelationsRepresentationExporter), CreateArgumentsDictionary(
-            defaultArguments, new Dictionary<string, object>
+            defaultArguments, new Dictionary<string, object?>
             {
                 { "fileRelationsOutputName", $"{projectName}-structural_relations_all.csv" },
                 { "fileRelationsStrategy", new HoneydewChooseStrategy() },
                 { "fileRelationsHeaders", null },
             })),
         new(new ExportFileRelationsScript(csvRelationsRepresentationExporter), CreateArgumentsDictionary(
-            defaultArguments, new Dictionary<string, object>
+            defaultArguments, new Dictionary<string, object?>
             {
                 { "fileRelationsOutputName", $"{projectName}-structural_relations.csv" },
                 { "fileRelationsStrategy", new JafaxChooseStrategy() },
@@ -281,23 +276,23 @@ static void RunScripts(ScriptRunner scriptRunner, Dictionary<string, object> def
         new(new ExportCyclomaticComplexityPerFileScript(jsonModelExporter), defaultArguments),
         new(new ExportClassRelationsScript(csvRelationsRepresentationExporter), defaultArguments),
         new(new ExportStatisticsScript(jsonModelExporter), defaultArguments),
-        new(new ExportRelationsBetweenSolutionsAndProjectsScripts(new CsvRelationsRepresentationExporter(),
-            new TextFileExporter()), defaultArguments),
+        new(new ExportRelationsBetweenSolutionsAndProjectsScripts(new CsvRelationsRepresentationExporter(logger),
+            new TextFileExporter(logger)), defaultArguments),
         new(new GenericDependenciesScript(csvRelationsRepresentationExporter), CreateArgumentsDictionary(
-            defaultArguments, new Dictionary<string, object>
+            defaultArguments, new Dictionary<string, object?>
             {
                 { "genericDependenciesOutputName", $"{projectName}-generic_relations.csv" },
                 { "addStrategy", new AddGenericNamesStrategy(true) },
             })),
         new(new SpektrumExportScript(jsonModelExporter), CreateArgumentsDictionary(defaultArguments,
-            new Dictionary<string, object>
+            new Dictionary<string, object?>
             {
                 { "spektrumOutputName", $"{projectName}-spektrum.json" },
             })),
     });
 }
 
-static async Task<RepositoryModel> LoadModel(ILogger logger, IProgressLogger progressLogger, string inputPath,
+static async Task<RepositoryModel?> LoadModel(ILogger logger, IProgressLogger progressLogger, string inputPath,
     CancellationToken cancellationToken)
 {
     var repositoryLoader = new RawFileRepositoryLoader(logger, progressLogger,
@@ -318,10 +313,10 @@ static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger 
     return repositoryModel;
 }
 
-static Dictionary<string, object> CreateArgumentsDictionary(IDictionary<string, object> source,
-    Dictionary<string, object> additionalArguments)
+static Dictionary<string, object?> CreateArgumentsDictionary(IDictionary<string, object?> source,
+    Dictionary<string, object?> additionalArguments)
 {
-    var result = new Dictionary<string, object>(source);
+    var result = new Dictionary<string, object?>(source);
     foreach (var (key, value) in additionalArguments)
     {
         result[key] = value;
@@ -333,6 +328,6 @@ static Dictionary<string, object> CreateArgumentsDictionary(IDictionary<string, 
 static IProjectLoadingStrategy GetProjectLoadingStrategy(ILogger logger, bool parallelExtraction)
 {
     return parallelExtraction
-        ? new ParallelProjectLoadingStrategy(logger)
-        : new BasicProjectLoadingStrategy(logger);
+        ? new ParallelProjectLoadingStrategy(logger, new ActualFilePathProvider(logger))
+        : new BasicProjectLoadingStrategy(logger, new ActualFilePathProvider(logger));
 }

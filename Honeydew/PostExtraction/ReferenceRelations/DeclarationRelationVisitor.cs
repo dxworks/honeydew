@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Honeydew.ScriptBeePlugin;
+﻿using Honeydew.ScriptBeePlugin;
 using Honeydew.ScriptBeePlugin.Models;
 
 namespace Honeydew.PostExtraction.ReferenceRelations;
@@ -34,22 +33,22 @@ public class DeclarationRelationVisitor : IEntityModelVisitor
 
         if (!entityModel.HasProperty(ParameterRelationVisitor.ParameterDependencyMetricName))
         {
-            _parameterRelationVisitor?.Visit(entityModel);
+            _parameterRelationVisitor.Visit(entityModel);
         }
 
         if (!entityModel.HasProperty(FieldsRelationVisitor.FieldsDependencyMetricName))
         {
-            _fieldsRelationVisitor?.Visit(entityModel);
+            _fieldsRelationVisitor.Visit(entityModel);
         }
 
         if (!entityModel.HasProperty(PropertiesRelationVisitor.PropertiesDependencyMetricName))
         {
-            _propertiesRelationVisitor?.Visit(entityModel);
+            _propertiesRelationVisitor.Visit(entityModel);
         }
 
         if (!entityModel.HasProperty(LocalVariablesRelationVisitor.LocalVariablesDependencyMetricName))
         {
-            _localVariablesRelationVisitor?.Visit(entityModel);
+            _localVariablesRelationVisitor.Visit(entityModel);
         }
 
         if (entityModel.HasProperty(ParameterRelationVisitor.ParameterDependencyMetricName) &&

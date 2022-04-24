@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Honeydew.Extractors.CSharp;
+﻿using Honeydew.Extractors.CSharp;
 using Honeydew.Logging;
+using Honeydew.Models;
 using Honeydew.Models.Types;
 using Honeydew.RepositoryLoading.ProjectRead;
 using Honeydew.RepositoryLoading.SolutionRead;
+using Honeydew.RepositoryLoading.Strategies;
 using Honeydew.Utils;
-using Honeydew.Models;
 
 namespace Honeydew.RepositoryLoading;
 
@@ -94,7 +89,8 @@ public class RepositoryExtractor
             _progressLogger.Log();
             _progressLogger.Log($"Solution {currentSolutionIndex}/{totalSolutions} - {solutionPath}");
 
-            var solutionExtractor = new SolutionExtractor(_logger, _progressLogger, _projectExtractorFactory);
+            var solutionExtractor = new SolutionExtractor(_logger, _progressLogger, _projectExtractorFactory,
+                new ActualFilePathProvider(_logger));
             var solutionLoadingResult =
                 await solutionExtractor.Extract(solutionPath, processedProjectFilePaths, cancellationToken);
 
@@ -307,7 +303,8 @@ public class RepositoryExtractor
 
         _progressLogger.CreateProgressBars(new[] { path });
 
-        var solutionExtractor = new SolutionExtractor(_logger, _progressLogger, _projectExtractorFactory);
+        var solutionExtractor = new SolutionExtractor(_logger, _progressLogger, _projectExtractorFactory,
+            new ActualFilePathProvider(_logger));
 
         var solutionLoadingResult = await solutionExtractor.Extract(path, new HashSet<string>(), cancellationToken);
 

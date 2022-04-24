@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
+﻿using System.Drawing;
 using System.Text;
 using DotNetGraph.Edge;
 using DotNetGraph.SubGraph;
@@ -36,11 +34,11 @@ public class ExportRelationsBetweenSolutionsAndProjectsScripts : Script
         _textFileExporter = textFileExporter;
     }
 
-    public override void Run(Dictionary<string, object> arguments)
+    public override void Run(Dictionary<string, object?> arguments)
     {
-        var outputPath = VerifyArgument<string>(arguments, "outputPath");
-        var projectName = VerifyArgument<string>(arguments, "projectName");
-        var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel");
+        var outputPath = VerifyArgument<string>(arguments, "outputPath")!;
+        var projectName = VerifyArgument<string>(arguments, "projectName")!;
+        var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel")!;
 
         const string relationsFolder = "relations";
 

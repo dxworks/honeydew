@@ -4,11 +4,11 @@ namespace Honeydew.Extractors.Visitors.Setters;
 
 public interface IAccessedFieldsSetterVisitor<in TSyntaxNode, in TSemanticNode, TAccessedFieldSyntaxNode,
     TTypeWithAccessedFields> :
-    ISetterVisitor<TSyntaxNode, TSemanticNode, TTypeWithAccessedFields, TAccessedFieldSyntaxNode, AccessedField>
+    ISetterVisitor<TSyntaxNode, TSemanticNode, TTypeWithAccessedFields, TAccessedFieldSyntaxNode, AccessedField?>
     where TTypeWithAccessedFields : IContainedTypeWithAccessedFields
 {
-    string ISetterVisitor<TSyntaxNode, TSemanticNode, TTypeWithAccessedFields, TAccessedFieldSyntaxNode,
-        AccessedField>.Name()
+    string ISetterVisitor<TSyntaxNode, TSemanticNode, TTypeWithAccessedFields, TAccessedFieldSyntaxNode, AccessedField?>
+        .Name()
     {
         return "Accessed Field";
     }

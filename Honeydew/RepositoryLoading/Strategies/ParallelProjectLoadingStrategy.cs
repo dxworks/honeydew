@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Honeydew.Extractors;
+﻿using Honeydew.Extractors;
 using Honeydew.Logging;
 using Honeydew.Models;
 using Honeydew.Models.Types;
@@ -14,16 +10,18 @@ namespace Honeydew.RepositoryLoading.Strategies;
 public class ParallelProjectLoadingStrategy : IProjectLoadingStrategy
 {
     private readonly ILogger _logger;
+    private readonly ActualFilePathProvider _actualFilePathProvider;
 
-    public ParallelProjectLoadingStrategy(ILogger logger)
+    public ParallelProjectLoadingStrategy(ILogger logger, ActualFilePathProvider actualFilePathProvider)
     {
         _logger = logger;
+        _actualFilePathProvider = actualFilePathProvider;
     }
 
     public async Task<ProjectModel> Load(Project project, IFactExtractor factExtractor,
         CancellationToken cancellationToken)
     {
-        var projectFilePath = ActualFilePathProvider.GetActualFilePath(project.FilePath);
+        var projectFilePath = _actualFilePathProvider.GetActualFilePath(project.FilePath);
         var projectModel = new ProjectModel
         {
             Name = project.Name,
@@ -72,7 +70,20 @@ public class ParallelProjectLoadingStrategy : IProjectLoadingStrategy
         {
             var syntaxTree = await document.GetSyntaxTreeAsync(cancellationToken);
             var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
-            syntaxTreeFilePath = ActualFilePathProvider.GetActualFilePath(syntaxTree?.FilePath);
+
+            if (syntaxTree is null)
+            {
+                _logger.Log($"Syntax tree is null for document {syntaxTreeFilePath}", LogLevels.Warning);
+                return null;
+            }
+
+            if (semanticModel is null)
+            {
+                _logger.Log($"Semantic Model is null for document {syntaxTreeFilePath}", LogLevels.Warning);
+                return null;
+            }
+
+            syntaxTreeFilePath = _actualFilePathProvider.GetActualFilePath(syntaxTree.FilePath);
 
             _logger.Log($"Extracting facts from {syntaxTreeFilePath} ({currentProjectIndex}/{documentCount})...");
 

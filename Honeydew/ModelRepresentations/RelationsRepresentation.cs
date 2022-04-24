@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Honeydew.ModelRepresentations;
+﻿namespace Honeydew.ModelRepresentations;
 
 public class RelationsRepresentation
 {

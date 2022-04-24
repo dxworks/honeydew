@@ -1,6 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Honeydew.Extractors;
+﻿using Honeydew.Extractors;
 using Honeydew.Models;
 using Microsoft.CodeAnalysis;
 

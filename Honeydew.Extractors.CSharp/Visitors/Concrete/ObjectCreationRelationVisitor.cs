@@ -1,5 +1,6 @@
 ﻿using Honeydew.Extractors.CSharp.Visitors.Utils;
 using Honeydew.Extractors.Visitors;
+using Honeydew.Logging;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
@@ -10,6 +11,13 @@ namespace Honeydew.Extractors.CSharp.Visitors.Concrete;
 public class ObjectCreationRelationVisitor : IExtractionVisitor<TypeDeclarationSyntax, SemanticModel, IMembersClassType>
 {
     public const string ObjectCreationDependencyMetricName = "ObjectCreationDependency";
+
+    private readonly ILogger _logger;
+
+    public ObjectCreationRelationVisitor(ILogger logger)
+    {
+        _logger = logger;
+    }
 
     public IMembersClassType Visit(TypeDeclarationSyntax syntaxNode, SemanticModel semanticModel,
         IMembersClassType modelType)
@@ -26,7 +34,7 @@ public class ObjectCreationRelationVisitor : IExtractionVisitor<TypeDeclarationS
         return modelType;
     }
 
-    private static IDictionary<string, int> AddDependencies(BaseTypeDeclarationSyntax syntaxNode,
+    private IDictionary<string, int> AddDependencies(BaseTypeDeclarationSyntax syntaxNode,
         SemanticModel semanticModel)
     {
         var dictionary = new Dictionary<string, int>();
@@ -79,6 +87,12 @@ public class ObjectCreationRelationVisitor : IExtractionVisitor<TypeDeclarationS
                      .Where(syntax => syntax.Parent is EqualsValueClauseSyntax)
                      .Select(syntax => syntax.Parent))
         {
+            if (expressionSyntax is null)
+            {
+                _logger.Log($"Initializer Expression Syntax is null for {syntaxNode.Identifier.ToString()}");
+                continue;
+            }
+
             var dependencyName = CSharpExtractionHelperMethods
                 .GetContainingType(expressionSyntax, semanticModel).Name;
             if (dependencyName != CSharpConstants.VarIdentifier)

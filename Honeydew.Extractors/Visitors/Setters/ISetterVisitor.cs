@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Honeydew.Logging;
+﻿using Honeydew.Logging;
 
 namespace Honeydew.Extractors.Visitors.Setters;
 

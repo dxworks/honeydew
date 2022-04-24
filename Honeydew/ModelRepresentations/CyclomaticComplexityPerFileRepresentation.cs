@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Honeydew.ModelRepresentations;
 
@@ -18,9 +17,7 @@ public class FileWrapper
     [JsonProperty("concerns")] public List<Concern> Concerns { get; set; } = new();
 }
 
-public class Concern
-{
-    [JsonProperty("entity")] public string Entity { get; set; }
-    [JsonProperty("tag")] public string Tag { get; set; }
-    [JsonProperty("strength")] public string Strength { get; set; }
-}
+public record Concern(
+    [JsonProperty("entity")] string Entity,
+    [JsonProperty("tag")] string Tag,
+    [JsonProperty("strength")] string Strength);

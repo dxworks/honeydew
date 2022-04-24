@@ -10,7 +10,7 @@ public record MethodModel : IMethodTypeWithLocalFunctions
 
     public string AccessModifier { get; set; } = "";
 
-    public IReturnValueType? ReturnValue { get; set; } 
+    public IReturnValueType ReturnValue { get; set; }
 
     public IList<IParameterType> ParameterTypes { get; set; } = new List<IParameterType>();
 

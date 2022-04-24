@@ -5,7 +5,7 @@ namespace Honeydew.Extractors.CSharp;
 
 public class CSharpCompilationMaker : ICompilationMaker
 {
-    private IEnumerable<MetadataReference> _references;
+    private IEnumerable<MetadataReference>? _references;
 
     public Compilation GetCompilation()
     {
@@ -25,7 +25,7 @@ public class CSharpCompilationMaker : ICompilationMaker
 
         var references = new List<MetadataReference>();
 
-        var value = (string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES");
+        var value = (string?)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES");
         if (value != null)
         {
             var pathToDlls = value.Split(Path.PathSeparator);

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Honeydew.IO.Writers.CSV;
+﻿using Honeydew.IO.Writers.CSV;
+using Honeydew.Logging;
 using Honeydew.ModelRepresentations;
 
 namespace Honeydew.IO.Writers.Exporters;
@@ -12,8 +9,15 @@ public class CsvRelationsRepresentationExporter
     public IList<Tuple<string, Func<string, string>>> ColumnFunctionForEachRow =
         new List<Tuple<string, Func<string, string>>>();
 
+    private readonly ILogger _logger;
+
+    public CsvRelationsRepresentationExporter(ILogger logger)
+    {
+        _logger = logger;
+    }
+
     public void Export(string filePath, RelationsRepresentation classRelationsRepresentation,
-        List<string> csvHeaders = null)
+        List<string>? csvHeaders = null)
     {
         if (string.IsNullOrEmpty(filePath))
         {
@@ -68,11 +72,16 @@ public class CsvRelationsRepresentationExporter
             csvBuilder.AddColumnWithFormulaForEachRow(header, func);
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-
-        using (var writer = new StreamWriter(filePath))
+        var directoryName = Path.GetDirectoryName(filePath);
+        if (string.IsNullOrEmpty(directoryName))
         {
-            writer.Write(csvBuilder.CreateCsv());
+            _logger.Log($"Could not create directory for CSV Export: {filePath}", LogLevels.Error);
+            return;
         }
+
+        Directory.CreateDirectory(directoryName);
+
+        using var writer = new StreamWriter(filePath);
+        writer.Write(csvBuilder.CreateCsv());
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Honeydew.Models.Types;
+﻿namespace Honeydew.Models.Types;
 
 public interface IMembersClassType : IClassType, ITypeWithDestructor, ITypeWithGenericParameters
 {

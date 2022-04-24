@@ -7,13 +7,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="ScriptBeePlugin" Version="2.0.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="4.0.1" />
+        <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="4.0.1" />
     </ItemGroup>
-
+    
     <ItemGroup>
-      <ProjectReference Include="..\Honeydew.Logging\Honeydew.Logging.csproj" />
-      <ProjectReference Include="..\Honeydew.Models.CSharp\Honeydew.Models.CSharp.csproj" />
+      <ProjectReference Include="..\Honeydew.Extractors\Honeydew.Extractors.csproj" />
       <ProjectReference Include="..\Honeydew.Models.VisualBasic\Honeydew.Models.VisualBasic.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="Visitors" />
     </ItemGroup>
 
 </Project>

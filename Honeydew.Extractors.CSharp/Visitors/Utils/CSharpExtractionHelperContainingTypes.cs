@@ -12,7 +12,7 @@ public static partial class CSharpExtractionHelperMethods
 
         if (declaredSymbol != null)
         {
-            return declaredSymbol.ContainingNamespace.ToString();
+            return declaredSymbol.ContainingNamespace.ToString() ?? "";
         }
 
         var namespaceDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseNamespaceDeclarationSyntax>();
@@ -37,6 +37,7 @@ public static partial class CSharpExtractionHelperMethods
 
     public static string GetDefinitionClassName(SyntaxNode syntaxNode, SemanticModel semanticModel)
     {
+        // todo ask someone about trimming ?
         while (true)
         {
             var symbolInfo = semanticModel.GetSymbolInfo(syntaxNode);
@@ -44,10 +45,10 @@ public static partial class CSharpExtractionHelperMethods
             {
                 if (symbolInfo.Symbol.ContainingType is null)
                 {
-                    return symbolInfo.Symbol.ToString();
+                    return symbolInfo.Symbol.ToString()?.TrimEnd('?') ?? "";
                 }
 
-                return symbolInfo.Symbol.ContainingType.ToString();
+                return symbolInfo.Symbol.ContainingType.ToString()?.TrimEnd('?') ?? "";
             }
 
             switch (syntaxNode)
@@ -61,17 +62,17 @@ public static partial class CSharpExtractionHelperMethods
                         {
                             case IFieldSymbol fieldSymbol:
                             {
-                                return fieldSymbol.Type.Name;
+                                return fieldSymbol.Type.Name.TrimEnd('?');
                             }
 
                             case ILocalSymbol localSymbol:
                             {
-                                return localSymbol.Type.ToString();
+                                return localSymbol.Type.ToString()?.TrimEnd('?') ?? "";
                             }
 
                             case { } symbol:
                             {
-                                return symbol.ToString();
+                                return symbol.ToString()?.TrimEnd('?') ?? "";
                             }
 
                             case null:
@@ -80,11 +81,11 @@ public static partial class CSharpExtractionHelperMethods
                                 {
                                     case IdentifierNameSyntax identifierNameSyntax:
                                     {
-                                        return identifierNameSyntax.Identifier.ToString();
+                                        return identifierNameSyntax.Identifier.ToString().TrimEnd('?');
                                     }
                                     case ObjectCreationExpressionSyntax objectCreationExpressionSyntax:
                                     {
-                                        return objectCreationExpressionSyntax.Type.ToString();
+                                        return objectCreationExpressionSyntax.Type.ToString().TrimEnd('?');
                                     }
                                 }
                             }
@@ -102,7 +103,7 @@ public static partial class CSharpExtractionHelperMethods
                             semanticModel.GetSymbolInfo(constructorDeclarationSyntax.Initializer);
                         if (initializerSymbolInfo.Symbol != null)
                         {
-                            return initializerSymbolInfo.Symbol.ContainingType.ToString();
+                            return initializerSymbolInfo.Symbol.ContainingType.ToString()?.TrimEnd('?') ?? "";
                         }
 
                         if (constructorDeclarationSyntax.Initializer.ThisOrBaseKeyword.Text ==
@@ -112,7 +113,7 @@ public static partial class CSharpExtractionHelperMethods
                                 syntaxNode.GetParentDeclarationSyntax<BaseTypeDeclarationSyntax>();
                             if (baseTypeDeclarationSyntax is { BaseList.Types.Count: > 0 })
                             {
-                                return baseTypeDeclarationSyntax.BaseList.Types[0].Type.ToString();
+                                return baseTypeDeclarationSyntax.BaseList.Types[0].Type.ToString().TrimEnd('?');
                             }
                         }
                     }
@@ -127,7 +128,7 @@ public static partial class CSharpExtractionHelperMethods
 
                 case IdentifierNameSyntax identifierNameSyntax:
                 {
-                    return identifierNameSyntax.Identifier.ToString();
+                    return identifierNameSyntax.Identifier.ToString().TrimEnd('?');
                 }
 
                 default:
@@ -153,7 +154,7 @@ public static partial class CSharpExtractionHelperMethods
                         if (GetLocationClassNameFromMemberAccessExpressionSyntax(memberAccessExpressionSyntax,
                                 out var className))
                         {
-                            return className;
+                            return className?.Trim('?') ?? "";
                         }
                     }
                         break;
@@ -167,7 +168,7 @@ public static partial class CSharpExtractionHelperMethods
                 if (GetLocationClassNameFromMemberAccessExpressionSyntax(memberAccessExpressionSyntax,
                         out var className))
                 {
-                    return className;
+                    return className?.TrimEnd('?') ?? "";
                 }
             }
                 break;
@@ -182,7 +183,8 @@ public static partial class CSharpExtractionHelperMethods
                     {
                         if (methodSymbol.ReceiverType != null)
                         {
-                            return methodSymbol.ReceiverType.ToString();
+                            var locationClassName = methodSymbol.ReceiverType.ToString() ?? "";
+                            return locationClassName.TrimEnd('?');
                         }
                     }
                         break;
@@ -201,10 +203,10 @@ public static partial class CSharpExtractionHelperMethods
                 break;
         }
 
-        return GetDefinitionClassName(syntaxNode, semanticModel);
+        return GetDefinitionClassName(syntaxNode, semanticModel).TrimEnd('?');
 
         bool GetLocationClassNameFromMemberAccessExpressionSyntax(
-            MemberAccessExpressionSyntax memberAccessExpressionSyntax, out string className)
+            MemberAccessExpressionSyntax memberAccessExpressionSyntax, out string? className)
         {
             className = "";
             var symbolInfo = semanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression);

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Honeydew.ScriptBeePlugin.Models;
+﻿using Honeydew.ScriptBeePlugin.Models;
 
 namespace Honeydew.PostExtraction.ReferenceRelations;
 

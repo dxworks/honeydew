@@ -1,49 +1,66 @@
-﻿using System.IO;
+﻿using Honeydew.Logging;
 
-namespace Honeydew.RepositoryLoading.Strategies
+namespace Honeydew.RepositoryLoading.Strategies;
+
+public class ActualFilePathProvider
 {
-    internal static class ActualFilePathProvider
+    private readonly ILogger _logger;
+
+    public ActualFilePathProvider(ILogger logger)
     {
-        public static string GetActualFilePath(string filePath)
+        _logger = logger;
+    }
+
+    public string GetActualFilePath(string? filePath)
+    {
+        if (string.IsNullOrEmpty(filePath))
         {
-            try
-            {
-                if (File.Exists(filePath))
-                {
-                    return GetProperFilePathCapitalization(filePath);
-                }
-
-                if (Directory.Exists(filePath))
-                {
-                    return GetProperDirectoryCapitalization(new DirectoryInfo(filePath));
-                }
-
-                return filePath;
-            }
-            catch
-            {
-                return filePath;
-            }
+            return "";
         }
 
-        private static string GetProperDirectoryCapitalization(DirectoryInfo dirInfo)
+        try
         {
-            var parentDirInfo = dirInfo.Parent;
-            if (null == parentDirInfo)
+            if (File.Exists(filePath))
             {
-                return dirInfo.Root.FullName;
+                return GetProperFilePathCapitalization(filePath);
             }
 
-            return Path.Combine(GetProperDirectoryCapitalization(parentDirInfo),
-                parentDirInfo.GetDirectories(dirInfo.Name)[0].Name);
-        }
+            if (Directory.Exists(filePath))
+            {
+                return GetProperDirectoryCapitalization(new DirectoryInfo(filePath));
+            }
 
-        private static string GetProperFilePathCapitalization(string filename)
+            return filePath;
+        }
+        catch
         {
-            var fileInfo = new FileInfo(filename);
-            var dirInfo = fileInfo.Directory;
-
-            return Path.Combine(GetProperDirectoryCapitalization(dirInfo), dirInfo.GetFiles(fileInfo.Name)[0].Name);
+            return filePath;
         }
+    }
+
+    private string GetProperDirectoryCapitalization(DirectoryInfo dirInfo)
+    {
+        var parentDirInfo = dirInfo.Parent;
+        if (null == parentDirInfo)
+        {
+            return dirInfo.Root.FullName;
+        }
+
+        return Path.Combine(GetProperDirectoryCapitalization(parentDirInfo),
+            parentDirInfo.GetDirectories(dirInfo.Name)[0].Name);
+    }
+
+    private string GetProperFilePathCapitalization(string filename)
+    {
+        var fileInfo = new FileInfo(filename);
+        var dirInfo = fileInfo.Directory;
+
+        if (dirInfo is null)
+        {
+            _logger.Log($"Could not get directory info for file: {filename}");
+            return filename;
+        }
+
+        return Path.Combine(GetProperDirectoryCapitalization(dirInfo), dirInfo.GetFiles(fileInfo.Name)[0].Name);
     }
 }

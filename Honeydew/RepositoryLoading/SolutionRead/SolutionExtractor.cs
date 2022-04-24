@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Honeydew.Logging;
+﻿using Honeydew.Logging;
 using Honeydew.Models;
 using Honeydew.RepositoryLoading.ProjectRead;
 using Honeydew.RepositoryLoading.Strategies;
@@ -18,13 +13,15 @@ public class SolutionExtractor
     private readonly ILogger _logger;
     private readonly IProgressLogger _progressLogger;
     private readonly ProjectExtractorFactory _projectExtractorFactory;
+    private readonly ActualFilePathProvider _actualFilePathProvider;
 
     public SolutionExtractor(ILogger logger, IProgressLogger progressLogger,
-        ProjectExtractorFactory projectExtractorFactory)
+        ProjectExtractorFactory projectExtractorFactory, ActualFilePathProvider actualFilePathProvider)
     {
         _logger = logger;
         _progressLogger = progressLogger;
         _projectExtractorFactory = projectExtractorFactory;
+        _actualFilePathProvider = actualFilePathProvider;
     }
 
     public async Task<SolutionLoadingResult?> Extract(string path, ISet<string> processedProjectPaths,
@@ -41,7 +38,7 @@ public class SolutionExtractor
 
             SolutionModel solutionModel = new()
             {
-                FilePath = ActualFilePathProvider.GetActualFilePath(solution.FilePath)
+                FilePath = _actualFilePathProvider.GetActualFilePath(solution.FilePath)
             };
 
             var i = 1;
@@ -69,7 +66,7 @@ public class SolutionExtractor
                     continue;
                 }
 
-                var projectFilePath = ActualFilePathProvider.GetActualFilePath(project.FilePath);
+                var projectFilePath = _actualFilePathProvider.GetActualFilePath(project.FilePath);
                 solutionModel.ProjectsPaths.Add(projectFilePath);
 
                 if (processedProjectPaths.Contains(projectFilePath))
