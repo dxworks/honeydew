@@ -19,17 +19,7 @@ public class LocalFunctionInfoVisitor : CompositeVisitor<IMethodTypeWithLocalFun
     public IMethodTypeWithLocalFunctions Visit(LocalFunctionStatementSyntax syntaxNode, SemanticModel semanticModel,
         IMethodTypeWithLocalFunctions modelType)
     {
-        var returnType =
-            GetFullName(syntaxNode.ReturnType, semanticModel, out var isNullable);
-        var returnTypeModifier = SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
-
         modelType.Name = syntaxNode.Identifier.ToString();
-        modelType.ReturnValue = new ReturnValueModel
-        {
-            Type = returnType,
-            Modifier = returnTypeModifier,
-            IsNullable = isNullable
-        };
         modelType.Modifier = syntaxNode.Modifiers.ToString();
 
         modelType.AccessModifier = "";

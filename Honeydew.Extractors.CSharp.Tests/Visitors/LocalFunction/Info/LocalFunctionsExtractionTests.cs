@@ -29,6 +29,11 @@ public class LocalFunctionsExtractionTests
             {
                 new ParameterInfoVisitor()
             });
+        var returnValueSetter = new CSharpReturnValueSetterVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<IReturnValueType>>
+            {
+                new ReturnValueInfoVisitor()
+            });
         var localFunctionsSetterClassVisitor = new CSharpLocalFunctionsSetterClassVisitor(_loggerMock.Object,
             new List<ITypeVisitor<IMethodTypeWithLocalFunctions>>
             {
@@ -36,9 +41,11 @@ public class LocalFunctionsExtractionTests
                 new LocalFunctionInfoVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodTypeWithLocalFunctions>>
                 {
                     calledMethodSetterVisitor,
-                    parameterSetterVisitor
+                    parameterSetterVisitor,
+                    returnValueSetter,
                 }),
-                parameterSetterVisitor
+                parameterSetterVisitor,
+                returnValueSetter,
             });
 
         var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,

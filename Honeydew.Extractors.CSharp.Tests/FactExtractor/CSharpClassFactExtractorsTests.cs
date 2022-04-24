@@ -29,6 +29,11 @@ public class CSharpClassFactExtractorsTests
             {
                 new ParameterInfoVisitor()
             });
+        var returnValueSetterVisitor = new CSharpReturnValueSetterVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<IReturnValueType>>
+            {
+                new ReturnValueInfoVisitor()
+            });
         var methodInfoVisitor = new MethodInfoVisitor();
 
         var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
@@ -42,14 +47,15 @@ public class CSharpClassFactExtractorsTests
                         {
                             methodInfoVisitor,
                             calledMethodSetterVisitor,
-                            parameterSetterVisitor
+                            returnValueSetterVisitor,
+                            parameterSetterVisitor,
                         }),
                         new CSharpConstructorSetterClassVisitor(_loggerMock.Object,
                             new List<ITypeVisitor<IConstructorType>>
                             {
                                 new ConstructorInfoVisitor(),
                                 calledMethodSetterVisitor,
-                                parameterSetterVisitor
+                                parameterSetterVisitor,
                             }),
                         new CSharpFieldSetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IFieldType>>
                         {
@@ -62,7 +68,8 @@ public class CSharpClassFactExtractorsTests
                                 new List<ITypeVisitor<IAccessorMethodType>>
                                 {
                                     methodInfoVisitor,
-                                    calledMethodSetterVisitor
+                                    calledMethodSetterVisitor,
+                                    returnValueSetterVisitor,
                                 })
                         })
                     })

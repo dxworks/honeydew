@@ -19,6 +19,11 @@ public class CSharpMethodReturnValueAttributeMetricTests
 
     public CSharpMethodReturnValueAttributeMetricTests()
     {
+        var attributeSetterVisitor = new CSharpAttributeSetterVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<IAttributeType>>
+            {
+                new AttributeInfoVisitor()
+            });
         var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
             new List<ITypeVisitor<ICompilationUnitType>>
             {
@@ -29,10 +34,13 @@ public class CSharpMethodReturnValueAttributeMetricTests
                         new CSharpMethodSetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
                         {
                             new MethodInfoVisitor(),
-                            new CSharpAttributeSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IAttributeType>>
-                            {
-                                new AttributeInfoVisitor()
-                            })
+                            attributeSetterVisitor,
+                            new CSharpReturnValueSetterVisitor(_loggerMock.Object,
+                                new List<ITypeVisitor<IReturnValueType>>
+                                {
+                                    new ReturnValueInfoVisitor(),
+                                    attributeSetterVisitor
+                                })
                         })
                     })
             });

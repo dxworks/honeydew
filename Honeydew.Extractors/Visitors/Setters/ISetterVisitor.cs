@@ -5,7 +5,7 @@ using Honeydew.Models;
 namespace Honeydew.Extractors.Visitors.Setters;
 
 public interface
-    ISetterVisitor<in TSetterSyntaxNode, TSemanticModel, TSetterType, TWrappedSyntaxNode, TWrappedType> :
+    ISetterVisitor<in TSetterSyntaxNode, in TSemanticModel, TSetterType, TWrappedSyntaxNode, TWrappedType> :
         IExtractionVisitor<TSetterSyntaxNode, TSemanticModel, TSetterType>
 {
     string Name();

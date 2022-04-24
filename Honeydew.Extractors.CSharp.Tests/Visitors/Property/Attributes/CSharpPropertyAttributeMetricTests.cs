@@ -41,6 +41,12 @@ public class CSharpPropertyAttributeMetricTests
                                 {
                                     new MethodInfoVisitor(),
                                     attributeSetterVisitor,
+                                    new CSharpReturnValueSetterVisitor(_loggerMock.Object,
+                                        new List<ITypeVisitor<IReturnValueType>>
+                                        {
+                                            new ReturnValueInfoVisitor(),
+                                            attributeSetterVisitor
+                                        })
                                 })
                         })
                     })

@@ -1,6 +1,5 @@
 ﻿using Honeydew.Extractors.CSharp.Visitors.Utils;
 using Honeydew.Extractors.Visitors;
-using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -26,18 +25,8 @@ public class MethodInfoVisitor :
 
         SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier, ref modifier);
 
-        var returnType = GetFullName(syntaxNode.ReturnType, semanticModel, out var isNullable);
-
-        var returnTypeModifier = SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
-
-
         modelType.Name = syntaxNode.Identifier.ToString();
-        modelType.ReturnValue = new ReturnValueModel
-        {
-            Type = returnType,
-            Modifier = returnTypeModifier,
-            IsNullable = isNullable
-        };
+
         modelType.Modifier = modifier;
         modelType.AccessModifier = accessModifier;
         modelType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
@@ -52,32 +41,9 @@ public class MethodInfoVisitor :
         var modifier = syntaxNode.Modifiers.ToString();
 
         SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier, ref modifier);
-        var keyword = syntaxNode.Keyword.ToString();
 
-        IEntityType returnType = new EntityTypeModel
-        {
-            Name = "void"
-        };
-        var isNullable = false;
+        modelMethodType.Name = syntaxNode.Keyword.ToString();
 
-        if (keyword == "get")
-        {
-            var basePropertyDeclarationSyntax =
-                syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
-            if (basePropertyDeclarationSyntax != null)
-            {
-                returnType =
-                    GetFullName(basePropertyDeclarationSyntax.Type, semanticModel,
-                        out isNullable);
-            }
-        }
-
-        modelMethodType.Name = keyword;
-        modelMethodType.ReturnValue = new ReturnValueModel
-        {
-            Type = returnType,
-            IsNullable = isNullable
-        };
         modelMethodType.Modifier = modifier;
         modelMethodType.AccessModifier = accessModifier;
         modelMethodType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
@@ -88,26 +54,9 @@ public class MethodInfoVisitor :
     public IAccessorMethodType Visit(ArrowExpressionClauseSyntax syntaxNode, SemanticModel semanticModel,
         IAccessorMethodType modelMethodType)
     {
-        IEntityType returnType = new EntityTypeModel
-        {
-            Name = "void"
-        };
-        var isNullable = false;
-        var basePropertyDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
-        if (basePropertyDeclarationSyntax != null)
-        {
-            returnType =
-                GetFullName(basePropertyDeclarationSyntax.Type, semanticModel,
-                    out isNullable);
-        }
-
         modelMethodType.Name = "get";
         modelMethodType.AccessModifier = "public";
-        modelMethodType.ReturnValue = new ReturnValueModel
-        {
-            Type = returnType,
-            IsNullable = isNullable
-        };
+
         modelMethodType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
 
         return modelMethodType;

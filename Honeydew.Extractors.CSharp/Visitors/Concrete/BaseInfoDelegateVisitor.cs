@@ -18,19 +18,10 @@ public class BaseInfoDelegateVisitor : IExtractionVisitor<DelegateDeclarationSyn
         CSharpConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier,
             ref modifier);
 
-        var returnType = GetFullName(syntaxNode.ReturnType, semanticModel);
-
-        var returnTypeModifier = SetTypeModifier(syntaxNode.ReturnType.ToString(), "");
-
         var name = GetFullName(syntaxNode, semanticModel).Name;
         modelType.Name = name;
         modelType.AccessModifier = accessModifier;
         modelType.Modifier = modifier;
-        modelType.ReturnValue = new ReturnValueModel
-        {
-            Type = returnType,
-            Modifier = returnTypeModifier
-        };
 
         modelType.ClassType = CSharpConstants.DelegateIdentifier;
         modelType.BaseTypes.Add(new BaseTypeModel

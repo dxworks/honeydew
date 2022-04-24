@@ -40,6 +40,11 @@ public class CSharpMethodParametersAttributeMetricTests
                             {
                                 new ParameterInfoVisitor(),
                                 attributeSetterVisitor
+                            }),
+                            new CSharpReturnValueSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IReturnValueType>>
+                            {
+                                new ReturnValueInfoVisitor(),
+                                attributeSetterVisitor
                             })
                         })
                     })

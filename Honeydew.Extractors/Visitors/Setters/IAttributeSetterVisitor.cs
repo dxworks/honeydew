@@ -2,7 +2,7 @@
 
 namespace Honeydew.Extractors.Visitors.Setters;
 
-public interface IAttributeSetterVisitor<in TSyntaxNode, TSemanticNode, TAttributeSyntaxNode, TTypeWithAttributes> :
+public interface IAttributeSetterVisitor<in TSyntaxNode, in TSemanticNode, TAttributeSyntaxNode, TTypeWithAttributes> :
     ISetterVisitor<TSyntaxNode, TSemanticNode, TTypeWithAttributes, TAttributeSyntaxNode, IAttributeType>
     where TTypeWithAttributes : ITypeWithAttributes
 {

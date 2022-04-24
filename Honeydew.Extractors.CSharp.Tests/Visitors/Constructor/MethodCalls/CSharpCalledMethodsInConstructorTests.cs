@@ -29,6 +29,11 @@ public class CSharpCalledMethodsInConstructorTests
             {
                 new ParameterInfoVisitor()
             });
+        var returnValueSetterVisitor = new CSharpReturnValueSetterVisitor(_loggerMock.Object,
+            new List<ITypeVisitor<IReturnValueType>>
+            {
+                new ReturnValueInfoVisitor()
+            });
 
         var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
             new List<ITypeVisitor<ICompilationUnitType>>
@@ -47,7 +52,8 @@ public class CSharpCalledMethodsInConstructorTests
                         new CSharpMethodSetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
                         {
                             new MethodInfoVisitor(),
-                            parameterSetterVisitor
+                            parameterSetterVisitor,
+                            returnValueSetterVisitor
                         })
                     })
             });

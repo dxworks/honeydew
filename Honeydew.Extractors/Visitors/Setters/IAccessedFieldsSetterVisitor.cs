@@ -2,7 +2,7 @@
 
 namespace Honeydew.Extractors.Visitors.Setters;
 
-public interface IAccessedFieldsSetterVisitor<in TSyntaxNode, TSemanticNode, TAccessedFieldSyntaxNode,
+public interface IAccessedFieldsSetterVisitor<in TSyntaxNode, in TSemanticNode, TAccessedFieldSyntaxNode,
     TTypeWithAccessedFields> :
     ISetterVisitor<TSyntaxNode, TSemanticNode, TTypeWithAccessedFields, TAccessedFieldSyntaxNode, AccessedField>
     where TTypeWithAccessedFields : IContainedTypeWithAccessedFields

@@ -2,7 +2,7 @@
 
 namespace Honeydew.Extractors.Visitors.Setters;
 
-public interface ICalledMethodSetterVisitor<in TSyntaxNode, TSemanticNode, TCalledMethodSyntaxNode,
+public interface ICalledMethodSetterVisitor<in TSyntaxNode, in TSemanticNode, TCalledMethodSyntaxNode,
     TCallingMethodsType> :
     ISetterVisitor<TSyntaxNode, TSemanticNode, TCallingMethodsType, TCalledMethodSyntaxNode, IMethodCallType>
     where TCallingMethodsType : ICallingMethodsType

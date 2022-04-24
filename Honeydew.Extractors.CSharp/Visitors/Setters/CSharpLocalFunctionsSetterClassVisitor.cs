@@ -32,36 +32,38 @@ public class CSharpLocalFunctionsSetterClassVisitor :
 
     public IEnumerable<LocalFunctionStatementSyntax> GetWrappedSyntaxNodes(MethodDeclarationSyntax syntaxNode)
     {
-        return syntaxNode.Body == null
-            ? Enumerable.Empty<LocalFunctionStatementSyntax>()
-            : syntaxNode.ChildNodes().OfType<LocalFunctionStatementSyntax>();
+        return GetLocalFunctionStatementSyntaxNodes(syntaxNode);
     }
 
     public IEnumerable<LocalFunctionStatementSyntax> GetWrappedSyntaxNodes(ConstructorDeclarationSyntax syntaxNode)
     {
-        return syntaxNode.Body == null
-            ? Enumerable.Empty<LocalFunctionStatementSyntax>()
-            : syntaxNode.ChildNodes().OfType<LocalFunctionStatementSyntax>();
+        return GetLocalFunctionStatementSyntaxNodes(syntaxNode);
     }
 
     public IEnumerable<LocalFunctionStatementSyntax> GetWrappedSyntaxNodes(DestructorDeclarationSyntax syntaxNode)
     {
-        return syntaxNode.Body == null
-            ? Enumerable.Empty<LocalFunctionStatementSyntax>()
-            : syntaxNode.ChildNodes().OfType<LocalFunctionStatementSyntax>();
+        return GetLocalFunctionStatementSyntaxNodes(syntaxNode);
     }
 
     public IEnumerable<LocalFunctionStatementSyntax> GetWrappedSyntaxNodes(AccessorDeclarationSyntax syntaxNode)
     {
         return syntaxNode.Body == null
             ? Enumerable.Empty<LocalFunctionStatementSyntax>()
-            : syntaxNode.ChildNodes().OfType<LocalFunctionStatementSyntax>();
+            : syntaxNode.Body.ChildNodes().OfType<LocalFunctionStatementSyntax>();
     }
 
     public IEnumerable<LocalFunctionStatementSyntax> GetWrappedSyntaxNodes(LocalFunctionStatementSyntax syntaxNode)
     {
         return syntaxNode.Body == null
             ? Enumerable.Empty<LocalFunctionStatementSyntax>()
-            : syntaxNode.ChildNodes().OfType<LocalFunctionStatementSyntax>();
+            : syntaxNode.Body.ChildNodes().OfType<LocalFunctionStatementSyntax>();
+    }
+
+    private static IEnumerable<LocalFunctionStatementSyntax> GetLocalFunctionStatementSyntaxNodes(
+        BaseMethodDeclarationSyntax syntaxNode)
+    {
+        return syntaxNode.Body == null
+            ? Enumerable.Empty<LocalFunctionStatementSyntax>()
+            : syntaxNode.Body.ChildNodes().OfType<LocalFunctionStatementSyntax>();
     }
 }

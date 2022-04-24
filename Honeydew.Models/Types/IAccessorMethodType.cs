@@ -1,6 +1,5 @@
 ﻿namespace Honeydew.Models.Types;
 
-public interface IAccessorMethodType : IMethodSkeletonType, ITypeWithLocalFunctions
+public interface IAccessorMethodType : IMethodSkeletonType, ITypeWithLocalFunctions, ITypeWithReturnValue
 {
-    public IReturnValueType ReturnValue { get; set; }
 }

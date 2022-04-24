@@ -19,17 +19,6 @@ public class CSharpCalledMethodsTests
 
     public CSharpCalledMethodsTests()
     {
-        var calledMethodSetterVisitor = new CSharpCalledMethodSetterVisitor(_loggerMock.Object,
-            new List<ITypeVisitor<IMethodCallType>>
-            {
-                new MethodCallInfoVisitor()
-            });
-        var parameterSetterVisitor = new CSharpParameterSetterVisitor(_loggerMock.Object,
-            new List<ITypeVisitor<IParameterType>>
-            {
-                new ParameterInfoVisitor()
-            });
-
         var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
             new List<ITypeVisitor<ICompilationUnitType>>
             {
@@ -40,8 +29,20 @@ public class CSharpCalledMethodsTests
                         new CSharpMethodSetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
                         {
                             new MethodInfoVisitor(),
-                            calledMethodSetterVisitor,
-                            parameterSetterVisitor
+                            new CSharpCalledMethodSetterVisitor(_loggerMock.Object,
+                                new List<ITypeVisitor<IMethodCallType>>
+                                {
+                                    new MethodCallInfoVisitor()
+                                }),
+                            new CSharpParameterSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IParameterType>>
+                            {
+                                new ParameterInfoVisitor()
+                            }),
+                            new CSharpReturnValueSetterVisitor(_loggerMock.Object,
+                                new List<ITypeVisitor<IReturnValueType>>
+                                {
+                                    new ReturnValueInfoVisitor()
+                                })
                         }),
                     })
             });

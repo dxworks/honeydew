@@ -12,22 +12,22 @@ public class FieldInfoVisitor : IExtractionVisitor<VariableDeclaratorSyntax, Sem
 {
     public IFieldType Visit(VariableDeclaratorSyntax syntaxNode, SemanticModel semanticModel, IFieldType modelType)
     {
-        var declaration = syntaxNode.GetParentDeclarationSyntax<BaseFieldDeclarationSyntax>();
+        var baseFieldDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseFieldDeclarationSyntax>();
 
-        if (declaration is null)
+        if (baseFieldDeclarationSyntax is null)
         {
             return modelType;
         }
 
-        var allModifiers = declaration.Modifiers.ToString();
+        var allModifiers = baseFieldDeclarationSyntax.Modifiers.ToString();
         var accessModifier = CSharpConstants.DefaultFieldAccessModifier;
         var modifier = allModifiers;
 
         CSharpConstants.SetModifiers(allModifiers, ref accessModifier, ref modifier);
 
-        var typeName = GetFullName(declaration, semanticModel, out var isNullable);
+        var typeName = GetFullName(baseFieldDeclarationSyntax.Declaration, semanticModel, out var isNullable);
 
-        var isEvent = declaration is EventFieldDeclarationSyntax;
+        var isEvent = baseFieldDeclarationSyntax is EventFieldDeclarationSyntax;
 
         modelType.AccessModifier = accessModifier;
         modelType.Modifier = modifier;

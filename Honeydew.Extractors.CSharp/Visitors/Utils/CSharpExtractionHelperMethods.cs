@@ -92,8 +92,10 @@ public static partial class CSharpExtractionHelperMethods
         return new MethodCallModel
         {
             Name = methodName,
-            DefinitionClassName = CSharpExtractionHelperMethods.GetDefinitionClassName(invocationExpressionSyntax, semanticModel),
-            LocationClassName = CSharpExtractionHelperMethods.GetLocationClassName(invocationExpressionSyntax, semanticModel),
+            DefinitionClassName =
+                CSharpExtractionHelperMethods.GetDefinitionClassName(invocationExpressionSyntax, semanticModel),
+            LocationClassName =
+                CSharpExtractionHelperMethods.GetLocationClassName(invocationExpressionSyntax, semanticModel),
             ParameterTypes = GetParameters(invocationExpressionSyntax, semanticModel),
             MethodDefinitionNames = GetMethodDefinitionNames(invocationExpressionSyntax, semanticModel),
             GenericParameters = GetGenericParameters(invocationExpressionSyntax, semanticModel),
@@ -550,12 +552,32 @@ public static partial class CSharpExtractionHelperMethods
     {
         var attributeListSyntax = syntaxNode.GetParentDeclarationSyntax<AttributeListSyntax>();
 
-        if (attributeListSyntax?.Target == null)
+        if (attributeListSyntax is null)
         {
             return "";
         }
 
-        return attributeListSyntax.Target.Identifier.ToString();
+        if (attributeListSyntax.Target == null)
+        {
+            return attributeListSyntax.Parent switch
+            {
+                BaseMethodDeclarationSyntax => "method",
+                AccessorDeclarationSyntax => "method",
+                ArrowExpressionClauseSyntax => "method",
+                TypeDeclarationSyntax => "type",
+                DelegateDeclarationSyntax => "type",
+                EnumDeclarationSyntax => "type",
+                EnumMemberDeclarationSyntax => "field",
+                BaseFieldDeclarationSyntax => "field",
+                BasePropertyDeclarationSyntax => "property",
+                ParameterSyntax => "param",
+                TypeParameterSyntax => "param",
+                TypeSyntax => "return",
+                _ => ""
+            };
+        }
+
+        return attributeListSyntax.Target.Identifier.ToString().TrimEnd(':');
     }
 
     public static AccessedField GetAccessField(ExpressionSyntax identifierNameSyntax, SemanticModel semanticModel)
@@ -578,7 +600,8 @@ public static partial class CSharpExtractionHelperMethods
             return new AccessedField
             {
                 Name = symbolInfo.Symbol.Name,
-                DefinitionClassName = CSharpExtractionHelperMethods.GetDefinitionClassName(expressionSyntax, semanticModel),
+                DefinitionClassName =
+                    CSharpExtractionHelperMethods.GetDefinitionClassName(expressionSyntax, semanticModel),
                 LocationClassName = CSharpExtractionHelperMethods.GetLocationClassName(expressionSyntax, semanticModel),
                 Kind = GetAccessType(identifierNameSyntax),
             };
@@ -591,7 +614,8 @@ public static partial class CSharpExtractionHelperMethods
                 return null;
             }
 
-            var definitionClassName = CSharpExtractionHelperMethods.GetDefinitionClassName(memberAccessExpressionSyntax, semanticModel);
+            var definitionClassName =
+                CSharpExtractionHelperMethods.GetDefinitionClassName(memberAccessExpressionSyntax, semanticModel);
             return new AccessedField
             {
                 Name = memberAccessExpressionSyntax.Name.ToString(),
@@ -603,7 +627,7 @@ public static partial class CSharpExtractionHelperMethods
 
         return null;
     }
-    
+
     private static AccessedField.AccessKind GetAccessType(SyntaxNode syntax)
     {
         if (syntax?.Parent is AssignmentExpressionSyntax)

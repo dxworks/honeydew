@@ -37,7 +37,12 @@ public class CSharpMethodInfoMetricTests
                             new CSharpParameterSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IParameterType>>
                             {
                                 new ParameterInfoVisitor()
-                            })
+                            }),
+                            new CSharpReturnValueSetterVisitor(_loggerMock.Object,
+                                new List<ITypeVisitor<IReturnValueType>>
+                                {
+                                    new ReturnValueInfoVisitor()
+                                })
                         })
                     })
             });

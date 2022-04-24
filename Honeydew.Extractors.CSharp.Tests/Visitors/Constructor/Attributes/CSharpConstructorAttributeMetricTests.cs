@@ -164,7 +164,6 @@ public class CSharpConstructorAttributeMetricTests
         }
     }
 
-
     [Theory]
     [FileData("TestData/ConstructorWithCustomAttribute.txt")]
     public void Extract_ShouldExtractAttribute_WhenProvidedWithCustomAttribute(string fileContent)

@@ -1,6 +1,6 @@
 ﻿namespace Honeydew.Models.Types;
 
-public interface IMethodType : IMethodSkeletonType, ITypeWithGenericParameters, ITypeWithLocalFunctions
+public interface IMethodType : IMethodSkeletonType, ITypeWithGenericParameters, ITypeWithLocalFunctions,
+    ITypeWithReturnValue
 {
-    public IReturnValueType ReturnValue { get; set; }
 }
