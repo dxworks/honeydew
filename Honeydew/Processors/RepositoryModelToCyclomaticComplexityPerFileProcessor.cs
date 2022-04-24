@@ -1,13 +1,10 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.ModelRepresentations;
-using HoneydewCore.Processors;
-using HoneydewScriptBeePlugin.Models;
+using Honeydew.ModelRepresentations;
+using Honeydew.ScriptBeePlugin.Models;
 
 namespace Honeydew.Processors;
 
-public class
-    RepositoryModelToCyclomaticComplexityPerFileProcessor : IProcessorFunction<RepositoryModel,
-        CyclomaticComplexityPerFileRepresentation>
+public class RepositoryModelToCyclomaticComplexityPerFileProcessor
 {
     public CyclomaticComplexityPerFileRepresentation Process(RepositoryModel repositoryModel)
     {

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Honeydew.Extractors;
+using Honeydew.Logging;
+using Honeydew.Models;
 using Honeydew.RepositoryLoading.Strategies;
-using HoneydewCore.Logging;
-using HoneydewExtractors.Core.Metrics.Extraction;
-using HoneydewModels;
 using Microsoft.CodeAnalysis;
 
 namespace Honeydew.RepositoryLoading.ProjectRead;

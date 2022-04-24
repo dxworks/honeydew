@@ -5,10 +5,6 @@ VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew", "Honeydew\Honeydew.csproj", "{93AE9036-6182-40FD-AA20-2B57AC054DEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoneydewCore", "HoneydewCore\HoneydewCore.csproj", "{D8EC22F6-F481-4064-BFEA-5A3C7AAF4963}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoneydewCoreTest", "HoneydewCoreTest\HoneydewCoreTest.csproj", "{E4E5B7D6-21B0-44C9-B9AC-935F849F027E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Models", "Honeydew.Models\Honeydew.Models.csproj", "{3C39FA7E-C03E-4EF7-A57B-0A6BC8458096}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors", "Honeydew.Extractors\Honeydew.Extractors.csproj", "{23BABD99-C5B6-401A-ACB0-44271449BB80}"
@@ -29,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Models.CSharp", "H
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Models.VisualBasic", "Honeydew.Models.VisualBasic\Honeydew.Models.VisualBasic.csproj", "{82554C93-F1BA-4383-AAA2-3BB9E4BFE74E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Logging", "Honeydew.Logging\Honeydew.Logging.csproj", "{BFCBF895-D6BF-42E4-9195-4CB75D6CDC97}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,14 +37,6 @@ Global
 		{93AE9036-6182-40FD-AA20-2B57AC054DEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93AE9036-6182-40FD-AA20-2B57AC054DEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93AE9036-6182-40FD-AA20-2B57AC054DEA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D8EC22F6-F481-4064-BFEA-5A3C7AAF4963}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D8EC22F6-F481-4064-BFEA-5A3C7AAF4963}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D8EC22F6-F481-4064-BFEA-5A3C7AAF4963}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D8EC22F6-F481-4064-BFEA-5A3C7AAF4963}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E4E5B7D6-21B0-44C9-B9AC-935F849F027E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E4E5B7D6-21B0-44C9-B9AC-935F849F027E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E4E5B7D6-21B0-44C9-B9AC-935F849F027E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E4E5B7D6-21B0-44C9-B9AC-935F849F027E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3C39FA7E-C03E-4EF7-A57B-0A6BC8458096}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3C39FA7E-C03E-4EF7-A57B-0A6BC8458096}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C39FA7E-C03E-4EF7-A57B-0A6BC8458096}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -87,6 +77,10 @@ Global
 		{82554C93-F1BA-4383-AAA2-3BB9E4BFE74E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82554C93-F1BA-4383-AAA2-3BB9E4BFE74E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82554C93-F1BA-4383-AAA2-3BB9E4BFE74E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFCBF895-D6BF-42E4-9195-4CB75D6CDC97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFCBF895-D6BF-42E4-9195-4CB75D6CDC97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFCBF895-D6BF-42E4-9195-4CB75D6CDC97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFCBF895-D6BF-42E4-9195-4CB75D6CDC97}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

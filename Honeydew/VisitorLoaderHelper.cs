@@ -1,103 +1,90 @@
 ﻿using System.Collections.Generic;
-using HoneydewCore.Logging;
-using HoneydewExtractors.Core.Metrics.Visitors;
-using HoneydewExtractors.Core.Metrics.Visitors.AccessedFields;
-using HoneydewExtractors.Core.Metrics.Visitors.Attributes;
-using HoneydewExtractors.Core.Metrics.Visitors.Classes;
-using HoneydewExtractors.Core.Metrics.Visitors.CompilationUnit;
-using HoneydewExtractors.Core.Metrics.Visitors.Constructors;
-using HoneydewExtractors.Core.Metrics.Visitors.Destructors;
-using HoneydewExtractors.Core.Metrics.Visitors.Fields;
-using HoneydewExtractors.Core.Metrics.Visitors.LocalVariables;
-using HoneydewExtractors.Core.Metrics.Visitors.MethodCalls;
-using HoneydewExtractors.Core.Metrics.Visitors.Methods;
-using HoneydewExtractors.Core.Metrics.Visitors.Parameters;
-using HoneydewExtractors.Core.Metrics.Visitors.Properties;
-using HoneydewExtractors.CSharp.Metrics.Extraction.AccessField;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Attribute;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Class;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Class.Relations;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Common;
-using HoneydewExtractors.CSharp.Metrics.Extraction.CompilationUnit;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Constructor;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Delegate;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Destructor;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Enum;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Field;
-using HoneydewExtractors.CSharp.Metrics.Extraction.LocalVariables;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Method;
-using HoneydewExtractors.CSharp.Metrics.Extraction.MethodCall;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Parameter;
-using HoneydewExtractors.CSharp.Metrics.Extraction.Property;
-using HoneydewExtractors.CSharp.Metrics.Visitors.Method;
-using HoneydewExtractors.CSharp.Metrics.Visitors.Method.LocalFunctions;
+using Honeydew.Extractors.CSharp.Visitors.Concrete;
+using Honeydew.Extractors.CSharp.Visitors.Setters;
+using Honeydew.Extractors.Visitors;
+using Honeydew.Logging;
+using Honeydew.Models.Types;
 
 namespace Honeydew;
 
-internal static partial class VisitorLoaderHelper
+internal static class VisitorLoaderHelper
 {
-    public static ICompositeVisitor LoadCSharpVisitors(ILogger logger)
+    public static CompositeVisitor<ICompilationUnitType> LoadCSharpVisitors(ILogger logger)
     {
         var linesOfCodeVisitor = new LinesOfCodeVisitor();
 
-        var attributeSetterVisitor = new AttributeSetterVisitor(new List<IAttributeVisitor>
+        var attributeSetterVisitor = new CSharpAttributeSetterVisitor(logger, new List<ITypeVisitor<IAttributeType>>
         {
             new AttributeInfoVisitor()
         });
 
-        var calledMethodSetterVisitor = new CalledMethodSetterVisitor(new List<ICSharpMethodCallVisitor>
-        {
-            new MethodCallInfoVisitor()
-        });
+        var calledMethodSetterVisitor = new CSharpCalledMethodSetterVisitor(logger,
+            new List<ITypeVisitor<IMethodCallType>>
+            {
+                new MethodCallInfoVisitor()
+            });
 
-        var accessedFieldsSetterVisitor = new AccessedFieldsSetterVisitor(new List<ICSharpAccessedFieldsVisitor>
-        {
-            new AccessFieldVisitor()
-        });
+        var accessedFieldsSetterVisitor = new CSharpAccessedFieldsSetterVisitor(logger,
+            new List<ITypeVisitor<AccessedField>>
+            {
+                new AccessFieldVisitor()
+            });
 
-        var parameterSetterVisitor = new ParameterSetterVisitor(new List<IParameterVisitor>
+        var parameterSetterVisitor = new CSharpParameterSetterVisitor(logger, new List<ITypeVisitor<IParameterType>>
         {
             new ParameterInfoVisitor(),
             attributeSetterVisitor
         });
 
-        var genericParameterSetterVisitor = new GenericParameterSetterVisitor(new List<IGenericParameterVisitor>
-        {
-            new GenericParameterInfoVisitor(),
-            attributeSetterVisitor
-        });
+        var returnValueSetterVisitor = new CSharpReturnValueSetterVisitor(logger,
+            new List<ITypeVisitor<IReturnValueType>>
+            {
+                new ReturnValueInfoVisitor(),
+                attributeSetterVisitor,
+            });
 
-        var localVariablesTypeSetterVisitor = new LocalVariablesTypeSetterVisitor(new List<ILocalVariablesVisitor>
-        {
-            new LocalVariableInfoVisitor()
-        });
+        var genericParameterSetterVisitor = new CSharpGenericParameterSetterVisitor(logger,
+            new List<ITypeVisitor<IGenericParameterType>>
+            {
+                new GenericParameterInfoVisitor(),
+                attributeSetterVisitor
+            });
+
+        var localVariablesTypeSetterVisitor = new CSharpLocalVariablesTypeSetterVisitor(logger,
+            new List<ITypeVisitor<ILocalVariableType>>
+            {
+                new LocalVariableInfoVisitor()
+            });
 
         var gotoInfoVisitor = new GotoStatementVisitor();
 
-        var localFunctionsSetterClassVisitor = new LocalFunctionsSetterClassVisitor(new List<ILocalFunctionVisitor>
-        {
-            new LocalFunctionInfoVisitor(new List<ILocalFunctionVisitor>
+        var localFunctionsSetterClassVisitor = new CSharpLocalFunctionsSetterClassVisitor(logger,
+            new List<ITypeVisitor<IMethodTypeWithLocalFunctions>>
             {
+                new LocalFunctionInfoVisitor(logger, new List<ITypeVisitor<IMethodTypeWithLocalFunctions>>
+                {
+                    calledMethodSetterVisitor,
+                    linesOfCodeVisitor,
+                    parameterSetterVisitor,
+                    returnValueSetterVisitor,
+                    localVariablesTypeSetterVisitor,
+                    genericParameterSetterVisitor,
+                    accessedFieldsSetterVisitor,
+                    gotoInfoVisitor,
+                }),
                 calledMethodSetterVisitor,
                 linesOfCodeVisitor,
                 parameterSetterVisitor,
+                returnValueSetterVisitor,
                 localVariablesTypeSetterVisitor,
                 genericParameterSetterVisitor,
                 accessedFieldsSetterVisitor,
                 gotoInfoVisitor,
-            }),
-            calledMethodSetterVisitor,
-            linesOfCodeVisitor,
-            parameterSetterVisitor,
-            localVariablesTypeSetterVisitor,
-            genericParameterSetterVisitor,
-            accessedFieldsSetterVisitor,
-            gotoInfoVisitor,
-        });
+            });
 
         var methodInfoVisitor = new MethodInfoVisitor();
 
-        var methodVisitors = new List<ICSharpMethodVisitor>
+        var methodVisitors = new List<ITypeVisitor<IMethodType>>
         {
             methodInfoVisitor,
             linesOfCodeVisitor,
@@ -105,13 +92,14 @@ internal static partial class VisitorLoaderHelper
             localFunctionsSetterClassVisitor,
             attributeSetterVisitor,
             parameterSetterVisitor,
+            returnValueSetterVisitor,
             localVariablesTypeSetterVisitor,
             genericParameterSetterVisitor,
             accessedFieldsSetterVisitor,
             gotoInfoVisitor,
         };
 
-        var constructorVisitors = new List<ICSharpConstructorVisitor>
+        var constructorVisitors = new List<ITypeVisitor<IConstructorType>>
         {
             new ConstructorInfoVisitor(),
             linesOfCodeVisitor,
@@ -125,7 +113,7 @@ internal static partial class VisitorLoaderHelper
             gotoInfoVisitor,
         };
 
-        var destructorVisitors = new List<IDestructorVisitor>
+        var destructorVisitors = new List<ITypeVisitor<IDestructorType>>
         {
             new DestructorInfoVisitor(),
             linesOfCodeVisitor,
@@ -137,43 +125,44 @@ internal static partial class VisitorLoaderHelper
             gotoInfoVisitor,
         };
 
-        var fieldVisitors = new List<ICSharpFieldVisitor>
+        var fieldVisitors = new List<ITypeVisitor<IFieldType>>
         {
             new FieldInfoVisitor(),
             attributeSetterVisitor,
         };
 
-        var propertyAccessorsVisitors = new List<IMethodVisitor>
+        var propertyAccessorsVisitors = new List<ITypeVisitor<IAccessorMethodType>>
         {
             methodInfoVisitor,
             calledMethodSetterVisitor,
             attributeSetterVisitor,
             linesOfCodeVisitor,
+            returnValueSetterVisitor,
             localFunctionsSetterClassVisitor,
             localVariablesTypeSetterVisitor,
             accessedFieldsSetterVisitor,
             gotoInfoVisitor,
         };
 
-        var propertyVisitors = new List<ICSharpPropertyVisitor>
+        var propertyVisitors = new List<ITypeVisitor<IPropertyType>>
         {
             new PropertyInfoVisitor(),
-            new MethodAccessorSetterPropertyVisitor(propertyAccessorsVisitors),
+            new CSharpAccessorMethodSetterPropertyVisitor(logger, propertyAccessorsVisitors),
             linesOfCodeVisitor,
             attributeSetterVisitor,
         };
 
         var importsVisitor = new ImportsVisitor();
 
-        var classVisitors = new List<ICSharpClassVisitor>
+        var classVisitors = new List<ITypeVisitor<IMembersClassType>>
         {
             new BaseInfoClassVisitor(),
             new BaseTypesClassVisitor(),
-            new MethodSetterClassVisitor(methodVisitors),
-            new ConstructorSetterClassVisitor(constructorVisitors),
-            new DestructorSetterClassVisitor(destructorVisitors),
-            new FieldSetterClassVisitor(fieldVisitors),
-            new PropertySetterClassVisitor(propertyVisitors),
+            new CSharpMethodSetterClassVisitor(logger, methodVisitors),
+            new CSharpConstructorSetterClassVisitor(logger, constructorVisitors),
+            new CSharpDestructorSetterClassVisitor(logger, destructorVisitors),
+            new CSharpFieldSetterClassVisitor(logger, fieldVisitors),
+            new CSharpPropertySetterClassVisitor(logger, propertyVisitors),
             importsVisitor,
             linesOfCodeVisitor,
             attributeSetterVisitor,
@@ -184,20 +173,21 @@ internal static partial class VisitorLoaderHelper
             new ObjectCreationRelationVisitor(),
         };
 
-        var delegateVisitors = new List<ICSharpDelegateVisitor>
+        var delegateVisitors = new List<ITypeVisitor<IDelegateType>>
         {
             new BaseInfoDelegateVisitor(),
             importsVisitor,
             attributeSetterVisitor,
             parameterSetterVisitor,
+            returnValueSetterVisitor,
             genericParameterSetterVisitor,
             linesOfCodeVisitor,
         };
 
-        var enumVisitors = new List<IEnumVisitor>
+        var enumVisitors = new List<ITypeVisitor<IEnumType>>
         {
             new BaseInfoEnumVisitor(),
-            new EnumLabelsSetterVisitor(new List<IEnumLabelVisitor>
+            new CSharpEnumLabelsSetterVisitor(logger, new List<ITypeVisitor<IEnumLabelType>>
             {
                 new BasicEnumLabelInfoVisitor(),
                 attributeSetterVisitor,
@@ -207,25 +197,15 @@ internal static partial class VisitorLoaderHelper
             linesOfCodeVisitor,
         };
 
-        var compilationUnitVisitors = new List<ICSharpCompilationUnitVisitor>
+        var compilationUnitVisitors = new List<ITypeVisitor<ICompilationUnitType>>
         {
-            new ClassSetterCompilationUnitVisitor(classVisitors),
-            new DelegateSetterCompilationUnitVisitor(delegateVisitors),
-            new EnumSetterCompilationUnitVisitor(enumVisitors),
+            new CSharpClassSetterCompilationUnitVisitor(logger, classVisitors),
+            new CSharpDelegateSetterCompilationUnitVisitor(logger, delegateVisitors),
+            new CSharpEnumSetterCompilationUnitVisitor(logger, enumVisitors),
             importsVisitor,
             linesOfCodeVisitor,
         };
 
-        var compositeVisitor = new CompositeVisitor();
-
-        foreach (var compilationUnitVisitor in compilationUnitVisitors)
-        {
-            compositeVisitor.Add(compilationUnitVisitor);
-        }
-
-        compositeVisitor.Accept(new LoggerSetterVisitor(logger));
-
-
-        return compositeVisitor;
+        return new CSharpCompilationUnitCompositeVisitor(logger, compilationUnitVisitors);
     }
 }

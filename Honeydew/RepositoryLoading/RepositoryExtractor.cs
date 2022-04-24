@@ -4,13 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Honeydew.Extractors.CSharp;
+using Honeydew.Logging;
+using Honeydew.Models.Types;
 using Honeydew.RepositoryLoading.ProjectRead;
 using Honeydew.RepositoryLoading.SolutionRead;
 using Honeydew.Utils;
-using HoneydewCore.Logging;
-using HoneydewExtractors.CSharp.Metrics;
-using HoneydewModels;
-using HoneydewModels.Types;
+using Honeydew.Models;
 
 namespace Honeydew.RepositoryLoading;
 

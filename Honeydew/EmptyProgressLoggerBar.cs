@@ -1,5 +1,5 @@
 ﻿using System;
-using HoneydewCore.Logging;
+using Honeydew.Logging;
 
 namespace Honeydew
 {

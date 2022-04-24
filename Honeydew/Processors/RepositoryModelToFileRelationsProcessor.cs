@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using HoneydewCore.ModelRepresentations;
-using HoneydewCore.Processors;
-using HoneydewCore.Utils;
-using HoneydewScriptBeePlugin.Models;
+using Honeydew.ModelRepresentations;
+using Honeydew.Models.CSharp;
+using Honeydew.ScriptBeePlugin.Models;
+using ClassModel = Honeydew.ScriptBeePlugin.Models.ClassModel;
+using DelegateModel = Honeydew.ScriptBeePlugin.Models.DelegateModel;
 
 namespace Honeydew.Processors;
 
-public class RepositoryModelToFileRelationsProcessor : IProcessorFunction<RepositoryModel, RelationsRepresentation>
+public class RepositoryModelToFileRelationsProcessor
 {
     private readonly IRelationsMetricChooseStrategy _metricChooseStrategy;
 

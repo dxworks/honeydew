@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using HoneydewExtractors.Core.Metrics.Extraction;
-using HoneydewModels;
+using Honeydew.Extractors;
+using Honeydew.Models;
 using Microsoft.CodeAnalysis;
 
 namespace Honeydew.RepositoryLoading.Strategies;

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using HoneydewScriptBeePlugin;
-using HoneydewScriptBeePlugin.Models;
+using Honeydew.ScriptBeePlugin;
+using Honeydew.ScriptBeePlugin.Models;
 
 namespace Honeydew.PostExtraction.ReferenceRelations;
 

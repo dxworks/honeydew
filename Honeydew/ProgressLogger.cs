@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using HoneydewCore.Logging;
+using Honeydew.Logging;
 using Konsole;
 
 namespace Honeydew

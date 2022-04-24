@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using HoneydewCore.Logging;
+using Honeydew.Logging;
 
 namespace Honeydew.Scripts;
 

@@ -1,10 +1,8 @@
 ﻿using System.Collections.Concurrent;
-using Honeydew.Models;
+using Honeydew.Logging;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Honeydew.ScriptBeePlugin.Models;
-using HoneydewCore.Logging;
-using HoneydewCore.Processors;
 using static Honeydew.ScriptBeePlugin.Loaders.MetricAdder;
 using AttributeModel = Honeydew.ScriptBeePlugin.Models.AttributeModel;
 using ClassModel = Honeydew.ScriptBeePlugin.Models.ClassModel;
@@ -19,14 +17,13 @@ using NamespaceModel = Honeydew.ScriptBeePlugin.Models.NamespaceModel;
 using ParameterModel = Honeydew.ScriptBeePlugin.Models.ParameterModel;
 using ProjectModel = Honeydew.ScriptBeePlugin.Models.ProjectModel;
 using PropertyModel = Honeydew.ScriptBeePlugin.Models.PropertyModel;
-using RepositoryModel = Honeydew.Models.RepositoryModel;
+using RepositoryModel = Honeydew.ScriptBeePlugin.Models.RepositoryModel;
 using ReturnValueModel = Honeydew.ScriptBeePlugin.Models.ReturnValueModel;
 using SolutionModel = Honeydew.ScriptBeePlugin.Models.SolutionModel;
 
 namespace Honeydew.ScriptBeePlugin.Loaders;
 
-public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunction<RepositoryModel,
-    Models.RepositoryModel>
+public class RepositoryModelToReferenceRepositoryModelProcessor
 {
     private readonly ILogger _logger;
     private readonly IProgressLogger _progressLogger;
@@ -47,16 +44,16 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
         _progressLogger = progressLogger;
     }
 
-    public Models.RepositoryModel Process(RepositoryModel? inputRepositoryModel)
+    public RepositoryModel Process(Honeydew.Models.RepositoryModel? inputRepositoryModel)
     {
         if (inputRepositoryModel == null)
         {
-            return new Models.RepositoryModel();
+            return new RepositoryModel();
         }
 
         Log("ReferenceModel - Updating Model Version");
 
-        var repositoryModel = new Models.RepositoryModel
+        var repositoryModel = new RepositoryModel
         {
             Version = inputRepositoryModel.Version
         };
@@ -81,8 +78,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
     #region Solutions Project Namespaces CompilationUnits Classes
 
-    private void PopulateModelWithSolutionProjectNamespacesCompilationUnitsAndClasses(RepositoryModel repositoryModel,
-        Models.RepositoryModel referenceRepositoryModel)
+    private void PopulateModelWithSolutionProjectNamespacesCompilationUnitsAndClasses(Honeydew.Models.RepositoryModel repositoryModel,
+        RepositoryModel referenceRepositoryModel)
     {
         var namespaceTreeHandler = new NamespaceTreeHandler();
 
@@ -359,8 +356,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
     #region Project References
 
-    private void PopulateProjectWithProjectReferences(RepositoryModel repositoryModel,
-        Models.RepositoryModel referenceRepositoryModel)
+    private void PopulateProjectWithProjectReferences(Honeydew.Models.RepositoryModel repositoryModel,
+        RepositoryModel referenceRepositoryModel)
     {
         var allProjects = referenceRepositoryModel.Solutions.SelectMany(model => model.Projects).ToList();
 
@@ -388,8 +385,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
     #region Imports, Attributes, Base Types, Generic Parameters
 
-    private void PopulateWithEntityReferences(RepositoryModel repositoryModel,
-        Models.RepositoryModel referenceRepositoryModel)
+    private void PopulateWithEntityReferences(Honeydew.Models.RepositoryModel repositoryModel,
+        RepositoryModel referenceRepositoryModel)
     {
         for (var projectIndex = 0; projectIndex < referenceRepositoryModel.Projects.Count; projectIndex++)
         {
@@ -823,8 +820,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
 
     #region MethodCalls FieldAccesses
 
-    private void PopulateModelWithMethodReferencesAndFieldAccesses(RepositoryModel repositoryModel,
-        Models.RepositoryModel referenceRepositoryModel)
+    private void PopulateModelWithMethodReferencesAndFieldAccesses(Honeydew.Models.RepositoryModel repositoryModel,
+        RepositoryModel referenceRepositoryModel)
     {
         for (var projectIndex = 0; projectIndex < referenceRepositoryModel.Projects.Count; projectIndex++)
         {

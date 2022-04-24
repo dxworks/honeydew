@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using HoneydewCore.Logging;
-using HoneydewExtractors.Core.Metrics.Extraction;
-using HoneydewModels;
+using Honeydew.Extractors;
+using Honeydew.Logging;
+using Honeydew.Models;
 using Microsoft.CodeAnalysis;
 
 namespace Honeydew.RepositoryLoading.Strategies;

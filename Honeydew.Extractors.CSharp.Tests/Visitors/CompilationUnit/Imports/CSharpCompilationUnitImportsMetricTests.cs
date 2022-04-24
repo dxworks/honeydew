@@ -3,7 +3,7 @@ using System.Linq;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
 using Honeydew.Extractors.Visitors;
-using Honeydew.Models;
+using Honeydew.Logging;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Moq;

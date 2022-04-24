@@ -6,19 +6,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommandLine;
 using Honeydew;
+using Honeydew.Extractors.CSharp;
+using Honeydew.IO.Writers.Exporters;
+using Honeydew.Logging;
+using Honeydew.Models;
+using Honeydew.Models.Exporters;
+using Honeydew.Models.Importers;
 using Honeydew.PostExtraction.ReferenceRelations;
 using Honeydew.Processors;
 using Honeydew.RepositoryLoading;
 using Honeydew.RepositoryLoading.Strategies;
+using Honeydew.ScriptBeePlugin.Loaders;
 using Honeydew.Scripts;
-using HoneydewCore.IO.Writers.Exporters;
-using HoneydewCore.Logging;
-using HoneydewCore.Processors;
-using HoneydewExtractors.CSharp.Metrics;
-using HoneydewModels;
-using HoneydewModels.Exporters;
-using HoneydewModels.Importers;
-using HoneydewScriptBeePlugin.Loaders;
+using Honeydew.Utils;
 
 const string defaultPathForAllRepresentations = "results";
 
@@ -127,7 +127,8 @@ await result.MapResult(async options =>
                     progressLogger.Log();
                     progressLogger.Log("Trimming File Paths");
 
-                    repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
+                    repositoryModel =
+                        new FilePathShortenerProcessor(new FolderPathValidator(), inputPath).Process(repositoryModel);
                 }
                 catch (Exception e)
                 {
@@ -300,7 +301,7 @@ static async Task<RepositoryModel> LoadModel(ILogger logger, IProgressLogger pro
     CancellationToken cancellationToken)
 {
     var repositoryLoader = new RawFileRepositoryLoader(logger, progressLogger,
-        new JsonModelImporter<RepositoryModel>(new ConverterList()));
+        new JsonModelImporter<RepositoryModel>(new CSharpConverterList()));
     var repositoryModel = await repositoryLoader.Load(inputPath, cancellationToken);
     return repositoryModel;
 }

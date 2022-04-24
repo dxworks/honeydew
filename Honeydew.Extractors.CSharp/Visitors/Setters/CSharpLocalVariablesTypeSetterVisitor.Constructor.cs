@@ -1,5 +1,5 @@
 ﻿using Honeydew.Extractors.Visitors.Setters;
-using Honeydew.Models;
+using Honeydew.Logging;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;

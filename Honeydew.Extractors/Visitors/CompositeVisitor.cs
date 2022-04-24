@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Honeydew.Models;
+using Honeydew.Logging;
 
 namespace Honeydew.Extractors.Visitors;
 

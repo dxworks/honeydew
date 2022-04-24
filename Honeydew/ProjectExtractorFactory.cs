@@ -1,7 +1,7 @@
-﻿using Honeydew.RepositoryLoading.ProjectRead;
+﻿using Honeydew.Extractors.CSharp;
+using Honeydew.RepositoryLoading.ProjectRead;
 using Honeydew.RepositoryLoading.Strategies;
-using HoneydewCore.Logging;
-using HoneydewExtractors.CSharp.Metrics;
+using Honeydew.Logging;
 
 namespace Honeydew;
 

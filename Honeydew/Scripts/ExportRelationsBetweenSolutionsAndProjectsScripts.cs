@@ -4,9 +4,9 @@ using System.IO;
 using System.Text;
 using DotNetGraph.Edge;
 using DotNetGraph.SubGraph;
-using HoneydewCore.IO.Writers.Exporters;
-using HoneydewCore.ModelRepresentations;
-using HoneydewScriptBeePlugin.Models;
+using Honeydew.IO.Writers.Exporters;
+using Honeydew.ModelRepresentations;
+using Honeydew.ScriptBeePlugin.Models;
 
 namespace Honeydew.Scripts;
 
