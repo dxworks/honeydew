@@ -2,17 +2,17 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record EnumModel : IEnumType
+public record CSharpEnumModel : IEnumType
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
 
-    public string ClassType { get; set; }
+    public string ClassType { get; set; } = "";
 
-    public string FilePath { get; set; }
+    public string FilePath { get; set; } = "";
 
-    public string AccessModifier { get; set; }
+    public string AccessModifier { get; set; } = "";
 
-    public string Modifier { get; set; }
+    public string Modifier { get; set; } = "";
 
     public string Type { get; set; } = "int";
 
@@ -20,9 +20,9 @@ public record EnumModel : IEnumType
 
     public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
 
-    public string ContainingNamespaceName { get; set; }
+    public string ContainingNamespaceName { get; set; } = "";
 
-    public string ContainingClassName { get; set; }
+    public string ContainingClassName { get; set; } = "";
 
     public IList<IBaseType> BaseTypes { get; set; } = new List<IBaseType>();
 

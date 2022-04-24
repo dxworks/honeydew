@@ -10,9 +10,9 @@ public class CSharpClassTypeConverter : ITypeConverter<IClassType>
     {
         return type switch
         {
-            "delegate" => new DelegateModel(),
-            "enum" => new EnumModel(),
-            _ => new ClassModel()
+            "delegate" => new CSharpDelegateModel(),
+            "enum" => new CSharpEnumModel(),
+            _ => new CSharpClassModel()
         };
     }
 
@@ -20,9 +20,9 @@ public class CSharpClassTypeConverter : ITypeConverter<IClassType>
     {
         return value switch
         {
-            DelegateModel delegateModel => delegateModel,
-            EnumModel enumModel => enumModel,
-            _ => (ClassModel)value
+            CSharpDelegateModel delegateModel => delegateModel,
+            CSharpEnumModel enumModel => enumModel,
+            _ => (CSharpClassModel)value
         };
     }
 }

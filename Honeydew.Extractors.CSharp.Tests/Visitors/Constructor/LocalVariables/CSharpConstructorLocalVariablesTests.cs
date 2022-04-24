@@ -50,7 +50,7 @@ public class CSharpConstructorLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Constructors.Count);
 
         foreach (var constructorType in classModel.Constructors)
@@ -75,7 +75,7 @@ public class CSharpConstructorLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Constructors.Count);
 
         foreach (var constructorType in classModel.Constructors)
@@ -101,7 +101,7 @@ public class CSharpConstructorLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Constructors.Count);
 
         foreach (var constructorType in classModel.Constructors)
@@ -130,7 +130,7 @@ public class CSharpConstructorLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Constructors.Count);
 
         foreach (var constructorType in classModel.Constructors)
@@ -156,7 +156,7 @@ public class CSharpConstructorLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         foreach (var constructorType in classModel.Constructors)
         {
@@ -175,7 +175,7 @@ public class CSharpConstructorLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         foreach (var constructorType in classModel.Constructors)
         {

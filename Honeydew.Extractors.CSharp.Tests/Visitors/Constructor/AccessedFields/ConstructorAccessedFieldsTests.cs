@@ -53,7 +53,7 @@ public class ConstructorAccessedFieldsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         foreach (var constructorType in classModel.Constructors)
         {
             Assert.Equal(2, constructorType.AccessedFields.Count);
@@ -89,7 +89,7 @@ public class ConstructorAccessedFieldsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         foreach (var constructorType in classModel.Constructors)
         {
             Assert.Equal(4, constructorType.AccessedFields.Count);

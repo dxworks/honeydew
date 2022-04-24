@@ -61,7 +61,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsForImports
                     Name = "Project1",
                     CompilationUnits =
                     {
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             FilePath = "Project1.Services",
                             ClassTypes = classTypes

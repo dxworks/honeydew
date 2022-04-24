@@ -53,7 +53,7 @@ public class CSharpGenericClassTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal("Namespace1.Class1<T>", classModel.Name);
         Assert.Equal(1, classModel.GenericParameters.Count);
@@ -79,7 +79,7 @@ public class CSharpGenericClassTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal("Namespace1.Class1<T,R,K>", classModel.Name);
         Assert.Equal(3, classModel.GenericParameters.Count);
@@ -96,7 +96,7 @@ public class CSharpGenericClassTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(2, classModel.BaseTypes.Count);
         Assert.Equal("object", classModel.BaseTypes[0].Type.Name);
@@ -115,7 +115,7 @@ public class CSharpGenericClassTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(2, classModel.BaseTypes.Count);
         Assert.Equal("System.ValueType", classModel.BaseTypes[0].Type.Name);
@@ -134,7 +134,7 @@ public class CSharpGenericClassTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(3, classModel.BaseTypes.Count);
 
@@ -161,7 +161,7 @@ public class CSharpGenericClassTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(1, classModel.BaseTypes.Count);
         Assert.Equal("Namespace1.BaseType<T>", classModel.BaseTypes[0].Type.Name);
@@ -178,7 +178,7 @@ public class CSharpGenericClassTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal("Namespace1.Class1<T,R,K>", classModel.Name);
 
@@ -228,7 +228,7 @@ public class CSharpGenericClassTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal("Namespace1.Class1", classModel.Name);
 
@@ -259,7 +259,7 @@ public class CSharpGenericClassTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal("Namespace1.IInterface<out T, in TK>", classModel.Name);
         Assert.Equal(2, classModel.GenericParameters.Count);
@@ -280,8 +280,8 @@ public class CSharpGenericClassTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel1 = (ClassModel)classTypes[0];
-        var classModel2 = (ClassModel)classTypes[1];
+        var classModel1 = (CSharpClassModel)classTypes[0];
+        var classModel2 = (CSharpClassModel)classTypes[1];
 
         Assert.Equal("Namespace1.Class1<T, TK, TR, TP>", classModel1.Name);
         Assert.Equal(4, classModel1.GenericParameters.Count);
@@ -331,7 +331,7 @@ public class CSharpGenericClassTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal("Namespace1.Class1<T, TK, TR>", classModel.Name);
         Assert.Equal(3, classModel.GenericParameters.Count);

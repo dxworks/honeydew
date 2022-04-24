@@ -58,7 +58,7 @@ public class PropertyAccessedFieldsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         foreach (var propertyType in classModel.Properties)
         {
             foreach (var accessor in propertyType.Accessors)
@@ -107,7 +107,7 @@ public class PropertyAccessedFieldsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         foreach (var propertyType in classModel.Properties)
         {
             foreach (var accessor in propertyType.Accessors)

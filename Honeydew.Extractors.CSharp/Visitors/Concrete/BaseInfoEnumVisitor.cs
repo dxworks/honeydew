@@ -28,9 +28,9 @@ public class BaseInfoEnumVisitor : IExtractionVisitor<EnumDeclarationSyntax, Sem
             modelType.Type = baseTypeSyntax.ToString();
         }
 
-        modelType.BaseTypes.Add(new BaseTypeModel
+        modelType.BaseTypes.Add(new CSharpBaseTypeModel
         {
-            Type = new EntityTypeModel
+            Type = new CSharpEntityTypeModel
             {
                 Name = "System.Enum",
                 FullType = new GenericType

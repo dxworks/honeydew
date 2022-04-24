@@ -63,8 +63,8 @@ public class CSharpLocalFunctionLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
-        var method = (MethodModel)classModel.Methods[0];
+        var classModel = (CSharpClassModel)classTypes[0];
+        var method = (CSharpMethodModel)classModel.Methods[0];
         Assert.Equal(1, method.LocalFunctions.Count);
 
         foreach (var localFunction in method.LocalFunctions)
@@ -94,8 +94,8 @@ public class CSharpLocalFunctionLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
-        var method = (MethodModel)classModel.Methods[0];
+        var classModel = (CSharpClassModel)classTypes[0];
+        var method = (CSharpMethodModel)classModel.Methods[0];
         Assert.Equal(1, method.LocalFunctions.Count);
 
         foreach (var localFunction in method.LocalFunctions)
@@ -127,8 +127,8 @@ public class CSharpLocalFunctionLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
-        var method = (MethodModel)classModel.Methods[0];
+        var classModel = (CSharpClassModel)classTypes[0];
+        var method = (CSharpMethodModel)classModel.Methods[0];
         Assert.Equal(1, method.LocalFunctions.Count);
 
         foreach (var localFunction in method.LocalFunctions)
@@ -157,11 +157,11 @@ public class CSharpLocalFunctionLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         foreach (var methodType in classModel.Methods)
         {
-            var method = (MethodModel)methodType;
+            var method = (CSharpMethodModel)methodType;
             Assert.Equal(1, method.LocalFunctions.Count);
 
             foreach (var localFunction in method.LocalFunctions)
@@ -177,7 +177,7 @@ public class CSharpLocalFunctionLocalVariablesTests
         }
 
 
-        var method0 = (MethodModel)classModel.Methods[0];
+        var method0 = (CSharpMethodModel)classModel.Methods[0];
         Assert.Equal("Namespace1.Class2", method0.LocalFunctions[0].LocalVariableTypes[0].Type.Name);
         Assert.Equal("Namespace1.Class2", method0.LocalFunctions[0].LocalVariableTypes[1].Type.Name);
         Assert.Equal("Namespace1.Class2",
@@ -185,13 +185,13 @@ public class CSharpLocalFunctionLocalVariablesTests
         Assert.Equal("Namespace1.Class2",
             method0.LocalFunctions[0].LocalFunctions[0].LocalVariableTypes[1].Type.Name);
 
-        var method1 = (MethodModel)classModel.Methods[1];
+        var method1 = (CSharpMethodModel)classModel.Methods[1];
         Assert.Equal("int", method1.LocalFunctions[0].LocalVariableTypes[0].Type.Name);
         Assert.Equal("int", method1.LocalFunctions[0].LocalVariableTypes[1].Type.Name);
         Assert.Equal("int", method1.LocalFunctions[0].LocalFunctions[0].LocalVariableTypes[0].Type.Name);
         Assert.Equal("int", method1.LocalFunctions[0].LocalFunctions[0].LocalVariableTypes[1].Type.Name);
 
-        var method2 = (MethodModel)classModel.Methods[2];
+        var method2 = (CSharpMethodModel)classModel.Methods[2];
         Assert.Equal("ExternClass", method2.LocalFunctions[0].LocalVariableTypes[0].Type.Name);
         Assert.Equal("ExternClass", method2.LocalFunctions[0].LocalVariableTypes[1].Type.Name);
         Assert.Equal("ExternClass", method2.LocalFunctions[0].LocalFunctions[0].LocalVariableTypes[0].Type.Name);

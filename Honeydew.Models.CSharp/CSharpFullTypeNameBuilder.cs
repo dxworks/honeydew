@@ -2,15 +2,15 @@
 
 namespace Honeydew.Models.CSharp;
 
-public static class FullTypeNameBuilder
+public static class CSharpFullTypeNameBuilder
 {
-    public static EntityTypeModel CreateEntityTypeModel(string? name, bool isExternType = false)
+    public static CSharpEntityTypeModel CreateEntityTypeModel(string? name, bool isExternType = false)
     {
         name ??= "";
 
         try
         {
-            return new EntityTypeModel
+            return new CSharpEntityTypeModel
             {
                 Name = name,
                 FullType = GetFullType(name),
@@ -19,7 +19,7 @@ public static class FullTypeNameBuilder
         }
         catch (Exception)
         {
-            return new EntityTypeModel
+            return new CSharpEntityTypeModel
             {
                 Name = name,
                 FullType = new GenericType

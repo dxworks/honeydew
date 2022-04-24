@@ -23,7 +23,7 @@ public class CSharpGenericParameterSetterVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public IGenericParameterType CreateWrappedType() => new GenericParameterModel();
+    public IGenericParameterType CreateWrappedType() => new CSharpGenericParameterModel();
 
     public IEnumerable<TypeParameterSyntax> GetWrappedSyntaxNodes(TypeDeclarationSyntax syntaxNode)
     {

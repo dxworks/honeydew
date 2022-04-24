@@ -241,7 +241,7 @@ internal static class CSharpFullNameProvider
 
     public static IEntityType CreateEntityTypeModel(string? name, bool isExternType = false)
     {
-        return FullTypeNameBuilder.CreateEntityTypeModel(name, isExternType);
+        return CSharpFullTypeNameBuilder.CreateEntityTypeModel(name, isExternType);
     }
 
     private static string ReconstructFullName(GenericType? genericType)
@@ -281,7 +281,7 @@ internal static class CSharpFullNameProvider
     {
         if (symbolInfo == null)
         {
-            return new EntityTypeModel
+            return new CSharpEntityTypeModel
             {
                 Name = ""
             };
@@ -424,14 +424,14 @@ internal static class CSharpFullNameProvider
         {
             case 0:
             {
-                return new EntityTypeModel
+                return new CSharpEntityTypeModel
                 {
                     Name = declarationSyntax.ToString()
                 };
             }
             case 1:
             {
-                return new EntityTypeModel
+                return new CSharpEntityTypeModel
                 {
                     Name = $"{elementTypesSet.First()}[]"
                 };
@@ -440,7 +440,7 @@ internal static class CSharpFullNameProvider
             {
                 if (elementTypesSet.Contains("System.Int32") && elementTypesSet.Contains("System.Single"))
                 {
-                    return new EntityTypeModel
+                    return new CSharpEntityTypeModel
                     {
                         Name = "System.Single[]"
                     };
@@ -448,7 +448,7 @@ internal static class CSharpFullNameProvider
 
                 if (elementTypesSet.Contains("System.Int32") && elementTypesSet.Contains("System.Double"))
                 {
-                    return new EntityTypeModel
+                    return new CSharpEntityTypeModel
                     {
                         Name = "System.Double[]"
                     };
@@ -456,13 +456,13 @@ internal static class CSharpFullNameProvider
 
                 if (elementTypesSet.Contains("System.Single") && elementTypesSet.Contains("System.Double"))
                 {
-                    return new EntityTypeModel
+                    return new CSharpEntityTypeModel
                     {
                         Name = "System.Double[]"
                     };
                 }
 
-                return new EntityTypeModel
+                return new CSharpEntityTypeModel
                 {
                     Name = "System.Object[]"
                 };
@@ -472,19 +472,19 @@ internal static class CSharpFullNameProvider
                 if (elementTypesSet.Contains("System.Int32") && elementTypesSet.Contains("System.Single") &&
                     elementTypesSet.Contains("System.Double"))
                 {
-                    return new EntityTypeModel
+                    return new CSharpEntityTypeModel
                     {
                         Name = "System.Double[]"
                     };
                 }
 
-                return new EntityTypeModel
+                return new CSharpEntityTypeModel
                 {
                     Name = "System.Object[]"
                 };
             }
             default:
-                return new EntityTypeModel
+                return new CSharpEntityTypeModel
                 {
                     Name = "System.Object[]"
                 };

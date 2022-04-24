@@ -19,7 +19,7 @@ public class CSharpFieldSetterClassVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public IFieldType CreateWrappedType() => new FieldModel();
+    public IFieldType CreateWrappedType() => new CSharpFieldModel();
 
     public IEnumerable<VariableDeclaratorSyntax> GetWrappedSyntaxNodes(TypeDeclarationSyntax syntaxNode)
     {

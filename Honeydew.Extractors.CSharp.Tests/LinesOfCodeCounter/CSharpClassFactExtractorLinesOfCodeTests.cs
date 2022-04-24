@@ -85,7 +85,7 @@ public class CSharpClassFactExtractorLinesOfCodeTests
         Assert.Equal(18, compilationUnit.Loc.EmptyLines);
         Assert.Equal(8, compilationUnit.Loc.CommentedLines);
 
-        var classModel = (ClassModel)classModels[0];
+        var classModel = (CSharpClassModel)classModels[0];
         Assert.Equal(8, classModel.Loc.SourceLines);
         Assert.Equal(12, classModel.Loc.EmptyLines);
         Assert.Equal(5, classModel.Loc.CommentedLines);
@@ -114,7 +114,7 @@ public class CSharpClassFactExtractorLinesOfCodeTests
         Assert.Equal(19, compilationUnit.Loc.EmptyLines);
         Assert.Equal(8, compilationUnit.Loc.CommentedLines);
 
-        var classModel = (ClassModel)classModels[0];
+        var classModel = (CSharpClassModel)classModels[0];
         Assert.Equal(8, classModel.Loc.SourceLines);
         Assert.Equal(14, classModel.Loc.EmptyLines);
         Assert.Equal(5, classModel.Loc.CommentedLines);
@@ -143,7 +143,7 @@ public class CSharpClassFactExtractorLinesOfCodeTests
         Assert.Equal(8, compilationUnit.Loc.EmptyLines);
         Assert.Equal(2, compilationUnit.Loc.CommentedLines);
 
-        var classModel = (EnumModel)classModels[0];
+        var classModel = (CSharpEnumModel)classModels[0];
         Assert.Equal(5, classModel.Loc.SourceLines);
         Assert.Equal(5, classModel.Loc.EmptyLines);
         Assert.Equal(1, classModel.Loc.CommentedLines);
@@ -164,7 +164,7 @@ public class CSharpClassFactExtractorLinesOfCodeTests
         Assert.Equal(3, compilationUnit.Loc.EmptyLines);
         Assert.Equal(1, compilationUnit.Loc.CommentedLines);
 
-        var classModel = (DelegateModel)classModels[0];
+        var classModel = (CSharpDelegateModel)classModels[0];
         Assert.Equal(1, classModel.Loc.SourceLines);
         Assert.Equal(0, classModel.Loc.EmptyLines);
         Assert.Equal(0, classModel.Loc.CommentedLines);
@@ -185,7 +185,7 @@ public class CSharpClassFactExtractorLinesOfCodeTests
         Assert.Equal(3, compilationUnit.Loc.EmptyLines);
         Assert.Equal(1, compilationUnit.Loc.CommentedLines);
 
-        var classModel = (DelegateModel)classModels[0];
+        var classModel = (CSharpDelegateModel)classModels[0];
         Assert.Equal(4, classModel.Loc.SourceLines);
         Assert.Equal(1, classModel.Loc.EmptyLines);
         Assert.Equal(0, classModel.Loc.CommentedLines);
@@ -202,7 +202,7 @@ public class CSharpClassFactExtractorLinesOfCodeTests
 
         var classTypes = compilationUnit.ClassTypes;
 
-        var localFunction = ((MethodModel)((ClassModel)classTypes[0]).Methods[0]).LocalFunctions[0];
+        var localFunction = ((CSharpMethodModel)((CSharpClassModel)classTypes[0]).Methods[0]).LocalFunctions[0];
 
         Assert.Equal(2, localFunction.Loc.SourceLines);
         Assert.Equal(1, localFunction.Loc.CommentedLines);
@@ -220,7 +220,7 @@ public class CSharpClassFactExtractorLinesOfCodeTests
 
         var classTypes = compilationUnit.ClassTypes;
 
-        var accessor = ((ClassModel)classTypes[0]).Properties[0].Accessors[0];
+        var accessor = ((CSharpClassModel)classTypes[0]).Properties[0].Accessors[0];
 
         Assert.Equal(2, accessor.Loc.SourceLines);
         Assert.Equal(1, accessor.Loc.CommentedLines);
@@ -238,12 +238,12 @@ public class CSharpClassFactExtractorLinesOfCodeTests
 
         var classTypes = compilationUnit.ClassTypes;
 
-        var addAccessor = ((ClassModel)classTypes[0]).Properties[0].Accessors[0];
+        var addAccessor = ((CSharpClassModel)classTypes[0]).Properties[0].Accessors[0];
         Assert.Equal(2, addAccessor.Loc.SourceLines);
         Assert.Equal(0, addAccessor.Loc.CommentedLines);
         Assert.Equal(2, addAccessor.Loc.EmptyLines);
 
-        var removeAccessor = ((ClassModel)classTypes[0]).Properties[0].Accessors[1];
+        var removeAccessor = ((CSharpClassModel)classTypes[0]).Properties[0].Accessors[1];
         Assert.Equal(1, removeAccessor.Loc.SourceLines);
         Assert.Equal(0, removeAccessor.Loc.CommentedLines);
         Assert.Equal(0, removeAccessor.Loc.EmptyLines);

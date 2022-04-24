@@ -2,15 +2,15 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record FieldModel : IFieldType
+public record CSharpFieldModel : IFieldType
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
 
     public IEntityType Type { get; set; }
 
     public string Modifier { get; set; } = "";
 
-    public string AccessModifier { get; set; }
+    public string AccessModifier { get; set; } = "";
 
     public bool IsEvent { get; set; }
 

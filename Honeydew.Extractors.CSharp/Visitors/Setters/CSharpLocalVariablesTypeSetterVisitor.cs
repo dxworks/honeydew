@@ -17,7 +17,7 @@ public partial class CSharpLocalVariablesTypeSetterVisitor : CompositeVisitor<IL
 
     public ILogger Logger => CompositeLogger;
 
-    public ILocalVariableType CreateWrappedType() => new LocalVariableModel();
+    public ILocalVariableType CreateWrappedType() => new CSharpLocalVariableModel();
 
     private IEnumerable<VariableDeclaratorSyntax> GetVariableDeclaratorSyntaxNodes(SyntaxNode syntaxNode)
     {

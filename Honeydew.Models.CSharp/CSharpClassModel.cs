@@ -2,19 +2,19 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record ClassModel : IPropertyMembersClassType
+public record CSharpClassModel : IPropertyMembersClassType
 {
-    public string ClassType { get; set; }
+    public string ClassType { get; set; } = "";
 
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
 
     public IList<IGenericParameterType> GenericParameters { get; set; } = new List<IGenericParameterType>();
 
-    public string FilePath { get; set; }
+    public string FilePath { get; set; } = "";
 
     public LinesOfCode Loc { get; set; }
 
-    public string AccessModifier { get; set; }
+    public string AccessModifier { get; set; } = "";
 
     public string Modifier { get; set; } = "";
 

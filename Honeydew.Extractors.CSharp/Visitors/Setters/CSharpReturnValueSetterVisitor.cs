@@ -23,7 +23,7 @@ public partial class CSharpReturnValueSetterVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public IReturnValueType CreateWrappedType() => new ReturnValueModel();
+    public IReturnValueType CreateWrappedType() => new CSharpReturnValueModel();
 
     public IEnumerable<TypeSyntax> GetWrappedSyntaxNodes(DelegateDeclarationSyntax syntaxNode)
     {

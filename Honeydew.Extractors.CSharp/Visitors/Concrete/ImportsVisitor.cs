@@ -97,7 +97,7 @@ public class ImportsVisitor :
         return importTypes;
     }
 
-    private UsingModel GetUsingModelFromUsingSyntax(UsingDirectiveSyntax usingDirectiveSyntax,
+    private CSharpUsingModel GetUsingModelFromUsingSyntax(UsingDirectiveSyntax usingDirectiveSyntax,
         SemanticModel semanticModel)
     {
         var usingName = usingDirectiveSyntax.Name.ToString();
@@ -112,7 +112,7 @@ public class ImportsVisitor :
                     semanticModel);
         }
 
-        var usingModel = new UsingModel
+        var usingModel = new CSharpUsingModel
         {
             Name = usingName,
             IsStatic = isStatic,

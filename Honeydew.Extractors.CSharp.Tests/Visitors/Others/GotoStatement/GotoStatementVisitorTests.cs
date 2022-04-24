@@ -81,7 +81,7 @@ public class GotoStatementVisitorTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         TestGotoStatementInMetrics(classModel.Constructors[0].Metrics);
     }
@@ -94,7 +94,7 @@ public class GotoStatementVisitorTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         TestGotoStatementInMetrics(classModel.Destructor.Metrics);
     }
@@ -107,7 +107,7 @@ public class GotoStatementVisitorTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         TestGotoStatementInMetrics(classModel.Methods[0].Metrics);
     }
@@ -120,7 +120,7 @@ public class GotoStatementVisitorTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         TestGotoStatementInMetrics(classModel.Properties[0].Accessors[0].Metrics);
         TestGotoStatementInMetrics(classModel.Properties[0].Accessors[1].Metrics);
@@ -137,8 +137,8 @@ public class GotoStatementVisitorTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
-        var methodModel = (MethodModel)classModel.Methods[0];
+        var classModel = (CSharpClassModel)classTypes[0];
+        var methodModel = (CSharpMethodModel)classModel.Methods[0];
 
         Assert.Single(methodModel.Metrics);
         Assert.Equal(0, (int)methodModel.Metrics[0].Value!);

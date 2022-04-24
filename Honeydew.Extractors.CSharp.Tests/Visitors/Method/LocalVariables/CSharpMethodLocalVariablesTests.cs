@@ -51,7 +51,7 @@ public class CSharpMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Methods.Count);
 
         foreach (var methodType in classModel.Methods)
@@ -76,7 +76,7 @@ public class CSharpMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Methods.Count);
 
         foreach (var methodType in classModel.Methods)
@@ -109,7 +109,7 @@ public class CSharpMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Methods.Count);
 
         foreach (var methodType in classModel.Methods)
@@ -129,7 +129,7 @@ public class CSharpMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Methods.Count);
 
         foreach (var methodType in classModel.Methods)
@@ -148,7 +148,7 @@ public class CSharpMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Methods.Count);
 
         foreach (var methodType in classModel.Methods)
@@ -169,7 +169,7 @@ public class CSharpMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Methods.Count);
 
         foreach (var methodType in classModel.Methods)
@@ -190,7 +190,7 @@ public class CSharpMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Methods.Count);
 
         foreach (var methodType in classModel.Methods)
@@ -210,7 +210,7 @@ public class CSharpMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(3, classModel.Methods.Count);
 
         foreach (var methodType in classModel.Methods)
@@ -238,7 +238,7 @@ public class CSharpMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         foreach (var methodType in classModel.Methods)
         {
@@ -257,7 +257,7 @@ public class CSharpMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         foreach (var methodType in classModel.Methods)
         {
@@ -279,7 +279,7 @@ public class CSharpMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         var methodType = classModel.Methods[0];
         Assert.Equal(2, methodType.LocalVariableTypes.Count);
@@ -298,7 +298,7 @@ public class CSharpMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         var methodType = classModel.Methods[0];
         Assert.Equal(2, methodType.LocalVariableTypes.Count);
@@ -317,7 +317,7 @@ public class CSharpMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         var methodType = classModel.Methods[0];
         Assert.Equal(2, methodType.LocalVariableTypes.Count);

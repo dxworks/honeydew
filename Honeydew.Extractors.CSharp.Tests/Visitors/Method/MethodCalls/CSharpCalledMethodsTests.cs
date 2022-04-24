@@ -58,7 +58,7 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var methodModelM = ((ClassModel)classTypes[1]).Methods[1];
+        var methodModelM = ((CSharpClassModel)classTypes[1]).Methods[1];
         Assert.Equal("M", methodModelM.Name);
         Assert.Equal(3, methodModelM.CalledMethods.Count);
 
@@ -75,7 +75,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Foo", calledMethod2.LocationClassName);
         Assert.Empty(calledMethod2.MethodDefinitionNames);
         Assert.Equal(1, calledMethod2.ParameterTypes.Count);
-        var calledMethod2Parameter = (ParameterModel)calledMethod2.ParameterTypes[0];
+        var calledMethod2Parameter = (CSharpParameterModel)calledMethod2.ParameterTypes[0];
         Assert.Equal("", calledMethod2Parameter.Modifier);
         Assert.Null(calledMethod2Parameter.DefaultValue);
         Assert.Equal("int", calledMethod2Parameter.Type.Name);
@@ -86,7 +86,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("int", calledMethod3.LocationClassName);
         Assert.Empty(calledMethod3.MethodDefinitionNames);
         Assert.Equal(1, calledMethod3.ParameterTypes.Count);
-        var calledMethod3Parameter = (ParameterModel)calledMethod3.ParameterTypes[0];
+        var calledMethod3Parameter = (CSharpParameterModel)calledMethod3.ParameterTypes[0];
         Assert.Equal("", calledMethod3Parameter.Modifier);
         Assert.Null(calledMethod3Parameter.DefaultValue);
         Assert.Equal("string", calledMethod3Parameter.Type.Name);
@@ -101,7 +101,7 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var methodModelM = ((ClassModel)classTypes[0]).Methods[0];
+        var methodModelM = ((CSharpClassModel)classTypes[0]).Methods[0];
         Assert.Equal("M", methodModelM.Name);
         Assert.Equal(1, methodModelM.CalledMethods.Count);
 
@@ -111,7 +111,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("Foo", calledMethod.LocationClassName);
         Assert.Empty(calledMethod.MethodDefinitionNames);
         Assert.Equal(1, calledMethod.ParameterTypes.Count);
-        var calledMethodParameter = (ParameterModel)calledMethod.ParameterTypes[0];
+        var calledMethodParameter = (CSharpParameterModel)calledMethod.ParameterTypes[0];
         Assert.Equal("", calledMethodParameter.Modifier);
         Assert.Equal("System.Int32", calledMethodParameter.Type.Name);
         Assert.Null(calledMethodParameter.DefaultValue);
@@ -125,7 +125,7 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var methodModelM = ((ClassModel)classTypes[0]).Methods[1];
+        var methodModelM = ((CSharpClassModel)classTypes[0]).Methods[1];
         Assert.Equal("Method", methodModelM.Name);
         Assert.Equal(5, methodModelM.CalledMethods.Count);
 
@@ -136,7 +136,7 @@ public class CSharpCalledMethodsTests
             Assert.Equal("TopLevel.Bar", calledMethod.LocationClassName);
             Assert.Empty(calledMethod.MethodDefinitionNames);
             Assert.Equal(1, calledMethod.ParameterTypes.Count);
-            var calledMethodParameter = (ParameterModel)calledMethod.ParameterTypes[0];
+            var calledMethodParameter = (CSharpParameterModel)calledMethod.ParameterTypes[0];
             Assert.Equal("", calledMethodParameter.Modifier);
             Assert.Null(calledMethodParameter.DefaultValue);
             Assert.Equal("System.Func<int>", calledMethodParameter.Type.Name);
@@ -151,7 +151,7 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var methodModelM = ((ClassModel)classTypes[0]).Methods[1];
+        var methodModelM = ((CSharpClassModel)classTypes[0]).Methods[1];
         Assert.Equal("Method", methodModelM.Name);
         Assert.Equal(4, methodModelM.CalledMethods.Count);
 
@@ -162,7 +162,7 @@ public class CSharpCalledMethodsTests
             Assert.Equal("TopLevel.Bar", calledMethod.LocationClassName);
             Assert.Empty(calledMethod.MethodDefinitionNames);
             Assert.Equal(1, calledMethod.ParameterTypes.Count);
-            var calledMethodParameter = (ParameterModel)calledMethod.ParameterTypes[0];
+            var calledMethodParameter = (CSharpParameterModel)calledMethod.ParameterTypes[0];
             Assert.Equal("", calledMethodParameter.Modifier);
             Assert.Null(calledMethodParameter.DefaultValue);
             Assert.Equal("System.Action<int>", calledMethodParameter.Type.Name);
@@ -177,7 +177,7 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var methodModelM = ((ClassModel)classTypes[0]).Methods[2];
+        var methodModelM = ((CSharpClassModel)classTypes[0]).Methods[2];
         Assert.Equal("Method", methodModelM.Name);
         Assert.Equal(4, methodModelM.CalledMethods.Count);
 
@@ -188,7 +188,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Bar", calledMethod1.LocationClassName);
         Assert.Empty(calledMethod1.MethodDefinitionNames);
         Assert.Equal(1, calledMethod1.ParameterTypes.Count);
-        var calledMethod1Parameter = (ParameterModel)calledMethod1.ParameterTypes[0];
+        var calledMethod1Parameter = (CSharpParameterModel)calledMethod1.ParameterTypes[0];
         Assert.Equal("", calledMethod1Parameter.Modifier);
         Assert.Null(calledMethod1Parameter.DefaultValue);
         Assert.Equal("System.Action<int>", calledMethod1Parameter.Type.Name);
@@ -199,7 +199,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Bar", calledMethod1.LocationClassName);
         Assert.Empty(calledMethod1.MethodDefinitionNames);
         Assert.Equal(1, calledMethod2.ParameterTypes.Count);
-        var calledMethod2Parameter = (ParameterModel)calledMethod2.ParameterTypes[0];
+        var calledMethod2Parameter = (CSharpParameterModel)calledMethod2.ParameterTypes[0];
         Assert.Equal("", calledMethod2Parameter.Modifier);
         Assert.Null(calledMethod2Parameter.DefaultValue);
         Assert.Equal("int", calledMethod2Parameter.Type.Name);
@@ -210,7 +210,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Bar", calledMethod1.LocationClassName);
         Assert.Empty(calledMethod1.MethodDefinitionNames);
         Assert.Equal(1, calledMethod3.ParameterTypes.Count);
-        var calledMethod3Parameter = (ParameterModel)calledMethod3.ParameterTypes[0];
+        var calledMethod3Parameter = (CSharpParameterModel)calledMethod3.ParameterTypes[0];
         Assert.Equal("", calledMethod3Parameter.Modifier);
         Assert.Null(calledMethod3Parameter.DefaultValue);
         Assert.Equal("System.Func<int>", calledMethod3Parameter.Type.Name);
@@ -221,7 +221,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Bar", calledMethod1.LocationClassName);
         Assert.Empty(calledMethod1.MethodDefinitionNames);
         Assert.Equal(1, calledMethod4.ParameterTypes.Count);
-        var calledMethod4Parameter = (ParameterModel)calledMethod4.ParameterTypes[0];
+        var calledMethod4Parameter = (CSharpParameterModel)calledMethod4.ParameterTypes[0];
         Assert.Equal("", calledMethod4Parameter.Modifier);
         Assert.Null(calledMethod4Parameter.DefaultValue);
         Assert.Equal("int", calledMethod4Parameter.Type.Name);
@@ -235,7 +235,7 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var methodModelM = ((ClassModel)classTypes[2]).Methods[0];
+        var methodModelM = ((CSharpClassModel)classTypes[2]).Methods[0];
         Assert.Equal("Method", methodModelM.Name);
         Assert.Equal(5, methodModelM.CalledMethods.Count);
 
@@ -283,7 +283,7 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var methodModelM = ((ClassModel)classTypes[0]).Methods[0];
+        var methodModelM = ((CSharpClassModel)classTypes[0]).Methods[0];
         Assert.Equal("Method", methodModelM.Name);
         Assert.Equal(5, methodModelM.CalledMethods.Count);
 
@@ -300,7 +300,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("System.Collections.Generic.IEnumerable<string>", calledMethod1.LocationClassName);
         Assert.Empty(calledMethod1.MethodDefinitionNames);
         Assert.Equal(1, calledMethod1.ParameterTypes.Count);
-        var calledMethod1Parameter = (ParameterModel)calledMethod1.ParameterTypes[0];
+        var calledMethod1Parameter = (CSharpParameterModel)calledMethod1.ParameterTypes[0];
         Assert.Equal("", calledMethod1Parameter.Modifier);
         Assert.Equal("System.Func<string, string>", calledMethod1Parameter.Type.Name);
         Assert.Null(calledMethod1Parameter.DefaultValue);
@@ -311,7 +311,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("System.Collections.Generic.IEnumerable<string>", calledMethod2.LocationClassName);
         Assert.Empty(calledMethod2.MethodDefinitionNames);
         Assert.Equal(1, calledMethod2.ParameterTypes.Count);
-        var calledMethod2Parameter = (ParameterModel)calledMethod2.ParameterTypes[0];
+        var calledMethod2Parameter = (CSharpParameterModel)calledMethod2.ParameterTypes[0];
         Assert.Equal("", calledMethod2Parameter.Modifier);
         Assert.Equal("int", calledMethod2Parameter.Type.Name);
         Assert.Null(calledMethod2Parameter.DefaultValue);
@@ -322,7 +322,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("System.Collections.Generic.List<string>", calledMethod3.LocationClassName);
         Assert.Empty(calledMethod3.MethodDefinitionNames);
         Assert.Equal(1, calledMethod3.ParameterTypes.Count);
-        var calledMethod3Parameter = (ParameterModel)calledMethod3.ParameterTypes[0];
+        var calledMethod3Parameter = (CSharpParameterModel)calledMethod3.ParameterTypes[0];
         Assert.Equal("", calledMethod3Parameter.Modifier);
         Assert.Equal("System.Func<string, bool>", calledMethod3Parameter.Type.Name);
         Assert.Null(calledMethod3Parameter.DefaultValue);
@@ -344,7 +344,7 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var methodModelM = ((ClassModel)classTypes[1]).Methods[0];
+        var methodModelM = ((CSharpClassModel)classTypes[1]).Methods[0];
         Assert.Equal("Method", methodModelM.Name);
         Assert.Equal(1, methodModelM.CalledMethods.Count);
 
@@ -356,12 +356,12 @@ public class CSharpCalledMethodsTests
 
         Assert.Equal(2, calledMethod0.ParameterTypes.Count);
 
-        var calledMethod0Parameter = (ParameterModel)calledMethod0.ParameterTypes[0];
+        var calledMethod0Parameter = (CSharpParameterModel)calledMethod0.ParameterTypes[0];
         Assert.Equal("", calledMethod0Parameter.Modifier);
         Assert.Equal("string", calledMethod0Parameter.Type.Name);
         Assert.Null(calledMethod0Parameter.DefaultValue);
 
-        var method0Parameter = (ParameterModel)calledMethod0.ParameterTypes[1];
+        var method0Parameter = (CSharpParameterModel)calledMethod0.ParameterTypes[1];
         Assert.Equal("out", method0Parameter.Modifier);
         Assert.Equal("string", method0Parameter.Type.Name);
         Assert.Null(method0Parameter.DefaultValue);
@@ -376,7 +376,7 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var methodModelM = ((ClassModel)classTypes[1]).Methods[0];
+        var methodModelM = ((CSharpClassModel)classTypes[1]).Methods[0];
         Assert.Equal("Method", methodModelM.Name);
         Assert.Equal(1, methodModelM.CalledMethods.Count);
 
@@ -388,12 +388,12 @@ public class CSharpCalledMethodsTests
 
         Assert.Equal(2, calledMethod0.ParameterTypes.Count);
 
-        var calledMethod0Parameter = (ParameterModel)calledMethod0.ParameterTypes[0];
+        var calledMethod0Parameter = (CSharpParameterModel)calledMethod0.ParameterTypes[0];
         Assert.Equal("", calledMethod0Parameter.Modifier);
         Assert.Equal("string", calledMethod0Parameter.Type.Name);
         Assert.Null(calledMethod0Parameter.DefaultValue);
 
-        var method0Parameter = (ParameterModel)calledMethod0.ParameterTypes[1];
+        var method0Parameter = (CSharpParameterModel)calledMethod0.ParameterTypes[1];
         Assert.Equal("out", method0Parameter.Modifier);
         Assert.Equal("string", method0Parameter.Type.Name);
         Assert.Null(method0Parameter.DefaultValue);
@@ -407,13 +407,13 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var genericMethodModel = ((ClassModel)classTypes[0]).Methods[0];
+        var genericMethodModel = ((CSharpClassModel)classTypes[0]).Methods[0];
         Assert.Equal("Method", genericMethodModel.Name);
         Assert.Equal(1, genericMethodModel.ParameterTypes.Count);
         Assert.Equal("T", genericMethodModel.ParameterTypes[0].Type.Name);
         Assert.Equal(0, genericMethodModel.CalledMethods.Count);
 
-        var methodCaller = ((ClassModel)classTypes[0]).Methods[1];
+        var methodCaller = ((CSharpClassModel)classTypes[0]).Methods[1];
         Assert.Equal("Caller", methodCaller.Name);
         Assert.Empty(methodCaller.ParameterTypes);
         Assert.Equal(3, methodCaller.CalledMethods.Count);
@@ -451,7 +451,7 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Methods.Count);
 
         foreach (var methodType in classModel.Methods)
@@ -469,7 +469,7 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Methods.Count);
 
         foreach (var methodType in classModel.Methods)
@@ -491,7 +491,7 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         var methodType = classModel.Methods[0];
         Assert.Equal(4, methodType.CalledMethods.Count);
@@ -511,13 +511,13 @@ public class CSharpCalledMethodsTests
 
         Assert.Equal(2, classTypes.Count);
 
-        var classModel1 = (ClassModel)classTypes[0];
+        var classModel1 = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel1.Methods.Count);
 
         Assert.Equal("G", classModel1.Methods[0].Name);
         Assert.Equal("int", classModel1.Methods[0].ReturnValue.Type.Name);
         Assert.Equal(1, classModel1.Methods[0].ParameterTypes.Count);
-        var parameterModel1 = (ParameterModel)classModel1.Methods[0].ParameterTypes[0];
+        var parameterModel1 = (CSharpParameterModel)classModel1.Methods[0].ParameterTypes[0];
         Assert.Equal("float", parameterModel1.Type.Name);
         Assert.Equal("", parameterModel1.Modifier);
         Assert.Null(parameterModel1.DefaultValue);
@@ -532,7 +532,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("virtual", classModel1.Methods[1].Modifier);
         Assert.Empty(classModel1.Methods[1].CalledMethods);
 
-        var classModel2 = (ClassModel)classTypes[1];
+        var classModel2 = (CSharpClassModel)classTypes[1];
         Assert.Equal(2, classModel2.Methods.Count);
 
         Assert.Equal("M", classModel2.Methods[0].Name);
@@ -553,7 +553,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Foo", classModel2.Methods[1].CalledMethods[0].LocationClassName);
         Assert.Empty(classModel2.Methods[1].CalledMethods[0].MethodDefinitionNames);
         Assert.Equal(1, classModel2.Methods[1].CalledMethods[0].ParameterTypes.Count);
-        var parameterModel2 = (ParameterModel)classModel2.Methods[1].CalledMethods[0].ParameterTypes[0];
+        var parameterModel2 = (CSharpParameterModel)classModel2.Methods[1].CalledMethods[0].ParameterTypes[0];
         Assert.Equal("float", parameterModel2.Type.Name);
         Assert.Equal("", parameterModel2.Modifier);
         Assert.Null(parameterModel2.DefaultValue);
@@ -579,13 +579,13 @@ public class CSharpCalledMethodsTests
 
         Assert.Equal(2, classTypes.Count);
 
-        var classModel1 = (ClassModel)classTypes[0];
+        var classModel1 = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel1.Methods.Count);
 
         Assert.Equal("A", classModel1.Methods[0].Name);
         Assert.Equal("int", classModel1.Methods[0].ReturnValue.Type.Name);
         Assert.Equal(1, classModel1.Methods[0].ParameterTypes.Count);
-        var parameterModel1 = (ParameterModel)classModel1.Methods[0].ParameterTypes[0];
+        var parameterModel1 = (CSharpParameterModel)classModel1.Methods[0].ParameterTypes[0];
         Assert.Equal("int", parameterModel1.Type.Name);
         Assert.Equal("", parameterModel1.Modifier);
         Assert.Null(parameterModel1.DefaultValue);
@@ -596,11 +596,11 @@ public class CSharpCalledMethodsTests
         Assert.Equal("B", classModel1.Methods[1].Name);
         Assert.Equal("int", classModel1.Methods[1].ReturnValue.Type.Name);
         Assert.Equal(2, classModel1.Methods[1].ParameterTypes.Count);
-        var parameterModel2 = (ParameterModel)classModel1.Methods[1].ParameterTypes[0];
+        var parameterModel2 = (CSharpParameterModel)classModel1.Methods[1].ParameterTypes[0];
         Assert.Equal("int", parameterModel2.Type.Name);
         Assert.Equal("", parameterModel2.Modifier);
         Assert.Null(parameterModel2.DefaultValue);
-        var parameterModel3 = (ParameterModel)classModel1.Methods[1].ParameterTypes[1];
+        var parameterModel3 = (CSharpParameterModel)classModel1.Methods[1].ParameterTypes[1];
         Assert.Equal("int", parameterModel3.Type.Name);
         Assert.Equal("", parameterModel3.Modifier);
         Assert.Null(parameterModel3.DefaultValue);
@@ -612,7 +612,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Foo", classModel1.Methods[1].CalledMethods[0].LocationClassName);
         Assert.Empty(classModel1.Methods[1].CalledMethods[0].MethodDefinitionNames);
         Assert.Equal(1, classModel1.Methods[1].CalledMethods[0].ParameterTypes.Count);
-        var parameterModel4 = (ParameterModel)classModel1.Methods[1].CalledMethods[0].ParameterTypes[0];
+        var parameterModel4 = (CSharpParameterModel)classModel1.Methods[1].CalledMethods[0].ParameterTypes[0];
         Assert.Equal("int", parameterModel4.Type.Name);
         Assert.Equal("", parameterModel4.Modifier);
         Assert.Null(parameterModel4.DefaultValue);
@@ -621,27 +621,27 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Foo", classModel1.Methods[1].CalledMethods[1].LocationClassName);
         Assert.Empty(classModel1.Methods[1].CalledMethods[1].MethodDefinitionNames);
         Assert.Equal(1, classModel1.Methods[1].CalledMethods[1].ParameterTypes.Count);
-        var parameterModel5 = (ParameterModel)classModel1.Methods[1].CalledMethods[1].ParameterTypes[0];
+        var parameterModel5 = (CSharpParameterModel)classModel1.Methods[1].CalledMethods[1].ParameterTypes[0];
         Assert.Equal("int", parameterModel5.Type.Name);
         Assert.Equal("", parameterModel5.Modifier);
         Assert.Null(parameterModel5.DefaultValue);
 
-        var classModel2 = (ClassModel)classTypes[1];
+        var classModel2 = (CSharpClassModel)classTypes[1];
         Assert.Equal(2, classModel2.Methods.Count);
 
         var methodModelF = classModel2.Methods[0];
         Assert.Equal("F", methodModelF.Name);
         Assert.Equal("int", methodModelF.ReturnValue.Type.Name);
         Assert.Equal(3, methodModelF.ParameterTypes.Count);
-        var parameterModel6 = (ParameterModel)methodModelF.ParameterTypes[0];
+        var parameterModel6 = (CSharpParameterModel)methodModelF.ParameterTypes[0];
         Assert.Equal("int", parameterModel6.Type.Name);
         Assert.Equal("", parameterModel6.Modifier);
         Assert.Null(parameterModel6.DefaultValue);
-        var parameterModel7 = (ParameterModel)methodModelF.ParameterTypes[1];
+        var parameterModel7 = (CSharpParameterModel)methodModelF.ParameterTypes[1];
         Assert.Equal("int", parameterModel7.Type.Name);
         Assert.Equal("", parameterModel7.Modifier);
         Assert.Null(parameterModel7.DefaultValue);
-        var parameterModel8 = (ParameterModel)methodModelF.ParameterTypes[2];
+        var parameterModel8 = (CSharpParameterModel)methodModelF.ParameterTypes[2];
         Assert.Equal("string", parameterModel8.Type.Name);
         Assert.Equal("", parameterModel8.Modifier);
         Assert.Null(parameterModel8.DefaultValue);
@@ -653,7 +653,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Foo", methodModelF.CalledMethods[0].LocationClassName);
         Assert.Empty(methodModelF.CalledMethods[0].MethodDefinitionNames);
         Assert.Equal(1, methodModelF.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel9 = (ParameterModel)methodModelF.CalledMethods[0].ParameterTypes[0];
+        var parameterModel9 = (CSharpParameterModel)methodModelF.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("int", parameterModel9.Type.Name);
         Assert.Equal("", parameterModel9.Modifier);
         Assert.Null(parameterModel9.DefaultValue);
@@ -662,11 +662,11 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Foo", methodModelF.CalledMethods[1].LocationClassName);
         Assert.Empty(methodModelF.CalledMethods[1].MethodDefinitionNames);
         Assert.Equal(2, methodModelF.CalledMethods[1].ParameterTypes.Count);
-        var parameterModel10 = (ParameterModel)methodModelF.CalledMethods[1].ParameterTypes[0];
+        var parameterModel10 = (CSharpParameterModel)methodModelF.CalledMethods[1].ParameterTypes[0];
         Assert.Equal("int", parameterModel10.Type.Name);
         Assert.Equal("", parameterModel10.Modifier);
         Assert.Null(parameterModel10.DefaultValue);
-        var parameterModel11 = (ParameterModel)methodModelF.CalledMethods[1].ParameterTypes[1];
+        var parameterModel11 = (CSharpParameterModel)methodModelF.CalledMethods[1].ParameterTypes[1];
         Assert.Equal("int", parameterModel11.Type.Name);
         Assert.Equal("", parameterModel11.Modifier);
         Assert.Null(parameterModel11.DefaultValue);
@@ -675,7 +675,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Bar", methodModelF.CalledMethods[2].LocationClassName);
         Assert.Empty(methodModelF.CalledMethods[2].MethodDefinitionNames);
         Assert.Equal(1, methodModelF.CalledMethods[2].ParameterTypes.Count);
-        var parameterModel12 = (ParameterModel)methodModelF.CalledMethods[2].ParameterTypes[0];
+        var parameterModel12 = (CSharpParameterModel)methodModelF.CalledMethods[2].ParameterTypes[0];
         Assert.Equal("string", parameterModel12.Type.Name);
         Assert.Equal("", parameterModel12.Modifier);
         Assert.Null(parameterModel12.DefaultValue);
@@ -684,7 +684,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Foo", methodModelF.CalledMethods[3].LocationClassName);
         Assert.Empty(methodModelF.CalledMethods[3].MethodDefinitionNames);
         Assert.Equal(1, methodModelF.CalledMethods[3].ParameterTypes.Count);
-        var parameterModel13 = (ParameterModel)methodModelF.CalledMethods[3].ParameterTypes[0];
+        var parameterModel13 = (CSharpParameterModel)methodModelF.CalledMethods[3].ParameterTypes[0];
         Assert.Equal("int", parameterModel13.Type.Name);
         Assert.Equal("", parameterModel13.Modifier);
         Assert.Null(parameterModel13.DefaultValue);
@@ -693,7 +693,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("K", methodModelK.Name);
         Assert.Equal("int", methodModelK.ReturnValue.Type.Name);
         Assert.Equal(1, methodModelK.ParameterTypes.Count);
-        var parameterModel14 = (ParameterModel)methodModelK.ParameterTypes[0];
+        var parameterModel14 = (CSharpParameterModel)methodModelK.ParameterTypes[0];
         Assert.Equal("string", parameterModel14.Type.Name);
         Assert.Equal("", parameterModel14.Modifier);
         Assert.Null(parameterModel14.DefaultValue);
@@ -714,7 +714,7 @@ public class CSharpCalledMethodsTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(4, classModel.Methods.Count);
         Assert.Empty(classModel.Constructors);
 
@@ -735,7 +735,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Foo", printMethod.CalledMethods[0].LocationClassName);
         Assert.Empty(printMethod.CalledMethods[0].MethodDefinitionNames);
         Assert.Equal(1, printMethod.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel1 = (ParameterModel)printMethod.CalledMethods[0].ParameterTypes[0];
+        var parameterModel1 = (CSharpParameterModel)printMethod.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("int", parameterModel1.Type.Name);
         Assert.Equal("ref", parameterModel1.Modifier);
         Assert.Null(parameterModel1.DefaultValue);
@@ -745,7 +745,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Foo", printMethod.CalledMethods[1].LocationClassName);
         Assert.Empty(printMethod.CalledMethods[1].MethodDefinitionNames);
         Assert.Equal(1, printMethod.CalledMethods[1].ParameterTypes.Count);
-        var parameterModel2 = (ParameterModel)printMethod.CalledMethods[1].ParameterTypes[0];
+        var parameterModel2 = (CSharpParameterModel)printMethod.CalledMethods[1].ParameterTypes[0];
         Assert.Equal("int", parameterModel2.Type.Name);
         Assert.Equal("out", parameterModel2.Modifier);
         Assert.Null(parameterModel2.DefaultValue);
@@ -755,7 +755,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Foo", printMethod.CalledMethods[2].LocationClassName);
         Assert.Empty(printMethod.CalledMethods[2].MethodDefinitionNames);
         Assert.Equal(1, printMethod.CalledMethods[2].ParameterTypes.Count);
-        var parameterModel3 = (ParameterModel)printMethod.CalledMethods[2].ParameterTypes[0];
+        var parameterModel3 = (CSharpParameterModel)printMethod.CalledMethods[2].ParameterTypes[0];
         Assert.Equal("int", parameterModel3.Type.Name);
         Assert.Equal("in", parameterModel3.Modifier);
         Assert.Null(parameterModel3.DefaultValue);
@@ -767,7 +767,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("", fMethod.Modifier);
         Assert.Empty(fMethod.CalledMethods);
         Assert.Equal(1, fMethod.ParameterTypes.Count);
-        var fMethodParameter = (ParameterModel)fMethod.ParameterTypes[0];
+        var fMethodParameter = (CSharpParameterModel)fMethod.ParameterTypes[0];
         Assert.Equal("int", fMethodParameter.Type.Name);
         Assert.Equal("ref", fMethodParameter.Modifier);
         Assert.Null(fMethodParameter.DefaultValue);
@@ -778,7 +778,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("", kMethod.Modifier);
         Assert.Empty(kMethod.CalledMethods);
         Assert.Equal(1, kMethod.ParameterTypes.Count);
-        var kMethodParameter = (ParameterModel)kMethod.ParameterTypes[0];
+        var kMethodParameter = (CSharpParameterModel)kMethod.ParameterTypes[0];
         Assert.Equal("int", kMethodParameter.Type.Name);
         Assert.Equal("out", kMethodParameter.Modifier);
         Assert.Null(kMethodParameter.DefaultValue);
@@ -789,7 +789,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("", zMethod.Modifier);
         Assert.Empty(zMethod.CalledMethods);
         Assert.Equal(1, zMethod.ParameterTypes.Count);
-        var zMethodParameter = (ParameterModel)zMethod.ParameterTypes[0];
+        var zMethodParameter = (CSharpParameterModel)zMethod.ParameterTypes[0];
         Assert.Equal("int", zMethodParameter.Type.Name);
         Assert.Equal("in", zMethodParameter.Modifier);
         Assert.Null(zMethodParameter.DefaultValue);
@@ -803,7 +803,7 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var method = ((ClassModel)classTypes[0]).Methods[0];
+        var method = ((CSharpClassModel)classTypes[0]).Methods[0];
 
         Assert.Equal(3, method.CalledMethods.Count);
 
@@ -828,7 +828,7 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var method = ((ClassModel)classTypes[0]).Methods[0];
+        var method = ((CSharpClassModel)classTypes[0]).Methods[0];
 
         Assert.Equal(1, method.CalledMethods.Count);
 
@@ -847,7 +847,7 @@ public class CSharpCalledMethodsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var methodModel = ((ClassModel)classTypes[1]).Methods[0];
+        var methodModel = ((CSharpClassModel)classTypes[1]).Methods[0];
 
         Assert.Equal("M", methodModel.Name);
         Assert.Equal(1, methodModel.CalledMethods.Count);
@@ -856,7 +856,7 @@ public class CSharpCalledMethodsTests
         Assert.Equal("TopLevel.Foo", methodModel.CalledMethods[0].LocationClassName);
         Assert.Empty(methodModel.CalledMethods[0].MethodDefinitionNames);
         Assert.Equal(1, methodModel.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel = (ParameterModel)methodModel.CalledMethods[0].ParameterTypes[0];
+        var parameterModel = (CSharpParameterModel)methodModel.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel.Modifier);
         Assert.Null(parameterModel.DefaultValue);
         Assert.Equal("int", parameterModel.Type.Name);

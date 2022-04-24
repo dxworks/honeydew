@@ -352,7 +352,7 @@ public class CSharpClassImportsMetricTests
 
         foreach (var classType in classTypes)
         {
-            var usingModels = classType.Imports.Cast<UsingModel>().ToArray();
+            var usingModels = classType.Imports.Cast<CSharpUsingModel>().ToArray();
 
             Assert.NotNull(usingModels.SingleOrDefault(model => model.Name == "System" && !model.IsStatic));
             Assert.NotNull(usingModels.SingleOrDefault(model =>
@@ -369,21 +369,21 @@ public class CSharpClassImportsMetricTests
 
         Assert.Equal(6, classTypes[0].Imports.Count);
 
-        var structImportTypes = classTypes[1].Imports.Cast<UsingModel>().ToList();
+        var structImportTypes = classTypes[1].Imports.Cast<CSharpUsingModel>().ToList();
         Assert.Equal(8, structImportTypes.Count);
         Assert.Contains(structImportTypes,
             model => model.Name == "Microsoft.CodeAnalysis.CSharp" && model.IsStatic);
         Assert.Contains(structImportTypes, model => model.Name == "MyLib" && model.IsStatic);
 
-        var recordImportTypes = classTypes[2].Imports.Cast<UsingModel>().ToList();
+        var recordImportTypes = classTypes[2].Imports.Cast<CSharpUsingModel>().ToList();
         Assert.Equal(7, recordImportTypes.Count);
         Assert.Contains(recordImportTypes, model => model.Name == "MyLib.Records" && model.IsStatic);
 
-        var classImportTypes = classTypes[3].Imports.Cast<UsingModel>().ToList();
+        var classImportTypes = classTypes[3].Imports.Cast<CSharpUsingModel>().ToList();
         Assert.Equal(7, classImportTypes.Count);
         Assert.Contains(classImportTypes, model => model.Name == "MyLib.Records" && model.IsStatic);
 
-        var delegateImportTypes = classTypes[4].Imports.Cast<UsingModel>().ToList();
+        var delegateImportTypes = classTypes[4].Imports.Cast<CSharpUsingModel>().ToList();
         Assert.Equal(7, delegateImportTypes.Count);
         Assert.Contains(delegateImportTypes,
             model => model.Name == "Microsoft.CodeAnalysis.CSharp" && model.IsStatic);

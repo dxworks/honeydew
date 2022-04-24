@@ -34,7 +34,7 @@ public class CSharpAttributeSetterVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public IAttributeType CreateWrappedType() => new AttributeModel();
+    public IAttributeType CreateWrappedType() => new CSharpAttributeModel();
 
     public IEnumerable<AttributeSyntax> GetWrappedSyntaxNodes(TypeDeclarationSyntax syntaxNode)
     {

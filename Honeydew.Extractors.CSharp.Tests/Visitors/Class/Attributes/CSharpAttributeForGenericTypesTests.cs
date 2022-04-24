@@ -110,9 +110,9 @@ public class CSharpAttributeForGenericTypesTests
 
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
-        var methodModel = (MethodModel)classModel.Methods[0];
+        var methodModel = (CSharpMethodModel)classModel.Methods[0];
         var genericParameters = new[]
         {
             classModel.GenericParameters[0],

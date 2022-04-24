@@ -54,7 +54,7 @@ public class MethodAccessedFieldsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         foreach (var methodType in classModel.Methods)
         {
             Assert.Equal(2, methodType.AccessedFields.Count);
@@ -90,7 +90,7 @@ public class MethodAccessedFieldsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         foreach (var methodType in classModel.Methods)
         {
             Assert.Equal(2, methodType.AccessedFields.Count);
@@ -126,7 +126,7 @@ public class MethodAccessedFieldsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         foreach (var methodType in classModel.Methods)
         {
             Assert.Equal(2, methodType.AccessedFields.Count);
@@ -160,7 +160,7 @@ public class MethodAccessedFieldsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         foreach (var methodType in classModel.Methods)
         {
             Assert.Equal(2, methodType.AccessedFields.Count);
@@ -194,7 +194,7 @@ public class MethodAccessedFieldsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[2];
+        var classModel = (CSharpClassModel)classTypes[2];
         var methodType = classModel.Methods[0];
 
         Assert.Equal(4, methodType.AccessedFields.Count);

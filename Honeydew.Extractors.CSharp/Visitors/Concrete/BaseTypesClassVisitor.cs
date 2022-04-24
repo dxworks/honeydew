@@ -18,7 +18,7 @@ public class BaseTypesClassVisitor : IExtractionVisitor<TypeDeclarationSyntax, S
             {
                 foreach (var baseInterface in GetBaseInterfaces(interfaceDeclarationSyntax, semanticModel))
                 {
-                    modelType.BaseTypes.Add(new BaseTypeModel
+                    modelType.BaseTypes.Add(new CSharpBaseTypeModel
                     {
                         Type = baseInterface,
                         Kind = "interface"
@@ -29,7 +29,7 @@ public class BaseTypesClassVisitor : IExtractionVisitor<TypeDeclarationSyntax, S
 
             default:
             {
-                modelType.BaseTypes.Add(new BaseTypeModel
+                modelType.BaseTypes.Add(new CSharpBaseTypeModel
                 {
                     Type = GetBaseClassName(syntaxNode, semanticModel),
                     Kind = "class"
@@ -37,7 +37,7 @@ public class BaseTypesClassVisitor : IExtractionVisitor<TypeDeclarationSyntax, S
 
                 foreach (var baseInterface in GetBaseInterfaces(syntaxNode, semanticModel))
                 {
-                    modelType.BaseTypes.Add(new BaseTypeModel
+                    modelType.BaseTypes.Add(new CSharpBaseTypeModel
                     {
                         Type = baseInterface,
                         Kind = "interface"

@@ -6,8 +6,6 @@ using Honeydew.ScriptBeePlugin.Models;
 using static Honeydew.ScriptBeePlugin.Loaders.MetricAdder;
 using AttributeModel = Honeydew.ScriptBeePlugin.Models.AttributeModel;
 using ClassModel = Honeydew.ScriptBeePlugin.Models.ClassModel;
-using DelegateModel = Honeydew.Models.CSharp.DelegateModel;
-using EnumModel = Honeydew.Models.CSharp.EnumModel;
 using FieldModel = Honeydew.ScriptBeePlugin.Models.FieldModel;
 using GenericParameterModel = Honeydew.ScriptBeePlugin.Models.GenericParameterModel;
 using LinesOfCode = Honeydew.ScriptBeePlugin.Models.LinesOfCode;
@@ -127,7 +125,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
                     switch (classType)
                     {
-                        case DelegateModel delegateModel:
+                        case CSharpDelegateModel delegateModel:
                         {
                             var model = new Models.DelegateModel
                             {
@@ -154,7 +152,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                         }
                             break;
 
-                        case EnumModel enumModel:
+                        case CSharpEnumModel enumModel:
                         {
                             var model = new Models.EnumModel
                             {
@@ -181,7 +179,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                         }
                             break;
 
-                        case Honeydew.Models.CSharp.ClassModel classModel:
+                        case Honeydew.Models.CSharp.CSharpClassModel classModel:
                         {
                             EntityModel entityModel = classModel.ClassType switch
                             {
@@ -416,7 +414,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
                     switch (entityModel)
                     {
-                        case ClassModel classModel when classType is Honeydew.Models.CSharp.ClassModel membersClassType:
+                        case ClassModel classModel when classType is Honeydew.Models.CSharp.CSharpClassModel membersClassType:
                         {
                             if (classType is ITypeWithGenericParameters typeWithGenericParameters)
                             {
@@ -448,7 +446,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                             break;
                         }
                         case InterfaceModel interfaceModel
-                            when classType is Honeydew.Models.CSharp.ClassModel interfaceType:
+                            when classType is Honeydew.Models.CSharp.CSharpClassModel interfaceType:
                         {
                             if (classType is ITypeWithGenericParameters typeWithGenericParameters)
                             {
@@ -471,7 +469,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                         }
 
                         case Models.DelegateModel delegateModel
-                            when classType is DelegateModel delegateType:
+                            when classType is CSharpDelegateModel delegateType:
                         {
                             delegateModel.Parameters =
                                 ConvertParameters(delegateType.ParameterTypes, projectModel);
@@ -486,7 +484,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
                             break;
                         }
-                        case Models.EnumModel enumModel when classType is EnumModel enumType:
+                        case Models.EnumModel enumModel when classType is CSharpEnumModel enumType:
                             enumModel.Labels = ConvertEnumLabels(enumType.Labels, projectModel).ToList();
                             break;
                     }
@@ -524,7 +522,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             Type = ConvertEntityType(returnValueType.Type, projectModel),
             Attributes = ConvertAttributes(returnValueType.Attributes, projectModel),
             Modifier =
-                returnValueType is Honeydew.Models.CSharp.ReturnValueModel returnValue ? returnValue.Modifier : "",
+                returnValueType is Honeydew.Models.CSharp.CSharpReturnValueModel returnValue ? returnValue.Modifier : "",
         };
     }
 
@@ -622,7 +620,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             return new List<EntityModel>();
         }
 
-        var entityTypeModel = FullTypeNameBuilder.CreateEntityTypeModel(entityName);
+        var entityTypeModel = CSharpFullTypeNameBuilder.CreateEntityTypeModel(entityName);
         return SearchEntityByName(entityTypeModel.FullType.Name, entityTypeModel.FullType.ContainedTypes.Count,
             projectModel);
     }
@@ -1255,9 +1253,9 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                 .Select(parameter =>
                 {
                     var indexOfNullable = parameter.IndexOf('?');
-                    return new Honeydew.Models.CSharp.ParameterModel
+                    return new Honeydew.Models.CSharp.CSharpParameterModel
                     {
-                        Type = new EntityTypeModel
+                        Type = new CSharpEntityTypeModel
                         {
                             Name = indexOfNullable >= 0 ? parameter[..indexOfNullable] : parameter
                         },
@@ -1361,7 +1359,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                 Attributes = ConvertAttributes(parameterType.Attributes, projectModel),
             };
 
-            if (parameterType is Honeydew.Models.CSharp.ParameterModel param)
+            if (parameterType is Honeydew.Models.CSharp.CSharpParameterModel param)
             {
                 parameterModel.Modifier = ConvertParameterModifier(param.Modifier);
                 parameterModel.DefaultValue = param.DefaultValue;
@@ -1402,7 +1400,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
     private EntityType ConvertEntityType(string typeName, ProjectModel projectModel)
     {
-        return ConvertEntityType(FullTypeNameBuilder.CreateEntityTypeModel(typeName), projectModel);
+        return ConvertEntityType(CSharpFullTypeNameBuilder.CreateEntityTypeModel(typeName), projectModel);
     }
 
     private EntityType ConvertEntityType(IEntityType type, ProjectModel projectModel)
@@ -1453,7 +1451,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
     private ClassModel CreateClassModel(string className)
     {
-        var entityTypeModel = FullTypeNameBuilder.CreateEntityTypeModel(className);
+        var entityTypeModel = CSharpFullTypeNameBuilder.CreateEntityTypeModel(className);
 
         var entityName = entityTypeModel.FullType.Name;
         var genericParameterCount = entityTypeModel.FullType.ContainedTypes.Count;

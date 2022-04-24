@@ -2,7 +2,7 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record MethodModel : IMethodTypeWithLocalFunctions
+public record CSharpMethodModel : IMethodTypeWithLocalFunctions
 {
     public string Name { get; set; } = "";
 

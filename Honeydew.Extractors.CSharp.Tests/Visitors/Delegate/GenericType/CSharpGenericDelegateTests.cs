@@ -44,7 +44,7 @@ public class CSharpGenericDelegateTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (DelegateModel)classTypes[0];
+        var classModel = (CSharpDelegateModel)classTypes[0];
 
         Assert.Equal("Namespace1.Delegate1<T>", classModel.Name);
         Assert.Equal(1, classModel.GenericParameters.Count);
@@ -62,7 +62,7 @@ public class CSharpGenericDelegateTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (DelegateModel)classTypes[0];
+        var classModel = (CSharpDelegateModel)classTypes[0];
 
         Assert.Equal("Namespace1.Delegate1<T,R,K>", classModel.Name);
         Assert.Equal(3, classModel.GenericParameters.Count);
@@ -82,7 +82,7 @@ public class CSharpGenericDelegateTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (DelegateModel)classTypes[0];
+        var classModel = (CSharpDelegateModel)classTypes[0];
 
         Assert.Equal("Namespace1.Delegate1<out T, in TR, in TK>", classModel.Name);
         Assert.Equal(3, classModel.GenericParameters.Count);
@@ -103,7 +103,7 @@ public class CSharpGenericDelegateTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel1 = (DelegateModel)classTypes[0];
+        var classModel1 = (CSharpDelegateModel)classTypes[0];
 
         Assert.Equal("Namespace1.Delegate1<out T, in TK, in TR, in TP>", classModel1.Name);
         Assert.Equal(4, classModel1.GenericParameters.Count);
@@ -146,7 +146,7 @@ public class CSharpGenericDelegateTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (DelegateModel)classTypes[0];
+        var classModel = (CSharpDelegateModel)classTypes[0];
 
         Assert.Equal("Namespace1.Delegate1<out T, in TR, in TK>", classModel.Name);
         Assert.Equal(3, classModel.GenericParameters.Count);

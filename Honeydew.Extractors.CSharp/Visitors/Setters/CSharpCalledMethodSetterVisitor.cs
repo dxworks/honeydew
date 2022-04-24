@@ -29,7 +29,7 @@ public class CSharpCalledMethodSetterVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public IMethodCallType CreateWrappedType() => new MethodCallModel();
+    public IMethodCallType CreateWrappedType() => new CSharpMethodCallModel();
 
     public IEnumerable<InvocationExpressionSyntax> GetWrappedSyntaxNodes(MethodDeclarationSyntax syntaxNode)
     {

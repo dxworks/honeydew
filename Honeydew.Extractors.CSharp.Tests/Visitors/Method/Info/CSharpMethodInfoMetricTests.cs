@@ -62,7 +62,7 @@ public class CSharpMethodInfoMetricTests
 
         foreach (var classType in classTypes)
         {
-            var classModel = (ClassModel)classType;
+            var classModel = (CSharpClassModel)classType;
 
             Assert.Empty(classModel.Methods);
         }
@@ -78,13 +78,13 @@ public class CSharpMethodInfoMetricTests
 
         Assert.Equal(2, classTypes.Count);
 
-        var classModel1 = (ClassModel)classTypes[0];
+        var classModel1 = (CSharpClassModel)classTypes[0];
         Assert.Equal(3, classModel1.Methods.Count);
 
         Assert.Equal("G", classModel1.Methods[0].Name);
         Assert.Equal("int", classModel1.Methods[0].ReturnValue.Type.Name);
         Assert.Equal(1, classModel1.Methods[0].ParameterTypes.Count);
-        var parameterModel = (ParameterModel)classModel1.Methods[0].ParameterTypes[0];
+        var parameterModel = (CSharpParameterModel)classModel1.Methods[0].ParameterTypes[0];
         Assert.Equal("float", parameterModel.Type.Name);
         Assert.Equal("", parameterModel.Modifier);
         Assert.Null(parameterModel.DefaultValue);
@@ -106,7 +106,7 @@ public class CSharpMethodInfoMetricTests
         Assert.Equal("abstract", classModel1.Methods[2].Modifier);
         Assert.Empty(classModel1.Methods[2].CalledMethods);
 
-        var classModel2 = (ClassModel)classTypes[1];
+        var classModel2 = (CSharpClassModel)classTypes[1];
         Assert.Equal(2, classModel2.Methods.Count);
 
         Assert.Equal("X", classModel2.Methods[0].Name);
@@ -132,6 +132,6 @@ public class CSharpMethodInfoMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        Assert.Equal("null", ((ParameterModel)((ClassModel)classTypes[0]).Methods[0].ParameterTypes[0]).DefaultValue);
+        Assert.Equal("null", ((CSharpParameterModel)((CSharpClassModel)classTypes[0]).Methods[0].ParameterTypes[0]).DefaultValue);
     }
 }

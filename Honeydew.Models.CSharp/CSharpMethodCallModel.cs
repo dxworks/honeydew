@@ -2,13 +2,13 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record MethodCallModel : IMethodCallType
+public record CSharpMethodCallModel : IMethodCallType
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
 
-    public string DefinitionClassName { get; set; }
+    public string DefinitionClassName { get; set; } = "";
 
-    public string LocationClassName { get; set; }
+    public string LocationClassName { get; set; } = "";
 
     public IList<string> MethodDefinitionNames { get; set; } = new List<string>();
 

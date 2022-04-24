@@ -59,7 +59,7 @@ public class CSharpAccessorMethodsTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(3, classModel.Properties.Count);
         foreach (var property in classModel.Properties)
@@ -79,7 +79,7 @@ public class CSharpAccessorMethodsTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(2, classModel.Properties.Count);
         foreach (var property in classModel.Properties)
@@ -99,7 +99,7 @@ public class CSharpAccessorMethodsTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(2, classModel.Properties.Count);
         foreach (var property in classModel.Properties)
@@ -119,7 +119,7 @@ public class CSharpAccessorMethodsTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(2, classModel.Properties.Count);
         foreach (var property in classModel.Properties)
@@ -140,7 +140,7 @@ public class CSharpAccessorMethodsTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(2, classModel.Properties.Count);
         foreach (var property in classModel.Properties)
@@ -161,7 +161,7 @@ public class CSharpAccessorMethodsTests
 
         Assert.Equal(2, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(1, classModel.Properties.Count);
         var property = classModel.Properties[0];
@@ -201,7 +201,7 @@ public class CSharpAccessorMethodsTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(2, classModel.Properties.Count);
 

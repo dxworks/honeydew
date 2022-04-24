@@ -19,7 +19,7 @@ public class CSharpEnumLabelsSetterVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public IEnumLabelType CreateWrappedType() => new EnumLabelType();
+    public IEnumLabelType CreateWrappedType() => new CSharpEnumLabelType();
 
     public IEnumerable<EnumMemberDeclarationSyntax> GetWrappedSyntaxNodes(EnumDeclarationSyntax syntaxNode)
     {

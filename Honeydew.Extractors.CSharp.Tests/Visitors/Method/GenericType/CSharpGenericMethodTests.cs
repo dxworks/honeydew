@@ -71,7 +71,7 @@ public class CSharpGenericMethodTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal("Namespace1.Class1", classModel.Name);
         Assert.Equal("Method", classModel.Methods[0].Name);
@@ -101,7 +101,7 @@ public class CSharpGenericMethodTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal("Method", classModel.Methods[0].Name);
         Assert.Equal(2, classModel.Methods[0].GenericParameters.Count);
@@ -118,7 +118,7 @@ public class CSharpGenericMethodTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         var methodModel = classModel.Methods[0];
 
         Assert.Equal("Method", methodModel.Name);
@@ -163,7 +163,7 @@ public class CSharpGenericMethodTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         var methodModel = classModel.Methods[0];
 
         Assert.Equal("Method", methodModel.Name);
@@ -188,8 +188,8 @@ public class CSharpGenericMethodTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
-        var methodModel = (MethodModel)classModel.Methods[0];
+        var classModel = (CSharpClassModel)classTypes[0];
+        var methodModel = (CSharpMethodModel)classModel.Methods[0];
 
         var localFunctions = new[]
         {
@@ -249,8 +249,8 @@ public class CSharpGenericMethodTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
-        var methodModel = (MethodModel)classModel.Methods[0];
+        var classModel = (CSharpClassModel)classTypes[0];
+        var methodModel = (CSharpMethodModel)classModel.Methods[0];
 
         var localFunctions = new[]
         {

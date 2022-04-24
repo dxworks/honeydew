@@ -71,7 +71,7 @@ public class CSharpCalledMethodsInConstructorTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(1, classModel.Constructors.Count);
         Assert.Equal(2, classModel.Methods.Count);
 
@@ -79,7 +79,7 @@ public class CSharpCalledMethodsInConstructorTests
         Assert.Equal("Function", functionMethod.Name);
         Assert.Equal("void", functionMethod.ReturnValue.Type.Name);
         Assert.Equal(1, functionMethod.ParameterTypes.Count);
-        var functionMethodParameter = (ParameterModel)functionMethod.ParameterTypes[0];
+        var functionMethodParameter = (CSharpParameterModel)functionMethod.ParameterTypes[0];
         Assert.Equal("int", functionMethodParameter.Type.Name);
         Assert.Equal("", functionMethodParameter.Modifier);
         Assert.Null(functionMethodParameter.DefaultValue);
@@ -91,7 +91,7 @@ public class CSharpCalledMethodsInConstructorTests
         Assert.Equal("Compute", computeMethod.Name);
         Assert.Equal("int", computeMethod.ReturnValue.Type.Name);
         Assert.Equal(1, computeMethod.ParameterTypes.Count);
-        var computeMethodParameter = (ParameterModel)computeMethod.ParameterTypes[0];
+        var computeMethodParameter = (CSharpParameterModel)computeMethod.ParameterTypes[0];
         Assert.Equal("int", computeMethodParameter.Type.Name);
         Assert.Equal("", computeMethodParameter.Modifier);
         Assert.Null(computeMethodParameter.DefaultValue);
@@ -102,7 +102,7 @@ public class CSharpCalledMethodsInConstructorTests
         var intArgConstructor = classModel.Constructors[0];
         Assert.Equal("Foo", intArgConstructor.Name);
         Assert.Equal(1, intArgConstructor.ParameterTypes.Count);
-        var intArgConstructorParameter = (ParameterModel)intArgConstructor.ParameterTypes[0];
+        var intArgConstructorParameter = (CSharpParameterModel)intArgConstructor.ParameterTypes[0];
         Assert.Equal("int", intArgConstructorParameter.Type.Name);
         Assert.Equal("", intArgConstructorParameter.Modifier);
         Assert.Null(intArgConstructorParameter.DefaultValue);
@@ -115,7 +115,7 @@ public class CSharpCalledMethodsInConstructorTests
         Assert.Equal("TopLevel.Foo", intArgConstructor.CalledMethods[0].LocationClassName);
         Assert.Empty(intArgConstructor.CalledMethods[0].MethodDefinitionNames);
         Assert.Equal(1, intArgConstructor.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel1 = (ParameterModel)intArgConstructor.CalledMethods[0].ParameterTypes[0];
+        var parameterModel1 = (CSharpParameterModel)intArgConstructor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("int", parameterModel1.Type.Name);
         Assert.Equal("", parameterModel1.Modifier);
         Assert.Null(parameterModel1.DefaultValue);
@@ -126,7 +126,7 @@ public class CSharpCalledMethodsInConstructorTests
         Assert.Equal("TopLevel.Foo", methodSignatureType.LocationClassName);
         Assert.Empty(methodSignatureType.MethodDefinitionNames);
         Assert.Equal(1, methodSignatureType.ParameterTypes.Count);
-        var parameterModel2 = (ParameterModel)methodSignatureType.ParameterTypes[0];
+        var parameterModel2 = (CSharpParameterModel)methodSignatureType.ParameterTypes[0];
         Assert.Equal("int", parameterModel2.Type.Name);
         Assert.Equal("", parameterModel2.Modifier);
         Assert.Null(parameterModel2.DefaultValue);

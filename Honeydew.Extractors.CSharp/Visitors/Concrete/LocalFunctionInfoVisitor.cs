@@ -33,7 +33,7 @@ public class LocalFunctionInfoVisitor : CompositeVisitor<IMethodTypeWithLocalFun
         foreach (var localFunctionStatementSyntax in syntaxNode.Body.ChildNodes()
                      .OfType<LocalFunctionStatementSyntax>())
         {
-            IMethodTypeWithLocalFunctions localFunction = new MethodModel();
+            IMethodTypeWithLocalFunctions localFunction = new CSharpMethodModel();
             foreach (var visitor in GetContainedVisitors())
             {
                 try

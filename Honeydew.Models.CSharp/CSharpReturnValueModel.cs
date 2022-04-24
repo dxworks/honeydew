@@ -2,13 +2,11 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record ParameterModel : IParameterType
+public record CSharpReturnValueModel : IReturnValueType
 {
     public IEntityType Type { get; set; }
 
     public string Modifier { get; set; } = "";
-
-    public string? DefaultValue { get; set; }
 
     public bool IsNullable { get; set; }
 

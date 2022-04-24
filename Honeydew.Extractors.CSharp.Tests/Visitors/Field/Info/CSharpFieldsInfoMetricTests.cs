@@ -49,7 +49,7 @@ public class CSharpFieldsInfoMetricTests
 
         foreach (var classType in classTypes)
         {
-            var classModel = (ClassModel)classType;
+            var classModel = (CSharpClassModel)classType;
             Assert.Empty(classModel.Fields);
         }
     }
@@ -66,7 +66,7 @@ public class CSharpFieldsInfoMetricTests
         Assert.Equal(1, classTypes.Count);
 
 
-        var fieldTypes = ((ClassModel)classTypes[0]).Fields;
+        var fieldTypes = ((CSharpClassModel)classTypes[0]).Fields;
 
         Assert.Equal(3, fieldTypes.Count);
 
@@ -112,7 +112,7 @@ public class CSharpFieldsInfoMetricTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var fieldTypes = ((ClassModel)classTypes[0]).Fields;
+        var fieldTypes = ((CSharpClassModel)classTypes[0]).Fields;
 
         Assert.Equal(5, fieldTypes.Count);
 
@@ -170,7 +170,7 @@ public class CSharpFieldsInfoMetricTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var fieldTypes = ((ClassModel)classTypes[0]).Fields;
+        var fieldTypes = ((CSharpClassModel)classTypes[0]).Fields;
 
         Assert.Equal(4, fieldTypes.Count);
 
@@ -221,7 +221,7 @@ public class CSharpFieldsInfoMetricTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var fieldTypes = ((ClassModel)classTypes[0]).Fields;
+        var fieldTypes = ((CSharpClassModel)classTypes[0]).Fields;
 
         Assert.Equal(5, fieldTypes.Count);
 

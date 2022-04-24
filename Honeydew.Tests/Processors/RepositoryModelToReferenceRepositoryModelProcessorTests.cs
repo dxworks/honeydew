@@ -11,14 +11,9 @@ using Honeydew.ScriptBeePlugin.Loaders;
 using Honeydew.ScriptBeePlugin.Models;
 using Moq;
 using Xunit;
-using ClassModel = Honeydew.Models.CSharp.ClassModel;
-using FieldModel = Honeydew.Models.CSharp.FieldModel;
-using MethodModel = Honeydew.Models.CSharp.MethodModel;
 using NamespaceModel = Honeydew.Models.NamespaceModel;
-using ParameterModel = Honeydew.Models.CSharp.ParameterModel;
 using ProjectModel = Honeydew.Models.ProjectModel;
 using RepositoryModel = Honeydew.Models.RepositoryModel;
-using ReturnValueModel = Honeydew.Models.CSharp.ReturnValueModel;
 using SolutionModel = Honeydew.Models.SolutionModel;
 
 namespace Honeydew.Tests.Processors;
@@ -159,18 +154,18 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
                     Name = "Project1",
                     CompilationUnits =
                     {
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             FilePath = "Project1.Services",
                             ClassTypes = new List<IClassType>
                             {
-                                new ClassModel
+                                new CSharpClassModel
                                 {
                                     Name = "Project1.Services.CreateService",
                                     FilePath = "validPathToProject/Project1/Services/CreateService.cs",
                                     ContainingNamespaceName = "Project1.Services",
                                 },
-                                new ClassModel
+                                new CSharpClassModel
                                 {
                                     Name = "Project1.Services.RetrieveService",
                                     FilePath = "validPathToProject/Project1/Services/RetrieveService.cs",
@@ -188,12 +183,12 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
                                 }
                             }
                         },
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             FilePath = "Project1.Models",
                             ClassTypes = new List<IClassType>
                             {
-                                new ClassModel
+                                new CSharpClassModel
                                 {
                                     Name = "Project1.Models.MyModel",
                                     FilePath = "validPathToProject/Project1/Models/MyModel.cs",
@@ -261,21 +256,21 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
                     Name = "Project1",
                     CompilationUnits =
                     {
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             FilePath = "Project1.Services",
                             ClassTypes = new List<IClassType>
                             {
-                                new ClassModel
+                                new CSharpClassModel
                                 {
                                     Name = "Project1.Services.CreateService",
                                     FilePath = "validPathToProject/Project1/Services/CreateService.cs",
                                     ContainingNamespaceName = "Project1.Services",
                                     BaseTypes = new List<IBaseType>
                                     {
-                                        new BaseTypeModel
+                                        new CSharpBaseTypeModel
                                         {
-                                            Type = new EntityTypeModel
+                                            Type = new CSharpEntityTypeModel
                                             {
                                                 Name = "object"
                                             },
@@ -284,44 +279,44 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
                                     },
                                     Methods = new List<IMethodType>
                                     {
-                                        new MethodModel
+                                        new CSharpMethodModel
                                         {
                                             Name = "Create",
                                             Modifier = "",
                                             AccessModifier = "public",
-                                            ReturnValue = new ReturnValueModel
+                                            ReturnValue = new CSharpReturnValueModel
                                             {
-                                                Type = new EntityTypeModel
+                                                Type = new CSharpEntityTypeModel
                                                 {
                                                     Name = "Project1.Models.MyModel"
                                                 }
                                             },
                                         },
-                                        new MethodModel
+                                        new CSharpMethodModel
                                         {
                                             Name = "Convert",
                                             Modifier = "",
                                             AccessModifier = "public",
                                             ParameterTypes =
                                             {
-                                                new ParameterModel
+                                                new CSharpParameterModel
                                                 {
-                                                    Type = new EntityTypeModel
+                                                    Type = new CSharpEntityTypeModel
                                                     {
                                                         Name = "Project1.Models.MyModel"
                                                     }
                                                 }
                                             },
-                                            ReturnValue = new ReturnValueModel
+                                            ReturnValue = new CSharpReturnValueModel
                                             {
-                                                Type = new EntityTypeModel
+                                                Type = new CSharpEntityTypeModel
                                                 {
                                                     Name = "Project1.Models.MyModel"
                                                 }
                                             },
                                             CalledMethods =
                                             {
-                                                new MethodCallModel
+                                                new CSharpMethodCallModel
                                                 {
                                                     LocationClassName = "Project1.Services.CreateService",
                                                     DefinitionClassName = "Project1.Services.CreateService",
@@ -329,40 +324,40 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
                                                 }
                                             }
                                         },
-                                        new MethodModel
+                                        new CSharpMethodModel
                                         {
                                             Name = "Convert",
                                             Modifier = "",
                                             AccessModifier = "public",
                                             ParameterTypes =
                                             {
-                                                new ParameterModel
+                                                new CSharpParameterModel
                                                 {
-                                                    Type = new EntityTypeModel
+                                                    Type = new CSharpEntityTypeModel
                                                     {
                                                         Name = "Project1.Models.OtherModel"
                                                     }
                                                 }
                                             },
-                                            ReturnValue = new ReturnValueModel
+                                            ReturnValue = new CSharpReturnValueModel
                                             {
-                                                Type = new EntityTypeModel
+                                                Type = new CSharpEntityTypeModel
                                                 {
                                                     Name = "Project1.Models.MyModel"
                                                 }
                                             },
                                             CalledMethods =
                                             {
-                                                new MethodCallModel
+                                                new CSharpMethodCallModel
                                                 {
                                                     LocationClassName = "Project1.Services.CreateService",
                                                     DefinitionClassName = "Project1.Services.CreateService",
                                                     Name = "Convert",
                                                     ParameterTypes =
                                                     {
-                                                        new ParameterModel
+                                                        new CSharpParameterModel
                                                         {
-                                                            Type = new EntityTypeModel
+                                                            Type = new CSharpEntityTypeModel
                                                             {
                                                                 Name = "Project1.Models.MyModel"
                                                             }
@@ -371,53 +366,53 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
                                                 }
                                             }
                                         },
-                                        new MethodModel
+                                        new CSharpMethodModel
                                         {
                                             Name = "Process",
                                             Modifier = "",
                                             AccessModifier = "public",
                                             ParameterTypes =
                                             {
-                                                new ParameterModel
+                                                new CSharpParameterModel
                                                 {
-                                                    Type = new EntityTypeModel
+                                                    Type = new CSharpEntityTypeModel
                                                     {
                                                         Name = "Project1.Models.MyModel",
                                                     }
                                                 },
-                                                new ParameterModel
+                                                new CSharpParameterModel
                                                 {
-                                                    Type = new EntityTypeModel
+                                                    Type = new CSharpEntityTypeModel
                                                     {
                                                         Name = "Project1.Models.MyModel"
                                                     }
                                                 }
                                             },
-                                            ReturnValue = new ReturnValueModel
+                                            ReturnValue = new CSharpReturnValueModel
                                             {
-                                                Type = new EntityTypeModel
+                                                Type = new CSharpEntityTypeModel
                                                 {
                                                     Name = "Project1.Models.MyModel"
                                                 }
                                             },
                                             CalledMethods =
                                             {
-                                                new MethodCallModel
+                                                new CSharpMethodCallModel
                                                 {
                                                     LocationClassName = "Project1.Services.CreateService",
                                                     DefinitionClassName = "Project1.Services.CreateService",
                                                     Name = "Create"
                                                 },
-                                                new MethodCallModel
+                                                new CSharpMethodCallModel
                                                 {
                                                     LocationClassName = "Project1.Services.CreateService",
                                                     DefinitionClassName = "Project1.Services.CreateService",
                                                     Name = "Convert",
                                                     ParameterTypes =
                                                     {
-                                                        new ParameterModel
+                                                        new CSharpParameterModel
                                                         {
-                                                            Type = new EntityTypeModel
+                                                            Type = new CSharpEntityTypeModel
                                                             {
                                                                 Name = "Project1.Models.OtherModel"
                                                             }
@@ -430,18 +425,18 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
                                 },
                             }
                         },
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             FilePath = "Project1.Models",
                             ClassTypes = new List<IClassType>
                             {
-                                new ClassModel
+                                new CSharpClassModel
                                 {
                                     Name = "Project1.Models.MyModel",
                                     FilePath = "validPathToProject/Project1/Models/MyModel.cs",
                                     ContainingNamespaceName = "Project1.Models",
                                 },
-                                new ClassModel
+                                new CSharpClassModel
                                 {
                                     Name = "Project1.Models.OtherModel",
                                     FilePath = "validPathToProject/Project1/Models/OtherModel.cs",
@@ -615,7 +610,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
                     Name = "Project1",
                     CompilationUnits =
                     {
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             FilePath = "Project1.Services",
                             ClassTypes = classModels,
@@ -767,22 +762,22 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
                     Name = "Project1",
                     CompilationUnits =
                     {
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             FilePath = "Project1.Services",
                             ClassTypes = new List<IClassType>
                             {
-                                new ClassModel
+                                new CSharpClassModel
                                 {
                                     Name = "Project1.Services.CreateService",
                                     FilePath = "validPathToProject/Project1/Services/CreateService.cs",
                                     ContainingNamespaceName = "Project1.Services",
                                     Fields = new List<IFieldType>
                                     {
-                                        new FieldModel
+                                        new CSharpFieldModel
                                         {
                                             Name = "Model",
-                                            Type = new EntityTypeModel
+                                            Type = new CSharpEntityTypeModel
                                             {
                                                 Name = "Project1.Models.MyModel",
                                             },
@@ -793,21 +788,21 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
                                 },
                             }
                         },
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             FilePath = "Project1.Models",
                             ClassTypes = new List<IClassType>
                             {
-                                new ClassModel
+                                new CSharpClassModel
                                 {
                                     Name = "Project1.Models.MyModel",
                                     FilePath = "validPathToProject/Project1/Models/MyModel.cs",
                                     ContainingNamespaceName = "Project1.Models",
                                     BaseTypes = new List<IBaseType>
                                     {
-                                        new BaseTypeModel
+                                        new CSharpBaseTypeModel
                                         {
-                                            Type = new EntityTypeModel
+                                            Type = new CSharpEntityTypeModel
                                             {
                                                 Name = "object"
                                             },
@@ -816,20 +811,20 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
                                     },
                                     Fields = new List<IFieldType>
                                     {
-                                        new FieldModel
+                                        new CSharpFieldModel
                                         {
                                             Name = "_value",
-                                            Type = new EntityTypeModel
+                                            Type = new CSharpEntityTypeModel
                                             {
                                                 Name = "int",
                                             },
                                             Modifier = "readonly",
                                             AccessModifier = "private"
                                         },
-                                        new FieldModel
+                                        new CSharpFieldModel
                                         {
                                             Name = "ValueEvent",
-                                            Type = new EntityTypeModel
+                                            Type = new CSharpEntityTypeModel
                                             {
                                                 Name = "int",
                                             },
@@ -839,7 +834,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
                                         }
                                     }
                                 },
-                                new ClassModel
+                                new CSharpClassModel
                                 {
                                     Name = "Project1.Models.OtherModel",
                                     FilePath = "validPathToProject/Project1/Models/OtherModel.cs",

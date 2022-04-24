@@ -21,7 +21,7 @@ public class CSharpAccessorMethodSetterPropertyVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public IAccessorMethodType CreateWrappedType() => new AccessorMethodModel();
+    public IAccessorMethodType CreateWrappedType() => new CSharpAccessorMethodModel();
 
     IEnumerable<AccessorDeclarationSyntax>
         ISetterVisitor<BasePropertyDeclarationSyntax, SemanticModel, IPropertyType, AccessorDeclarationSyntax,

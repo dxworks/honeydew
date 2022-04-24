@@ -20,7 +20,7 @@ public class ParameterInfoVisitor : IExtractionVisitor<ParameterSyntax, Semantic
         modelType.Type = parameterInfo.Type;
         modelType.IsNullable = parameterInfo.IsNullable;
 
-        if (modelType is not ParameterModel parameterModel)
+        if (modelType is not CSharpParameterModel parameterModel)
         {
             return modelType;
         }

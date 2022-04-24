@@ -2,9 +2,9 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record BaseTypeModel : IBaseType
+public record CSharpBaseTypeModel : IBaseType
 {
     public IEntityType Type { get; set; }
 
-    public string Kind { get; set; }
+    public string Kind { get; set; } = "";
 }

@@ -51,7 +51,7 @@ public class CSharpEnumAttributesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var enumModel = (EnumModel)classTypes[0];
+        var enumModel = (CSharpEnumModel)classTypes[0];
         Assert.Equal(1, enumModel.Attributes.Count);
         Assert.Equal("type", enumModel.Attributes[0].Target);
         Assert.Equal("System.ObsoleteAttribute", enumModel.Attributes[0].Name);
@@ -73,7 +73,7 @@ public class CSharpEnumAttributesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var enumModel = (EnumModel)classTypes[0];
+        var enumModel = (CSharpEnumModel)classTypes[0];
         Assert.Empty(enumModel.Attributes);
 
         var label1 = enumModel.Labels[0];

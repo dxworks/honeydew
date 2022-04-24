@@ -165,7 +165,7 @@ public class CSharpCompilationUnitImportsMetricTests
 
         var compilationUnit = _factExtractor.Extract(syntaxTree, semanticModel);
 
-        var usingModels = compilationUnit.Imports.Cast<UsingModel>().ToList();
+        var usingModels = compilationUnit.Imports.Cast<CSharpUsingModel>().ToList();
         Assert.Equal(9, usingModels.Count);
 
         Assert.NotNull(usingModels.SingleOrDefault(model => model.Name == "System" && !model.IsStatic));

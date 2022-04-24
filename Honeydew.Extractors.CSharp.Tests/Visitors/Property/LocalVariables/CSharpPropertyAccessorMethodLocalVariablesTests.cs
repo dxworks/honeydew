@@ -54,7 +54,7 @@ public class CSharpPropertyAccessorMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(3, classModel.Properties.Count);
 
         foreach (var propertyType in classModel.Properties)
@@ -78,7 +78,7 @@ public class CSharpPropertyAccessorMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(3, classModel.Properties.Count);
 
         foreach (var property in classModel.Properties)
@@ -116,7 +116,7 @@ public class CSharpPropertyAccessorMethodLocalVariablesTests
         var syntaxTree = _syntacticModelCreator.Create(fileContent);
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(3, classModel.Properties.Count);
 
@@ -141,7 +141,7 @@ public class CSharpPropertyAccessorMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(3, classModel.Properties.Count);
 
         foreach (var property in classModel.Properties)
@@ -164,7 +164,7 @@ public class CSharpPropertyAccessorMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         foreach (var propertyType in classModel.Properties)
         {
@@ -186,7 +186,7 @@ public class CSharpPropertyAccessorMethodLocalVariablesTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         foreach (var propertyType in classModel.Properties)
         {

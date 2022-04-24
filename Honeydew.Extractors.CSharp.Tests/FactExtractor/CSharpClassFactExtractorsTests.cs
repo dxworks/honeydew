@@ -149,7 +149,7 @@ public class CSharpClassFactExtractorsTests
 
         foreach (var classType in classTypes)
         {
-            var classModel = (ClassModel)classType;
+            var classModel = (CSharpClassModel)classType;
             Assert.Equal(entityType, classModel.ClassType);
             Assert.Equal("Models.Main.Items", classModel.ContainingNamespaceName);
             Assert.Equal("Models.Main.Items.MainItem", classModel.Name);
@@ -182,7 +182,7 @@ public class CSharpClassFactExtractorsTests
 
         foreach (var classType in classTypes)
         {
-            var classModel = (ClassModel)classType;
+            var classModel = (CSharpClassModel)classType;
             Assert.Equal("Models.Main.Items", classModel.ContainingNamespaceName);
             Assert.Equal("Models.Main.Items.MainItem", classModel.Name);
             Assert.Equal(accessModifier, classModel.AccessModifier);
@@ -217,20 +217,20 @@ public class CSharpClassFactExtractorsTests
 
         foreach (var classType in classTypes)
         {
-            var classModel = (ClassModel)classType;
+            var classModel = (CSharpClassModel)classType;
             Assert.Equal("Models.Main.Items", classModel.ContainingNamespaceName);
             Assert.Equal("Models.Main.Items.MainItem", classModel.Name);
 
             Assert.Equal(1, classModel.Methods.Count);
             Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
-            var parameterModel = (ParameterModel)classModel.Methods[0].ParameterTypes[0];
+            var parameterModel = (CSharpParameterModel)classModel.Methods[0].ParameterTypes[0];
             Assert.Equal("int", parameterModel.Type.Name);
             Assert.Equal(parameterModifier, parameterModel.Modifier);
             Assert.Null(parameterModel.DefaultValue);
 
             Assert.Equal(1, classModel.Constructors.Count);
             Assert.Equal(1, classModel.Constructors[0].ParameterTypes.Count);
-            var parameterModelConstructor = (ParameterModel)classModel.Constructors[0].ParameterTypes[0];
+            var parameterModelConstructor = (CSharpParameterModel)classModel.Constructors[0].ParameterTypes[0];
             Assert.Equal("int", parameterModelConstructor.Type.Name);
             Assert.Equal(parameterModifier, parameterModelConstructor.Modifier);
             Assert.Null(parameterModelConstructor.DefaultValue);
@@ -250,12 +250,12 @@ public class CSharpClassFactExtractorsTests
 
         foreach (var classType in classTypes)
         {
-            var classModel = (ClassModel)classType;
+            var classModel = (CSharpClassModel)classType;
             Assert.Equal("Models.Main.Items", classModel.ContainingNamespaceName);
             Assert.Equal("Models.Main.Items.MainItem", classModel.Name);
             Assert.Equal(1, classModel.Methods.Count);
             Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
-            var parameterModel = (ParameterModel)classModel.Methods[0].ParameterTypes[0];
+            var parameterModel = (CSharpParameterModel)classModel.Methods[0].ParameterTypes[0];
             Assert.Equal("int", parameterModel.Type.Name);
             Assert.Equal("this", parameterModel.Modifier);
             Assert.Null(parameterModel.DefaultValue);
@@ -276,20 +276,20 @@ public class CSharpClassFactExtractorsTests
 
         foreach (var classType in classTypes)
         {
-            var classModel = (ClassModel)classType;
+            var classModel = (CSharpClassModel)classType;
             Assert.Equal("Models.Main.Items", classModel.ContainingNamespaceName);
             Assert.Equal("Models.Main.Items.MainItem", classModel.Name);
 
             Assert.Equal(1, classModel.Methods.Count);
             Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
-            var parameterModel = (ParameterModel)classModel.Methods[0].ParameterTypes[0];
+            var parameterModel = (CSharpParameterModel)classModel.Methods[0].ParameterTypes[0];
             Assert.Equal("int[]", parameterModel.Type.Name);
             Assert.Equal("params", parameterModel.Modifier);
             Assert.Null(parameterModel.DefaultValue);
 
             Assert.Equal(1, classModel.Constructors.Count);
             Assert.Equal(1, classModel.Constructors[0].ParameterTypes.Count);
-            var parameterModelConstructor = (ParameterModel)classModel.Constructors[0].ParameterTypes[0];
+            var parameterModelConstructor = (CSharpParameterModel)classModel.Constructors[0].ParameterTypes[0];
             Assert.Equal("int[]", parameterModelConstructor.Type.Name);
             Assert.Equal("params", parameterModelConstructor.Modifier);
             Assert.Null(parameterModelConstructor.DefaultValue);
@@ -310,19 +310,19 @@ public class CSharpClassFactExtractorsTests
 
         foreach (var classType in classTypes)
         {
-            var classModel = (ClassModel)classType;
+            var classModel = (CSharpClassModel)classType;
             Assert.Equal(6, classModel.Methods.Count);
 
             Assert.Empty(classModel.Methods[0].ParameterTypes);
 
             Assert.Equal(1, classModel.Methods[1].ParameterTypes.Count);
-            var method1Parameter = (ParameterModel)classModel.Methods[1].ParameterTypes[0];
+            var method1Parameter = (CSharpParameterModel)classModel.Methods[1].ParameterTypes[0];
             Assert.Equal("object", method1Parameter.Type.Name);
             Assert.Equal("", method1Parameter.Modifier);
             Assert.Equal("null", method1Parameter.DefaultValue);
 
             Assert.Equal(1, classModel.Methods[2].ParameterTypes.Count);
-            var method2Parameter = (ParameterModel)classModel.Methods[2].ParameterTypes[0];
+            var method2Parameter = (CSharpParameterModel)classModel.Methods[2].ParameterTypes[0];
             Assert.Equal("int", method2Parameter.Type.Name);
             Assert.Equal("", method2Parameter.Modifier);
             Assert.Equal("15", method2Parameter.DefaultValue);
@@ -330,30 +330,30 @@ public class CSharpClassFactExtractorsTests
             Assert.Equal(2, classModel.Methods[3].ParameterTypes.Count);
             foreach (var parameterType in classModel.Methods[3].ParameterTypes)
             {
-                var parameterModel = (ParameterModel)parameterType;
+                var parameterModel = (CSharpParameterModel)parameterType;
                 Assert.Equal("int", parameterModel.Type.Name);
                 Assert.Equal("", parameterModel.Modifier);
                 Assert.Null(parameterModel.DefaultValue);
             }
 
             Assert.Equal(3, classModel.Methods[4].ParameterTypes.Count);
-            var method4Parameter0 = (ParameterModel)classModel.Methods[4].ParameterTypes[0];
+            var method4Parameter0 = (CSharpParameterModel)classModel.Methods[4].ParameterTypes[0];
             Assert.Equal("int", method4Parameter0.Type.Name);
             Assert.Equal("", method4Parameter0.Modifier);
             Assert.Null(method4Parameter0.DefaultValue);
 
-            var method4Parameter1 = (ParameterModel)classModel.Methods[4].ParameterTypes[1];
+            var method4Parameter1 = (CSharpParameterModel)classModel.Methods[4].ParameterTypes[1];
             Assert.Equal("int", method4Parameter1.Type.Name);
             Assert.Equal("in", method4Parameter1.Modifier);
             Assert.Equal("15", method4Parameter1.DefaultValue);
 
-            var method4Parameter2 = (ParameterModel)classModel.Methods[4].ParameterTypes[2];
+            var method4Parameter2 = (CSharpParameterModel)classModel.Methods[4].ParameterTypes[2];
             Assert.Equal("string", method4Parameter2.Type.Name);
             Assert.Equal("", method4Parameter2.Modifier);
             Assert.Equal("\"\"", method4Parameter2.DefaultValue);
 
             Assert.Equal(1, classModel.Methods[5].ParameterTypes.Count);
-            var method5Parameter = (ParameterModel)classModel.Methods[5].ParameterTypes[0];
+            var method5Parameter = (CSharpParameterModel)classModel.Methods[5].ParameterTypes[0];
             Assert.Equal("string", method5Parameter.Type.Name);
             Assert.Equal("", method5Parameter.Modifier);
             Assert.Equal("\"null\"", method5Parameter.DefaultValue);
@@ -373,8 +373,8 @@ public class CSharpClassFactExtractorsTests
 
         foreach (var classType in classTypes)
         {
-            var classModel = (ClassModel)classType;
-            Assert.Equal(typeof(ClassModel), classModel.GetType());
+            var classModel = (CSharpClassModel)classType;
+            Assert.Equal(typeof(CSharpClassModel), classModel.GetType());
 
             Assert.Empty(classModel.Metrics);
         }
@@ -394,14 +394,14 @@ public class CSharpClassFactExtractorsTests
 
         foreach (var classType in classTypes)
         {
-            var classModel = (ClassModel)classType;
-            Assert.Equal(typeof(ClassModel), classModel.GetType());
+            var classModel = (CSharpClassModel)classType;
+            Assert.Equal(typeof(CSharpClassModel), classModel.GetType());
         }
 
-        Assert.Equal("Models.Main.Items", ((ClassModel)classTypes[0]).ContainingNamespaceName);
+        Assert.Equal("Models.Main.Items", ((CSharpClassModel)classTypes[0]).ContainingNamespaceName);
         Assert.Equal("Models.Main.Items.MainItem", classTypes[0].Name);
 
-        Assert.Equal("Models.Main.Items", ((ClassModel)classTypes[1]).ContainingNamespaceName);
+        Assert.Equal("Models.Main.Items", ((CSharpClassModel)classTypes[1]).ContainingNamespaceName);
         Assert.Equal("Models.Main.Items.IInterface", classTypes[1].Name);
     }
 
@@ -419,7 +419,7 @@ public class CSharpClassFactExtractorsTests
 
         foreach (var classType in classTypes)
         {
-            var classModel = (ClassModel)classType;
+            var classModel = (CSharpClassModel)classType;
             Assert.Empty(classModel.Fields);
         }
     }
@@ -436,7 +436,7 @@ public class CSharpClassFactExtractorsTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var fieldInfos = ((ClassModel)classTypes[0]).Fields;
+        var fieldInfos = ((CSharpClassModel)classTypes[0]).Fields;
 
         Assert.Equal(3, fieldInfos.Count);
 
@@ -483,7 +483,7 @@ public class CSharpClassFactExtractorsTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var fieldInfos = ((ClassModel)classTypes[0]).Fields;
+        var fieldInfos = ((CSharpClassModel)classTypes[0]).Fields;
 
         Assert.Equal(5, fieldInfos.Count);
 
@@ -542,7 +542,7 @@ public class CSharpClassFactExtractorsTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var fieldInfos = ((ClassModel)classTypes[0]).Fields;
+        var fieldInfos = ((CSharpClassModel)classTypes[0]).Fields;
 
         Assert.Equal(4, fieldInfos.Count);
 
@@ -594,7 +594,7 @@ public class CSharpClassFactExtractorsTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var fieldInfos = ((ClassModel)classTypes[0]).Fields;
+        var fieldInfos = ((CSharpClassModel)classTypes[0]).Fields;
 
         Assert.Equal(5, fieldInfos.Count);
 
@@ -640,7 +640,7 @@ public class CSharpClassFactExtractorsTests
         var classTypes = _sut.Extract(syntaxTree, semanticModel).ClassTypes;
 
         Assert.Equal(1, classTypes.Count);
-        Assert.Empty(((ClassModel)classTypes[0]).Methods);
+        Assert.Empty(((CSharpClassModel)classTypes[0]).Methods);
     }
 
     [Theory]
@@ -653,15 +653,15 @@ public class CSharpClassFactExtractorsTests
         var classTypes = _sut.Extract(syntaxTree, semanticModel).ClassTypes;
 
         Assert.Equal(1, classTypes.Count);
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(3, classModel.Methods.Count);
 
         var methodF = classModel.Methods[0];
         Assert.Equal("f", methodF.Name);
         Assert.Equal("CSharpExtractor", methodF.ReturnValue.Type.Name);
-        Assert.Equal("", ((ReturnValueModel)methodF.ReturnValue).Modifier);
+        Assert.Equal("", ((CSharpReturnValueModel)methodF.ReturnValue).Modifier);
         Assert.Equal(1, methodF.ParameterTypes.Count);
-        var parameterModel1 = (ParameterModel)methodF.ParameterTypes[0];
+        var parameterModel1 = (CSharpParameterModel)methodF.ParameterTypes[0];
         Assert.Equal("int", parameterModel1.Type.Name);
         Assert.Equal("", parameterModel1.Modifier);
         Assert.Null(parameterModel1.DefaultValue);
@@ -672,9 +672,9 @@ public class CSharpClassFactExtractorsTests
         var methodG = classModel.Methods[1];
         Assert.Equal("g", methodG.Name);
         Assert.Equal("int", methodG.ReturnValue.Type.Name);
-        Assert.Equal("", ((ReturnValueModel)methodG.ReturnValue).Modifier);
+        Assert.Equal("", ((CSharpReturnValueModel)methodG.ReturnValue).Modifier);
         Assert.Equal(1, methodG.ParameterTypes.Count);
-        var parameterModel2 = (ParameterModel)methodG.ParameterTypes[0];
+        var parameterModel2 = (CSharpParameterModel)methodG.ParameterTypes[0];
         Assert.Equal("CSharpExtractor", parameterModel2.Type.Name);
         Assert.Equal("", parameterModel2.Modifier);
         Assert.Null(parameterModel2.DefaultValue);
@@ -685,13 +685,13 @@ public class CSharpClassFactExtractorsTests
         var methodH = classModel.Methods[2];
         Assert.Equal("h", methodH.Name);
         Assert.Equal("string", methodH.ReturnValue.Type.Name);
-        Assert.Equal("", ((ReturnValueModel)methodH.ReturnValue).Modifier);
+        Assert.Equal("", ((CSharpReturnValueModel)methodH.ReturnValue).Modifier);
         Assert.Equal(2, methodH.ParameterTypes.Count);
-        var parameterModel3 = (ParameterModel)methodH.ParameterTypes[0];
+        var parameterModel3 = (CSharpParameterModel)methodH.ParameterTypes[0];
         Assert.Equal("float", parameterModel3.Type.Name);
         Assert.Equal("", parameterModel3.Modifier);
         Assert.Null(parameterModel3.DefaultValue);
-        var parameterModel4 = (ParameterModel)methodH.ParameterTypes[1];
+        var parameterModel4 = (CSharpParameterModel)methodH.ParameterTypes[1];
         Assert.Equal("CSharpExtractor", parameterModel4.Type.Name);
         Assert.Equal("", parameterModel4.Modifier);
         Assert.Null(parameterModel4.DefaultValue);
@@ -710,14 +710,14 @@ public class CSharpClassFactExtractorsTests
         var classTypes = _sut.Extract(syntaxTree, semanticModel).ClassTypes;
 
         Assert.Equal(1, classTypes.Count);
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(3, classModel.Methods.Count);
 
         Assert.Equal("f", classModel.Methods[0].Name);
         Assert.Equal("void", classModel.Methods[0].ReturnValue.Type.Name);
-        Assert.Equal("", ((ReturnValueModel)classModel.Methods[0].ReturnValue).Modifier);
+        Assert.Equal("", ((CSharpReturnValueModel)classModel.Methods[0].ReturnValue).Modifier);
         Assert.Equal(1, classModel.Methods[0].ParameterTypes.Count);
-        var parameterModel1 = (ParameterModel)classModel.Methods[0].ParameterTypes[0];
+        var parameterModel1 = (CSharpParameterModel)classModel.Methods[0].ParameterTypes[0];
         Assert.Equal("int", parameterModel1.Type.Name);
         Assert.Equal("", parameterModel1.Modifier);
         Assert.Null(parameterModel1.DefaultValue);
@@ -727,9 +727,9 @@ public class CSharpClassFactExtractorsTests
 
         Assert.Equal("g", classModel.Methods[1].Name);
         Assert.Equal("int", classModel.Methods[1].ReturnValue.Type.Name);
-        Assert.Equal("", ((ReturnValueModel)classModel.Methods[1].ReturnValue).Modifier);
+        Assert.Equal("", ((CSharpReturnValueModel)classModel.Methods[1].ReturnValue).Modifier);
         Assert.Equal(1, classModel.Methods[1].ParameterTypes.Count);
-        var parameterModel2 = (ParameterModel)classModel.Methods[1].ParameterTypes[0];
+        var parameterModel2 = (CSharpParameterModel)classModel.Methods[1].ParameterTypes[0];
         Assert.Equal("CSharpExtractor", parameterModel2.Type.Name);
         Assert.Equal("", parameterModel2.Modifier);
         Assert.Null(parameterModel2.DefaultValue);
@@ -742,13 +742,13 @@ public class CSharpClassFactExtractorsTests
 
         Assert.Equal("h", classModel.Methods[2].Name);
         Assert.Equal("string", classModel.Methods[2].ReturnValue.Type.Name);
-        Assert.Equal("", ((ReturnValueModel)classModel.Methods[2].ReturnValue).Modifier);
+        Assert.Equal("", ((CSharpReturnValueModel)classModel.Methods[2].ReturnValue).Modifier);
         Assert.Equal(2, classModel.Methods[2].ParameterTypes.Count);
-        var parameterModel3 = (ParameterModel)classModel.Methods[2].ParameterTypes[0];
+        var parameterModel3 = (CSharpParameterModel)classModel.Methods[2].ParameterTypes[0];
         Assert.Equal("float", parameterModel3.Type.Name);
         Assert.Equal("", parameterModel3.Modifier);
         Assert.Null(parameterModel3.DefaultValue);
-        var parameterModel4 = (ParameterModel)classModel.Methods[2].ParameterTypes[1];
+        var parameterModel4 = (CSharpParameterModel)classModel.Methods[2].ParameterTypes[1];
         Assert.Equal("CSharpExtractor", parameterModel4.Type.Name);
         Assert.Equal("", parameterModel4.Modifier);
         Assert.Null(parameterModel4.DefaultValue);
@@ -778,7 +778,7 @@ public class CSharpClassFactExtractorsTests
 
         foreach (var classType in classTypes)
         {
-            var classModel = (ClassModel)classType;
+            var classModel = (CSharpClassModel)classType;
             Assert.Equal("struct", classModel.ClassType);
             Assert.Equal("public", classModel.AccessModifier);
             Assert.Equal("readonly", classModel.Modifier);
@@ -796,7 +796,7 @@ public class CSharpClassFactExtractorsTests
         var classModels = _sut.Extract(syntaxTree, semanticModel).ClassTypes;
 
         Assert.Equal(1, classModels.Count);
-        var classModel = (ClassModel)classModels[0];
+        var classModel = (CSharpClassModel)classModels[0];
         Assert.Equal("Geometry.Point2D", classModel.Name);
 
         Assert.Equal("struct", classModel.ClassType);
@@ -806,7 +806,7 @@ public class CSharpClassFactExtractorsTests
         Assert.Equal(1, classModel.Methods.Count);
         Assert.Equal("ToString", classModel.Methods[0].Name);
         Assert.Equal("string", classModel.Methods[0].ReturnValue.Type.Name);
-        Assert.Equal("", ((ReturnValueModel)classModel.Methods[0].ReturnValue).Modifier);
+        Assert.Equal("", ((CSharpReturnValueModel)classModel.Methods[0].ReturnValue).Modifier);
         Assert.Equal("public", classModel.Methods[0].AccessModifier);
         Assert.Equal("readonly override", classModel.Methods[0].Modifier);
 
@@ -867,7 +867,7 @@ public class CSharpClassFactExtractorsTests
         var classTypes = _sut.Extract(syntaxTree, semanticModel).ClassTypes;
 
         Assert.Equal(1, classTypes.Count);
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal("Geometry.Point", classModel.Name);
         Assert.Equal("struct", classModel.ClassType);
@@ -903,7 +903,7 @@ public class CSharpClassFactExtractorsTests
 
         Assert.Equal(2, classTypes.Count);
 
-        var classModel1 = (ClassModel)classTypes[0];
+        var classModel1 = (CSharpClassModel)classTypes[0];
         Assert.Equal("Namespace1.CustomRef", classModel1.Name);
         Assert.Equal("struct", classModel1.ClassType);
         Assert.Equal("public", classModel1.AccessModifier);
@@ -917,7 +917,7 @@ public class CSharpClassFactExtractorsTests
             Assert.Equal("System.Span<int>", fieldModel.Type.Name);
         }
 
-        var classModel2 = (ClassModel)classTypes[1];
+        var classModel2 = (CSharpClassModel)classTypes[1];
         Assert.Equal("Namespace1.ConversionRequest", classModel2.Name);
         Assert.Equal("struct", classModel2.ClassType);
         Assert.Equal("public", classModel2.AccessModifier);
@@ -951,7 +951,7 @@ public class CSharpClassFactExtractorsTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal("Namespace1.Class1", classModel.Name);
 
         Assert.Equal(2, classModel.Methods.Count);
@@ -966,10 +966,10 @@ public class CSharpClassFactExtractorsTests
             Assert.Equal("int", methodModel.ReturnValue.Type.Name);
         }
 
-        Assert.Equal("ref", ((ReturnValueModel)classModel.Methods[0].ReturnValue).Modifier);
+        Assert.Equal("ref", ((CSharpReturnValueModel)classModel.Methods[0].ReturnValue).Modifier);
         Assert.Equal("System.Func<int, bool>", classModel.Methods[0].ParameterTypes[1].Type.Name);
 
-        Assert.Equal("ref readonly", ((ReturnValueModel)classModel.Methods[1].ReturnValue).Modifier);
+        Assert.Equal("ref readonly", ((CSharpReturnValueModel)classModel.Methods[1].ReturnValue).Modifier);
         Assert.Equal("bool", classModel.Methods[1].ParameterTypes[1].Type.Name);
     }
 
@@ -982,7 +982,7 @@ public class CSharpClassFactExtractorsTests
 
         var classTypes = _sut.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal("Namespace1.Class1", classModel.Name);
 
@@ -1019,7 +1019,7 @@ public class CSharpClassFactExtractorsTests
 
         var classTypes = _sut.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal("Namespace1.Class1", classModel.Name);
 

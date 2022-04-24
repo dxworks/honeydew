@@ -28,7 +28,7 @@ public class CSharpLocalFunctionsSetterClassVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public IMethodTypeWithLocalFunctions CreateWrappedType() => new MethodModel();
+    public IMethodTypeWithLocalFunctions CreateWrappedType() => new CSharpMethodModel();
 
     public IEnumerable<LocalFunctionStatementSyntax> GetWrappedSyntaxNodes(MethodDeclarationSyntax syntaxNode)
     {

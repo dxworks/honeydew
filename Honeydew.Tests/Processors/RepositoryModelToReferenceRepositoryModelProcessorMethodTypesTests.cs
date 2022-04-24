@@ -128,7 +128,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorMethodTypesTests
                     Name = "Project1",
                     CompilationUnits =
                     {
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             FilePath = "Project1.Class1",
                             ClassTypes = classTypes
@@ -169,7 +169,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorMethodTypesTests
                     Name = "Project1",
                     CompilationUnits =
                     {
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             FilePath = "Project1.Class1",
                             ClassTypes = classTypes

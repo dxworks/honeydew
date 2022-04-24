@@ -19,7 +19,7 @@ public class CSharpPropertySetterClassVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public IPropertyType CreateWrappedType() => new PropertyModel();
+    public IPropertyType CreateWrappedType() => new CSharpPropertyModel();
 
     public IEnumerable<BasePropertyDeclarationSyntax> GetWrappedSyntaxNodes(TypeDeclarationSyntax syntaxNode)
     {

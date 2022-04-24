@@ -19,7 +19,7 @@ public class CSharpMethodSetterClassVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public IMethodType CreateWrappedType() => new MethodModel();
+    public IMethodType CreateWrappedType() => new CSharpMethodModel();
 
     public IEnumerable<MethodDeclarationSyntax> GetWrappedSyntaxNodes(TypeDeclarationSyntax syntaxNode)
     {

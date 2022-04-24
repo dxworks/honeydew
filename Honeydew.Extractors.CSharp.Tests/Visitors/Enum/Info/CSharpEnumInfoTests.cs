@@ -44,7 +44,7 @@ public class CSharpEnumInfoTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var enumModel = (EnumModel)classTypes[0];
+        var enumModel = (CSharpEnumModel)classTypes[0];
 
         Assert.Equal("Enums.MyEnum", enumModel.Name);
         Assert.Equal("Enums", enumModel.ContainingNamespaceName);
@@ -73,7 +73,7 @@ public class CSharpEnumInfoTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var enumModel = (EnumModel)classTypes[0];
+        var enumModel = (CSharpEnumModel)classTypes[0];
 
         Assert.Equal("Enums.MyEnum", enumModel.Name);
         Assert.Equal("Enums", enumModel.ContainingNamespaceName);
@@ -97,8 +97,8 @@ public class CSharpEnumInfoTests
 
         Assert.Equal(2, classTypes.Count);
 
-        var enumModel1 = (EnumModel)classTypes[0];
-        var enumModel2 = (EnumModel)classTypes[1];
+        var enumModel1 = (CSharpEnumModel)classTypes[0];
+        var enumModel2 = (CSharpEnumModel)classTypes[1];
 
         Assert.Equal("Enums.Class1.MyEnum", enumModel1.Name);
         Assert.Equal("Enums", enumModel1.ContainingNamespaceName);

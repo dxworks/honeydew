@@ -78,7 +78,7 @@ public class CSharpPropertyAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(2, classModel.Properties.Count);
 
@@ -108,7 +108,7 @@ public class CSharpPropertyAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Properties.Count);
 
         foreach (var property in classModel.Properties)
@@ -133,7 +133,7 @@ public class CSharpPropertyAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(2, classModel.Properties.Count);
 
@@ -164,7 +164,7 @@ public class CSharpPropertyAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var properties = ((ClassModel)classTypes[0]).Properties;
+        var properties = ((CSharpClassModel)classTypes[0]).Properties;
 
         Assert.Equal(2, properties.Count);
 
@@ -206,7 +206,7 @@ public class CSharpPropertyAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classType = (ClassModel)classTypes[1];
+        var classType = (CSharpClassModel)classTypes[1];
 
         Assert.Equal(2, classType.Properties.Count);
 
@@ -245,7 +245,7 @@ public class CSharpPropertyAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classType = (ClassModel)classTypes[0];
+        var classType = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(2, classType.Properties.Count);
 
@@ -294,7 +294,7 @@ public class CSharpPropertyAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classType = (ClassModel)classTypes[0];
+        var classType = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(5, classType.Properties.Count);
         foreach (var propertyType in classType.Properties)
@@ -336,7 +336,7 @@ public class CSharpPropertyAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classType = (ClassModel)classTypes[0];
+        var classType = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(5, classType.Properties.Count);
         foreach (var propertyType in classType.Properties)

@@ -2,9 +2,11 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record DestructorModel : IDestructorType
+public record CSharpAccessorMethodModel : IAccessorMethodType
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
+
+    public IReturnValueType ReturnValue { get; set; }
 
     public IList<IParameterType> ParameterTypes { get; set; } = new List<IParameterType>();
 
@@ -12,9 +14,9 @@ public record DestructorModel : IDestructorType
 
     public IList<AccessedField> AccessedFields { get; set; } = new List<AccessedField>();
 
-    public string AccessModifier { get; set; }
+    public string AccessModifier { get; set; } = "";
 
-    public string Modifier { get; set; }
+    public string Modifier { get; set; } = "";
 
     public int CyclomaticComplexity { get; set; }
 

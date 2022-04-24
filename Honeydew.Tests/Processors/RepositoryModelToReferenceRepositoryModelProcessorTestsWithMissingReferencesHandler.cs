@@ -132,7 +132,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
                     Name = "Project1",
                     CompilationUnits =
                     {
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             FilePath = "Project1.Services",
                             ClassTypes = classTypes
@@ -299,7 +299,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
                     Name = "Project1",
                     CompilationUnits =
                     {
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             FilePath = "Project1.Services",
                             ClassTypes = classTypes,
@@ -439,7 +439,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
                     Name = "Project1",
                     CompilationUnits =
                     {
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             FilePath = "Project1.Services",
                             ClassTypes = classTypes,
@@ -556,7 +556,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
                     Name = "Project1",
                     CompilationUnits =
                     {
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             FilePath = "Project1.MyNamespace",
                             ClassTypes = classTypes,
@@ -725,7 +725,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
                     Name = "Project1",
                     CompilationUnits =
                     {
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             FilePath = "Project1/class1.cs",
                             ClassTypes = classTypes,

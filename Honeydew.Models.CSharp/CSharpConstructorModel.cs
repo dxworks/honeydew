@@ -2,13 +2,13 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record ConstructorModel : IConstructorType
+public record CSharpConstructorModel : IConstructorType
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
 
-    public string AccessModifier { get; set; }
+    public string AccessModifier { get; set; } = "";
 
-    public string Modifier { get; set; }
+    public string Modifier { get; set; } = "";
 
     public IList<IParameterType> ParameterTypes { get; set; } = new List<IParameterType>();
 

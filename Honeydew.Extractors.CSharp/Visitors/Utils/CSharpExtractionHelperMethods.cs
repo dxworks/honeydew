@@ -79,7 +79,7 @@ public static partial class CSharpExtractionHelperMethods
         return null;
     }
 
-    public static MethodCallModel GetMethodCallModel(InvocationExpressionSyntax invocationExpressionSyntax,
+    public static CSharpMethodCallModel GetMethodCallModel(InvocationExpressionSyntax invocationExpressionSyntax,
         SemanticModel semanticModel)
     {
         var methodName = invocationExpressionSyntax.Expression switch
@@ -88,7 +88,7 @@ public static partial class CSharpExtractionHelperMethods
             _ => invocationExpressionSyntax.Expression.ToString()
         };
 
-        return new MethodCallModel
+        return new CSharpMethodCallModel
         {
             Name = methodName,
             DefinitionClassName =
@@ -108,7 +108,7 @@ public static partial class CSharpExtractionHelperMethods
         if (methodSymbol != null)
         {
             return methodSymbol.TypeParameters
-                .Select(parameter => FullTypeNameBuilder.CreateEntityTypeModel(parameter.Name))
+                .Select(parameter => CSharpFullTypeNameBuilder.CreateEntityTypeModel(parameter.Name))
                 .Cast<IEntityType>()
                 .ToList();
         }
@@ -213,7 +213,7 @@ public static partial class CSharpExtractionHelperMethods
                 }
             }
 
-            parameters.Add(new ParameterModel
+            parameters.Add(new CSharpParameterModel
             {
                 Type = CSharpFullNameProvider.CreateEntityTypeModel(parameter.Type.ToString()),
                 Modifier = modifier,
@@ -235,7 +235,7 @@ public static partial class CSharpExtractionHelperMethods
         };
     }
 
-    public static ParameterModel? ExtractInfoAboutParameter(BaseParameterSyntax baseParameterSyntax,
+    public static CSharpParameterModel? ExtractInfoAboutParameter(BaseParameterSyntax baseParameterSyntax,
         SemanticModel semanticModel)
     {
         if (baseParameterSyntax.Type is null)
@@ -252,7 +252,7 @@ public static partial class CSharpExtractionHelperMethods
             defaultValue = parameterSyntax.Default?.Value.ToString();
         }
 
-        return new ParameterModel
+        return new CSharpParameterModel
         {
             Type = parameterType,
             Modifier = baseParameterSyntax.Modifiers.ToString(),
@@ -349,7 +349,7 @@ public static partial class CSharpExtractionHelperMethods
                 var parameterSymbolInfo = ModelExtensions.GetSymbolInfo(semanticModel, argumentSyntax.Expression);
                 if (parameterSymbolInfo.Symbol != null)
                 {
-                    parameterList.Add(new ParameterModel
+                    parameterList.Add(new CSharpParameterModel
                     {
                         Type = GetFullName(argumentSyntax.Expression, semanticModel)
                     });
@@ -368,7 +368,7 @@ public static partial class CSharpExtractionHelperMethods
                     break;
                 }
 
-                parameterList.Add(new ParameterModel
+                parameterList.Add(new CSharpParameterModel
                 {
                     Type = CSharpFullNameProvider.CreateEntityTypeModel(literalExpressionSyntax.Token.Value.GetType()
                         .FullName),
@@ -515,7 +515,7 @@ public static partial class CSharpExtractionHelperMethods
                 var parameterType = CSharpConstants.SystemObject;
                 if (parameterSymbolInfo.Symbol != null)
                 {
-                    parameterTypes.Add(new ParameterModel
+                    parameterTypes.Add(new CSharpParameterModel
                     {
                         Type = GetFullName(argumentSyntax.Expression, semanticModel)
                     });
@@ -530,7 +530,7 @@ public static partial class CSharpExtractionHelperMethods
                     }
                 }
 
-                parameterTypes.Add(new ParameterModel
+                parameterTypes.Add(new CSharpParameterModel
                 {
                     Type = CSharpFullNameProvider.CreateEntityTypeModel(parameterType)
                 });

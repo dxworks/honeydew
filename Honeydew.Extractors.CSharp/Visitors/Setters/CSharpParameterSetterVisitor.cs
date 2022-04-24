@@ -22,7 +22,7 @@ public class CSharpParameterSetterVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public IParameterType CreateWrappedType() => new ParameterModel();
+    public IParameterType CreateWrappedType() => new CSharpParameterModel();
 
     public IEnumerable<ParameterSyntax> GetWrappedSyntaxNodes(DelegateDeclarationSyntax syntaxNode)
     {

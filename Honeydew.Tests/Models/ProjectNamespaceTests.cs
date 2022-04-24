@@ -18,7 +18,7 @@ public class ProjectNamespaceTests
     [Fact]
     public void Add_ShouldAddNewClass_WhenClassIsFromDefaultNamespace()
     {
-        _sut.Add(new ClassModel
+        _sut.Add(new CSharpClassModel
         {
             Name = "GlobalClass",
             ContainingNamespaceName = "",
@@ -32,7 +32,7 @@ public class ProjectNamespaceTests
     [Fact]
     public void Add_ShouldAddNewClass_WhenANewClassModelIsAdded()
     {
-        _sut.Add(new ClassModel
+        _sut.Add(new CSharpClassModel
         {
             Name = "Models.Class1",
             ContainingNamespaceName = "Models",
@@ -46,17 +46,17 @@ public class ProjectNamespaceTests
     [Fact]
     public void Add_ShouldAddNewClasses_WhenMultipleClassNamesAreAdded()
     {
-        _sut.Add(new ClassModel
+        _sut.Add(new CSharpClassModel
         {
             Name = "Models.Class1",
             ContainingNamespaceName = "Models",
         });
-        _sut.Add(new ClassModel
+        _sut.Add(new CSharpClassModel
         {
             Name = "Models.Class2",
             ContainingNamespaceName = "Models",
         });
-        _sut.Add(new ClassModel
+        _sut.Add(new CSharpClassModel
         {
             Name = "Models.Class3",
             ContainingNamespaceName = "Models",
@@ -72,17 +72,17 @@ public class ProjectNamespaceTests
     [Fact]
     public void Add_ShouldAddNewClassOnce_WhenTheSameClassNamesAdded()
     {
-        _sut.Add(new ClassModel
+        _sut.Add(new CSharpClassModel
         {
             Name = "Models.Class1",
             ContainingNamespaceName = "Models",
         });
-        _sut.Add(new ClassModel
+        _sut.Add(new CSharpClassModel
         {
             Name = "Models.Class2",
             ContainingNamespaceName = "Models",
         });
-        _sut.Add(new ClassModel
+        _sut.Add(new CSharpClassModel
         {
             Name = "Models.Class1",
             ContainingNamespaceName = "Models",
@@ -97,12 +97,12 @@ public class ProjectNamespaceTests
     [Fact]
     public void Add_ShouldNotAddClassOnce_WhenNamespaceIsDifferentInClass()
     {
-        _sut.Add(new ClassModel
+        _sut.Add(new CSharpClassModel
         {
             Name = "Models.Class1",
             ContainingNamespaceName = "Models",
         });
-        _sut.Add(new ClassModel
+        _sut.Add(new CSharpClassModel
         {
             Name = "Models.Items.Class2",
             ContainingNamespaceName = "Models.Items",
@@ -116,7 +116,7 @@ public class ProjectNamespaceTests
     [Fact]
     public void Add_ShouldAddClassModelWithAllAttributes_WhenMultipleClassNamesAreAdded()
     {
-        var classModel1 = new ClassModel
+        var classModel1 = new CSharpClassModel
         {
             Name = "Items.Pencil"
         };
@@ -130,7 +130,7 @@ public class ProjectNamespaceTests
 
         _sut.Add(classModel1);
 
-        var classModel2 = new ClassModel
+        var classModel2 = new CSharpClassModel
         {
             Name = "Items.Notebook"
         };
@@ -138,9 +138,9 @@ public class ProjectNamespaceTests
         (
             Value: new List<IBaseType>
             {
-                new BaseTypeModel
+                new CSharpBaseTypeModel
                 {
-                    Type = new EntityTypeModel
+                    Type = new CSharpEntityTypeModel
                     {
                         Name = "Object"
                     },
@@ -154,7 +154,7 @@ public class ProjectNamespaceTests
 
         _sut.Add(classModel2);
 
-        var classModel3 = new ClassModel
+        var classModel3 = new CSharpClassModel
         {
             Name = "Items.IItemService"
         };
@@ -170,17 +170,17 @@ public class ProjectNamespaceTests
         (
             Value: new List<IBaseType>
             {
-                new BaseTypeModel
+                new CSharpBaseTypeModel
                 {
-                    Type = new EntityTypeModel
+                    Type = new CSharpEntityTypeModel
                     {
                         Name = "BaseService"
                     },
                     Kind = "class"
                 },
-                new BaseTypeModel
+                new CSharpBaseTypeModel
                 {
-                    Type = new EntityTypeModel
+                    Type = new CSharpEntityTypeModel
                     {
                         Name = "IService"
                     },

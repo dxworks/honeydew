@@ -20,7 +20,7 @@ public class CSharpFactExtractor : IFactExtractor
     {
         var compilationUnitSyntaxTree = GetCompilationUnitSyntaxTree(syntacticTree);
 
-        ICompilationUnitType compilationUnitModel = new CompilationUnitModel();
+        ICompilationUnitType compilationUnitModel = new CSharpCompilationUnitModel();
 
         foreach (var visitor in _compositeVisitor.GetContainedVisitors())
         {

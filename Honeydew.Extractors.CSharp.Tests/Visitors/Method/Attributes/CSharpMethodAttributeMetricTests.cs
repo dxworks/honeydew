@@ -62,7 +62,7 @@ public class CSharpMethodAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(2, classModel.Methods.Count);
 
@@ -88,7 +88,7 @@ public class CSharpMethodAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Methods.Count);
 
         foreach (var methodType in classModel.Methods)
@@ -109,7 +109,7 @@ public class CSharpMethodAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(2, classModel.Methods.Count);
 
@@ -136,7 +136,7 @@ public class CSharpMethodAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var methods = ((ClassModel)classTypes[0]).Methods;
+        var methods = ((CSharpClassModel)classTypes[0]).Methods;
 
         Assert.Equal(2, methods.Count);
 
@@ -177,7 +177,7 @@ public class CSharpMethodAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classType = (ClassModel)classTypes[1];
+        var classType = (CSharpClassModel)classTypes[1];
 
         Assert.Equal(2, classType.Methods.Count);
 
@@ -216,7 +216,7 @@ public class CSharpMethodAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classType = (ClassModel)classTypes[0];
+        var classType = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(2, classType.Methods.Count);
 

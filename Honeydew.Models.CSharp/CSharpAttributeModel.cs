@@ -2,7 +2,7 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record AttributeModel : IAttributeType
+public record CSharpAttributeModel : IAttributeType
 {
     public string Name { get; set; }
 

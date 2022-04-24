@@ -92,7 +92,7 @@ public class LocalFunctionsExtractionTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
+        var method = (CSharpMethodModel)((CSharpClassModel)classTypes[0]).Methods[0];
 
         Assert.Equal("Method", method.Name);
         Assert.Equal(1, method.LocalFunctions.Count);
@@ -112,7 +112,7 @@ public class LocalFunctionsExtractionTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
+        var method = (CSharpMethodModel)((CSharpClassModel)classTypes[0]).Methods[0];
 
         Assert.Equal("Method", method.Name);
         Assert.Equal(1, method.LocalFunctions.Count);
@@ -134,7 +134,7 @@ public class LocalFunctionsExtractionTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
+        var method = (CSharpMethodModel)((CSharpClassModel)classTypes[0]).Methods[0];
 
         Assert.Equal("Method", method.Name);
         Assert.Equal(3, method.LocalFunctions.Count);
@@ -170,7 +170,7 @@ public class LocalFunctionsExtractionTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
+        var method = (CSharpMethodModel)((CSharpClassModel)classTypes[0]).Methods[0];
 
         Assert.Equal("Method", method.Name);
         Assert.Equal(1, method.LocalFunctions.Count);
@@ -187,10 +187,10 @@ public class LocalFunctionsExtractionTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
-        var constructor = (ConstructorModel)((ClassModel)classTypes[0]).Constructors[0];
-        var property = (PropertyModel)((ClassModel)classTypes[0]).Properties[0];
-        var eventProperty = (PropertyModel)((ClassModel)classTypes[0]).Properties[1];
+        var method = (CSharpMethodModel)((CSharpClassModel)classTypes[0]).Methods[0];
+        var constructor = (CSharpConstructorModel)((CSharpClassModel)classTypes[0]).Constructors[0];
+        var property = (CSharpPropertyModel)((CSharpClassModel)classTypes[0]).Properties[0];
+        var eventProperty = (CSharpPropertyModel)((CSharpClassModel)classTypes[0]).Properties[1];
 
         var localFunctions = new[]
         {
@@ -220,7 +220,7 @@ public class LocalFunctionsExtractionTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
+        var method = (CSharpMethodModel)((CSharpClassModel)classTypes[0]).Methods[0];
 
         Assert.Equal("Method", method.Name);
         Assert.Equal(4, method.LocalFunctions.Count);
@@ -293,12 +293,12 @@ public class LocalFunctionsExtractionTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
+        var method = (CSharpMethodModel)((CSharpClassModel)classTypes[0]).Methods[0];
 
         Assert.Equal("Method", method.Name);
         Assert.Equal(1, method.LocalFunctions.Count);
 
-        var stringSumFunction = (MethodModel)method.LocalFunctions[0];
+        var stringSumFunction = (CSharpMethodModel)method.LocalFunctions[0];
         Assert.Equal("StringSum", stringSumFunction.Name);
         Assert.Equal("string", stringSumFunction.ReturnValue!.Type.Name);
         Assert.Equal(2, stringSumFunction.ParameterTypes.Count);
@@ -306,7 +306,7 @@ public class LocalFunctionsExtractionTests
         Assert.Equal("int", stringSumFunction.ParameterTypes[1].Type.Name);
         Assert.Equal(2, stringSumFunction.LocalFunctions.Count);
 
-        var sumFunction = (MethodModel)stringSumFunction.LocalFunctions[0];
+        var sumFunction = (CSharpMethodModel)stringSumFunction.LocalFunctions[0];
         Assert.Equal("Sum", sumFunction.Name);
         Assert.Equal("int", sumFunction.ReturnValue!.Type.Name);
         Assert.Equal(2, sumFunction.ParameterTypes.Count);
@@ -314,7 +314,7 @@ public class LocalFunctionsExtractionTests
         Assert.Equal("int", sumFunction.ParameterTypes[1].Type.Name);
         Assert.Equal(1, sumFunction.LocalFunctions.Count);
 
-        var doubledFunction = (MethodModel)sumFunction.LocalFunctions[0];
+        var doubledFunction = (CSharpMethodModel)sumFunction.LocalFunctions[0];
         Assert.Equal("Doubled", doubledFunction.Name);
         Assert.Equal("int", doubledFunction.ReturnValue!.Type.Name);
         Assert.Equal(1, doubledFunction.ParameterTypes.Count);
@@ -322,7 +322,7 @@ public class LocalFunctionsExtractionTests
         Assert.Empty(doubledFunction.LocalFunctions);
 
 
-        var stringifyFunction = (MethodModel)stringSumFunction.LocalFunctions[1];
+        var stringifyFunction = (CSharpMethodModel)stringSumFunction.LocalFunctions[1];
         Assert.Equal("Stringify", stringifyFunction.Name);
         Assert.Equal("string", stringifyFunction.ReturnValue!.Type.Name);
         Assert.Equal(2, stringifyFunction.ParameterTypes.Count);
@@ -330,7 +330,7 @@ public class LocalFunctionsExtractionTests
         Assert.Equal("int", stringifyFunction.ParameterTypes[1].Type.Name);
         Assert.Equal(2, stringifyFunction.LocalFunctions.Count);
 
-        var calculateFunction = (MethodModel)stringifyFunction.LocalFunctions[0];
+        var calculateFunction = (CSharpMethodModel)stringifyFunction.LocalFunctions[0];
         Assert.Equal("Calculate", calculateFunction.Name);
         Assert.Equal("int", calculateFunction.ReturnValue!.Type.Name);
         Assert.Equal(2, calculateFunction.ParameterTypes.Count);
@@ -338,7 +338,7 @@ public class LocalFunctionsExtractionTests
         Assert.Equal("int", calculateFunction.ParameterTypes[1].Type.Name);
         Assert.Empty(calculateFunction.LocalFunctions);
 
-        var stringifyNumberFunction = (MethodModel)stringifyFunction.LocalFunctions[1];
+        var stringifyNumberFunction = (CSharpMethodModel)stringifyFunction.LocalFunctions[1];
         Assert.Equal("StringifyNumber", stringifyNumberFunction.Name);
         Assert.Equal("string", stringifyNumberFunction.ReturnValue!.Type.Name);
         Assert.Equal(1, stringifyNumberFunction.ParameterTypes.Count);
@@ -355,12 +355,12 @@ public class LocalFunctionsExtractionTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var method = (MethodModel)((ClassModel)classTypes[0]).Methods[0];
+        var method = (CSharpMethodModel)((CSharpClassModel)classTypes[0]).Methods[0];
 
         Assert.Equal("Method", method.Name);
         Assert.Equal(1, method.LocalFunctions.Count);
 
-        var stringSumFunction = (MethodModel)method.LocalFunctions[0];
+        var stringSumFunction = (CSharpMethodModel)method.LocalFunctions[0];
         Assert.Equal("StringSum", stringSumFunction.Name);
         Assert.Equal(2, stringSumFunction.LocalFunctions.Count);
         Assert.Equal(1, stringSumFunction.CalledMethods.Count);
@@ -373,7 +373,7 @@ public class LocalFunctionsExtractionTests
         Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[0].Type.Name);
         Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[1].Type.Name);
 
-        var sumFunction = (MethodModel)stringSumFunction.LocalFunctions[0];
+        var sumFunction = (CSharpMethodModel)stringSumFunction.LocalFunctions[0];
         Assert.Equal("Sum", sumFunction.Name);
         Assert.Equal(1, sumFunction.LocalFunctions.Count);
         Assert.Equal(2, sumFunction.CalledMethods.Count);
@@ -389,13 +389,13 @@ public class LocalFunctionsExtractionTests
             Assert.Equal("int", calledMethod.ParameterTypes[0].Type.Name);
         }
 
-        var doubledFunction = (MethodModel)sumFunction.LocalFunctions[0];
+        var doubledFunction = (CSharpMethodModel)sumFunction.LocalFunctions[0];
         Assert.Equal("Doubled", doubledFunction.Name);
         Assert.Empty(doubledFunction.LocalFunctions);
         Assert.Empty(doubledFunction.CalledMethods);
 
 
-        var stringifyFunction = (MethodModel)stringSumFunction.LocalFunctions[1];
+        var stringifyFunction = (CSharpMethodModel)stringSumFunction.LocalFunctions[1];
         Assert.Equal("Stringify", stringifyFunction.Name);
         Assert.Equal(2, stringifyFunction.LocalFunctions.Count);
         Assert.Equal(2, stringifyFunction.CalledMethods.Count);
@@ -422,7 +422,7 @@ public class LocalFunctionsExtractionTests
         Assert.Equal("int", stringifyFunctionCalledMethod2.ParameterTypes[1].Type.Name);
 
 
-        var calculateFunction = (MethodModel)stringifyFunction.LocalFunctions[0];
+        var calculateFunction = (CSharpMethodModel)stringifyFunction.LocalFunctions[0];
         Assert.Equal("Calculate", calculateFunction.Name);
         Assert.Empty(calculateFunction.LocalFunctions);
         Assert.Equal(1, calculateFunction.CalledMethods.Count);
@@ -438,7 +438,7 @@ public class LocalFunctionsExtractionTests
         Assert.Equal("int", calculateFunctionCalledMethod.ParameterTypes[1].Type.Name);
 
 
-        var stringifyNumberFunction = (MethodModel)stringifyFunction.LocalFunctions[1];
+        var stringifyNumberFunction = (CSharpMethodModel)stringifyFunction.LocalFunctions[1];
         Assert.Equal("StringifyNumber", stringifyNumberFunction.Name);
         Assert.Empty(stringifyNumberFunction.LocalFunctions);
         Assert.Equal(1, stringifyNumberFunction.CalledMethods.Count);
@@ -461,7 +461,7 @@ public class LocalFunctionsExtractionTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var property = (PropertyModel)((ClassModel)classTypes[0]).Properties[0];
+        var property = (CSharpPropertyModel)((CSharpClassModel)classTypes[0]).Properties[0];
 
         Assert.Equal("Value", property.Name);
         Assert.Equal(1, property.Accessors[0].LocalFunctions.Count);
@@ -524,7 +524,7 @@ public class LocalFunctionsExtractionTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var property = (PropertyModel)((ClassModel)classTypes[0]).Properties[0];
+        var property = (CSharpPropertyModel)((CSharpClassModel)classTypes[0]).Properties[0];
 
         Assert.Equal("Value", property.Name);
         Assert.Equal(1, property.Accessors[0].LocalFunctions.Count);
@@ -543,7 +543,7 @@ public class LocalFunctionsExtractionTests
         Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[0].Type.Name);
         Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[1].Type.Name);
 
-        var sumFunction = (MethodModel)stringSumFunction.LocalFunctions[0];
+        var sumFunction = (CSharpMethodModel)stringSumFunction.LocalFunctions[0];
         Assert.Equal("Sum", sumFunction.Name);
         Assert.Equal(1, sumFunction.LocalFunctions.Count);
         Assert.Equal(2, sumFunction.CalledMethods.Count);
@@ -560,13 +560,13 @@ public class LocalFunctionsExtractionTests
             Assert.Equal("int", calledMethod.ParameterTypes[0].Type.Name);
         }
 
-        var doubledFunction = (MethodModel)sumFunction.LocalFunctions[0];
+        var doubledFunction = (CSharpMethodModel)sumFunction.LocalFunctions[0];
         Assert.Equal("Doubled", doubledFunction.Name);
         Assert.Empty(doubledFunction.LocalFunctions);
         Assert.Empty(doubledFunction.CalledMethods);
 
 
-        var stringifyFunction = (MethodModel)stringSumFunction.LocalFunctions[1];
+        var stringifyFunction = (CSharpMethodModel)stringSumFunction.LocalFunctions[1];
         Assert.Equal("Stringify", stringifyFunction.Name);
         Assert.Equal(2, stringifyFunction.LocalFunctions.Count);
         Assert.Equal(2, stringifyFunction.CalledMethods.Count);
@@ -595,7 +595,7 @@ public class LocalFunctionsExtractionTests
         Assert.Equal("int", stringifyFunctionCalledMethod2.ParameterTypes[1].Type.Name);
 
 
-        var calculateFunction = (MethodModel)stringifyFunction.LocalFunctions[0];
+        var calculateFunction = (CSharpMethodModel)stringifyFunction.LocalFunctions[0];
         Assert.Equal("Calculate", calculateFunction.Name);
         Assert.Empty(calculateFunction.LocalFunctions);
         Assert.Equal(1, calculateFunction.CalledMethods.Count);
@@ -612,7 +612,7 @@ public class LocalFunctionsExtractionTests
         Assert.Equal("int", calculateFunctionCalledMethod.ParameterTypes[1].Type.Name);
 
 
-        var stringifyNumberFunction = (MethodModel)stringifyFunction.LocalFunctions[1];
+        var stringifyNumberFunction = (CSharpMethodModel)stringifyFunction.LocalFunctions[1];
         Assert.Equal("StringifyNumber", stringifyNumberFunction.Name);
         Assert.Empty(stringifyNumberFunction.LocalFunctions);
         Assert.Equal(1, stringifyNumberFunction.CalledMethods.Count);
@@ -635,7 +635,7 @@ public class LocalFunctionsExtractionTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var property = (PropertyModel)((ClassModel)classTypes[0]).Properties[0];
+        var property = (CSharpPropertyModel)((CSharpClassModel)classTypes[0]).Properties[0];
 
         Assert.Equal("Value", property.Name);
         Assert.Equal(1, property.Accessors[0].LocalFunctions.Count);
@@ -654,7 +654,7 @@ public class LocalFunctionsExtractionTests
         Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[0].Type.Name);
         Assert.Equal("int", stringSumFunction.CalledMethods[0].ParameterTypes[1].Type.Name);
 
-        var sumFunction = (MethodModel)stringSumFunction.LocalFunctions[0];
+        var sumFunction = (CSharpMethodModel)stringSumFunction.LocalFunctions[0];
         Assert.Equal("Sum", sumFunction.Name);
         Assert.Equal(1, sumFunction.LocalFunctions.Count);
         Assert.Equal(2, sumFunction.CalledMethods.Count);
@@ -671,13 +671,13 @@ public class LocalFunctionsExtractionTests
             Assert.Equal("int", calledMethod.ParameterTypes[0].Type.Name);
         }
 
-        var doubledFunction = (MethodModel)sumFunction.LocalFunctions[0];
+        var doubledFunction = (CSharpMethodModel)sumFunction.LocalFunctions[0];
         Assert.Equal("Doubled", doubledFunction.Name);
         Assert.Empty(doubledFunction.LocalFunctions);
         Assert.Empty(doubledFunction.CalledMethods);
 
 
-        var stringifyFunction = (MethodModel)stringSumFunction.LocalFunctions[1];
+        var stringifyFunction = (CSharpMethodModel)stringSumFunction.LocalFunctions[1];
         Assert.Equal("Stringify", stringifyFunction.Name);
         Assert.Equal(2, stringifyFunction.LocalFunctions.Count);
         Assert.Equal(2, stringifyFunction.CalledMethods.Count);
@@ -706,7 +706,7 @@ public class LocalFunctionsExtractionTests
         Assert.Equal("int", stringifyFunctionCalledMethod2.ParameterTypes[1].Type.Name);
 
 
-        var calculateFunction = (MethodModel)stringifyFunction.LocalFunctions[0];
+        var calculateFunction = (CSharpMethodModel)stringifyFunction.LocalFunctions[0];
         Assert.Equal("Calculate", calculateFunction.Name);
         Assert.Empty(calculateFunction.LocalFunctions);
         Assert.Equal(1, calculateFunction.CalledMethods.Count);
@@ -723,7 +723,7 @@ public class LocalFunctionsExtractionTests
         Assert.Equal("int", calculateFunctionCalledMethod.ParameterTypes[1].Type.Name);
 
 
-        var stringifyNumberFunction = (MethodModel)stringifyFunction.LocalFunctions[1];
+        var stringifyNumberFunction = (CSharpMethodModel)stringifyFunction.LocalFunctions[1];
         Assert.Equal("StringifyNumber", stringifyNumberFunction.Name);
         Assert.Empty(stringifyNumberFunction.LocalFunctions);
         Assert.Equal(1, stringifyNumberFunction.CalledMethods.Count);

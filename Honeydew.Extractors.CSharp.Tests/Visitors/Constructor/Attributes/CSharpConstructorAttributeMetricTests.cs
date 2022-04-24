@@ -64,7 +64,7 @@ public class CSharpConstructorAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(2, classModel.Constructors.Count);
 
@@ -90,7 +90,7 @@ public class CSharpConstructorAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(1, classModel.Constructors.Count);
 
         var attributeTypes = classModel.Constructors[0].Attributes;
@@ -108,7 +108,7 @@ public class CSharpConstructorAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(1, classModel.Constructors.Count);
 
@@ -132,7 +132,7 @@ public class CSharpConstructorAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var constructors = ((ClassModel)classTypes[0]).Constructors;
+        var constructors = ((CSharpClassModel)classTypes[0]).Constructors;
 
         Assert.Equal(1, constructors.Count);
 
@@ -172,7 +172,7 @@ public class CSharpConstructorAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classType = (ClassModel)classTypes[1];
+        var classType = (CSharpClassModel)classTypes[1];
 
         Assert.Equal(1, classType.Constructors.Count);
 
@@ -210,7 +210,7 @@ public class CSharpConstructorAttributeMetricTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classType = (ClassModel)classTypes[0];
+        var classType = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(1, classType.Constructors.Count);
 

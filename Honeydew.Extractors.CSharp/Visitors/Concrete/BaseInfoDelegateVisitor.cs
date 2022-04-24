@@ -23,10 +23,10 @@ public class BaseInfoDelegateVisitor : IExtractionVisitor<DelegateDeclarationSyn
         modelType.Modifier = modifier;
 
         modelType.ClassType = CSharpConstants.DelegateIdentifier;
-        modelType.BaseTypes.Add(new BaseTypeModel
+        modelType.BaseTypes.Add(new CSharpBaseTypeModel
         {
             Kind = CSharpConstants.ClassIdentifier,
-            Type = new EntityTypeModel
+            Type = new CSharpEntityTypeModel
             {
                 Name = CSharpConstants.SystemDelegate
             }

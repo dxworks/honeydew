@@ -53,7 +53,7 @@ public class ConstructorCallsVisitor : IExtractionVisitor<ConstructorDeclaration
             methodName = methodSymbol.ContainingType.Name;
         }
 
-        return new MethodCallModel
+        return new CSharpMethodCallModel
         {
             Name = methodName,
             DefinitionClassName = GetDefinitionClassName(syntaxNode, semanticModel),

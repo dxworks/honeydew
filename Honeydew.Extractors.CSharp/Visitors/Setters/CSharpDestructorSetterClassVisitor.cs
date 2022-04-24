@@ -19,7 +19,7 @@ public class CSharpDestructorSetterClassVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public IDestructorType CreateWrappedType() => new DestructorModel();
+    public IDestructorType CreateWrappedType() => new CSharpDestructorModel();
 
     public IEnumerable<DestructorDeclarationSyntax> GetWrappedSyntaxNodes(TypeDeclarationSyntax syntaxNode)
     {

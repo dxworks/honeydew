@@ -90,15 +90,15 @@ public class FilePathShortenerProcessorTests
         {
             CompilationUnits =
             {
-                new CompilationUnitModel
+                new CSharpCompilationUnitModel
                 {
                     ClassTypes =
                     {
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "C:/SomePath/InputFolder/Project1/Namespace1/Class1.cs"
                         },
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "C:/SomePath/InputFolder/Project1/Namespace1/Class2.cs"
                         }
@@ -110,25 +110,25 @@ public class FilePathShortenerProcessorTests
         {
             CompilationUnits =
             {
-                new CompilationUnitModel
+                new CSharpCompilationUnitModel
                 {
                     ClassTypes =
                     {
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "C:\\SomePath\\InputFolder\\Project2\\Models\\Model1.cs"
                         },
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "C:\\SomePath\\InputFolder\\Project2\\Models\\Model2.cs"
                         }
                     }
                 },
-                new CompilationUnitModel
+                new CSharpCompilationUnitModel
                 {
                     ClassTypes =
                     {
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "C:\\SomePath\\InputFolder\\Project2\\Controllers\\Controller.cs"
                         }
@@ -140,11 +140,11 @@ public class FilePathShortenerProcessorTests
         {
             CompilationUnits =
             {
-                new CompilationUnitModel
+                new CSharpCompilationUnitModel
                 {
                     ClassTypes =
                     {
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath =
                                 "C:/SomePath/InputFolder/SomeFolder/Folder1/Folder2/Folder3/_my_class.cs"
@@ -191,15 +191,15 @@ public class FilePathShortenerProcessorTests
             FilePath = "Path1/Path2/Project.csproj",
             CompilationUnits =
             {
-                new CompilationUnitModel
+                new CSharpCompilationUnitModel
                 {
                     ClassTypes =
                     {
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "Class1.cs"
                         },
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "Path1/Path2/Namespace1/Class2.cs"
                         }
@@ -222,25 +222,25 @@ public class FilePathShortenerProcessorTests
             FilePath = "Folder1\\Folder\\Project2\\Project2.csproj",
             CompilationUnits =
             {
-                new CompilationUnitModel
+                new CSharpCompilationUnitModel
                 {
                     ClassTypes =
                     {
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "Models\\Model1.cs"
                         },
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "Folder1\\Folder\\Models\\Model2.cs"
                         }
                     }
                 },
-                new CompilationUnitModel
+                new CSharpCompilationUnitModel
                 {
                     ClassTypes =
                     {
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "Controllers\\Controller.cs"
                         }
@@ -292,15 +292,15 @@ public class FilePathShortenerProcessorTests
             FilePath = "D:/SomePath/Project1/Project1.csproj",
             CompilationUnits =
             {
-                new CompilationUnitModel
+                new CSharpCompilationUnitModel
                 {
                     ClassTypes =
                     {
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "D:/SomePath/Project1/Models/Model1.cs"
                         },
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "D:/SomePath/Project1/Models/Model2.cs"
                         }
@@ -313,21 +313,21 @@ public class FilePathShortenerProcessorTests
             FilePath = "D:\\SomePath\\Project2\\Project2.csproj",
             CompilationUnits =
             {
-                new CompilationUnitModel
+                new CSharpCompilationUnitModel
                 {
                     ClassTypes =
                     {
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "D:\\SomePath\\Project2\\Controller\\Impl\\Controller.cs"
                         }
                     }
                 },
-                new CompilationUnitModel
+                new CSharpCompilationUnitModel
                 {
                     ClassTypes =
                     {
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "D:\\SomePath\\Project2\\Repository\\IRepository.cs"
                         }
@@ -365,35 +365,35 @@ public class FilePathShortenerProcessorTests
             FilePath = "D:/SomePath/Project1/Project1.csproj",
             CompilationUnits =
             {
-                new CompilationUnitModel
+                new CSharpCompilationUnitModel
                 {
                     ClassTypes =
                     {
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "D:/SomePath/Project1/Models/Model1.cs"
                         },
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "D:/SomePath/Project1/Models/Model2.cs"
                         }
                     }
                 },
-                new CompilationUnitModel
+                new CSharpCompilationUnitModel
                 {
                     ClassTypes =
                     {
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "D:\\SomePath\\Project1\\Controller\\Impl\\Controller.cs"
                         }
                     }
                 },
-                new CompilationUnitModel
+                new CSharpCompilationUnitModel
                 {
                     ClassTypes =
                     {
-                        new ClassModel
+                        new CSharpClassModel
                         {
                             FilePath = "D:\\SomePath\\Project1\\Repository\\IRepository.cs"
                         }

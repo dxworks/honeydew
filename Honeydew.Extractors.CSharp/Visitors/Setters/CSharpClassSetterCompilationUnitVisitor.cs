@@ -19,7 +19,7 @@ public class CSharpClassSetterCompilationUnitVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public IMembersClassType CreateWrappedType() => new ClassModel();
+    public IMembersClassType CreateWrappedType() => new CSharpClassModel();
 
     public IEnumerable<TypeDeclarationSyntax> GetWrappedSyntaxNodes(CompilationUnitSyntax syntaxNode)
     {

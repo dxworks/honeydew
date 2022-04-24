@@ -19,7 +19,7 @@ public class CSharpConstructorSetterClassVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public IConstructorType CreateWrappedType() => new ConstructorModel();
+    public IConstructorType CreateWrappedType() => new CSharpConstructorModel();
 
     public IEnumerable<ConstructorDeclarationSyntax> GetWrappedSyntaxNodes(TypeDeclarationSyntax syntaxNode)
     {

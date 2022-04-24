@@ -61,7 +61,7 @@ public class CSharpCyclomaticComplexityTests
 
         Assert.Equal(2, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(1, classModel.Constructors[0].CyclomaticComplexity);
         Assert.Equal(1, classModel.Methods[0].CyclomaticComplexity);
         Assert.Equal(2, classModel.Properties[0].CyclomaticComplexity);
@@ -79,7 +79,7 @@ public class CSharpCyclomaticComplexityTests
 
         Assert.Equal(2, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(2, classModel.Constructors[0].CyclomaticComplexity);
         Assert.Equal(4, classModel.Methods[0].CyclomaticComplexity);
         Assert.Equal(4, classModel.Properties[0].CyclomaticComplexity);
@@ -96,7 +96,7 @@ public class CSharpCyclomaticComplexityTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
         Assert.Equal(3, classModel.Constructors[0].CyclomaticComplexity);
         Assert.Equal(4, classModel.Methods[0].CyclomaticComplexity);
         Assert.Equal(4, classModel.Properties[0].CyclomaticComplexity);
@@ -113,7 +113,7 @@ public class CSharpCyclomaticComplexityTests
 
         Assert.Equal(1, classTypes.Count);
 
-        Assert.Equal(5, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
+        Assert.Equal(5, ((CSharpClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
     }
 
     [Theory]
@@ -127,7 +127,7 @@ public class CSharpCyclomaticComplexityTests
 
         Assert.Equal(1, classTypes.Count);
 
-        Assert.Equal(7, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
+        Assert.Equal(7, ((CSharpClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
     }
 
     [Theory]
@@ -142,7 +142,7 @@ public class CSharpCyclomaticComplexityTests
 
         Assert.Equal(1, classTypes.Count);
 
-        Assert.Equal(7, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
+        Assert.Equal(7, ((CSharpClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
     }
 
     [Theory]
@@ -157,7 +157,7 @@ public class CSharpCyclomaticComplexityTests
 
         Assert.Equal(1, classTypes.Count);
 
-        Assert.Equal(6, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
+        Assert.Equal(6, ((CSharpClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
     }
 
     [Theory]
@@ -171,7 +171,7 @@ public class CSharpCyclomaticComplexityTests
 
         Assert.Equal(1, classTypes.Count);
 
-        Assert.Equal(2, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
+        Assert.Equal(2, ((CSharpClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
     }
 
     [Theory]
@@ -185,7 +185,7 @@ public class CSharpCyclomaticComplexityTests
 
         Assert.Equal(1, classTypes.Count);
 
-        Assert.Equal(2, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
+        Assert.Equal(2, ((CSharpClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
     }
 
     [Theory]
@@ -199,7 +199,7 @@ public class CSharpCyclomaticComplexityTests
 
         Assert.Equal(1, classTypes.Count);
 
-        Assert.Equal(7, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
+        Assert.Equal(7, ((CSharpClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
     }
 
     [Theory]
@@ -214,7 +214,7 @@ public class CSharpCyclomaticComplexityTests
 
         Assert.Equal(1, classTypes.Count);
 
-        Assert.Equal(6, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
+        Assert.Equal(6, ((CSharpClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
     }
 
     [Theory]
@@ -229,7 +229,7 @@ public class CSharpCyclomaticComplexityTests
 
         Assert.Equal(1, classTypes.Count);
 
-        Assert.Equal(1, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
+        Assert.Equal(1, ((CSharpClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
     }
 
     [Theory]
@@ -244,7 +244,7 @@ public class CSharpCyclomaticComplexityTests
 
         Assert.Equal(5, classTypes.Count);
 
-        Assert.Equal(5, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
+        Assert.Equal(5, ((CSharpClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
     }
 
     [Theory]
@@ -259,6 +259,6 @@ public class CSharpCyclomaticComplexityTests
 
         Assert.Equal(1, classTypes.Count);
 
-        Assert.Equal(5, ((ClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
+        Assert.Equal(5, ((CSharpClassModel)classTypes[0]).Methods[0].CyclomaticComplexity);
     }
 }

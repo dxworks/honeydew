@@ -176,11 +176,11 @@ public class RepositoryModelToReferenceRepositoryModelProcessorPartialClassesTes
                     Name = "Project1",
                     CompilationUnits =
                     {
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             ClassTypes = classTypes1
                         },
-                        new CompilationUnitModel
+                        new CSharpCompilationUnitModel
                         {
                             ClassTypes = classTypes2
                         }

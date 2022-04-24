@@ -19,7 +19,7 @@ public class CSharpDelegateSetterCompilationUnitVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public IDelegateType CreateWrappedType() => new DelegateModel();
+    public IDelegateType CreateWrappedType() => new CSharpDelegateModel();
 
     public IEnumerable<DelegateDeclarationSyntax> GetWrappedSyntaxNodes(CompilationUnitSyntax syntaxNode)
     {

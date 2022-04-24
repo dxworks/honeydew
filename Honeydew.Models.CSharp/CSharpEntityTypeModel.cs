@@ -2,9 +2,9 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record EntityTypeModel : IEntityType
+public record CSharpEntityTypeModel : IEntityType
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
 
     public GenericType FullType { get; set; }
 

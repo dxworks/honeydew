@@ -64,10 +64,10 @@ public class LocalFunctionsAccessedFieldsTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
-        var modelMethod1 = (MethodModel)classModel.Methods[0];
-        var modelMethod2 = (MethodModel)classModel.Methods[1];
+        var modelMethod1 = (CSharpMethodModel)classModel.Methods[0];
+        var modelMethod2 = (CSharpMethodModel)classModel.Methods[1];
 
         var localFunctions = new[]
         {

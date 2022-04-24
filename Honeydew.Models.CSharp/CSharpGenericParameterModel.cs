@@ -2,13 +2,13 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record ReturnValueModel : IReturnValueType
+public record CSharpGenericParameterModel : IGenericParameterType
 {
-    public IEntityType Type { get; set; }
+    public string Name { get; set; } = "";
 
     public string Modifier { get; set; } = "";
 
-    public bool IsNullable { get; set; }
+    public IList<IEntityType> Constraints { get; set; } = new List<IEntityType>();
 
     public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
 }

@@ -70,7 +70,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(1, classModel.Properties.Count);
         var property = classModel.Properties[0];
@@ -103,7 +103,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(1, classModel.Properties.Count);
         var property = classModel.Properties[0];
@@ -126,7 +126,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var classModel = (ClassModel)classTypes[0];
+        var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(1, classModel.Properties.Count);
         var property = classModel.Properties[0];
@@ -145,7 +145,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var propertyModel = ((ClassModel)classTypes[0]).Properties[0];
+        var propertyModel = ((CSharpClassModel)classTypes[0]).Properties[0];
         Assert.Equal("Value", propertyModel.Name);
         Assert.Equal("abstract", propertyModel.Modifier);
         Assert.Equal("public", propertyModel.AccessModifier);
@@ -169,7 +169,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var propertyTypes = ((ClassModel)classTypes[0]).Properties;
+        var propertyTypes = ((CSharpClassModel)classTypes[0]).Properties;
 
         Assert.Equal(2, propertyTypes.Count);
 
@@ -217,7 +217,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var propertyModels = ((ClassModel)classTypes[0]).Properties;
+        var propertyModels = ((CSharpClassModel)classTypes[0]).Properties;
 
         Assert.Equal(3, propertyModels.Count);
 
@@ -276,7 +276,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var propertyModels = ((ClassModel)classTypes[0]).Properties;
+        var propertyModels = ((CSharpClassModel)classTypes[0]).Properties;
 
         Assert.Equal(3, propertyModels.Count);
 
@@ -322,7 +322,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var propertyModels = ((ClassModel)classTypes[0]).Properties;
+        var propertyModels = ((CSharpClassModel)classTypes[0]).Properties;
 
         Assert.Equal(5, propertyModels.Count);
 
@@ -390,7 +390,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(2, classTypes.Count);
 
-        var propertyModels = ((ClassModel)classTypes[1]).Properties;
+        var propertyModels = ((CSharpClassModel)classTypes[1]).Properties;
 
         Assert.Equal(1, propertyModels.Count);
 
@@ -415,7 +415,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var propertyModels = ((ClassModel)classTypes[0]).Properties;
+        var propertyModels = ((CSharpClassModel)classTypes[0]).Properties;
 
         Assert.Equal(1, propertyModels.Count);
 
@@ -432,7 +432,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("TopLevel.Foo", getAccessor.CalledMethods[0].DefinitionClassName);
         Assert.Equal("TopLevel.Foo", getAccessor.CalledMethods[0].LocationClassName);
         Assert.Equal(1, getAccessor.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel1 = (ParameterModel)getAccessor.CalledMethods[0].ParameterTypes[0];
+        var parameterModel1 = (CSharpParameterModel)getAccessor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel1.Modifier);
         Assert.Equal("int", parameterModel1.Type.Name);
         Assert.Null(parameterModel1.DefaultValue);
@@ -444,7 +444,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("TopLevel.Foo", setAccessor.CalledMethods[0].DefinitionClassName);
         Assert.Equal("TopLevel.Foo", setAccessor.CalledMethods[0].LocationClassName);
         Assert.Equal(1, setAccessor.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel2 = (ParameterModel)setAccessor.CalledMethods[0].ParameterTypes[0];
+        var parameterModel2 = (CSharpParameterModel)setAccessor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel2.Modifier);
         Assert.Equal("int", parameterModel2.Type.Name);
         Assert.Null(parameterModel2.DefaultValue);
@@ -462,7 +462,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(2, classTypes.Count);
 
-        var propertyModels = ((ClassModel)classTypes[1]).Properties;
+        var propertyModels = ((CSharpClassModel)classTypes[1]).Properties;
 
         Assert.Equal(1, propertyModels.Count);
 
@@ -479,7 +479,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("TopLevel.Bar", getAccessor.CalledMethods[0].DefinitionClassName);
         Assert.Equal("TopLevel.Bar", getAccessor.CalledMethods[0].LocationClassName);
         Assert.Equal(1, getAccessor.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel1 = (ParameterModel)getAccessor.CalledMethods[0].ParameterTypes[0];
+        var parameterModel1 = (CSharpParameterModel)getAccessor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel1.Modifier);
         Assert.Equal("int", parameterModel1.Type.Name);
         Assert.Null(parameterModel1.DefaultValue);
@@ -491,7 +491,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("TopLevel.Bar", setAccessor.CalledMethods[0].DefinitionClassName);
         Assert.Equal("TopLevel.Bar", setAccessor.CalledMethods[0].LocationClassName);
         Assert.Equal(1, setAccessor.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel2 = (ParameterModel)setAccessor.CalledMethods[0].ParameterTypes[0];
+        var parameterModel2 = (CSharpParameterModel)setAccessor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel2.Modifier);
         Assert.Equal("int", parameterModel2.Type.Name);
         Assert.Null(parameterModel2.DefaultValue);
@@ -509,7 +509,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var propertyModels = ((ClassModel)classTypes[0]).Properties;
+        var propertyModels = ((CSharpClassModel)classTypes[0]).Properties;
 
         Assert.Equal(1, propertyModels.Count);
 
@@ -526,7 +526,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("ExternClass", getAccessor.CalledMethods[0].DefinitionClassName);
         Assert.Equal("ExternClass", getAccessor.CalledMethods[0].LocationClassName);
         Assert.Equal(1, getAccessor.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel1 = (ParameterModel)getAccessor.CalledMethods[0].ParameterTypes[0];
+        var parameterModel1 = (CSharpParameterModel)getAccessor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel1.Modifier);
         Assert.Equal("int", parameterModel1.Type.Name);
         Assert.Null(parameterModel1.DefaultValue);
@@ -538,7 +538,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("ExternClass", setAccessor.CalledMethods[0].DefinitionClassName);
         Assert.Equal("ExternClass", setAccessor.CalledMethods[0].LocationClassName);
         Assert.Equal(1, setAccessor.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel2 = (ParameterModel)setAccessor.CalledMethods[0].ParameterTypes[0];
+        var parameterModel2 = (CSharpParameterModel)setAccessor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel2.Modifier);
         Assert.Equal("int", parameterModel2.Type.Name);
         Assert.Null(parameterModel2.DefaultValue);
@@ -556,7 +556,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var propertyModels = ((ClassModel)classTypes[0]).Properties;
+        var propertyModels = ((CSharpClassModel)classTypes[0]).Properties;
 
         Assert.Equal(1, propertyModels.Count);
 
@@ -573,7 +573,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("TopLevel.Foo", addAccessor.CalledMethods[0].DefinitionClassName);
         Assert.Equal("TopLevel.Foo", addAccessor.CalledMethods[0].LocationClassName);
         Assert.Equal(1, addAccessor.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel1 = (ParameterModel)addAccessor.CalledMethods[0].ParameterTypes[0];
+        var parameterModel1 = (CSharpParameterModel)addAccessor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel1.Modifier);
         Assert.Equal("double", parameterModel1.Type.Name);
         Assert.Null(parameterModel1.DefaultValue);
@@ -585,7 +585,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("TopLevel.Foo", removeAccessor.CalledMethods[0].DefinitionClassName);
         Assert.Equal("TopLevel.Foo", removeAccessor.CalledMethods[0].LocationClassName);
         Assert.Equal(1, removeAccessor.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel2 = (ParameterModel)removeAccessor.CalledMethods[0].ParameterTypes[0];
+        var parameterModel2 = (CSharpParameterModel)removeAccessor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel2.Modifier);
         Assert.Equal("double", parameterModel2.Type.Name);
         Assert.Null(parameterModel2.DefaultValue);
@@ -603,7 +603,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(2, classTypes.Count);
 
-        var propertyModels = ((ClassModel)classTypes[1]).Properties;
+        var propertyModels = ((CSharpClassModel)classTypes[1]).Properties;
 
         Assert.Equal(1, propertyModels.Count);
 
@@ -620,7 +620,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("TopLevel.Bar", addAccessor.CalledMethods[0].DefinitionClassName);
         Assert.Equal("TopLevel.Bar", addAccessor.CalledMethods[0].LocationClassName);
         Assert.Equal(1, addAccessor.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel1 = (ParameterModel)addAccessor.CalledMethods[0].ParameterTypes[0];
+        var parameterModel1 = (CSharpParameterModel)addAccessor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel1.Modifier);
         Assert.Equal("int", parameterModel1.Type.Name);
         Assert.Null(parameterModel1.DefaultValue);
@@ -632,7 +632,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("TopLevel.Bar", removeAccessor.CalledMethods[0].DefinitionClassName);
         Assert.Equal("TopLevel.Bar", removeAccessor.CalledMethods[0].LocationClassName);
         Assert.Equal(1, removeAccessor.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel2 = (ParameterModel)removeAccessor.CalledMethods[0].ParameterTypes[0];
+        var parameterModel2 = (CSharpParameterModel)removeAccessor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel2.Modifier);
         Assert.Equal("System.Func<string>", parameterModel2.Type.Name);
         Assert.Null(parameterModel2.DefaultValue);
@@ -650,7 +650,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var propertyModels = ((ClassModel)classTypes[0]).Properties;
+        var propertyModels = ((CSharpClassModel)classTypes[0]).Properties;
 
         Assert.Equal(1, propertyModels.Count);
 
@@ -667,7 +667,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("ExternClass", addAccessor.CalledMethods[0].DefinitionClassName);
         Assert.Equal("ExternClass", addAccessor.CalledMethods[0].DefinitionClassName);
         Assert.Equal(1, addAccessor.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel1 = (ParameterModel)addAccessor.CalledMethods[0].ParameterTypes[0];
+        var parameterModel1 = (CSharpParameterModel)addAccessor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel1.Modifier);
         Assert.Equal("int", parameterModel1.Type.Name);
         Assert.Null(parameterModel1.DefaultValue);
@@ -679,7 +679,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("ExternClass", removeAccessor.CalledMethods[0].DefinitionClassName);
         Assert.Equal("ExternClass", removeAccessor.CalledMethods[0].LocationClassName);
         Assert.Equal(1, removeAccessor.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel2 = (ParameterModel)removeAccessor.CalledMethods[0].ParameterTypes[0];
+        var parameterModel2 = (CSharpParameterModel)removeAccessor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel2.Modifier);
         Assert.Equal("System.Func<int>", parameterModel2.Type.Name);
         Assert.Null(parameterModel2.DefaultValue);
@@ -697,7 +697,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(2, classTypes.Count);
 
-        var propertyModels = ((ClassModel)classTypes[1]).Properties;
+        var propertyModels = ((CSharpClassModel)classTypes[1]).Properties;
 
         Assert.Equal(2, propertyModels.Count);
 
@@ -715,7 +715,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("TopLevel.Bar", addAccessor.CalledMethods[0].DefinitionClassName);
         Assert.Equal("TopLevel.Bar", addAccessor.CalledMethods[0].LocationClassName);
         Assert.Equal(1, addAccessor.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel1 = (ParameterModel)addAccessor.CalledMethods[0].ParameterTypes[0];
+        var parameterModel1 = (CSharpParameterModel)addAccessor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel1.Modifier);
         Assert.Equal("int", parameterModel1.Type.Name);
         Assert.Null(parameterModel1.DefaultValue);
@@ -727,7 +727,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("TopLevel.Bar", removeAccessor.CalledMethods[0].DefinitionClassName);
         Assert.Equal("TopLevel.Bar", removeAccessor.CalledMethods[0].LocationClassName);
         Assert.Equal(1, removeAccessor.CalledMethods[0].ParameterTypes.Count);
-        var parameterModel2 = (ParameterModel)removeAccessor.CalledMethods[0].ParameterTypes[0];
+        var parameterModel2 = (CSharpParameterModel)removeAccessor.CalledMethods[0].ParameterTypes[0];
         Assert.Equal("", parameterModel2.Modifier);
         Assert.Equal("System.Func<string>", parameterModel2.Type.Name);
         Assert.Null(parameterModel2.DefaultValue);
@@ -741,7 +741,7 @@ public class CSharpPropertyInfoTests
         var semanticModel = _semanticModelCreator.Create(syntaxTree);
         var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
 
-        var propertyAccessor = ((ClassModel)classTypes[0]).Properties[0].Accessors[0];
+        var propertyAccessor = ((CSharpClassModel)classTypes[0]).Properties[0].Accessors[0];
 
         Assert.Equal(1, propertyAccessor.CalledMethods.Count);
 

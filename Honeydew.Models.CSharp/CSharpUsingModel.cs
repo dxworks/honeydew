@@ -2,9 +2,9 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record UsingModel : IImportType
+public record CSharpUsingModel : IImportType
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
 
     public bool IsStatic { get; init; }
 

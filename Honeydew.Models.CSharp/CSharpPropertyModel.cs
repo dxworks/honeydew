@@ -2,12 +2,11 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record PropertyModel : IPropertyType
+public record CSharpPropertyModel : IPropertyType
 {
-    public int CyclomaticComplexity { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
 
-    public string AccessModifier { get; set; }
+    public string AccessModifier { get; set; } = "";
 
     public string Modifier { get; set; } = "";
 
@@ -18,6 +17,8 @@ public record PropertyModel : IPropertyType
     public bool IsEvent { get; set; }
 
     public bool IsNullable { get; set; }
+
+    public int CyclomaticComplexity { get; set; }
 
     public IList<IAccessorMethodType> Accessors { get; set; } = new List<IAccessorMethodType>();
 

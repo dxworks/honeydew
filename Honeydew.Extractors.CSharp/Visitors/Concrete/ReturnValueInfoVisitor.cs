@@ -29,7 +29,7 @@ public class ReturnValueInfoVisitor :
     {
         if (syntaxNode.Type != "get")
         {
-            modelType.Type = new EntityTypeModel
+            modelType.Type = new CSharpEntityTypeModel
             {
                 Name = "void"
             };

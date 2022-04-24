@@ -2,11 +2,9 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record AccessorMethodModel : IAccessorMethodType
+public record CSharpDestructorModel : IDestructorType
 {
     public string Name { get; set; } = "";
-
-    public IReturnValueType ReturnValue { get; set; }
 
     public IList<IParameterType> ParameterTypes { get; set; } = new List<IParameterType>();
 
