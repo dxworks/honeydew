@@ -19,7 +19,7 @@ namespace TopLevel
 
         private int A()
         {
-            throw new NotImplementedException();
+            throw new Exception("The method or operation is not implemented.");
         }
     }                                  
 }

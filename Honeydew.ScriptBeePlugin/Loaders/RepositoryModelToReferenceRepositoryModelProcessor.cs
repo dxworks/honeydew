@@ -1,10 +1,10 @@
 ﻿using System.Collections.Concurrent;
+using Honeydew.Models;
+using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
+using Honeydew.ScriptBeePlugin.Models;
 using HoneydewCore.Logging;
 using HoneydewCore.Processors;
-using HoneydewCore.Utils;
-using Honeydew.Models.CSharp;
-using Honeydew.ScriptBeePlugin.Models;
 using static Honeydew.ScriptBeePlugin.Loaders.MetricAdder;
 using AttributeModel = Honeydew.ScriptBeePlugin.Models.AttributeModel;
 using ClassModel = Honeydew.ScriptBeePlugin.Models.ClassModel;
@@ -12,13 +12,16 @@ using DelegateModel = Honeydew.Models.CSharp.DelegateModel;
 using EnumModel = Honeydew.Models.CSharp.EnumModel;
 using FieldModel = Honeydew.ScriptBeePlugin.Models.FieldModel;
 using GenericParameterModel = Honeydew.ScriptBeePlugin.Models.GenericParameterModel;
+using LinesOfCode = Honeydew.ScriptBeePlugin.Models.LinesOfCode;
 using LocalVariableModel = Honeydew.ScriptBeePlugin.Models.LocalVariableModel;
 using MethodModel = Honeydew.ScriptBeePlugin.Models.MethodModel;
 using NamespaceModel = Honeydew.ScriptBeePlugin.Models.NamespaceModel;
 using ParameterModel = Honeydew.ScriptBeePlugin.Models.ParameterModel;
+using ProjectModel = Honeydew.ScriptBeePlugin.Models.ProjectModel;
 using PropertyModel = Honeydew.ScriptBeePlugin.Models.PropertyModel;
 using RepositoryModel = Honeydew.Models.RepositoryModel;
 using ReturnValueModel = Honeydew.ScriptBeePlugin.Models.ReturnValueModel;
+using SolutionModel = Honeydew.ScriptBeePlugin.Models.SolutionModel;
 
 namespace Honeydew.ScriptBeePlugin.Loaders;
 
@@ -764,7 +767,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
         return model;
     }
 
-    private MethodModel ConvertAccessor(EntityModel entity, PropertyModel parentProperty, IAccessorType accessorType,
+    private MethodModel ConvertAccessor(EntityModel entity, PropertyModel parentProperty,
+        IAccessorMethodType accessorMethodType,
         ProjectModel projectModel)
     {
         var model = new MethodModel
@@ -772,22 +776,22 @@ public class RepositoryModelToReferenceRepositoryModelProcessor : IProcessorFunc
             ContainingMethod = null,
             ContainingProperty = parentProperty,
             Entity = entity,
-            Name = accessorType.Name,
+            Name = accessorMethodType.Name,
             Type = MethodType.Accessor,
-            LinesOfCode = ConvertLoc(accessorType.Loc),
-            Modifier = accessorType.Modifier,
-            AccessModifier = ConvertAccessModifier(accessorType.AccessModifier),
-            Modifiers = ConvertModifierToModifierList(accessorType.Modifier),
+            LinesOfCode = ConvertLoc(accessorMethodType.Loc),
+            Modifier = accessorMethodType.Modifier,
+            AccessModifier = ConvertAccessModifier(accessorMethodType.AccessModifier),
+            Modifiers = ConvertModifierToModifierList(accessorMethodType.Modifier),
             GenericParameters = new List<GenericParameterModel>(),
-            CyclomaticComplexity = accessorType.CyclomaticComplexity,
-            Attributes = ConvertAttributes(accessorType.Attributes, projectModel),
-            ReturnValue = ConvertReturnValue(accessorType.ReturnValue, projectModel),
-            Parameters = ConvertParameters(accessorType.ParameterTypes, projectModel),
-            LocalVariables = ConvertLocalVariables(accessorType.LocalVariableTypes, projectModel),
+            CyclomaticComplexity = accessorMethodType.CyclomaticComplexity,
+            Attributes = ConvertAttributes(accessorMethodType.Attributes, projectModel),
+            ReturnValue = ConvertReturnValue(accessorMethodType.ReturnValue, projectModel),
+            Parameters = ConvertParameters(accessorMethodType.ParameterTypes, projectModel),
+            LocalVariables = ConvertLocalVariables(accessorMethodType.LocalVariableTypes, projectModel),
         };
 
-        AddMetrics(model, accessorType);
-        model.LocalFunctions = ConvertLocalFunctions(entity, model, accessorType.LocalFunctions, projectModel);
+        AddMetrics(model, accessorMethodType);
+        model.LocalFunctions = ConvertLocalFunctions(entity, model, accessorMethodType.LocalFunctions, projectModel);
 
         return model;
     }

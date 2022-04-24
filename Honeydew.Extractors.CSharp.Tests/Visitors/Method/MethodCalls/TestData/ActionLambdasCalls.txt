@@ -23,7 +23,7 @@ namespace TopLevel
     
         private void A(int obj)
         {
-            throw new System.NotImplementedException();
+            throw new System.Exception("The method or operation is not implemented.");
         }
     }                                      
 }

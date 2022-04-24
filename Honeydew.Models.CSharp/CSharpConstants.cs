@@ -1,4 +1,4 @@
-﻿namespace Honeydew.Extractors.CSharp.Utils;
+﻿namespace Honeydew.Models.CSharp;
 
 public static class CSharpConstants
 {

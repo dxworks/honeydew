@@ -1,6 +1,8 @@
-﻿using Honeydew.Models.Types;
-using HoneydewCore.Utils;
+﻿using Honeydew.Models.CSharp;
+using Honeydew.Models.Types;
 using Honeydew.ScriptBeePlugin.Models;
+using FieldModel = Honeydew.ScriptBeePlugin.Models.FieldModel;
+using MethodModel = Honeydew.ScriptBeePlugin.Models.MethodModel;
 
 namespace Honeydew.ScriptBeePlugin.Loaders;
 

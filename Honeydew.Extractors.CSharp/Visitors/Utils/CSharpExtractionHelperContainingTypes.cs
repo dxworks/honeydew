@@ -1,4 +1,4 @@
-﻿using Honeydew.Extractors.CSharp.Utils;
+﻿using Honeydew.Models.CSharp;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 

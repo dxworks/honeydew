@@ -11,6 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Honeydew.Models.CSharp\Honeydew.Models.CSharp.csproj" />
       <ProjectReference Include="..\HoneydewCore\HoneydewCore.csproj" />
       <ProjectReference Include="..\Honeydew.Models\Honeydew.Models.csproj" />
     </ItemGroup>

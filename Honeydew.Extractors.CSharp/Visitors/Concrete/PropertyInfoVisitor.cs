@@ -1,5 +1,5 @@
-﻿using Honeydew.Extractors.CSharp.Utils;
-using Honeydew.Extractors.Visitors;
+﻿using Honeydew.Extractors.Visitors;
+using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
