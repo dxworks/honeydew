@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
+using Honeydew.Extractors.Dotnet;
 using Honeydew.Extractors.Visitors;
 using Honeydew.Logging;
 using Honeydew.Models.Types;
@@ -14,7 +15,7 @@ public class CSharpDelegateAttributeMetricTests
     private readonly CSharpFactExtractor _factExtractor;
     private readonly Mock<ILogger> _loggerMock = new();
     private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
-    private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
+    private readonly DotnetSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
     public CSharpDelegateAttributeMetricTests()
     {

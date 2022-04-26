@@ -12,9 +12,6 @@ using Honeydew.Logging;
 using Honeydew.Models;
 using Honeydew.PostExtraction.ReferenceRelations;
 using Honeydew.Processors;
-using Honeydew.RepositoryLoading;
-using Honeydew.RepositoryLoading.SolutionRead;
-using Honeydew.RepositoryLoading.Strategies;
 using Honeydew.ScriptBeePlugin.Loaders;
 using Honeydew.Scripts;
 using Honeydew.Utils;
@@ -308,9 +305,8 @@ static async Task<RepositoryModel?> LoadModel(ILogger logger, IProgressLogger pr
 static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger progressLogger,
     ILogger missingFilesLogger, string inputPath, bool parallelExtraction, CancellationToken cancellationToken)
 {
-    var projectLoadingStrategy = GetProjectLoadingStrategy(logger, parallelExtraction);
 
-    var projectExtractorFactory = new ProjectExtractorFactory(logger, progressLogger, projectLoadingStrategy);
+    var projectExtractorFactory = new ProjectExtractorFactory(logger, progressLogger, parallelExtraction);
 
 
     var csharpProjectExtractor = projectExtractorFactory.GetProjectExtractor(ProjectExtractorFactory.CSharp)!;
@@ -324,7 +320,7 @@ static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger 
             new(".csproj", csharpProjectExtractor, new List<FileSchema>
             {
                 new(".cs", new CSharpFactExtractor(CSharpExtractionVisitors.GetVisitors(logger))),
-            })
+            }),
         })
     };
 
@@ -346,11 +342,4 @@ static Dictionary<string, object?> CreateArgumentsDictionary(IDictionary<string,
     }
 
     return result;
-}
-
-static IProjectLoadingStrategy GetProjectLoadingStrategy(ILogger logger, bool parallelExtraction)
-{
-    return parallelExtraction
-        ? new ParallelProjectLoadingStrategy(logger, new ActualFilePathProvider(logger))
-        : new BasicProjectLoadingStrategy(logger, new ActualFilePathProvider(logger));
 }

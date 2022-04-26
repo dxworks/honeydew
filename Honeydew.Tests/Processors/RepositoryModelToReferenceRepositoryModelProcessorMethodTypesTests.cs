@@ -2,6 +2,7 @@
 using Honeydew.Extractors.CSharp;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
+using Honeydew.Extractors.Dotnet;
 using Honeydew.Extractors.Visitors;
 using Honeydew.Logging;
 using Honeydew.Models.CSharp;
@@ -24,7 +25,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorMethodTypesTests
     private readonly Mock<ILogger> _loggerMock = new();
     private readonly Mock<IProgressLogger> _progressLoggerMock = new();
     private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
-    private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
+    private readonly DotnetSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
     public RepositoryModelToReferenceRepositoryModelProcessorMethodTypesTests()
     {
@@ -60,7 +61,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorMethodTypesTests
         var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
             new List<ITypeVisitor<ICompilationUnitType>>
             {
-                new CSharpClassSetterCompilationUnitVisitor(_loggerMock.Object,
+                new CSharpClassSetterVisitor(_loggerMock.Object,
                     new List<ITypeVisitor<IMembersClassType>>
                     {
                         new BaseInfoClassVisitor(),

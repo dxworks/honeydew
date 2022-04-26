@@ -1,0 +1,8 @@
+﻿Namespace SpecialSpace  
+    Namespace System
+        Module Module1
+            Interface Interface1  
+            End Interface  
+        End Module  
+    End Namespace  
+End Namespace  

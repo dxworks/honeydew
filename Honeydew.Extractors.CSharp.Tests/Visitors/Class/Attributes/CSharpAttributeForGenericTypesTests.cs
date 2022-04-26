@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Honeydew.Extractors.CSharp.Visitors.Concrete;
 using Honeydew.Extractors.CSharp.Visitors.Setters;
+using Honeydew.Extractors.Dotnet;
 using Honeydew.Extractors.Visitors;
 using Honeydew.Logging;
 using Honeydew.Models.CSharp;
@@ -29,7 +30,7 @@ public class CSharpAttributeForGenericTypesTests
         var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
             new List<ITypeVisitor<ICompilationUnitType>>
             {
-                new CSharpClassSetterCompilationUnitVisitor(_loggerMock.Object,
+                new CSharpClassSetterVisitor(_loggerMock.Object,
                     new List<ITypeVisitor<IMembersClassType>>
                     {
                         new BaseInfoClassVisitor(),
@@ -104,7 +105,7 @@ public class CSharpAttributeForGenericTypesTests
 ";
 
         var syntacticModelCreator = new CSharpSyntacticModelCreator();
-        var semanticModelCreator = new CSharpSemanticModelCreator(new CSharpCompilationMaker());
+        var semanticModelCreator = new DotnetSemanticModelCreator(new CSharpCompilationMaker());
         var syntaxTree = syntacticModelCreator.Create(fileContent);
         var semanticModel = semanticModelCreator.Create(syntaxTree);
 

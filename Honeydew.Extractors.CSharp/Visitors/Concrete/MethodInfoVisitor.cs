@@ -1,4 +1,4 @@
-﻿using Honeydew.Extractors.CSharp.Visitors.Utils;
+﻿using Honeydew.Extractors.Dotnet;
 using Honeydew.Extractors.Visitors;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;

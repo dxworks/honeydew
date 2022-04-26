@@ -1,0 +1,8 @@
+﻿Namespace SpecialSpace  
+    Namespace System
+        Module Module1
+            Structure Structure1  
+            End Structure  
+        End Module  
+    End Namespace  
+End Namespace  

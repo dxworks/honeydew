@@ -1,15 +1,15 @@
-﻿using Honeydew.Extractors.CSharp.Visitors.Utils;
-using Honeydew.Extractors.Visitors;
+﻿using Honeydew.Extractors.Visitors;
 using Honeydew.Extractors.Visitors.Setters;
 using Honeydew.Logging;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Honeydew.Extractors.Dotnet;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Setters;
 
 public class CSharpAccessedFieldsSetterVisitor :
-    CompositeVisitor<AccessedField>,
+    CompositeVisitor<AccessedField?>,
     IAccessedFieldsSetterVisitor<MethodDeclarationSyntax, SemanticModel, ExpressionSyntax, IMethodType>,
     IAccessedFieldsSetterVisitor<ConstructorDeclarationSyntax, SemanticModel, ExpressionSyntax, IConstructorType>,
     IAccessedFieldsSetterVisitor<DestructorDeclarationSyntax, SemanticModel, ExpressionSyntax, IDestructorType>,
@@ -18,7 +18,7 @@ public class CSharpAccessedFieldsSetterVisitor :
     IAccessedFieldsSetterVisitor<LocalFunctionStatementSyntax, SemanticModel, ExpressionSyntax,
         IMethodTypeWithLocalFunctions>
 {
-    public CSharpAccessedFieldsSetterVisitor(ILogger compositeLogger, IEnumerable<ITypeVisitor<AccessedField>> visitors)
+    public CSharpAccessedFieldsSetterVisitor(ILogger compositeLogger, IEnumerable<ITypeVisitor<AccessedField?>> visitors)
         : base(compositeLogger, visitors)
     {
     }

@@ -198,7 +198,7 @@ internal static class CSharpExtractionVisitors
 
         var compilationUnitVisitors = new List<ITypeVisitor<ICompilationUnitType>>
         {
-            new CSharpClassSetterCompilationUnitVisitor(logger, classVisitors),
+            new CSharpClassSetterVisitor(logger, classVisitors),
             new CSharpDelegateSetterCompilationUnitVisitor(logger, delegateVisitors),
             new CSharpEnumSetterCompilationUnitVisitor(logger, enumVisitors),
             importsVisitor,

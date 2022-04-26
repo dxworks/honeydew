@@ -4,6 +4,7 @@ using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Honeydew.Extractors.Dotnet;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Utils;
 
