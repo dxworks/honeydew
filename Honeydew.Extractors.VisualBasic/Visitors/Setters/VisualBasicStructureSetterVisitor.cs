@@ -10,7 +10,7 @@ namespace Honeydew.Extractors.VisualBasic.Visitors.Setters;
 
 public class VisualBasicStructureSetterVisitor :
     CompositeVisitor<IMembersClassType>,
-    IClassSetterCompilationUnitVisitor<CompilationUnitSyntax, SemanticModel, StructureStatementSyntax>
+    IClassSetterCompilationUnitVisitor<CompilationUnitSyntax, SemanticModel, StructureBlockSyntax>
 {
     public VisualBasicStructureSetterVisitor(ILogger compositeLogger, IEnumerable<ITypeVisitor<IMembersClassType>> visitors)
         : base(compositeLogger, visitors)
@@ -21,8 +21,8 @@ public class VisualBasicStructureSetterVisitor :
 
     public IMembersClassType CreateWrappedType() => new VisualBasicClassModel();
 
-    public IEnumerable<StructureStatementSyntax> GetWrappedSyntaxNodes(CompilationUnitSyntax syntaxNode)
+    public IEnumerable<StructureBlockSyntax> GetWrappedSyntaxNodes(CompilationUnitSyntax syntaxNode)
     {
-        return syntaxNode.DescendantNodes().OfType<StructureStatementSyntax>();
+        return syntaxNode.DescendantNodes().OfType<StructureBlockSyntax>();
     }
 }

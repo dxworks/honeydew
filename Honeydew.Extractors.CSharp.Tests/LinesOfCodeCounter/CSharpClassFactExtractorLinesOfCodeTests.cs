@@ -61,7 +61,7 @@ public class CSharpClassFactExtractorLinesOfCodeTests
                 {
                     linesOfCodeVisitor,
                 }),
-                new CSharpDelegateSetterCompilationUnitVisitor(_loggerMock.Object, new List<ITypeVisitor<IDelegateType>>
+                new CSharpDelegateSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IDelegateType>>
                 {
                     linesOfCodeVisitor
                 }),

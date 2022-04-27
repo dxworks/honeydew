@@ -10,7 +10,7 @@ namespace Honeydew.Extractors.VisualBasic.Visitors.Setters;
 
 public class VisualBasicInterfaceSetterVisitor :
     CompositeVisitor<IMembersClassType>,
-    IClassSetterCompilationUnitVisitor<CompilationUnitSyntax, SemanticModel, InterfaceStatementSyntax>
+    IClassSetterCompilationUnitVisitor<CompilationUnitSyntax, SemanticModel, InterfaceBlockSyntax>
 {
     public VisualBasicInterfaceSetterVisitor(ILogger compositeLogger, IEnumerable<ITypeVisitor<IMembersClassType>> visitors)
         : base(compositeLogger, visitors)
@@ -21,8 +21,8 @@ public class VisualBasicInterfaceSetterVisitor :
 
     public IMembersClassType CreateWrappedType() => new VisualBasicClassModel();
 
-    public IEnumerable<InterfaceStatementSyntax> GetWrappedSyntaxNodes(CompilationUnitSyntax syntaxNode)
+    public IEnumerable<InterfaceBlockSyntax> GetWrappedSyntaxNodes(CompilationUnitSyntax syntaxNode)
     {
-        return syntaxNode.DescendantNodes().OfType<InterfaceStatementSyntax>();
+        return syntaxNode.DescendantNodes().OfType<InterfaceBlockSyntax>();
     }
 }

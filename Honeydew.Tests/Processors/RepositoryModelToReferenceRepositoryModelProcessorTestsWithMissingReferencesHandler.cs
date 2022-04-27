@@ -84,7 +84,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTestsWithMissingR
                                 parameterSetterVisitor,
                                 localFunctionsSetterClassVisitor
                             }),
-                        new CSharpDestructorSetterClassVisitor(_loggerMock.Object,
+                        new CSharpDestructorSetterVisitor(_loggerMock.Object,
                             new List<ITypeVisitor<IDestructorType>>
                             {
                                 new DestructorInfoVisitor(),

@@ -8,46 +8,50 @@ using static Honeydew.Extractors.VisualBasic.Visitors.Utils.VisualBasicExtractio
 namespace Honeydew.Extractors.VisualBasic.Visitors.Concrete;
 
 public class BaseInfoClassVisitor :
-    IExtractionVisitor<ClassStatementSyntax, SemanticModel, IMembersClassType>,
-    IExtractionVisitor<InterfaceStatementSyntax, SemanticModel, IMembersClassType>,
-    IExtractionVisitor<StructureStatementSyntax, SemanticModel, IMembersClassType>
+    IExtractionVisitor<ClassBlockSyntax, SemanticModel, IMembersClassType>,
+    IExtractionVisitor<InterfaceBlockSyntax, SemanticModel, IMembersClassType>,
+    IExtractionVisitor<StructureBlockSyntax, SemanticModel, IMembersClassType>
 {
-    public IMembersClassType Visit(ClassStatementSyntax syntaxNode, SemanticModel semanticModel,
+    public IMembersClassType Visit(ClassBlockSyntax syntaxNode, SemanticModel semanticModel,
         IMembersClassType modelType)
     {
         return UpdateModelType(syntaxNode, semanticModel, modelType);
     }
 
-    public IMembersClassType Visit(InterfaceStatementSyntax syntaxNode, SemanticModel semanticModel,
+    public IMembersClassType Visit(InterfaceBlockSyntax syntaxNode, SemanticModel semanticModel,
         IMembersClassType modelType)
     {
         return UpdateModelType(syntaxNode, semanticModel, modelType);
     }
 
-    public IMembersClassType Visit(StructureStatementSyntax syntaxNode, SemanticModel semanticModel,
+    public IMembersClassType Visit(StructureBlockSyntax syntaxNode, SemanticModel semanticModel,
         IMembersClassType modelType)
     {
         return UpdateModelType(syntaxNode, semanticModel, modelType);
     }
 
-    private static IMembersClassType UpdateModelType(TypeStatementSyntax syntaxNode, SemanticModel semanticModel,
+    private static IMembersClassType UpdateModelType(TypeBlockSyntax blockSyntax, SemanticModel semanticModel,
         IMembersClassType modelType)
     {
         var accessModifier = VisualBasicConstants.DefaultClassAccessModifier;
         var modifier = "";
-        VisualBasicConstants.SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier,
+        VisualBasicConstants.SetModifiers(blockSyntax.BlockStatement.Modifiers.ToString(), ref accessModifier,
             ref modifier);
 
-        modelType.Name = GetFullName(syntaxNode, semanticModel).Name;
+        modelType.Name = GetFullName(blockSyntax, semanticModel).Name;
         modelType.AccessModifier = accessModifier;
         modelType.Modifier = modifier;
-        modelType.ClassType = syntaxNode.Kind().ToString().Replace("Statement", "").ToLower();
-        modelType.ContainingNamespaceName = GetContainingNamespaceName(syntaxNode, semanticModel);
-        modelType.ContainingClassName = GetContainingClassName(syntaxNode, semanticModel);
+        modelType.ClassType = blockSyntax.Kind()
+            .ToString()
+            .Replace("Statement", "")
+            .Replace("Block", "")
+            .ToLower();
+        modelType.ContainingNamespaceName = GetContainingNamespaceName(blockSyntax, semanticModel);
+        modelType.ContainingClassName = GetContainingClassName(blockSyntax, semanticModel);
 
         if (modelType is VisualBasicClassModel visualBasicClassModel)
         {
-            visualBasicClassModel.ContainingModuleName = GetContainingModuleName(syntaxNode);
+            visualBasicClassModel.ContainingModuleName = GetContainingModuleName(blockSyntax);
         }
 
         return modelType;

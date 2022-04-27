@@ -8,11 +8,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Setters;
 
-public class CSharpDestructorSetterClassVisitor :
+public class CSharpDestructorSetterVisitor :
     CompositeVisitor<IDestructorType>,
     IDestructorSetterClassVisitor<TypeDeclarationSyntax, SemanticModel, DestructorDeclarationSyntax>
 {
-    public CSharpDestructorSetterClassVisitor(ILogger compositeLogger,
+    public CSharpDestructorSetterVisitor(ILogger compositeLogger,
         IEnumerable<ITypeVisitor<IDestructorType>> visitors) : base(compositeLogger, visitors)
     {
     }

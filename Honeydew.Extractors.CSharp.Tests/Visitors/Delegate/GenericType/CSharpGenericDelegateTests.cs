@@ -23,7 +23,7 @@ public class CSharpGenericDelegateTests
         var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
             new List<ITypeVisitor<ICompilationUnitType>>
             {
-                new CSharpDelegateSetterCompilationUnitVisitor(_loggerMock.Object, new List<ITypeVisitor<IDelegateType>>
+                new CSharpDelegateSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IDelegateType>>
                 {
                     new BaseInfoDelegateVisitor(),
                     new CSharpGenericParameterSetterVisitor(_loggerMock.Object,

@@ -159,7 +159,7 @@ internal static class CSharpExtractionVisitors
             new BaseTypesClassVisitor(),
             new CSharpMethodSetterClassVisitor(logger, methodVisitors),
             new CSharpConstructorSetterClassVisitor(logger, constructorVisitors),
-            new CSharpDestructorSetterClassVisitor(logger, destructorVisitors),
+            new CSharpDestructorSetterVisitor(logger, destructorVisitors),
             new CSharpFieldSetterClassVisitor(logger, fieldVisitors),
             new CSharpPropertySetterClassVisitor(logger, propertyVisitors),
             importsVisitor,
@@ -199,7 +199,7 @@ internal static class CSharpExtractionVisitors
         var compilationUnitVisitors = new List<ITypeVisitor<ICompilationUnitType>>
         {
             new CSharpClassSetterVisitor(logger, classVisitors),
-            new CSharpDelegateSetterCompilationUnitVisitor(logger, delegateVisitors),
+            new CSharpDelegateSetterVisitor(logger, delegateVisitors),
             new CSharpEnumSetterVisitor(logger, enumVisitors),
             importsVisitor,
             linesOfCodeVisitor,
