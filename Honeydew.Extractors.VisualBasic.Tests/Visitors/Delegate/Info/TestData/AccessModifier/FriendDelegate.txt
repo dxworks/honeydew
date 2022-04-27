@@ -1,0 +1,3 @@
+﻿Module Module1
+    Friend Delegate Sub Delegate1() 
+End Module

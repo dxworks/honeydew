@@ -1,26 +1,8 @@
-﻿using System.Text;
-using Honeydew.Extractors.Dotnet;
-using Honeydew.Models.Types;
+﻿using Honeydew.Models.Types;
 using Honeydew.Models.VisualBasic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.VisualBasic;
-using AttributeListSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.AttributeListSyntax;
-using AttributeSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.AttributeSyntax;
-using ConditionalAccessExpressionSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.ConditionalAccessExpressionSyntax;
-using DoStatementSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.DoStatementSyntax;
-using EnumMemberDeclarationSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.EnumMemberDeclarationSyntax;
-using ExpressionSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.ExpressionSyntax;
-using ForEachStatementSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.ForEachStatementSyntax;
-using ForStatementSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.ForStatementSyntax;
-using IfStatementSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.IfStatementSyntax;
-using InvocationExpressionSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.InvocationExpressionSyntax;
-using LiteralExpressionSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.LiteralExpressionSyntax;
-using MemberAccessExpressionSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.MemberAccessExpressionSyntax;
-using NameSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.NameSyntax;
-using ParameterSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.ParameterSyntax;
-using TypeParameterSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.TypeParameterSyntax;
-using TypeSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.TypeSyntax;
-using WhileStatementSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.WhileStatementSyntax;
+using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 
 namespace Honeydew.Extractors.VisualBasic.Visitors.Utils;
 
@@ -252,31 +234,6 @@ public static partial class VisualBasicExtractionHelperMethods
     //     };
     // }
 
-    // public static VisualBasicParameterModel? ExtractInfoAboutParameter(BaseParameterSyntax baseParameterSyntax,
-    //     SemanticModel semanticModel)
-    // {
-    //     if (baseParameterSyntax.Type is null)
-    //     {
-    //         return null;
-    //     }
-    //     
-    //     var parameterType = GetFullName(baseParameterSyntax.Type, semanticModel, out var isNullable);
-    //
-    //     string? defaultValue = null;
-    //
-    //     if (baseParameterSyntax is ParameterSyntax parameterSyntax)
-    //     {
-    //         defaultValue = parameterSyntax.Default?.Value.ToString();
-    //     }
-    //
-    //     return new VisualBasicParameterModel
-    //     {
-    //         Type = parameterType,
-    //         Modifier = baseParameterSyntax.Modifiers.ToString(),
-    //         DefaultValue = defaultValue,
-    //         IsNullable = isNullable
-    //     };
-    // }
     //
     // public static IEntityType GetContainingType(SyntaxNode syntaxNode, SemanticModel semanticModel)
     // {
@@ -413,7 +370,12 @@ public static partial class VisualBasicExtractionHelperMethods
     //
     //     return modifier;
     // }
-    //
+    
+    public static int CalculateCyclomaticComplexity(MethodBlockSyntax methodBlockSyntax)
+    {
+        return CalculateCyclomaticComplexityForSyntaxNode(methodBlockSyntax) + 1;
+    }
+
     // public static int CalculateCyclomaticComplexity(ArrowExpressionClauseSyntax syntax)
     // {
     //     return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
@@ -444,73 +406,66 @@ public static partial class VisualBasicExtractionHelperMethods
     // {
     //     return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
     // }
-    //
-    // private static int CalculateCyclomaticComplexity(ExpressionSyntax? conditionExpressionSyntax)
-    // {
-    //     if (conditionExpressionSyntax == null)
-    //     {
-    //         return 1;
-    //     }
-    //
-    //     var logicalOperatorsCount = conditionExpressionSyntax
-    //         .DescendantTokens()
-    //         .Count(token =>
-    //         {
-    //             var syntaxKind = token.Kind();
-    //             return syntaxKind is SyntaxKind.AmpersandAmpersandToken or SyntaxKind.BarBarToken or SyntaxKind
-    //                 .AndKeyword or SyntaxKind.OrKeyword;
-    //         });
-    //
-    //     return logicalOperatorsCount + 1;
-    // }
-    //
-    // private static int CalculateCyclomaticComplexityForSyntaxNode(SyntaxNode syntax)
-    // {
-    //     var count = 0;
-    //     foreach (var descendantNode in syntax.DescendantNodes())
-    //     {
-    //         switch (descendantNode)
-    //         {
-    //             case WhileStatementSyntax whileStatementSyntax:
-    //             {
-    //                 count += CalculateCyclomaticComplexity(whileStatementSyntax.Condition);
-    //             }
-    //                 break;
-    //             case IfStatementSyntax ifStatementSyntax:
-    //             {
-    //                 count += CalculateCyclomaticComplexity(ifStatementSyntax.Condition);
-    //             }
-    //                 break;
-    //             case ForStatementSyntax forStatementSyntax:
-    //             {
-    //                 count += CalculateCyclomaticComplexity(forStatementSyntax.Condition);
-    //             }
-    //                 break;
-    //             case DoStatementSyntax:
-    //             case CaseSwitchLabelSyntax:
-    //             case DefaultSwitchLabelSyntax:
-    //             case CasePatternSwitchLabelSyntax:
-    //             case ForEachStatementSyntax:
-    //             case ConditionalExpressionSyntax:
-    //             case ConditionalAccessExpressionSyntax:
-    //                 count++;
-    //                 break;
-    //             default:
-    //             {
-    //                 switch (descendantNode.Kind())
-    //                 {
-    //                     case SyntaxKind.CoalesceAssignmentExpression:
-    //                     case SyntaxKind.CoalesceExpression:
-    //                         count++;
-    //                         break;
-    //                 }
-    //             }
-    //                 break;
-    //         }
-    //     }
-    //
-    //     return count;
-    // }
+
+    private static int CalculateCyclomaticComplexity(ExpressionSyntax? conditionExpressionSyntax)
+    {
+        if (conditionExpressionSyntax == null)
+        {
+            return 1;
+        }
+
+        var logicalOperatorsCount = conditionExpressionSyntax
+            .DescendantTokens()
+            .Count(token =>
+            {
+                var syntaxKind = token.Kind();
+                return syntaxKind is SyntaxKind.AndKeyword or SyntaxKind.OrKeyword;
+            });
+
+        return logicalOperatorsCount + 1;
+    }
+
+    private static int CalculateCyclomaticComplexityForSyntaxNode(SyntaxNode syntax)
+    {
+        var count = 0;
+        foreach (var descendantNode in syntax.DescendantNodes())
+        {
+            switch (descendantNode)
+            {
+                case WhileStatementSyntax whileStatementSyntax:
+                {
+                    count += CalculateCyclomaticComplexity(whileStatementSyntax.Condition);
+                }
+                    break;
+                case IfStatementSyntax ifStatementSyntax:
+                {
+                    count += CalculateCyclomaticComplexity(ifStatementSyntax.Condition);
+                }
+                    break;
+                case ElseIfBlockSyntax elseIfBlockSyntax:
+                {
+                    count += CalculateCyclomaticComplexity(elseIfBlockSyntax.ElseIfStatement.Condition);
+                }
+                    break;
+                case ElseIfStatementSyntax elseIfStatementSyntax:
+                {
+                    count += CalculateCyclomaticComplexity(elseIfStatementSyntax.Condition);
+                }
+                    break;
+
+                case ForStatementSyntax:
+                case DoStatementSyntax:
+                case CaseStatementSyntax:
+                case ElseCaseClauseSyntax:
+                case ForEachStatementSyntax:
+                case ConditionalAccessExpressionSyntax:
+                    count++;
+                    break;
+            }
+        }
+
+        return count;
+    }
     //
     // public static IEnumerable<IParameterType> GetParameters(AttributeSyntax attributeSyntax,
     //     SemanticModel semanticModel)
