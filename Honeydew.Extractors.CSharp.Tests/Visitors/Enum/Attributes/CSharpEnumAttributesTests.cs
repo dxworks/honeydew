@@ -29,7 +29,7 @@ public class CSharpEnumAttributesTests
         var compositeVisitor = new CSharpCompilationUnitCompositeVisitor(_loggerMock.Object,
             new List<ITypeVisitor<ICompilationUnitType>>
             {
-                new CSharpEnumSetterCompilationUnitVisitor(_loggerMock.Object, new List<ITypeVisitor<IEnumType>>
+                new CSharpEnumSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IEnumType>>
                 {
                     new BaseInfoEnumVisitor(),
                     new CSharpEnumLabelsSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IEnumLabelType>>

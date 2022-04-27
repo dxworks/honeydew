@@ -58,8 +58,7 @@ public static partial class VisualBasicExtractionHelperMethods
 
     public static string GetContainingClassName(SyntaxNode syntaxNode, SemanticModel semanticModel)
     {
-        var parentTypeBlockSyntax = syntaxNode.GetParentDeclarationSyntax<TypeBlockSyntax>()
-            ?.GetParentDeclarationSyntax<TypeBlockSyntax>();
+        var parentTypeBlockSyntax = syntaxNode.GetParentDeclarationSyntax<TypeBlockSyntax>();
 
         if (parentTypeBlockSyntax is ModuleBlockSyntax)
         {

@@ -1,0 +1,4 @@
+﻿Module Module1
+    Public Enum Enum1   
+    End Enum
+End Module

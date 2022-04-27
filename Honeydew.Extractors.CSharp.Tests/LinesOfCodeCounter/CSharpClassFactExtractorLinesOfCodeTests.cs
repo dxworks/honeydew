@@ -57,7 +57,7 @@ public class CSharpClassFactExtractorLinesOfCodeTests
                                 })
                         })
                     }),
-                new CSharpEnumSetterCompilationUnitVisitor(_loggerMock.Object, new List<ITypeVisitor<IEnumType>>
+                new CSharpEnumSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IEnumType>>
                 {
                     linesOfCodeVisitor,
                 }),

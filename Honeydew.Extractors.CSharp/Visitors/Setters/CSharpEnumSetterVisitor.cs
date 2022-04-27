@@ -4,16 +4,15 @@ using Honeydew.Logging;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Setters;
 
-public class CSharpEnumSetterCompilationUnitVisitor :
+public class CSharpEnumSetterVisitor :
     CompositeVisitor<IEnumType>,
-    IEnumSetterCompilationUnitVisitor<CSharpSyntaxNode, SemanticModel, EnumDeclarationSyntax>
+    IEnumSetterCompilationUnitVisitor<CompilationUnitSyntax, SemanticModel, EnumDeclarationSyntax>
 {
-    public CSharpEnumSetterCompilationUnitVisitor(ILogger compositeLogger,
+    public CSharpEnumSetterVisitor(ILogger compositeLogger,
         IEnumerable<ITypeVisitor<IEnumType>> visitors) : base(compositeLogger, visitors)
     {
     }
@@ -21,7 +20,7 @@ public class CSharpEnumSetterCompilationUnitVisitor :
     public ILogger Logger => CompositeLogger;
     public IEnumType CreateWrappedType() => new CSharpEnumModel();
 
-    public IEnumerable<EnumDeclarationSyntax> GetWrappedSyntaxNodes(CSharpSyntaxNode syntaxNode)
+    public IEnumerable<EnumDeclarationSyntax> GetWrappedSyntaxNodes(CompilationUnitSyntax syntaxNode)
     {
         return syntaxNode.DescendantNodes().OfType<EnumDeclarationSyntax>();
     }

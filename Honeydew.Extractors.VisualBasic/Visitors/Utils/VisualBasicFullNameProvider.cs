@@ -33,9 +33,10 @@ internal static class VisualBasicFullNameProvider
         switch (syntaxNode)
         {
             case TypeStatementSyntax:
-            // case DelegateStatementSyntax:
-            // case BaseMethodDeclarationSyntax:
-            // case BasePropertyDeclarationSyntax:
+            case EnumStatementSyntax:
+                // case DelegateStatementSyntax:
+                // case BaseMethodDeclarationSyntax:
+                // case BasePropertyDeclarationSyntax:
             {
                 var declaredSymbol = semanticModel.GetDeclaredSymbol(syntaxNode);
                 if (declaredSymbol != null)
@@ -58,51 +59,51 @@ internal static class VisualBasicFullNameProvider
                 return GetFullName(typeBlockSyntax.BlockStatement, semanticModel, out isNullable);
             }
 
-            // case PredefinedTypeSyntax predefinedTypeSyntax:
-            // {
-            //     var symbolInfo = semanticModel.GetSymbolInfo(predefinedTypeSyntax);
-            //     if (symbolInfo.Symbol != null)
-            //     {
-            //         var symbolName = symbolInfo.Symbol.ToString();
-            //         if (!string.IsNullOrEmpty(symbolName) && symbolName.EndsWith('?'))
-            //         {
-            //             isNullable = true;
-            //         }
-            //
-            //         return CreateEntityTypeModel(symbolName);
-            //     }
-            //
-            //     var typeInfo = semanticModel.GetTypeInfo(predefinedTypeSyntax);
-            //     if (typeInfo.Type != null)
-            //     {
-            //         var typeName = typeInfo.Type.ToString();
-            //         if (!string.IsNullOrEmpty(typeName) && typeName.EndsWith('?'))
-            //         {
-            //             isNullable = true;
-            //         }
-            //
-            //         return CreateEntityTypeModel(typeName);
-            //     }
-            //
-            //     name = "";
-            //     isExtern = true;
-            // }
-            //     break;
-            //
-            // case BaseExpressionSyntax baseExpressionSyntax:
-            // {
-            //     var typeInfo = semanticModel.GetTypeInfo(baseExpressionSyntax);
-            //     if (typeInfo.Type != null)
-            //     {
-            //         var typeName = typeInfo.Type.ToDisplayString();
-            //         if (!string.IsNullOrEmpty(typeName) && typeName.EndsWith('?'))
-            //         {
-            //             isNullable = true;
-            //         }
-            //
-            //         return CreateEntityTypeModel(typeName);
-            //     }
-            // }
+                // case PredefinedTypeSyntax predefinedTypeSyntax:
+                // {
+                //     var symbolInfo = semanticModel.GetSymbolInfo(predefinedTypeSyntax);
+                //     if (symbolInfo.Symbol != null)
+                //     {
+                //         var symbolName = symbolInfo.Symbol.ToString();
+                //         if (!string.IsNullOrEmpty(symbolName) && symbolName.EndsWith('?'))
+                //         {
+                //             isNullable = true;
+                //         }
+                //
+                //         return CreateEntityTypeModel(symbolName);
+                //     }
+                //
+                //     var typeInfo = semanticModel.GetTypeInfo(predefinedTypeSyntax);
+                //     if (typeInfo.Type != null)
+                //     {
+                //         var typeName = typeInfo.Type.ToString();
+                //         if (!string.IsNullOrEmpty(typeName) && typeName.EndsWith('?'))
+                //         {
+                //             isNullable = true;
+                //         }
+                //
+                //         return CreateEntityTypeModel(typeName);
+                //     }
+                //
+                //     name = "";
+                //     isExtern = true;
+                // }
+                //     break;
+                //
+                // case BaseExpressionSyntax baseExpressionSyntax:
+                // {
+                //     var typeInfo = semanticModel.GetTypeInfo(baseExpressionSyntax);
+                //     if (typeInfo.Type != null)
+                //     {
+                //         var typeName = typeInfo.Type.ToDisplayString();
+                //         if (!string.IsNullOrEmpty(typeName) && typeName.EndsWith('?'))
+                //         {
+                //             isNullable = true;
+                //         }
+                //
+                //         return CreateEntityTypeModel(typeName);
+                //     }
+                // }
                 break;
 
             // case TypeSyntax typeSyntax:

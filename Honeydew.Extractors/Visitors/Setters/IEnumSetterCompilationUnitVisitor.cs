@@ -2,7 +2,7 @@
 
 namespace Honeydew.Extractors.Visitors.Setters;
 
-public interface IEnumSetterCompilationUnitVisitor<in TSyntaxNode, TSemanticModel, TClassSyntaxNode> :
+public interface IEnumSetterCompilationUnitVisitor<in TSyntaxNode, in TSemanticModel, TClassSyntaxNode> :
     ISetterVisitor<TSyntaxNode, TSemanticModel, ICompilationUnitType, TClassSyntaxNode, IEnumType>
 {
     string ISetterVisitor<TSyntaxNode, TSemanticModel, ICompilationUnitType, TClassSyntaxNode, IEnumType>.Name()

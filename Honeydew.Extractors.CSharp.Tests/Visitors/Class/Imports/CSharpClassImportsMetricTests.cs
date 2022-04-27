@@ -37,7 +37,7 @@ public class CSharpClassImportsMetricTests
                     new BaseInfoDelegateVisitor(),
                     importsVisitor
                 }),
-                new CSharpEnumSetterCompilationUnitVisitor(_loggerMock.Object, new List<ITypeVisitor<IEnumType>>
+                new CSharpEnumSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IEnumType>>
                 {
                     new BaseInfoEnumVisitor(),
                     importsVisitor

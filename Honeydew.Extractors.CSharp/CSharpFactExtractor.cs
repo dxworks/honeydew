@@ -1,4 +1,5 @@
-﻿using Honeydew.Extractors.Visitors;
+﻿using Honeydew.Extractors.Dotnet;
+using Honeydew.Extractors.Visitors;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
@@ -11,7 +12,7 @@ public class CSharpFactExtractor : IFactExtractor
 {
     private readonly CompositeVisitor<ICompilationUnitType> _compositeVisitor;
     private readonly CSharpSyntacticModelCreator _syntacticModelCreator = new();
-    private readonly CSharpSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
+    private readonly DotnetSemanticModelCreator _semanticModelCreator = new(new CSharpCompilationMaker());
 
     public CSharpFactExtractor(CompositeVisitor<ICompilationUnitType> compositeVisitor)
     {

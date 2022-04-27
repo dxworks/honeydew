@@ -582,7 +582,7 @@ public static partial class VisualBasicExtractionHelperMethods
     //             ArrowExpressionClauseSyntax => "method",
     //             TypeStatementSyntax => "type",
     //             DelegateStatementSyntax => "type",
-    //             EnumStatementSyntax => "type",
+    //             EnumBlockSyntax => "type",
     //             EnumMemberDeclarationSyntax => "field",
     //             BaseFieldDeclarationSyntax => "field",
     //             BasePropertyDeclarationSyntax => "property",

@@ -200,7 +200,7 @@ internal static class CSharpExtractionVisitors
         {
             new CSharpClassSetterVisitor(logger, classVisitors),
             new CSharpDelegateSetterCompilationUnitVisitor(logger, delegateVisitors),
-            new CSharpEnumSetterCompilationUnitVisitor(logger, enumVisitors),
+            new CSharpEnumSetterVisitor(logger, enumVisitors),
             importsVisitor,
             linesOfCodeVisitor,
         };
