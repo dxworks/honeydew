@@ -75,19 +75,19 @@ public class CSharpFieldsInfoMetricTests
         Assert.Equal("int", fieldTypes[0].Type.Name);
         Assert.Equal("readonly", fieldTypes[0].Modifier);
         Assert.Equal("private", fieldTypes[0].AccessModifier);
-        Assert.False(fieldTypes[0].IsEvent);
+        Assert.False(((CSharpFieldModel)fieldTypes[0]).IsEvent);
 
         Assert.Equal("X", fieldTypes[1].Name);
         Assert.Equal("float", fieldTypes[1].Type.Name);
         Assert.Equal("volatile", fieldTypes[1].Modifier);
         Assert.Equal("private", fieldTypes[1].AccessModifier);
-        Assert.False(fieldTypes[1].IsEvent);
+        Assert.False(((CSharpFieldModel)fieldTypes[1]).IsEvent);
 
         Assert.Equal("Y", fieldTypes[2].Name);
         Assert.Equal("string", fieldTypes[2].Type.Name);
         Assert.Equal("static", fieldTypes[2].Modifier);
         Assert.Equal("private", fieldTypes[2].AccessModifier);
-        Assert.False(fieldTypes[2].IsEvent);
+        Assert.False(((CSharpFieldModel)fieldTypes[2]).IsEvent);
     }
 
     [Theory]
@@ -121,31 +121,31 @@ public class CSharpFieldsInfoMetricTests
         Assert.Equal("int", fieldTypes[0].Type.Name);
         Assert.Equal("", fieldTypes[0].Modifier);
         Assert.Equal(modifier, fieldTypes[0].AccessModifier);
-        Assert.False(fieldTypes[0].IsEvent);
+        Assert.False(((CSharpFieldModel)fieldTypes[0]).IsEvent);
 
         Assert.Equal("X", fieldTypes[1].Name);
         Assert.Equal("float", fieldTypes[1].Type.Name);
         Assert.Equal("", fieldTypes[1].Modifier);
         Assert.Equal(modifier, fieldTypes[1].AccessModifier);
-        Assert.False(fieldTypes[1].IsEvent);
+        Assert.False(((CSharpFieldModel)fieldTypes[1]).IsEvent);
 
         Assert.Equal("Yaz_fafa", fieldTypes[2].Name);
         Assert.Equal("float", fieldTypes[2].Type.Name);
         Assert.Equal("", fieldTypes[2].Modifier);
         Assert.Equal(modifier, fieldTypes[2].AccessModifier);
-        Assert.False(fieldTypes[2].IsEvent);
+        Assert.False(((CSharpFieldModel)fieldTypes[2]).IsEvent);
 
         Assert.Equal("_zxy", fieldTypes[3].Name);
         Assert.Equal("string", fieldTypes[3].Type.Name);
         Assert.Equal("", fieldTypes[3].Modifier);
         Assert.Equal(modifier, fieldTypes[3].AccessModifier);
-        Assert.False(fieldTypes[3].IsEvent);
+        Assert.False(((CSharpFieldModel)fieldTypes[3]).IsEvent);
 
         Assert.Equal("extractor", fieldTypes[4].Name);
         Assert.Equal("CSharpMetricExtractor", fieldTypes[4].Type.Name);
         Assert.Equal("", fieldTypes[4].Modifier);
         Assert.Equal(modifier, fieldTypes[4].AccessModifier);
-        Assert.False(fieldTypes[4].IsEvent);
+        Assert.False(((CSharpFieldModel)fieldTypes[4]).IsEvent);
     }
 
     [Theory]
@@ -179,25 +179,25 @@ public class CSharpFieldsInfoMetricTests
         Assert.Equal("CSharpMetricExtractor", fieldTypes[0].Type.Name);
         Assert.Equal("", fieldTypes[0].Modifier);
         Assert.Equal(visibility, fieldTypes[0].AccessModifier);
-        Assert.True(fieldTypes[0].IsEvent);
+        Assert.True(((CSharpFieldModel)fieldTypes[0]).IsEvent);
 
         Assert.Equal("_some_event", fieldTypes[1].Name);
         Assert.Equal("int", fieldTypes[1].Type.Name);
         Assert.Equal("", fieldTypes[1].Modifier);
         Assert.Equal(visibility, fieldTypes[1].AccessModifier);
-        Assert.True(fieldTypes[1].IsEvent);
+        Assert.True(((CSharpFieldModel)fieldTypes[1]).IsEvent);
 
         Assert.Equal("MyAction1", fieldTypes[2].Name);
         Assert.Equal("System.Action", fieldTypes[2].Type.Name);
         Assert.Equal("", fieldTypes[2].Modifier);
         Assert.Equal(visibility, fieldTypes[2].AccessModifier);
-        Assert.True(fieldTypes[2].IsEvent);
+        Assert.True(((CSharpFieldModel)fieldTypes[2]).IsEvent);
 
         Assert.Equal("MyAction2", fieldTypes[3].Name);
         Assert.Equal("System.Action", fieldTypes[3].Type.Name);
         Assert.Equal("", fieldTypes[3].Modifier);
         Assert.Equal(visibility, fieldTypes[3].AccessModifier);
-        Assert.True(fieldTypes[3].IsEvent);
+        Assert.True(((CSharpFieldModel)fieldTypes[3]).IsEvent);
     }
 
     [Theory]
@@ -230,30 +230,30 @@ public class CSharpFieldsInfoMetricTests
         Assert.Equal("int", fieldTypes[0].Type.Name);
         Assert.Equal(modifier, fieldTypes[0].Modifier);
         Assert.Equal("public", fieldTypes[0].AccessModifier);
-        Assert.False(fieldTypes[0].IsEvent);
+        Assert.False(((CSharpFieldModel)fieldTypes[0]).IsEvent);
 
         Assert.Equal("X", fieldTypes[1].Name);
         Assert.Equal("float", fieldTypes[1].Type.Name);
         Assert.Equal(modifier, fieldTypes[1].Modifier);
         Assert.Equal("protected", fieldTypes[1].AccessModifier);
-        Assert.False(fieldTypes[1].IsEvent);
+        Assert.False(((CSharpFieldModel)fieldTypes[1]).IsEvent);
 
         Assert.Equal("Yaz_fafa", fieldTypes[2].Name);
         Assert.Equal("float", fieldTypes[2].Type.Name);
         Assert.Equal(modifier, fieldTypes[2].Modifier);
         Assert.Equal("protected", fieldTypes[2].AccessModifier);
-        Assert.False(fieldTypes[2].IsEvent);
+        Assert.False(((CSharpFieldModel)fieldTypes[2]).IsEvent);
 
         Assert.Equal("_zxy", fieldTypes[3].Name);
         Assert.Equal("string", fieldTypes[3].Type.Name);
         Assert.Equal(modifier, fieldTypes[3].Modifier);
         Assert.Equal("private", fieldTypes[3].AccessModifier);
-        Assert.False(fieldTypes[3].IsEvent);
+        Assert.False(((CSharpFieldModel)fieldTypes[3]).IsEvent);
 
         Assert.Equal("extractor", fieldTypes[4].Name);
         Assert.Equal("CSharpMetricExtractor", fieldTypes[4].Type.Name);
         Assert.Equal(modifier, fieldTypes[4].Modifier);
         Assert.Equal("private", fieldTypes[4].AccessModifier);
-        Assert.False(fieldTypes[4].IsEvent);
+        Assert.False(((CSharpFieldModel)fieldTypes[4]).IsEvent);
     }
 }

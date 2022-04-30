@@ -74,7 +74,7 @@ public class CSharpPropertyInfoTests
         var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(1, classModel.Properties.Count);
-        var property = classModel.Properties[0];
+        var property = (CSharpPropertyModel)classModel.Properties[0];
         Assert.Equal("Value", property.Name);
         Assert.Equal("public", property.AccessModifier);
         Assert.Equal("int", property.Type.Name);
@@ -107,7 +107,7 @@ public class CSharpPropertyInfoTests
         var classModel = (CSharpClassModel)classTypes[0];
 
         Assert.Equal(1, classModel.Properties.Count);
-        var property = classModel.Properties[0];
+        var property = (CSharpPropertyModel)classModel.Properties[0];
         Assert.Equal("Value", property.Name);
         Assert.Equal("public", property.AccessModifier);
         Assert.Equal("System.Func<int>", property.Type.Name);
@@ -146,7 +146,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(1, classTypes.Count);
 
-        var propertyModel = ((CSharpClassModel)classTypes[0]).Properties[0];
+        var propertyModel = (CSharpPropertyModel)((CSharpClassModel)classTypes[0]).Properties[0];
         Assert.Equal("Value", propertyModel.Name);
         Assert.Equal("abstract", propertyModel.Modifier);
         Assert.Equal("public", propertyModel.AccessModifier);
@@ -178,7 +178,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("int", propertyTypes[0].Type.Name);
         Assert.Equal("static", propertyTypes[0].Modifier);
         Assert.Equal("private", propertyTypes[0].AccessModifier);
-        Assert.False(propertyTypes[0].IsEvent);
+        Assert.False(((CSharpPropertyModel)propertyTypes[0]).IsEvent);
         foreach (var accessor in propertyTypes[0].Accessors)
         {
             Assert.Empty(accessor.CalledMethods);
@@ -188,7 +188,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("float", propertyTypes[1].Type.Name);
         Assert.Equal("", propertyTypes[1].Modifier);
         Assert.Equal("private", propertyTypes[1].AccessModifier);
-        Assert.False(propertyTypes[1].IsEvent);
+        Assert.False(((CSharpPropertyModel)propertyTypes[1]).IsEvent);
         foreach (var accessor in propertyTypes[1].Accessors)
         {
             Assert.Empty(accessor.CalledMethods);
@@ -226,7 +226,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("int", propertyModels[0].Type.Name);
         Assert.Equal("", propertyModels[0].Modifier);
         Assert.Equal(modifier, propertyModels[0].AccessModifier);
-        Assert.False(propertyModels[0].IsEvent);
+        Assert.False(((CSharpPropertyModel)propertyModels[0]).IsEvent);
         foreach (var accessor in propertyModels[0].Accessors)
         {
             Assert.Empty(accessor.CalledMethods);
@@ -236,7 +236,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("float", propertyModels[1].Type.Name);
         Assert.Equal("", propertyModels[1].Modifier);
         Assert.Equal(modifier, propertyModels[1].AccessModifier);
-        Assert.False(propertyModels[1].IsEvent);
+        Assert.False(((CSharpPropertyModel)propertyModels[1]).IsEvent);
         foreach (var accessor in propertyModels[1].Accessors)
         {
             Assert.Empty(accessor.CalledMethods);
@@ -246,7 +246,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("CSharpMetricExtractor", propertyModels[2].Type.Name);
         Assert.Equal("", propertyModels[2].Modifier);
         Assert.Equal(modifier, propertyModels[2].AccessModifier);
-        Assert.False(propertyModels[2].IsEvent);
+        Assert.False(((CSharpPropertyModel)propertyModels[2]).IsEvent);
         foreach (var accessor in propertyModels[2].Accessors)
         {
             Assert.Empty(accessor.CalledMethods);
@@ -285,7 +285,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("CSharpMetricExtractor", propertyModels[0].Type.Name);
         Assert.Equal("", propertyModels[0].Modifier);
         Assert.Equal(visibility, propertyModels[0].AccessModifier);
-        Assert.True(propertyModels[0].IsEvent);
+        Assert.True(((CSharpPropertyModel)propertyModels[0]).IsEvent);
         foreach (var accessor in propertyModels[0].Accessors)
         {
             Assert.Empty(accessor.CalledMethods);
@@ -295,7 +295,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("int", propertyModels[1].Type.Name);
         Assert.Equal("", propertyModels[1].Modifier);
         Assert.Equal(visibility, propertyModels[1].AccessModifier);
-        Assert.True(propertyModels[1].IsEvent);
+        Assert.True(((CSharpPropertyModel)propertyModels[1]).IsEvent);
         foreach (var accessor in propertyModels[1].Accessors)
         {
             Assert.Empty(accessor.CalledMethods);
@@ -305,7 +305,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("System.Action", propertyModels[2].Type.Name);
         Assert.Equal("", propertyModels[2].Modifier);
         Assert.Equal(visibility, propertyModels[2].AccessModifier);
-        Assert.True(propertyModels[2].IsEvent);
+        Assert.True(((CSharpPropertyModel)propertyModels[2]).IsEvent);
         foreach (var accessor in propertyModels[2].Accessors)
         {
             Assert.Empty(accessor.CalledMethods);
@@ -327,7 +327,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(5, propertyModels.Count);
 
-        var propertyModel0 = propertyModels[0];
+        var propertyModel0 = (CSharpPropertyModel)propertyModels[0];
         Assert.Equal("Value", propertyModel0.Name);
         Assert.False(propertyModel0.IsEvent);
         Assert.Equal(2, propertyModel0.Accessors.Count);
@@ -339,7 +339,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("private", propertyModel0.Accessors[1].AccessModifier);
         Assert.Equal("", propertyModel0.Accessors[1].Modifier);
 
-        var propertyModel1 = propertyModels[1];
+        var propertyModel1 = (CSharpPropertyModel)propertyModels[1];
         Assert.Equal("Name", propertyModel1.Name);
         Assert.False(propertyModel1.IsEvent);
         Assert.Equal(2, propertyModel1.Accessors.Count);
@@ -351,7 +351,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("protected", propertyModel1.Accessors[1].AccessModifier);
         Assert.Equal("", propertyModel1.Accessors[1].Modifier);
 
-        var propertyModel2 = propertyModels[2];
+        var propertyModel2 = (CSharpPropertyModel)propertyModels[2];
         Assert.Equal("FullName", propertyModel2.Name);
         Assert.False(propertyModel2.IsEvent);
         Assert.Equal(1, propertyModel2.Accessors.Count);
@@ -359,7 +359,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("public", propertyModel2.Accessors[0].AccessModifier);
         Assert.Equal("", propertyModel2.Accessors[0].Modifier);
 
-        var propertyModel3 = propertyModels[3];
+        var propertyModel3 = (CSharpPropertyModel)propertyModels[3];
         Assert.Equal("IsHere", propertyModel3.Name);
         Assert.False(propertyModel3.IsEvent);
         Assert.Equal(1, propertyModel3.Accessors.Count);
@@ -367,7 +367,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("public", propertyModel3.Accessors[0].AccessModifier);
         Assert.Equal("", propertyModel3.Accessors[0].Modifier);
 
-        var propertyModel4 = propertyModels[4];
+        var propertyModel4 = (CSharpPropertyModel)propertyModels[4];
         Assert.Equal("IntEvent", propertyModel4.Name);
         Assert.True(propertyModel4.IsEvent);
         Assert.Equal(2, propertyModel4.Accessors.Count);
@@ -399,7 +399,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("TopLevel.Bar", propertyModels[0].Type.Name);
         Assert.Equal("", propertyModels[0].Modifier);
         Assert.Equal("protected", propertyModels[0].AccessModifier);
-        Assert.False(propertyModels[0].IsEvent);
+        Assert.False(((CSharpPropertyModel)propertyModels[0]).IsEvent);
         foreach (var accessor in propertyModels[0].Accessors)
         {
             Assert.Empty(accessor.CalledMethods);
@@ -424,7 +424,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("int", propertyModels[0].Type.Name);
         Assert.Equal("", propertyModels[0].Modifier);
         Assert.Equal("public", propertyModels[0].AccessModifier);
-        Assert.False(propertyModels[0].IsEvent);
+        Assert.False(((CSharpPropertyModel)propertyModels[0]).IsEvent);
 
         var getAccessor = propertyModels[0].Accessors[0];
         Assert.Equal("get", getAccessor.Name);
@@ -471,7 +471,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("int", propertyModels[0].Type.Name);
         Assert.Equal("", propertyModels[0].Modifier);
         Assert.Equal("public", propertyModels[0].AccessModifier);
-        Assert.False(propertyModels[0].IsEvent);
+        Assert.False(((CSharpPropertyModel)propertyModels[0]).IsEvent);
 
         var getAccessor = propertyModels[0].Accessors[0];
         Assert.Equal("get", getAccessor.Name);
@@ -518,7 +518,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("int", propertyModels[0].Type.Name);
         Assert.Equal("", propertyModels[0].Modifier);
         Assert.Equal("public", propertyModels[0].AccessModifier);
-        Assert.False(propertyModels[0].IsEvent);
+        Assert.False(((CSharpPropertyModel)propertyModels[0]).IsEvent);
 
         var getAccessor = propertyModels[0].Accessors[0];
         Assert.Equal("get", getAccessor.Name);
@@ -565,7 +565,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("System.Func<double>", propertyModels[0].Type.Name);
         Assert.Equal("", propertyModels[0].Modifier);
         Assert.Equal("public", propertyModels[0].AccessModifier);
-        Assert.True(propertyModels[0].IsEvent);
+        Assert.True(((CSharpPropertyModel)propertyModels[0]).IsEvent);
 
         var addAccessor = propertyModels[0].Accessors[0];
         Assert.Equal("add", addAccessor.Name);
@@ -612,7 +612,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("System.Func<string>", propertyModels[0].Type.Name);
         Assert.Equal("", propertyModels[0].Modifier);
         Assert.Equal("public", propertyModels[0].AccessModifier);
-        Assert.True(propertyModels[0].IsEvent);
+        Assert.True(((CSharpPropertyModel)propertyModels[0]).IsEvent);
 
         var addAccessor = propertyModels[0].Accessors[0];
         Assert.Equal("add", addAccessor.Name);
@@ -659,7 +659,7 @@ public class CSharpPropertyInfoTests
         Assert.Equal("System.Func<int>", propertyModels[0].Type.Name);
         Assert.Equal("", propertyModels[0].Modifier);
         Assert.Equal("public", propertyModels[0].AccessModifier);
-        Assert.True(propertyModels[0].IsEvent);
+        Assert.True(((CSharpPropertyModel)propertyModels[0]).IsEvent);
 
         var addAccessor = propertyModels[0].Accessors[0];
         Assert.Equal("add", addAccessor.Name);
@@ -702,7 +702,7 @@ public class CSharpPropertyInfoTests
 
         Assert.Equal(2, propertyModels.Count);
 
-        var propertyModel = propertyModels[1];
+        var propertyModel = (CSharpPropertyModel)propertyModels[1];
         Assert.Equal("Value", propertyModel.Name);
         Assert.Equal("System.Func<string>", propertyModel.Type.Name);
         Assert.Equal("", propertyModel.Modifier);

@@ -1,0 +1,10 @@
+﻿Public Interface X
+    Function GetID() As Integer
+End Interface
+
+Public Interface MyInterface        
+End Interface
+
+Public Interface Y
+    Inherits X, MyInterface
+End Interface

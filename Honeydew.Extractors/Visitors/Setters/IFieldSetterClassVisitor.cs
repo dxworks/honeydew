@@ -3,9 +3,9 @@
 namespace Honeydew.Extractors.Visitors.Setters;
 
 public interface IFieldSetterClassVisitor<in TSyntaxNode, in TSemanticModel, TFieldSyntaxNode> :
-    ISetterVisitor<TSyntaxNode, TSemanticModel, IMembersClassType, TFieldSyntaxNode, IFieldType?>
+    ISetterVisitor<TSyntaxNode, TSemanticModel, IMembersClassType, TFieldSyntaxNode, IFieldType>
 {
-    string ISetterVisitor<TSyntaxNode, TSemanticModel, IMembersClassType, TFieldSyntaxNode, IFieldType?>.Name()
+    string ISetterVisitor<TSyntaxNode, TSemanticModel, IMembersClassType, TFieldSyntaxNode, IFieldType>.Name()
     {
         return "Field";
     }
@@ -17,10 +17,7 @@ public interface IFieldSetterClassVisitor<in TSyntaxNode, in TSemanticModel, TFi
         {
             var fieldType = ApplyContainedVisitors(wrappedSyntaxNode, CreateWrappedType(), semanticModel);
 
-            if (fieldType is not null && !string.IsNullOrEmpty(fieldType.Name))
-            {
-                modelType.Fields.Add(fieldType);
-            }
+            modelType.Fields.Add(fieldType);
         }
 
         return modelType;

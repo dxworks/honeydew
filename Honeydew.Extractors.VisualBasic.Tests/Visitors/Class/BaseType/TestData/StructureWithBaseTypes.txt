@@ -1,0 +1,6 @@
+﻿Public Interface MyInterface        
+End Interface
+
+Public Structure Y
+    Implements MyInterface
+End Structure

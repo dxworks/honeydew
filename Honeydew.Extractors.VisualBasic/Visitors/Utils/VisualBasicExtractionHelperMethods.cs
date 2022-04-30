@@ -19,45 +19,6 @@ public static partial class VisualBasicExtractionHelperMethods
         return VisualBasicFullNameProvider.GetFullName(syntaxNode, semanticModel, out _);
     }
 
-    // public static IEnumerable<IEntityType> GetBaseInterfaces(BaseTypeStatementSyntax node,
-    //     SemanticModel semanticModel)
-    // {
-    //     var declaredSymbol = semanticModel.GetDeclaredSymbol(node);
-    //
-    //     IList<IEntityType> interfaces = new List<IEntityType>();
-    //
-    //     if (declaredSymbol is not ITypeSymbol typeSymbol)
-    //     {
-    //         return interfaces;
-    //     }
-    //
-    //     foreach (var interfaceSymbol in typeSymbol.Interfaces)
-    //     {
-    //         interfaces.Add(VisualBasicFullNameProvider.CreateEntityTypeModel(interfaceSymbol.ToString()));
-    //     }
-    //
-    //     return interfaces;
-    // }
-    
-    public static IEntityType GetBaseClassName(TypeBlockSyntax typeBlockSyntax, SemanticModel semanticModel)
-    {
-        var declaredSymbol = semanticModel.GetDeclaredSymbol(typeBlockSyntax);
-
-        // if (declaredSymbol is not ITypeSymbol typeSymbol)
-        // {
-        //     return CreateEntityTypeModel(VisualBasicConstants.ObjectIdentifier);
-        // }
-        //
-        // if (typeSymbol.BaseType == null)
-        // {
-        //     return CreateEntityTypeModel(VisualBasicConstants.ObjectIdentifier);
-        // }
-
-        // return CreateEntityTypeModel(typeSymbol.BaseType.ToString());
-
-        return CreateEntityTypeModel("Object");
-    }
-
     // public static VisualBasicMethodCallModel GetMethodCallModel(InvocationExpressionSyntax invocationExpressionSyntax,
     //     SemanticModel semanticModel)
     // {
@@ -156,11 +117,12 @@ public static partial class VisualBasicExtractionHelperMethods
     //
     //     return new List<string>();
     // }
-    
-    public static IList<IParameterType> GetParameters(MemberAccessExpressionSyntax methodCall, SemanticModel semanticModel)
+
+    public static IList<IParameterType> GetParameters(MemberAccessExpressionSyntax methodCall,
+        SemanticModel semanticModel)
     {
         IList<IParameterType> parameters = new List<IParameterType>();
-        
+
         var symbolInfo = semanticModel.GetSymbolInfo(methodCall);
         if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
         {
@@ -180,7 +142,7 @@ public static partial class VisualBasicExtractionHelperMethods
                         defaultValue = defaultValue.ToLower();
                     }
                 }
-                
+
                 parameters.Add(new VisualBasicParameterModel
                 {
                     Type = CreateEntityTypeModel(parameter.Type.ToString()),
@@ -340,12 +302,7 @@ public static partial class VisualBasicExtractionHelperMethods
     {
         return CalculateCyclomaticComplexityForSyntaxNode(propertyBlockSyntax) + 1;
     }
-    
-    // public static int CalculateCyclomaticComplexity(ArrowExpressionClauseSyntax syntax)
-    // {
-    //     return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
-    // }
-    //
+
     // public static int CalculateCyclomaticComplexity(AccessorDeclarationSyntax syntax)
     // {
     //     return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;

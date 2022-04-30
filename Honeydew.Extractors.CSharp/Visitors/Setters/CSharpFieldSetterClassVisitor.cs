@@ -9,10 +9,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Honeydew.Extractors.CSharp.Visitors.Setters;
 
 public class CSharpFieldSetterClassVisitor :
-    CompositeVisitor<IFieldType?>,
+    CompositeVisitor<IFieldType>,
     IFieldSetterClassVisitor<TypeDeclarationSyntax, SemanticModel, VariableDeclaratorSyntax>
 {
-    public CSharpFieldSetterClassVisitor(ILogger compositeLogger, IEnumerable<ITypeVisitor<IFieldType?>> visitors) :
+    public CSharpFieldSetterClassVisitor(ILogger compositeLogger, IEnumerable<ITypeVisitor<IFieldType>> visitors) :
         base(compositeLogger, visitors)
     {
     }
