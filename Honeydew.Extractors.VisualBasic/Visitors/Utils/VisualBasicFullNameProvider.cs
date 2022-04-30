@@ -162,10 +162,19 @@ internal static class VisualBasicFullNameProvider
             // }
             //     break;
             //
-            // case VariableDeclarationSyntax variableDeclarationSyntax:
-            // {
-            //     return GetFullName(variableDeclarationSyntax.Type, semanticModel, out isNullable);
-            // }
+            case VariableDeclaratorSyntax variableDeclarationSyntax:
+            {
+                switch (variableDeclarationSyntax.AsClause)
+                {
+                    case AsNewClauseSyntax asNewClauseSyntax:
+                        return GetFullName(asNewClauseSyntax.NewExpression, semanticModel, out isNullable);
+                    case SimpleAsClauseSyntax simpleAsClauseSyntax:
+                        return GetFullName(simpleAsClauseSyntax.Type, semanticModel, out isNullable);
+                }
+                
+                // return GetFullName(variableDeclarationSyntax.Type, semanticModel, out isNullable);
+            }
+                break;
             //
             // case TypeConstraintSyntax typeConstraintSyntax:
             // {
