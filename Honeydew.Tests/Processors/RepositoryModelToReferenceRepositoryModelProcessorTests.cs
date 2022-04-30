@@ -464,7 +464,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
 
         var compilationUnitModel = projectModel1.Files[0];
         var referenceClassCreateService =
-            compilationUnitModel.Entities[0] as Honeydew.ScriptBeePlugin.Models.ClassModel;
+            compilationUnitModel.Entities[0] as ClassModel;
 
         Assert.Equal("Project1", projectModel1.Name);
         Assert.Equal(referenceRepositoryModel, projectModel1.Repository);
@@ -655,7 +655,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
         var projectModel1 = referenceSolutionModel.Projects[0];
 
         var referenceNamespaceServices = projectModel1.Files[0];
-        var referenceMyClass = referenceNamespaceServices.Entities[0] as Honeydew.ScriptBeePlugin.Models.ClassModel;
+        var referenceMyClass = referenceNamespaceServices.Entities[0] as ClassModel;
 
         Assert.Equal(1, referenceNamespaceServices.Entities.Count);
 
@@ -864,12 +864,11 @@ public class RepositoryModelToReferenceRepositoryModelProcessorTests
 
         var referenceNamespaceServices = projectModel1.Files[0];
         var referenceClassCreateService =
-            referenceNamespaceServices.Entities[0] as Honeydew.ScriptBeePlugin.Models.ClassModel;
+            referenceNamespaceServices.Entities[0] as ClassModel;
 
         var referenceNamespaceModels = projectModel1.Files[1];
-        var referenceClassMyModel = referenceNamespaceModels.Entities[0] as Honeydew.ScriptBeePlugin.Models.ClassModel;
-        var referenceClassOtherModel =
-            referenceNamespaceModels.Entities[1] as Honeydew.ScriptBeePlugin.Models.ClassModel;
+        var referenceClassMyModel = referenceNamespaceModels.Entities[0] as ClassModel;
+        var referenceClassOtherModel = referenceNamespaceModels.Entities[1] as ClassModel;
 
         Assert.NotNull(referenceClassCreateService);
         Assert.Equal("Project1.Services.CreateService", referenceClassCreateService!.Name);

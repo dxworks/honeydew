@@ -1,0 +1,10 @@
+﻿Imports System.Text
+Imports System.IO
+Imports Microsoft.VisualBasic.ControlChars
+
+Namespace System
+    Module Module1
+        Enum Enum1  
+        End Enum  
+    End Module  
+End Namespace 

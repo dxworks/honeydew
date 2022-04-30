@@ -301,7 +301,7 @@ public class LocalFunctionsExtractionTests
 
         var stringSumFunction = (CSharpMethodModel)method.LocalFunctions[0];
         Assert.Equal("StringSum", stringSumFunction.Name);
-        Assert.Equal("string", stringSumFunction.ReturnValue!.Type.Name);
+        Assert.Equal("string", stringSumFunction.ReturnValue.Type.Name);
         Assert.Equal(2, stringSumFunction.ParameterTypes.Count);
         Assert.Equal("int", stringSumFunction.ParameterTypes[0].Type.Name);
         Assert.Equal("int", stringSumFunction.ParameterTypes[1].Type.Name);
@@ -309,7 +309,7 @@ public class LocalFunctionsExtractionTests
 
         var sumFunction = (CSharpMethodModel)stringSumFunction.LocalFunctions[0];
         Assert.Equal("Sum", sumFunction.Name);
-        Assert.Equal("int", sumFunction.ReturnValue!.Type.Name);
+        Assert.Equal("int", sumFunction.ReturnValue.Type.Name);
         Assert.Equal(2, sumFunction.ParameterTypes.Count);
         Assert.Equal("int", sumFunction.ParameterTypes[0].Type.Name);
         Assert.Equal("int", sumFunction.ParameterTypes[1].Type.Name);
@@ -317,7 +317,7 @@ public class LocalFunctionsExtractionTests
 
         var doubledFunction = (CSharpMethodModel)sumFunction.LocalFunctions[0];
         Assert.Equal("Doubled", doubledFunction.Name);
-        Assert.Equal("int", doubledFunction.ReturnValue!.Type.Name);
+        Assert.Equal("int", doubledFunction.ReturnValue.Type.Name);
         Assert.Equal(1, doubledFunction.ParameterTypes.Count);
         Assert.Equal("int", doubledFunction.ParameterTypes[0].Type.Name);
         Assert.Empty(doubledFunction.LocalFunctions);
@@ -325,7 +325,7 @@ public class LocalFunctionsExtractionTests
 
         var stringifyFunction = (CSharpMethodModel)stringSumFunction.LocalFunctions[1];
         Assert.Equal("Stringify", stringifyFunction.Name);
-        Assert.Equal("string", stringifyFunction.ReturnValue!.Type.Name);
+        Assert.Equal("string", stringifyFunction.ReturnValue.Type.Name);
         Assert.Equal(2, stringifyFunction.ParameterTypes.Count);
         Assert.Equal("int", stringifyFunction.ParameterTypes[0].Type.Name);
         Assert.Equal("int", stringifyFunction.ParameterTypes[1].Type.Name);
@@ -333,7 +333,7 @@ public class LocalFunctionsExtractionTests
 
         var calculateFunction = (CSharpMethodModel)stringifyFunction.LocalFunctions[0];
         Assert.Equal("Calculate", calculateFunction.Name);
-        Assert.Equal("int", calculateFunction.ReturnValue!.Type.Name);
+        Assert.Equal("int", calculateFunction.ReturnValue.Type.Name);
         Assert.Equal(2, calculateFunction.ParameterTypes.Count);
         Assert.Equal("int", calculateFunction.ParameterTypes[0].Type.Name);
         Assert.Equal("int", calculateFunction.ParameterTypes[1].Type.Name);
@@ -341,7 +341,7 @@ public class LocalFunctionsExtractionTests
 
         var stringifyNumberFunction = (CSharpMethodModel)stringifyFunction.LocalFunctions[1];
         Assert.Equal("StringifyNumber", stringifyNumberFunction.Name);
-        Assert.Equal("string", stringifyNumberFunction.ReturnValue!.Type.Name);
+        Assert.Equal("string", stringifyNumberFunction.ReturnValue.Type.Name);
         Assert.Equal(1, stringifyNumberFunction.ParameterTypes.Count);
         Assert.Equal("int", stringifyNumberFunction.ParameterTypes[0].Type.Name);
         Assert.Empty(stringifyNumberFunction.LocalFunctions);

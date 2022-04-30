@@ -2,7 +2,7 @@ namespace Honeydew.ScriptBeePlugin.Models;
 
 public class RepositoryModel : ReferenceEntity
 {
-    public string Version { get; set; }
+    public string Version { get; set; } = "";
 
     public IList<SolutionModel> Solutions { get; set; } = new List<SolutionModel>();
 

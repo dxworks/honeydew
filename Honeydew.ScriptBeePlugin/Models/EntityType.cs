@@ -4,7 +4,7 @@ public class EntityType : ReferenceEntity
 {
     public EntityModel Entity { get; set; }
 
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
 
     public IList<EntityType> GenericTypes { get; set; } = new List<EntityType>();
 

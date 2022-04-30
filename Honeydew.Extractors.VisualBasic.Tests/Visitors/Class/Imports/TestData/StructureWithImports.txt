@@ -1,0 +1,6 @@
+﻿Imports System.Text
+Imports System.IO
+Imports Microsoft.VisualBasic.ControlChars
+
+Public Structure Struct1
+End Structure
