@@ -1,24 +1,9 @@
 ﻿using System.Text;
-using Honeydew.Extractors.Dotnet;
 using Honeydew.Models.Types;
 using Honeydew.Models.VisualBasic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.VisualBasic;
 using Microsoft.CodeAnalysis.VisualBasic.Syntax;
-using ArrayTypeSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.ArrayTypeSyntax;
-using AttributeSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.AttributeSyntax;
-using AwaitExpressionSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.AwaitExpressionSyntax;
-using ExpressionSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.ExpressionSyntax;
-using LiteralExpressionSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.LiteralExpressionSyntax;
-using NullableTypeSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.NullableTypeSyntax;
-using ObjectCreationExpressionSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.ObjectCreationExpressionSyntax;
-using ParenthesizedExpressionSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.ParenthesizedExpressionSyntax;
-using PredefinedTypeSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.PredefinedTypeSyntax;
-using ThrowStatementSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.ThrowStatementSyntax;
-using TypeConstraintSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.TypeConstraintSyntax;
-using TypeOfExpressionSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.TypeOfExpressionSyntax;
-using TypeParameterListSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.TypeParameterListSyntax;
-using TypeSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.TypeSyntax;
 
 namespace Honeydew.Extractors.VisualBasic.Visitors.Utils;
 
@@ -36,7 +21,6 @@ internal static class VisualBasicFullNameProvider
             case EnumStatementSyntax:
             case DelegateStatementSyntax:
                 // case BaseMethodDeclarationSyntax:
-                // case BasePropertyDeclarationSyntax:
             {
                 var declaredSymbol = semanticModel.GetDeclaredSymbol(syntaxNode);
                 if (declaredSymbol != null)
@@ -58,6 +42,22 @@ internal static class VisualBasicFullNameProvider
             {
                 return GetFullName(typeBlockSyntax.BlockStatement, semanticModel, out isNullable);
             }
+
+            case PropertyStatementSyntax propertyStatementSyntax:
+            {
+                switch (propertyStatementSyntax.AsClause)
+                {
+                    case AsNewClauseSyntax asNewClauseSyntax:
+                        return GetFullName(asNewClauseSyntax.NewExpression, semanticModel, out isNullable);
+                    case SimpleAsClauseSyntax simpleAsClauseSyntax:
+                        if (simpleAsClauseSyntax.Type is not null)
+                        {
+                            return CreateEntityTypeModel(simpleAsClauseSyntax.Type.ToString(), isExtern);
+                        }
+                        break;
+                }
+            }
+                break;
 
             // case PredefinedTypeSyntax predefinedTypeSyntax:
             // {
@@ -172,56 +172,46 @@ internal static class VisualBasicFullNameProvider
             //     return GetFullName(typeConstraintSyntax.Type, semanticModel, out isNullable);
             // }
             //
-            // case ExpressionSyntax expressionSyntax:
-            // {
-            //     var symbolInfo = semanticModel.GetSymbolInfo(expressionSyntax);
-            //     if (symbolInfo.Symbol != null)
-            //     {
-            //         return GetFullName(symbolInfo.Symbol, false, ref isNullable);
-            //     }
-            //
-            //     var typeInfo = semanticModel.GetTypeInfo(expressionSyntax);
-            //     if (typeInfo.Type != null && typeInfo.Type.ToString() != "?" && typeInfo.Type.ToString() != "?[]")
-            //     {
-            //         return GetFullName(typeInfo.Type, false, ref isNullable);
-            //     }
-            //
-            //     switch (expressionSyntax)
-            //     {
-            //         case ObjectCreationExpressionSyntax objectCreationExpressionSyntax:
-            //             return GetFullName(objectCreationExpressionSyntax.Type, semanticModel, out isNullable);
-            //         case BaseObjectCreationExpressionSyntax baseObjectCreationExpressionSyntax:
-            //             return GetFullName(baseObjectCreationExpressionSyntax, semanticModel, out isNullable);
-            //         case ImplicitArrayCreationExpressionSyntax implicitArrayCreationExpressionSyntax:
-            //             return GetFullName(implicitArrayCreationExpressionSyntax, semanticModel, out isNullable);
-            //         case ParenthesizedExpressionSyntax parenthesizedExpressionSyntax:
-            //             return GetFullName(parenthesizedExpressionSyntax.Expression, semanticModel, out isNullable);
-            //         case AwaitExpressionSyntax awaitExpressionSyntax:
-            //         {
-            //             var entityType = GetFullName(awaitExpressionSyntax.Expression, semanticModel, out isNullable);
-            //             if (entityType.FullType.ContainedTypes.Count > 0)
-            //             {
-            //                 var fullName = ReconstructFullName(entityType.FullType.ContainedTypes[0]);
-            //                 return CreateEntityTypeModel(fullName);
-            //             }
-            //
-            //             return entityType;
-            //         }
-            //         case TypeOfExpressionSyntax:
-            //         {
-            //             name = "System.Type";
-            //         }
-            //             break;
-            //         default:
-            //         {
-            //             name = "";
-            //             isExtern = true;
-            //         }
-            //             break;
-            //     }
-            // }
-            //     break;
-            //
+            case ExpressionSyntax expressionSyntax:
+            {
+                var symbolInfo = semanticModel.GetSymbolInfo(expressionSyntax);
+                if (symbolInfo.Symbol != null)
+                {
+                    return GetFullName(symbolInfo.Symbol, false, ref isNullable);
+                }
+
+                switch (expressionSyntax)
+                {
+                    case ObjectCreationExpressionSyntax objectCreationExpressionSyntax:
+                        return CreateEntityTypeModel(objectCreationExpressionSyntax.Type.ToString(), isExtern);
+                    case ParenthesizedExpressionSyntax parenthesizedExpressionSyntax:
+                        return GetFullName(parenthesizedExpressionSyntax.Expression, semanticModel, out isNullable);
+                    case AwaitExpressionSyntax awaitExpressionSyntax:
+                    {
+                        var entityType = GetFullName(awaitExpressionSyntax.Expression, semanticModel, out isNullable);
+                        if (entityType.FullType.ContainedTypes.Count > 0)
+                        {
+                            var fullName = ReconstructFullName(entityType.FullType.ContainedTypes[0]);
+                            return CreateEntityTypeModel(fullName);
+                        }
+
+                        return entityType;
+                    }
+                    case TypeOfExpressionSyntax:
+                    {
+                        name = "System.Type";
+                    }
+                        break;
+                    default:
+                    {
+                        name = "";
+                        isExtern = true;
+                    }
+                        break;
+                }
+            }
+                break;
+
             // case AccessorDeclarationSyntax accessorDeclarationSyntax:
             // {
             //     var basePropertyDeclarationSyntax = accessorDeclarationSyntax

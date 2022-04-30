@@ -325,22 +325,7 @@ public static partial class VisualBasicExtractionHelperMethods
     //     return GetParameters(methodSymbol);
     // }
     //
-    // public static string SetTypeModifier(string typeString, string modifier)
-    // {
-    //     if (typeString.StartsWith(VisualBasicConstants.RefReadonlyIdentifier))
-    //     {
-    //         modifier += $" {VisualBasicConstants.RefReadonlyIdentifier}";
-    //         modifier = modifier.Trim();
-    //     }
-    //     else if (typeString.StartsWith(VisualBasicConstants.RefIdentifier))
-    //     {
-    //         modifier += $" {VisualBasicConstants.RefIdentifier}";
-    //         modifier = modifier.Trim();
-    //     }
-    //
-    //     return modifier;
-    // }
-    
+
     public static int CalculateCyclomaticComplexity(MethodBlockSyntax methodBlockSyntax)
     {
         return CalculateCyclomaticComplexityForSyntaxNode(methodBlockSyntax) + 1;
@@ -349,6 +334,11 @@ public static partial class VisualBasicExtractionHelperMethods
     public static int CalculateCyclomaticComplexity(ConstructorBlockSyntax constructorBlockSyntax)
     {
         return CalculateCyclomaticComplexityForSyntaxNode(constructorBlockSyntax) + 1;
+    }
+
+    public static int CalculateCyclomaticComplexity(PropertyStatementSyntax propertyBlockSyntax)
+    {
+        return CalculateCyclomaticComplexityForSyntaxNode(propertyBlockSyntax) + 1;
     }
     
     // public static int CalculateCyclomaticComplexity(ArrowExpressionClauseSyntax syntax)

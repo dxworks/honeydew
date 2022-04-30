@@ -1,0 +1,4 @@
+﻿Interface Customer
+   Public ReadOnly Property Tags As List(Of String)  
+   Property Name As String
+End Interface  

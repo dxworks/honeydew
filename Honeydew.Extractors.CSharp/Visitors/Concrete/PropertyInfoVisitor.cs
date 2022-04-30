@@ -45,7 +45,11 @@ public class PropertyInfoVisitor : IExtractionVisitor<BasePropertyDeclarationSyn
         modelType.AccessModifier = accessModifier;
         modelType.Modifier = modifier;
 
-        modelType.IsEvent = isEvent;
+        if (modelType is CSharpPropertyModel propertyModel)
+        {
+            propertyModel.IsEvent = isEvent;
+        }
+
         modelType.Type = typeName;
         modelType.Name = name;
         modelType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);

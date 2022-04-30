@@ -31,7 +31,12 @@ public class FieldInfoVisitor : IExtractionVisitor<VariableDeclaratorSyntax, Sem
 
         modelType.AccessModifier = accessModifier;
         modelType.Modifier = modifier;
-        modelType.IsEvent = isEvent;
+
+        if (modelType is CSharpFieldModel fieldModel)
+        {
+            fieldModel.IsEvent = isEvent;
+        }
+
         modelType.Type = typeName;
         modelType.Name = syntaxNode.Identifier.ToString();
         modelType.IsNullable = isNullable;

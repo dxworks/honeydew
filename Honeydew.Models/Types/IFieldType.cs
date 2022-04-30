@@ -4,5 +4,4 @@ public interface IFieldType : INamedType, ITypeWithModifiers, ITypeWithAttribute
 {
     public IEntityType Type { get; set; }
 
-    public bool IsEvent { get; set; }
 }

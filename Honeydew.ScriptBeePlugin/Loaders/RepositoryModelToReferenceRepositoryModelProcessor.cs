@@ -4,20 +4,6 @@ using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Honeydew.ScriptBeePlugin.Models;
 using static Honeydew.ScriptBeePlugin.Loaders.MetricAdder;
-using AttributeModel = Honeydew.ScriptBeePlugin.Models.AttributeModel;
-using ClassModel = Honeydew.ScriptBeePlugin.Models.ClassModel;
-using FieldModel = Honeydew.ScriptBeePlugin.Models.FieldModel;
-using GenericParameterModel = Honeydew.ScriptBeePlugin.Models.GenericParameterModel;
-using LinesOfCode = Honeydew.ScriptBeePlugin.Models.LinesOfCode;
-using LocalVariableModel = Honeydew.ScriptBeePlugin.Models.LocalVariableModel;
-using MethodModel = Honeydew.ScriptBeePlugin.Models.MethodModel;
-using NamespaceModel = Honeydew.ScriptBeePlugin.Models.NamespaceModel;
-using ParameterModel = Honeydew.ScriptBeePlugin.Models.ParameterModel;
-using ProjectModel = Honeydew.ScriptBeePlugin.Models.ProjectModel;
-using PropertyModel = Honeydew.ScriptBeePlugin.Models.PropertyModel;
-using RepositoryModel = Honeydew.ScriptBeePlugin.Models.RepositoryModel;
-using ReturnValueModel = Honeydew.ScriptBeePlugin.Models.ReturnValueModel;
-using SolutionModel = Honeydew.ScriptBeePlugin.Models.SolutionModel;
 
 namespace Honeydew.ScriptBeePlugin.Loaders;
 
@@ -127,7 +113,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                     {
                         case CSharpDelegateModel delegateModel:
                         {
-                            var model = new Models.DelegateModel
+                            var model = new DelegateModel
                             {
                                 Name = delegateModel.Name,
                                 FilePath = delegateModel.FilePath,
@@ -154,7 +140,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
                         case CSharpEnumModel enumModel:
                         {
-                            var model = new Models.EnumModel
+                            var model = new EnumModel
                             {
                                 Name = enumModel.Name,
                                 FilePath = enumModel.FilePath,
@@ -179,7 +165,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                         }
                             break;
 
-                        case Honeydew.Models.CSharp.CSharpClassModel classModel:
+                        case CSharpClassModel classModel:
                         {
                             EntityModel entityModel = classModel.ClassType switch
                             {
@@ -414,7 +400,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
                     switch (entityModel)
                     {
-                        case ClassModel classModel when classType is Honeydew.Models.CSharp.CSharpClassModel membersClassType:
+                        case ClassModel classModel when classType is CSharpClassModel membersClassType:
                         {
                             if (classType is ITypeWithGenericParameters typeWithGenericParameters)
                             {
@@ -446,7 +432,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                             break;
                         }
                         case InterfaceModel interfaceModel
-                            when classType is Honeydew.Models.CSharp.CSharpClassModel interfaceType:
+                            when classType is CSharpClassModel interfaceType:
                         {
                             if (classType is ITypeWithGenericParameters typeWithGenericParameters)
                             {
@@ -468,7 +454,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                             break;
                         }
 
-                        case Models.DelegateModel delegateModel
+                        case DelegateModel delegateModel
                             when classType is CSharpDelegateModel delegateType:
                         {
                             delegateModel.Parameters =
@@ -484,7 +470,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
                             break;
                         }
-                        case Models.EnumModel enumModel when classType is CSharpEnumModel enumType:
+                        case EnumModel enumModel when classType is CSharpEnumModel enumType:
                             enumModel.Labels = ConvertEnumLabels(enumType.Labels, projectModel).ToList();
                             break;
                     }
@@ -522,7 +508,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             Type = ConvertEntityType(returnValueType.Type, projectModel),
             Attributes = ConvertAttributes(returnValueType.Attributes, projectModel),
             Modifier =
-                returnValueType is Honeydew.Models.CSharp.CSharpReturnValueModel returnValue ? returnValue.Modifier : "",
+                returnValueType is CSharpReturnValueModel returnValue ? returnValue.Modifier : "",
         };
     }
 
@@ -635,7 +621,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             Modifier = propertyType.Modifier,
             AccessModifier = ConvertAccessModifier(propertyType.AccessModifier),
             Modifiers = ConvertModifierToModifierList(propertyType.Modifier),
-            IsEvent = propertyType.IsEvent,
+            IsEvent = propertyType is CSharpPropertyModel { IsEvent: true },
             LinesOfCode = ConvertLoc(propertyType.Loc),
             CyclomaticComplexity = propertyType.CyclomaticComplexity,
             Type = ConvertEntityType(propertyType.Type, projectModel),
@@ -659,7 +645,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             Modifier = fieldType.Modifier,
             AccessModifier = ConvertAccessModifier(fieldType.AccessModifier),
             Modifiers = ConvertModifierToModifierList(fieldType.Modifier),
-            IsEvent = fieldType.IsEvent,
+            IsEvent = fieldType is CSharpFieldModel { IsEvent: true },
             Type = ConvertEntityType(fieldType.Type, projectModel),
             Attributes = ConvertAttributes(fieldType.Attributes, projectModel),
         };
@@ -1253,7 +1239,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                 .Select(parameter =>
                 {
                     var indexOfNullable = parameter.IndexOf('?');
-                    return new Honeydew.Models.CSharp.CSharpParameterModel
+                    return new CSharpParameterModel
                     {
                         Type = new CSharpEntityTypeModel
                         {
@@ -1359,7 +1345,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                 Attributes = ConvertAttributes(parameterType.Attributes, projectModel),
             };
 
-            if (parameterType is Honeydew.Models.CSharp.CSharpParameterModel param)
+            if (parameterType is CSharpParameterModel param)
             {
                 parameterModel.Modifier = ConvertParameterModifier(param.Modifier);
                 parameterModel.DefaultValue = param.DefaultValue;

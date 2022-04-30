@@ -2,7 +2,7 @@
 
 namespace Honeydew.Models.CSharp;
 
-public record CSharpFieldModel : IFieldType
+public record CSharpFieldModel : IFieldType, IEventType
 {
     public string Name { get; set; } = "";
 

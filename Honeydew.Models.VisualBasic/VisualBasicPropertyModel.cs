@@ -1,8 +1,8 @@
 ﻿using Honeydew.Models.Types;
 
-namespace Honeydew.Models.CSharp;
+namespace Honeydew.Models.VisualBasic;
 
-public record CSharpPropertyModel : IPropertyType, IEventType
+public record VisualBasicPropertyModel : IPropertyType
 {
     public string Name { get; set; } = "";
 
@@ -13,8 +13,6 @@ public record CSharpPropertyModel : IPropertyType, IEventType
     public IList<IAttributeType> Attributes { get; set; } = new List<IAttributeType>();
 
     public IEntityType Type { get; set; }
-
-    public bool IsEvent { get; set; }
 
     public bool IsNullable { get; set; }
 
