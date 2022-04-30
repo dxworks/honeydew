@@ -1,0 +1,8 @@
+﻿Namespace Namespace1  
+    Module Module1
+        Class User                            
+            Public Sub New()      
+            End Sub            
+        End Class  
+    End Module  
+End Namespace  

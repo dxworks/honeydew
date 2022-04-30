@@ -38,7 +38,7 @@ public class GotoStatementVisitorTests
                     new List<ITypeVisitor<IMembersClassType>>
                     {
                         new BaseInfoClassVisitor(),
-                        new CSharpConstructorSetterClassVisitor(_loggerMock.Object,
+                        new CSharpConstructorSetterVisitor(_loggerMock.Object,
                             new List<ITypeVisitor<IConstructorType>>
                             {
                                 new ConstructorInfoVisitor(),

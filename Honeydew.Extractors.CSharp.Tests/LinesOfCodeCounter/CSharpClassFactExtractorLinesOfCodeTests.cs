@@ -28,7 +28,7 @@ public class CSharpClassFactExtractorLinesOfCodeTests
                     new List<ITypeVisitor<IMembersClassType>>
                     {
                         linesOfCodeVisitor,
-                        new CSharpConstructorSetterClassVisitor(_loggerMock.Object,
+                        new CSharpConstructorSetterVisitor(_loggerMock.Object,
                             new List<ITypeVisitor<IConstructorType>>
                             {
                                 linesOfCodeVisitor

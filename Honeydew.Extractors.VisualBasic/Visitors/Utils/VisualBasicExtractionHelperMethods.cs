@@ -3,6 +3,7 @@ using Honeydew.Models.VisualBasic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.VisualBasic;
 using Microsoft.CodeAnalysis.VisualBasic.Syntax;
+using static Honeydew.Extractors.VisualBasic.Visitors.Utils.VisualBasicFullNameProvider;
 
 namespace Honeydew.Extractors.VisualBasic.Visitors.Utils;
 
@@ -37,46 +38,25 @@ public static partial class VisualBasicExtractionHelperMethods
     //
     //     return interfaces;
     // }
+    
+    public static IEntityType GetBaseClassName(TypeBlockSyntax typeBlockSyntax, SemanticModel semanticModel)
+    {
+        var declaredSymbol = semanticModel.GetDeclaredSymbol(typeBlockSyntax);
 
-    // private static IEntityType GetBaseClassName(TypeStatementSyntax node, SemanticModel semanticModel)
-    // {
-    //     var declaredSymbol = ModelExtensions.GetDeclaredSymbol(semanticModel, node);
-    //
-    //     if (declaredSymbol is not ITypeSymbol typeSymbol)
-    //     {
-    //         return VisualBasicFullNameProvider.CreateEntityTypeModel(VisualBasicConstants.ObjectIdentifier);
-    //     }
-    //
-    //     if (typeSymbol.BaseType == null)
-    //     {
-    //         return VisualBasicFullNameProvider.CreateEntityTypeModel(VisualBasicConstants.ObjectIdentifier);
-    //     }
-    //
-    //     return VisualBasicFullNameProvider.CreateEntityTypeModel(typeSymbol.BaseType.ToString());
-    // }
-    //
-    // public static IEntityType GetBaseClassName(BaseTypeStatementSyntax baseTypeStatementSyntax,
-    //     SemanticModel semanticModel)
-    // {
-    //     if (baseTypeStatementSyntax is TypeStatementSyntax TypeStatementSyntax)
-    //     {
-    //         return GetBaseClassName(TypeStatementSyntax, semanticModel);
-    //     }
-    //
-    //     return VisualBasicFullNameProvider.CreateEntityTypeModel(VisualBasicConstants.ObjectIdentifier);
-    // }
-    //
-    // public static IMethodSymbol? GetMethodSymbol(VisualBasicSyntaxNode expressionSyntax, SemanticModel semanticModel)
-    // {
-    //     var symbolInfo = semanticModel.GetSymbolInfo(expressionSyntax);
-    //     var symbol = symbolInfo.Symbol;
-    //     if (symbol is IMethodSymbol methodSymbol)
-    //     {
-    //         return methodSymbol;
-    //     }
-    //
-    //     return null;
-    // }
+        // if (declaredSymbol is not ITypeSymbol typeSymbol)
+        // {
+        //     return CreateEntityTypeModel(VisualBasicConstants.ObjectIdentifier);
+        // }
+        //
+        // if (typeSymbol.BaseType == null)
+        // {
+        //     return CreateEntityTypeModel(VisualBasicConstants.ObjectIdentifier);
+        // }
+
+        // return CreateEntityTypeModel(typeSymbol.BaseType.ToString());
+
+        return CreateEntityTypeModel("Object");
+    }
 
     // public static VisualBasicMethodCallModel GetMethodCallModel(InvocationExpressionSyntax invocationExpressionSyntax,
     //     SemanticModel semanticModel)
@@ -176,53 +156,43 @@ public static partial class VisualBasicExtractionHelperMethods
     //
     //     return new List<string>();
     // }
-    //
-    // public static IList<IParameterType> GetParameters(IMethodSymbol methodSymbol)
-    // {
-    //     IList<IParameterType> parameters = new List<IParameterType>();
-    //     foreach (var parameter in methodSymbol.Parameters)
-    //     {
-    //         var modifier = parameter.RefKind switch
-    //         {
-    //             RefKind.In => "in",
-    //             RefKind.Out => "out",
-    //             RefKind.Ref => "ref",
-    //             _ => ""
-    //         };
-    //
-    //         if (parameter.IsParams)
-    //         {
-    //             modifier = "params";
-    //         }
-    //
-    //         if (parameter.IsThis)
-    //         {
-    //             modifier = "this";
-    //         }
-    //
-    //         string? defaultValue = null;
-    //         if (parameter.HasExplicitDefaultValue)
-    //         {
-    //             defaultValue = parameter.ExplicitDefaultValue == null
-    //                 ? "null"
-    //                 : parameter.ExplicitDefaultValue.ToString();
-    //             if (defaultValue is "False" or "True")
-    //             {
-    //                 defaultValue = defaultValue.ToLower();
-    //             }
-    //         }
-    //
-    //         parameters.Add(new VisualBasicParameterModel
-    //         {
-    //             Type = VisualBasicFullNameProvider.CreateEntityTypeModel(parameter.Type.ToString()),
-    //             Modifier = modifier,
-    //             DefaultValue = defaultValue
-    //         });
-    //     }
-    //
-    //     return parameters;
-    // }
-    //
+    
+    public static IList<IParameterType> GetParameters(MemberAccessExpressionSyntax methodCall, SemanticModel semanticModel)
+    {
+        IList<IParameterType> parameters = new List<IParameterType>();
+        
+        var symbolInfo = semanticModel.GetSymbolInfo(methodCall);
+        if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
+        {
+            foreach (var parameter in methodSymbol.Parameters)
+            {
+                // var modifier = parameterSyntax.Modifiers.ToString();
+                // todo parameter modifiers
+                var modifier = "";
+                string? defaultValue = null;
+                if (parameter.HasExplicitDefaultValue)
+                {
+                    defaultValue = parameter.ExplicitDefaultValue == null
+                        ? "null"
+                        : parameter.ExplicitDefaultValue.ToString();
+                    if (defaultValue is "False" or "True")
+                    {
+                        defaultValue = defaultValue.ToLower();
+                    }
+                }
+                
+                parameters.Add(new VisualBasicParameterModel
+                {
+                    Type = CreateEntityTypeModel(parameter.Type.ToString()),
+                    Modifier = modifier,
+                    DefaultValue = defaultValue
+                });
+            }
+        }
+
+        return parameters;
+    }
+
     // public static string GetAliasTypeOfNamespace(NameSyntax nodeName, SemanticModel semanticModel)
     // {
     //     var symbolInfo = ModelExtensions.GetSymbolInfo(semanticModel, nodeName);
@@ -376,6 +346,11 @@ public static partial class VisualBasicExtractionHelperMethods
         return CalculateCyclomaticComplexityForSyntaxNode(methodBlockSyntax) + 1;
     }
 
+    public static int CalculateCyclomaticComplexity(ConstructorBlockSyntax constructorBlockSyntax)
+    {
+        return CalculateCyclomaticComplexityForSyntaxNode(constructorBlockSyntax) + 1;
+    }
+    
     // public static int CalculateCyclomaticComplexity(ArrowExpressionClauseSyntax syntax)
     // {
     //     return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;

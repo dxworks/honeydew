@@ -55,7 +55,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessorPartialClassesTes
                             new MethodInfoVisitor(),
                             returnValueSetterVisitor,
                         }),
-                        new CSharpConstructorSetterClassVisitor(_loggerMock.Object,
+                        new CSharpConstructorSetterVisitor(_loggerMock.Object,
                             new List<ITypeVisitor<IConstructorType>>
                             {
                                 new ConstructorInfoVisitor(),

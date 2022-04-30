@@ -62,7 +62,7 @@ public class LocalFunctionsExtractionTests
                             calledMethodSetterVisitor,
                             localFunctionsSetterClassVisitor,
                         }),
-                        new CSharpConstructorSetterClassVisitor(_loggerMock.Object,
+                        new CSharpConstructorSetterVisitor(_loggerMock.Object,
                             new List<ITypeVisitor<IConstructorType>>
                             {
                                 new ConstructorInfoVisitor(),

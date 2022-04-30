@@ -37,7 +37,7 @@ public class CSharpLocalVariablesTests
                             new MethodInfoVisitor(),
                             localVariablesTypeSetterVisitor
                         }),
-                        new CSharpConstructorSetterClassVisitor(_loggerMock.Object,
+                        new CSharpConstructorSetterVisitor(_loggerMock.Object,
                             new List<ITypeVisitor<IConstructorType>>
                             {
                                 new ConstructorInfoVisitor(),

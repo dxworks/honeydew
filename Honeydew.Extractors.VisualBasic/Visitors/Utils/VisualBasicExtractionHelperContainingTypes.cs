@@ -127,8 +127,7 @@ public static partial class VisualBasicExtractionHelperMethods
                     }
                 }
                     break;
-
-                // todo
+                //
                 // case ConstructorBlockSyntax constructorDeclarationSyntax:
                 // {
                 //     if (constructorDeclarationSyntax.Initializer != null)
@@ -139,7 +138,7 @@ public static partial class VisualBasicExtractionHelperMethods
                 //         {
                 //             return initializerSymbolInfo.Symbol.ContainingType.ToString()?.TrimEnd('?') ?? "";
                 //         }
-                //
+                //     
                 //         if (constructorDeclarationSyntax.Initializer.ThisOrBaseKeyword.Text ==
                 //             VisualBasicConstants.BaseClassIdentifier)
                 //         {
@@ -199,6 +198,29 @@ public static partial class VisualBasicExtractionHelperMethods
 
             case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
             {
+                if (memberAccessExpressionSyntax.Expression is MyBaseExpressionSyntax)
+                {
+                    var typeBlockSyntax = memberAccessExpressionSyntax.GetParentDeclarationSyntax<TypeBlockSyntax>();
+                    if (typeBlockSyntax is not null)
+                    {
+                        var inheritsStatementSyntax = typeBlockSyntax.Inherits.FirstOrDefault();
+
+                        var inheritedType = inheritsStatementSyntax?.Types.FirstOrDefault();
+                        if (inheritedType is null)
+                        {
+                            return "Object";
+                        }
+
+                        var symbol = semanticModel.GetSymbolInfo(inheritedType).Symbol;
+                        if (symbol is null)
+                        {
+                            return inheritedType.ToString().Trim('?');
+                        }
+
+                        return symbol.ToString()?.Trim('?') ?? "";
+                    }
+                }
+
                 if (GetLocationClassNameFromMemberAccessExpressionSyntax(memberAccessExpressionSyntax,
                         out var className))
                 {
@@ -269,6 +291,16 @@ public static partial class VisualBasicExtractionHelperMethods
                     className = GetLocationClassName(memberAccessExpressionSyntax.Name, semanticModel);
                     return true;
                 }
+
+                case IParameterSymbol parameterSymbol:
+                {
+                    if (parameterSymbol.IsThis)
+                    {
+                        className = parameterSymbol.Type.ToString();
+                        return true;
+                    }
+                }
+                    break;
 
                 default:
                 {

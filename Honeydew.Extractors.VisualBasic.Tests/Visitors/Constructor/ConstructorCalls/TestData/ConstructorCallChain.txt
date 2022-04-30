@@ -1,0 +1,14 @@
+﻿Module Module1
+    Class User
+        Public Sub New()            
+        End Sub
+
+        Public Sub New(ByVal a As String)
+            Me.New()
+        End Sub
+        
+        Public Sub New(ByVal a As String, ByVal b As String)
+            Me.New("welcome")            
+        End Sub
+    End Class    
+End Module

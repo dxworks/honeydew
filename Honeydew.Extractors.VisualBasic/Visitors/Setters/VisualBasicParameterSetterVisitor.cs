@@ -9,10 +9,10 @@ using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 namespace Honeydew.Extractors.VisualBasic.Visitors.Setters;
 
 public class VisualBasicParameterSetterVisitor :
-    CompositeVisitor<IParameterType>,
-    IParameterSetterVisitor<DelegateStatementSyntax, SemanticModel, ParameterSyntax, IDelegateType>,
-    IParameterSetterVisitor<MethodBlockSyntax, SemanticModel, ParameterSyntax, IMethodType>,
-    IParameterSetterVisitor<ConstructorBlockSyntax, SemanticModel, ParameterSyntax, IConstructorType>
+        CompositeVisitor<IParameterType>,
+        IParameterSetterVisitor<DelegateStatementSyntax, SemanticModel, ParameterSyntax, IDelegateType>,
+        IParameterSetterVisitor<MethodBlockSyntax, SemanticModel, ParameterSyntax, IMethodType>,
+        IParameterSetterVisitor<ConstructorBlockSyntax, SemanticModel, ParameterSyntax, IConstructorType>
     //IParameterSetterVisitor<FunctionB, SemanticModel, ParameterSyntax, IMethodTypeWithLocalFunctions>
 {
     public VisualBasicParameterSetterVisitor(ILogger logger, IEnumerable<ITypeVisitor<IParameterType>> visitors) : base(
@@ -32,13 +32,13 @@ public class VisualBasicParameterSetterVisitor :
 
     public IEnumerable<ParameterSyntax> GetWrappedSyntaxNodes(MethodBlockSyntax syntaxNode)
     {
-        return syntaxNode.ChildNodes().OfType<ParameterListSyntax>()
+        return syntaxNode.BlockStatement.ChildNodes().OfType<ParameterListSyntax>()
             .SelectMany(syntax => syntax.Parameters);
     }
 
     public IEnumerable<ParameterSyntax> GetWrappedSyntaxNodes(ConstructorBlockSyntax syntaxNode)
     {
-        return syntaxNode.ChildNodes().OfType<ParameterListSyntax>()
+        return syntaxNode.BlockStatement.ChildNodes().OfType<ParameterListSyntax>()
             .SelectMany(syntax => syntax.Parameters);
     }
 
