@@ -10,8 +10,8 @@ using static Honeydew.Models.VisualBasic.VisualBasicConstants;
 namespace Honeydew.Extractors.VisualBasic.Visitors.Concrete;
 
 public class MethodInfoVisitor :
-    IExtractionVisitor<MethodStatementSyntax, SemanticModel, IMethodType>
-    // IExtractionVisitor<AccessorDeclarationSyntax, SemanticModel, IAccessorMethodType>,
+    IExtractionVisitor<MethodStatementSyntax, SemanticModel, IMethodType>,
+    IExtractionVisitor<AccessorBlockSyntax, SemanticModel, IAccessorMethodType>
 {
     public IMethodType Visit(MethodStatementSyntax syntaxNode, SemanticModel semanticModel, IMethodType modelType)
     {
@@ -35,21 +35,20 @@ public class MethodInfoVisitor :
         return modelType;
     }
 
-    // public IAccessorMethodType Visit(AccessorDeclarationSyntax syntaxNode, SemanticModel semanticModel,
-    //     IAccessorMethodType modelMethodType)
-    // {
-    //     var accessModifier = "public";
-    //     var modifier = syntaxNode.Modifiers.ToString();
-    //
-    //     SetModifiers(syntaxNode.Modifiers.ToString(), ref accessModifier, ref modifier);
-    //
-    //     modelMethodType.Name = syntaxNode.Keyword.ToString();
-    //
-    //     modelMethodType.Modifier = modifier;
-    //     modelMethodType.AccessModifier = accessModifier;
-    //     modelMethodType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
-    //
-    //     return modelMethodType;
-    // }
+    public IAccessorMethodType Visit(AccessorBlockSyntax syntaxNode, SemanticModel semanticModel,
+        IAccessorMethodType modelMethodType)
+    {
+        var accessModifier = "Public";
+        var modifier = syntaxNode.AccessorStatement.Modifiers.ToString();
     
+        SetModifiers(syntaxNode.AccessorStatement.Modifiers.ToString(), ref accessModifier, ref modifier);
+    
+        modelMethodType.Name = syntaxNode.AccessorStatement.AccessorKeyword.ToString();
+    
+        modelMethodType.Modifier = modifier;
+        modelMethodType.AccessModifier = accessModifier;
+        modelMethodType.CyclomaticComplexity = CalculateCyclomaticComplexity(syntaxNode);
+    
+        return modelMethodType;
+    }
 }

@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Setters;
 
-public class CSharpLocalFunctionsSetterClassVisitor :
+public class CSharpLocalFunctionsSetterVisitor :
     CompositeVisitor<IMethodTypeWithLocalFunctions>,
     ILocalFunctionsSetterClassVisitor<MethodDeclarationSyntax, SemanticModel, LocalFunctionStatementSyntax,
         IMethodType>,
@@ -21,7 +21,7 @@ public class CSharpLocalFunctionsSetterClassVisitor :
     ILocalFunctionsSetterClassVisitor<LocalFunctionStatementSyntax, SemanticModel, LocalFunctionStatementSyntax,
         IMethodTypeWithLocalFunctions>
 {
-    public CSharpLocalFunctionsSetterClassVisitor(ILogger compositeLogger,
+    public CSharpLocalFunctionsSetterVisitor(ILogger compositeLogger,
         IEnumerable<ITypeVisitor<IMethodTypeWithLocalFunctions>> visitors) : base(compositeLogger, visitors)
     {
     }

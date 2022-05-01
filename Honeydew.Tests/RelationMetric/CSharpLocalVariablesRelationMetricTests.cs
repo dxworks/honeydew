@@ -37,7 +37,7 @@ public class CSharpLocalVariablesRelationVisitorTests
             {
                 new LocalVariableInfoVisitor()
             });
-        var localFunctionsSetterClassVisitor = new CSharpLocalFunctionsSetterClassVisitor(_loggerMock.Object,
+        var localFunctionsSetterClassVisitor = new CSharpLocalFunctionsSetterVisitor(_loggerMock.Object,
             new List<ITypeVisitor<IMethodTypeWithLocalFunctions>>
             {
                 new LocalFunctionInfoVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodTypeWithLocalFunctions>>
@@ -74,7 +74,7 @@ public class CSharpLocalVariablesRelationVisitorTests
                         new CSharpPropertySetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IPropertyType>>
                         {
                             new PropertyInfoVisitor(),
-                            new CSharpAccessorMethodSetterPropertyVisitor(_loggerMock.Object,
+                            new CSharpAccessorMethodSetterVisitor(_loggerMock.Object,
                                 new List<ITypeVisitor<IAccessorMethodType>>
                                 {
                                     methodInfoVisitor,

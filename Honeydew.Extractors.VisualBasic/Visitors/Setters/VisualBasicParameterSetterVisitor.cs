@@ -12,7 +12,8 @@ public class VisualBasicParameterSetterVisitor :
         CompositeVisitor<IParameterType>,
         IParameterSetterVisitor<DelegateStatementSyntax, SemanticModel, ParameterSyntax, IDelegateType>,
         IParameterSetterVisitor<MethodStatementSyntax, SemanticModel, ParameterSyntax, IMethodType>,
-        IParameterSetterVisitor<ConstructorBlockSyntax, SemanticModel, ParameterSyntax, IConstructorType>
+        IParameterSetterVisitor<ConstructorBlockSyntax, SemanticModel, ParameterSyntax, IConstructorType>,
+        IParameterSetterVisitor<AccessorBlockSyntax, SemanticModel, ParameterSyntax, IAccessorMethodType>
 {
     public VisualBasicParameterSetterVisitor(ILogger logger, IEnumerable<ITypeVisitor<IParameterType>> visitors) : base(
         logger, visitors)
@@ -38,6 +39,12 @@ public class VisualBasicParameterSetterVisitor :
     public IEnumerable<ParameterSyntax> GetWrappedSyntaxNodes(ConstructorBlockSyntax syntaxNode)
     {
         return syntaxNode.BlockStatement.ChildNodes().OfType<ParameterListSyntax>()
+            .SelectMany(syntax => syntax.Parameters);
+    }
+
+    public IEnumerable<ParameterSyntax> GetWrappedSyntaxNodes(AccessorBlockSyntax syntaxNode)
+    {
+        return syntaxNode.AccessorStatement.ChildNodes().OfType<ParameterListSyntax>()
             .SelectMany(syntax => syntax.Parameters);
     }
 }

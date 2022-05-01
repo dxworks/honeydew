@@ -9,7 +9,6 @@ namespace Honeydew.Extractors.VisualBasic.Visitors.Concrete;
 
 public class ReturnValueInfoVisitor :
         IExtractionVisitor<ReturnValueModel, SemanticModel, IReturnValueType>
-    // IExtractionVisitor<ReturnValueModel, SemanticModel, IReturnValueType>
 {
     public IReturnValueType Visit(ReturnValueModel returnValueModel, SemanticModel semanticModel,
         IReturnValueType modelType)
@@ -39,29 +38,4 @@ public class ReturnValueInfoVisitor :
 
         return modelType;
     }
-
-    // public IReturnValueType Visit(AccessorReturnValue syntaxNode, SemanticModel semanticModel,
-    //     IReturnValueType modelType)
-    // {
-    //     if (syntaxNode.Type != "get")
-    //     {
-    //         modelType.Type = new VisualBasicEntityTypeModel
-    //         {
-    //             Name = "void"
-    //         };
-    //         modelType.IsNullable = false;
-    //         modelType.Modifier = "";
-    //
-    //         return modelType;
-    //     }
-    //
-    //     var returnType = GetFullName(syntaxNode.ReturnType, semanticModel, out var isNullable);
-    //     var returnTypeModifier = SetTypeModifier(syntaxNode.ToString(), "");
-    //
-    //     modelType.Type = returnType;
-    //     modelType.Modifier = returnTypeModifier;
-    //     modelType.IsNullable = isNullable;
-    //
-    //     return modelType;
-    // }
 }

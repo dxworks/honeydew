@@ -1,0 +1,38 @@
+﻿Class Customer  
+   Private _Prop2 As String = "Empty"
+   Friend Property Prop2 As String
+       Get
+        Dim count As Integer = 0
+       Dim message As String
+       
+       If count = 0 Then
+           message = "There are no items."
+       'If count is 1, output will be "There is 1 item.".        
+       ElseIf count = 1 Then
+           message = "There is 1 item."
+       'If count is greater than 1, output will be "There are {count} items.", where {count} is replaced by the value of count. 
+       Else
+           message = $"There are {count} items."
+       End If
+                    
+           Return _Prop2
+       End Get
+       Set(ByVal value As String)
+           _Prop2 = value
+           
+           
+            Dim count As Integer = 0
+            Dim message As String
+           
+           If count = 0 Then
+               message = "There are no items."
+           'If count is 1, output will be "There is 1 item.".        
+           ElseIf count = 1 Then
+               message = "There is 1 item."
+           'If count is greater than 1, output will be "There are {count} items.", where {count} is replaced by the value of count. 
+           Else
+               message = $"There are {count} items."
+           End If
+       End Set
+   End Property
+End Class  

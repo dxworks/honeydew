@@ -36,7 +36,7 @@ public class LocalFunctionsAccessedFieldsTests
                         new CSharpMethodSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
                         {
                             new MethodInfoVisitor(),
-                            new CSharpLocalFunctionsSetterClassVisitor(_loggerMock.Object,
+                            new CSharpLocalFunctionsSetterVisitor(_loggerMock.Object,
                                 new List<ITypeVisitor<IMethodTypeWithLocalFunctions>>
                                 {
                                     new LocalFunctionInfoVisitor(_loggerMock.Object,

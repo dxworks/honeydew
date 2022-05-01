@@ -19,104 +19,116 @@ public static partial class VisualBasicExtractionHelperMethods
         return VisualBasicFullNameProvider.GetFullName(syntaxNode, semanticModel, out _);
     }
 
-    // public static VisualBasicMethodCallModel GetMethodCallModel(InvocationExpressionSyntax invocationExpressionSyntax,
-    //     SemanticModel semanticModel)
-    // {
-    //     var methodName = invocationExpressionSyntax.Expression switch
-    //     {
-    //         MemberAccessExpressionSyntax memberAccessExpressionSyntax => memberAccessExpressionSyntax.Name.ToString(),
-    //         _ => invocationExpressionSyntax.Expression.ToString()
-    //     };
-    //
-    //     return new VisualBasicMethodCallModel
-    //     {
-    //         Name = methodName,
-    //         DefinitionClassName =
-    //             GetDefinitionClassName(invocationExpressionSyntax, semanticModel),
-    //         LocationClassName =
-    //             GetLocationClassName(invocationExpressionSyntax, semanticModel),
-    //         ParameterTypes = GetParameters(invocationExpressionSyntax, semanticModel),
-    //         MethodDefinitionNames = GetMethodDefinitionNames(invocationExpressionSyntax, semanticModel),
-    //         GenericParameters = GetGenericParameters(invocationExpressionSyntax, semanticModel),
-    //     };
-    // }
+    public static VisualBasicMethodCallModel GetMethodCallModel(InvocationExpressionSyntax invocationExpressionSyntax,
+        SemanticModel semanticModel)
+    {
+        var methodName = invocationExpressionSyntax.Expression switch
+        {
+            MemberAccessExpressionSyntax memberAccessExpressionSyntax => memberAccessExpressionSyntax.Name.ToString(),
+            _ => invocationExpressionSyntax.Expression.ToString()
+        };
 
-    // private static IList<IEntityType> GetGenericParameters(InvocationExpressionSyntax invocationExpressionSyntax,
-    //     SemanticModel semanticModel)
-    // {
-    //     var methodSymbol = GetMethodSymbol(invocationExpressionSyntax, semanticModel);
-    //     if (methodSymbol != null)
-    //     {
-    //         return methodSymbol.TypeParameters
-    //             .Select(parameter => VisualBasicFullTypeNameBuilder.CreateEntityTypeModel(parameter.Name))
-    //             .Cast<IEntityType>()
-    //             .ToList();
-    //     }
-    //
-    //     return new List<IEntityType>();
-    // }
+        return new VisualBasicMethodCallModel
+        {
+            Name = methodName,
+            DefinitionClassName =
+                GetDefinitionClassName(invocationExpressionSyntax, semanticModel),
+            LocationClassName =
+                GetLocationClassName(invocationExpressionSyntax, semanticModel),
+            ParameterTypes = GetParameters(invocationExpressionSyntax, semanticModel),
+            MethodDefinitionNames = GetMethodDefinitionNames(invocationExpressionSyntax, semanticModel),
+            GenericParameters = GetGenericParameters(invocationExpressionSyntax, semanticModel),
+        };
+    }
 
-    // private static IList<string> GetMethodDefinitionNames(ISymbol symbol)
-    // {
-    //     var definitionNames = new List<string>();
-    //
-    //     var currentSymbol = symbol.ContainingSymbol;
-    //
-    //     while (currentSymbol is IMethodSymbol methodSymbol)
-    //     {
-    //         var containingSymbol =
-    //             methodSymbol.ContainingSymbol == null ? "" : methodSymbol.ContainingSymbol.ToString() ?? "";
-    //         var containingNamespace = methodSymbol.ContainingNamespace == null
-    //             ? ""
-    //             : methodSymbol.ContainingNamespace.ToString() ?? "";
-    //         var symbolName = containingSymbol.Replace(containingNamespace, "").Trim('.');
-    //         var methodSymbolName = methodSymbol.MethodKind switch
-    //         {
-    //             MethodKind.Constructor => symbolName,
-    //             MethodKind.Destructor => $"~{symbolName}",
-    //             _ => methodSymbol.Name
-    //         };
-    //
-    //         if (methodSymbol.AssociatedSymbol != null)
-    //         {
-    //             var associatedSymbolName = methodSymbol.AssociatedSymbol.Name;
-    //             var index = methodSymbolName.IndexOf($"_{associatedSymbolName}", StringComparison.Ordinal);
-    //             var methodName = methodSymbolName;
-    //             if (index >= 0)
-    //             {
-    //                 methodName = methodName.Remove(index);
-    //             }
-    //
-    //             definitionNames.Add(methodName);
-    //             definitionNames.Add(associatedSymbolName);
-    //         }
-    //         else
-    //         {
-    //             var signature =
-    //                 $"{methodSymbolName}({string.Join(", ", methodSymbol.Parameters.Select(p => p.Type.ToString()))})";
-    //
-    //             definitionNames.Add(signature);
-    //         }
-    //
-    //         currentSymbol = currentSymbol.ContainingSymbol;
-    //     }
-    //
-    //     definitionNames.Reverse();
-    //
-    //     return definitionNames;
-    // }
-    //
-    // private static IList<string> GetMethodDefinitionNames(InvocationExpressionSyntax invocationExpressionSyntax,
-    //     SemanticModel semanticModel)
-    // {
-    //     var symbolInfo = semanticModel.GetSymbolInfo(invocationExpressionSyntax);
-    //     if (symbolInfo.Symbol != null)
-    //     {
-    //         return GetMethodDefinitionNames(symbolInfo.Symbol);
-    //     }
-    //
-    //     return new List<string>();
-    // }
+    private static IList<IEntityType> GetGenericParameters(InvocationExpressionSyntax invocationExpressionSyntax,
+        SemanticModel semanticModel)
+    {
+        var methodSymbol = GetMethodSymbol(invocationExpressionSyntax, semanticModel);
+        if (methodSymbol != null)
+        {
+            return methodSymbol.TypeParameters
+                .Select(parameter => VisualBasicFullTypeNameBuilder.CreateEntityTypeModel(parameter.Name))
+                .Cast<IEntityType>()
+                .ToList();
+        }
+
+        return new List<IEntityType>();
+    }
+
+    private static IMethodSymbol? GetMethodSymbol(SyntaxNode expressionSyntax, SemanticModel semanticModel)
+    {
+        var symbolInfo = semanticModel.GetSymbolInfo(expressionSyntax);
+        var symbol = symbolInfo.Symbol;
+        if (symbol is IMethodSymbol methodSymbol)
+        {
+            return methodSymbol;
+        }
+
+        return null;
+    }
+
+    private static IList<string> GetMethodDefinitionNames(ISymbol symbol)
+    {
+        var definitionNames = new List<string>();
+
+        var currentSymbol = symbol.ContainingSymbol;
+
+        while (currentSymbol is IMethodSymbol methodSymbol)
+        {
+            var containingSymbol =
+                methodSymbol.ContainingSymbol == null ? "" : methodSymbol.ContainingSymbol.ToString() ?? "";
+            var containingNamespace = methodSymbol.ContainingNamespace == null
+                ? ""
+                : methodSymbol.ContainingNamespace.ToString() ?? "";
+            var symbolName = containingSymbol.Replace(containingNamespace, "").Trim('.');
+            var methodSymbolName = methodSymbol.MethodKind switch
+            {
+                MethodKind.Constructor => symbolName,
+                MethodKind.Destructor => $"~{symbolName}",
+                _ => methodSymbol.Name
+            };
+
+            if (methodSymbol.AssociatedSymbol != null)
+            {
+                var associatedSymbolName = methodSymbol.AssociatedSymbol.Name;
+                var index = methodSymbolName.IndexOf($"_{associatedSymbolName}", StringComparison.Ordinal);
+                var methodName = methodSymbolName;
+                if (index >= 0)
+                {
+                    methodName = methodName.Remove(index);
+                }
+
+                definitionNames.Add(methodName);
+                definitionNames.Add(associatedSymbolName);
+            }
+            else
+            {
+                var signature =
+                    $"{methodSymbolName}({string.Join(", ", methodSymbol.Parameters.Select(p => p.Type.ToString()))})";
+
+                definitionNames.Add(signature);
+            }
+
+            currentSymbol = currentSymbol.ContainingSymbol;
+        }
+
+        definitionNames.Reverse();
+
+        return definitionNames;
+    }
+
+    private static IList<string> GetMethodDefinitionNames(InvocationExpressionSyntax invocationExpressionSyntax,
+        SemanticModel semanticModel)
+    {
+        var symbolInfo = semanticModel.GetSymbolInfo(invocationExpressionSyntax);
+        if (symbolInfo.Symbol != null)
+        {
+            return GetMethodDefinitionNames(symbolInfo.Symbol);
+        }
+
+        return new List<string>();
+    }
 
     public static IList<IParameterType> GetParameters(MemberAccessExpressionSyntax methodCall,
         SemanticModel semanticModel)
@@ -155,16 +167,100 @@ public static partial class VisualBasicExtractionHelperMethods
         return parameters;
     }
 
-    // public static string GetAliasTypeOfNamespace(NameSyntax nodeName, SemanticModel semanticModel)
-    // {
-    //     var symbolInfo = ModelExtensions.GetSymbolInfo(semanticModel, nodeName);
-    //     return symbolInfo.Symbol switch
-    //     {
-    //         null => nameof(EAliasType.NotDetermined),
-    //         INamespaceSymbol => nameof(EAliasType.Namespace),
-    //         _ => nameof(EAliasType.Class)
-    //     };
-    // }
+    private static IList<IParameterType> GetParameters(InvocationExpressionSyntax invocationSyntax,
+        SemanticModel semanticModel)
+    {
+        var methodSymbol = GetMethodSymbol(invocationSyntax, semanticModel);
+        if (methodSymbol == null)
+        {
+            // try to reconstruct the parameters from the method call
+            var parameterList = new List<IParameterType>();
+            var success = true;
+
+            foreach (var argumentSyntax in invocationSyntax.ArgumentList.Arguments)
+            {
+                var argumentExpressionSyntax = argumentSyntax.GetExpression();
+                var parameterSymbolInfo = semanticModel.GetSymbolInfo(argumentExpressionSyntax);
+                if (parameterSymbolInfo.Symbol != null)
+                {
+                    parameterList.Add(new VisualBasicParameterModel
+                    {
+                        Type = GetFullName(argumentExpressionSyntax, semanticModel)
+                    });
+                    continue;
+                }
+
+                if (argumentExpressionSyntax is not LiteralExpressionSyntax literalExpressionSyntax)
+                {
+                    success = false;
+                    break;
+                }
+
+                if (literalExpressionSyntax.Token.Value == null)
+                {
+                    success = false;
+                    break;
+                }
+
+                parameterList.Add(new VisualBasicParameterModel
+                {
+                    Type = CreateEntityTypeModel(literalExpressionSyntax.Token.Value.GetType()
+                        .FullName),
+                });
+            }
+
+            return success ? parameterList : new List<IParameterType>();
+        }
+
+        return GetParameters(methodSymbol);
+    }
+
+
+    private static IList<IParameterType> GetParameters(IMethodSymbol methodSymbol)
+    {
+        IList<IParameterType> parameters = new List<IParameterType>();
+        foreach (var parameter in methodSymbol.Parameters)
+        {
+            var modifier = parameter.RefKind switch
+            {
+                RefKind.In => "in",
+                RefKind.Out => "out",
+                RefKind.Ref => "ref",
+                _ => ""
+            };
+
+            if (parameter.IsParams)
+            {
+                modifier = "params";
+            }
+
+            if (parameter.IsThis)
+            {
+                modifier = "this";
+            }
+
+            string? defaultValue = null;
+            if (parameter.HasExplicitDefaultValue)
+            {
+                defaultValue = parameter.ExplicitDefaultValue == null
+                    ? "null"
+                    : parameter.ExplicitDefaultValue.ToString();
+                if (defaultValue is "False" or "True")
+                {
+                    defaultValue = defaultValue.ToLower();
+                }
+            }
+
+            parameters.Add(new VisualBasicParameterModel
+            {
+                Type = CreateEntityTypeModel(parameter.Type.ToString()),
+                Modifier = modifier,
+                DefaultValue = defaultValue
+            });
+        }
+
+        return parameters;
+    }
 
     //
     // public static IEntityType GetContainingType(SyntaxNode syntaxNode, SemanticModel semanticModel)
@@ -299,6 +395,7 @@ public static partial class VisualBasicExtractionHelperMethods
         {
             return CalculateCyclomaticComplexity(methodBlockSyntax);
         }
+
         return CalculateCyclomaticComplexityForSyntaxNode(methodStatementSyntax) + 1;
     }
 
@@ -312,10 +409,10 @@ public static partial class VisualBasicExtractionHelperMethods
         return CalculateCyclomaticComplexityForSyntaxNode(propertyBlockSyntax) + 1;
     }
 
-    // public static int CalculateCyclomaticComplexity(AccessorDeclarationSyntax syntax)
-    // {
-    //     return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
-    // }
+    public static int CalculateCyclomaticComplexity(AccessorBlockSyntax syntax)
+    {
+        return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
+    }
     //
     // public static int CalculateCyclomaticComplexity(MemberDeclarationSyntax syntax)
     // {
@@ -331,11 +428,6 @@ public static partial class VisualBasicExtractionHelperMethods
     //     }
     //
     //     return CalculateCyclomaticComplexityForSyntaxNode(syntax) + accessorCount;
-    // }
-    //
-    // public static int CalculateCyclomaticComplexity(LocalFunctionStatementSyntax syntax)
-    // {
-    //     return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
     // }
 
     private static int CalculateCyclomaticComplexity(ExpressionSyntax? conditionExpressionSyntax)

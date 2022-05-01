@@ -30,7 +30,7 @@ public class CSharpPropertyAccessorMethodLocalVariablesTests
                         new CSharpPropertySetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IPropertyType>>
                         {
                             new PropertyInfoVisitor(),
-                            new CSharpAccessorMethodSetterPropertyVisitor(_loggerMock.Object,
+                            new CSharpAccessorMethodSetterVisitor(_loggerMock.Object,
                                 new List<ITypeVisitor<IAccessorMethodType>>
                                 {
                                     new MethodInfoVisitor(),

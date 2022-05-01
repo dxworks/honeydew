@@ -8,12 +8,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Setters;
 
-public class CSharpAccessorMethodSetterPropertyVisitor :
+public class CSharpAccessorMethodSetterVisitor :
     CompositeVisitor<IAccessorMethodType>,
     IAccessorMethodSetterPropertyVisitor<BasePropertyDeclarationSyntax, SemanticModel, AccessorDeclarationSyntax>,
     IAccessorMethodSetterPropertyVisitor<BasePropertyDeclarationSyntax, SemanticModel, ArrowExpressionClauseSyntax>
 {
-    public CSharpAccessorMethodSetterPropertyVisitor(ILogger compositeLogger,
+    public CSharpAccessorMethodSetterVisitor(ILogger compositeLogger,
         IEnumerable<ITypeVisitor<IAccessorMethodType>> visitors) : base(compositeLogger,
         visitors)
     {

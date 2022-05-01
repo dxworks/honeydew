@@ -37,7 +37,7 @@ public class CSharpPropertyAttributeMetricTests
                         {
                             new PropertyInfoVisitor(),
                             attributeSetterVisitor,
-                            new CSharpAccessorMethodSetterPropertyVisitor(_loggerMock.Object,
+                            new CSharpAccessorMethodSetterVisitor(_loggerMock.Object,
                                 new List<ITypeVisitor<IAccessorMethodType>>
                                 {
                                     new MethodInfoVisitor(),

@@ -36,7 +36,7 @@ public class CSharpGenericMethodTests
                         {
                             new MethodInfoVisitor(),
                             genericParameterSetterVisitor,
-                            new CSharpLocalFunctionsSetterClassVisitor(_loggerMock.Object,
+                            new CSharpLocalFunctionsSetterVisitor(_loggerMock.Object,
                                 new List<ITypeVisitor<IMethodTypeWithLocalFunctions>>
                                 {
                                     new LocalFunctionInfoVisitor(_loggerMock.Object,

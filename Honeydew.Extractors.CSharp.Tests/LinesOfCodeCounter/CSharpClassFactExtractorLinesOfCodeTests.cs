@@ -36,7 +36,7 @@ public class CSharpClassFactExtractorLinesOfCodeTests
                         new CSharpMethodSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
                         {
                             linesOfCodeVisitor,
-                            new CSharpLocalFunctionsSetterClassVisitor(_loggerMock.Object,
+                            new CSharpLocalFunctionsSetterVisitor(_loggerMock.Object,
                                 new List<ITypeVisitor<IMethodTypeWithLocalFunctions>>
                                 {
                                     linesOfCodeVisitor,
@@ -50,7 +50,7 @@ public class CSharpClassFactExtractorLinesOfCodeTests
                         new CSharpPropertySetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IPropertyType>>
                         {
                             linesOfCodeVisitor,
-                            new CSharpAccessorMethodSetterPropertyVisitor(_loggerMock.Object,
+                            new CSharpAccessorMethodSetterVisitor(_loggerMock.Object,
                                 new List<ITypeVisitor<IAccessorMethodType>>
                                 {
                                     linesOfCodeVisitor

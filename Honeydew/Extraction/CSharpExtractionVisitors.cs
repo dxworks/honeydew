@@ -57,7 +57,7 @@ internal static class CSharpExtractionVisitors
 
         var gotoInfoVisitor = new GotoStatementVisitor();
 
-        var localFunctionsSetterClassVisitor = new CSharpLocalFunctionsSetterClassVisitor(logger,
+        var localFunctionsSetterClassVisitor = new CSharpLocalFunctionsSetterVisitor(logger,
             new List<ITypeVisitor<IMethodTypeWithLocalFunctions>>
             {
                 new LocalFunctionInfoVisitor(logger, new List<ITypeVisitor<IMethodTypeWithLocalFunctions>>
@@ -146,7 +146,7 @@ internal static class CSharpExtractionVisitors
         var propertyVisitors = new List<ITypeVisitor<IPropertyType>>
         {
             new PropertyInfoVisitor(),
-            new CSharpAccessorMethodSetterPropertyVisitor(logger, propertyAccessorsVisitors),
+            new CSharpAccessorMethodSetterVisitor(logger, propertyAccessorsVisitors),
             linesOfCodeVisitor,
             attributeSetterVisitor,
         };
