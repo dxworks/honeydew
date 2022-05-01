@@ -1,0 +1,28 @@
+﻿Namespace Namespace1  
+    Module Module1
+        Class User      
+         Private _F As String = "Empty"            
+         Public ReadOnly Property Prop2 As String = ""  
+        
+          Friend Property XX As String
+              Get
+                  Dim x = Prop2
+                  Dim y = _F
+                  
+                  Prop2 = y
+                  _F = x   
+              
+                  Return x
+              End Get
+              Set(ByVal value As String)
+              
+                  Dim x = Prop2
+                  Dim y = _F
+                  
+                  Prop2 = y
+                  _F = x   
+              End Set
+          End Property           
+        End Class  
+    End Module  
+End Namespace  
