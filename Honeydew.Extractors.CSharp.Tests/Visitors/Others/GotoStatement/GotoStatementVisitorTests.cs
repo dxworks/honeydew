@@ -45,7 +45,7 @@ public class GotoStatementVisitorTests
                                 gotoStatementVisitor,
                                 localFunctionsSetterClassVisitor,
                             }),
-                        new CSharpMethodSetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
+                        new CSharpMethodSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
                         {
                             new MethodInfoVisitor(),
                             gotoStatementVisitor,

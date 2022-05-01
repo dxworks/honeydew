@@ -56,7 +56,7 @@ public class LocalFunctionsExtractionTests
                     new List<ITypeVisitor<IMembersClassType>>
                     {
                         new BaseInfoClassVisitor(),
-                        new CSharpMethodSetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
+                        new CSharpMethodSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
                         {
                             new MethodInfoVisitor(),
                             calledMethodSetterVisitor,

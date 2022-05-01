@@ -1,18 +1,36 @@
 ﻿using Honeydew.Extractors.Visitors;
+using Honeydew.Extractors.VisualBasic.Visitors.Setters;
 using Honeydew.Models.Types;
+using Honeydew.Models.VisualBasic;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 using static Honeydew.Extractors.VisualBasic.Visitors.Utils.VisualBasicExtractionHelperMethods;
 
 namespace Honeydew.Extractors.VisualBasic.Visitors.Concrete;
 
 public class ReturnValueInfoVisitor :
-        IExtractionVisitor<TypeSyntax, SemanticModel, IReturnValueType>
-    // IExtractionVisitor<AccessorReturnValue, SemanticModel, IReturnValueType>
+        IExtractionVisitor<ReturnValueModel, SemanticModel, IReturnValueType>
+    // IExtractionVisitor<ReturnValueModel, SemanticModel, IReturnValueType>
 {
-    public IReturnValueType Visit(TypeSyntax syntaxNode, SemanticModel semanticModel, IReturnValueType modelType)
+    public IReturnValueType Visit(ReturnValueModel returnValueModel, SemanticModel semanticModel,
+        IReturnValueType modelType)
     {
-        var returnType = GetFullName(syntaxNode, semanticModel, out var isNullable);
+        IEntityType returnType;
+        var isNullable = false;
+        if (returnValueModel.ReturnType is null)
+        {
+            returnType = new VisualBasicEntityTypeModel
+            {
+                Name = "Void",
+                FullType = new GenericType
+                {
+                    Name = "Void"
+                }
+            };
+        }
+        else
+        {
+            returnType = GetFullName(returnValueModel.ReturnType, semanticModel, out isNullable);
+        }
         // var returnTypeModifier = SetTypeModifier(syntaxNode.ToString(), "");
 
         modelType.Type = returnType;

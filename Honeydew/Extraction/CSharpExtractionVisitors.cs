@@ -157,7 +157,7 @@ internal static class CSharpExtractionVisitors
         {
             new BaseInfoClassVisitor(),
             new BaseTypesClassVisitor(),
-            new CSharpMethodSetterClassVisitor(logger, methodVisitors),
+            new CSharpMethodSetterVisitor(logger, methodVisitors),
             new CSharpConstructorSetterVisitor(logger, constructorVisitors),
             new CSharpDestructorSetterVisitor(logger, destructorVisitors),
             new CSharpFieldSetterClassVisitor(logger, fieldVisitors),

@@ -8,14 +8,16 @@ using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 
 namespace Honeydew.Extractors.VisualBasic.Visitors.Setters;
 
+public record ReturnValueModel(string Type, TypeSyntax? ReturnType);
+
 public partial class VisualBasicReturnValueSetterVisitor :
     CompositeVisitor<IReturnValueType>,
-    IReturnValueSetterVisitor<DelegateStatementSyntax, SemanticModel, TypeSyntax, IDelegateType>
-    // IReturnValueSetterVisitor<MethodBlockSyntax, SemanticModel, TypeSyntax, IMethodType>,
-    // IReturnValueSetterVisitor<ArrowExpressionClauseSyntax, SemanticModel, TypeSyntax, IAccessorMethodType>,
-    // IReturnValueSetterVisitor<LocalFunctionStatementSyntax, SemanticModel, TypeSyntax, IMethodTypeWithLocalFunctions>
+    IReturnValueSetterVisitor<DelegateStatementSyntax, SemanticModel, ReturnValueModel, IDelegateType>,
+    IReturnValueSetterVisitor<MethodBlockSyntax, SemanticModel, ReturnValueModel, IMethodType>,
+    IReturnValueSetterVisitor<MethodStatementSyntax, SemanticModel, ReturnValueModel, IMethodType>
 {
-    public VisualBasicReturnValueSetterVisitor(ILogger compositeLogger, IEnumerable<ITypeVisitor<IReturnValueType>> visitors)
+    public VisualBasicReturnValueSetterVisitor(ILogger compositeLogger,
+        IEnumerable<ITypeVisitor<IReturnValueType>> visitors)
         : base(compositeLogger, visitors)
     {
     }
@@ -24,27 +26,18 @@ public partial class VisualBasicReturnValueSetterVisitor :
 
     public IReturnValueType CreateWrappedType() => new VisualBasicReturnValueModel();
 
-    public IEnumerable<TypeSyntax> GetWrappedSyntaxNodes(DelegateStatementSyntax syntaxNode)
+    public IEnumerable<ReturnValueModel> GetWrappedSyntaxNodes(DelegateStatementSyntax syntaxNode)
     {
-        yield return syntaxNode.AsClause.Type;
+        yield return new ReturnValueModel("return", syntaxNode.AsClause?.Type);
     }
 
-    // public IEnumerable<TypeSyntax> GetWrappedSyntaxNodes(MethodBlockSyntax syntaxNode)
-    // {
-    //     yield return syntaxNode.BlockStatement;
-    // }
+    public IEnumerable<ReturnValueModel> GetWrappedSyntaxNodes(MethodBlockSyntax syntaxNode)
+    {
+        yield return new ReturnValueModel("return", syntaxNode.SubOrFunctionStatement.AsClause?.Type);
+    }
 
-    // public IEnumerable<TypeSyntax> GetWrappedSyntaxNodes(ArrowExpressionClauseSyntax syntaxNode)
-    // {
-    //     var basePropertyDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
-    //     if (basePropertyDeclarationSyntax != null)
-    //     {
-    //         yield return basePropertyDeclarationSyntax.Type;
-    //     }
-    // }
-    //
-    // public IEnumerable<TypeSyntax> GetWrappedSyntaxNodes(LocalFunctionStatementSyntax syntaxNode)
-    // {
-    //     yield return syntaxNode.ReturnType;
-    // }
+    public IEnumerable<ReturnValueModel> GetWrappedSyntaxNodes(MethodStatementSyntax syntaxNode)
+    {
+        yield return new ReturnValueModel("return", syntaxNode.AsClause?.Type);
+    }
 }

@@ -34,7 +34,7 @@ public class CSharpReturnValueRelationMetricTests
                     new List<ITypeVisitor<IMembersClassType>>
                     {
                         new BaseInfoClassVisitor(),
-                        new CSharpMethodSetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
+                        new CSharpMethodSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
                         {
                             new MethodInfoVisitor(),
                             new CSharpReturnValueSetterVisitor(_loggerMock.Object,

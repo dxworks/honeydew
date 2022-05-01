@@ -1,0 +1,13 @@
+﻿Public Class Customer  
+    Public ReadOnly givenName As String  
+    Friend familyName As String  
+    Private salary, salary2 As Decimal    
+    
+    Public Function GetSalary() As Decimal  
+        Return salary  
+    End Function  
+    
+    Public Sub giveRaise(raise As Double)  
+        salary *= raise  
+    End Sub  
+End Class

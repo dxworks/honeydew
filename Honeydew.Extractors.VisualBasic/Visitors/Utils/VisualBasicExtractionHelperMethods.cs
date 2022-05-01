@@ -293,6 +293,15 @@ public static partial class VisualBasicExtractionHelperMethods
         return CalculateCyclomaticComplexityForSyntaxNode(methodBlockSyntax) + 1;
     }
 
+    public static int CalculateCyclomaticComplexity(MethodStatementSyntax methodStatementSyntax)
+    {
+        if (methodStatementSyntax.Parent is MethodBlockSyntax methodBlockSyntax)
+        {
+            return CalculateCyclomaticComplexity(methodBlockSyntax);
+        }
+        return CalculateCyclomaticComplexityForSyntaxNode(methodStatementSyntax) + 1;
+    }
+
     public static int CalculateCyclomaticComplexity(ConstructorBlockSyntax constructorBlockSyntax)
     {
         return CalculateCyclomaticComplexityForSyntaxNode(constructorBlockSyntax) + 1;

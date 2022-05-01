@@ -35,7 +35,7 @@ public class CSharpAttributeForGenericTypesTests
                     {
                         new BaseInfoClassVisitor(),
                         genericParameterSetterVisitor,
-                        new CSharpMethodSetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
+                        new CSharpMethodSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
                         {
                             new MethodInfoVisitor(),
                             genericParameterSetterVisitor,

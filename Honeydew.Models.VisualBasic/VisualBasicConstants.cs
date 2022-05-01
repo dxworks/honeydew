@@ -5,6 +5,8 @@ public static class VisualBasicConstants
     public const string DefaultClassAccessModifier = "Friend";
     public const string DefaultClassMethodAccessModifier = "Friend";
     public const string DefaultFieldAccessModifier = "Friend";
+    public const string DefaultInterfaceMethodAccessModifier = "Public";
+    public const string DefaultInterfaceMethodModifier = "MustOverride";
 
     private static readonly string[] AccessModifiers =
         { "Protected Friend", "Private Protected", "Public", "Private", "Protected", "Friend" };

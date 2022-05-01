@@ -101,7 +101,7 @@ public class VisualBasicConstructorInfoTests
 
     [Theory]
     [FilePath("TestData/ClassWithConstructorForCyclomaticComplexity.txt")]
-    public async Task Extract_ShouldHaveCyclomaticComplexity_WhenProvidedWithDelegate(string filePath)
+    public async Task Extract_ShouldHaveCyclomaticComplexity_WhenProvidedWithConstructor(string filePath)
     {
         var compilationUnitType = await _factExtractor.Extract(filePath, It.IsAny<CancellationToken>());
 

@@ -33,7 +33,7 @@ public class CSharpClassFactExtractorLinesOfCodeTests
                             {
                                 linesOfCodeVisitor
                             }),
-                        new CSharpMethodSetterClassVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
+                        new CSharpMethodSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IMethodType>>
                         {
                             linesOfCodeVisitor,
                             new CSharpLocalFunctionsSetterClassVisitor(_loggerMock.Object,
