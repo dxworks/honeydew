@@ -1,0 +1,19 @@
+Imports System
+
+Namespace Namespace1
+    Public Class Class1
+        Private a As Integer
+
+        Public Property Value1 As Integer
+            Get
+                Dim array As Integer() = New Integer(a - 1) {}
+                Dim array2 As Class2() = New Class2(a - 1) {}
+                Dim array3 As ExternClass() = New ExternClass(a - 1) {}
+                Return 0
+            End Get
+        End Property
+    End Class
+
+    Public Class Class2
+    End Class
+End Namespace

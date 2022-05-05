@@ -59,37 +59,6 @@ internal static class VisualBasicFullNameProvider
                 }
             }
                 break;
-
-            // case PredefinedTypeSyntax predefinedTypeSyntax:
-            // {
-            //     var symbolInfo = semanticModel.GetSymbolInfo(predefinedTypeSyntax);
-            //     if (symbolInfo.Symbol != null)
-            //     {
-            //         var symbolName = symbolInfo.Symbol.ToString();
-            //         if (!string.IsNullOrEmpty(symbolName) && symbolName.EndsWith('?'))
-            //         {
-            //             isNullable = true;
-            //         }
-            //
-            //         return CreateEntityTypeModel(symbolName);
-            //     }
-            //
-            //     var typeInfo = semanticModel.GetTypeInfo(predefinedTypeSyntax);
-            //     if (typeInfo.Type != null)
-            //     {
-            //         var typeName = typeInfo.Type.ToString();
-            //         if (!string.IsNullOrEmpty(typeName) && typeName.EndsWith('?'))
-            //         {
-            //             isNullable = true;
-            //         }
-            //
-            //         return CreateEntityTypeModel(typeName);
-            //     }
-            //
-            //     name = "";
-            //     isExtern = true;
-            // }
-            //     break;
             //
             // case BaseExpressionSyntax baseExpressionSyntax:
             // {
@@ -218,6 +187,10 @@ internal static class VisualBasicFullNameProvider
                         isExtern = true;
                     }
                         break;
+                    case GenericNameSyntax genericNameSyntax:
+                    {
+                        return GetGenericFullName(genericNameSyntax, semanticModel, out isNullable);
+                    }
                     default:
                     {
                         name = "";
@@ -237,23 +210,6 @@ internal static class VisualBasicFullNameProvider
             //         : $"{GetFullName(basePropertyDeclarationSyntax, semanticModel, out isNullable).Name}.{accessorDeclarationSyntax.Keyword.ToString()}";
             // }
             //     break;
-            //
-            // case ThrowStatementSyntax throwStatementSyntax:
-            // {
-            //     var parentDeclarationSyntax = throwStatementSyntax.GetParentDeclarationSyntax<CatchClauseSyntax>();
-            //     if (parentDeclarationSyntax is not null)
-            //     {
-            //         var catchDeclarationSyntax = parentDeclarationSyntax.Declaration;
-            //         var declarationSyntax = catchDeclarationSyntax?.Type ?? throwStatementSyntax.Expression;
-            //
-            //         if (declarationSyntax is not null)
-            //         {
-            //             return GetFullName(declarationSyntax, semanticModel, out isNullable);
-            //         }
-            //     }
-            //
-            //     break;
-            // }
 
             default:
             {
@@ -264,6 +220,50 @@ internal static class VisualBasicFullNameProvider
         isNullable = !string.IsNullOrEmpty(name) && name.EndsWith('?');
 
         return CreateEntityTypeModel(name, isExtern);
+    }
+
+    private static IEntityType GetGenericFullName(GenericNameSyntax genericNameSyntax, SemanticModel semanticModel,
+        out bool isNullable)
+    {
+        var name = genericNameSyntax.ToString();
+        isNullable = name.EndsWith('?');
+        if (isNullable)
+        {
+            name = name.TrimEnd('?');
+        }
+
+        return new VisualBasicEntityTypeModel
+        {
+            Name = name,
+            FullType = new GenericType
+            {
+                Name = name,
+                ContainedTypes = genericNameSyntax.TypeArgumentList.Arguments
+                    .Select(arg =>
+                    {
+                        switch (arg)
+                        {
+                            case GenericNameSyntax genericNameSyntax1:
+                                return GetGenericFullName(genericNameSyntax1, semanticModel, out _).FullType;
+                            default:
+                                var argName = arg.ToString();
+                                var nullable = argName.EndsWith('?');
+                                if (nullable)
+                                {
+                                    argName = argName.TrimEnd('?');
+                                }
+
+                                return new GenericType
+                                {
+                                    Name = argName,
+                                    IsNullable = nullable
+                                };
+                        }
+                    })
+                    .ToList(),
+                IsNullable = isNullable
+            }
+        };
     }
 
     public static IEntityType CreateEntityTypeModel(string? name, bool isExternType = false)

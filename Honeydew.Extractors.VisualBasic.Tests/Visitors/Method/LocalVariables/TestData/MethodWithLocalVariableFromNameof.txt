@@ -1,0 +1,9 @@
+Imports System
+
+Namespace Namespace1
+    Public Class Class1
+        Public Sub Method(ByVal p As Parent)
+            Dim type As String = NameOf(Class1)
+        End Sub
+    End Class
+End Namespace

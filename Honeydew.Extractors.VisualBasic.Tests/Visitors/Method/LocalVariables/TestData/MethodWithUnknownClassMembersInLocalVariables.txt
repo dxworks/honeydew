@@ -1,0 +1,15 @@
+Imports System
+Imports HoneydewCore.Extractors
+
+Namespace App
+    Public Class Class1
+        Public Sub Method(ByVal c As Class2)
+            Dim v = c.Method()
+            Dim v2 = c.Field
+            Dim v3 = c.[Property]
+            Dim a As Integer = c.Method()
+            Dim a2 As Integer = c.Field
+            Dim a3 As Integer = c.[Property]
+        End Sub
+    End Class
+End Namespace

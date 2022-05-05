@@ -1,0 +1,12 @@
+﻿Namespace Namespace1
+    Public Class Class1
+        Public Sub New(ByVal a As Integer, ByVal b As Integer, ByVal c As Integer)
+            Dim sum As Integer = a + b
+            Dim min, max As Integer
+            a = 2
+            min = 6
+            max = b + 2
+            Dim s As String = sum.ToString()
+        End Sub
+    End Class
+End Namespace

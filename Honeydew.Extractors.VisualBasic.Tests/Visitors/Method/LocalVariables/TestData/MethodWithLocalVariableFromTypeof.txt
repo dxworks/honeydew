@@ -1,0 +1,9 @@
+Imports System
+
+Namespace Namespace1
+    Public Class Class1
+        Public Sub Method()
+            Dim type As Type = GetType(Class1)
+        End Sub
+    End Class
+End Namespace

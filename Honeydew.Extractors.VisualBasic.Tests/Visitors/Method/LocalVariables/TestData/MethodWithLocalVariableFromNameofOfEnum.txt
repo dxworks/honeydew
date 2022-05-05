@@ -1,0 +1,14 @@
+Imports System
+
+Namespace Namespace1
+    Public Class Class1
+        Public Sub Method(ByVal p As Parent)
+            Dim type As String = NameOf(ETypes.T2)
+        End Sub
+    End Class
+
+    Public Enum ETypes
+        T1
+        T2
+    End Enum
+End Namespace

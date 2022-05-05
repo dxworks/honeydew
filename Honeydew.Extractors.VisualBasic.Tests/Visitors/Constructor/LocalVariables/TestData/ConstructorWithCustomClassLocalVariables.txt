@@ -1,0 +1,22 @@
+Namespace Namespace1
+    Public Class Class1
+        Public Sub New(ByVal p As Parent, ByVal a As Integer)
+            Dim parent As Parent = p
+            Dim class1 As Parent = New Class2()
+            Dim class2 As Parent = New Class3()
+            Dim class3 As Class2 = New Class2()
+            Dim class4 As Class3 = New Class3()
+        End Sub
+    End Class
+
+    Public Class Parent
+    End Class
+
+    Public Class Class2
+        Inherits Parent
+    End Class
+
+    Public Class Class3
+        Inherits Parent
+    End Class
+End Namespace

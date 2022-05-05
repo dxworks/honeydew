@@ -127,32 +127,6 @@ public static partial class VisualBasicExtractionHelperMethods
                     }
                 }
                     break;
-                //
-                // case ConstructorBlockSyntax constructorDeclarationSyntax:
-                // {
-                //     if (constructorDeclarationSyntax.Initializer != null)
-                //     {
-                //         var initializerSymbolInfo =
-                //             semanticModel.GetSymbolInfo(constructorDeclarationSyntax.Initializer);
-                //         if (initializerSymbolInfo.Symbol != null)
-                //         {
-                //             return initializerSymbolInfo.Symbol.ContainingType.ToString()?.TrimEnd('?') ?? "";
-                //         }
-                //     
-                //         if (constructorDeclarationSyntax.Initializer.ThisOrBaseKeyword.Text ==
-                //             VisualBasicConstants.BaseClassIdentifier)
-                //         {
-                //             var baseTypeStatementSyntax =
-                //                 syntaxNode.GetParentDeclarationSyntax<BaseTypeStatementSyntax>();
-                //             if (baseTypeStatementSyntax is { BaseList.Types.Count: > 0 })
-                //             {
-                //                 return baseTypeStatementSyntax.BaseList.Types[0].Type.ToString().TrimEnd('?');
-                //             }
-                //         }
-                //     }
-                // }
-                //     break;
-
                 case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
                 {
                     syntaxNode = memberAccessExpressionSyntax.Expression;

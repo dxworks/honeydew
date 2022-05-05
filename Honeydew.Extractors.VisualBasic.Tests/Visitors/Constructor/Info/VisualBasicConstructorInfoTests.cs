@@ -22,7 +22,7 @@ public class VisualBasicConstructorInfoTests
                 new VisualBasicClassSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IMembersClassType>>
                 {
                     new BaseInfoClassVisitor(),
-                    new VisualBasicConstructorVisitor(_loggerMock.Object, new List<ITypeVisitor<IConstructorType>>
+                    new VisualBasicConstructorSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IConstructorType>>
                     {
                         new ConstructorInfoVisitor(),
                         new VisualBasicParameterSetterVisitor(_loggerMock.Object, new List<ITypeVisitor<IParameterType>>
