@@ -8,11 +8,11 @@ using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 
 namespace Honeydew.Extractors.VisualBasic.Visitors.Setters;
 
-public class VisualBasicConstructorClassVisitor :
+public class VisualBasicConstructorVisitor :
     CompositeVisitor<IConstructorType>,
     IConstructorSetterClassVisitor<ClassBlockSyntax, SemanticModel, ConstructorBlockSyntax>
 {
-    public VisualBasicConstructorClassVisitor(ILogger compositeLogger,
+    public VisualBasicConstructorVisitor(ILogger compositeLogger,
         IEnumerable<ITypeVisitor<IConstructorType>> visitors) : base(compositeLogger, visitors)
     {
     }

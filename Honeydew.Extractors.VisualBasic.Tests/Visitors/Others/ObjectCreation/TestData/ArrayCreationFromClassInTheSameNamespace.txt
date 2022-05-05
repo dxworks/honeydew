@@ -1,0 +1,35 @@
+﻿Imports System
+
+Namespace App
+    Class C
+    End Class
+
+    Class [MyClass]
+        Private _c As C() = New C() {}
+        Private _c2 As C() = {}
+        Public Property MyC As C() = {New C(), New C()}
+        Public Property MyC3 As C() = {New C(), New C()}
+
+        Public ReadOnly Property ComputedC As C()
+            Get
+                Return {New C()}
+            End Get
+        End Property
+
+        Public ReadOnly Property MyC2 As C()
+            Get
+                Return New C() {New C()}
+            End Get
+        End Property
+
+        Public Sub New()
+            Dim cs = New C(1) {New C(), New C()}
+            Dim c As C() = {New C()}
+        End Sub
+
+        Public Function Method() As C()
+            Dim c = New C() {New C()}
+            Return c
+        End Function
+    End Class
+End Namespace

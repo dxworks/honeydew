@@ -54,6 +54,7 @@ internal static class VisualBasicFullNameProvider
                         {
                             return CreateEntityTypeModel(simpleAsClauseSyntax.Type.ToString(), isExtern);
                         }
+
                         break;
                 }
             }
@@ -171,7 +172,7 @@ internal static class VisualBasicFullNameProvider
                     case SimpleAsClauseSyntax simpleAsClauseSyntax:
                         return GetFullName(simpleAsClauseSyntax.Type, semanticModel, out isNullable);
                 }
-                
+
                 // return GetFullName(variableDeclarationSyntax.Type, semanticModel, out isNullable);
             }
                 break;
@@ -209,6 +210,12 @@ internal static class VisualBasicFullNameProvider
                     case TypeOfExpressionSyntax:
                     {
                         name = "System.Type";
+                    }
+                        break;
+                    case IdentifierNameSyntax identifierNameSyntax:
+                    {
+                        name = identifierNameSyntax.Identifier.ToString();
+                        isExtern = true;
                     }
                         break;
                     default:

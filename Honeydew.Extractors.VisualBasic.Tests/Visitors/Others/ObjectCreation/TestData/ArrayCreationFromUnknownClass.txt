@@ -1,0 +1,32 @@
+﻿Imports System
+
+Namespace App
+    Class [MyClass]
+        Private _c As ExternClass() = New ExternClass() {}
+        Private _c2 As ExternClass() = {}
+        Public Property MyC As ExternClass() = {New ExternClass(), New ExternClass()}
+        Public Property MyC3 As ExternClass() = {New ExternClass(), New ExternClass()}
+
+        Public ReadOnly Property ComputedC As ExternClass()
+            Get
+                Return {New ExternClass()}
+            End Get
+        End Property
+
+        Public ReadOnly Property MyC2 As ExternClass()
+            Get
+                Return New ExternClass() {New ExternClass()}
+            End Get
+        End Property
+
+        Public Sub New()
+            Dim cs = New ExternClass(1) {New ExternClass(), New ExternClass()}
+            Dim c As ExternClass() = {New ExternClass()}
+        End Sub
+
+        Public Function Method() As ExternClass()
+            Dim c = New ExternClass() {New ExternClass()}
+            Return c
+        End Function
+    End Class
+End Namespace

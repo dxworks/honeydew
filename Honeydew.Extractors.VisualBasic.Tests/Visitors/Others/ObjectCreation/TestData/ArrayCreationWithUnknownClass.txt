@@ -1,0 +1,14 @@
+﻿Imports System
+
+Namespace App
+    Class Class1
+    End Class
+
+    Class [MyClass]
+        Public Sub Method(ByVal c As ExternClass)
+            c.[Call]({New Class1()})
+            c.[Call]({New Class1(), New Class1()})
+            c.[Call]({New Class1(), "Text"})
+        End Sub
+    End Class
+End Namespace

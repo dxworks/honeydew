@@ -1,0 +1,37 @@
+﻿Namespace Throwing
+    Public Class NumberGenerator
+        Private ReadOnly _nullReference As ExternException = New ExternException()
+        Public Property IndexOutOfRange As ExternException
+
+        Public Sub GetNumber(ByVal number As Double, ByVal exception As ExternException)
+            Dim myException As ExternException = New ExternException()
+            Dim myVarException = New ExternException()
+
+            If number < 0
+                    Throw exception
+            ElseIf number < 2            
+                    Throw _nullReference
+            ElseIf number < 5
+                    Throw IndexOutOfRange
+            ElseIf number < 6
+                    Throw myException
+            ElseIf number < 7
+                    Throw myVarException
+            ElseIf number < 8
+                    Throw New ExternException()
+            Else 
+                    Throw GetException()
+            End If
+
+            Try
+                OtherClass.[Call]()
+            Catch __unusedExternException1__ As ExternException
+                Throw
+            End Try
+        End Sub
+
+        Public Function GetException() As ExternException
+            Return New ExternException()
+        End Function
+    End Class
+End Namespace
