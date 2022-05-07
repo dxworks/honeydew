@@ -2,9 +2,11 @@ namespace Honeydew.ScriptBeePlugin.Models;
 
 public class ProjectModel : ReferenceEntity
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
 
     public string FilePath { get; set; } = "";
+
+    public string Language { get; set; } = "";
 
     public IList<ProjectModel> ProjectReferences { get; set; } = new List<ProjectModel>();
 

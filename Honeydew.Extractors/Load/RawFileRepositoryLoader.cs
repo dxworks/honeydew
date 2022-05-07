@@ -8,13 +8,13 @@ public class RawFileRepositoryLoader
 {
     private readonly ILogger _logger;
     private readonly IProgressLogger _progressLogger;
-    private readonly JsonModelImporter<RepositoryModel> _jsonModelImporter;
+    private readonly RepositoryModelImporter _repositoryModelImporter;
 
     public RawFileRepositoryLoader(ILogger logger, IProgressLogger progressLogger,
-        JsonModelImporter<RepositoryModel> jsonModelImporter)
+        RepositoryModelImporter repositoryModelImporter)
     {
         _logger = logger;
-        _jsonModelImporter = jsonModelImporter;
+        _repositoryModelImporter = repositoryModelImporter;
         _progressLogger = progressLogger;
     }
 
@@ -25,7 +25,7 @@ public class RawFileRepositoryLoader
 
         try
         {
-            var repositoryModel = await _jsonModelImporter.Import(path, cancellationToken);
+            var repositoryModel = await _repositoryModelImporter.Import(path, cancellationToken);
 
             if (repositoryModel == null)
             {

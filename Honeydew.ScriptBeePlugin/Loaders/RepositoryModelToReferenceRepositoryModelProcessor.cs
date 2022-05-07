@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using Honeydew.Logging;
-using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Honeydew.ScriptBeePlugin.Models;
 using static Honeydew.ScriptBeePlugin.Loaders.MetricAdder;
@@ -62,7 +61,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
     #region Solutions Project Namespaces CompilationUnits Classes
 
-    private void PopulateModelWithSolutionProjectNamespacesCompilationUnitsAndClasses(Honeydew.Models.RepositoryModel repositoryModel,
+    private void PopulateModelWithSolutionProjectNamespacesCompilationUnitsAndClasses(
+        Honeydew.Models.RepositoryModel repositoryModel,
         RepositoryModel referenceRepositoryModel)
     {
         var namespaceTreeHandler = new NamespaceTreeHandler();
@@ -88,9 +88,12 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                 Name = projectModel.Name,
                 FilePath = projectModel.FilePath,
                 Repository = referenceRepositoryModel,
+                Language = projectModel.Language,
             };
 
             referenceRepositoryModel.Projects.Add(referenceProjectModel);
+
+            var repositoryModelConversionStrategy = GetRepositoryModelConversionStrategy(projectModel.Language);
 
             foreach (var compilationUnitType in projectModel.CompilationUnits)
             {
@@ -109,136 +112,137 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                     var namespaceModel = namespaceTreeHandler.GetOrAdd(classType.ContainingNamespaceName);
                     presentNamespacesSet.Add(classType.ContainingNamespaceName);
 
-                    switch (classType)
+                    if (repositoryModelConversionStrategy.IsDelegateModel(classType))
                     {
-                        case CSharpDelegateModel delegateModel:
+                        var model = new DelegateModel
                         {
-                            var model = new DelegateModel
-                            {
-                                Name = delegateModel.Name,
-                                FilePath = delegateModel.FilePath,
-                                Modifier = delegateModel.Modifier,
-                                AccessModifier = ConvertAccessModifier(delegateModel.AccessModifier),
-                                Modifiers = ConvertModifierToModifierList(delegateModel.Modifier),
-                                File = fileModel,
-                                Namespace = namespaceModel,
-                                IsInternal = true,
-                                IsExternal = false,
-                                IsPrimitive = false,
-                                LinesOfCode = ConvertLoc(delegateModel.Loc),
-                            };
+                            Name = classType.Name,
+                            FilePath = classType.FilePath,
+                            Modifier = classType.Modifier,
+                            AccessModifier = ConvertAccessModifier(classType.AccessModifier),
+                            Modifiers = ConvertModifierToModifierList(classType.Modifier),
+                            File = fileModel,
+                            Namespace = namespaceModel,
+                            IsInternal = true,
+                            IsExternal = false,
+                            IsPrimitive = false,
+                            LinesOfCode = ConvertLoc(classType.Loc),
+                        };
 
-                            namespaceModel.Entities.Add(model);
-                            fileModel.Entities.Add(model);
+                        namespaceModel.Entities.Add(model);
+                        fileModel.Entities.Add(model);
 
-                            _entityModels.Add((referenceProjectModel, delegateModel.Name, 0), new List<EntityModel>
-                            {
-                                model
-                            });
-                        }
-                            break;
-
-                        case CSharpEnumModel enumModel:
+                        _entityModels.Add((referenceProjectModel, classType.Name, 0), new List<EntityModel>
                         {
-                            var model = new EnumModel
-                            {
-                                Name = enumModel.Name,
-                                FilePath = enumModel.FilePath,
-                                Modifier = enumModel.Modifier,
-                                AccessModifier = ConvertAccessModifier(enumModel.AccessModifier),
-                                Modifiers = ConvertModifierToModifierList(enumModel.Modifier),
-                                File = fileModel,
-                                Namespace = namespaceModel,
-                                IsInternal = true,
-                                IsExternal = false,
-                                IsPrimitive = false,
-                                LinesOfCode = ConvertLoc(enumModel.Loc),
-                                Type = enumModel.Type,
-                            };
-                            namespaceModel.Entities.Add(model);
-                            fileModel.Entities.Add(model);
-
-                            _entityModels.Add((referenceProjectModel, enumModel.Name, 0), new List<EntityModel>
-                            {
-                                model
-                            });
-                        }
-                            break;
-
-                        case CSharpClassModel classModel:
+                            model
+                        });
+                    }
+                    else if (repositoryModelConversionStrategy.IsEnumModel(classType))
+                    {
+                        var model = new EnumModel
                         {
-                            EntityModel entityModel = classModel.ClassType switch
+                            Name = classType.Name,
+                            FilePath = classType.FilePath,
+                            Modifier = classType.Modifier,
+                            AccessModifier = ConvertAccessModifier(classType.AccessModifier),
+                            Modifiers = ConvertModifierToModifierList(classType.Modifier),
+                            File = fileModel,
+                            Namespace = namespaceModel,
+                            IsInternal = true,
+                            IsExternal = false,
+                            IsPrimitive = false,
+                            LinesOfCode = ConvertLoc(classType.Loc),
+                            Type = repositoryModelConversionStrategy.GetEnumType(classType)
+                        };
+                        namespaceModel.Entities.Add(model);
+                        fileModel.Entities.Add(model);
+
+                        _entityModels.Add((referenceProjectModel, classType.Name, 0), new List<EntityModel>
+                        {
+                            model
+                        });
+                    }
+                    else if (repositoryModelConversionStrategy.IsInterfaceModel(classType))
+                    {
+                        var model = new InterfaceModel
+                        {
+                            Name = classType.Name,
+                            FilePath = classType.FilePath,
+                            Modifier = classType.Modifier,
+                            AccessModifier = ConvertAccessModifier(classType.AccessModifier),
+                            Modifiers = ConvertModifierToModifierList(classType.Modifier),
+                            File = fileModel,
+                            Namespace = namespaceModel,
+                            IsInternal = true,
+                            IsExternal = false,
+                            IsPrimitive = false,
+                            LinesOfCode = ConvertLoc(classType.Loc),
+                        };
+
+                        namespaceModel.Entities.Add(model);
+                        fileModel.Entities.Add(model);
+
+                        if (_entityModels.TryGetValue(
+                                (referenceProjectModel, model.Name, model.GenericParameters.Count), out var entities))
+                        {
+                            foreach (var entity in entities.OfType<InterfaceModel>())
                             {
-                                "interface" => new InterfaceModel
-                                {
-                                    Name = classModel.Name,
-                                    FilePath = classModel.FilePath,
-                                    Modifier = classModel.Modifier,
-                                    AccessModifier = ConvertAccessModifier(classModel.AccessModifier),
-                                    Modifiers = ConvertModifierToModifierList(classModel.Modifier),
-                                    File = fileModel,
-                                    Namespace = namespaceModel,
-                                    IsInternal = true,
-                                    IsExternal = false,
-                                    IsPrimitive = false,
-                                    LinesOfCode = ConvertLoc(classModel.Loc),
-                                },
-                                _ => new ClassModel
-                                {
-                                    Name = classModel.Name,
-                                    FilePath = classModel.FilePath,
-                                    Type = ConvertClassType(classModel.ClassType),
-                                    Modifier = classModel.Modifier,
-                                    AccessModifier = ConvertAccessModifier(classModel.AccessModifier),
-                                    Modifiers = ConvertModifierToModifierList(classModel.Modifier),
-                                    File = fileModel,
-                                    Namespace = namespaceModel,
-                                    IsInternal = true,
-                                    IsExternal = false,
-                                    IsPrimitive = false,
-                                    LinesOfCode = ConvertLoc(classModel.Loc),
-                                }
-                            };
-
-                            namespaceModel.Entities.Add(entityModel);
-                            fileModel.Entities.Add(entityModel);
-
-                            if (_entityModels.TryGetValue(
-                                    (referenceProjectModel, entityModel.Name, classModel.GenericParameters.Count),
-                                    out var entities))
-                            {
-                                foreach (var entity in entities)
-                                {
-                                    switch (entity)
-                                    {
-                                        case ClassModel @class when entityModel is ClassModel entityClassModel:
-                                            @class.Partials.Add(entityClassModel);
-                                            entityClassModel.Partials.Add(@class);
-                                            break;
-                                        case InterfaceModel @interface
-                                            when entityModel is InterfaceModel entityInterfaceModel:
-                                            @interface.Partials.Add(entityInterfaceModel);
-                                            entityInterfaceModel.Partials.Add(@interface);
-                                            break;
-                                    }
-                                }
-
-                                entities.Add(entityModel);
+                                entity.Partials.Add(model);
+                                model.Partials.Add(entity);
                             }
-                            else
-                            {
-                                _entityModels.Add(
-                                    (referenceProjectModel, entityModel.Name, classModel.GenericParameters.Count),
-                                    new List<EntityModel>
-                                    {
-                                        entityModel
-                                    });
-                            }
-                        }
 
-                            break;
-                        default:
-                            continue;
+                            entities.Add(model);
+                        }
+                        else
+                        {
+                            _entityModels.Add((referenceProjectModel, model.Name, model.GenericParameters.Count),
+                                new List<EntityModel>
+                                {
+                                    model
+                                });
+                        }
+                    }
+                    else if (repositoryModelConversionStrategy.IsClassModel(classType))
+                    {
+                        var model = new ClassModel
+                        {
+                            Name = classType.Name,
+                            FilePath = classType.FilePath,
+                            Type = ConvertClassType(classType.ClassType),
+                            Modifier = classType.Modifier,
+                            AccessModifier = ConvertAccessModifier(classType.AccessModifier),
+                            Modifiers = ConvertModifierToModifierList(classType.Modifier),
+                            File = fileModel,
+                            Namespace = namespaceModel,
+                            IsInternal = true,
+                            IsExternal = false,
+                            IsPrimitive = false,
+                            LinesOfCode = ConvertLoc(classType.Loc),
+                        };
+
+                        namespaceModel.Entities.Add(model);
+                        fileModel.Entities.Add(model);
+
+                        if (_entityModels.TryGetValue(
+                                (referenceProjectModel, model.Name, model.GenericParameters.Count), out var entities))
+                        {
+                            foreach (var entity in entities.OfType<ClassModel>())
+                            {
+                                model.Partials.Add(entity);
+                                entity.Partials.Add(model);
+                            }
+
+                            entities.Add(model);
+                        }
+                        else
+                        {
+                            _entityModels.Add(
+                                (referenceProjectModel, model.Name, model.GenericParameters.Count),
+                                new List<EntityModel>
+                                {
+                                    model
+                                });
+                        }
                     }
                 }
             }
@@ -375,6 +379,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
         for (var projectIndex = 0; projectIndex < referenceRepositoryModel.Projects.Count; projectIndex++)
         {
             var projectModel = referenceRepositoryModel.Projects[projectIndex];
+            var repositoryModelConversionStrategy = GetRepositoryModelConversionStrategy(projectModel.Language);
+
             for (var compilationUnitIndex = 0; compilationUnitIndex < projectModel.Files.Count; compilationUnitIndex++)
             {
                 var file = projectModel.Files[compilationUnitIndex];
@@ -382,7 +388,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
                 AddMetrics(file, compilationUnitType);
 
-                file.Imports = compilationUnitType.Imports.Select(import => ConvertImportType(import, projectModel))
+                file.Imports = compilationUnitType.Imports.Select(import =>
+                        ConvertImportType(import, projectModel, repositoryModelConversionStrategy))
                     .ToList();
 
                 for (var classTypeIndex = 0; classTypeIndex < compilationUnitType.ClassTypes.Count; classTypeIndex++)
@@ -392,86 +399,100 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
                     Log($"ReferenceModel - Populating Entity References for {entityModel.FilePath}");
 
-                    entityModel.Imports = classType.Imports.Select(import => ConvertImportType(import, projectModel))
+                    entityModel.Imports = classType.Imports.Select(import =>
+                            ConvertImportType(import, projectModel, repositoryModelConversionStrategy))
                         .ToList();
-                    entityModel.Attributes = ConvertAttributes(classType.Attributes, projectModel);
+                    entityModel.Attributes = ConvertAttributes(classType.Attributes, projectModel,
+                        repositoryModelConversionStrategy);
 
                     AddMetrics(entityModel, classType);
 
                     switch (entityModel)
                     {
-                        case ClassModel classModel when classType is CSharpClassModel membersClassType:
+                        case ClassModel classModel when classType is IPropertyMembersClassType propertyMembersClassType:
                         {
                             if (classType is ITypeWithGenericParameters typeWithGenericParameters)
                             {
                                 classModel.GenericParameters =
-                                    ConvertGenericParameters(typeWithGenericParameters.GenericParameters, projectModel);
+                                    ConvertGenericParameters(typeWithGenericParameters.GenericParameters, projectModel,
+                                        repositoryModelConversionStrategy);
                             }
 
                             foreach (var baseType in classType.BaseTypes)
                             {
-                                classModel.BaseTypes.Add(ConvertEntityType(baseType.Type, projectModel));
+                                classModel.BaseTypes.Add(ConvertEntityType(baseType.Type, projectModel,
+                                    repositoryModelConversionStrategy));
                             }
 
-                            classModel.Methods = PopulateWithMethodModels(classModel, membersClassType.Methods)
+                            classModel.Methods = PopulateWithMethodModels(classModel, propertyMembersClassType.Methods)
                                 .ToList();
-                            classModel.Constructors = membersClassType.Constructors
+                            classModel.Constructors = propertyMembersClassType.Constructors
                                 .Select(constructorType =>
-                                    ConvertConstructor(classModel, constructorType, projectModel))
+                                    ConvertConstructor(classModel, constructorType, projectModel,
+                                        repositoryModelConversionStrategy))
                                 .ToList();
                             classModel.Destructor =
-                                ConvertDestructor(classModel, membersClassType.Destructor, projectModel);
+                                ConvertDestructor(classModel, propertyMembersClassType.Destructor, projectModel,
+                                    repositoryModelConversionStrategy);
 
-                            classModel.Fields = membersClassType.Fields
-                                .Select(fieldType => ConvertField(classModel, fieldType, projectModel))
+                            classModel.Fields = propertyMembersClassType.Fields
+                                .Select(fieldType => ConvertField(classModel, fieldType, projectModel,
+                                    repositoryModelConversionStrategy))
                                 .ToList();
 
                             classModel.Properties =
-                                PopulateWithPropertyModels(classModel, membersClassType.Properties).ToList();
+                                PopulateWithPropertyModels(classModel, propertyMembersClassType.Properties).ToList();
 
                             break;
                         }
                         case InterfaceModel interfaceModel
-                            when classType is CSharpClassModel interfaceType:
+                            when classType is IPropertyMembersClassType propertyMembersClassType:
                         {
                             if (classType is ITypeWithGenericParameters typeWithGenericParameters)
                             {
                                 interfaceModel.GenericParameters =
-                                    ConvertGenericParameters(typeWithGenericParameters.GenericParameters, projectModel);
+                                    ConvertGenericParameters(typeWithGenericParameters.GenericParameters, projectModel,
+                                        repositoryModelConversionStrategy);
                             }
 
                             foreach (var baseType in classType.BaseTypes)
                             {
-                                interfaceModel.BaseTypes.Add(ConvertEntityType(baseType.Type, projectModel));
+                                interfaceModel.BaseTypes.Add(ConvertEntityType(baseType.Type, projectModel,
+                                    repositoryModelConversionStrategy));
                             }
 
                             interfaceModel.Methods =
-                                PopulateWithMethodModels(interfaceModel, interfaceType.Methods).ToList();
+                                PopulateWithMethodModels(interfaceModel, propertyMembersClassType.Methods).ToList();
 
                             interfaceModel.Properties =
-                                PopulateWithPropertyModels(interfaceModel, interfaceType.Properties).ToList();
+                                PopulateWithPropertyModels(interfaceModel, propertyMembersClassType.Properties)
+                                    .ToList();
 
                             break;
                         }
 
                         case DelegateModel delegateModel
-                            when classType is CSharpDelegateModel delegateType:
+                            when classType is IDelegateType delegateType:
                         {
                             delegateModel.Parameters =
-                                ConvertParameters(delegateType.ParameterTypes, projectModel);
+                                ConvertParameters(delegateType.ParameterTypes, projectModel,
+                                    repositoryModelConversionStrategy);
                             delegateModel.ReturnValue =
-                                ConvertReturnValue(delegateType.ReturnValue, projectModel);
+                                ConvertReturnValue(delegateType.ReturnValue, projectModel,
+                                    repositoryModelConversionStrategy);
 
                             if (classType is ITypeWithGenericParameters typeWithGenericParameters)
                             {
                                 delegateModel.GenericParameters =
-                                    ConvertGenericParameters(typeWithGenericParameters.GenericParameters, projectModel);
+                                    ConvertGenericParameters(typeWithGenericParameters.GenericParameters, projectModel,
+                                        repositoryModelConversionStrategy);
                             }
 
                             break;
                         }
-                        case EnumModel enumModel when classType is CSharpEnumModel enumType:
-                            enumModel.Labels = ConvertEnumLabels(enumType.Labels, projectModel).ToList();
+                        case EnumModel enumModel when classType is IEnumType enumType:
+                            enumModel.Labels = ConvertEnumLabels(enumType.Labels, projectModel,
+                                repositoryModelConversionStrategy).ToList();
                             break;
                     }
                 }
@@ -480,39 +501,42 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             IEnumerable<MethodModel> PopulateWithMethodModels(EntityModel parentEntity,
                 IEnumerable<IMethodType> methodModels)
             {
-                return methodModels.Select(methodType => ConvertMethod(parentEntity, null, methodType, projectModel));
+                return methodModels.Select(methodType => ConvertMethod(parentEntity, null, methodType, projectModel,
+                    repositoryModelConversionStrategy));
             }
 
             IEnumerable<PropertyModel> PopulateWithPropertyModels(EntityModel entityModel,
                 IEnumerable<IPropertyType> properties)
             {
-                return properties.Select(propertyType => ConvertProperty(entityModel, propertyType, projectModel));
+                return properties.Select(propertyType =>
+                    ConvertProperty(entityModel, propertyType, projectModel, repositoryModelConversionStrategy));
             }
         }
     }
 
     private IEnumerable<EnumLabelModel> ConvertEnumLabels(IEnumerable<IEnumLabelType> enumLabels,
-        ProjectModel projectModel)
+        ProjectModel projectModel, IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         return enumLabels.Select(label => new EnumLabelModel
         {
             Name = label.Name,
-            Attributes = ConvertAttributes(label.Attributes, projectModel),
+            Attributes = ConvertAttributes(label.Attributes, projectModel, repositoryModelConversionStrategy),
         });
     }
 
-    private ReturnValueModel ConvertReturnValue(IReturnValueType returnValueType, ProjectModel projectModel)
+    private ReturnValueModel ConvertReturnValue(IReturnValueType returnValueType, ProjectModel projectModel,
+        IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         return new ReturnValueModel
         {
-            Type = ConvertEntityType(returnValueType.Type, projectModel),
-            Attributes = ConvertAttributes(returnValueType.Attributes, projectModel),
-            Modifier =
-                returnValueType is CSharpReturnValueModel returnValue ? returnValue.Modifier : "",
+            Type = ConvertEntityType(returnValueType.Type, projectModel, repositoryModelConversionStrategy),
+            Attributes = ConvertAttributes(returnValueType.Attributes, projectModel, repositoryModelConversionStrategy),
+            Modifier = returnValueType.Modifier
         };
     }
 
-    private ImportModel ConvertImportType(IImportType importType, ProjectModel projectModel)
+    private ImportModel ConvertImportType(IImportType importType, ProjectModel projectModel,
+        IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         var aliasType = ConvertAliasType(importType.AliasType);
 
@@ -522,8 +546,9 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             IsStatic = importType.IsStatic,
             AliasType = aliasType,
             Entity = aliasType == AliasType.Class || importType.IsStatic
-                ? SearchEntityByName(importType.Name, projectModel).FirstOrDefault() ??
-                  CreateClassModel(importType.Name)
+                ? SearchEntityByName(importType.Name, projectModel, repositoryModelConversionStrategy)
+                      .FirstOrDefault() ??
+                  CreateClassModel(importType.Name, repositoryModelConversionStrategy)
                 : null,
             Namespace = !importType.IsStatic && aliasType is AliasType.Namespace or AliasType.None
                 ? SearchNamespaceByName(importType.Name, projectModel)
@@ -599,20 +624,21 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
         return new List<EntityModel>();
     }
 
-    private IEnumerable<EntityModel> SearchEntityByName(string entityName, ProjectModel projectModel)
+    private IEnumerable<EntityModel> SearchEntityByName(string entityName, ProjectModel projectModel,
+        IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         if (string.IsNullOrEmpty(entityName))
         {
             return new List<EntityModel>();
         }
 
-        var entityTypeModel = CSharpFullTypeNameBuilder.CreateEntityTypeModel(entityName);
+        var entityTypeModel = repositoryModelConversionStrategy.CreateEntityTypeModel(entityName);
         return SearchEntityByName(entityTypeModel.FullType.Name, entityTypeModel.FullType.ContainedTypes.Count,
             projectModel);
     }
 
     private PropertyModel ConvertProperty(EntityModel entityModel, IPropertyType propertyType,
-        ProjectModel projectModel)
+        ProjectModel projectModel, IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         var model = new PropertyModel
         {
@@ -621,22 +647,24 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             Modifier = propertyType.Modifier,
             AccessModifier = ConvertAccessModifier(propertyType.AccessModifier),
             Modifiers = ConvertModifierToModifierList(propertyType.Modifier),
-            IsEvent = propertyType is CSharpPropertyModel { IsEvent: true },
+            IsEvent = repositoryModelConversionStrategy.IsEvent(propertyType),
             LinesOfCode = ConvertLoc(propertyType.Loc),
             CyclomaticComplexity = propertyType.CyclomaticComplexity,
-            Type = ConvertEntityType(propertyType.Type, projectModel),
-            Attributes = ConvertAttributes(propertyType.Attributes, projectModel),
+            Type = ConvertEntityType(propertyType.Type, projectModel, repositoryModelConversionStrategy),
+            Attributes = ConvertAttributes(propertyType.Attributes, projectModel, repositoryModelConversionStrategy),
         };
 
         AddMetrics(model, propertyType);
         model.Accessors = propertyType.Accessors
-            .Select(accessor => ConvertAccessor(entityModel, model, accessor, projectModel))
+            .Select(accessor =>
+                ConvertAccessor(entityModel, model, accessor, projectModel, repositoryModelConversionStrategy))
             .ToList();
 
         return model;
     }
 
-    private FieldModel ConvertField(ClassModel classModel, IFieldType fieldType, ProjectModel projectModel)
+    private FieldModel ConvertField(ClassModel classModel, IFieldType fieldType, ProjectModel projectModel,
+        IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         var model = new FieldModel
         {
@@ -645,9 +673,9 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             Modifier = fieldType.Modifier,
             AccessModifier = ConvertAccessModifier(fieldType.AccessModifier),
             Modifiers = ConvertModifierToModifierList(fieldType.Modifier),
-            IsEvent = fieldType is CSharpFieldModel { IsEvent: true },
-            Type = ConvertEntityType(fieldType.Type, projectModel),
-            Attributes = ConvertAttributes(fieldType.Attributes, projectModel),
+            IsEvent = repositoryModelConversionStrategy.IsEvent(fieldType),
+            Type = ConvertEntityType(fieldType.Type, projectModel, repositoryModelConversionStrategy),
+            Attributes = ConvertAttributes(fieldType.Attributes, projectModel, repositoryModelConversionStrategy),
         };
         AddMetrics(model, fieldType);
 
@@ -655,7 +683,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
     }
 
     private MethodModel ConvertConstructor(ClassModel parentClass, IConstructorType constructorType,
-        ProjectModel projectModel)
+        ProjectModel projectModel, IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         var model = new MethodModel
         {
@@ -669,21 +697,24 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             Modifiers = ConvertModifierToModifierList(constructorType.Modifier),
             LinesOfCode = ConvertLoc(constructorType.Loc),
             CyclomaticComplexity = constructorType.CyclomaticComplexity,
-            Attributes = ConvertAttributes(constructorType.Attributes, projectModel),
-            Parameters = ConvertParameters(constructorType.ParameterTypes, projectModel),
-            LocalVariables = ConvertLocalVariables(constructorType.LocalVariableTypes, projectModel),
+            Attributes = ConvertAttributes(constructorType.Attributes, projectModel, repositoryModelConversionStrategy),
+            Parameters = ConvertParameters(constructorType.ParameterTypes, projectModel,
+                repositoryModelConversionStrategy),
+            LocalVariables = ConvertLocalVariables(constructorType.LocalVariableTypes, projectModel,
+                repositoryModelConversionStrategy),
             ReturnValue = null,
             GenericParameters = new List<GenericParameterModel>(),
         };
 
         AddMetrics(model, constructorType);
-        model.LocalFunctions = ConvertLocalFunctions(parentClass, model, constructorType.LocalFunctions, projectModel);
+        model.LocalFunctions = ConvertLocalFunctions(parentClass, model, constructorType.LocalFunctions, projectModel,
+            repositoryModelConversionStrategy);
 
         return model;
     }
 
     private MethodModel? ConvertDestructor(ClassModel parentClass, IDestructorType? destructorType,
-        ProjectModel projectModel)
+        ProjectModel projectModel, IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         if (destructorType == null)
         {
@@ -702,21 +733,24 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             Modifiers = ConvertModifierToModifierList(destructorType.Modifier),
             LinesOfCode = ConvertLoc(destructorType.Loc),
             CyclomaticComplexity = destructorType.CyclomaticComplexity,
-            Attributes = ConvertAttributes(destructorType.Attributes, projectModel),
-            Parameters = ConvertParameters(destructorType.ParameterTypes, projectModel),
-            LocalVariables = ConvertLocalVariables(destructorType.LocalVariableTypes, projectModel),
+            Attributes = ConvertAttributes(destructorType.Attributes, projectModel, repositoryModelConversionStrategy),
+            Parameters = ConvertParameters(destructorType.ParameterTypes, projectModel,
+                repositoryModelConversionStrategy),
+            LocalVariables = ConvertLocalVariables(destructorType.LocalVariableTypes, projectModel,
+                repositoryModelConversionStrategy),
             ReturnValue = null,
             GenericParameters = new List<GenericParameterModel>(),
         };
 
         AddMetrics(model, destructorType);
-        model.LocalFunctions = ConvertLocalFunctions(parentClass, model, destructorType.LocalFunctions, projectModel);
+        model.LocalFunctions = ConvertLocalFunctions(parentClass, model, destructorType.LocalFunctions, projectModel,
+            repositoryModelConversionStrategy);
 
         return model;
     }
 
     private MethodModel ConvertMethod(EntityModel entityModel, MethodModel? parentMethod, IMethodType methodType,
-        ProjectModel projectModel)
+        ProjectModel projectModel, IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         var model = new MethodModel
         {
@@ -728,12 +762,14 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             Modifier = methodType.Modifier,
             AccessModifier = ConvertAccessModifier(methodType.AccessModifier),
             Modifiers = ConvertModifierToModifierList(methodType.Modifier),
-            GenericParameters = ConvertGenericParameters(methodType.GenericParameters, projectModel),
+            GenericParameters = ConvertGenericParameters(methodType.GenericParameters, projectModel,
+                repositoryModelConversionStrategy),
             CyclomaticComplexity = methodType.CyclomaticComplexity,
-            Attributes = ConvertAttributes(methodType.Attributes, projectModel),
-            ReturnValue = ConvertReturnValue(methodType.ReturnValue, projectModel),
-            Parameters = ConvertParameters(methodType.ParameterTypes, projectModel),
-            LocalVariables = ConvertLocalVariables(methodType.LocalVariableTypes, projectModel),
+            Attributes = ConvertAttributes(methodType.Attributes, projectModel, repositoryModelConversionStrategy),
+            ReturnValue = ConvertReturnValue(methodType.ReturnValue, projectModel, repositoryModelConversionStrategy),
+            Parameters = ConvertParameters(methodType.ParameterTypes, projectModel, repositoryModelConversionStrategy),
+            LocalVariables = ConvertLocalVariables(methodType.LocalVariableTypes, projectModel,
+                repositoryModelConversionStrategy),
         };
 
         AddMetrics(model, methodType);
@@ -743,14 +779,15 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             model.Type = MethodType.Extension;
         }
 
-        model.LocalFunctions = ConvertLocalFunctions(entityModel, model, methodType.LocalFunctions, projectModel);
+        model.LocalFunctions = ConvertLocalFunctions(entityModel, model, methodType.LocalFunctions, projectModel,
+            repositoryModelConversionStrategy);
 
         return model;
     }
 
     private MethodModel ConvertAccessor(EntityModel entity, PropertyModel parentProperty,
-        IAccessorMethodType accessorMethodType,
-        ProjectModel projectModel)
+        IAccessorMethodType accessorMethodType, ProjectModel projectModel,
+        IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         var model = new MethodModel
         {
@@ -765,24 +802,31 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             Modifiers = ConvertModifierToModifierList(accessorMethodType.Modifier),
             GenericParameters = new List<GenericParameterModel>(),
             CyclomaticComplexity = accessorMethodType.CyclomaticComplexity,
-            Attributes = ConvertAttributes(accessorMethodType.Attributes, projectModel),
-            ReturnValue = ConvertReturnValue(accessorMethodType.ReturnValue, projectModel),
-            Parameters = ConvertParameters(accessorMethodType.ParameterTypes, projectModel),
-            LocalVariables = ConvertLocalVariables(accessorMethodType.LocalVariableTypes, projectModel),
+            Attributes = ConvertAttributes(accessorMethodType.Attributes, projectModel,
+                repositoryModelConversionStrategy),
+            ReturnValue = ConvertReturnValue(accessorMethodType.ReturnValue, projectModel,
+                repositoryModelConversionStrategy),
+            Parameters = ConvertParameters(accessorMethodType.ParameterTypes, projectModel,
+                repositoryModelConversionStrategy),
+            LocalVariables = ConvertLocalVariables(accessorMethodType.LocalVariableTypes, projectModel,
+                repositoryModelConversionStrategy),
         };
 
         AddMetrics(model, accessorMethodType);
-        model.LocalFunctions = ConvertLocalFunctions(entity, model, accessorMethodType.LocalFunctions, projectModel);
+        model.LocalFunctions = ConvertLocalFunctions(entity, model, accessorMethodType.LocalFunctions, projectModel,
+            repositoryModelConversionStrategy);
 
         return model;
     }
 
     private IList<MethodModel> ConvertLocalFunctions(EntityModel entityModel, MethodModel parentMethod,
-        IEnumerable<IMethodTypeWithLocalFunctions> localFunctions, ProjectModel projectModel)
+        IEnumerable<IMethodTypeWithLocalFunctions> localFunctions, ProjectModel projectModel,
+        IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         return localFunctions.Select(localFunction =>
             {
-                var localFunctionMethod = ConvertMethod(entityModel, parentMethod, localFunction, projectModel);
+                var localFunctionMethod = ConvertMethod(entityModel, parentMethod, localFunction, projectModel,
+                    repositoryModelConversionStrategy);
                 localFunctionMethod.Type = MethodType.LocalFunction;
                 return localFunctionMethod;
             })
@@ -790,11 +834,11 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
     }
 
     private IList<LocalVariableModel> ConvertLocalVariables(IEnumerable<ILocalVariableType> localVariableTypes,
-        ProjectModel projectModel)
+        ProjectModel projectModel, IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         return localVariableTypes.Select(localVariableType => new LocalVariableModel
         {
-            Type = ConvertEntityType(localVariableType.Type, projectModel),
+            Type = ConvertEntityType(localVariableType.Type, projectModel, repositoryModelConversionStrategy),
             Name = localVariableType.Name,
             Modifier = localVariableType.Modifier,
         }).ToList();
@@ -810,6 +854,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
         for (var projectIndex = 0; projectIndex < referenceRepositoryModel.Projects.Count; projectIndex++)
         {
             var projectModel = referenceRepositoryModel.Projects[projectIndex];
+            var repositoryModelConversionStrategy = GetRepositoryModelConversionStrategy(projectModel.Language);
+
             for (var compilationUnitIndex = 0;
                  compilationUnitIndex < projectModel.Files.Count;
                  compilationUnitIndex++)
@@ -938,9 +984,10 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                     {
                         var fieldAccess = new FieldAccess
                         {
-                            Field = GetFieldReference(accessedField, projectModel),
+                            Field = GetFieldReference(accessedField, projectModel, repositoryModelConversionStrategy),
                             Caller = methodModel,
-                            AccessEntityType = ConvertEntityType(accessedField.LocationClassName, projectModel),
+                            AccessEntityType = ConvertEntityType(accessedField.LocationClassName, projectModel,
+                                repositoryModelConversionStrategy),
                             AccessKind = ConvertAccessKind(accessedField.Kind),
                         };
                         methodModel.FieldAccesses.Add(fieldAccess);
@@ -983,15 +1030,18 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                 {
                     foreach (var calledMethod in calledMethods)
                     {
-                        var calledMethodReference = GetMethodReference(calledMethod, projectModel);
+                        var calledMethodReference = GetMethodReference(calledMethod, projectModel,
+                            repositoryModelConversionStrategy);
                         var methodCall = new MethodCall
                         {
                             Caller = callerMethodModel,
                             Called = calledMethodReference,
-                            CalledEnitityType = ConvertEntityType(calledMethod.LocationClassName, projectModel),
+                            CalledEnitityType = ConvertEntityType(calledMethod.LocationClassName, projectModel,
+                                repositoryModelConversionStrategy),
                             GenericParameters = calledMethod.GenericParameters.Select(parameter =>
-                                ConvertEntityType(parameter, projectModel)).ToList(),
-                            ConcreteParameters = ConvertParameters(calledMethod.ParameterTypes, projectModel)
+                                ConvertEntityType(parameter, projectModel, repositoryModelConversionStrategy)).ToList(),
+                            ConcreteParameters = ConvertParameters(calledMethod.ParameterTypes, projectModel,
+                                    repositoryModelConversionStrategy)
                                 .Select(p => p.Type).ToList()
                         };
                         callerMethodModel.OutgoingCalls.Add(methodCall);
@@ -1058,9 +1108,11 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
         return null;
     }
 
-    private FieldModel GetFieldReference(AccessedField accessedField, ProjectModel projectModel)
+    private FieldModel GetFieldReference(AccessedField accessedField, ProjectModel projectModel,
+        IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
-        var locationClassModelPossibilities = SearchEntityByName(accessedField.LocationClassName, projectModel)
+        var locationClassModelPossibilities = SearchEntityByName(accessedField.LocationClassName, projectModel,
+                repositoryModelConversionStrategy)
             .Where(classModel => classModel is ClassModel)
             .Cast<ClassModel>();
         foreach (var locationClassModel in locationClassModelPossibilities)
@@ -1079,7 +1131,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             }
         }
 
-        var definitionClassModelPossibilities = SearchEntityByName(accessedField.DefinitionClassName, projectModel)
+        var definitionClassModelPossibilities = SearchEntityByName(accessedField.DefinitionClassName, projectModel,
+                repositoryModelConversionStrategy)
             .Where(classModel => classModel is ClassModel)
             .Cast<ClassModel>();
 
@@ -1099,7 +1152,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             }
         }
 
-        var classModel = CreateClassModel(accessedField.LocationClassName);
+        var classModel = CreateClassModel(accessedField.LocationClassName, repositoryModelConversionStrategy);
 
         var fieldModel = new FieldModel
         {
@@ -1122,9 +1175,11 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
         };
     }
 
-    private MethodModel GetMethodReference(IMethodCallType methodCallType, ProjectModel projectModel)
+    private MethodModel GetMethodReference(IMethodCallType methodCallType, ProjectModel projectModel,
+        IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
-        var locationClassModelPossibilities = SearchEntityByName(methodCallType.LocationClassName, projectModel)
+        var locationClassModelPossibilities = SearchEntityByName(methodCallType.LocationClassName, projectModel,
+                repositoryModelConversionStrategy)
             .Where(classModel => classModel is ClassModel)
             .Cast<ClassModel>();
 
@@ -1141,7 +1196,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             }
             else
             {
-                var methodReference = GetMethodReferenceFromLocalFunction(methodCallType, classModel);
+                var methodReference =
+                    GetMethodReferenceFromLocalFunction(methodCallType, classModel, repositoryModelConversionStrategy);
                 if (methodReference != null)
                 {
                     return methodReference;
@@ -1149,7 +1205,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             }
         }
 
-        var definitionClassModelPossibilities = SearchEntityByName(methodCallType.DefinitionClassName, projectModel)
+        var definitionClassModelPossibilities = SearchEntityByName(methodCallType.DefinitionClassName, projectModel,
+                repositoryModelConversionStrategy)
             .Where(classModel => classModel is ClassModel)
             .Cast<ClassModel>();
 
@@ -1166,7 +1223,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             }
             else
             {
-                var methodReference = GetMethodReferenceFromLocalFunction(methodCallType, classModel);
+                var methodReference =
+                    GetMethodReferenceFromLocalFunction(methodCallType, classModel, repositoryModelConversionStrategy);
                 if (methodReference != null)
                 {
                     return methodReference;
@@ -1174,7 +1232,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             }
         }
 
-        var createdClassModel = CreateClassModel(methodCallType.LocationClassName);
+        var createdClassModel = CreateClassModel(methodCallType.LocationClassName, repositoryModelConversionStrategy);
 
         var genericParameters = new List<GenericParameterModel>();
         for (var i = 0; i < methodCallType.GenericParameters.Count; i++)
@@ -1195,7 +1253,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                 .Select(parameter => new ParameterModel
                 {
                     TypeName = parameter.Type.Name ?? "",
-                    Type = ConvertEntityType(parameter.Type, projectModel),
+                    Type = ConvertEntityType(parameter.Type, projectModel, repositoryModelConversionStrategy),
                 }).ToList()
         };
 
@@ -1204,8 +1262,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
         return methodModel;
     }
 
-    private static MethodModel? GetMethodReferenceFromLocalFunction(IMethodCallType methodCallType,
-        ClassModel classModel)
+    private MethodModel? GetMethodReferenceFromLocalFunction(IMethodCallType methodCallType, ClassModel classModel,
+        IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         if (methodCallType.MethodDefinitionNames.Count == 0)
         {
@@ -1236,18 +1294,8 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                 ? new List<string>()
                 : parametersText.Split(',').Select(p => p.Trim());
             IList<IParameterType> parameterTypes = parameters
-                .Select(parameter =>
-                {
-                    var indexOfNullable = parameter.IndexOf('?');
-                    return new CSharpParameterModel
-                    {
-                        Type = new CSharpEntityTypeModel
-                        {
-                            Name = indexOfNullable >= 0 ? parameter[..indexOfNullable] : parameter
-                        },
-                        IsNullable = indexOfNullable >= 0
-                    };
-                }).Cast<IParameterType>().ToList();
+                .Select(repositoryModelConversionStrategy.CreateParameterType)
+                .ToList();
             var methodModel = GetMethodReferenceByName(classModel, methodName, genericParametersCount, parameterTypes);
             if (methodModel == null)
             {
@@ -1308,13 +1356,14 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
     #endregion
 
     private IList<AttributeModel> ConvertAttributes(IEnumerable<IAttributeType> attributeTypes,
-        ProjectModel projectModel)
+        ProjectModel projectModel, IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         return attributeTypes.Select(attributeType => new AttributeModel
             {
-                Type = ConvertEntityType(attributeType.Type, projectModel),
+                Type = ConvertEntityType(attributeType.Type, projectModel, repositoryModelConversionStrategy),
                 Target = ConvertAttributeTarget(attributeType.Target),
-                Parameters = ConvertParameters(attributeType.ParameterTypes, projectModel),
+                Parameters = ConvertParameters(attributeType.ParameterTypes, projectModel,
+                    repositoryModelConversionStrategy),
             })
             .ToList();
     }
@@ -1327,7 +1376,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
     }
 
     private IList<ParameterModel> ConvertParameters(IEnumerable<IParameterType> parameterTypes,
-        ProjectModel projectModel)
+        ProjectModel projectModel, IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         var parameters = new List<ParameterModel>();
 
@@ -1341,15 +1390,12 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             var parameterModel = new ParameterModel
             {
                 TypeName = parameterType.Type.Name ?? "",
-                Type = ConvertEntityType(parameterType.Type, projectModel),
-                Attributes = ConvertAttributes(parameterType.Attributes, projectModel),
+                Type = ConvertEntityType(parameterType.Type, projectModel, repositoryModelConversionStrategy),
+                Attributes = ConvertAttributes(parameterType.Attributes, projectModel,
+                    repositoryModelConversionStrategy),
+                Modifier = ConvertParameterModifier(parameterType.Modifier),
+                DefaultValue = parameterType.DefaultValue,
             };
-
-            if (parameterType is CSharpParameterModel param)
-            {
-                parameterModel.Modifier = ConvertParameterModifier(param.Modifier);
-                parameterModel.DefaultValue = param.DefaultValue;
-            }
 
             parameters.Add(parameterModel);
         }
@@ -1364,15 +1410,17 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             : ParameterModifier.None;
     }
 
-    private IList<GenericParameterModel> ConvertGenericParameters(
-        IEnumerable<IGenericParameterType> genericParameters, ProjectModel projectModel)
+    private IList<GenericParameterModel> ConvertGenericParameters(IEnumerable<IGenericParameterType> genericParameters,
+        ProjectModel projectModel, IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         return genericParameters.Select(parameterType => new GenericParameterModel
             {
                 Name = parameterType.Name,
                 Modifier = ConvertGenericParameterModifier(parameterType.Modifier),
-                Constraints = parameterType.Constraints.Select(c => ConvertEntityType(c, projectModel)).ToList(),
-                Attributes = ConvertAttributes(parameterType.Attributes, projectModel),
+                Constraints = parameterType.Constraints
+                    .Select(c => ConvertEntityType(c, projectModel, repositoryModelConversionStrategy)).ToList(),
+                Attributes = ConvertAttributes(parameterType.Attributes, projectModel,
+                    repositoryModelConversionStrategy),
             })
             .ToList();
     }
@@ -1384,19 +1432,22 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             : GenericParameterModifier.None;
     }
 
-    private EntityType ConvertEntityType(string typeName, ProjectModel projectModel)
+    private EntityType ConvertEntityType(string typeName, ProjectModel projectModel,
+        IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
-        return ConvertEntityType(CSharpFullTypeNameBuilder.CreateEntityTypeModel(typeName), projectModel);
+        return ConvertEntityType(repositoryModelConversionStrategy.CreateEntityTypeModel(typeName), projectModel,
+            repositoryModelConversionStrategy);
     }
 
-    private EntityType ConvertEntityType(IEntityType type, ProjectModel projectModel)
+    private EntityType ConvertEntityType(IEntityType type, ProjectModel projectModel,
+        IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         var entityModel =
             (type.FullType == null
-                ? SearchEntityByName(type.Name, projectModel).FirstOrDefault()
+                ? SearchEntityByName(type.Name, projectModel, repositoryModelConversionStrategy).FirstOrDefault()
                 : SearchEntityByName(type.FullType.Name, type.FullType.ContainedTypes.Count, projectModel)
                     .FirstOrDefault()
-            ) ?? CreateClassModel(type.Name);
+            ) ?? CreateClassModel(type.Name, repositoryModelConversionStrategy);
 
         var entityType = new EntityType
         {
@@ -1405,13 +1456,14 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             IsNullable = type.FullType?.IsNullable ?? type.Name.EndsWith('?'),
             GenericTypes = type.FullType == null
                 ? new List<EntityType>()
-                : ConvertGeneric(type.FullType.ContainedTypes, projectModel),
+                : ConvertGeneric(type.FullType.ContainedTypes, projectModel, repositoryModelConversionStrategy),
         };
 
         return entityType;
     }
 
-    private IList<EntityType> ConvertGeneric(IEnumerable<GenericType> genericTypes, ProjectModel projectModel)
+    private IList<EntityType> ConvertGeneric(IEnumerable<GenericType> genericTypes, ProjectModel projectModel,
+        IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
         var entityTypes = new List<EntityType>();
 
@@ -1419,14 +1471,15 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
         {
             var entityModel = SearchEntityByName(genericType.Name, genericType.ContainedTypes.Count, projectModel)
                                   .FirstOrDefault() ??
-                              CreateClassModel(genericType.Name);
+                              CreateClassModel(genericType.Name, repositoryModelConversionStrategy);
 
             var entityType = new EntityType
             {
                 Name = genericType.Name,
                 IsNullable = genericType.IsNullable,
                 Entity = entityModel,
-                GenericTypes = ConvertGeneric(genericType.ContainedTypes, projectModel),
+                GenericTypes = ConvertGeneric(genericType.ContainedTypes, projectModel,
+                    repositoryModelConversionStrategy),
             };
 
             entityTypes.Add(entityType);
@@ -1435,9 +1488,10 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
         return entityTypes;
     }
 
-    private ClassModel CreateClassModel(string className)
+    private ClassModel CreateClassModel(string className,
+        IRepositoryModelConversionStrategy repositoryModelConversionStrategy)
     {
-        var entityTypeModel = CSharpFullTypeNameBuilder.CreateEntityTypeModel(className);
+        var entityTypeModel = repositoryModelConversionStrategy.CreateEntityTypeModel(className);
 
         var entityName = entityTypeModel.FullType.Name;
         var genericParameterCount = entityTypeModel.FullType.ContainedTypes.Count;
@@ -1467,7 +1521,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             GenericParameters = genericParameters,
             // namespace ? todo ask someone
         };
-        var isPrimitive = CSharpConstants.IsPrimitive(classModel.Name);
+        var isPrimitive = repositoryModelConversionStrategy.IsPrimitive(classModel.Name);
         classModel.IsPrimitive = isPrimitive;
         classModel.IsExternal = !isPrimitive;
 
@@ -1480,5 +1534,18 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
     {
         _logger.Log(message);
         _progressLogger.Log(message);
+    }
+
+    private IRepositoryModelConversionStrategy GetRepositoryModelConversionStrategy(string projectLanguage)
+    {
+        switch (projectLanguage)
+        {
+            case "Visual Basic":
+                return new VisualBasicRepositoryModelConversionStrategy();
+
+            default:
+                // case "C#":
+                return new CSharpRepositoryModelConversionStrategy();
+        }
     }
 }

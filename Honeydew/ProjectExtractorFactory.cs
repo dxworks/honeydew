@@ -4,6 +4,7 @@ using Honeydew.Extractors.Dotnet;
 using Honeydew.Extractors.Dotnet.Load;
 using Honeydew.Extractors.Dotnet.Load.Strategies;
 using Honeydew.Extractors.Load;
+using Honeydew.Extractors.VisualBasic;
 using Honeydew.Logging;
 
 namespace Honeydew;
@@ -11,7 +12,7 @@ namespace Honeydew;
 public class ProjectExtractorFactory
 {
     public const string CSharp = "C#";
-    public const string VisualBasic = "VisualBasic";
+    public const string VisualBasic = "Visual Basic";
 
     private readonly ILogger _logger;
     private readonly IProgressLogger _progressLogger;
@@ -31,8 +32,10 @@ public class ProjectExtractorFactory
             CSharp => new DotnetProjectExtractor(_logger, _progressLogger,
                 GetProjectLoadingStrategy(_logger, _parallelExtraction),
                 new CSharpFactExtractor(CSharpExtractionVisitors.GetVisitors(_logger)), new MsBuildProjectProvider()),
-            // VisualBasic => new ProjectExtractor(_logger, _progressLogger, _projectLoadingStrategy,
-            //     new VisualBasicFactExtractor(VisualBasicExtractionVisitors.GetVisitors(_logger)), new MsBuildProjectProvider()),
+            VisualBasic => new DotnetProjectExtractor(_logger, _progressLogger,
+                GetProjectLoadingStrategy(_logger, _parallelExtraction),
+                new VisualBasicFactExtractor(VisualBasicExtractionVisitors.GetVisitors(_logger)),
+                new MsBuildProjectProvider()),
             _ => null
         };
     }

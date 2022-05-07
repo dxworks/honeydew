@@ -23,8 +23,7 @@ internal static class CSharpExtractionVisitors
                 new MethodCallInfoVisitor()
             });
 
-        var accessedFieldsSetterVisitor = new CSharpAccessedFieldsSetterVisitor(logger,
-            new List<ITypeVisitor<AccessedField>>
+        var accessedFieldsSetterVisitor = new CSharpAccessedFieldsSetterVisitor(logger, new List<ITypeVisitor<AccessedField?>>
             {
                 new AccessFieldVisitor()
             });

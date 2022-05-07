@@ -2,11 +2,14 @@
 using CommandLine;
 using Honeydew;
 using Honeydew.Extraction;
+using Honeydew.Extractors.Converters;
 using Honeydew.Extractors.CSharp;
 using Honeydew.Extractors.CSharp.Converters;
 using Honeydew.Extractors.Exporters;
 using Honeydew.Extractors.Importers;
 using Honeydew.Extractors.Load;
+using Honeydew.Extractors.VisualBasic;
+using Honeydew.Extractors.VisualBasic.Converters;
 using Honeydew.IO.Writers.Exporters;
 using Honeydew.Logging;
 using Honeydew.Models;
@@ -296,8 +299,13 @@ static void RunScripts(ScriptRunner scriptRunner, Dictionary<string, object?> de
 static async Task<RepositoryModel?> LoadModel(ILogger logger, IProgressLogger progressLogger, string inputPath,
     CancellationToken cancellationToken)
 {
+    var cSharpConverterList = new CSharpConverterList();
     var repositoryLoader = new RawFileRepositoryLoader(logger, progressLogger,
-        new JsonModelImporter<RepositoryModel>(new CSharpConverterList()));
+        new RepositoryModelImporter(new ProjectModelConverter(new Dictionary<string, IConverterList>
+        {
+            { ProjectExtractorFactory.CSharp, cSharpConverterList },
+            { ProjectExtractorFactory.VisualBasic, new VisualBasicConverterList() },
+        }, cSharpConverterList)));
     var repositoryModel = await repositoryLoader.Load(inputPath, cancellationToken);
     return repositoryModel;
 }
@@ -305,11 +313,10 @@ static async Task<RepositoryModel?> LoadModel(ILogger logger, IProgressLogger pr
 static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger progressLogger,
     ILogger missingFilesLogger, string inputPath, bool parallelExtraction, CancellationToken cancellationToken)
 {
-
     var projectExtractorFactory = new ProjectExtractorFactory(logger, progressLogger, parallelExtraction);
 
-
     var csharpProjectExtractor = projectExtractorFactory.GetProjectExtractor(ProjectExtractorFactory.CSharp)!;
+    var visualBasicProjectExtractor = projectExtractorFactory.GetProjectExtractor(ProjectExtractorFactory.VisualBasic)!;
     var solutionExtractor = new SolutionExtractor(logger, progressLogger, projectExtractorFactory,
         new ActualFilePathProvider(logger));
 
@@ -317,9 +324,13 @@ static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger 
     {
         new(".sln", solutionExtractor, new List<ProjectSchema>
         {
-            new(".csproj", csharpProjectExtractor, new List<FileSchema>
+            new(ProjectExtractorFactory.CSharp, ".csproj", csharpProjectExtractor, new List<FileSchema>
             {
                 new(".cs", new CSharpFactExtractor(CSharpExtractionVisitors.GetVisitors(logger))),
+            }),
+            new(ProjectExtractorFactory.VisualBasic, ".vbproj", visualBasicProjectExtractor, new List<FileSchema>
+            {
+                new(".vb", new VisualBasicFactExtractor(VisualBasicExtractionVisitors.GetVisitors(logger))),
             }),
         })
     };

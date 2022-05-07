@@ -87,20 +87,10 @@ public class RepositoryExtractor
         _progressLogger.Log($"Searching for Source Files that were not processed yet at {path}");
 
 
-        var projectModelWithUnprocessedFiles = new ProjectModel
-        {
-            Name = "Project_With_Unprocessed_Files"
-        };
-
-        await foreach (var compilationUnitType in ExtractUnprocessedSourceFiles(path,
+        await foreach (var projectWithUnprocessedFiles in ExtractUnprocessedSourceFiles(path,
                            processedSourceCodeFilePaths, cancellationToken))
         {
-            projectModelWithUnprocessedFiles.CompilationUnits.Add(compilationUnitType);
-        }
-
-        if (projectModelWithUnprocessedFiles.CompilationUnits.Count > 0)
-        {
-            repositoryModel.Projects.Add(projectModelWithUnprocessedFiles);
+            repositoryModel.Projects.Add(projectWithUnprocessedFiles);
         }
 
         return repositoryModel;
@@ -190,94 +180,108 @@ public class RepositoryExtractor
     }
 
 
-    private async IAsyncEnumerable<ICompilationUnitType> ExtractUnprocessedSourceFiles(string path,
-        HashSet<string> processedSourceCodeFilePaths,
+    private async IAsyncEnumerable<ProjectModel> ExtractUnprocessedSourceFiles(string path,
+        ISet<string> processedSourceCodeFilePaths,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        foreach (var (extension, factExtractor) in _solutionSchemas.SelectMany(schema => schema.ProjectSchemas)
-                     .SelectMany(schema => schema.FileSchemas))
+        foreach (var (language, _, _, fileSchemata) in _solutionSchemas.SelectMany(schema => schema.ProjectSchemas))
         {
-            var notProcessedFilePaths =
-                Directory.GetFiles(path, $"*{extension}", SearchOption.AllDirectories)
-                    .Select(Path.GetFullPath)
-                    .Where(filePath => !processedSourceCodeFilePaths.Contains(filePath)).ToList();
-
-            if (notProcessedFilePaths.Count > 0)
+            foreach (var (extension, factExtractor) in fileSchemata)
             {
-                _logger.Log($"{notProcessedFilePaths.Count} {extension} Files were found that were not processed!");
-                _progressLogger.Log(
-                    $"{notProcessedFilePaths.Count} {extension} Files were found that were not processed!");
-                _progressLogger.Log();
-
-                var progressBar = _progressLogger.CreateProgressLogger(notProcessedFilePaths.Count,
-                    $"Extracting Facts from {extension} Files");
-                progressBar.Start();
-
-                var tasks = notProcessedFilePaths.Select(ExtractCompilationUnit);
-
-                if (_parallelExtraction)
+                var projectModelWithUnprocessedFiles = new ProjectModel
                 {
-                    using var filesSemaphore = new SemaphoreSlim(1, 1);
+                    Name = $"Project_With_Unprocessed_Files_Of_Type_{extension}",
+                    Language = language,
+                    CompilationUnits = new List<ICompilationUnitType>()
+                };
 
-                    foreach (var bucket in TaskUtils.Interleaved(tasks))
+                var notProcessedFilePaths =
+                    Directory.GetFiles(path, $"*{extension}", SearchOption.AllDirectories)
+                        .Select(Path.GetFullPath)
+                        .Where(filePath => !processedSourceCodeFilePaths.Contains(filePath)).ToList();
+
+                if (notProcessedFilePaths.Count > 0)
+                {
+                    _logger.Log($"{notProcessedFilePaths.Count} {extension} Files were found that were not processed!");
+                    _progressLogger.Log(
+                        $"{notProcessedFilePaths.Count} {extension} Files were found that were not processed!");
+                    _progressLogger.Log();
+
+                    var progressBar = _progressLogger.CreateProgressLogger(notProcessedFilePaths.Count,
+                        $"Extracting Facts from {extension} Files");
+                    progressBar.Start();
+
+                    var tasks = notProcessedFilePaths.Select(ExtractCompilationUnit);
+
+                    if (_parallelExtraction)
                     {
-                        var task = await bucket;
-                        var compilationUnitType = await task;
+                        using var filesSemaphore = new SemaphoreSlim(1, 1);
 
-                        if (compilationUnitType == null)
+                        foreach (var bucket in TaskUtils.Interleaved(tasks))
                         {
-                            continue;
-                        }
+                            var task = await bucket;
+                            var compilationUnitType = await task;
 
-                        await filesSemaphore.WaitAsync(cancellationToken);
+                            if (compilationUnitType == null)
+                            {
+                                continue;
+                            }
+
+                            await filesSemaphore.WaitAsync(cancellationToken);
+                            try
+                            {
+                                projectModelWithUnprocessedFiles.Add(compilationUnitType);
+                            }
+                            finally
+                            {
+                                filesSemaphore.Release();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var task in tasks)
+                        {
+                            var compilationUnitType = await task;
+
+                            if (compilationUnitType == null)
+                            {
+                                continue;
+                            }
+
+                            projectModelWithUnprocessedFiles.Add(compilationUnitType);
+                        }
+                    }
+
+                    progressBar.Stop();
+
+                    async Task<ICompilationUnitType?> ExtractCompilationUnit(string filePath)
+                    {
                         try
                         {
-                            yield return compilationUnitType;
-                        }
-                        finally
-                        {
-                            filesSemaphore.Release();
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (var task in tasks)
-                    {
-                        var compilationUnitType = await task;
+                            _logger.Log($"{extension} File found at {filePath}");
+                            _missingFilesLogger.Log(filePath);
+                            progressBar.Step(filePath);
 
-                        if (compilationUnitType == null)
+                            processedSourceCodeFilePaths.Add(filePath);
+
+                            var compilationUnitType = await factExtractor.Extract(filePath, cancellationToken);
+                            compilationUnitType.FilePath = filePath;
+
+                            return compilationUnitType;
+                        }
+                        catch (Exception e)
                         {
-                            continue;
+                            _logger.Log($"The following exception occurred when parsing file {filePath}: ${e}");
                         }
 
-                        yield return compilationUnitType;
+                        return null;
                     }
                 }
 
-                progressBar.Stop();
-
-                async Task<ICompilationUnitType?> ExtractCompilationUnit(string filePath)
+                if (projectModelWithUnprocessedFiles.CompilationUnits.Count > 0)
                 {
-                    try
-                    {
-                        _logger.Log($"{extension} File found at {filePath}");
-                        _missingFilesLogger.Log(filePath);
-                        progressBar.Step(filePath);
-
-                        processedSourceCodeFilePaths.Add(filePath);
-
-                        var compilationUnitType = await factExtractor.Extract(filePath, cancellationToken);
-                        compilationUnitType.FilePath = filePath;
-
-                        return compilationUnitType;
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.Log($"The following exception occurred when parsing file {filePath}: ${e}");
-                    }
-
-                    return null;
+                    yield return projectModelWithUnprocessedFiles;
                 }
             }
         }
@@ -286,7 +290,8 @@ public class RepositoryExtractor
     private async IAsyncEnumerable<ProjectModel> ExtractUnprocessedProjectFiles(string path,
         IReadOnlySet<string> processedProjectFilePaths, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        foreach (var (extension, projectExtractor, _) in _solutionSchemas.SelectMany(schema => schema.ProjectSchemas))
+        foreach (var (_, extension, projectExtractor, _) in _solutionSchemas.SelectMany(schema =>
+                     schema.ProjectSchemas))
         {
             var notProcessedProjectPaths =
                 Directory.GetFiles(path, $"*{extension}", SearchOption.AllDirectories)

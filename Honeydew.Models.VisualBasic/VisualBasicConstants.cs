@@ -29,4 +29,42 @@ public static class VisualBasicConstants
             modifier = allModifiers;
         }
     }
+
+    public static bool IsPrimitive(string type)
+    {
+        if (string.IsNullOrEmpty(type))
+        {
+            return true;
+        }
+
+        type = type.TrimEnd('?');
+
+        type = ConvertSystemTypeToPrimitiveType(type);
+
+        return type is "Byte" or "Char" or "Date" or "Decimal" or "Double" or "Integer" or "Long" or "Object" or "SByte"
+            or "Short" or "Single" or "String" or "UInteger" or "ULong" or "UShort" or "Object" or "Void";
+    }
+
+    private static string ConvertSystemTypeToPrimitiveType(string type)
+    {
+        return type switch
+        {
+            "System.Byte" => "Byte",
+            "System.Char" => "Char",
+            "System.Date" => "Date",
+            "System.Decimal" => "Decimal",
+            "System.Double" => "Double",
+            "System.Integer" => "Integer",
+            "System.Long" => "Long",
+            "System.Object" => "Object",
+            "System.SByte" => "SByte",
+            "System.Short" => "Short",
+            "System.Single" => "Single",
+            "System.String" => "String",
+            "System.UInteger" => "UInteger",
+            "System.ULong" => "ULong",
+            "System.UShort" => "UShort",
+            _ => type
+        };
+    }
 }

@@ -1,3 +1,4 @@
 ﻿namespace Honeydew.Extractors.Load;
 
-public record ProjectSchema(string Extension, IProjectExtractor ProjectExtractor, List<FileSchema> FileSchemas);
+public record ProjectSchema(string Language, string Extension, IProjectExtractor ProjectExtractor,
+    List<FileSchema> FileSchemas);
