@@ -1,0 +1,29 @@
+﻿Imports HoneydewCore.Extractors
+
+' here is the namespace
+Namespace TopLevel
+    ' some code
+    Public Class File
+        ' this is a field
+        Private _f As Integer
+
+        Public ReadOnly Property Field As Integer
+            Get
+                ' should return calculated
+
+                Return Calc(_f)
+            End Get
+        End Property '
+
+
+        ' this method calculates 
+        Public Function Calc(ByVal a As Integer) As Integer
+
+            ' calculate double
+
+            Dim d = a * 2
+            Return d
+            ' return a*2;
+        End Function
+    End Class
+End Namespace

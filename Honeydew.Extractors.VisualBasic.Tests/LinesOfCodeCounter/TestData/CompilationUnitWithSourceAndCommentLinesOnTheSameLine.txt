@@ -1,0 +1,12 @@
+﻿Namespace TopLevel
+    Public Class File3
+        Public Function Calc(ByVal a As Integer) As Integer
+            Dim x = 5    ' aaa             
+            ' 
+            ' ggg
+            ' 
+            ' cc
+            Dim y = 55 ' comm
+        End Function
+    End Class
+End Namespace

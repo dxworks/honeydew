@@ -1,0 +1,4 @@
+﻿Namespace MyDelegates
+    ' the delegate
+    Public Delegate Sub F(ByVal x As Integer)
+End Namespace

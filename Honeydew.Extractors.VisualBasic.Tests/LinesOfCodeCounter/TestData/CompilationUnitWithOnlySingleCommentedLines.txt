@@ -1,0 +1,13 @@
+﻿'Namespace TopLevel
+'    Public Class File
+'        Private _f As Integer
+'        Public ReadOnly Property Field As Integer
+'            Get
+'                Return Calc(_f)
+'            End Get
+'        End Property
+'        Public Function Calc(ByVal a As Integer) As Integer
+'            Return a * 2
+'        End Function
+'    End Class
+'End Namespace
