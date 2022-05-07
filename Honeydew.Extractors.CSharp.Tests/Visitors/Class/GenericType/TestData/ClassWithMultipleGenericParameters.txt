@@ -1,0 +1,4 @@
+﻿namespace Namespace1
+{
+    public class Class1<T,R,K> : Base1<T>, Base2, Base3<R,K>, Base4<C<T,R>, K> { }
+}

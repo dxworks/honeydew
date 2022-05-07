@@ -1,0 +1,12 @@
+﻿Namespace Namespace1  
+    Module Module1
+        Class User        
+            Public name, location As String  
+                                         
+            Public Sub New(ByVal a As String, ByVal b As String)    
+                name = a    
+                location = b   
+            End Sub            
+        End Class  
+    End Module  
+End Namespace  

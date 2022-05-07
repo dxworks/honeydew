@@ -1,0 +1,4 @@
+﻿Module Module1
+    Protected Friend Enum Enum1   
+    End Enum
+End Module

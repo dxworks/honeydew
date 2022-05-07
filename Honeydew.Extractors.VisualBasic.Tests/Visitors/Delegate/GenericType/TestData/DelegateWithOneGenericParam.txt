@@ -1,0 +1,3 @@
+﻿Namespace Namespace1
+    Public Delegate Function Delegate1(Of T)(ByVal item As T) As T
+End Namespace

@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using HoneydewModels.Exporters;
-using HoneydewScriptBeePlugin.Models;
+﻿using Honeydew.Extractors.Exporters;
+using Honeydew.ScriptBeePlugin.Models;
 
 namespace Honeydew.Scripts;
 
@@ -28,11 +26,11 @@ public class ExportStatisticsScript : Script
         _repositoryExporter = repositoryExporter;
     }
 
-    public override void Run(Dictionary<string, object> arguments)
+    public override void Run(Dictionary<string, object?> arguments)
     {
-        var outputPath = VerifyArgument<string>(arguments, "outputPath");
-        var outputName = VerifyArgument<string>(arguments, "statisticsFileOutputName");
-        var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel");
+        var outputPath = VerifyArgument<string>(arguments, "outputPath")!;
+        var outputName = VerifyArgument<string>(arguments, "statisticsFileOutputName")!;
+        var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel")!;
 
         var fileCount = 0;
         var classCount = 0;

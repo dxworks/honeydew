@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Honeydew.Logging;
 using Honeydew.PostExtraction.ReferenceRelations;
-using HoneydewCore.Logging;
-using HoneydewScriptBeePlugin.Models;
+using RepositoryModel = Honeydew.ScriptBeePlugin.Models.RepositoryModel;
 
 namespace Honeydew.Scripts;
 
@@ -30,9 +29,9 @@ public class ApplyPostExtractionVisitorsScript : Script
         _progressLogger = progressLogger;
     }
 
-    public override object RunForResult(Dictionary<string, object> arguments)
+    public override object RunForResult(Dictionary<string, object?> arguments)
     {
-        var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel");
+        var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel")!;
 
         _logger.Log();
         _logger.Log("Applying Post Extraction Metrics");

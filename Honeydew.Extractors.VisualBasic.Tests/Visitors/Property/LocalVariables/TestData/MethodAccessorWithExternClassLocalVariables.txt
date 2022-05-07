@@ -1,0 +1,16 @@
+Imports System
+
+Namespace Namespace1
+    Public Class Class1
+        Private p As ExternClass
+
+        Public Property Value1 As Integer
+            Get
+                Dim c As ExternClass = p
+                Dim c2 As ExternClass
+                Dim c3 As ExternClass = New ExternClass()
+                Return 0
+            End Get
+        End Property
+    End Class
+End Namespace

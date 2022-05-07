@@ -1,0 +1,8 @@
+﻿Module Module1
+
+    Interface IUser
+
+        Sub GetDetails(ByVal x As String)
+
+    End Interface
+End Module

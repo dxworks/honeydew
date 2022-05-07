@@ -1,0 +1,18 @@
+﻿Imports HoneydewCore.Extractors
+
+' here is the namespace
+Namespace Enums
+
+    Public Enum MyEnum
+
+        ' some values
+        A
+
+        B = 2
+        X
+        Y
+
+        Z ' this is Z 
+
+    End Enum
+End Namespace

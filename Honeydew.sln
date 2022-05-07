@@ -5,19 +5,31 @@ VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew", "Honeydew\Honeydew.csproj", "{93AE9036-6182-40FD-AA20-2B57AC054DEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoneydewCore", "HoneydewCore\HoneydewCore.csproj", "{D8EC22F6-F481-4064-BFEA-5A3C7AAF4963}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Models", "Honeydew.Models\Honeydew.Models.csproj", "{3C39FA7E-C03E-4EF7-A57B-0A6BC8458096}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoneydewCoreTest", "HoneydewCoreTest\HoneydewCoreTest.csproj", "{E4E5B7D6-21B0-44C9-B9AC-935F849F027E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors", "Honeydew.Extractors\Honeydew.Extractors.csproj", "{23BABD99-C5B6-401A-ACB0-44271449BB80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoneydewModels", "HoneydewModels\HoneydewModels.csproj", "{3C39FA7E-C03E-4EF7-A57B-0A6BC8458096}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors.Tests", "Honeydew.Extractors.Tests\Honeydew.Extractors.Tests.csproj", "{A75D42F1-2EE2-458D-9F8D-A51435BED666}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoneydewExtractors", "HoneydewExtractors\HoneydewExtractors.csproj", "{23BABD99-C5B6-401A-ACB0-44271449BB80}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.ScriptBeePlugin", "Honeydew.ScriptBeePlugin\Honeydew.ScriptBeePlugin.csproj", "{A910D258-36EA-47CD-B483-E2AEB36E7192}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoneydewExtractorsTests", "HoneydewExtractorsTests\HoneydewExtractorsTests.csproj", "{A75D42F1-2EE2-458D-9F8D-A51435BED666}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Tests", "Honeydew.Tests\Honeydew.Tests.csproj", "{48DF9CC1-FD24-4181-8393-62991F2E643B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoneydewScriptBeePlugin", "HoneydewScriptBeePlugin\HoneydewScriptBeePlugin.csproj", "{A910D258-36EA-47CD-B483-E2AEB36E7192}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors.CSharp", "Honeydew.Extractors.CSharp\Honeydew.Extractors.CSharp.csproj", "{A8C5FDCB-38C8-4968-9F81-A368DBE55DCD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoneydewTests", "HoneydewTests\HoneydewTests.csproj", "{48DF9CC1-FD24-4181-8393-62991F2E643B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors.VisualBasic", "Honeydew.Extractors.VisualBasic\Honeydew.Extractors.VisualBasic.csproj", "{1C3A04A2-2421-4ACF-B348-37292195B8C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors.CSharp.Tests", "Honeydew.Extractors.CSharp.Tests\Honeydew.Extractors.CSharp.Tests.csproj", "{C2747A42-BB82-4021-8427-BDCA74CC7481}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Models.CSharp", "Honeydew.Models.CSharp\Honeydew.Models.CSharp.csproj", "{64AAA15C-AC73-42CC-975D-1B141703F972}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Models.VisualBasic", "Honeydew.Models.VisualBasic\Honeydew.Models.VisualBasic.csproj", "{82554C93-F1BA-4383-AAA2-3BB9E4BFE74E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Logging", "Honeydew.Logging\Honeydew.Logging.csproj", "{BFCBF895-D6BF-42E4-9195-4CB75D6CDC97}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors.Dotnet", "Honeydew.Extractors.Dotnet\Honeydew.Extractors.Dotnet.csproj", "{C93DF5BE-3A62-49F2-A1C7-76005E10C1F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors.VisualBasic.Tests", "Honeydew.Extractors.VisualBasic.Tests\Honeydew.Extractors.VisualBasic.Tests.csproj", "{28CAF44A-43E2-4296-A15C-6D49849F1C09}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,14 +41,6 @@ Global
 		{93AE9036-6182-40FD-AA20-2B57AC054DEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93AE9036-6182-40FD-AA20-2B57AC054DEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93AE9036-6182-40FD-AA20-2B57AC054DEA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D8EC22F6-F481-4064-BFEA-5A3C7AAF4963}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D8EC22F6-F481-4064-BFEA-5A3C7AAF4963}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D8EC22F6-F481-4064-BFEA-5A3C7AAF4963}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D8EC22F6-F481-4064-BFEA-5A3C7AAF4963}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E4E5B7D6-21B0-44C9-B9AC-935F849F027E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E4E5B7D6-21B0-44C9-B9AC-935F849F027E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E4E5B7D6-21B0-44C9-B9AC-935F849F027E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E4E5B7D6-21B0-44C9-B9AC-935F849F027E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3C39FA7E-C03E-4EF7-A57B-0A6BC8458096}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3C39FA7E-C03E-4EF7-A57B-0A6BC8458096}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C39FA7E-C03E-4EF7-A57B-0A6BC8458096}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -57,6 +61,38 @@ Global
 		{48DF9CC1-FD24-4181-8393-62991F2E643B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48DF9CC1-FD24-4181-8393-62991F2E643B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48DF9CC1-FD24-4181-8393-62991F2E643B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8C5FDCB-38C8-4968-9F81-A368DBE55DCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8C5FDCB-38C8-4968-9F81-A368DBE55DCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8C5FDCB-38C8-4968-9F81-A368DBE55DCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8C5FDCB-38C8-4968-9F81-A368DBE55DCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C3A04A2-2421-4ACF-B348-37292195B8C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C3A04A2-2421-4ACF-B348-37292195B8C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C3A04A2-2421-4ACF-B348-37292195B8C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C3A04A2-2421-4ACF-B348-37292195B8C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2747A42-BB82-4021-8427-BDCA74CC7481}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2747A42-BB82-4021-8427-BDCA74CC7481}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2747A42-BB82-4021-8427-BDCA74CC7481}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2747A42-BB82-4021-8427-BDCA74CC7481}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64AAA15C-AC73-42CC-975D-1B141703F972}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64AAA15C-AC73-42CC-975D-1B141703F972}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64AAA15C-AC73-42CC-975D-1B141703F972}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64AAA15C-AC73-42CC-975D-1B141703F972}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82554C93-F1BA-4383-AAA2-3BB9E4BFE74E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82554C93-F1BA-4383-AAA2-3BB9E4BFE74E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82554C93-F1BA-4383-AAA2-3BB9E4BFE74E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82554C93-F1BA-4383-AAA2-3BB9E4BFE74E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFCBF895-D6BF-42E4-9195-4CB75D6CDC97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFCBF895-D6BF-42E4-9195-4CB75D6CDC97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFCBF895-D6BF-42E4-9195-4CB75D6CDC97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFCBF895-D6BF-42E4-9195-4CB75D6CDC97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C93DF5BE-3A62-49F2-A1C7-76005E10C1F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C93DF5BE-3A62-49F2-A1C7-76005E10C1F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C93DF5BE-3A62-49F2-A1C7-76005E10C1F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C93DF5BE-3A62-49F2-A1C7-76005E10C1F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28CAF44A-43E2-4296-A15C-6D49849F1C09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28CAF44A-43E2-4296-A15C-6D49849F1C09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28CAF44A-43E2-4296-A15C-6D49849F1C09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28CAF44A-43E2-4296-A15C-6D49849F1C09}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

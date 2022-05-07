@@ -1,0 +1,10 @@
+﻿Namespace Namespace1
+    Public Class Class1(Of T As {IInterface, IInterface2(Of TK, TR)}, TK, TR)
+    End Class
+
+    Public Interface IInterface
+    End Interface
+
+    Public Interface IInterface2(Of T, TK)
+    End Interface
+End Namespace

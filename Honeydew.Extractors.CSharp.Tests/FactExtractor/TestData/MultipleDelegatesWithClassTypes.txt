@@ -1,0 +1,8 @@
+﻿namespace MyDelegates
+{
+    public class Class1 {}
+
+    public delegate void Delegate1(Class1 c);
+
+    public delegate Class1 Delegate2(ExternClass c);
+}

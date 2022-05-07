@@ -1,0 +1,32 @@
+﻿Imports System
+
+Namespace App
+    Class [MyClass]
+        Private _c As String() = New String() {}
+        Private _c2 As Integer() = {}
+        Public Property MyC As String() = {"value", "other"}
+        Public Property MyC3 As Integer() = {2, 51}
+
+        Public ReadOnly Property ComputedC As Double()
+            Get
+                Return {2.0}
+            End Get
+        End Property
+
+        Public ReadOnly Property MyC2 As String()
+            Get
+                Return New String() {"Hallo"}
+            End Get
+        End Property
+
+        Public Sub New()
+            Dim cs = New Integer(1) {6, 12}
+            Dim c As Double() = {2.0}
+        End Sub
+
+        Public Function Method() As Boolean()
+            Dim c = New Boolean() {False}
+            Return c
+        End Function
+    End Class
+End Namespace

@@ -1,0 +1,25 @@
+﻿using System;
+
+namespace TopLevel
+{    
+    public class Bar
+    {
+        void Other(Func<int> a)
+        {
+        } 
+        void Method()
+        {
+            Func<int> func = () => 66;
+            Other(func);
+            Other(() => 0);
+            Other(() => { return 6;});
+            Other(A);
+            Other(delegate { return 7;});
+        }
+
+        private int A()
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+    }                                  
+}

@@ -1,0 +1,20 @@
+﻿Imports System
+
+Namespace Namespace1
+
+    Public Class Class1
+        <Serializable>
+        Friend Property C As Char
+
+        <Serializable>
+        Friend Custom Event eC As Action(Of Char)
+            AddHandler(ByVal value As Action(Of Char))
+            End AddHandler
+            RemoveHandler(ByVal value As Action(Of Char))
+            End RemoveHandler
+            <Serializable>
+            RaiseEvent(ByVal obj As Char)
+            End RaiseEvent
+        End Event
+    End Class
+End Namespace

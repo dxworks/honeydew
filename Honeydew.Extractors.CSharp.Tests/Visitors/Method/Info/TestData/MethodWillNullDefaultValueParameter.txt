@@ -1,0 +1,10 @@
+﻿using System;
+using HoneydewCore.Extractors;
+
+namespace TopLevel
+{
+   public class Bar
+   {
+       int MethodWithNullableDefault(string? p = null) {return 2;}
+   }                                  
+}

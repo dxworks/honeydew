@@ -1,0 +1,15 @@
+﻿Public Module Exercise
+
+    Public Class Outside
+        Public Class Inside
+            Public Sub New()
+                MsgBox(" =- Inside -=")
+            End Sub
+        End Class
+
+        Public Sub New()
+            MsgBox(" -= Outside =-")
+        End Sub
+    End Class
+    
+End Module

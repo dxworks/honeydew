@@ -1,0 +1,20 @@
+Imports System.Threading.Tasks
+
+Namespace App
+    Public Class Class1
+        Public Async Sub Method()
+            Await Wait()
+            Dim i = Await [Get]()
+            Await Wait()
+            Dim x As ExternClass(Of Integer, ExternClass(Of Double)) = Await [Get]()
+        End Sub
+
+        Public Function [Get]() As Task(Of ExternClass(Of Integer, ExternClass(Of Double)))
+            Return Task.FromResult(New ExternClass(Of Integer, ExternClass(Of Double))())
+        End Function
+
+        Public Function Wait() As Task
+            Return Task.Delay(100)
+        End Function
+    End Class
+End Namespace

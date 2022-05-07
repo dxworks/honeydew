@@ -1,0 +1,30 @@
+﻿Imports System
+
+Namespace Throwing
+    Class MyArgumentException
+        Inherits Exception
+    End Class
+
+    Public Class NumberGenerator
+        Private numbers As Integer() = {2, 4, 6, 8, 10, 12, 14, 16, 18, 20}
+
+        Public Function GetNumber(ByVal indexString As String) As Integer
+            Try
+                Dim index = Integer.Parse(indexString)
+
+                If index = 2 Then
+                    Throw New MyArgumentException()
+                End If
+
+                Try
+                    Return numbers(index)
+                Catch __unusedIndexOutOfRangeException1__ As IndexOutOfRangeException
+                    Throw New NullReferenceException()
+                End Try
+
+            Catch e As Exception
+                Throw New MyArgumentException()
+            End Try
+        End Function
+    End Class
+End Namespace

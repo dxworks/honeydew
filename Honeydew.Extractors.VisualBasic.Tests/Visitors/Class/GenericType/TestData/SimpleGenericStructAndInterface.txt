@@ -1,0 +1,9 @@
+﻿Namespace Namespace1
+    Public Structure Class1(Of T)
+        Implements BaseType(Of T)
+    End Structure
+
+
+    Public Interface BaseType(Of T)
+    End Interface
+End Namespace

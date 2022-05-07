@@ -1,0 +1,35 @@
+﻿using System;
+using HoneydewCore.Extractors;
+
+// here is the namespace
+namespace TopLevel
+{
+    // some code
+    public class File
+    {
+        // this is a field
+        private int _f;
+
+        public int Field
+         {
+            get
+            {
+                // should return calculated
+
+                return Calc(_f);
+            }
+         } //
+
+
+        /* this method calculates */
+        public int Calc(int a)
+        {
+ 
+            // calculate double
+
+            var d = a*2;
+            return d;
+           // return a*2;
+        }        
+    }                                        
+}

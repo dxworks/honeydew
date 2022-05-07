@@ -1,0 +1,7 @@
+﻿Imports System
+
+Namespace Namespace1
+
+    <Serializable>
+    Public Delegate Function Delegate1(ByVal str As String) As Integer
+End Namespace

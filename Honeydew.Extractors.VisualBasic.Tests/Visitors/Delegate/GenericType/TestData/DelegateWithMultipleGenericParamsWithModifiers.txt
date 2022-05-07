@@ -1,0 +1,3 @@
+Namespace Namespace1
+    Public Delegate Function Delegate1(Of Out T, In TR, In TK)(ByVal r As TR, ByVal tk As TK, ByVal tk2 As TK) As T
+End Namespace

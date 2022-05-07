@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using HoneydewCore.Logging;
+﻿using Honeydew.Logging;
 
 namespace Honeydew.Scripts;
 
@@ -14,10 +11,10 @@ internal class ScriptRunner
         _logger = logger;
     }
 
-    public object RunForResult(ScriptRuntime scriptRuntime)
+    public object? RunForResult(ScriptRuntime scriptRuntime)
     {
         var (script, arguments) = scriptRuntime;
-        arguments ??= new Dictionary<string, object>();
+        arguments ??= new Dictionary<string, object?>();
 
         try
         {
@@ -61,7 +58,7 @@ internal class ScriptRunner
     private void Run(ScriptRuntime scriptRuntime)
     {
         var (script, arguments) = scriptRuntime;
-        arguments ??= new Dictionary<string, object>();   
+        arguments ??= new Dictionary<string, object?>();   
 
         try
         {

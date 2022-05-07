@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+                                        
+namespace TopLevel
+{                                                       
+    class Foo
+    {
+        public Dictionary<string, string> MyDictionary = new();
+    }
+                                            
+    public class Bar
+    {
+        Foo foo {get;set;}
+        void Method()
+        {                                                   
+            if (foo.MyDictionary.TryGetValue("value", out var value))
+            {                                                        
+            }
+        }
+    }                                              
+}

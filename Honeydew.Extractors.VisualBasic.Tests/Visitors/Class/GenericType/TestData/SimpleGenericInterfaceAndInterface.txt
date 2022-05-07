@@ -1,0 +1,8 @@
+﻿Namespace Namespace1
+    Public Interface Class1(Of T)
+        Inherits BaseType(Of T)
+    End Interface
+
+    Public Interface BaseType(Of T)
+    End Interface
+End Namespace

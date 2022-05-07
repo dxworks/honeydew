@@ -1,0 +1,4 @@
+﻿Module Module1
+    Private Protected Class Class1    
+    End Class    
+End Module

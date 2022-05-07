@@ -1,0 +1,27 @@
+﻿Namespace Namespace1  
+   Module Module1
+       Class User      
+       
+         Private _Prop2 As String = "Empty"
+         Friend Property Prop2 As String
+            Get
+                Dim x As Integer = Function1()
+                Method1(2.0)
+                Return _Prop2
+            End Get
+            Set(ByVal value As String)
+                Dim x As Integer = Function1()
+                Method1(2.0)
+                _Prop2 = value
+            End Set
+         End Property     
+                        
+        Public Sub Method1(raise As Double)                    
+        End Sub
+           
+        Public Function Function1() As Integer  
+           Return 2
+        End Function                
+       End Class  
+   End Module  
+End Namespace  

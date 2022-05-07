@@ -1,0 +1,16 @@
+Imports System
+Imports HoneydewCore.Extractors
+
+Namespace App
+    Public Class Class1
+        Public Sub Method(ByVal c As Class2)
+            Dim v = c.Method()
+        End Sub
+    End Class
+
+    Public Class Class2
+        Public Function Method() As Integer
+            Return 6
+        End Function
+    End Class
+End Namespace

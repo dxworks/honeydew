@@ -1,0 +1,37 @@
+﻿Imports System
+
+Namespace Throwing
+    Class MyException
+        Inherits Exception
+    End Class
+
+    Public Class NumberGenerator
+        Private ReadOnly _nullReference As NullReferenceException = New NullReferenceException()
+        Public Property IndexOutOfRange As IndexOutOfRangeException
+
+        Public Sub GetNumber(ByVal number As Double, ByVal exception As Exception)
+            Dim myException As MyException = New MyException()
+            Dim myVarException = New MyException()
+
+              If number < 0
+                      Throw exception
+              ElseIf number < 2            
+                      Throw _nullReference
+              ElseIf number < 5
+                      Throw IndexOutOfRange
+              ElseIf number < 6
+                      Throw myException
+              ElseIf number < 7
+                      Throw myVarException
+              ElseIf number < 8
+                      Throw New ExternException()
+              Else 
+                      Throw GetException()
+              End If
+        End Sub
+
+        Public Function GetException() As NotSupportedException
+            Return New NotSupportedException()
+        End Function
+    End Class
+End Namespace

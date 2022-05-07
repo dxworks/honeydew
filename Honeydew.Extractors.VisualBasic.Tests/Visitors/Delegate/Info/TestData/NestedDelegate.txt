@@ -1,0 +1,7 @@
+﻿Namespace Namespace1  
+    Module Module1
+        Class Class1
+                Delegate Sub SampleDelegate()
+        End Class
+    End Module  
+End Namespace  

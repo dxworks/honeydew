@@ -1,0 +1,4 @@
+﻿Module Module1
+    Private Protected Enum Enum1   
+    End Enum
+End Module

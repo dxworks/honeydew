@@ -1,0 +1,14 @@
+﻿Imports System
+
+Namespace Namespace1
+
+    Public Class Class1
+        <Serializable>
+        Public Sub Method1()
+        End Sub
+
+        <Serializable>
+        Public Sub Method2()
+        End Sub
+    End Class
+End Namespace

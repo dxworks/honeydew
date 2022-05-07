@@ -1,0 +1,20 @@
+﻿ Public Class Window
+     Public Sub New(ByVal top As Integer, ByVal left As Integer)
+         Me.top = top
+         Me.left = left
+     End Sub 'New
+
+     Private top As Integer
+     Private left As Integer
+ End Class
+
+ Public Class ListBox
+     Inherits Window
+     Public Sub New(ByVal top As Integer, ByVal left As Integer, ByVal theContents As String)
+         MyBase.New(top, left)
+         mListBoxContents = theContents
+     End Sub 
+
+     Private mListBoxContents As String 
+
+ End Class

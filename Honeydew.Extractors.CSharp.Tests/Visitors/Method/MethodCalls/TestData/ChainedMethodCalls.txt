@@ -1,0 +1,41 @@
+﻿using System;
+
+namespace TopLevel
+{
+    class Foo
+    {
+        public string GetName()
+        {
+            return "";
+        }
+    }
+
+    class Builder
+    {
+        public Builder Set()
+        {
+            return this;
+        }
+
+        public Foo Build()
+        {
+            return new Foo();
+        }
+    }
+
+    public class Bar
+    {
+        void Method()
+        {
+            var a = Create()
+                .Set()
+                .Build()
+                .GetName().Trim();
+        }
+
+        private Builder Create()
+        {
+            return new Builder();
+        }
+    }
+}

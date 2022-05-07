@@ -1,0 +1,37 @@
+﻿using System;
+
+namespace App
+{                
+    class C { }
+
+    class MyClass
+    {
+        private C[] _c = new C[] { };
+        private C[] _c2 = { };
+
+        public C[] MyC { get; set; } = new[] {new C(), new C()};
+        public C[] MyC3 { get; set; } = {new C(), new C()};
+
+        public C[] ComputedC => new[]
+        {
+            new C()
+        };
+
+        public C[] MyC2
+        {
+            get { return new C[] {new C()}; }
+        }
+
+        public MyClass()
+        {
+            var cs = new C[2] {new C(), new C()};
+            C[] c = {new C()};
+        }
+
+        public C[] Method()
+        {
+            var c = new C[]{new C()};
+            return c;
+        }
+    }
+}

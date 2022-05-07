@@ -1,0 +1,23 @@
+﻿Namespace Namespace1  
+    Module Module1
+        Class User      
+            Public Sub S1()    
+                Dim x As Integer = Function1()
+                Method1(2.0)  
+            End Sub      
+                                                 
+            Public Function F1() As Integer
+                Dim x As Integer = Function1()
+                Method1(2.0)  
+                Return 5
+            End Function
+                         
+            Public Sub Method1(raise As Double)                    
+            End Sub
+            
+            Public Function Function1() As Integer  
+                Return 2
+            End Function                
+        End Class  
+    End Module  
+End Namespace  

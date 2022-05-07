@@ -1,0 +1,6 @@
+﻿Namespace Namespace1
+    Public Class Class1
+        <Obsolete("Message")>
+        Friend B As Boolean
+    End Class
+End Namespace

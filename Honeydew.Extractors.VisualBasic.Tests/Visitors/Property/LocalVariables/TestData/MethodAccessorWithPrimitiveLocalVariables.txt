@@ -1,0 +1,19 @@
+﻿Imports System
+
+Namespace Namespace1
+    Public Class Class1
+        Private a, b As Integer
+
+        Public Property Value1 As Integer
+            Get
+                Dim sum As Integer = a + b
+                Dim min, max As Integer
+                a = 2
+                min = 6
+                max = b + 2
+                Dim s As String = sum.ToString()
+                Return 0
+            End Get
+        End Property
+    End Class
+End Namespace

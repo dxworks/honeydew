@@ -1,0 +1,9 @@
+﻿Namespace Namespace1      
+    Module Module1
+        Enum Enum1
+            Value1 = -1
+            Value2 = 0
+            Value3 = 1
+        End Enum  
+    End Module      
+End Namespace  

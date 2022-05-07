@@ -1,0 +1,41 @@
+﻿using System;
+
+namespace Throwing
+{
+    class MyException : Exception
+    {
+    }
+
+    public class NumberGenerator
+    {
+        private readonly NullReferenceException _nullReference = new();
+
+        public IndexOutOfRangeException IndexOutOfRange { get; set; }
+
+        public void GetNumber(double number, Exception exception)
+        {
+            MyException myException = new MyException();
+            var myVarException = new MyException();
+            switch (number)
+            {
+                case < 0:
+                    throw exception;
+                case < 2:
+                    throw _nullReference;
+                case < 5:
+                    throw IndexOutOfRange;
+                case < 6:
+                    throw myException;
+                case <7:
+                    throw myVarException;
+                default:
+                    throw GetException();
+            }
+        }
+
+        public NotSupportedException GetException()
+        {
+            return new();
+        }
+    }
+}

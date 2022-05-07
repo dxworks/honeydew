@@ -1,0 +1,30 @@
+﻿Imports System
+
+Namespace App
+    Class [MyClass]
+        Private _c As ExternClass = New ExternClass()
+        Private _c2 As ExternClass = New ExternClass()
+        Public Property MyC As ExternClass = New ExternClass()
+
+        Public ReadOnly Property ComputedC As ExternClass
+            Get
+                Return New ComputedC()
+            End Get
+        End Property
+
+        Public ReadOnly Property MyC2 As ExternClass
+            Get
+                Return New ExternClass()
+            End Get
+        End Property
+
+        Public Sub New()            
+            Dim c As ExternClass = New ExternClass()
+        End Sub
+
+        Public Function Method() As ExternClass
+            Dim c = New ExternClass()
+            Return c
+        End Function
+    End Class
+End Namespace

@@ -1,0 +1,12 @@
+﻿namespace TopLevel {
+    public class File3 {        
+        /*
+        public int Calc(int a) {
+             int x = 5;    /* aaa             
+
+             ggg
+             */
+           /* cc*/  int y = 55; // comm
+        } /*      */ /* 
+    }       */                                 
+}

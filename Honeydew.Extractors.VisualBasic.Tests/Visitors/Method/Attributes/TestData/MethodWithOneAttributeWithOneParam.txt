@@ -1,0 +1,11 @@
+﻿Namespace Namespace1
+    Public Class Class1
+        <Obsolete("Message")>
+        Public Sub Method(ByVal a As Integer)
+        End Sub
+
+        <Obsolete("Message")>
+        Public Sub Method(ByVal a As String)
+        End Sub
+    End Class
+End Namespace

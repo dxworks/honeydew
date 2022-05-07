@@ -1,0 +1,32 @@
+﻿using System;
+                                      
+namespace TopLevel
+{
+    public class Foo
+    {
+        public int A(int a)
+        {
+            return a * 2;
+        }
+
+        public int B(int a, int b)
+        {
+            return A(a) + this.A(b);
+        }
+    }
+
+    public class Bar
+    {
+        public int F(int a, int b, string c)
+        {
+            Foo f = new Foo();
+            var z = new Foo();
+            return f.A(a) + f.B(b, K(c)) + z.A(a);
+        }
+
+        private int K(string s)
+        {
+            return s.Length;
+        }
+    }                       
+}

@@ -1,0 +1,17 @@
+﻿Namespace Namespace1
+    Friend Class Class1
+        <Extern("Hello"), ExternAttribute(), ExternAttribute("World", False), Extern(2), Extern(New String() {})>
+        Protected Property Name As String
+
+        <Extern("Hello"), ExternAttribute(), ExternAttribute("World", False), Extern(2), Extern(New String() {})>
+        Protected Custom Event F As Func(Of String)
+            AddHandler(ByVal value As Func(Of String))
+            End AddHandler
+            RemoveHandler(ByVal value As Func(Of String))
+            End RemoveHandler
+            <Extern("Hello"), ExternAttribute(), ExternAttribute("World", False), Extern(2), Extern(New String() {})>
+            RaiseEvent()
+            End RaiseEvent
+        End Event
+    End Class
+End Namespace

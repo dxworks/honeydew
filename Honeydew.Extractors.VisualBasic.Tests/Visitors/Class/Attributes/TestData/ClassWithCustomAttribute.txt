@@ -1,0 +1,18 @@
+﻿Imports System
+
+Namespace MyNamespace
+
+    <AttributeUsage(AttributeTargets.Class, AllowMultiple:=True)>
+    Friend Class MyAttribute
+        Inherits Attribute
+        Public Sub New()
+        End Sub
+
+        Public Sub New(ByVal str As String)
+        End Sub
+    End Class
+
+    <My("Hello"), MyAttribute(), MyAttribute("World"), My>
+    Friend Class [MyClass]
+    End Class
+End Namespace

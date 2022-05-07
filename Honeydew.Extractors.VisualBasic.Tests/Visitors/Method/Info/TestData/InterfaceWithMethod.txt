@@ -1,0 +1,4 @@
+﻿Interface IUser
+    Sub GetDetails()
+    Function ThisFunc(ByVal thisInt As Integer) As Integer
+End Interface

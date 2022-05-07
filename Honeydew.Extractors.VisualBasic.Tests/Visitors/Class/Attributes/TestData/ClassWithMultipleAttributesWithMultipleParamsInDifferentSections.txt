@@ -1,0 +1,10 @@
+﻿Imports System
+
+Namespace Namespace1
+    <Obsolete("Message", False)>
+    <Serializable>
+    <AttributeUsage(AttributeTargets.Class)>
+    Public Class Class1
+
+    End Class
+End Namespace

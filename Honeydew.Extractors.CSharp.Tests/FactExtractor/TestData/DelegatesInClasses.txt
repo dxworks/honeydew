@@ -1,0 +1,13 @@
+﻿namespace MyDelegates
+{
+    internal delegate void Delegate1(int a);
+    class Class1
+    {
+        internal delegate int Delegate2();
+
+        class InnerClass
+        {
+            internal delegate int Delegate3(string a);    
+        }
+    }
+}

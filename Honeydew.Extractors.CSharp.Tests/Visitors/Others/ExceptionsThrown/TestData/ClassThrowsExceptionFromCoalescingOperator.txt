@@ -1,0 +1,16 @@
+﻿using System;
+
+namespace Throwing
+{
+    public class NumberGenerator
+    {
+        private string name;
+    
+        public string Name
+        {
+            get => name;
+            set => name = value ??
+                          throw new ArgumentNullException(paramName: nameof(value), message: "Name cannot be null");
+        }
+    }
+}

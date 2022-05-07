@@ -1,0 +1,6 @@
+﻿Imports System.Text
+Imports System.IO
+Imports Microsoft.VisualBasic.ControlChars
+
+Public Interface Interface1
+End Interface

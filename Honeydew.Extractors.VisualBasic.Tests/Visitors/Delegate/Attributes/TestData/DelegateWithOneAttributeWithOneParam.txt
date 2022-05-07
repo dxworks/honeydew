@@ -1,0 +1,4 @@
+﻿Namespace Namespace1
+    <Obsolete("Message")>
+    Public Delegate Function Delegate1(ByVal d As Double) As String
+End Namespace

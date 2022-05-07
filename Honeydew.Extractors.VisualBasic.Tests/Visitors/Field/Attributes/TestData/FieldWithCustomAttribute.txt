@@ -1,0 +1,20 @@
+﻿
+Imports System
+
+Namespace MyNamespace
+
+    <AttributeUsage(AttributeTargets.Field Or AttributeTargets.Event, AllowMultiple:=True)>
+    Friend Class MyAttribute
+        Inherits Attribute
+        Public Sub New()
+        End Sub
+
+        Public Sub New(ByVal str As String)
+        End Sub
+    End Class
+
+    Friend Class [MyClass]
+        <My("Hello"), MyAttribute(), MyAttribute("World"), My>
+        Private _myField As Integer
+    End Class
+End Namespace

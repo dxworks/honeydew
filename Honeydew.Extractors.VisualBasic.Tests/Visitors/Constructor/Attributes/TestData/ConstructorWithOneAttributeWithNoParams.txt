@@ -1,0 +1,10 @@
+﻿Imports System
+
+Namespace Namespace1
+
+    Public Class Class1
+        <Serializable>
+        Public Sub New(ByVal s As String)
+        End Sub
+    End Class
+End Namespace

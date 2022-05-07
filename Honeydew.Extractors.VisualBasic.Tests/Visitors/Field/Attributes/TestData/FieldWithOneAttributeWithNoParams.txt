@@ -1,0 +1,9 @@
+﻿Imports System
+
+Namespace Namespace1
+
+    Public Class Class1
+        <Serializable>
+        Friend C As Char
+    End Class
+End Namespace

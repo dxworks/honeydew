@@ -1,24 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 using CommandLine;
 using Honeydew;
+using Honeydew.Extraction;
+using Honeydew.Extractors.Converters;
+using Honeydew.Extractors.CSharp;
+using Honeydew.Extractors.CSharp.Converters;
+using Honeydew.Extractors.Exporters;
+using Honeydew.Extractors.Importers;
+using Honeydew.Extractors.Load;
+using Honeydew.Extractors.VisualBasic;
+using Honeydew.Extractors.VisualBasic.Converters;
+using Honeydew.IO.Writers.Exporters;
+using Honeydew.Logging;
+using Honeydew.Models;
 using Honeydew.PostExtraction.ReferenceRelations;
 using Honeydew.Processors;
-using Honeydew.RepositoryLoading;
-using Honeydew.RepositoryLoading.Strategies;
+using Honeydew.ScriptBeePlugin.Loaders;
 using Honeydew.Scripts;
-using HoneydewCore.IO.Writers.Exporters;
-using HoneydewCore.Logging;
-using HoneydewCore.Processors;
-using HoneydewExtractors.CSharp.Metrics;
-using HoneydewModels;
-using HoneydewModels.Exporters;
-using HoneydewModels.Importers;
-using HoneydewScriptBeePlugin.Loaders;
+using Honeydew.Utils;
 
 const string defaultPathForAllRepresentations = "results";
 
@@ -127,7 +126,8 @@ await result.MapResult(async options =>
                     progressLogger.Log();
                     progressLogger.Log("Trimming File Paths");
 
-                    repositoryModel = new FilePathShortenerProcessor(inputPath).Process(repositoryModel);
+                    repositoryModel =
+                        new FilePathShortenerProcessor(new FolderPathValidator(), inputPath).Process(repositoryModel);
                 }
                 catch (Exception e)
                 {
@@ -143,7 +143,7 @@ await result.MapResult(async options =>
 
             new ScriptRunner(progressLogger).Run(false, new List<ScriptRuntime>
             {
-                new(new ExportRawModelScript(new JsonModelExporter()), new Dictionary<string, object>
+                new(new ExportRawModelScript(new JsonModelExporter()), new Dictionary<string, object?>
                 {
                     { "outputPath", defaultPathForAllRepresentations },
                     { "repositoryModel", repositoryModel },
@@ -188,7 +188,7 @@ await result.MapResult(async options =>
             logger.Log("Done Converting Model");
             progressLogger.Log("Done Converting Model");
 
-            var defaultArguments = new Dictionary<string, object>
+            var defaultArguments = new Dictionary<string, object?>
             {
                 { "outputPath", defaultPathForAllRepresentations },
                 { "referenceRepositoryModel", referenceRepositoryModel },
@@ -200,7 +200,7 @@ await result.MapResult(async options =>
             };
             var scriptRunner = new ScriptRunner(progressLogger);
 
-            var csvRelationsRepresentationExporter = new CsvRelationsRepresentationExporter
+            var csvRelationsRepresentationExporter = new CsvRelationsRepresentationExporter(logger)
             {
                 ColumnFunctionForEachRow = new List<Tuple<string, Func<string, string>>>
                 {
@@ -234,7 +234,7 @@ static string GetProjectName(string inputPath)
     return Path.GetFileNameWithoutExtension(inputPath);
 }
 
-static void RunScripts(ScriptRunner scriptRunner, Dictionary<string, object> defaultArguments,
+static void RunScripts(ScriptRunner scriptRunner, Dictionary<string, object?> defaultArguments,
     JsonModelExporter jsonModelExporter, CsvRelationsRepresentationExporter csvRelationsRepresentationExporter,
     ILogger logger, IProgressLogger progressLogger, string projectName, bool runInParallel)
 {
@@ -250,14 +250,14 @@ static void RunScripts(ScriptRunner scriptRunner, Dictionary<string, object> def
     scriptRunner.Run(false, new List<ScriptRuntime>
     {
         new(new ExportFileRelationsScript(csvRelationsRepresentationExporter), CreateArgumentsDictionary(
-            defaultArguments, new Dictionary<string, object>
+            defaultArguments, new Dictionary<string, object?>
             {
                 { "fileRelationsOutputName", $"{projectName}-structural_relations_all.csv" },
                 { "fileRelationsStrategy", new HoneydewChooseStrategy() },
                 { "fileRelationsHeaders", null },
             })),
         new(new ExportFileRelationsScript(csvRelationsRepresentationExporter), CreateArgumentsDictionary(
-            defaultArguments, new Dictionary<string, object>
+            defaultArguments, new Dictionary<string, object?>
             {
                 { "fileRelationsOutputName", $"{projectName}-structural_relations.csv" },
                 { "fileRelationsStrategy", new JafaxChooseStrategy() },
@@ -280,27 +280,32 @@ static void RunScripts(ScriptRunner scriptRunner, Dictionary<string, object> def
         new(new ExportCyclomaticComplexityPerFileScript(jsonModelExporter), defaultArguments),
         new(new ExportClassRelationsScript(csvRelationsRepresentationExporter), defaultArguments),
         new(new ExportStatisticsScript(jsonModelExporter), defaultArguments),
-        new(new ExportRelationsBetweenSolutionsAndProjectsScripts(new CsvRelationsRepresentationExporter(),
-            new TextFileExporter()), defaultArguments),
+        new(new ExportRelationsBetweenSolutionsAndProjectsScripts(new CsvRelationsRepresentationExporter(logger),
+            new TextFileExporter(logger)), defaultArguments),
         new(new GenericDependenciesScript(csvRelationsRepresentationExporter), CreateArgumentsDictionary(
-            defaultArguments, new Dictionary<string, object>
+            defaultArguments, new Dictionary<string, object?>
             {
                 { "genericDependenciesOutputName", $"{projectName}-generic_relations.csv" },
                 { "addStrategy", new AddGenericNamesStrategy(true) },
             })),
         new(new SpektrumExportScript(jsonModelExporter), CreateArgumentsDictionary(defaultArguments,
-            new Dictionary<string, object>
+            new Dictionary<string, object?>
             {
                 { "spektrumOutputName", $"{projectName}-spektrum.json" },
             })),
     });
 }
 
-static async Task<RepositoryModel> LoadModel(ILogger logger, IProgressLogger progressLogger, string inputPath,
+static async Task<RepositoryModel?> LoadModel(ILogger logger, IProgressLogger progressLogger, string inputPath,
     CancellationToken cancellationToken)
 {
+    var cSharpConverterList = new CSharpConverterList();
     var repositoryLoader = new RawFileRepositoryLoader(logger, progressLogger,
-        new JsonModelImporter<RepositoryModel>(new ConverterList()));
+        new RepositoryModelImporter(new ProjectModelConverter(new Dictionary<string, IConverterList>
+        {
+            { ProjectExtractorFactory.CSharp, cSharpConverterList },
+            { ProjectExtractorFactory.VisualBasic, new VisualBasicConverterList() },
+        }, cSharpConverterList)));
     var repositoryModel = await repositoryLoader.Load(inputPath, cancellationToken);
     return repositoryModel;
 }
@@ -308,30 +313,44 @@ static async Task<RepositoryModel> LoadModel(ILogger logger, IProgressLogger pro
 static async Task<RepositoryModel> ExtractModel(ILogger logger, IProgressLogger progressLogger,
     ILogger missingFilesLogger, string inputPath, bool parallelExtraction, CancellationToken cancellationToken)
 {
-    var repositoryLoader = new RepositoryExtractor(logger, progressLogger, missingFilesLogger,
-        new CSharpCompilationMaker(),
-        new ProjectExtractorFactory(logger, progressLogger, GetProjectLoadingStrategy(logger, parallelExtraction)),
-        parallelExtraction);
+    var projectExtractorFactory = new ProjectExtractorFactory(logger, progressLogger, parallelExtraction);
+
+    var csharpProjectExtractor = projectExtractorFactory.GetProjectExtractor(ProjectExtractorFactory.CSharp)!;
+    var visualBasicProjectExtractor = projectExtractorFactory.GetProjectExtractor(ProjectExtractorFactory.VisualBasic)!;
+    var solutionExtractor = new SolutionExtractor(logger, progressLogger, projectExtractorFactory,
+        new ActualFilePathProvider(logger));
+
+    var solutionSchemas = new List<SolutionSchema>
+    {
+        new(".sln", solutionExtractor, new List<ProjectSchema>
+        {
+            new(ProjectExtractorFactory.CSharp, ".csproj", csharpProjectExtractor, new List<FileSchema>
+            {
+                new(".cs", new CSharpFactExtractor(CSharpExtractionVisitors.GetVisitors(logger))),
+            }),
+            new(ProjectExtractorFactory.VisualBasic, ".vbproj", visualBasicProjectExtractor, new List<FileSchema>
+            {
+                new(".vb", new VisualBasicFactExtractor(VisualBasicExtractionVisitors.GetVisitors(logger))),
+            }),
+        })
+    };
+
+    var repositoryLoader =
+        new RepositoryExtractor(solutionSchemas, logger, progressLogger, missingFilesLogger, parallelExtraction);
+
     var repositoryModel = await repositoryLoader.Load(inputPath, cancellationToken);
 
     return repositoryModel;
 }
 
-static Dictionary<string, object> CreateArgumentsDictionary(IDictionary<string, object> source,
-    Dictionary<string, object> additionalArguments)
+static Dictionary<string, object?> CreateArgumentsDictionary(IDictionary<string, object?> source,
+    Dictionary<string, object?> additionalArguments)
 {
-    var result = new Dictionary<string, object>(source);
+    var result = new Dictionary<string, object?>(source);
     foreach (var (key, value) in additionalArguments)
     {
         result[key] = value;
     }
 
     return result;
-}
-
-static IProjectLoadingStrategy GetProjectLoadingStrategy(ILogger logger, bool parallelExtraction)
-{
-    return parallelExtraction
-        ? new ParallelProjectLoadingStrategy(logger)
-        : new BasicProjectLoadingStrategy(logger);
 }

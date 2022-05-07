@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace TopLevel
+{                                                       
+    public class Bar
+    {
+        void Method()
+        {
+            var list = new List<string>();
+            var enumerable = list.Where(s => s != null).Skip(6).Select(s=>s.Trim()).ToList();
+        }
+    }                                          
+}

@@ -1,0 +1,12 @@
+﻿Public Class X
+    Public Sub GetDetails()
+    End Sub
+End Class
+
+Public Interface MyInterface        
+End Interface
+
+Public Class Y
+    Inherits X
+    Implements MyInterface
+End Class

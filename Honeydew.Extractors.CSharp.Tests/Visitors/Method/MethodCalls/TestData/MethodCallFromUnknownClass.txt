@@ -1,0 +1,12 @@
+﻿using System;
+                                      
+namespace TopLevel
+{                                                   
+    public class Bar
+    {
+        void M()
+        {
+            Foo.Method(2);    
+        }
+    }                                  
+}

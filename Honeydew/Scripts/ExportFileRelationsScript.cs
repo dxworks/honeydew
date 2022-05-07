@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using Honeydew.IO.Writers.Exporters;
 using Honeydew.Processors;
-using HoneydewCore.IO.Writers.Exporters;
-using HoneydewScriptBeePlugin.Models;
+using Honeydew.ScriptBeePlugin.Models;
 
 namespace Honeydew.Scripts;
 
@@ -35,13 +33,13 @@ public class ExportFileRelationsScript : Script
         _representationExporter = representationExporter;
     }
 
-    public override void Run(Dictionary<string, object> arguments)
+    public override void Run(Dictionary<string, object?> arguments)
     {
-        var outputPath = VerifyArgument<string>(arguments, "outputPath");
-        var outputName = VerifyArgument<string>(arguments, "fileRelationsOutputName");
-        var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel");
-        var strategy = VerifyArgument<IRelationsMetricChooseStrategy>(arguments, "fileRelationsStrategy");
-        var csvHeaders = VerifyArgument<List<string>>(arguments, "fileRelationsHeaders");
+        var outputPath = VerifyArgument<string>(arguments, "outputPath")!;
+        var outputName = VerifyArgument<string>(arguments, "fileRelationsOutputName")!;
+        var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel")!;
+        var strategy = VerifyArgument<IRelationsMetricChooseStrategy>(arguments, "fileRelationsStrategy")!;
+        var csvHeaders = VerifyArgument<List<string>>(arguments, "fileRelationsHeaders")!;
 
         var allFileRelationsRepresentation =
             new RepositoryModelToFileRelationsProcessor(strategy).Process(repositoryModel);

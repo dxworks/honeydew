@@ -1,0 +1,12 @@
+﻿Namespace Namespace1
+    Public Class Class1
+        Inherits GenericClass(Of String)
+        Implements IInterface(Of Class1, ExternClass)
+    End Class
+    
+    Public Class GenericClass(Of T)
+    End Class
+    
+    Public Interface IInterface(Of T, K)
+    End Interface    
+End Namespace

@@ -1,0 +1,26 @@
+﻿MustInherit Class Person
+  Public Name As String
+  Public Address As String
+  Public City As String
+  Public State As String
+  Public ZIP As String
+
+  MustOverride Sub PrintName()
+
+  Sub Print()
+    PrintName()
+    Console.WriteLine(Address)
+    Console.WriteLine(City & ", " & State & " " & ZIP)
+  End Sub
+End Class
+
+Class Customer
+  Inherits Person
+
+  Overrides Sub PrintName()
+    Console.Write("Customer ")
+    Console.WriteLine(Name)
+  End Sub
+
+  Public CustomerID As Integer
+End Class

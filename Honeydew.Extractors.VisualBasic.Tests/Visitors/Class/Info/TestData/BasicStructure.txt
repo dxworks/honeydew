@@ -1,0 +1,12 @@
+﻿Module Module1
+
+    Public Structure User
+    
+        Public name As String
+    
+        Public location As String
+    
+        Public age As Integer
+    
+    End Structure    
+End Module

@@ -1,0 +1,7 @@
+﻿namespace Models.Main.Items
+{
+    public interface MainItem
+    {
+        public int Value { get; set; }
+    }
+}

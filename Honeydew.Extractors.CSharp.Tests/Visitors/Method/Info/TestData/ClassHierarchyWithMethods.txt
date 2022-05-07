@@ -1,0 +1,33 @@
+﻿using System;
+using HoneydewCore.Extractors;
+
+namespace TopLevel
+{
+    public abstract class Foo
+    {
+        protected int G(float a)
+        {
+            return (int) a;
+        }
+
+        public virtual bool H()
+        {
+            return false;
+        }
+
+        public abstract int X();
+    }
+
+    public class Bar : Foo
+    {
+        public override int X()
+        {
+            return 1;
+        }
+
+        public override bool H()
+        {
+            return true;
+        }
+    }                                  
+}

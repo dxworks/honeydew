@@ -1,0 +1,7 @@
+﻿Imports systxt = System.Text
+Imports sysio = System.IO
+Imports ch = Microsoft.VisualBasic.ControlChars
+
+Module Module1
+    Public Delegate Sub SampleDelegate(ByVal a As Integer, ByVal b As Integer)
+End Module

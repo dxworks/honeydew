@@ -1,0 +1,30 @@
+Namespace Namespace1  
+    Module Module1
+        Class User                            
+            Protected Overrides Sub Finalize()         
+            
+              Dim a as Integer = 2
+              If a = 2 Then
+                        GoTo L2
+                    End If
+                        
+                    Dim b as Integer = a
+                
+                    L2:
+                    Dim x as Integer = 5
+                
+                    Select Case a
+                        Case 0
+                            Dim y as Integer = x
+                            GoTo CaseElse
+                        Case 5
+                            ' comment
+                        Case Else
+                            a = 6
+                            GoTo Case5
+                    End Select            
+                               
+                End Sub            
+        End Class  
+    End Module  
+End Namespace  

@@ -1,0 +1,10 @@
+﻿Imports systxt = System.Text
+Imports sysio = System.IO
+Imports ch = Microsoft.VisualBasic.ControlChars
+
+Namespace System
+    Module Module1
+        Enum Enum1  
+        End Enum  
+    End Module  
+End Namespace 

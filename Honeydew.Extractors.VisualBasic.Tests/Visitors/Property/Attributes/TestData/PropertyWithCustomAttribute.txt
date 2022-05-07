@@ -1,0 +1,35 @@
+﻿
+Imports System
+
+Namespace MyNamespace
+
+    <AttributeUsage(AttributeTargets.Property Or AttributeTargets.Event, AllowMultiple:=True)>
+    Friend Class MyAttribute
+        Inherits Attribute
+        Public Sub New()
+        End Sub
+
+        Public Sub New(ByVal str As String)
+        End Sub
+    End Class
+
+    Friend Class [MyClass]
+        <My("Hello"), MyAttribute(), MyAttribute("World"), My>
+        Private Property _myProp As Integer
+
+        <My("Hello")>
+        <MyAttribute()>
+        <MyAttribute("World"), My>
+        Public Custom Event AProp As Action(Of String)
+            AddHandler(ByVal value As Action(Of String))
+            End AddHandler
+            RemoveHandler(ByVal value As Action(Of String))
+            End RemoveHandler
+            <My("Hello")>
+            <MyAttribute()>
+            <MyAttribute("World"), My>
+            RaiseEvent(ByVal obj As String)
+            End RaiseEvent
+        End Event
+    End Class
+End Namespace

@@ -1,0 +1,20 @@
+﻿Public Class Users
+
+    Public id As Integer = 0
+
+    Public name As String = String.Empty
+
+    Public Sub New()
+    End Sub
+
+    Public Sub GetUserDetails(ByVal uid As Integer, ByVal uname As String)
+        id = uid
+        uname = name
+        Console.WriteLine("Id: {0}, Name: {1}", id, name)
+    End Sub
+
+    Public Property Designation As Integer
+
+    Public Property Location As String
+
+End Class

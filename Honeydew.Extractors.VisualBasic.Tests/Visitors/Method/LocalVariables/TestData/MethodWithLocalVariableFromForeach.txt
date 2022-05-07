@@ -1,0 +1,23 @@
+﻿Imports System.Collections.Generic
+
+Namespace Namespace1
+    Public Class Class1
+        Public Sub Method(ByVal list As List(Of Class2))
+            For Each c As Class2 In list
+            Next
+        End Sub
+
+        Public Sub Method(ByVal list As List(Of Integer))
+            For Each c As Integer In list
+            Next
+        End Sub
+
+        Public Sub Method(ByVal list As List(Of ExternClass))
+            For Each c As ExternClass In list
+            Next
+        End Sub
+    End Class
+
+    Public Class Class2
+    End Class
+End Namespace

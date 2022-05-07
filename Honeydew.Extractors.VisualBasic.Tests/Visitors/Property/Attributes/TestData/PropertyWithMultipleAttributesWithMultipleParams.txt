@@ -1,0 +1,19 @@
+﻿Imports System
+
+Namespace Namespace1
+    Public Class Class1
+        <Obsolete("Message", False), Serializable, AttributeUsage(AttributeTargets.Class)>
+        Private Property L As Long
+
+        <Obsolete("Message", False), Serializable, AttributeUsage(AttributeTargets.Class)>
+        Private Custom Event FL As Action(Of Long)
+            AddHandler(ByVal value As Action(Of Long))
+            End AddHandler
+            RemoveHandler(ByVal value As Action(Of Long))
+            End RemoveHandler
+            <Obsolete("Message", False), Serializable, AttributeUsage(AttributeTargets.Class)>
+            RaiseEvent(ByVal obj As Long)
+            End RaiseEvent
+        End Event
+    End Class
+End Namespace
