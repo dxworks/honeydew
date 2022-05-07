@@ -2,7 +2,7 @@
 
 namespace Honeydew.Extractors.Visitors.Setters;
 
-public interface IGenericParameterSetterVisitor<in TSyntaxNode, TSemanticNode, TGenericParameterSyntaxNode,
+public interface IGenericParameterSetterVisitor<in TSyntaxNode, in TSemanticNode, TGenericParameterSyntaxNode,
     TTypeWithGenericParameters> :
     ISetterVisitor<TSyntaxNode, TSemanticNode, TTypeWithGenericParameters, TGenericParameterSyntaxNode,
         IGenericParameterType>

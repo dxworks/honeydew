@@ -32,7 +32,7 @@ internal static class VisualBasicFullNameProvider
                     syntaxNode.ChildNodes().OfType<TypeParameterListSyntax>().FirstOrDefault();
                 if (typeParameterListSyntax != null)
                 {
-                    var indexOf = name.IndexOf('<');
+                    var indexOf = name.IndexOf('(');
                     name = $"{name[..indexOf]}{typeParameterListSyntax}";
                 }
             }
@@ -145,12 +145,12 @@ internal static class VisualBasicFullNameProvider
                 // return GetFullName(variableDeclarationSyntax.Type, semanticModel, out isNullable);
             }
                 break;
-            //
-            // case TypeConstraintSyntax typeConstraintSyntax:
-            // {
-            //     return GetFullName(typeConstraintSyntax.Type, semanticModel, out isNullable);
-            // }
-            //
+            
+            case TypeConstraintSyntax typeConstraintSyntax:
+            {
+                return GetFullName(typeConstraintSyntax.Type, semanticModel, out isNullable);
+            }
+            
             case ExpressionSyntax expressionSyntax:
             {
                 var symbolInfo = semanticModel.GetSymbolInfo(expressionSyntax);
@@ -189,7 +189,7 @@ internal static class VisualBasicFullNameProvider
                         break;
                     case GenericNameSyntax genericNameSyntax:
                     {
-                        return GetGenericFullName(genericNameSyntax, semanticModel, out isNullable);
+                        return GetGenericFullName(genericNameSyntax, out isNullable);
                     }
                     default:
                     {
@@ -222,8 +222,7 @@ internal static class VisualBasicFullNameProvider
         return CreateEntityTypeModel(name, isExtern);
     }
 
-    private static IEntityType GetGenericFullName(GenericNameSyntax genericNameSyntax, SemanticModel semanticModel,
-        out bool isNullable)
+    private static IEntityType GetGenericFullName(GenericNameSyntax genericNameSyntax, out bool isNullable)
     {
         var name = genericNameSyntax.ToString();
         isNullable = name.EndsWith('?');
@@ -244,7 +243,7 @@ internal static class VisualBasicFullNameProvider
                         switch (arg)
                         {
                             case GenericNameSyntax genericNameSyntax1:
-                                return GetGenericFullName(genericNameSyntax1, semanticModel, out _).FullType;
+                                return GetGenericFullName(genericNameSyntax1, out _).FullType;
                             default:
                                 var argName = arg.ToString();
                                 var nullable = argName.EndsWith('?');
@@ -288,7 +287,7 @@ internal static class VisualBasicFullNameProvider
             return stringBuilder.ToString();
         }
 
-        stringBuilder.Append('<');
+        stringBuilder.Append("(Of");
         for (var i = 0; i < genericType.ContainedTypes.Count; i++)
         {
             var containedType = genericType.ContainedTypes[i];
@@ -299,7 +298,7 @@ internal static class VisualBasicFullNameProvider
             }
         }
 
-        stringBuilder.Append('>');
+        stringBuilder.Append(')');
 
         return stringBuilder.ToString();
     }

@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 
 namespace Honeydew.Extractors.VisualBasic.Visitors.Setters;
 
-public partial class VisualBasicLocalVariablesTypeSetterVisitor :
+public partial class VisualBasicLocalVariablesSetterVisitor :
     ILocalVariablesTypeSetterVisitor<MethodStatementSyntax, SemanticModel, ModifiedIdentifierSyntax, IMethodType>
 {
     public IMethodType Visit(MethodStatementSyntax syntaxNode, SemanticModel semanticModel,

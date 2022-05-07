@@ -1,0 +1,11 @@
+﻿Namespace Namespace1
+    Public Class Class1(Of T As Structure, TK As Class, TR As notnull, TP As IInterface2(Of T, IInterface2(Of T, TK)))
+        Implements IInterface(Of T, TK), IInterface2(Of TR, TP)
+    End Class
+
+    Public Interface IInterface(Of T As New, TK)
+    End Interface
+
+    Public Interface IInterface2(Of T, TK)
+    End Interface
+End Namespace

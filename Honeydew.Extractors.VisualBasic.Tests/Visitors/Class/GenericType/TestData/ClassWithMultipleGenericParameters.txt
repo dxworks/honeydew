@@ -1,0 +1,6 @@
+﻿Namespace Namespace1
+    Public Class Class1(Of T, R, K)
+        Inherits Base1(Of T)
+        Implements Base2, Base3(Of R, K), Base4(Of C(Of T, R), K)
+    End Class
+End Namespace

@@ -27,7 +27,7 @@ public class VisualBasicConstructorLocalVariablesTests
                             new List<ITypeVisitor<IConstructorType>>
                             {
                                 new ConstructorInfoVisitor(),
-                                new VisualBasicLocalVariablesTypeSetterVisitor(_loggerMock.Object,
+                                new VisualBasicLocalVariablesSetterVisitor(_loggerMock.Object,
                                     new List<ITypeVisitor<ILocalVariableType>>
                                     {
                                         new LocalVariableInfoVisitor()

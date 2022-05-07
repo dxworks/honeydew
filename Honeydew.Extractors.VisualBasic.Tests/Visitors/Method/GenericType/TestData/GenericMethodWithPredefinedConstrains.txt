@@ -1,0 +1,10 @@
+﻿Namespace Namespace1
+    Public Class Class1
+        Public Function Method(Of tT As Structure, TK As Class, tTR As notnull, tTP As IInterface2(Of tT, IInterface2(Of tT, TK)))(ByVal t As TK, ByVal tr As tTR, ByVal tp As tTP) As tT
+            Return Nothing
+        End Function
+    End Class
+
+    Public Interface IInterface2(Of T, TK)
+    End Interface
+End Namespace

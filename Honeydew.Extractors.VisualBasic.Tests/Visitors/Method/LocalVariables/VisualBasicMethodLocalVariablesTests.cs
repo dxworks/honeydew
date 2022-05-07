@@ -16,7 +16,7 @@ public class VisualBasicMethodLocalVariablesTests
 
     public VisualBasicMethodLocalVariablesTests()
     {
-        var localVariablesTypeSetterVisitor = new VisualBasicLocalVariablesTypeSetterVisitor(_loggerMock.Object,
+        var localVariablesTypeSetterVisitor = new VisualBasicLocalVariablesSetterVisitor(_loggerMock.Object,
             new List<ITypeVisitor<ILocalVariableType>>
             {
                 new LocalVariableInfoVisitor()

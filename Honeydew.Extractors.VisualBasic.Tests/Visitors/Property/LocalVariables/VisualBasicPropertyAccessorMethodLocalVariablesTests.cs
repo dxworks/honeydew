@@ -31,7 +31,7 @@ public class VisualBasicPropertyAccessorMethodLocalVariablesTests
                                 new List<ITypeVisitor<IAccessorMethodType>>
                                 {
                                     new MethodInfoVisitor(),
-                                    new VisualBasicLocalVariablesTypeSetterVisitor(_loggerMock.Object,
+                                    new VisualBasicLocalVariablesSetterVisitor(_loggerMock.Object,
                                         new List<ITypeVisitor<ILocalVariableType>>
                                         {
                                             new LocalVariableInfoVisitor()

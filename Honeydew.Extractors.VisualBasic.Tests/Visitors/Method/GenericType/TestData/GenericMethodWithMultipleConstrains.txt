@@ -1,0 +1,11 @@
+﻿Namespace Namespace1
+    Public Interface MyInterface
+        Public Function Method(Of T As {IInterface, IInterface2(Of TK, TR)}, TR, TK)(ByVal r As TR, ByVal tk As TK, ByVal tk2 As TK) As T
+    End Interface
+
+    Public Interface IInterface
+    End Interface
+
+    Public Interface IInterface2(Of T, TK)
+    End Interface
+End Namespace
