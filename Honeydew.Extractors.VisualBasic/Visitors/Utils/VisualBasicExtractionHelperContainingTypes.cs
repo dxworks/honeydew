@@ -68,11 +68,16 @@ public static partial class VisualBasicExtractionHelperMethods
         return parentTypeBlockSyntax is not null ? GetFullName(parentTypeBlockSyntax, semanticModel).Name : "";
     }
 
-    public static string GetDefinitionClassName(SyntaxNode syntaxNode, SemanticModel semanticModel)
+    public static string GetDefinitionClassName(SyntaxNode? syntaxNode, SemanticModel semanticModel)
     {
         // todo ask someone about trimming ?
         while (true)
         {
+            if (syntaxNode is null)
+            {
+                return "";
+            }
+
             var symbolInfo = semanticModel.GetSymbolInfo(syntaxNode);
             if (symbolInfo.Symbol != null)
             {
@@ -89,7 +94,8 @@ public static partial class VisualBasicExtractionHelperMethods
                 case InvocationExpressionSyntax invocationExpressionSyntax:
                 {
                     if (invocationExpressionSyntax.Expression is MemberAccessExpressionSyntax
-                        memberAccessExpressionSyntax)
+                            memberAccessExpressionSyntax &&
+                        memberAccessExpressionSyntax.Expression is not null)
                     {
                         switch (semanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression).Symbol)
                         {
@@ -239,6 +245,11 @@ public static partial class VisualBasicExtractionHelperMethods
             MemberAccessExpressionSyntax memberAccessExpressionSyntax, out string? className)
         {
             className = "";
+            if (memberAccessExpressionSyntax.Expression is null)
+            {
+                return false;
+            }
+
             var symbolInfo = semanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression);
             switch (symbolInfo.Symbol)
             {

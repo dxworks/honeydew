@@ -22,8 +22,7 @@ public class AccessFieldVisitor : IExtractionVisitor<ExpressionSyntax, SemanticM
             return new AccessedField
             {
                 Name = symbolInfo.Symbol.Name,
-                DefinitionClassName =
-                    GetDefinitionClassName(syntaxNode, semanticModel),
+                DefinitionClassName = GetDefinitionClassName(syntaxNode, semanticModel),
                 LocationClassName = GetLocationClassName(syntaxNode, semanticModel),
                 Kind = GetAccessType(syntaxNode),
             };
@@ -36,8 +35,7 @@ public class AccessFieldVisitor : IExtractionVisitor<ExpressionSyntax, SemanticM
                 return modelType;
             }
 
-            var definitionClassName =
-                GetDefinitionClassName(memberAccessExpressionSyntax, semanticModel);
+            var definitionClassName = GetDefinitionClassName(memberAccessExpressionSyntax, semanticModel);
             return new AccessedField
             {
                 Name = memberAccessExpressionSyntax.Name.ToString(),

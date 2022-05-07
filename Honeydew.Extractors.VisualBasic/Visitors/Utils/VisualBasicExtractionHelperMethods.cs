@@ -31,10 +31,8 @@ public static partial class VisualBasicExtractionHelperMethods
         return new VisualBasicMethodCallModel
         {
             Name = methodName,
-            DefinitionClassName =
-                GetDefinitionClassName(invocationExpressionSyntax, semanticModel),
-            LocationClassName =
-                GetLocationClassName(invocationExpressionSyntax, semanticModel),
+            DefinitionClassName = GetDefinitionClassName(invocationExpressionSyntax, semanticModel),
+            LocationClassName = GetLocationClassName(invocationExpressionSyntax, semanticModel),
             ParameterTypes = GetParameters(invocationExpressionSyntax, semanticModel),
             MethodDefinitionNames = GetMethodDefinitionNames(invocationExpressionSyntax, semanticModel),
             GenericParameters = GetGenericParameters(invocationExpressionSyntax, semanticModel),
