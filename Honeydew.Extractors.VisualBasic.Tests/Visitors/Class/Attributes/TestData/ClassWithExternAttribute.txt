@@ -1,0 +1,5 @@
+﻿Namespace Namespace1
+    <Extern("Hello"), ExternAttribute(), ExternAttribute("World", False), Extern(2), Extern(New String() {})>
+    Friend Class Class1
+    End Class
+End Namespace

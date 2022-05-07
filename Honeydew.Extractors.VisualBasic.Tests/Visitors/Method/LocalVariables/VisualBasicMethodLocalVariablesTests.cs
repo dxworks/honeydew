@@ -280,6 +280,12 @@ public class VisualBasicMethodLocalVariablesTests
         foreach (var localVariableType in methodType.LocalVariableTypes)
         {
             Assert.Equal("ExternClass(Of Integer, ExternClass(Of Double))", localVariableType.Type.Name);
+            Assert.Equal("ExternClass(Of Integer, ExternClass(Of Double))", localVariableType.Type.FullType.Name);
+            Assert.Equal(2, localVariableType.Type.FullType.ContainedTypes.Count);
+            Assert.Equal("Integer", localVariableType.Type.FullType.ContainedTypes[0].Name);
+            Assert.Equal("ExternClass(Of Double)", localVariableType.Type.FullType.ContainedTypes[1].Name);
+            Assert.Single(localVariableType.Type.FullType.ContainedTypes[1].ContainedTypes);
+            Assert.Equal("Double", localVariableType.Type.FullType.ContainedTypes[1].ContainedTypes[0].Name);
         }
     }
 }

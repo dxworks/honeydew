@@ -1,0 +1,6 @@
+﻿Imports System
+
+Namespace Namespace1
+    <Obsolete("Message", False), Serializable, AttributeUsage(AttributeTargets.Class)>
+    Public Delegate Function Delegate1(ByVal a As Integer, ByVal b As String) As Integer
+End Namespace

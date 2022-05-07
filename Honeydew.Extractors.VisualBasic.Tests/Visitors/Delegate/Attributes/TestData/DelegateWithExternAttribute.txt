@@ -1,0 +1,4 @@
+﻿Namespace Namespace1
+    <Extern("Hello"), ExternAttribute(), ExternAttribute("World", False), Extern(2), Extern(New String() {})>
+    Public Delegate Function Delegate1() As Integer
+End Namespace

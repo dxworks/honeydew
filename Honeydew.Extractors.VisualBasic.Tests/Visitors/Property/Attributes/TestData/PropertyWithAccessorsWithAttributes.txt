@@ -1,0 +1,34 @@
+﻿Imports System
+
+Namespace Namespace1
+
+    Public Class Class1
+        Private _value As Integer
+
+        Public Property Property1 As Integer
+        Public Property Property2 As Integer
+        Public ReadOnly Property Property3 As Integer
+
+        Public Property Property4 As Integer
+            <My("8")>
+            <Obsolete>
+            <ExternAttribute>
+            Get
+                Return 0
+            End Get
+            <My("val")>
+            <Obsolete>
+            <ExternAttribute>
+            Set(ByVal value As Integer)
+                _value = value
+            End Set
+        End Property
+    End Class
+
+    <AttributeUsage(AttributeTargets.Method, AllowMultiple:=True)>
+    Friend Class MyAttribute
+        Inherits Attribute
+        Public Sub New(ByVal str As String)
+        End Sub
+    End Class
+End Namespace

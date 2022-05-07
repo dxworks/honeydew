@@ -1,0 +1,17 @@
+﻿Imports System
+
+Namespace MyNamespace
+
+    <AttributeUsage(AttributeTargets.Delegate, AllowMultiple:=True)>
+    Public Class MyAttribute
+        Inherits Attribute
+        Public Sub New()
+        End Sub
+
+        Public Sub New(ByVal str As String)
+        End Sub
+    End Class
+
+    <My("Hello"), MyAttribute(), MyAttribute("World"), My>
+    Public Delegate Sub MyDelegate(ByVal a As Integer)
+End Namespace

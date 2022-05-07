@@ -59,79 +59,67 @@ internal static class VisualBasicFullNameProvider
                 }
             }
                 break;
-            //
-            // case BaseExpressionSyntax baseExpressionSyntax:
-            // {
-            //     var typeInfo = semanticModel.GetTypeInfo(baseExpressionSyntax);
-            //     if (typeInfo.Type != null)
-            //     {
-            //         var typeName = typeInfo.Type.ToDisplayString();
-            //         if (!string.IsNullOrEmpty(typeName) && typeName.EndsWith('?'))
-            //         {
-            //             isNullable = true;
-            //         }
-            //
-            //         return CreateEntityTypeModel(typeName);
-            //     }
-            // }
-            // break;
 
-            // case TypeSyntax typeSyntax:
-            // {
-            //     var symbolInfo = semanticModel.GetSymbolInfo(syntaxNode);
-            //     if (symbolInfo.Symbol != null)
-            //     {
-            //         isNullable = typeSyntax is NullableTypeSyntax;
-            //
-            //         var entityType = GetFullName(symbolInfo.Symbol, false, ref isNullable);
-            //
-            //         return entityType;
-            //     }
-            //
-            //     switch (typeSyntax)
-            //     {
-            //         case RefTypeSyntax refTypeSyntax:
-            //             return GetFullName(refTypeSyntax.Type, semanticModel, out isNullable);
-            //         case ArrayTypeSyntax arrayTypeSyntax:
-            //         {
-            //             name =
-            //                 $"{GetFullName(arrayTypeSyntax.ElementType, semanticModel, out isNullable).Name}{arrayTypeSyntax.RankSpecifiers.ToString()}";
-            //         }
-            //             break;
-            //         default:
-            //         {
-            //             var typeInfo = semanticModel.GetTypeInfo(typeSyntax);
-            //             if (typeInfo.Type != null && typeInfo.Type.ToString() != "?" &&
-            //                 typeInfo.Type.ToString() != "?[]")
-            //             {
-            //                 name = typeInfo.Type.ToString();
-            //             }
-            //             else
-            //             {
-            //                 name = typeSyntax.ToString();
-            //                 isExtern = true;
-            //             }
-            //         }
-            //             break;
-            //     }
-            // }
-            //     break;
+            case TypeSyntax typeSyntax:
+            {
+                var symbolInfo = semanticModel.GetSymbolInfo(syntaxNode);
+                if (symbolInfo.Symbol != null)
+                {
+                    isNullable = typeSyntax is NullableTypeSyntax;
 
-            // case AttributeSyntax attributeSyntax:
-            // {
-            //     var symbolInfo = semanticModel.GetSymbolInfo(attributeSyntax);
-            //     if (symbolInfo.Symbol != null)
-            //     {
-            //         name = symbolInfo.Symbol.ContainingSymbol.ToDisplayString();
-            //     }
-            //     else
-            //     {
-            //         name = attributeSyntax.Name.ToString();
-            //         isExtern = true;
-            //     }
-            // }
-            //     break;
-            //
+                    var entityType = GetFullName(symbolInfo.Symbol, false, ref isNullable);
+
+                    return entityType;
+                }
+
+                switch (typeSyntax)
+                {
+                    case ArrayTypeSyntax arrayTypeSyntax:
+                    {
+                        name =
+                            $"{GetFullName(arrayTypeSyntax.ElementType, semanticModel, out isNullable).Name}{arrayTypeSyntax.RankSpecifiers.ToString()}";
+                    }
+                        break;
+
+                    case GenericNameSyntax genericNameSyntax:
+                    {
+                        return GetGenericFullName(genericNameSyntax, out isNullable);
+                    }
+
+                    default:
+                    {
+                        var typeInfo = semanticModel.GetTypeInfo(typeSyntax);
+                        if (typeInfo.Type != null && typeInfo.Type.ToString() != "?" &&
+                            typeInfo.Type.ToString() != "?[]")
+                        {
+                            name = typeInfo.Type.ToString();
+                        }
+                        else
+                        {
+                            name = typeSyntax.ToString();
+                            isExtern = true;
+                        }
+                    }
+                        break;
+                }
+            }
+                break;
+
+            case AttributeSyntax attributeSyntax:
+            {
+                var symbolInfo = semanticModel.GetSymbolInfo(attributeSyntax);
+                if (symbolInfo.Symbol != null)
+                {
+                    name = symbolInfo.Symbol.ContainingSymbol.ToDisplayString();
+                }
+                else
+                {
+                    name = attributeSyntax.Name.ToString();
+                    isExtern = true;
+                }
+            }
+                break;
+
             case VariableDeclaratorSyntax variableDeclarationSyntax:
             {
                 switch (variableDeclarationSyntax.AsClause)
@@ -141,16 +129,14 @@ internal static class VisualBasicFullNameProvider
                     case SimpleAsClauseSyntax simpleAsClauseSyntax:
                         return GetFullName(simpleAsClauseSyntax.Type, semanticModel, out isNullable);
                 }
-
-                // return GetFullName(variableDeclarationSyntax.Type, semanticModel, out isNullable);
             }
                 break;
-            
+
             case TypeConstraintSyntax typeConstraintSyntax:
             {
                 return GetFullName(typeConstraintSyntax.Type, semanticModel, out isNullable);
             }
-            
+
             case ExpressionSyntax expressionSyntax:
             {
                 var symbolInfo = semanticModel.GetSymbolInfo(expressionSyntax);
@@ -365,181 +351,5 @@ internal static class VisualBasicFullNameProvider
         }
 
         return CreateEntityTypeModel(name, isExternType);
-    }
-
-    // private static IEntityType GetFullName(ObjectCreationExpressionSyntax declarationSyntax,
-    //     SemanticModel semanticModel, out bool isNullable)
-    // {
-    //     var symbolInfo = semanticModel.GetSymbolInfo(declarationSyntax);
-    //
-    //     string name;
-    //     if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
-    //     {
-    //         name = methodSymbol.ContainingType.ToDisplayString();
-    //         isNullable = name.EndsWith('?');
-    //
-    //         if (isNullable)
-    //         {
-    //             name = name[..^1];
-    //         }
-    //
-    //         return CreateEntityTypeModel(name);
-    //     }
-    //
-    //     var variableDeclarationSyntax = declarationSyntax.GetParentDeclarationSyntax<VariableDeclarationSyntax>();
-    //     if (variableDeclarationSyntax != null)
-    //     {
-    //         return GetFullName(variableDeclarationSyntax, semanticModel, out isNullable);
-    //     }
-    //
-    //     var propertyDeclarationSyntax =
-    //         declarationSyntax.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
-    //     if (propertyDeclarationSyntax != null)
-    //     {
-    //         name = propertyDeclarationSyntax.Type.ToString();
-    //         isNullable = name.EndsWith('?');
-    //
-    //         return CreateEntityTypeModel(name);
-    //     }
-    //
-    //     if (declarationSyntax is ObjectCreationExpressionSyntax objectCreationExpressionSyntax)
-    //     {
-    //         return GetFullName(objectCreationExpressionSyntax.Type, semanticModel, out isNullable);
-    //     }
-    //
-    //     name = declarationSyntax.ToString();
-    //     isNullable = name.EndsWith('?');
-    //
-    //     return CreateEntityTypeModel(name);
-    // }
-
-    // private static IEntityType GetFullName(ImplicitArrayCreationExpressionSyntax declarationSyntax,
-    //     SemanticModel semanticModel, out bool isNullable)
-    // {
-    //     var basePropertyDeclarationSyntax =
-    //         declarationSyntax.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
-    //     if (basePropertyDeclarationSyntax != null)
-    //     {
-    //         return GetFullName(basePropertyDeclarationSyntax.Type, semanticModel, out isNullable);
-    //     }
-    //
-    //     var baseFieldDeclarationSyntax = declarationSyntax.GetParentDeclarationSyntax<BaseFieldDeclarationSyntax>();
-    //     if (baseFieldDeclarationSyntax != null)
-    //     {
-    //         return GetFullName(baseFieldDeclarationSyntax, semanticModel, out isNullable);
-    //     }
-    //
-    //     var variableDeclarationSyntax = declarationSyntax.GetParentDeclarationSyntax<VariableDeclarationSyntax>();
-    //     if (variableDeclarationSyntax != null)
-    //     {
-    //         return GetFullName(variableDeclarationSyntax, semanticModel, out isNullable);
-    //     }
-    //
-    //     // try to infer type from elements
-    //     var elementTypesSet = new HashSet<string>();
-    //
-    //     foreach (var expression in declarationSyntax.Initializer.Expressions)
-    //     {
-    //         var fullName = GetExpressionType(expression, semanticModel, out isNullable).Name;
-    //         elementTypesSet.Add(fullName);
-    //     }
-    //
-    //     isNullable = false;
-    //
-    //     switch (elementTypesSet.Count)
-    //     {
-    //         case 0:
-    //         {
-    //             return new VisualBasicEntityTypeModel
-    //             {
-    //                 Name = declarationSyntax.ToString()
-    //             };
-    //         }
-    //         case 1:
-    //         {
-    //             return new VisualBasicEntityTypeModel
-    //             {
-    //                 Name = $"{elementTypesSet.First()}[]"
-    //             };
-    //         }
-    //         case 2:
-    //         {
-    //             if (elementTypesSet.Contains("System.Int32") && elementTypesSet.Contains("System.Single"))
-    //             {
-    //                 return new VisualBasicEntityTypeModel
-    //                 {
-    //                     Name = "System.Single[]"
-    //                 };
-    //             }
-    //
-    //             if (elementTypesSet.Contains("System.Int32") && elementTypesSet.Contains("System.Double"))
-    //             {
-    //                 return new VisualBasicEntityTypeModel
-    //                 {
-    //                     Name = "System.Double[]"
-    //                 };
-    //             }
-    //
-    //             if (elementTypesSet.Contains("System.Single") && elementTypesSet.Contains("System.Double"))
-    //             {
-    //                 return new VisualBasicEntityTypeModel
-    //                 {
-    //                     Name = "System.Double[]"
-    //                 };
-    //             }
-    //
-    //             return new VisualBasicEntityTypeModel
-    //             {
-    //                 Name = "System.Object[]"
-    //             };
-    //         }
-    //         case 3:
-    //         {
-    //             if (elementTypesSet.Contains("System.Int32") && elementTypesSet.Contains("System.Single") &&
-    //                 elementTypesSet.Contains("System.Double"))
-    //             {
-    //                 return new VisualBasicEntityTypeModel
-    //                 {
-    //                     Name = "System.Double[]"
-    //                 };
-    //             }
-    //
-    //             return new VisualBasicEntityTypeModel
-    //             {
-    //                 Name = "System.Object[]"
-    //             };
-    //         }
-    //         default:
-    //             return new VisualBasicEntityTypeModel
-    //             {
-    //                 Name = "System.Object[]"
-    //             };
-    //     }
-    // }
-
-    private static IEntityType GetExpressionType(ExpressionSyntax expression, SemanticModel semanticModel,
-        out bool isNullable)
-    {
-        switch (expression)
-        {
-            case LiteralExpressionSyntax literalExpressionSyntax:
-            {
-                if (literalExpressionSyntax.Token.Value != null)
-                {
-                    var name = literalExpressionSyntax.Token.Value.GetType().FullName;
-                    isNullable = !string.IsNullOrEmpty(name) && name.EndsWith('?');
-
-                    return CreateEntityTypeModel(name);
-                }
-            }
-                break;
-
-            case ObjectCreationExpressionSyntax objectCreationExpressionSyntax:
-            {
-                return GetFullName(objectCreationExpressionSyntax, semanticModel, out isNullable);
-            }
-        }
-
-        return GetFullName(expression, semanticModel, out isNullable);
     }
 }

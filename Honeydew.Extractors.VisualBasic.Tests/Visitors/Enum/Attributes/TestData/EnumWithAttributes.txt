@@ -1,0 +1,7 @@
+﻿Namespace Namespace1
+    <Obsolete("Message")>
+    Public Enum Class1 As Short
+        Label1 = 0
+        A2
+    End Enum
+End Namespace

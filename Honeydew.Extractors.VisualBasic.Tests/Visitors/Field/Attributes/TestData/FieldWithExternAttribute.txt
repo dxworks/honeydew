@@ -1,0 +1,6 @@
+﻿Namespace Namespace1
+    Friend Class Class1
+        <Extern("Hello"), ExternAttribute(), ExternAttribute("World", False), Extern(2), Extern(New String() {})>
+        Protected Name As String
+    End Class
+End Namespace

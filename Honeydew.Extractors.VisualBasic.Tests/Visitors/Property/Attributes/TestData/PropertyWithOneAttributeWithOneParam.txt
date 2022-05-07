@@ -1,0 +1,17 @@
+﻿Namespace Namespace1
+    Public Class Class1
+        <Obsolete("Message")>
+        Friend Property B As Boolean
+
+        <Obsolete("Message")>
+        Friend Custom Event FB As Func(Of Boolean)
+            AddHandler(ByVal value As Func(Of Boolean))
+            End AddHandler
+            RemoveHandler(ByVal value As Func(Of Boolean))
+            End RemoveHandler
+            <Obsolete("Message")>
+            RaiseEvent()
+            End RaiseEvent
+        End Event
+    End Class
+End Namespace

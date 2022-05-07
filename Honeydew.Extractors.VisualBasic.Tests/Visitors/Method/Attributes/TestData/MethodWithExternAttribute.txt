@@ -1,0 +1,13 @@
+﻿Namespace Namespace1
+    Friend Class Class1
+        <Extern("Hello"), ExternAttribute(), ExternAttribute("World", False), Extern(2), Extern(New String() {})>
+        Public Function Method() As Integer
+            Return 2
+        End Function
+
+        <Extern("Hello"), ExternAttribute(), ExternAttribute("World", False), Extern(2), Extern(New String() {})>
+        Public Function Sum(ByVal a As Integer, ByVal b As Integer) As Integer
+            Return a + b
+        End Function
+    End Class
+End Namespace

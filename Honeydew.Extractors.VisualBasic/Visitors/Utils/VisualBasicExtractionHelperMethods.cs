@@ -262,128 +262,6 @@ public static partial class VisualBasicExtractionHelperMethods
         return parameters;
     }
 
-    //
-    // public static IEntityType GetContainingType(SyntaxNode syntaxNode, SemanticModel semanticModel)
-    // {
-    //     if (syntaxNode is InvocationExpressionSyntax invocationExpressionSyntax)
-    //     {
-    //         switch (invocationExpressionSyntax.Expression)
-    //         {
-    //             case MemberAccessExpressionSyntax memberAccessExpressionSyntax:
-    //             {
-    //                 var entityType = GetFullName(memberAccessExpressionSyntax.Expression, semanticModel);
-    //                 if (string.IsNullOrEmpty(entityType.Name))
-    //                 {
-    //                     entityType = GetFullName(memberAccessExpressionSyntax.Name, semanticModel);
-    //                 }
-    //
-    //                 return entityType;
-    //             }
-    //
-    //             default:
-    //             {
-    //                 var symbolInfo = semanticModel.GetSymbolInfo(syntaxNode);
-    //                 if (symbolInfo.Symbol != null)
-    //                 {
-    //                     var containingSymbol = symbolInfo.Symbol.ContainingSymbol;
-    //                     var stringBuilder = new StringBuilder(containingSymbol.ToDisplayString());
-    //                     while (containingSymbol.Kind == SymbolKind.Method)
-    //                     {
-    //                         containingSymbol = containingSymbol.ContainingSymbol;
-    //                         if (containingSymbol.Kind == SymbolKind.Method)
-    //                         {
-    //                             stringBuilder = new StringBuilder(containingSymbol.ToDisplayString())
-    //                                 .Append('.')
-    //                                 .Append(stringBuilder);
-    //                         }
-    //                     }
-    //
-    //                     return VisualBasicFullNameProvider.CreateEntityTypeModel(stringBuilder.ToString());
-    //                 }
-    //
-    //                 var typeInfo = semanticModel.GetTypeInfo(syntaxNode);
-    //                 if (typeInfo.Type != null)
-    //                 {
-    //                     return VisualBasicFullNameProvider.CreateEntityTypeModel(typeInfo.Type.ToDisplayString());
-    //                 }
-    //             }
-    //                 break;
-    //         }
-    //     }
-    //
-    //     var baseFieldDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BaseFieldDeclarationSyntax>();
-    //     if (baseFieldDeclarationSyntax != null)
-    //     {
-    //         return GetFullName(baseFieldDeclarationSyntax.Declaration.Type, semanticModel);
-    //     }
-    //
-    //     var basePropertyDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<BasePropertyDeclarationSyntax>();
-    //     if (basePropertyDeclarationSyntax != null)
-    //     {
-    //         return GetFullName(basePropertyDeclarationSyntax.Type, semanticModel);
-    //     }
-    //
-    //     var variableDeclarationSyntax = syntaxNode.GetParentDeclarationSyntax<VariableDeclarationSyntax>();
-    //     if (variableDeclarationSyntax != null)
-    //     {
-    //         var fullName = GetFullName(variableDeclarationSyntax, semanticModel);
-    //         if (fullName.Name != VisualBasicConstants.VarIdentifier)
-    //         {
-    //             return fullName;
-    //         }
-    //     }
-    //
-    //     return VisualBasicFullNameProvider.CreateEntityTypeModel(syntaxNode.ToString());
-    // }
-    //
-    // private static IList<IParameterType> GetParameters(InvocationExpressionSyntax invocationSyntax,
-    //     SemanticModel semanticModel)
-    // {
-    //     var methodSymbol = GetMethodSymbol(invocationSyntax, semanticModel);
-    //     if (methodSymbol == null)
-    //     {
-    //         // try to reconstruct the parameters from the method call
-    //         var parameterList = new List<IParameterType>();
-    //         var success = true;
-    //
-    //         foreach (var argumentSyntax in invocationSyntax.ArgumentList.Arguments)
-    //         {
-    //             var parameterSymbolInfo = ModelExtensions.GetSymbolInfo(semanticModel, argumentSyntax.Expression);
-    //             if (parameterSymbolInfo.Symbol != null)
-    //             {
-    //                 parameterList.Add(new VisualBasicParameterModel
-    //                 {
-    //                     Type = GetFullName(argumentSyntax.Expression, semanticModel)
-    //                 });
-    //                 continue;
-    //             }
-    //
-    //             if (argumentSyntax.Expression is not LiteralExpressionSyntax literalExpressionSyntax)
-    //             {
-    //                 success = false;
-    //                 break;
-    //             }
-    //
-    //             if (literalExpressionSyntax.Token.Value == null)
-    //             {
-    //                 success = false;
-    //                 break;
-    //             }
-    //
-    //             parameterList.Add(new VisualBasicParameterModel
-    //             {
-    //                 Type = VisualBasicFullNameProvider.CreateEntityTypeModel(literalExpressionSyntax.Token.Value.GetType()
-    //                     .FullName),
-    //             });
-    //         }
-    //
-    //         return success ? parameterList : new List<IParameterType>();
-    //     }
-    //
-    //     return GetParameters(methodSymbol);
-    // }
-    //
-
     public static int CalculateCyclomaticComplexity(MethodBlockSyntax methodBlockSyntax)
     {
         return CalculateCyclomaticComplexityForSyntaxNode(methodBlockSyntax) + 1;
@@ -413,22 +291,6 @@ public static partial class VisualBasicExtractionHelperMethods
     {
         return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
     }
-    //
-    // public static int CalculateCyclomaticComplexity(MemberDeclarationSyntax syntax)
-    // {
-    //     if (syntax is not BasePropertyDeclarationSyntax basePropertyDeclarationSyntax)
-    //     {
-    //         return CalculateCyclomaticComplexityForSyntaxNode(syntax) + 1;
-    //     }
-    //
-    //     var accessorCount = 0;
-    //     if (basePropertyDeclarationSyntax.AccessorList != null)
-    //     {
-    //         accessorCount = basePropertyDeclarationSyntax.AccessorList.Accessors.Count;
-    //     }
-    //
-    //     return CalculateCyclomaticComplexityForSyntaxNode(syntax) + accessorCount;
-    // }
 
     private static int CalculateCyclomaticComplexity(ExpressionSyntax? conditionExpressionSyntax)
     {
@@ -489,88 +351,88 @@ public static partial class VisualBasicExtractionHelperMethods
 
         return count;
     }
-    //
-    // public static IEnumerable<IParameterType> GetParameters(AttributeSyntax attributeSyntax,
-    //     SemanticModel semanticModel)
-    // {
-    //     var symbolInfo = semanticModel.GetSymbolInfo(attributeSyntax);
-    //     if (symbolInfo.Symbol == null)
-    //     {
-    //         // try to reconstruct parameters
-    //         var parameterTypes = new List<IParameterType>();
-    //
-    //         if (attributeSyntax.ArgumentList == null)
-    //         {
-    //             return parameterTypes;
-    //         }
-    //
-    //         foreach (var argumentSyntax in attributeSyntax.ArgumentList.Arguments)
-    //         {
-    //             var parameterSymbolInfo = semanticModel.GetSymbolInfo(argumentSyntax.Expression);
-    //             var parameterType = VisualBasicConstants.SystemObject;
-    //             if (parameterSymbolInfo.Symbol != null)
-    //             {
-    //                 parameterTypes.Add(new VisualBasicParameterModel
-    //                 {
-    //                     Type = GetFullName(argumentSyntax.Expression, semanticModel)
-    //                 });
-    //                 continue;
-    //             }
-    //
-    //             if (argumentSyntax.Expression is LiteralExpressionSyntax literalExpressionSyntax)
-    //             {
-    //                 if (literalExpressionSyntax.Token.Value != null)
-    //                 {
-    //                     parameterType = literalExpressionSyntax.Token.Value.GetType().FullName;
-    //                 }
-    //             }
-    //
-    //             parameterTypes.Add(new VisualBasicParameterModel
-    //             {
-    //                 Type = VisualBasicFullNameProvider.CreateEntityTypeModel(parameterType)
-    //             });
-    //         }
-    //
-    //         return parameterTypes;
-    //     }
-    //
-    //     if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
-    //     {
-    //         return GetParameters(methodSymbol);
-    //     }
-    //
-    //     return new List<IParameterType>();
-    // }
-    //
-    // public static string GetAttributeTarget(AttributeSyntax syntaxNode)
-    // {
-    //     var attributeListSyntax = syntaxNode.GetParentDeclarationSyntax<AttributeListSyntax>();
-    //
-    //     if (attributeListSyntax is null)
-    //     {
-    //         return "";
-    //     }
-    //
-    //     if (attributeListSyntax.Target == null)
-    //     {
-    //         return attributeListSyntax.Parent switch
-    //         {
-    //             BaseMethodDeclarationSyntax => "method",
-    //             AccessorDeclarationSyntax => "method",
-    //             ArrowExpressionClauseSyntax => "method",
-    //             TypeStatementSyntax => "type",
-    //             DelegateStatementSyntax => "type",
-    //             EnumBlockSyntax => "type",
-    //             EnumMemberDeclarationSyntax => "field",
-    //             BaseFieldDeclarationSyntax => "field",
-    //             BasePropertyDeclarationSyntax => "property",
-    //             ParameterSyntax => "param",
-    //             TypeParameterSyntax => "param",
-    //             TypeSyntax => "return",
-    //             _ => ""
-    //         };
-    //     }
-    //
-    //     return attributeListSyntax.Target.Identifier.ToString().TrimEnd(':');
-    // }
+
+    public static IEnumerable<IParameterType> GetParameters(AttributeSyntax attributeSyntax,
+        SemanticModel semanticModel)
+    {
+        var symbolInfo = semanticModel.GetSymbolInfo(attributeSyntax);
+        if (symbolInfo.Symbol == null)
+        {
+            // try to reconstruct parameters
+            var parameterTypes = new List<IParameterType>();
+
+            if (attributeSyntax.ArgumentList == null)
+            {
+                return parameterTypes;
+            }
+
+            foreach (var argumentSyntax in attributeSyntax.ArgumentList.Arguments)
+            {
+                var expressionSyntax = argumentSyntax.GetExpression();
+                var parameterSymbolInfo = semanticModel.GetSymbolInfo(expressionSyntax);
+                var parameterType = "System.Object";
+
+                if (parameterSymbolInfo.Symbol != null)
+                {
+                    parameterTypes.Add(new VisualBasicParameterModel
+                    {
+                        Type = GetFullName(expressionSyntax, semanticModel)
+                    });
+                    continue;
+                }
+
+                if (expressionSyntax is LiteralExpressionSyntax literalExpressionSyntax)
+                {
+                    if (literalExpressionSyntax.Token.Value != null)
+                    {
+                        parameterType = literalExpressionSyntax.Token.Value.GetType().FullName;
+                    }
+                }
+
+                parameterTypes.Add(new VisualBasicParameterModel
+                {
+                    Type = CreateEntityTypeModel(parameterType)
+                });
+            }
+
+            return parameterTypes;
+        }
+
+        if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
+        {
+            return GetParameters(methodSymbol);
+        }
+
+        return new List<IParameterType>();
+    }
+
+    public static string GetAttributeTarget(AttributeSyntax syntaxNode)
+    {
+        if (syntaxNode.Target == null)
+        {
+            return syntaxNode.Parent?.Parent switch
+            {
+                MethodStatementSyntax => "method",
+                MethodBlockSyntax => "method",
+                ConstructorBlockSyntax => "method",
+                SubNewStatementSyntax => "method",
+                AccessorStatementSyntax => "method",
+                TypeBlockSyntax => "type",
+                TypeStatementSyntax => "type",
+                DelegateStatementSyntax => "type",
+                EnumBlockSyntax => "type",
+                EnumStatementSyntax => "type",
+                EnumMemberDeclarationSyntax => "field",
+                FieldDeclarationSyntax => "field",
+                PropertyBlockSyntax => "property",
+                PropertyStatementSyntax => "property",
+                ParameterSyntax => "param",
+                TypeParameterSyntax => "param",
+                TypeSyntax => "return",
+                _ => ""
+            };
+        }
+
+        return syntaxNode.Target.ToString().TrimEnd(':');
+    }
 }

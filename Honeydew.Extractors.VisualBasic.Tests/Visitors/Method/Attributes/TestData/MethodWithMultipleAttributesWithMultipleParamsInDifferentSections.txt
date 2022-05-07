@@ -1,0 +1,18 @@
+﻿Imports System
+
+Namespace Namespace1
+    Public Class Class1
+        <Obsolete("Message", False)>
+        <Serializable>
+        <AttributeUsage(AttributeTargets.Class)>
+        Public Sub Method(ByVal a As Double, ByVal b As Single)
+        End Sub
+
+        <Obsolete("Message", False)>
+        <Serializable>
+        <AttributeUsage(AttributeTargets.Class)>
+        Public Function Method(ByVal a As Double, ByVal b As Single, ByVal c As Double) As Double
+            Return a + b + c
+        End Function
+    End Class
+End Namespace

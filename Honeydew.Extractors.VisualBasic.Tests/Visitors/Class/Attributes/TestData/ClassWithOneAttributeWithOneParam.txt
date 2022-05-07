@@ -1,0 +1,6 @@
+﻿Namespace Namespace1
+    <Obsolete("Message")>
+    Public Class Class1
+
+    End Class
+End Namespace
