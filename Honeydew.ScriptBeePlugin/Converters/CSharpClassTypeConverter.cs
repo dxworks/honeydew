@@ -1,8 +1,7 @@
-﻿using Honeydew.Extractors.Converters;
-using Honeydew.Models.CSharp;
+﻿using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 
-namespace Honeydew.Extractors.CSharp.Converters;
+namespace Honeydew.ScriptBeePlugin.Converters;
 
 public class CSharpClassTypeConverter : ITypeConverter<IClassType>
 {

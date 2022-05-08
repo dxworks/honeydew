@@ -1,4 +1,4 @@
-﻿namespace Honeydew.Extractors.Converters;
+﻿namespace Honeydew.ScriptBeePlugin.Converters;
 
 public interface ITypeConverter<out TInterfaceType>
 {

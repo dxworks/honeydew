@@ -1,6 +1,6 @@
 ﻿using Honeydew.Logging;
 
-namespace Honeydew;
+namespace Honeydew.ScriptBeePlugin;
 
 public class EmptyProgressLoggerBar : IProgressLoggerBar
 {

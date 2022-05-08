@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Honeydew.Extractors.Converters;
+namespace Honeydew.ScriptBeePlugin.Converters;
 
 public class ProjectModelConverter : JsonConverter
 {

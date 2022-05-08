@@ -1,8 +1,8 @@
-﻿using Honeydew.Extractors.Converters;
-using Honeydew.Models;
+﻿using Honeydew.Models;
+using Honeydew.ScriptBeePlugin.Converters;
 using Newtonsoft.Json;
 
-namespace Honeydew.Extractors.Importers;
+namespace Honeydew.ScriptBeePlugin;
 
 public class RepositoryModelImporter
 {
@@ -13,9 +13,9 @@ public class RepositoryModelImporter
         _projectModelConverter = projectModelConverter;
     }
 
-    public async Task<RepositoryModel?> Import(string filePath, CancellationToken cancellationToken)
+    public async Task<RepositoryModel?> Import(Stream inputStream, CancellationToken cancellationToken)
     {
-        using var streamReader = File.OpenText(filePath);
+        using var streamReader = new StreamReader(inputStream);
         var serializer = new JsonSerializer();
 
         serializer.Converters.Add(_projectModelConverter);

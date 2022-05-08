@@ -1,8 +1,8 @@
-﻿using Honeydew.Extractors.Importers;
-using Honeydew.Logging;
+﻿using Honeydew.Logging;
 using Honeydew.Models;
+using Honeydew.ScriptBeePlugin;
 
-namespace Honeydew.Extractors.Load;
+namespace Honeydew;
 
 public class RawFileRepositoryLoader
 {
@@ -18,24 +18,16 @@ public class RawFileRepositoryLoader
         _progressLogger = progressLogger;
     }
 
-    public async Task<RepositoryModel?> Load(string path, CancellationToken cancellationToken)
+    public async Task<RepositoryModel?> LoadAsync(string path, CancellationToken cancellationToken)
     {
         _logger.Log($"Opening File at {path}");
         _progressLogger.Log($"Opening File at {path}");
 
+        await using var file = File.OpenRead(path);
+
         try
         {
-            var repositoryModel = await _repositoryModelImporter.Import(path, cancellationToken);
-
-            if (repositoryModel == null)
-            {
-                return null;
-            }
-
-            _logger.Log("Model Loaded");
-            _progressLogger.Log("Model Loaded");
-
-            return repositoryModel;
+            return await LoadAsync(file, cancellationToken);
         }
         catch (Exception e)
         {
@@ -43,5 +35,20 @@ public class RawFileRepositoryLoader
             _progressLogger.Log($"Could not load file at {path} because {e}");
             return null;
         }
+    }
+
+    public async Task<RepositoryModel?> LoadAsync(Stream inputStream, CancellationToken cancellationToken)
+    {
+        var repositoryModel = await _repositoryModelImporter.Import(inputStream, cancellationToken);
+
+        if (repositoryModel == null)
+        {
+            return null;
+        }
+
+        _logger.Log("Model Loaded");
+        _progressLogger.Log("Model Loaded");
+
+        return repositoryModel;
     }
 }

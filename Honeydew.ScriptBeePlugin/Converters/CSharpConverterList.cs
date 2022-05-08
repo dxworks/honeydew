@@ -1,10 +1,9 @@
-﻿using Honeydew.Extractors.Converters;
-using Honeydew.Models;
+﻿using Honeydew.Models;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Newtonsoft.Json;
 
-namespace Honeydew.Extractors.CSharp.Converters;
+namespace Honeydew.ScriptBeePlugin.Converters;
 
 public class CSharpConverterList : IConverterList
 {

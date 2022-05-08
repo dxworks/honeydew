@@ -2,19 +2,17 @@
 using CommandLine;
 using Honeydew;
 using Honeydew.Extraction;
-using Honeydew.Extractors.Converters;
 using Honeydew.Extractors.CSharp;
-using Honeydew.Extractors.CSharp.Converters;
 using Honeydew.Extractors.Exporters;
-using Honeydew.Extractors.Importers;
 using Honeydew.Extractors.Load;
 using Honeydew.Extractors.VisualBasic;
-using Honeydew.Extractors.VisualBasic.Converters;
 using Honeydew.IO.Writers.Exporters;
 using Honeydew.Logging;
 using Honeydew.Models;
 using Honeydew.PostExtraction.ReferenceRelations;
 using Honeydew.Processors;
+using Honeydew.ScriptBeePlugin;
+using Honeydew.ScriptBeePlugin.Converters;
 using Honeydew.ScriptBeePlugin.Loaders;
 using Honeydew.Scripts;
 using Honeydew.Utils;
@@ -306,7 +304,7 @@ static async Task<RepositoryModel?> LoadModel(ILogger logger, IProgressLogger pr
             { ProjectExtractorFactory.CSharp, cSharpConverterList },
             { ProjectExtractorFactory.VisualBasic, new VisualBasicConverterList() },
         }, cSharpConverterList)));
-    var repositoryModel = await repositoryLoader.Load(inputPath, cancellationToken);
+    var repositoryModel = await repositoryLoader.LoadAsync(inputPath, cancellationToken);
     return repositoryModel;
 }
 

@@ -1,4 +1,5 @@
 ﻿using Honeydew.Logging;
+using Honeydew.ScriptBeePlugin;
 using Konsole;
 
 namespace Honeydew;

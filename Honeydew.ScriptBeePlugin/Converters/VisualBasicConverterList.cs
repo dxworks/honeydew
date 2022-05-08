@@ -1,10 +1,9 @@
-﻿using Honeydew.Extractors.Converters;
-using Honeydew.Models;
+﻿using Honeydew.Models;
 using Honeydew.Models.Types;
 using Honeydew.Models.VisualBasic;
 using Newtonsoft.Json;
 
-namespace Honeydew.Extractors.VisualBasic.Converters;
+namespace Honeydew.ScriptBeePlugin.Converters;
 
 public class VisualBasicConverterList : IConverterList
 {

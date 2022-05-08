@@ -1,8 +1,7 @@
-﻿using Honeydew.Extractors.Converters;
-using Honeydew.Models.Types;
+﻿using Honeydew.Models.Types;
 using Honeydew.Models.VisualBasic;
 
-namespace Honeydew.Extractors.VisualBasic.Converters;
+namespace Honeydew.ScriptBeePlugin.Converters;
 
 public class VisualBasicClassTypeConverter : ITypeConverter<IClassType>
 {

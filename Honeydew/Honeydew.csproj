@@ -21,7 +21,6 @@
         <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
         <PackageReference Include="DotNetGraph" Version="2.7.0" />
         <PackageReference Include="Goblinfactory.Konsole" Version="7.0.0.7-alpha" />
-    
         <PackageReference Include="Serilog" Version="2.11.0" />
         <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
         <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
