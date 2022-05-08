@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Honeydew.Extractors.Converters;
+namespace Honeydew.ScriptBeePlugin.Converters;
 
 public class ModelJsonConverter<TInterfaceModel, TConcreteModel> : JsonConverter
     where TConcreteModel : TInterfaceModel

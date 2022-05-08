@@ -2,9 +2,9 @@
 
 public class EntityModel : ReferenceEntity
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
 
-    public string FilePath { get; set; }
+    public string FilePath { get; set; } = "";
 
     public bool IsExternal { get; set; }
 

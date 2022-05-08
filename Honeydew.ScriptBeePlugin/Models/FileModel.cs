@@ -2,7 +2,7 @@ namespace Honeydew.ScriptBeePlugin.Models;
 
 public class FileModel : ReferenceEntity
 {
-    public string FilePath { get; set; }
+    public string FilePath { get; set; } = "";
 
     public IList<EntityModel> Entities { get; set; } = new List<EntityModel>();
 
@@ -11,7 +11,6 @@ public class FileModel : ReferenceEntity
     public ProjectModel Project { get; set; }
 
     public LinesOfCode Loc { get; set; }
-
 
     public IDictionary<string, int> Metrics { get; set; } = new Dictionary<string, int>();
 }
