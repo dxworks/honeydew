@@ -11,9 +11,6 @@
     <ItemGroup>
         <ProjectReference Include="..\Honeydew.Extractors.CSharp\Honeydew.Extractors.CSharp.csproj" />
         <ProjectReference Include="..\Honeydew.Extractors.VisualBasic\Honeydew.Extractors.VisualBasic.csproj" />
-        <ProjectReference Include="..\Honeydew.Models.CSharp\Honeydew.Models.CSharp.csproj" />
-        <ProjectReference Include="..\Honeydew.Models.VisualBasic\Honeydew.Models.VisualBasic.csproj" />
-        <ProjectReference Include="..\Honeydew.Extractors\Honeydew.Extractors.csproj" />
         <ProjectReference Include="..\Honeydew.ScriptBeePlugin\Honeydew.ScriptBeePlugin.csproj" />
     </ItemGroup>
 

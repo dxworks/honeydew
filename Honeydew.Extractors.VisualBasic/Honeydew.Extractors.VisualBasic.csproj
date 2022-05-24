@@ -13,7 +13,6 @@
     
     <ItemGroup>
       <ProjectReference Include="..\Honeydew.Extractors.Dotnet\Honeydew.Extractors.Dotnet.csproj" />
-      <ProjectReference Include="..\Honeydew.Extractors\Honeydew.Extractors.csproj" />
       <ProjectReference Include="..\Honeydew.Models.VisualBasic\Honeydew.Models.VisualBasic.csproj" />
     </ItemGroup>
 

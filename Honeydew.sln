@@ -25,8 +25,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Models.CSharp", "H
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Models.VisualBasic", "Honeydew.Models.VisualBasic\Honeydew.Models.VisualBasic.csproj", "{82554C93-F1BA-4383-AAA2-3BB9E4BFE74E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Logging", "Honeydew.Logging\Honeydew.Logging.csproj", "{BFCBF895-D6BF-42E4-9195-4CB75D6CDC97}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors.Dotnet", "Honeydew.Extractors.Dotnet\Honeydew.Extractors.Dotnet.csproj", "{C93DF5BE-3A62-49F2-A1C7-76005E10C1F8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors.VisualBasic.Tests", "Honeydew.Extractors.VisualBasic.Tests\Honeydew.Extractors.VisualBasic.Tests.csproj", "{28CAF44A-43E2-4296-A15C-6D49849F1C09}"
@@ -81,10 +79,6 @@ Global
 		{82554C93-F1BA-4383-AAA2-3BB9E4BFE74E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82554C93-F1BA-4383-AAA2-3BB9E4BFE74E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82554C93-F1BA-4383-AAA2-3BB9E4BFE74E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BFCBF895-D6BF-42E4-9195-4CB75D6CDC97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BFCBF895-D6BF-42E4-9195-4CB75D6CDC97}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BFCBF895-D6BF-42E4-9195-4CB75D6CDC97}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BFCBF895-D6BF-42E4-9195-4CB75D6CDC97}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C93DF5BE-3A62-49F2-A1C7-76005E10C1F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C93DF5BE-3A62-49F2-A1C7-76005E10C1F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C93DF5BE-3A62-49F2-A1C7-76005E10C1F8}.Release|Any CPU.ActiveCfg = Release|Any CPU

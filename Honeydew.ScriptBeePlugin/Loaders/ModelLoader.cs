@@ -18,6 +18,7 @@ public class ModelLoader : IModelLoader
 
         var repositoryDictionary = new Dictionary<string, ScriptBeeModel>();
         var projectsDictionary = new Dictionary<string, ScriptBeeModel>();
+        var fileDictionary = new Dictionary<string, ScriptBeeModel>();
         var classDictionary = new Dictionary<string, ScriptBeeModel>();
 
         foreach (var stream in fileStreams)
@@ -51,24 +52,30 @@ public class ModelLoader : IModelLoader
             foreach (var projectModel in referenceRepositoryModel.Projects)
             {
                 projectsDictionary.Add($"{guid}|{projectModel.Name}", projectModel);
-                foreach (var entityModel in projectModel.Files.SelectMany(file => file.Entities))
-                {
-                    var entityId = entityModel switch
-                    {
-                        ClassModel classModel =>
-                            $"{guid}|{projectModel.Name}|{entityModel.Name}|{classModel.GenericParameters.Count}",
-                        InterfaceModel interfaceModel =>
-                            $"{guid}|{projectModel.Name}|{entityModel.Name}|{interfaceModel.GenericParameters.Count}",
-                        _ => $"{guid}|{projectModel.Name}|{entityModel.Name}"
-                    };
 
-                    if (classDictionary.ContainsKey(entityId))
+                foreach (var fileModel in projectModel.Files)
+                {
+                    fileDictionary[$"{guid}|{fileModel.FilePath}"] = fileModel;
+
+                    foreach (var entityModel in fileModel.Entities)
                     {
-                        progressLogger.Log("Duplicate entity found");
-                    }
-                    else
-                    {
-                        classDictionary.Add(entityId, entityModel);
+                        var entityId = entityModel switch
+                        {
+                            ClassModel classModel =>
+                                $"{guid}|{projectModel.Name}|{entityModel.Name}|{classModel.GenericParameters.Count}",
+                            InterfaceModel interfaceModel =>
+                                $"{guid}|{projectModel.Name}|{entityModel.Name}|{interfaceModel.GenericParameters.Count}",
+                            _ => $"{guid}|{projectModel.Name}|{entityModel.Name}"
+                        };
+
+                        if (classDictionary.ContainsKey(entityId))
+                        {
+                            progressLogger.Log("Duplicate entity found");
+                        }
+                        else
+                        {
+                            classDictionary.Add(entityId, entityModel);
+                        }
                     }
                 }
             }
@@ -80,7 +87,8 @@ public class ModelLoader : IModelLoader
         {
             { "Repository", repositoryDictionary },
             { "Project", projectsDictionary },
-            { "Class", classDictionary }
+            { "Class", classDictionary },
+            { "File", fileDictionary },
         };
     }
 
