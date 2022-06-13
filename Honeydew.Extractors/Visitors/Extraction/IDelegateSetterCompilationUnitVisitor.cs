@@ -1,8 +1,8 @@
 ﻿using Honeydew.Models.Types;
 
-namespace Honeydew.Extractors.Visitors.Setters;
+namespace Honeydew.Extractors.Visitors.Extraction;
 
-public interface IDelegateSetterCompilationUnitVisitor<in TSyntaxNode, TSemanticModel, TDelegateSyntaxNode> :
+public interface IDelegateSetterCompilationUnitVisitor<in TSyntaxNode, in TSemanticModel, TDelegateSyntaxNode> :
     ISetterVisitor<TSyntaxNode, TSemanticModel, ICompilationUnitType, TDelegateSyntaxNode, IDelegateType>
 
 {

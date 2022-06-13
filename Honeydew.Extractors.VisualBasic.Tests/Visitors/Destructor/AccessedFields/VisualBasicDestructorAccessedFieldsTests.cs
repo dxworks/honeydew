@@ -49,7 +49,7 @@ public class VisualBasicDestructorAccessedFieldsTests
         Assert.Equal("class", classType.ClassType);
 
         var destructor = classType.Destructor;
-        Assert.Equal(4, destructor.AccessedFields.Count);
+        Assert.Equal(4, destructor!.AccessedFields.Count);
 
         var accessedField1 = destructor.AccessedFields[0];
         Assert.Equal("Prop2", accessedField1.Name);

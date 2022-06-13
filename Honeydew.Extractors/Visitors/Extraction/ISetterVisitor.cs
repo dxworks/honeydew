@@ -1,6 +1,6 @@
 ﻿using Honeydew.Logging;
 
-namespace Honeydew.Extractors.Visitors.Setters;
+namespace Honeydew.Extractors.Visitors.Extraction;
 
 public interface
     ISetterVisitor<in TSetterSyntaxNode, in TSemanticModel, TSetterType, TWrappedSyntaxNode, TWrappedType> :

@@ -1,5 +1,4 @@
-﻿using Honeydew.Extractors.Dotnet;
-using Honeydew.Extractors.Visitors;
+﻿using Honeydew.Extractors.Visitors;
 using Honeydew.Extractors.VisualBasic.Visitors.Concrete;
 using Honeydew.Extractors.VisualBasic.Visitors.Setters;
 using Honeydew.Logging;

@@ -34,7 +34,7 @@ public record CSharpClassModel : IPropertyMembersClassType
 
     public IList<IMethodType> Methods { get; init; } = new List<IMethodType>();
 
-    public IDestructorType Destructor { get; set; }
+    public IDestructorType? Destructor { get; set; }
 
     public IList<MetricModel> Metrics { get; init; } = new List<MetricModel>();
 

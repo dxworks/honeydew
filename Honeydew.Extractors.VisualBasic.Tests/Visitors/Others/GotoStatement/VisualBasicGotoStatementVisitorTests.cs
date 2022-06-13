@@ -77,7 +77,7 @@ public class VisualBasicGotoStatementVisitorTests
 
         var classModel = (VisualBasicClassModel)compilationUnitType.ClassTypes[0];
 
-        TestGotoStatementInMetrics(classModel.Destructor.Metrics);
+        TestGotoStatementInMetrics(classModel.Destructor!.Metrics);
     }
 
     [Theory]

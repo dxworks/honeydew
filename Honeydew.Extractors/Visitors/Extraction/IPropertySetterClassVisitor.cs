@@ -1,8 +1,8 @@
 ﻿using Honeydew.Models.Types;
 
-namespace Honeydew.Extractors.Visitors.Setters;
+namespace Honeydew.Extractors.Visitors.Extraction;
 
-public interface IPropertySetterClassVisitor<in TSyntaxNode, TSemanticModel, TPropertySyntaxNode> :
+public interface IPropertySetterClassVisitor<in TSyntaxNode, in TSemanticModel, TPropertySyntaxNode> :
     ISetterVisitor<TSyntaxNode, TSemanticModel, IMembersClassType, TPropertySyntaxNode, IPropertyType>
 {
     string ISetterVisitor<TSyntaxNode, TSemanticModel, IMembersClassType, TPropertySyntaxNode, IPropertyType>.Name()

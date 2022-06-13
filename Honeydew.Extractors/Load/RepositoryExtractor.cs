@@ -29,7 +29,7 @@ public class RepositoryExtractor
 
         if (File.Exists(path))
         {
-            return await ExtractFromFile(path, cancellationToken, repositoryModel);
+            return await ExtractFromFile(path, repositoryModel, cancellationToken);
         }
 
         if (!Directory.Exists(path))
@@ -40,11 +40,11 @@ public class RepositoryExtractor
             return repositoryModel;
         }
 
-        return await ExtractFromDirectory(path, cancellationToken, repositoryModel);
+        return await ExtractFromDirectory(path, repositoryModel, cancellationToken);
     }
 
-    private async Task<RepositoryModel> ExtractFromDirectory(string path, CancellationToken cancellationToken,
-        RepositoryModel repositoryModel)
+    private async Task<RepositoryModel> ExtractFromDirectory(string path, RepositoryModel repositoryModel,
+        CancellationToken cancellationToken)
     {
         _logger.Log($"Searching for solution files at {path}");
         _progressLogger.Log($"Searching for solution files at {path}");
@@ -97,8 +97,8 @@ public class RepositoryExtractor
     }
 
 
-    private async Task<RepositoryModel> ExtractFromFile(string path, CancellationToken cancellationToken,
-        RepositoryModel repositoryModel)
+    private async Task<RepositoryModel> ExtractFromFile(string path, RepositoryModel repositoryModel,
+        CancellationToken cancellationToken)
     {
         var solutionLoadingResult = await ExtractFromSolutionFile(path, cancellationToken);
 

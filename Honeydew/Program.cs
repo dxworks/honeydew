@@ -212,12 +212,12 @@ await result.MapResult(async options =>
                 progressLogger, projectName, loadOptions.ParallelRunning);
 
             logger.Log();
-            logger.Log("Extraction Complete!");
+            logger.Log("Script Run Complete!");
             logger.Log();
             logger.Log($"Output will be found at {Path.GetFullPath(defaultPathForAllRepresentations)}");
 
             progressLogger.Log();
-            progressLogger.Log("Extraction Complete!");
+            progressLogger.Log("Processing Complete!");
             progressLogger.Log();
             progressLogger.Log($"Output will be found at {Path.GetFullPath(defaultPathForAllRepresentations)}");
         }
