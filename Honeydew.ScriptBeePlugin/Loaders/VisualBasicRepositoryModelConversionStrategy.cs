@@ -62,4 +62,32 @@ public class VisualBasicRepositoryModelConversionStrategy : IRepositoryModelConv
     {
         return VisualBasicFullTypeNameBuilder.CreateEntityTypeModel(type);
     }
+
+    public int GetGenericParameterCount(IClassType classType)
+    {
+        return classType switch
+        {
+            VisualBasicClassModel classModel => classModel.GenericParameters.Count,
+            VisualBasicDelegateModel delegateModel => delegateModel.GenericParameters.Count,
+            _ => 0
+        };
+    }
+
+    public int MethodCount(IClassType classType)
+    {
+        return classType switch
+        {
+            VisualBasicClassModel classModel => classModel.Methods.Count,
+            _ => 0
+        };
+    }
+
+    public int ConstructorCount(IClassType classType)
+    {
+        return classType switch
+        {
+            VisualBasicClassModel classModel => classModel.Constructors.Count,
+            _ => 0
+        };
+    }
 }

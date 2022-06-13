@@ -1,8 +1,8 @@
-﻿using Honeydew.Extractors.Visitors.Setters;
-using Honeydew.Models.Types;
+﻿using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Honeydew.Extractors.Dotnet;
+using Honeydew.Extractors.Visitors.Extraction;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Setters;
 

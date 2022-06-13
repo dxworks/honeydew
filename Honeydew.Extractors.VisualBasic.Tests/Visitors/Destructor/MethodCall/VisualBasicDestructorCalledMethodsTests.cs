@@ -47,7 +47,7 @@ public class VisualBasicDestructorCalledMethodsTests
         var classType = (VisualBasicClassModel)compilationUnitType.ClassTypes[0];
         Assert.Single(compilationUnitType.ClassTypes);
         Assert.Equal("class", classType.ClassType);
-        Assert.Equal("Finalize", classType.Destructor.Name);
+        Assert.Equal("Finalize", classType.Destructor!.Name);
         Assert.Equal(2, classType.Destructor.CalledMethods.Count);
 
         var calledMethod1 = classType.Destructor.CalledMethods[0];

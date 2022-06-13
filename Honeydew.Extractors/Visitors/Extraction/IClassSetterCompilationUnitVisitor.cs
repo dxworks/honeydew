@@ -1,8 +1,8 @@
 ﻿using Honeydew.Models.Types;
 
-namespace Honeydew.Extractors.Visitors.Setters;
+namespace Honeydew.Extractors.Visitors.Extraction;
 
-public interface IClassSetterCompilationUnitVisitor<in TSyntaxNode, TSemanticModel, TClassSyntaxNode> :
+public interface IClassSetterCompilationUnitVisitor<in TSyntaxNode, in TSemanticModel, TClassSyntaxNode> :
     ISetterVisitor<TSyntaxNode, TSemanticModel, ICompilationUnitType, TClassSyntaxNode, IMembersClassType>
 {
     string ISetterVisitor<TSyntaxNode, TSemanticModel, ICompilationUnitType, TClassSyntaxNode, IMembersClassType>.Name()

@@ -4,7 +4,7 @@ public class ParameterModel : ReferenceEntity
 {
     public EntityType Type { get; set; }
 
-    public string TypeName { get; set; }
+    public string TypeName { get; set; } = "";
 
     public ParameterModifier Modifier { get; set; } = ParameterModifier.None;
 

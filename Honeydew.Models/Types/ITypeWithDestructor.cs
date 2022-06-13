@@ -2,5 +2,5 @@
 
 public interface ITypeWithDestructor : IType
 {
-    public IDestructorType Destructor { get; set; }
+    public IDestructorType? Destructor { get; set; }
 }

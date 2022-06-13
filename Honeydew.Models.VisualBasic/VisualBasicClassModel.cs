@@ -13,7 +13,7 @@ public class VisualBasicClassModel : IPropertyMembersClassType
     public string ContainingClassName { get; set; } = "";
     public IList<IBaseType> BaseTypes { get; set; } = new List<IBaseType>();
     public IList<IImportType> Imports { get; set; } = new List<IImportType>();
-    public IDestructorType Destructor { get; set; }
+    public IDestructorType? Destructor { get; set; }
     public IList<IGenericParameterType> GenericParameters { get; set; } = new List<IGenericParameterType>();
     public IList<IFieldType> Fields { get; init; } = new List<IFieldType>();
     public IList<IConstructorType> Constructors { get; init; } = new List<IConstructorType>();

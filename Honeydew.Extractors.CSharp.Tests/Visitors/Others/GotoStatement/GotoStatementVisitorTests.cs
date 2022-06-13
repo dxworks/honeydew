@@ -97,7 +97,7 @@ public class GotoStatementVisitorTests
 
         var classModel = (CSharpClassModel)classTypes[0];
 
-        TestGotoStatementInMetrics(classModel.Destructor.Metrics);
+        TestGotoStatementInMetrics(classModel.Destructor!.Metrics);
     }
 
     [Theory]

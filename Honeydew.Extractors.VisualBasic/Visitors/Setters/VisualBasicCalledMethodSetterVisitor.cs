@@ -1,5 +1,5 @@
 ﻿using Honeydew.Extractors.Visitors;
-using Honeydew.Extractors.Visitors.Setters;
+using Honeydew.Extractors.Visitors.Extraction;
 using Honeydew.Logging;
 using Honeydew.Models.Types;
 using Honeydew.Models.VisualBasic;

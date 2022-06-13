@@ -1,6 +1,6 @@
 ﻿using Honeydew.Extractors.Dotnet;
 using Honeydew.Extractors.Visitors;
-using Honeydew.Extractors.Visitors.Setters;
+using Honeydew.Extractors.Visitors.Extraction;
 using Honeydew.Logging;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;

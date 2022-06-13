@@ -43,7 +43,7 @@ public class VisualBasicDestructorInfoTests
         Assert.Equal("Namespace1.Module1.User", classType.Name);
         Assert.Equal("class", classType.ClassType);
         Assert.NotNull(classType.Destructor);
-        Assert.Equal("Finalize", classType.Destructor.Name);
+        Assert.Equal("Finalize", classType.Destructor!.Name);
         Assert.Empty(classType.Destructor.ParameterTypes);
         Assert.Equal("Protected", classType.Destructor.AccessModifier);
         Assert.Equal("Overrides", classType.Destructor.Modifier);
@@ -60,7 +60,7 @@ public class VisualBasicDestructorInfoTests
         Assert.Equal("Module1.User", classType.Name);
         Assert.Equal("class", classType.ClassType);
         Assert.NotNull(classType.Destructor);
-        Assert.Equal("Finalize", classType.Destructor.Name);
+        Assert.Equal("Finalize", classType.Destructor!.Name);
         Assert.Equal(4, classType.Destructor.CyclomaticComplexity);
     }
 }

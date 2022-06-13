@@ -132,10 +132,14 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                         namespaceModel.Entities.Add(model);
                         fileModel.Entities.Add(model);
 
-                        _entityModels.Add((referenceProjectModel, classType.Name, 0), new List<EntityModel>
-                        {
-                            model
-                        });
+                        // todo check case when there is a delegate with the same name in the same project 
+                        var genericParameterCount =
+                            repositoryModelConversionStrategy.GetGenericParameterCount(classType);
+                        _entityModels[(referenceProjectModel, classType.Name, genericParameterCount)] =
+                            new List<EntityModel>
+                            {
+                                model
+                            };
                     }
                     else if (repositoryModelConversionStrategy.IsEnumModel(classType))
                     {
@@ -157,10 +161,11 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                         namespaceModel.Entities.Add(model);
                         fileModel.Entities.Add(model);
 
-                        _entityModels.Add((referenceProjectModel, classType.Name, 0), new List<EntityModel>
+                        // todo check case when there is an enum with the same name in the same project
+                        _entityModels[(referenceProjectModel, classType.Name, 0)] = new List<EntityModel>
                         {
                             model
-                        });
+                        };
                     }
                     else if (repositoryModelConversionStrategy.IsInterfaceModel(classType))
                     {
@@ -182,8 +187,10 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                         namespaceModel.Entities.Add(model);
                         fileModel.Entities.Add(model);
 
-                        if (_entityModels.TryGetValue(
-                                (referenceProjectModel, model.Name, model.GenericParameters.Count), out var entities))
+                        var genericParameterCount =
+                            repositoryModelConversionStrategy.GetGenericParameterCount(classType);
+                        if (_entityModels.TryGetValue((referenceProjectModel, model.Name, genericParameterCount),
+                                out var entities))
                         {
                             foreach (var entity in entities.OfType<InterfaceModel>())
                             {
@@ -195,7 +202,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                         }
                         else
                         {
-                            _entityModels.Add((referenceProjectModel, model.Name, model.GenericParameters.Count),
+                            _entityModels.Add((referenceProjectModel, model.Name, genericParameterCount),
                                 new List<EntityModel>
                                 {
                                     model
@@ -223,8 +230,10 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                         namespaceModel.Entities.Add(model);
                         fileModel.Entities.Add(model);
 
-                        if (_entityModels.TryGetValue(
-                                (referenceProjectModel, model.Name, model.GenericParameters.Count), out var entities))
+                        var genericParameterCount =
+                            repositoryModelConversionStrategy.GetGenericParameterCount(classType);
+                        if (_entityModels.TryGetValue((referenceProjectModel, model.Name, genericParameterCount),
+                                out var entities))
                         {
                             foreach (var entity in entities.OfType<ClassModel>())
                             {
@@ -237,7 +246,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                         else
                         {
                             _entityModels.Add(
-                                (referenceProjectModel, model.Name, model.GenericParameters.Count),
+                                (referenceProjectModel, model.Name, genericParameterCount),
                                 new List<EntityModel>
                                 {
                                     model
@@ -774,7 +783,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
         AddMetrics(model, methodType);
 
-        if (methodType.ParameterTypes.Count > 0 && model.Parameters[0].Modifier == ParameterModifier.This)
+        if (model.Parameters.Count > 0 && model.Parameters[0].Modifier == ParameterModifier.This)
         {
             model.Type = MethodType.Extension;
         }
@@ -866,20 +875,25 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
                 foreach (var entityModel in compilationUnit.Entities)
                 {
-                    var classType =
-                        compilationUnitType.ClassTypes.FirstOrDefault(c => c.Name == entityModel.Name);
-
-                    if (classType is not IMembersClassType membersClassType)
-                    {
-                        continue;
-                    }
-
-                    Log($"ReferenceModel - Populating Method Calls and Field Accesses for {classType.FilePath}");
+                    Log(
+                        $"ReferenceModel - Populating Method Calls and Field Accesses for {entityModel.Name} from {entityModel.FilePath}");
 
                     switch (entityModel)
                     {
                         case ClassModel classModel:
                         {
+                            var classType =
+                                compilationUnitType.ClassTypes.FirstOrDefault(c =>
+                                    repositoryModelConversionStrategy.IsClassModel(c) && c.Name == classModel.Name &&
+                                    repositoryModelConversionStrategy.MethodCount(c) == classModel.Methods.Count &&
+                                    repositoryModelConversionStrategy.ConstructorCount(c) ==
+                                    classModel.Constructors.Count);
+
+                            if (classType is not IMembersClassType membersClassType)
+                            {
+                                continue;
+                            }
+
                             for (var methodIndex = 0; methodIndex < membersClassType.Methods.Count; methodIndex++)
                             {
                                 var methodModel = classModel.Methods[methodIndex];
@@ -905,32 +919,17 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                                 ConvertFieldAccesses(membersClassType.Destructor.AccessedFields, classModel.Destructor);
                                 ConvertOutgoingCalls(classModel.Destructor, membersClassType.Destructor);
                             }
-                        }
-                            break;
 
-                        case InterfaceModel interfaceModel:
-                        {
-                            for (var methodIndex = 0; methodIndex < membersClassType.Methods.Count; methodIndex++)
+                            if (classType is not IPropertyMembersClassType propertyMembersClassType)
                             {
-                                var methodModel = interfaceModel.Methods[methodIndex];
-                                var methodType = membersClassType.Methods[methodIndex];
-
-                                ConvertFieldAccesses(methodType.AccessedFields, methodModel);
-                                ConvertOutgoingCalls(methodModel, methodType);
+                                continue;
                             }
-                        }
-                            break;
-                    }
 
-                    if (classType is not IPropertyMembersClassType propertyMembersClassType)
-                    {
-                        continue;
-                    }
+                            if (propertyMembersClassType.Properties.Count != classModel.Properties.Count)
+                            {
+                                continue;
+                            }
 
-                    switch (entityModel)
-                    {
-                        case ClassModel classModel:
-                        {
                             for (var propertyIndex = 0; propertyIndex < classModel.Properties.Count; propertyIndex++)
                             {
                                 var propertyModel = classModel.Properties[propertyIndex];
@@ -951,6 +950,38 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
                         case InterfaceModel interfaceModel:
                         {
+                            var classType =
+                                compilationUnitType.ClassTypes.FirstOrDefault(c =>
+                                    repositoryModelConversionStrategy.IsInterfaceModel(c) &&
+                                    c.Name == interfaceModel.Name &&
+                                    repositoryModelConversionStrategy.MethodCount(c) == interfaceModel.Methods.Count);
+
+                            if (classType is not IMembersClassType membersClassType)
+                            {
+                                continue;
+                            }
+
+
+                            for (var methodIndex = 0; methodIndex < membersClassType.Methods.Count; methodIndex++)
+                            {
+                                var methodModel = interfaceModel.Methods[methodIndex];
+                                var methodType = membersClassType.Methods[methodIndex];
+
+                                ConvertFieldAccesses(methodType.AccessedFields, methodModel);
+                                ConvertOutgoingCalls(methodModel, methodType);
+                            }
+
+
+                            if (classType is not IPropertyMembersClassType propertyMembersClassType)
+                            {
+                                continue;
+                            }
+
+                            if (propertyMembersClassType.Properties.Count != interfaceModel.Properties.Count)
+                            {
+                                continue;
+                            }
+
                             for (var propertyIndex = 0;
                                  propertyIndex < interfaceModel.Properties.Count;
                                  propertyIndex++)

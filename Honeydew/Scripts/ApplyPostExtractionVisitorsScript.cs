@@ -1,6 +1,9 @@
 ﻿using Honeydew.Logging;
+using Honeydew.PostExtraction;
+using Honeydew.PostExtraction.Model;
+using Honeydew.PostExtraction.Model.ComplexityMetrics;
 using Honeydew.PostExtraction.ReferenceRelations;
-using RepositoryModel = Honeydew.ScriptBeePlugin.Models.RepositoryModel;
+using Honeydew.ScriptBeePlugin.Models;
 
 namespace Honeydew.Scripts;
 
@@ -60,6 +63,20 @@ public class ApplyPostExtractionVisitorsScript : Script
             new DeclarationRelationVisitor(addStrategy, localVariablesRelationVisitor, parameterRelationVisitor,
                 fieldsRelationVisitor, propertiesRelationVisitor)
         };
+
+        var classSetterVisitor = new ClassTypeSetterModelVisitor(new List<IModelVisitor<EntityModel>>
+        {
+            new ClassComplexityMetricsModelVisitor(),
+            new MethodComplexityMetricsModelVisitor(),
+        });
+        
+        foreach (var projectModel in repositoryModel.Projects)
+        {
+            foreach (var compilationUnit in projectModel.Files)
+            {
+                classSetterVisitor.Visit(compilationUnit);
+            }
+        }
 
         foreach (var entityModel in repositoryModel.GetEnumerable())
         {

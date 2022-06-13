@@ -23,4 +23,10 @@ public interface IRepositoryModelConversionStrategy
     IParameterType CreateParameterType(string type);
 
     IEntityType CreateEntityTypeModel(string type);
+
+    int GetGenericParameterCount(IClassType classType);
+
+    int MethodCount(IClassType classType);
+    
+    int ConstructorCount(IClassType classType);
 }

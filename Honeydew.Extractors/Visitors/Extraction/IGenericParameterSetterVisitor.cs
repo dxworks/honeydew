@@ -1,6 +1,6 @@
 ﻿using Honeydew.Models.Types;
 
-namespace Honeydew.Extractors.Visitors.Setters;
+namespace Honeydew.Extractors.Visitors.Extraction;
 
 public interface IGenericParameterSetterVisitor<in TSyntaxNode, in TSemanticNode, TGenericParameterSyntaxNode,
     TTypeWithGenericParameters> :

@@ -1,6 +1,6 @@
 ﻿using Honeydew.Models.Types;
 
-namespace Honeydew.Extractors.Visitors.Setters;
+namespace Honeydew.Extractors.Visitors.Extraction;
 
 public interface IAttributeSetterVisitor<in TSyntaxNode, in TSemanticNode, TAttributeSyntaxNode, TTypeWithAttributes> :
     ISetterVisitor<TSyntaxNode, TSemanticNode, TTypeWithAttributes, TAttributeSyntaxNode, IAttributeType>

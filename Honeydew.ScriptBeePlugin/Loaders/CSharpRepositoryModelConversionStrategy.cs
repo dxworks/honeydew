@@ -62,4 +62,32 @@ public class CSharpRepositoryModelConversionStrategy : IRepositoryModelConversio
     {
         return CSharpFullTypeNameBuilder.CreateEntityTypeModel(type);
     }
+
+    public int GetGenericParameterCount(IClassType classType)
+    {
+        return classType switch
+        {
+            CSharpClassModel classModel => classModel.GenericParameters.Count,
+            CSharpDelegateModel delegateModel => delegateModel.GenericParameters.Count,
+            _ => 0
+        };
+    }
+
+    public int MethodCount(IClassType classType)
+    {
+        return classType switch
+        {
+            CSharpClassModel classModel => classModel.Methods.Count,
+            _ => 0
+        };
+    }
+
+    public int ConstructorCount(IClassType classType)
+    {
+        return classType switch
+        {
+            CSharpClassModel classModel => classModel.Constructors.Count,
+            _ => 0
+        };
+    }
 }

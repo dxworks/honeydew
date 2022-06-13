@@ -1,8 +1,8 @@
 ﻿using Honeydew.Models.Types;
 
-namespace Honeydew.Extractors.Visitors.Setters;
+namespace Honeydew.Extractors.Visitors.Extraction;
 
-public interface IParameterSetterVisitor<in TSyntaxNode, TSemanticNode, TParameterSyntaxNode, TMethodSignatureType> :
+public interface IParameterSetterVisitor<in TSyntaxNode, in TSemanticNode, TParameterSyntaxNode, TMethodSignatureType> :
     ISetterVisitor<TSyntaxNode, TSemanticNode, TMethodSignatureType, TParameterSyntaxNode, IParameterType>
     where TMethodSignatureType : IMethodSignatureType
 {

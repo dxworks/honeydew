@@ -1,11 +1,11 @@
 ﻿using Honeydew.Extractors.Visitors;
-using Honeydew.Extractors.Visitors.Setters;
 using Honeydew.Logging;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Honeydew.Extractors.Dotnet;
+using Honeydew.Extractors.Visitors.Extraction;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Setters;
 
