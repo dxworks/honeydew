@@ -1,6 +1,6 @@
 ﻿# Honeydew
 
-Honeydew is a tool that extracts facts from a C# Solution or C# Project
+Honeydew is a tool that extracts facts from a C# or Visual Basic Solution or Project
 
 ## Extraction
 
@@ -12,9 +12,9 @@ For extracting information about a solution or project use the following command
 
 If `input_path` is a path to a solution file (.sln), Honeydew will extract facts from that solution file
 
-If `input_path` is a path to a C# project file (.csproj), Honeydew will extract facts from that project
+If `input_path` is a path to a project file (.csproj or .vbproj), Honeydew will extract facts from that project
 
-If `input_path` is a path to a folder, Honeydew will find all the solution files and C# project files and extract facts
+If `input_path` is a path to a folder, Honeydew will find all the solution files and project files and extract facts
 from those
 
 The output files will be placed in a folder named `results`

@@ -21,6 +21,7 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:mermaid2.fence_mermaid
+  - pymdownx.tabbed
       
 nav:
   - Home: index.md
@@ -31,3 +32,9 @@ nav:
   - Model:
       - Types: model/types.md
       - Extractor: model/extractor.md
+  - Results:
+      - Raw: model_results/raw.md
+      - Spektrum: model_results/spektrum.md
+  - ScriptBee:
+      - Integration: scriptbee/integration.md
+      - Model: scriptbee/model.md
