@@ -2,6 +2,7 @@
 
 public class EntityModel : ReferenceEntity
 {
+    private HashSet<EntityModel>? _hierarchy;
     public string Name { get; set; } = "";
 
     public string FilePath { get; set; } = "";
@@ -28,5 +29,32 @@ public class EntityModel : ReferenceEntity
 
     public LinesOfCode LinesOfCode { get; set; }
 
-    public IDictionary<string, int> Metrics { get; set; } = new Dictionary<string, int>();
+    public IDictionary<string, double> Metrics { get; set; } = new Dictionary<string, double>();
+
+    public IEnumerable<EntityModel> Hierarchy
+    {
+        get
+        {
+            if (_hierarchy != null) return _hierarchy;
+
+            var directBaseTypes = this switch
+            {
+                ClassModel classModel => new HashSet<EntityModel>(classModel.BaseTypes.Select(t => t.Entity)),
+                InterfaceModel interfaceModel => new HashSet<EntityModel>(
+                    interfaceModel.BaseTypes.Select(t => t.Entity)),
+                _ => throw new InvalidOperationException("Can compute Hierarchy only for Class or Interface")
+            };
+
+            var indirectBaseTypes = directBaseTypes.SelectMany(t => t.Hierarchy);
+
+            _hierarchy = directBaseTypes.Union(indirectBaseTypes).ToHashSet();
+            _hierarchy.Add(this);
+            return _hierarchy;
+        }
+    }
+
+    public override string ToString()
+    {
+        return Name;
+    }
 }

@@ -1,22 +1,12 @@
 namespace Honeydew.ScriptBeePlugin.Models;
 
-public class MethodModel : ReferenceEntity
+public class MethodModel : MemberModel
 {
-    public string Name { get; set; }
-
-    public EntityModel Entity { get; set; }
-
     public MethodType Type { get; set; }
 
     public MethodModel? ContainingMethod { get; set; }
 
     public PropertyModel? ContainingProperty { get; set; }
-
-    public AccessModifier AccessModifier { get; set; }
-
-    public string Modifier { get; set; } = "";
-
-    public IList<Modifier> Modifiers { get; set; } = new List<Modifier>();
 
     public ReturnValueModel? ReturnValue { get; set; }
 
@@ -31,18 +21,16 @@ public class MethodModel : ReferenceEntity
     public IList<FieldAccess> FieldAccesses { get; set; } = new List<FieldAccess>();
 
     public IEnumerable<MethodCall> ExternalOutgoingCalls =>
-        _externalOutgoingCalls ??= OutgoingCalls.Where(call => call.Caller is { Entity.IsExternal: true });
+        _externalOutgoingCalls ??= OutgoingCalls.Where(call => call.Called is { Entity.IsExternal: true });
 
     public IEnumerable<MethodCall> InternalOutgoingCalls =>
-        _internalOutgoingCalls ??= OutgoingCalls.Where(call => call.Caller is { Entity.IsInternal: true });
+        _internalOutgoingCalls ??= OutgoingCalls.Where(call => call.Called is { Entity.IsInternal: true });
 
     public IEnumerable<FieldAccess> ExternalFieldAccesses =>
-        _externalFieldAccesses ??= FieldAccesses.Where(call => call.Caller is { Entity.IsExternal: true });
+        _externalFieldAccesses ??= FieldAccesses.Where(call => call.Field is { Entity.IsExternal: true });
 
     public IEnumerable<FieldAccess> InternalFieldAccesses =>
-        _internalFieldAccesses ??= FieldAccesses.Where(call => call.Caller is { Entity.IsInternal: true });
-
-    public IList<AttributeModel> Attributes { get; set; } = new List<AttributeModel>();
+        _internalFieldAccesses ??= FieldAccesses.Where(call => call.Field is { Entity.IsInternal: true });
 
     public IList<MethodModel> LocalFunctions { get; set; } = new List<MethodModel>();
 
