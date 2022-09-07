@@ -1,6 +1,6 @@
 ﻿using Honeydew.ScriptBeePlugin.Models;
 
-namespace Honeydew.PostExtraction.Model.DetectionStrategies;
+namespace Honeydew.DesignSmellsDetection.DetectionStrategies;
 
 public class DesignSmell
 {

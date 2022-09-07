@@ -31,7 +31,6 @@ public class MethodComplexityMetricsModelVisitor : IModelVisitor<EntityModel>
             amw = wmc / methodCount;
         }
 
-        classModel.Metrics["WMC"] = wmc;
         classModel.Metrics["AMW"] = amw;
         classModel.Metrics["NOM"] = methodCount;
     }

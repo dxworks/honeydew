@@ -1,6 +1,6 @@
 ﻿using Honeydew.ScriptBeePlugin.Models;
 
-namespace Honeydew.PostExtraction.Model.Metrics;
+namespace Honeydew.DesignSmellsDetection.Metrics;
 
 public class WeightOfAClass
 {
