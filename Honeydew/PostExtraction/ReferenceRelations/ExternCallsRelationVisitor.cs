@@ -25,7 +25,7 @@ public class ExternCallsRelationVisitor : IEntityModelVisitor
             {
                 foreach (var calledMethod in methodModel.OutgoingCalls)
                 {
-                    if (calledMethod.Caller != methodModel && calledMethod.CalledEnitityType.Entity != classModel)
+                    if (calledMethod.CalledEnitityType.Entity != classModel)
                     {
                         _addStrategy.AddDependency(dependencies, calledMethod.CalledEnitityType);
                     }
@@ -36,7 +36,7 @@ public class ExternCallsRelationVisitor : IEntityModelVisitor
             {
                 foreach (var calledMethod in methodModel.OutgoingCalls)
                 {
-                    if (calledMethod.Caller != methodModel && calledMethod.CalledEnitityType.Entity != classModel)
+                    if (calledMethod.CalledEnitityType.Entity != classModel)
                     {
                         _addStrategy.AddDependency(dependencies, calledMethod.CalledEnitityType);
                     }
@@ -47,8 +47,7 @@ public class ExternCallsRelationVisitor : IEntityModelVisitor
             {
                 foreach (var calledMethod in classModel.Destructor.OutgoingCalls)
                 {
-                    if (calledMethod.Caller != classModel.Destructor &&
-                        calledMethod.CalledEnitityType.Entity != classModel)
+                    if (calledMethod.CalledEnitityType.Entity != classModel)
                     {
                         _addStrategy.AddDependency(dependencies, calledMethod.CalledEnitityType);
                     }
@@ -61,7 +60,7 @@ public class ExternCallsRelationVisitor : IEntityModelVisitor
                 {
                     foreach (var calledMethod in accessor.OutgoingCalls)
                     {
-                        if (calledMethod.Caller != accessor && calledMethod.CalledEnitityType.Entity != classModel)
+                        if (calledMethod.CalledEnitityType.Entity != classModel)
                         {
                             _addStrategy.AddDependency(dependencies, calledMethod.CalledEnitityType);
                         }
@@ -75,7 +74,7 @@ public class ExternCallsRelationVisitor : IEntityModelVisitor
             {
                 foreach (var calledMethod in methodModel.OutgoingCalls)
                 {
-                    if (calledMethod.Caller != methodModel && calledMethod.CalledEnitityType.Entity != interfaceModel)
+                    if (calledMethod.CalledEnitityType.Entity != interfaceModel)
                     {
                         _addStrategy.AddDependency(dependencies, calledMethod.CalledEnitityType);
                     }
@@ -88,7 +87,7 @@ public class ExternCallsRelationVisitor : IEntityModelVisitor
                 {
                     foreach (var calledMethod in accessor.OutgoingCalls)
                     {
-                        if (calledMethod.Caller != accessor && calledMethod.CalledEnitityType.Entity != interfaceModel)
+                        if (calledMethod.CalledEnitityType.Entity != interfaceModel)
                         {
                             _addStrategy.AddDependency(dependencies, calledMethod.CalledEnitityType);
                         }
