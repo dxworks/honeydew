@@ -35,6 +35,8 @@ nav:
   - Results:
       - Raw: model_results/raw.md
       - Spektrum: model_results/spektrum.md
+      - Relations: model_results/relations.md
+      - Other: model_results/other.md
   - ScriptBee:
       - Integration: scriptbee/integration.md
       - Model: scriptbee/model.md
