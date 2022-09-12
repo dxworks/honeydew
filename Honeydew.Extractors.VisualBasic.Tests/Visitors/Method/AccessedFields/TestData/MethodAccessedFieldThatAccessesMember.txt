@@ -1,0 +1,20 @@
+﻿Namespace Namespace1
+    Public Class Class1
+        Public Property Field As Integer
+        Public X As Integer = 2
+
+        Public Function Method(ByVal a As Integer, ByVal b As Integer) As Integer
+            Return a + b
+        End Function
+    End Class
+
+    Public Class Class2
+        Private c1 As Class1 = New Class1()
+        Private c2 As Class1 = New Class1()
+
+        Public Sub Method1()
+            c1.Method(1, 2)
+            c2.Field = c1.X
+        End Sub
+    End Class
+End Namespace
