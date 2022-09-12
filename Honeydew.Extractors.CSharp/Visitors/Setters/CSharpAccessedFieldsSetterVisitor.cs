@@ -1,10 +1,10 @@
-﻿using Honeydew.Extractors.Visitors;
+﻿using Honeydew.Extractors.Dotnet;
+using Honeydew.Extractors.Visitors;
+using Honeydew.Extractors.Visitors.Extraction;
 using Honeydew.Logging;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Honeydew.Extractors.Dotnet;
-using Honeydew.Extractors.Visitors.Extraction;
 
 namespace Honeydew.Extractors.CSharp.Visitors.Setters;
 
@@ -18,14 +18,15 @@ public class CSharpAccessedFieldsSetterVisitor :
     IAccessedFieldsSetterVisitor<LocalFunctionStatementSyntax, SemanticModel, ExpressionSyntax,
         IMethodTypeWithLocalFunctions>
 {
-    public CSharpAccessedFieldsSetterVisitor(ILogger compositeLogger, IEnumerable<ITypeVisitor<AccessedField?>> visitors)
+    public CSharpAccessedFieldsSetterVisitor(ILogger compositeLogger,
+        IEnumerable<ITypeVisitor<AccessedField?>> visitors)
         : base(compositeLogger, visitors)
     {
     }
 
     public ILogger Logger => CompositeLogger;
 
-    public AccessedField CreateWrappedType() => new AccessedField();
+    public AccessedField CreateWrappedType() => new();
 
     public IEnumerable<ExpressionSyntax> GetWrappedSyntaxNodes(MethodDeclarationSyntax syntaxNode)
     {
@@ -90,14 +91,8 @@ public class CSharpAccessedFieldsSetterVisitor :
         return possibleMemberAccessExpressions;
     }
 
-    private static IEnumerable<ExpressionSyntax> GetPossibleAccessFields(List<SyntaxNode> descendantNodes)
+    private static IEnumerable<ExpressionSyntax> GetPossibleAccessFields(IEnumerable<SyntaxNode> descendantNodes)
     {
-        return
-            descendantNodes.OfType<MemberAccessExpressionSyntax>()
-                .Concat(descendantNodes.OfType<VariableDeclaratorSyntax>().Select(syntax => syntax.Initializer?.Value))
-                .Concat(descendantNodes.OfType<AssignmentExpressionSyntax>()
-                    .SelectMany(syntax => new List<ExpressionSyntax> { syntax.Left, syntax.Right }))
-                .Distinct()
-                .OfType<ExpressionSyntax>();
+        return descendantNodes.OfType<IdentifierNameSyntax>();
     }
 }

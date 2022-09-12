@@ -22,7 +22,7 @@ public class VisualBasicAccessedFieldsSetterVisitor :
 
     public ILogger Logger => CompositeLogger;
 
-    public AccessedField CreateWrappedType() => new AccessedField();
+    public AccessedField CreateWrappedType() => new();
 
     public IEnumerable<ExpressionSyntax> GetWrappedSyntaxNodes(MethodStatementSyntax syntaxNode)
     {
@@ -55,11 +55,6 @@ public class VisualBasicAccessedFieldsSetterVisitor :
 
     private static IEnumerable<ExpressionSyntax> GetPossibleAccessFields(List<SyntaxNode> descendantNodes)
     {
-        return descendantNodes.OfType<MemberAccessExpressionSyntax>()
-            .Concat(descendantNodes.OfType<VariableDeclaratorSyntax>().Select(syntax => syntax.Initializer?.Value))
-            .Concat(descendantNodes.OfType<AssignmentStatementSyntax>()
-                .SelectMany(syntax => new List<ExpressionSyntax> { syntax.Left, syntax.Right }))
-            .Distinct()
-            .OfType<ExpressionSyntax>();
+        return descendantNodes.OfType<IdentifierNameSyntax>();
     }
 }

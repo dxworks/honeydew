@@ -1,4 +1,5 @@
-﻿using Honeydew.Extractors.Visitors;
+﻿using Honeydew.Extractors.Dotnet;
+using Honeydew.Extractors.Visitors;
 using Honeydew.Models.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.VisualBasic.Syntax;
@@ -10,11 +11,30 @@ public class AccessFieldVisitor : IExtractionVisitor<ExpressionSyntax, SemanticM
 {
     public AccessedField Visit(ExpressionSyntax? syntaxNode, SemanticModel semanticModel, AccessedField modelType)
     {
-        if (syntaxNode == null)
+        if (syntaxNode is null)
         {
             return modelType;
         }
 
+        var accessedField = ExtractAccessedFieldWithSemanticModel(syntaxNode, semanticModel);
+        if (accessedField is not null)
+        {
+            return accessedField;
+        }
+
+        accessedField = ExtractAccessedFieldWithoutSemanticModel(syntaxNode, semanticModel);
+        if (accessedField is not null)
+        {
+            return accessedField;
+        }
+
+        return modelType;
+    }
+
+
+    private static AccessedField? ExtractAccessedFieldWithSemanticModel(SyntaxNode syntaxNode,
+        SemanticModel semanticModel)
+    {
         var symbolInfo = semanticModel.GetSymbolInfo(syntaxNode);
 
         if (symbolInfo.Symbol is IFieldSymbol or IPropertySymbol)
@@ -28,11 +48,18 @@ public class AccessFieldVisitor : IExtractionVisitor<ExpressionSyntax, SemanticM
             };
         }
 
-        if (syntaxNode is MemberAccessExpressionSyntax memberAccessExpressionSyntax)
+        return null;
+    }
+
+    private static AccessedField? ExtractAccessedFieldWithoutSemanticModel(SyntaxNode syntaxNode,
+        SemanticModel semanticModel)
+    {
+        if (syntaxNode.Parent is MemberAccessExpressionSyntax memberAccessExpressionSyntax &&
+            memberAccessExpressionSyntax.Name == syntaxNode)
         {
             if (memberAccessExpressionSyntax.Parent is InvocationExpressionSyntax)
             {
-                return modelType;
+                return null;
             }
 
             var definitionClassName = GetDefinitionClassName(memberAccessExpressionSyntax, semanticModel);
@@ -45,13 +72,36 @@ public class AccessFieldVisitor : IExtractionVisitor<ExpressionSyntax, SemanticM
             };
         }
 
-        return modelType;
+        return null;
     }
 
     private static AccessedField.AccessKind GetAccessType(SyntaxNode? syntax)
     {
-        return syntax?.Parent is AssignmentStatementSyntax
-            ? AccessedField.AccessKind.Setter
-            : AccessedField.AccessKind.Getter;
+        if (syntax is null)
+        {
+            return AccessedField.AccessKind.Getter;
+        }
+
+        if (syntax.Parent is MemberAccessExpressionSyntax memberAccessExpressionSyntax)
+        {
+            if (memberAccessExpressionSyntax.Expression == syntax)
+            {
+                return AccessedField.AccessKind.Getter;
+            }
+        }
+
+        var assignmentExpressionSyntax = syntax.GetParentDeclarationSyntax<AssignmentStatementSyntax>();
+
+        if (assignmentExpressionSyntax is null)
+        {
+            return AccessedField.AccessKind.Getter;
+        }
+
+        if (assignmentExpressionSyntax.Right.DescendantNodes().Any(s => s == syntax))
+        {
+            return AccessedField.AccessKind.Getter;
+        }
+
+        return AccessedField.AccessKind.Setter;
     }
 }

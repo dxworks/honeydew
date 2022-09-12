@@ -77,4 +77,41 @@ public class VisualBasicMethodAccessedFieldsTests
             Assert.Equal("Namespace1.Module1.User", accessedField4.DefinitionClassName);
         }
     }
+
+    [Theory]
+    [FilePath("TestData/MethodAccessedFieldThatAccessesMember.txt")]
+    public async Task Extract_ShouldHaveAccessedField_WhenGivenFiledThatCallsMethod(string filePath)
+    {
+        var compilationUnitType = await _factExtractor.Extract(filePath, It.IsAny<CancellationToken>());
+
+        var classModel = (VisualBasicClassModel)compilationUnitType.ClassTypes[1];
+        var methodType = classModel.Methods[0];
+
+        Assert.Equal(5, methodType.AccessedFields.Count);
+
+        Assert.Equal("c1", methodType.AccessedFields[0].Name);
+        Assert.Equal("Namespace1.Class2", methodType.AccessedFields[0].DefinitionClassName);
+        Assert.Equal("Namespace1.Class2", methodType.AccessedFields[0].LocationClassName);
+        Assert.Equal(AccessedField.AccessKind.Getter, methodType.AccessedFields[0].Kind);
+
+        Assert.Equal("c2", methodType.AccessedFields[1].Name);
+        Assert.Equal("Namespace1.Class2", methodType.AccessedFields[1].DefinitionClassName);
+        Assert.Equal("Namespace1.Class2", methodType.AccessedFields[1].LocationClassName);
+        Assert.Equal(AccessedField.AccessKind.Getter, methodType.AccessedFields[1].Kind);
+
+        Assert.Equal("Field", methodType.AccessedFields[2].Name);
+        Assert.Equal("Namespace1.Class1", methodType.AccessedFields[2].DefinitionClassName);
+        Assert.Equal("Namespace1.Class1", methodType.AccessedFields[2].LocationClassName);
+        Assert.Equal(AccessedField.AccessKind.Setter, methodType.AccessedFields[2].Kind);
+
+        Assert.Equal("c1", methodType.AccessedFields[3].Name);
+        Assert.Equal("Namespace1.Class2", methodType.AccessedFields[3].DefinitionClassName);
+        Assert.Equal("Namespace1.Class2", methodType.AccessedFields[3].LocationClassName);
+        Assert.Equal(AccessedField.AccessKind.Getter, methodType.AccessedFields[3].Kind);
+
+        Assert.Equal("X", methodType.AccessedFields[4].Name);
+        Assert.Equal("Namespace1.Class1", methodType.AccessedFields[4].DefinitionClassName);
+        Assert.Equal("Namespace1.Class1", methodType.AccessedFields[4].LocationClassName);
+        Assert.Equal(AccessedField.AccessKind.Getter, methodType.AccessedFields[4].Kind);
+    }
 }

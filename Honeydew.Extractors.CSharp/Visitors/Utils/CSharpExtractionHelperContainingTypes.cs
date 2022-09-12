@@ -190,6 +190,24 @@ public static partial class CSharpExtractionHelperMethods
                     }
                         break;
 
+                    case IPropertySymbol:
+                    case IFieldSymbol:
+                    {
+                        if (identifierNameSyntax.Parent is MemberAccessExpressionSyntax memberAccessExpressionSyntax &&
+                            memberAccessExpressionSyntax.Name == identifierNameSyntax)
+                        {
+                            var parentSymbolInfo = semanticModel.GetSymbolInfo(memberAccessExpressionSyntax.Expression);
+                            switch (parentSymbolInfo.Symbol)
+                            {
+                                case IFieldSymbol parentField:
+                                    return parentField.Type.ToString()?.Trim('?') ?? "";
+                                case IPropertySymbol parentProperty:
+                                    return parentProperty.Type.ToString()?.Trim('?') ?? "";
+                            }
+                        }
+                    }
+                        break;
+
                     default:
                     {
                     }

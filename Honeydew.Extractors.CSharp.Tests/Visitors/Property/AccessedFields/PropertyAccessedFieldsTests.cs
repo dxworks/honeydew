@@ -49,10 +49,9 @@ public class PropertyAccessedFieldsTests
     }
 
     [Theory]
-    [FileData("TestData/PropertyAccessedNonStaticFieldAndPropertyFromOtherClass.txt")]
     [FileData("TestData/PropertyAccessedStaticFieldAndPropertyFromOtherClass.txt")]
     public void
-        Extract_ShouldHaveAccessedFields_WhenGivenPropertyAccessorThatAccessesFieldsAndPropertiesFromOtherClass(
+        Extract_ShouldHaveAccessedFields_WhenGivenPropertyAccessorThatAccessesStaticFieldsAndPropertiesFromOtherClass(
             string fileContent)
     {
         var syntaxTree = _syntacticModelCreator.Create(fileContent);
@@ -96,6 +95,62 @@ public class PropertyAccessedFieldsTests
         {
             Assert.Equal(AccessedField.AccessKind.Setter, accessedField.Kind);
         }
+    }
+
+    [Theory]
+    [FileData("TestData/PropertyAccessedNonStaticFieldAndPropertyFromOtherClass.txt")]
+    public void
+        Extract_ShouldHaveAccessedFields_WhenGivenPropertyAccessorThatAccessesNonStaticFieldsAndPropertiesFromOtherClass(
+            string fileContent)
+    {
+        var syntaxTree = _syntacticModelCreator.Create(fileContent);
+        var semanticModel = _semanticModelCreator.Create(syntaxTree);
+        var classTypes = _factExtractor.Extract(syntaxTree, semanticModel).ClassTypes;
+
+        var classModel = (CSharpClassModel)classTypes[0];
+        foreach (var propertyType in classModel.Properties)
+        {
+            foreach (var accessor in propertyType.Accessors)
+            {
+                Assert.Equal(4, accessor.AccessedFields.Count);
+
+                Assert.Equal("_class2", accessor.AccessedFields[0].Name);
+                Assert.Equal("Namespace1.Class1", accessor.AccessedFields[0].DefinitionClassName);
+                Assert.Equal("Namespace1.Class1", accessor.AccessedFields[0].LocationClassName);
+
+                Assert.Equal("Field1", accessor.AccessedFields[1].Name);
+                Assert.Equal("Namespace1.Class2", accessor.AccessedFields[1].DefinitionClassName);
+                Assert.Equal("Namespace1.Class2", accessor.AccessedFields[1].LocationClassName);
+
+                Assert.Equal("_class2", accessor.AccessedFields[2].Name);
+                Assert.Equal("Namespace1.Class1", accessor.AccessedFields[2].DefinitionClassName);
+                Assert.Equal("Namespace1.Class1", accessor.AccessedFields[2].LocationClassName);
+
+                Assert.Equal("Property1", accessor.AccessedFields[3].Name);
+                Assert.Equal("Namespace1.Class2", accessor.AccessedFields[3].DefinitionClassName);
+                Assert.Equal("Namespace1.Class2", accessor.AccessedFields[3].LocationClassName);
+            }
+        }
+
+        foreach (var accessedField in classModel.Properties[0].Accessors[0].AccessedFields)
+        {
+            Assert.Equal(AccessedField.AccessKind.Getter, accessedField.Kind);
+        }
+
+        Assert.Equal(AccessedField.AccessKind.Getter, classModel.Properties[0].Accessors[1].AccessedFields[0].Kind);
+        Assert.Equal(AccessedField.AccessKind.Setter, classModel.Properties[0].Accessors[1].AccessedFields[1].Kind);
+        Assert.Equal(AccessedField.AccessKind.Getter, classModel.Properties[0].Accessors[1].AccessedFields[2].Kind);
+        Assert.Equal(AccessedField.AccessKind.Setter, classModel.Properties[0].Accessors[1].AccessedFields[3].Kind);
+
+        foreach (var accessedField in classModel.Properties[1].Accessors[0].AccessedFields)
+        {
+            Assert.Equal(AccessedField.AccessKind.Getter, accessedField.Kind);
+        }
+        
+        Assert.Equal(AccessedField.AccessKind.Getter, classModel.Properties[1].Accessors[1].AccessedFields[0].Kind);
+        Assert.Equal(AccessedField.AccessKind.Setter, classModel.Properties[1].Accessors[1].AccessedFields[1].Kind);
+        Assert.Equal(AccessedField.AccessKind.Getter, classModel.Properties[1].Accessors[1].AccessedFields[2].Kind);
+        Assert.Equal(AccessedField.AccessKind.Setter, classModel.Properties[1].Accessors[1].AccessedFields[3].Kind);
     }
 
     [Theory]
