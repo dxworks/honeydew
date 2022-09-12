@@ -16,7 +16,7 @@ jobs:
           python-version: 3.9.x
 
       - name: Install Mkdocs
-        run: pip install mkdocs-material
+        run: pip install mkdocs-material mermaid
 
       - name: Deploy mkdocs
         run: mkdocs gh-deploy --force
