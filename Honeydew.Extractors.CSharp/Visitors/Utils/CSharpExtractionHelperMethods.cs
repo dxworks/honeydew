@@ -433,7 +433,7 @@ public static partial class CSharpExtractionHelperMethods
     {
         if (conditionExpressionSyntax == null)
         {
-            return 1;
+            return 0;
         }
 
         var logicalOperatorsCount = conditionExpressionSyntax
@@ -445,7 +445,7 @@ public static partial class CSharpExtractionHelperMethods
                     .AndKeyword or SyntaxKind.OrKeyword;
             });
 
-        return logicalOperatorsCount + 1;
+        return logicalOperatorsCount;
     }
 
     private static int CalculateCyclomaticComplexityForSyntaxNode(SyntaxNode syntax)
@@ -457,17 +457,22 @@ public static partial class CSharpExtractionHelperMethods
             {
                 case WhileStatementSyntax whileStatementSyntax:
                 {
-                    count += CalculateCyclomaticComplexity(whileStatementSyntax.Condition);
+                    count += 1 + CalculateCyclomaticComplexity(whileStatementSyntax.Condition);
                 }
                     break;
                 case IfStatementSyntax ifStatementSyntax:
                 {
-                    count += CalculateCyclomaticComplexity(ifStatementSyntax.Condition);
+                    count += 1 + CalculateCyclomaticComplexity(ifStatementSyntax.Condition);
                 }
                     break;
                 case ForStatementSyntax forStatementSyntax:
                 {
-                    count += CalculateCyclomaticComplexity(forStatementSyntax.Condition);
+                    count += 1 + CalculateCyclomaticComplexity(forStatementSyntax.Condition);
+                }
+                    break;
+                case LambdaExpressionSyntax lambdaExpressionSyntax:
+                {
+                    count += CalculateCyclomaticComplexity(lambdaExpressionSyntax);
                 }
                     break;
                 case DoStatementSyntax:
@@ -477,6 +482,7 @@ public static partial class CSharpExtractionHelperMethods
                 case ForEachStatementSyntax:
                 case ConditionalExpressionSyntax:
                 case ConditionalAccessExpressionSyntax:
+                case CatchClauseSyntax:
                     count++;
                     break;
                 default:
