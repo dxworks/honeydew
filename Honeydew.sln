@@ -1,33 +1,35 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31205.134
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew", "Honeydew\Honeydew.csproj", "{93AE9036-6182-40FD-AA20-2B57AC054DEA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew", "Honeydew\Honeydew.csproj", "{93AE9036-6182-40FD-AA20-2B57AC054DEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Models", "Honeydew.Models\Honeydew.Models.csproj", "{3C39FA7E-C03E-4EF7-A57B-0A6BC8458096}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.Models", "Honeydew.Models\Honeydew.Models.csproj", "{3C39FA7E-C03E-4EF7-A57B-0A6BC8458096}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors", "Honeydew.Extractors\Honeydew.Extractors.csproj", "{23BABD99-C5B6-401A-ACB0-44271449BB80}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.Extractors", "Honeydew.Extractors\Honeydew.Extractors.csproj", "{23BABD99-C5B6-401A-ACB0-44271449BB80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors.Tests", "Honeydew.Extractors.Tests\Honeydew.Extractors.Tests.csproj", "{A75D42F1-2EE2-458D-9F8D-A51435BED666}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.Extractors.Tests", "Honeydew.Extractors.Tests\Honeydew.Extractors.Tests.csproj", "{A75D42F1-2EE2-458D-9F8D-A51435BED666}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.ScriptBeePlugin", "Honeydew.ScriptBeePlugin\Honeydew.ScriptBeePlugin.csproj", "{A910D258-36EA-47CD-B483-E2AEB36E7192}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.ScriptBeePlugin", "Honeydew.ScriptBeePlugin\Honeydew.ScriptBeePlugin.csproj", "{A910D258-36EA-47CD-B483-E2AEB36E7192}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Tests", "Honeydew.Tests\Honeydew.Tests.csproj", "{48DF9CC1-FD24-4181-8393-62991F2E643B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.Tests", "Honeydew.Tests\Honeydew.Tests.csproj", "{48DF9CC1-FD24-4181-8393-62991F2E643B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors.CSharp", "Honeydew.Extractors.CSharp\Honeydew.Extractors.CSharp.csproj", "{A8C5FDCB-38C8-4968-9F81-A368DBE55DCD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.Extractors.CSharp", "Honeydew.Extractors.CSharp\Honeydew.Extractors.CSharp.csproj", "{A8C5FDCB-38C8-4968-9F81-A368DBE55DCD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors.VisualBasic", "Honeydew.Extractors.VisualBasic\Honeydew.Extractors.VisualBasic.csproj", "{1C3A04A2-2421-4ACF-B348-37292195B8C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.Extractors.VisualBasic", "Honeydew.Extractors.VisualBasic\Honeydew.Extractors.VisualBasic.csproj", "{1C3A04A2-2421-4ACF-B348-37292195B8C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors.CSharp.Tests", "Honeydew.Extractors.CSharp.Tests\Honeydew.Extractors.CSharp.Tests.csproj", "{C2747A42-BB82-4021-8427-BDCA74CC7481}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.Extractors.CSharp.Tests", "Honeydew.Extractors.CSharp.Tests\Honeydew.Extractors.CSharp.Tests.csproj", "{C2747A42-BB82-4021-8427-BDCA74CC7481}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Models.CSharp", "Honeydew.Models.CSharp\Honeydew.Models.CSharp.csproj", "{64AAA15C-AC73-42CC-975D-1B141703F972}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.Models.CSharp", "Honeydew.Models.CSharp\Honeydew.Models.CSharp.csproj", "{64AAA15C-AC73-42CC-975D-1B141703F972}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Models.VisualBasic", "Honeydew.Models.VisualBasic\Honeydew.Models.VisualBasic.csproj", "{82554C93-F1BA-4383-AAA2-3BB9E4BFE74E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.Models.VisualBasic", "Honeydew.Models.VisualBasic\Honeydew.Models.VisualBasic.csproj", "{82554C93-F1BA-4383-AAA2-3BB9E4BFE74E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors.Dotnet", "Honeydew.Extractors.Dotnet\Honeydew.Extractors.Dotnet.csproj", "{C93DF5BE-3A62-49F2-A1C7-76005E10C1F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.Extractors.Dotnet", "Honeydew.Extractors.Dotnet\Honeydew.Extractors.Dotnet.csproj", "{C93DF5BE-3A62-49F2-A1C7-76005E10C1F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.Extractors.VisualBasic.Tests", "Honeydew.Extractors.VisualBasic.Tests\Honeydew.Extractors.VisualBasic.Tests.csproj", "{28CAF44A-43E2-4296-A15C-6D49849F1C09}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.Extractors.VisualBasic.Tests", "Honeydew.Extractors.VisualBasic.Tests\Honeydew.Extractors.VisualBasic.Tests.csproj", "{28CAF44A-43E2-4296-A15C-6D49849F1C09}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.DesignSmellsDetection", "Honeydew.DesignSmellsDetection\Honeydew.DesignSmellsDetection.csproj", "{669B4853-D97D-4F5A-8EED-441574BAE84B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,6 +89,10 @@ Global
 		{28CAF44A-43E2-4296-A15C-6D49849F1C09}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28CAF44A-43E2-4296-A15C-6D49849F1C09}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28CAF44A-43E2-4296-A15C-6D49849F1C09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{669B4853-D97D-4F5A-8EED-441574BAE84B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{669B4853-D97D-4F5A-8EED-441574BAE84B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{669B4853-D97D-4F5A-8EED-441574BAE84B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{669B4853-D97D-4F5A-8EED-441574BAE84B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

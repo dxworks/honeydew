@@ -35,7 +35,9 @@ public class SerilogLogger : ILogger
                 break;
             case LogLevels.Error:
                 _logger.Error(value);
-
+                break;
+            case LogLevels.Debug:
+                _logger.Debug(value);
                 break;
         }
     }

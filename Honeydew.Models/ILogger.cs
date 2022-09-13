@@ -10,4 +10,5 @@ public enum LogLevels
     Information,
     Warning,
     Error,
+    Debug
 }

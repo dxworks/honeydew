@@ -66,7 +66,7 @@ public class ApplyPostExtractionVisitorsScript : Script
 
         var classSetterVisitor = new ClassTypeSetterModelVisitor(new List<IModelVisitor<EntityModel>>
         {
-            new ClassComplexityMetricsModelVisitor(),
+            new MetricsModelVisitor(),
             new MethodComplexityMetricsModelVisitor(),
         });
         
