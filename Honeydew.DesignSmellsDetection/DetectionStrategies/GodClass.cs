@@ -10,7 +10,7 @@ public class GodClass : IDetectTypeDesignSmell
 
     public Maybe<DesignSmell> Detect(ClassModel t)
     {
-        var wmcVeryHigh = 47;
+        const int wmcVeryHigh = 47;
 
         var metrics = ClassMetrics.For(t);
         var atfd = metrics.AccessToForeignDataForType;

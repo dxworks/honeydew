@@ -23,7 +23,6 @@ public class DesignSmellsDetectionRunner
     {
         var typeDesignSmells = DetectTypeDesignSmells(codeBase);
 
-        //return typeDesignSmells;
         //IEnumerable<DesignSmell> methodDesignSmells = DetectMethodDesignSmells(codeBase);
 
         //return typeDesignSmells.Concat(methodDesignSmells);
