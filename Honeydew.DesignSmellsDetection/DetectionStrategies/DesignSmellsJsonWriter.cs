@@ -21,23 +21,29 @@ public static class DesignSmellsJsonWriter
 
 internal class DesignFlaw
 {
-    public string File { get; set; }
+    public DesignFlaw(string file, string name, string category, string value, IDictionary<string, double> metrics)
+    {
+        File = file;
+        Name = name;
+        Category = category;
+        Value = value;
+        Metrics = metrics;
+    }
 
-    public string Name { get; set; }
+    public string File { get; }
 
-    public string Category { get; set; }
+    public string Name { get; }
 
-    public string Value { get; set; }
+    public string Category { get; }
+
+    public string Value { get; }
+
+    public IDictionary<string, double> Metrics { get; }
 
     public static DesignFlaw From(DesignSmell smell)
     {
-        return new DesignFlaw
-        {
-            File = smell.SourceFile,
-            Name = smell.Name,
-            Category = GetCategory(smell.Name),
-            Value = RoundToInt(smell.Severity).ToString(CultureInfo.InvariantCulture)
-        };
+        return new DesignFlaw(smell.SourceFile, smell.Name, GetCategory(smell.Name),
+            RoundToInt(smell.Severity).ToString(CultureInfo.InvariantCulture), smell.Metrics);
     }
 
     private static int RoundToInt(double value)

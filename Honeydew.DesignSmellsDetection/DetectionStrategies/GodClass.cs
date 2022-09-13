@@ -17,15 +17,18 @@ public class GodClass : IDetectTypeDesignSmell
         var wmc = metrics.WeightedMethodCount;
         var tcc = metrics.TotalClassCohesion;
 
-        if (t.Name.Contains("CmsModuleController"))
-        {
-        }
 
         if (atfd > Few && wmc >= wmcVeryHigh && tcc < CommonFractionThreshold.OneThird)
             return Maybe<DesignSmell>.From(new DesignSmell
             {
                 Name = "God Class",
                 Severity = CalculateSeverity(atfd),
+                Metrics = new Dictionary<string, double>
+                {
+                    {"atfd", atfd},
+                    {"wmc", wmc},
+                    {"tcc", tcc}
+                },
                 SourceFile = t.FilePath,
                 Source = t
             });

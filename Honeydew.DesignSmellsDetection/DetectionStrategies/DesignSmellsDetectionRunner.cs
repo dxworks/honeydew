@@ -40,7 +40,8 @@ public class DesignSmellsDetectionRunner
                 SourceFile = g.First().SourceFile,
                 Name = g.First().Name,
                 Severity = LinearNormalization.WithMeasurementRange(1, 10).ValueFor(g.Sum(d => d.Severity)),
-                Source = g.First().Source
+                Source = g.First().Source,
+                Metrics = g.First().Metrics // TODO: could improve by merging the metrics
             });
     }
 

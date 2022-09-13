@@ -22,7 +22,7 @@ public class ExportDesignSmellsPerFileScript : Script
         var outputName = VerifyArgument<string>(arguments, "designSmellsOutputName")!;
         var repositoryModel = VerifyArgument<RepositoryModel>(arguments, "referenceRepositoryModel")!;
 
-        var designSmells = new DesignSmellsDetectionRunner(_logger).Detect(repositoryModel);
+        var designSmells = new DesignSmellsDetectionRunner(_logger).Detect(repositoryModel).OrderBy(ds => ds.SourceFile);
 
         DesignSmellsJsonWriter.Export(_modelExporter, designSmells, Path.Combine(outputPath, outputName));
     }
