@@ -7,7 +7,7 @@ public static class ClassificationExtensions
     public static IEnumerable<MemberModel> ProtectedMembers(this ClassModel type)
     {
         var classModel = type.BaseClass!.Entity as ClassModel;
-        return classModel!.Members.Where(m => m.IsProtected || m.IsVirtual).ToHashSet();
+        return classModel!.Members.Where(m => m.IsProtected).ToHashSet();
     }
 
     public static IEnumerable<MemberModel> ProtectedMembersUsed(this ClassModel type)

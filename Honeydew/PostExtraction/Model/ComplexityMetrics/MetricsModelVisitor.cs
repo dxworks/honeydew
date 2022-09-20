@@ -17,11 +17,12 @@ public class MetricsModelVisitor : IModelVisitor<EntityModel>
         metrics.AverageMethodWeight = AverageMethodWeight.Value(classModel, metrics.WeightedMethodCount);
         metrics.TotalClassCohesion = TotalClassCohesion.Value(classModel);
 
-        if (classModel.BaseClass != null)
+        if (classModel.BaseClass != null && classModel.BaseClass.Name != "object")
         {
             metrics.BaseClassUsageRatio = BaseClassUsageRatio.Value(classModel);
             metrics.BaseClassOverridingRatio = BaseClassOverridingRatio.Value(classModel);
             metrics.NumberOfProtectedMembers = NumberOfProtectedMembers.Value(classModel);
+            metrics.NopOverridingMethods = NopOverridingMethods.Value(classModel);
         }
     }
 }

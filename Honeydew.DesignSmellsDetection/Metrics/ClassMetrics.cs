@@ -12,6 +12,7 @@ public class ClassMetrics
     private const string BaseClassOverridingRatioKey = "bovr";
     private const string NumberOfProtectedMembersKey = "nprm";
     private const string AverageMethodWeightKey = "amw";
+    private const string NopOverridingMethodsKey = "nopOverridingMethods";
 
     private readonly IDictionary<string, double> _classMetrics;
 
@@ -66,6 +67,12 @@ public class ClassMetrics
     {
         get => _classMetrics[AverageMethodWeightKey];
         set => _classMetrics[AverageMethodWeightKey] = value;
+    }
+
+    public int NopOverridingMethods
+    {
+        get => (int)_classMetrics[NopOverridingMethodsKey];
+        set => _classMetrics[NopOverridingMethodsKey] = value;
     }
 
     public static ClassMetrics For(ClassModel classModel)
