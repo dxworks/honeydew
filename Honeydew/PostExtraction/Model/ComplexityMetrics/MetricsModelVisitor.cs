@@ -10,9 +10,9 @@ public class MetricsModelVisitor : IModelVisitor<EntityModel>
         if (entityModel is not ClassModel classModel) return;
         
         //var nopa = classModel.Fields.Count(f => f.AccessModifier == AccessModifier.Public);
-        var metrics = ClassMetrics.For(classModel);
+        var metrics = Metrics.For(classModel);
         metrics.WeightOfAClass = WeightOfAClass.Value(classModel);
-        metrics.AccessToForeignDataForType = AccessToForeignDataForType.Value(classModel);
+        metrics.AccessToForeignData = AccessToForeignData.Value(classModel);
         metrics.WeightedMethodCount = WeightedMethodCount.Value(classModel);
         metrics.AverageMethodWeight = AverageMethodWeight.Value(classModel, metrics.WeightedMethodCount);
         metrics.TotalClassCohesion = TotalClassCohesion.Value(classModel);
@@ -23,6 +23,14 @@ public class MetricsModelVisitor : IModelVisitor<EntityModel>
             metrics.BaseClassOverridingRatio = BaseClassOverridingRatio.Value(classModel);
             metrics.NumberOfProtectedMembers = NumberOfProtectedMembers.Value(classModel);
             metrics.NopOverridingMethods = NopOverridingMethods.Value(classModel);
+        }
+
+        foreach (var method in classModel.MethodsToConsiderForDesignSmells())
+        {
+            var methodMetrics = Metrics.For(method);
+            methodMetrics.AccessToForeignData = AccessToForeignData.Value(method);
+            methodMetrics.LocalityOfAttributeAccess = LocalityOfAttributeAccess.Value(method);
+            methodMetrics.ForeignDataProviders = ForeignDataProviders.Value(method);
         }
     }
 }

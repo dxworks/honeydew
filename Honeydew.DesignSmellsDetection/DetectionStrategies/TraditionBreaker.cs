@@ -1,5 +1,4 @@
 ﻿using CSharpFunctionalExtensions;
-using Honeydew.DesignSmellsDetection.Metrics;
 using Honeydew.ScriptBeePlugin.Models;
 
 namespace Honeydew.DesignSmellsDetection.DetectionStrategies;
@@ -8,7 +7,7 @@ public class TraditionBreaker : ClassificationDesignSmellDetectionStrategy
 {
     protected override Maybe<DesignSmell> DetectCore(ClassModel t)
     {
-        var metrics = ClassMetrics.For(t);
+        var metrics = Metrics.Metrics.For(t);
         var nopOverridingMethods = metrics.NopOverridingMethods;
 
         if (nopOverridingMethods > 0)
@@ -18,7 +17,6 @@ public class TraditionBreaker : ClassificationDesignSmellDetectionStrategy
                     Name = "Tradition Breaker",
                     Severity = CalculateSeverity(nopOverridingMethods),
                     SourceFile = t.FilePath,
-                    Source = t,
                     Metrics = new Dictionary<string, double>
                     {
                         { "nopOverridingMethods", nopOverridingMethods }

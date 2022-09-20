@@ -11,6 +11,4 @@ public class DesignSmell
     public double Severity { get; set; }
 
     public IDictionary<string, double> Metrics { get; set; } = new Dictionary<string, double>();
-
-    public EntityModel Source { get; set; } = null!;
 }

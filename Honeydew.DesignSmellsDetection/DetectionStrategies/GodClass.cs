@@ -1,5 +1,4 @@
 ﻿using CSharpFunctionalExtensions;
-using Honeydew.DesignSmellsDetection.Metrics;
 using Honeydew.ScriptBeePlugin.Models;
 
 namespace Honeydew.DesignSmellsDetection.DetectionStrategies;
@@ -12,8 +11,8 @@ public class GodClass : IDetectTypeDesignSmell
     {
         const int wmcVeryHigh = 47;
 
-        var metrics = ClassMetrics.For(t);
-        var atfd = metrics.AccessToForeignDataForType;
+        var metrics = Metrics.Metrics.For(t);
+        var atfd = metrics.AccessToForeignData;
         var wmc = metrics.WeightedMethodCount;
         var tcc = metrics.TotalClassCohesion;
 
@@ -29,8 +28,7 @@ public class GodClass : IDetectTypeDesignSmell
                     {"wmc", wmc},
                     {"tcc", tcc}
                 },
-                SourceFile = t.FilePath,
-                Source = t
+                SourceFile = t.FilePath
             });
 
         return Maybe<DesignSmell>.None;

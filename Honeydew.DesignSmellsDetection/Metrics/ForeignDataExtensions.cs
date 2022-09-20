@@ -14,12 +14,14 @@ public static class ForeignDataExtensions
     {
         var foreignData = method.FieldAccesses.Where(f =>
             !method.Entity.Hierarchy.Contains(f.Field.Entity) &&
-            f.Field.Entity is not EnumModel).Select(f => f.Field).ToHashSet();
+            f.Field.Entity is not EnumModel && f.Field.Entity.IsInternal).Select(f => f.Field).ToHashSet();
         return foreignData;
     }
 
-    //public static IEnumerable<IType> ForeignDataProviders(this IMethod method)
-    //{
-    //    return method.ForeignData().Select(member => member.ParentType).ExceptThirdParty().ToHashSetEx();
-    //}
+    public static IEnumerable<EntityModel> ForeignDataProviders(this MethodModel method)
+    {
+        var foreignDataProviders = method.ForeignData().Select(member => member.Entity).ToHashSet();
+
+        return foreignDataProviders;
+    }
 }

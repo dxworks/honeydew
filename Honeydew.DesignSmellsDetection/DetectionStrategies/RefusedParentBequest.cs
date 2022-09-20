@@ -1,6 +1,4 @@
 ﻿using CSharpFunctionalExtensions;
-using Honeydew.DesignSmellsDetection.Metrics;
-using Honeydew.Models.Types;
 using Honeydew.ScriptBeePlugin.Models;
 
 namespace Honeydew.DesignSmellsDetection.DetectionStrategies;
@@ -14,7 +12,7 @@ public class RefusedParentBequest : ClassificationDesignSmellDetectionStrategy
         const int wmcAverage = 14;
         const int nomAverage = 7;
 
-        var metrics = ClassMetrics.For(t);
+        var metrics = Metrics.Metrics.For(t);
         var bur = metrics.BaseClassUsageRatio;
         var bovr = metrics.BaseClassOverridingRatio;
         var nprotm = metrics.NumberOfProtectedMembers;
@@ -34,7 +32,6 @@ public class RefusedParentBequest : ClassificationDesignSmellDetectionStrategy
                     Name = "Refused Parent Bequest",
                     Severity = CalculateSeverity(bur, bovr),
                     SourceFile = t.FilePath,
-                    Source = t,
                     Metrics = new Dictionary<string, double>
                     {
                         { "bur", bur },

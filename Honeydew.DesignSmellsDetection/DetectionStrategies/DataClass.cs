@@ -10,7 +10,7 @@ public class DataClass : IDetectTypeDesignSmell
 
     public Maybe<DesignSmell> Detect(ClassModel t)
     {
-        var metrics = ClassMetrics.For(t);
+        var metrics = Metrics.Metrics.For(t);
 
         var woc = metrics.WeightOfAClass;
         var wmc = metrics.WeightedMethodCount;
@@ -28,7 +28,6 @@ public class DataClass : IDetectTypeDesignSmell
                     Name = "Data Class",
                     Severity = CalculateSeverity(publicAttributes, accessors, t),
                     SourceFile = t.FilePath,
-                    Source = t,
                     Metrics = new Dictionary<string, double>
                     {
                         { "woc", woc },

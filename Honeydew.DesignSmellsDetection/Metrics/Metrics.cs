@@ -2,21 +2,23 @@
 
 namespace Honeydew.DesignSmellsDetection.Metrics;
 
-public class ClassMetrics
+public class Metrics
 {
     private const string TotalClassCohesionKey = "tcc";
     private const string WeightedMethodCountKey = "wmc";
-    private const string AccessToForeignDataForTypeKey = "atfd";
+    private const string AccessToForeignDataKey = "atfd";
     private const string WeightOfAClassKey = "woc";
     private const string BaseClassUsageRatioKey = "bur";
     private const string BaseClassOverridingRatioKey = "bovr";
     private const string NumberOfProtectedMembersKey = "nprm";
     private const string AverageMethodWeightKey = "amw";
     private const string NopOverridingMethodsKey = "nopOverridingMethods";
+    private const string LocalityOfAttributeAccessKey = "laa";
+    private const string ForeignDataProvidersKey = "fdp";
 
     private readonly IDictionary<string, double> _classMetrics;
 
-    private ClassMetrics(IDictionary<string, double> classMetrics)
+    private Metrics(IDictionary<string, double> classMetrics)
     {
         _classMetrics = classMetrics;
     }
@@ -39,10 +41,10 @@ public class ClassMetrics
         set => _classMetrics[WeightedMethodCountKey] = value;
     }
 
-    public int AccessToForeignDataForType
+    public int AccessToForeignData
     {
-        get => (int)_classMetrics[AccessToForeignDataForTypeKey];
-        set => _classMetrics[AccessToForeignDataForTypeKey] = value;
+        get => (int)_classMetrics[AccessToForeignDataKey];
+        set => _classMetrics[AccessToForeignDataKey] = value;
     }
 
     public double BaseClassUsageRatio
@@ -75,8 +77,25 @@ public class ClassMetrics
         set => _classMetrics[NopOverridingMethodsKey] = value;
     }
 
-    public static ClassMetrics For(ClassModel classModel)
+    public double LocalityOfAttributeAccess
     {
-        return new ClassMetrics(classModel.Metrics);
+        get => _classMetrics[LocalityOfAttributeAccessKey];
+        set => _classMetrics[LocalityOfAttributeAccessKey] = value;
+    }
+
+    public int ForeignDataProviders
+    {
+        get => (int)_classMetrics[ForeignDataProvidersKey];
+        set => _classMetrics[ForeignDataProvidersKey] = value;
+    }
+
+    public static Metrics For(ClassModel classModel)
+    {
+        return new Metrics(classModel.Metrics);
+    }
+
+    public static Metrics For(MethodModel methodModel)
+    {
+        return new Metrics(methodModel.Metrics);
     }
 }

@@ -40,7 +40,7 @@ public class MethodModel : MemberModel
 
     public int CyclomaticComplexity { get; set; }
 
-    public IDictionary<string, int> Metrics { get; set; } = new Dictionary<string, int>();
+    public IDictionary<string, double> Metrics { get; set; } = new Dictionary<string, double>();
 
     private IEnumerable<MethodCall>? _externalOutgoingCalls;
 
