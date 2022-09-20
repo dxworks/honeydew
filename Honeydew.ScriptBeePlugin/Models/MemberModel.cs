@@ -15,10 +15,18 @@ public class MemberModel : ReferenceEntity
         AccessModifier == AccessModifier.Public && Entity.AccessModifier == AccessModifier.Public;
 
     public bool IsStatic => Modifiers.Contains(Models.Modifier.Static);
+    
+    public bool IsOverride => Modifiers.Contains(Models.Modifier.Override);
 
     public bool IsConst => Modifiers.Contains(Models.Modifier.Const);
 
     public bool IsReadonly => Modifiers.Contains(Models.Modifier.Readonly);
+
+    public bool IsVirtual => Modifiers.Contains(Models.Modifier.Virtual);
+
+    public bool IsProtected => new List<AccessModifier>
+            { AccessModifier.PrivateProtected, AccessModifier.Protected, AccessModifier.ProtectedInternal }
+        .Contains(AccessModifier);
 
     public override string ToString()
     {

@@ -8,12 +8,16 @@ public class ClassMetrics
     private const string WeightedMethodCountKey = "wmc";
     private const string AccessToForeignDataForTypeKey = "atfd";
     private const string WeightOfAClassKey = "woc";
+    private const string BaseClassUsageRatioKey = "bur";
+    private const string BaseClassOverridingRatioKey = "bovr";
+    private const string NumberOfProtectedMembersKey = "nprm";
+    private const string AverageMethodWeightKey = "amw";
 
     private readonly IDictionary<string, double> _classMetrics;
 
-    public static ClassMetrics For(ClassModel classModel)
+    private ClassMetrics(IDictionary<string, double> classMetrics)
     {
-        return new ClassMetrics(classModel.Metrics);
+        _classMetrics = classMetrics;
     }
 
     public double TotalClassCohesion
@@ -40,8 +44,32 @@ public class ClassMetrics
         set => _classMetrics[AccessToForeignDataForTypeKey] = value;
     }
 
-    private ClassMetrics(IDictionary<string, double> classMetrics)
+    public double BaseClassUsageRatio
     {
-        _classMetrics = classMetrics;
+        get => _classMetrics[BaseClassUsageRatioKey];
+        set => _classMetrics[BaseClassUsageRatioKey] = value;
+    }
+
+    public double BaseClassOverridingRatio
+    {
+        get => _classMetrics[BaseClassOverridingRatioKey];
+        set => _classMetrics[BaseClassOverridingRatioKey] = value;
+    }
+
+    public int NumberOfProtectedMembers
+    {
+        get => (int)_classMetrics[NumberOfProtectedMembersKey];
+        set => _classMetrics[NumberOfProtectedMembersKey] = value;
+    }
+
+    public double AverageMethodWeight
+    {
+        get => _classMetrics[AverageMethodWeightKey];
+        set => _classMetrics[AverageMethodWeightKey] = value;
+    }
+
+    public static ClassMetrics For(ClassModel classModel)
+    {
+        return new ClassMetrics(classModel.Metrics);
     }
 }

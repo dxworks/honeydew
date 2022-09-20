@@ -429,6 +429,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
                             foreach (var baseType in classType.BaseTypes)
                             {
+                                // TODO: Bug: If baseType is external, a ClassModel is always created, even if the baseType.Kind is an interface 
                                 classModel.BaseTypes.Add(ConvertEntityType(baseType.Type, projectModel,
                                     repositoryModelConversionStrategy));
                             }
@@ -614,11 +615,6 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             return new List<EntityModel>();
         }
 
-        if (_generatedTypes.TryGetValue((entityName, genericParameterCount), out var generatedType))
-        {
-            return new List<EntityModel> { generatedType };
-        }
-
         if (_entityModels.TryGetValue((projectModel, entityName, genericParameterCount), out var entityModels))
         {
             return entityModels;
@@ -628,6 +624,11 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                 _entityModels.TryGetValue((reference, entityName, genericParameterCount), out entityModels)))
         {
             return entityModels ?? new List<EntityModel>();
+        }
+
+        if (_generatedTypes.TryGetValue((entityName, genericParameterCount), out var generatedType))
+        {
+            return new List<EntityModel> { generatedType };
         }
 
         return new List<EntityModel>();
@@ -1114,6 +1115,7 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
             var methodModelParameters = methodModel.Parameters;
             for (var i = 0; i < methodModelParameters.Count; i++)
             {
+                // TODO maybe we should do a fuzzy match, in case the type is ? (which happens if the analysed solution has not been built before)
                 var parameterModel = methodModelParameters[i];
                 var parameterType = parameterTypes[i];
 

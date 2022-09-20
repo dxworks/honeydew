@@ -38,12 +38,7 @@ public class TotalClassCohesion
 
     private static IEnumerable<MemberModel> MethodsToConsiderFor(ClassModel type)
     {
-        var methodsAndProperties = new List<MemberModel>();
-
-        methodsAndProperties.AddRange(type.Methods);
-        methodsAndProperties.AddRange(type.Properties);
-
-        return methodsAndProperties.Where(m => !m.IsAbstract);
+        return type.MethodsAndProperties.Where(m => !m.IsAbstract);
     }
 
     private static IEnumerable<HashSet<MemberModel>> PairsFrom(IEnumerable<MemberModel> methods)

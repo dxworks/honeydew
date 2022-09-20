@@ -11,7 +11,7 @@ public class DesignSmellsDetectionRunner
     private readonly IList<IDetectTypeDesignSmell> _typeDesignSmellDetectionStrategies =
         new List<IDetectTypeDesignSmell>
         {
-            new GodClass(), new DataClass()
+            new GodClass(), new DataClass(), new RefusedParentBequest()
         };
 
     public DesignSmellsDetectionRunner(ILogger logger)

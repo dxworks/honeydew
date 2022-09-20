@@ -14,6 +14,14 @@ public class MetricsModelVisitor : IModelVisitor<EntityModel>
         metrics.WeightOfAClass = WeightOfAClass.Value(classModel);
         metrics.AccessToForeignDataForType = AccessToForeignDataForType.Value(classModel);
         metrics.WeightedMethodCount = WeightedMethodCount.Value(classModel);
+        metrics.AverageMethodWeight = AverageMethodWeight.Value(classModel, metrics.WeightedMethodCount);
         metrics.TotalClassCohesion = TotalClassCohesion.Value(classModel);
+
+        if (classModel.BaseClass != null)
+        {
+            metrics.BaseClassUsageRatio = BaseClassUsageRatio.Value(classModel);
+            metrics.BaseClassOverridingRatio = BaseClassOverridingRatio.Value(classModel);
+            metrics.NumberOfProtectedMembers = NumberOfProtectedMembers.Value(classModel);
+        }
     }
 }
