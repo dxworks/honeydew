@@ -1,9 +1,10 @@
 ﻿using System.Diagnostics;
+using Honeydew.DesignSmellsDetection.DetectionStrategies;
 using Honeydew.DesignSmellsDetection.Metrics;
 using Honeydew.Logging;
 using Honeydew.ScriptBeePlugin.Models;
 
-namespace Honeydew.DesignSmellsDetection.DetectionStrategies;
+namespace Honeydew.DesignSmellsDetection.Runner;
 
 public class DesignSmellsDetectionRunner
 {
@@ -78,23 +79,29 @@ public class DesignSmellsDetectionRunner
                 if (designSmell.HasValue) designSmells.Add(designSmell.Value);
             }
 
-            var allMethods = classModel.MethodsToConsiderForDesignSmells();
-            foreach (var method in allMethods)
-            {
-                foreach (var methodDesignSmellDetectionStrategy in _methodDesignSmellDetectionStrategies)
-                {
-                    var designSmell = methodDesignSmellDetectionStrategy.Detect(method);
-                    if (designSmell.HasValue)
-                    {
-                        designSmells.Add(designSmell.Value);
-                    }
-                }
-            }
+            var methodDesignSmells = DetectMethodDesignSmells(classModel);
+            designSmells.AddRange(methodDesignSmells);
         }
 
         stopWatch.Stop();
 
         _logger.Log($"\tDetected Design Smells in types in {stopWatch.ElapsedMilliseconds:000} ms");
         return designSmells;
+    }
+
+    private IEnumerable<DesignSmell> DetectMethodDesignSmells(ClassModel classModel)
+    {
+        var allMethods = classModel.MethodsToConsiderForDesignSmells();
+        foreach (var method in allMethods)
+        {
+            foreach (var methodDesignSmellDetectionStrategy in _methodDesignSmellDetectionStrategies)
+            {
+                var designSmell = methodDesignSmellDetectionStrategy.Detect(method);
+                if (designSmell.HasValue)
+                {
+                    yield return designSmell.Value;
+                }
+            }
+        }
     }
 }

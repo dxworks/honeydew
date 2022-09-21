@@ -1,6 +1,7 @@
-﻿using Honeydew.Extractors.Exporters;
+﻿using Honeydew.DesignSmellsDetection.DetectionStrategies;
+using Honeydew.Extractors.Exporters;
 
-namespace Honeydew.DesignSmellsDetection.DetectionStrategies;
+namespace Honeydew.DesignSmellsDetection.Runner;
 
 public static class DesignSmellsJsonWriter
 {
