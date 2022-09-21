@@ -22,18 +22,9 @@ public class TotalClassCohesion
             _ => new List<MethodModel>()
         };
 
-        var fieldsUsed = methods.SelectMany(m => m.FieldAccesses).Where(fa => FieldAccessIsFromParentClass(method, fa)).Select(fa => fa.Field)
+        var fieldsUsed = methods.SelectMany(m => m.FieldAccesses).Where(fa => fa.IsFrom(method.Entity)).Select(fa => fa.Field)
             .ToHashSet();
         return fieldsUsed;
-    }
-
-    private static bool FieldAccessIsFromParentClass(MemberModel method, FieldAccess fa)
-    {
-        /*
-         * if the method is on generic class, the method.Entity will be a generic class (e.g. BaseClass<T>), but the fa.AccessEntityType.Entity will not be generic (e.g. BaseClass).
-         * This is why we compare the name of an EntityType to the name of an EntityModel
-        */
-        return fa.AccessEntityType.Name == method.Entity.Name;
     }
 
     private static IEnumerable<MemberModel> MethodsToConsiderFor(ClassModel type)

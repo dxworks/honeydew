@@ -12,9 +12,9 @@ public static class ForeignDataExtensions
 
     public static IEnumerable<FieldModel> ForeignData(this MethodModel method)
     {
-        var foreignData = method.FieldAccesses.Where(f =>
+        var foreignData = method.InternalFieldAccesses.Where(f =>
             !method.Entity.Hierarchy.Contains(f.Field.Entity) &&
-            f.Field.Entity is not EnumModel && f.Field.Entity.IsInternal).Select(f => f.Field).ToHashSet();
+            f.Field.Entity is not EnumModel).Select(f => f.Field).ToHashSet();
         return foreignData;
     }
 

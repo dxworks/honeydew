@@ -20,9 +20,9 @@ public class DesignSmellsDetectionRunner
         {
             new FeatureEnvy(),
             new BlobMethod(),
-            //new IntensiveCoupling(),
-            //new DispersedCoupling(),
-            //new ShotgunSurgery()
+            new IntensiveCoupling(),
+            new DispersedCoupling(),
+            new ShotgunSurgery()
         };
 
     public DesignSmellsDetectionRunner(ILogger logger)

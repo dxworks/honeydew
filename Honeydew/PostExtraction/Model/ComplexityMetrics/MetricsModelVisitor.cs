@@ -32,6 +32,8 @@ public class MetricsModelVisitor : IModelVisitor<EntityModel>
             methodMetrics.LocalityOfAttributeAccess = LocalityOfAttributeAccess.Value(method);
             methodMetrics.ForeignDataProviders = ForeignDataProviders.Value(method);
             methodMetrics.NumberOfAccessedVariables = NumberOfAccessedVariables.Value(method);
+            methodMetrics.CouplingIntensity = CouplingIntensity.Value(method);
+            methodMetrics.CouplingDispersion = CouplingDispersion.Value(method, methodMetrics.CouplingIntensity);
         }
     }
 }

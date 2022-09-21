@@ -16,6 +16,8 @@ public class Metrics
     private const string LocalityOfAttributeAccessKey = "laa";
     private const string ForeignDataProvidersKey = "fdp";
     private const string NumberOfAccessedVariablesKey = "noav";
+    private const string CouplingDispersionKey = "cdisp";
+    private const string CouplingIntensityKey = "cint";
 
     private readonly IDictionary<string, double> _metrics;
 
@@ -95,7 +97,19 @@ public class Metrics
         get => (int)_metrics[NumberOfAccessedVariablesKey];
         set => _metrics[NumberOfAccessedVariablesKey] = value;
     }
-    
+
+    public int CouplingIntensity
+    {
+        get => (int)_metrics[CouplingIntensityKey];
+        set => _metrics[CouplingIntensityKey] = value;
+    }
+
+    public double CouplingDispersion
+    {
+        get => _metrics[CouplingDispersionKey];
+        set => _metrics[CouplingDispersionKey] = value;
+    }
+
     public static Metrics For(ClassModel classModel)
     {
         return new Metrics(classModel.Metrics);
