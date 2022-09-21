@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Honeydew.Extractors.Exporters;
+﻿using Honeydew.Extractors.Exporters;
 
 namespace Honeydew.DesignSmellsDetection.DetectionStrategies;
 
@@ -9,41 +8,55 @@ public static class DesignSmellsJsonWriter
         string designSmellsOutputFile)
     {
         var designFlaws = designSmells.Select(DesignFlaw.From).ToList();
-        WriteToJson(jsonModelExporter, designFlaws, designSmellsOutputFile);
+        {
+            var output = new Output
+            {
+                file = new Concerns
+                {
+                    concerns = designFlaws.ToArray()
+                }
+            };
+
+            WriteToJson(jsonModelExporter, output, designSmellsOutputFile);
+        }
     }
 
-    private static void WriteToJson(JsonModelExporter jsonModelExporter, IReadOnlyCollection<DesignFlaw> designFlaws,
+    private static void WriteToJson(JsonModelExporter jsonModelExporter, Output designFlaws,
         string output)
     {
         jsonModelExporter.Export(output, designFlaws);
     }
 }
 
+internal class Output
+{
+    public Concerns file { get; set; }
+}
+
+internal class Concerns
+{
+    public DesignFlaw[] concerns { get; set; }
+}
+
 internal class DesignFlaw
 {
-    public DesignFlaw(string file, string name, string category, string value, IDictionary<string, double> metrics)
+    public DesignFlaw(string file, string tag, int strength)
     {
-        File = file;
-        Name = name;
-        Category = category;
-        Value = value;
-        Metrics = metrics;
+        entity = file;
+        this.strength = strength;
+        this.tag = tag;
     }
 
-    public string File { get; }
+    public string entity { get; }
 
-    public string Name { get; }
+    public string tag { get; }
 
-    public string Category { get; }
-
-    public string Value { get; }
-
-    public IDictionary<string, double> Metrics { get; }
+    public int strength { get; }
 
     public static DesignFlaw From(DesignSmell smell)
     {
-        return new DesignFlaw(smell.SourceFile, smell.Name, GetCategory(smell.Name),
-            RoundToInt(smell.Severity).ToString(CultureInfo.InvariantCulture), smell.Metrics);
+        return new DesignFlaw(smell.SourceFile, GetTag(smell.Name),
+            RoundToInt(smell.Severity));
     }
 
     private static int RoundToInt(double value)
@@ -51,22 +64,19 @@ internal class DesignFlaw
         return Convert.ToInt32(value);
     }
 
-    private static string GetCategory(string name)
+    private static string GetTag(string name)
     {
-        const string encapsulation = "Encapsulation";
-        const string inheritance = "Inheritance Relations";
-        const string coupling = "Coupling";
         var designSmellToCategory = new Dictionary<string, string>
         {
-            { "God Class", encapsulation },
-            { "Feature Envy", encapsulation },
-            { "Data Class", encapsulation },
-            { "Intensive Coupling", coupling },
-            { "Dispersed Coupling", coupling },
-            { "Shotgun Surgery", coupling },
-            { "Refused Parent Bequest", inheritance },
-            { "Tradition Breaker", inheritance },
-            { "Blob Method", "Complexity" }
+            { "God Class", "anomaly.codesmell.encapsulation.GodClass" },
+            { "Feature Envy", "anomaly.codesmell.encapsulation.FeatureEnvy" },
+            { "Data Class", "anomaly.codesmell.encapsulation.DataClass" },
+            { "Intensive Coupling", "anomaly.cohesion.tangling.IntensiveCoupling" },
+            { "Dispersed Coupling", "anomaly.cohesion.tangling.DispersedCoupling" },
+            { "Shotgun Surgery", "anomaly.codesmell.encapsulation.ShotgunSurgery" },
+            { "Refused Parent Bequest", "anomaly.codesmell.inheritance.RefusedParentBequest" },
+            { "Tradition Breaker", "anomaly.codesmell.inheritance.TraditionBreaker" },
+            { "Blob Method", "anomaly.codesmell.complexity.BlobMethod" }
         };
 
         return designSmellToCategory.ContainsKey(name) ? designSmellToCategory[name] : name;
