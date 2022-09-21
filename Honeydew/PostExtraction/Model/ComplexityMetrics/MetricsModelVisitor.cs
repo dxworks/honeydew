@@ -31,6 +31,7 @@ public class MetricsModelVisitor : IModelVisitor<EntityModel>
             methodMetrics.AccessToForeignData = AccessToForeignData.Value(method);
             methodMetrics.LocalityOfAttributeAccess = LocalityOfAttributeAccess.Value(method);
             methodMetrics.ForeignDataProviders = ForeignDataProviders.Value(method);
+            methodMetrics.NumberOfAccessedVariables = NumberOfAccessedVariables.Value(method);
         }
     }
 }

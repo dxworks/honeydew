@@ -19,7 +19,7 @@ public class DesignSmellsDetectionRunner
         new List<IDetectMethodDesignSmell>
         {
             new FeatureEnvy(),
-            //new BlobMethod(),
+            new BlobMethod(),
             //new IntensiveCoupling(),
             //new DispersedCoupling(),
             //new ShotgunSurgery()

@@ -5,6 +5,7 @@ namespace Honeydew.DesignSmellsDetection.DetectionStrategies;
 
 public class FeatureEnvy : IDetectMethodDesignSmell
 {
+    private const int Few = 5;
     public Maybe<DesignSmell> Detect(MethodModel m)
     {
         var metrics = Metrics.Metrics.For(m);
@@ -12,7 +13,7 @@ public class FeatureEnvy : IDetectMethodDesignSmell
         var laa = metrics.LocalityOfAttributeAccess;
         var fdp = metrics.ForeignDataProviders;
 
-        if (atfd > 5 && laa < CommonFractionThreshold.OneThird && fdp > 0 && fdp <= 2)
+        if (atfd > Few && laa < CommonFractionThreshold.OneThird && fdp > 0 && fdp <= 2)
         {
             return Maybe<DesignSmell>.From(
                 new DesignSmell

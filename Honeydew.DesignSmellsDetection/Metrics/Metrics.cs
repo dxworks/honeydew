@@ -15,80 +15,87 @@ public class Metrics
     private const string NopOverridingMethodsKey = "nopOverridingMethods";
     private const string LocalityOfAttributeAccessKey = "laa";
     private const string ForeignDataProvidersKey = "fdp";
+    private const string NumberOfAccessedVariablesKey = "noav";
 
-    private readonly IDictionary<string, double> _classMetrics;
+    private readonly IDictionary<string, double> _metrics;
 
-    private Metrics(IDictionary<string, double> classMetrics)
+    private Metrics(IDictionary<string, double> metrics)
     {
-        _classMetrics = classMetrics;
+        _metrics = metrics;
     }
 
     public double TotalClassCohesion
     {
-        get => _classMetrics[TotalClassCohesionKey];
-        set => _classMetrics[TotalClassCohesionKey] = value;
+        get => _metrics[TotalClassCohesionKey];
+        set => _metrics[TotalClassCohesionKey] = value;
     }
 
     public double WeightOfAClass
     {
-        get => _classMetrics[WeightOfAClassKey];
-        set => _classMetrics[WeightOfAClassKey] = value;
+        get => _metrics[WeightOfAClassKey];
+        set => _metrics[WeightOfAClassKey] = value;
     }
 
     public double WeightedMethodCount
     {
-        get => _classMetrics[WeightedMethodCountKey];
-        set => _classMetrics[WeightedMethodCountKey] = value;
+        get => _metrics[WeightedMethodCountKey];
+        set => _metrics[WeightedMethodCountKey] = value;
     }
 
     public int AccessToForeignData
     {
-        get => (int)_classMetrics[AccessToForeignDataKey];
-        set => _classMetrics[AccessToForeignDataKey] = value;
+        get => (int)_metrics[AccessToForeignDataKey];
+        set => _metrics[AccessToForeignDataKey] = value;
     }
 
     public double BaseClassUsageRatio
     {
-        get => _classMetrics[BaseClassUsageRatioKey];
-        set => _classMetrics[BaseClassUsageRatioKey] = value;
+        get => _metrics[BaseClassUsageRatioKey];
+        set => _metrics[BaseClassUsageRatioKey] = value;
     }
 
     public double BaseClassOverridingRatio
     {
-        get => _classMetrics[BaseClassOverridingRatioKey];
-        set => _classMetrics[BaseClassOverridingRatioKey] = value;
+        get => _metrics[BaseClassOverridingRatioKey];
+        set => _metrics[BaseClassOverridingRatioKey] = value;
     }
 
     public int NumberOfProtectedMembers
     {
-        get => (int)_classMetrics[NumberOfProtectedMembersKey];
-        set => _classMetrics[NumberOfProtectedMembersKey] = value;
+        get => (int)_metrics[NumberOfProtectedMembersKey];
+        set => _metrics[NumberOfProtectedMembersKey] = value;
     }
 
     public double AverageMethodWeight
     {
-        get => _classMetrics[AverageMethodWeightKey];
-        set => _classMetrics[AverageMethodWeightKey] = value;
+        get => _metrics[AverageMethodWeightKey];
+        set => _metrics[AverageMethodWeightKey] = value;
     }
 
     public int NopOverridingMethods
     {
-        get => (int)_classMetrics[NopOverridingMethodsKey];
-        set => _classMetrics[NopOverridingMethodsKey] = value;
+        get => (int)_metrics[NopOverridingMethodsKey];
+        set => _metrics[NopOverridingMethodsKey] = value;
     }
 
     public double LocalityOfAttributeAccess
     {
-        get => _classMetrics[LocalityOfAttributeAccessKey];
-        set => _classMetrics[LocalityOfAttributeAccessKey] = value;
+        get => _metrics[LocalityOfAttributeAccessKey];
+        set => _metrics[LocalityOfAttributeAccessKey] = value;
     }
 
     public int ForeignDataProviders
     {
-        get => (int)_classMetrics[ForeignDataProvidersKey];
-        set => _classMetrics[ForeignDataProvidersKey] = value;
+        get => (int)_metrics[ForeignDataProvidersKey];
+        set => _metrics[ForeignDataProvidersKey] = value;
     }
 
+    public int NumberOfAccessedVariables
+    {
+        get => (int)_metrics[NumberOfAccessedVariablesKey];
+        set => _metrics[NumberOfAccessedVariablesKey] = value;
+    }
+    
     public static Metrics For(ClassModel classModel)
     {
         return new Metrics(classModel.Metrics);
