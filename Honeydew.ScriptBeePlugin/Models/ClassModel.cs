@@ -21,4 +21,75 @@ public class ClassModel : EntityModel
     public IList<MethodModel> Constructors { get; set; } = new List<MethodModel>();
 
     public MethodModel? Destructor { get; set; }
+
+    public IList<MemberModel> MethodsAndProperties
+    {
+        get
+        {
+            var methodsAndProperties = new List<MemberModel>();
+            methodsAndProperties.AddRange(Methods);
+            methodsAndProperties.AddRange(Properties);
+            return methodsAndProperties;
+        }
+    }
+
+    public IList<MemberModel> MethodsPropertiesAndConstructors
+    {
+        get
+        {
+            var methodsPropertiesAndConstructors = new List<MemberModel>();
+            methodsPropertiesAndConstructors.AddRange(MethodsAndProperties);
+            methodsPropertiesAndConstructors.AddRange(Constructors);
+            methodsPropertiesAndConstructors.AddRange(Constructors);
+            if (Destructor != null)
+            {
+                methodsPropertiesAndConstructors.Add(Destructor);
+            }
+            return methodsPropertiesAndConstructors;
+        }
+    }
+    public IList<MemberModel> Members
+    {
+        get
+        {
+            var allMembers = new List<MemberModel>();
+            allMembers.AddRange(MethodsPropertiesAndConstructors);
+            allMembers.AddRange(Fields);
+
+            return allMembers;
+        }
+    }
+    public EntityType? BaseClass
+    {
+        get
+        {
+            // TODO: currently we are returning only internal base classes
+            var baseClass = BaseTypes.Where(baseType => !baseType.IsExtern && baseType.Entity is ClassModel);
+          
+            return baseClass.SingleOrDefault();
+        }
+    }
+
+    public bool Uses(MemberModel member)
+    {
+        var allMethods = new List<MethodModel>();
+        allMethods.AddRange(Methods);
+        allMethods.AddRange(Properties.SelectMany(p => p.Accessors));
+        allMethods.AddRange(Constructors);
+        if (Destructor != null)
+        {
+            allMethods.Add(Destructor);
+        }
+
+        foreach (var method in allMethods)
+        {
+            if (method.OutgoingCalls.Any(call => call.Called == member) ||
+                method.FieldAccesses.Any(fa => fa.Field == member))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

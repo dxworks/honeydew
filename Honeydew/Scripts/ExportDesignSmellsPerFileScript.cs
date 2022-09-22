@@ -1,4 +1,4 @@
-﻿using Honeydew.DesignSmellsDetection.DetectionStrategies;
+﻿using Honeydew.DesignSmellsDetection.Runner;
 using Honeydew.Extractors.Exporters;
 using Honeydew.Logging;
 using Honeydew.ScriptBeePlugin.Models;
