@@ -23,7 +23,7 @@ jobs:
           scriptbee_semver=${semver//v}
           
           echo ::set-output name=semver::$semver
-          echo ::set-output name=scriptbee_semver::scriptbee_semver
+          echo ::set-output name=scriptbee_semver::$scriptbee_semver
         env:
           TAG: ${{ github.ref }}
 
