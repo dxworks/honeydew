@@ -52,9 +52,6 @@ jobs:
           name: honeydew@${{ steps.semver_parser.outputs.scriptbee_semver }}.zip
           path: honeydew@${{ steps.semver_parser.outputs.scriptbee_semver }}.zip
 
-      - name: Download all artifacts
-        uses: actions/download-artifact@v2
-
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
