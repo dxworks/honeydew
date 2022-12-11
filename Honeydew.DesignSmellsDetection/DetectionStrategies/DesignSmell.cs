@@ -1,6 +1,4 @@
-﻿using Honeydew.ScriptBeePlugin.Models;
-
-namespace Honeydew.DesignSmellsDetection.DetectionStrategies;
+﻿namespace Honeydew.DesignSmellsDetection.DetectionStrategies;
 
 public class DesignSmell
 {

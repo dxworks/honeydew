@@ -1,5 +1,4 @@
-﻿using Honeydew.Models.Types;
-using Honeydew.ScriptBeePlugin.Models;
+﻿using Honeydew.ScriptBeePlugin.Models;
 
 namespace Honeydew.DesignSmellsDetection.Metrics;
 
