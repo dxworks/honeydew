@@ -68,6 +68,12 @@ For loading a model from a json file
 
   If present, Honeydew will run scripts in parallel where possible
 
+## Pack
+
+```shell
+dotnet pack -c Release -o pack -p:PackageVersion=1.0.0
+```
+
 ## Build Project
 
 ### Self-contained application - Single-file app

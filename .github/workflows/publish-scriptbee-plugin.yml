@@ -20,10 +20,8 @@ jobs:
         run: |
           semver=${TAG#"refs/tags/v"}
           semver=${semver%"-voyager"}
-          scriptbee_semver=${semver//v}
           
           echo ::set-output name=semver::$semver
-          echo ::set-output name=scriptbee_semver::$scriptbee_semver
         env:
           TAG: ${{ github.ref }}
 
@@ -44,13 +42,13 @@ jobs:
           cp -R bin/*.dll honeydew
 
       - name: Create Archive
-        run: zip -j honeydew@${{ steps.semver_parser.outputs.scriptbee_semver }}.zip honeydew/*
+        run: zip -j honeydew@${{ steps.semver_parser.outputs.semver }}.zip honeydew/*
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: honeydew@${{ steps.semver_parser.outputs.scriptbee_semver }}.zip
-          path: honeydew@${{ steps.semver_parser.outputs.scriptbee_semver }}.zip
+          name: honeydew@${{ steps.semver_parser.outputs.semver }}.zip
+          path: honeydew@${{ steps.semver_parser.outputs.semver }}.zip
 
       - name: Create Release
         id: create_release
