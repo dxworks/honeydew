@@ -1,0 +1,46 @@
+slug: honyedew
+name: Honeydew
+description: The Honeydew description
+
+license: Apache-2.0
+
+repositories:
+  - https://github.com/dxworks/honeydew
+
+
+issues:
+  - https://github.com/dxworks/honeydew/issues
+
+docs:
+  - https://dxworks.org/honeydew
+  - https://github.com/dxworks/honeydew/tree/master/README.md
+
+site: https://dxworks.org/honeydew
+
+technologies:
+  - C#
+  - Roslyn
+
+tags:
+  - Analysis
+
+authors:
+  - name: Andrei Timar
+    github: https://github.com/andrei2699
+
+voyager:
+  versions:
+    - version: 2.1.2
+      name: dxworks/honeydew
+      tag: v2.1.2-voyager
+      asset: honeydew.zip
+      instrument-yml: https://raw.githubusercontent.com/dxworks/honeydew/v2.1.2-voyager/instrument.yml
+
+scriptBee:
+  versions:
+    - version: 2.1.2
+      name: Honeydew.ScriptBeePlugin.dll
+      sourceCode: https://github.com/dxworks/honeydew/tree/master/Honeydew.ScriptBeePlugin
+      asset: "https://github.com/dxworks/honeydew/releases/download/v2.1.2/honeydew@2.1.2.zip"
+      requires:
+        voyager: "2.1.x"

@@ -1,0 +1,68 @@
+name: Publish ScriptBee Plugin
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - '!*-voyager'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Extract Semver
+        id: semver_parser
+        run: |
+          semver=${TAG#"refs/tags/v"}
+          semver=${semver%"-voyager"}
+          scriptbee_semver=${semver//v}
+          
+          echo ::set-output name=semver::$semver
+          echo ::set-output name=scriptbee_semver::scriptbee_semver
+        env:
+          TAG: ${{ github.ref }}
+
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Release for OS
+        run: |
+          mkdir bin
+          dotnet publish -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.scriptbee_semver }} Honeydew/Honeydew.csproj
+
+      - name: Prepare Assets
+        run: |
+          mkdir honeydew
+          cp manifest.yaml honeydew/manifest.yaml
+          rm bin/*.pdb
+          cp -R bin/*.dll honeydew
+
+      - name: Create Archive
+        run: zip -j honeydew@${{ steps.semver_parser.outputs.scriptbee_semver }}.zip honeydew/*
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: honeydew@${{ steps.semver_parser.outputs.scriptbee_semver }}.zip
+          path: honeydew@${{ steps.semver_parser.outputs.scriptbee_semver }}.zip
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Honeydew ${{ steps.semver_parser.outputs.semver }}
+          body: ""
+          prerelease: false
+          draft: false
+          fail_on_unmatched_files: true
+          files: |
+            ./honeydew@${{ steps.semver_parser.outputs.semver }}.zip
