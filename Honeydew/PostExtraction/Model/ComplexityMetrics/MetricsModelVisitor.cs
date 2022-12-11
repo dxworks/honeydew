@@ -1,5 +1,5 @@
 ﻿using Honeydew.DesignSmellsDetection.Metrics;
-using Honeydew.ScriptBeePlugin.Models;
+using DxWorks.ScriptBee.Plugins.Honeydew.Models;
 
 namespace Honeydew.PostExtraction.Model.ComplexityMetrics;
 

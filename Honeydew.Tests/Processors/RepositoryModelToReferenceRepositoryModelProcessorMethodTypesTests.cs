@@ -7,11 +7,11 @@ using Honeydew.Extractors.Visitors;
 using Honeydew.Logging;
 using Honeydew.Models.CSharp;
 using Honeydew.Models.Types;
-using Honeydew.ScriptBeePlugin.Loaders;
-using Honeydew.ScriptBeePlugin.Models;
+using DxWorks.ScriptBee.Plugins.Honeydew.Loaders;
+using DxWorks.ScriptBee.Plugins.Honeydew.Models;
 using Moq;
 using Xunit;
-using ClassModel = Honeydew.ScriptBeePlugin.Models.ClassModel;
+using ClassModel = DxWorks.ScriptBee.Plugins.Honeydew.Models.ClassModel;
 using ProjectModel = Honeydew.Models.ProjectModel;
 using RepositoryModel = Honeydew.Models.RepositoryModel;
 

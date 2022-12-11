@@ -1,6 +1,6 @@
 ﻿using Honeydew.Extractors.Exporters;
 using Honeydew.Processors;
-using Honeydew.ScriptBeePlugin.Models;
+using DxWorks.ScriptBee.Plugins.Honeydew.Models;
 
 namespace Honeydew.Scripts;
 

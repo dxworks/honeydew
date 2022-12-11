@@ -1,5 +1,5 @@
 ﻿using Honeydew.ModelRepresentations;
-using Honeydew.ScriptBeePlugin.Models;
+using DxWorks.ScriptBee.Plugins.Honeydew.Models;
 
 namespace Honeydew.Processors;
 

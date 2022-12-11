@@ -1,6 +1,7 @@
-﻿using Honeydew.Logging;
+﻿using DxWorks.ScriptBee.Plugins.Honeydew;
+using Honeydew.Logging;
 using Honeydew.Models;
-using Honeydew.ScriptBeePlugin;
+using DxWorks.ScriptBee.Plugins.Honeydew;
 
 namespace Honeydew;
 

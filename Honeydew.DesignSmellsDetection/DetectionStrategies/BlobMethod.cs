@@ -1,5 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
-using Honeydew.ScriptBeePlugin.Models;
+using DxWorks.ScriptBee.Plugins.Honeydew.Models;
 
 namespace Honeydew.DesignSmellsDetection.DetectionStrategies;
 

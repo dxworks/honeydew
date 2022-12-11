@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using CommandLine;
+using DxWorks.ScriptBee.Plugins.Honeydew;
 using Honeydew;
 using Honeydew.Extraction;
 using Honeydew.Extractors.CSharp;
@@ -11,9 +12,9 @@ using Honeydew.Logging;
 using Honeydew.Models;
 using Honeydew.PostExtraction.ReferenceRelations;
 using Honeydew.Processors;
-using Honeydew.ScriptBeePlugin;
-using Honeydew.ScriptBeePlugin.Converters;
-using Honeydew.ScriptBeePlugin.Loaders;
+using DxWorks.ScriptBee.Plugins.Honeydew;
+using DxWorks.ScriptBee.Plugins.Honeydew.Converters;
+using DxWorks.ScriptBee.Plugins.Honeydew.Loaders;
 using Honeydew.Scripts;
 using Honeydew.Utils;
 

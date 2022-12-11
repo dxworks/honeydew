@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PackageId>DxWorks.ScriptBee.Plugins.Honeydew</PackageId>
+        <Description>Honeydew ScriptBee Loader Plugin</Description>
+        <PackageReleaseNotes>ReleaseNotes.md</PackageReleaseNotes>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageProjectUrl>https://github.com/dxworks/honeydew/tree/master/DxWorks.ScriptBee.Plugins.Honeydew</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/dxworks/honeydew</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <Version>1.0.0</Version>
+        <Company>dxworks</Company>
+        <Authors>dxworks</Authors>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="DxWorks.ScriptBee.Plugin.Api" Version="1.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Honeydew.Models.CSharp\Honeydew.Models.CSharp.csproj" />
+        <ProjectReference Include="..\Honeydew.Models.VisualBasic\Honeydew.Models.VisualBasic.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="./RELEASE_NOTES.md" Pack="true" PackagePath="" />
+        <None Include="./README.md" Pack="true" PackagePath="" />
+        <None Include="./LICENSE" Pack="true" PackagePath="" />
+    </ItemGroup>
+
+</Project>

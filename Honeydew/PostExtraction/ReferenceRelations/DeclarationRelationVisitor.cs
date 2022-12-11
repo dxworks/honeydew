@@ -1,5 +1,6 @@
-﻿using Honeydew.ScriptBeePlugin;
-using Honeydew.ScriptBeePlugin.Models;
+﻿using DxWorks.ScriptBee.Plugins.Honeydew;
+using DxWorks.ScriptBee.Plugins.Honeydew;
+using DxWorks.ScriptBee.Plugins.Honeydew.Models;
 
 namespace Honeydew.PostExtraction.ReferenceRelations;
 

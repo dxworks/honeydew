@@ -4,7 +4,7 @@ using DotNetGraph.Edge;
 using DotNetGraph.SubGraph;
 using Honeydew.IO.Writers.Exporters;
 using Honeydew.ModelRepresentations;
-using Honeydew.ScriptBeePlugin.Models;
+using DxWorks.ScriptBee.Plugins.Honeydew.Models;
 
 namespace Honeydew.Scripts;
 

@@ -1,7 +1,7 @@
 ﻿using Honeydew.Models.CSharp;
-using Honeydew.ScriptBeePlugin.Models;
-using ClassModel = Honeydew.ScriptBeePlugin.Models.ClassModel;
-using DelegateModel = Honeydew.ScriptBeePlugin.Models.DelegateModel;
+using DxWorks.ScriptBee.Plugins.Honeydew.Models;
+using ClassModel = DxWorks.ScriptBee.Plugins.Honeydew.Models.ClassModel;
+using DelegateModel = DxWorks.ScriptBee.Plugins.Honeydew.Models.DelegateModel;
 
 namespace Honeydew.PostExtraction.ReferenceRelations;
 

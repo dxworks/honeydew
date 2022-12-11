@@ -8,7 +8,7 @@ using Honeydew.Logging;
 using Honeydew.Models;
 using Honeydew.Models.Types;
 using Honeydew.PostExtraction.ReferenceRelations;
-using Honeydew.ScriptBeePlugin.Loaders;
+using DxWorks.ScriptBee.Plugins.Honeydew.Loaders;
 using Moq;
 using Xunit;
 

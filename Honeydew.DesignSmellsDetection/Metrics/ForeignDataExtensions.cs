@@ -1,4 +1,4 @@
-﻿using Honeydew.ScriptBeePlugin.Models;
+﻿using DxWorks.ScriptBee.Plugins.Honeydew.Models;
 
 namespace Honeydew.DesignSmellsDetection.Metrics;
 
@@ -25,4 +25,3 @@ public static class ForeignDataExtensions
         return foreignDataProviders;
     }
 }
-

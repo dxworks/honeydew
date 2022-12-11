@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.Extractors", "Hone
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.Extractors.Tests", "Honeydew.Extractors.Tests\Honeydew.Extractors.Tests.csproj", "{A75D42F1-2EE2-458D-9F8D-A51435BED666}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.ScriptBeePlugin", "Honeydew.ScriptBeePlugin\Honeydew.ScriptBeePlugin.csproj", "{A910D258-36EA-47CD-B483-E2AEB36E7192}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DxWorks.ScriptBee.Plugins.Honeydew", "DxWorks.ScriptBee.Plugins.Honeydew\DxWorks.ScriptBee.Plugins.Honeydew.csproj", "{A910D258-36EA-47CD-B483-E2AEB36E7192}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.Tests", "Honeydew.Tests\Honeydew.Tests.csproj", "{48DF9CC1-FD24-4181-8393-62991F2E643B}"
 EndProject

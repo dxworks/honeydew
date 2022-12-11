@@ -2,7 +2,7 @@
 using Honeydew.DesignSmellsDetection.DetectionStrategies;
 using Honeydew.DesignSmellsDetection.Metrics;
 using Honeydew.Logging;
-using Honeydew.ScriptBeePlugin.Models;
+using DxWorks.ScriptBee.Plugins.Honeydew.Models;
 
 namespace Honeydew.DesignSmellsDetection.Runner;
 

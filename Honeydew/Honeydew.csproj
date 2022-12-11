@@ -12,7 +12,7 @@
         <ProjectReference Include="..\Honeydew.DesignSmellsDetection\Honeydew.DesignSmellsDetection.csproj" />
         <ProjectReference Include="..\Honeydew.Extractors.CSharp\Honeydew.Extractors.CSharp.csproj" />
         <ProjectReference Include="..\Honeydew.Extractors.VisualBasic\Honeydew.Extractors.VisualBasic.csproj" />
-        <ProjectReference Include="..\Honeydew.ScriptBeePlugin\Honeydew.ScriptBeePlugin.csproj" />
+        <ProjectReference Include="..\DxWorks.ScriptBee.Plugins.Honeydew\DxWorks.ScriptBee.Plugins.Honeydew.csproj" />
     </ItemGroup>
 
     <ItemGroup>

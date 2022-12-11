@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Honeydew.Extractors\Honeydew.Extractors.csproj" />
-    <ProjectReference Include="..\Honeydew.ScriptBeePlugin\Honeydew.ScriptBeePlugin.csproj" />
+    <ProjectReference Include="..\DxWorks.ScriptBee.Plugins.Honeydew\DxWorks.ScriptBee.Plugins.Honeydew.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,7 @@
 ﻿using Honeydew.DesignSmellsDetection.Runner;
 using Honeydew.Extractors.Exporters;
 using Honeydew.Logging;
-using Honeydew.ScriptBeePlugin.Models;
+using DxWorks.ScriptBee.Plugins.Honeydew.Models;
 
 namespace Honeydew.Scripts;
 

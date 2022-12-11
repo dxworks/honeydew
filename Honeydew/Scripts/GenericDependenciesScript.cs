@@ -1,7 +1,7 @@
 ﻿using Honeydew.IO.Writers.Exporters;
 using Honeydew.ModelRepresentations;
 using Honeydew.PostExtraction.ReferenceRelations;
-using Honeydew.ScriptBeePlugin.Models;
+using DxWorks.ScriptBee.Plugins.Honeydew.Models;
 
 namespace Honeydew.Scripts;
 

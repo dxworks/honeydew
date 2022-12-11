@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Honeydew.Processors;
-using Honeydew.ScriptBeePlugin.Models;
+using DxWorks.ScriptBee.Plugins.Honeydew.Models;
 using Xunit;
 
 namespace Honeydew.Tests.Processors;

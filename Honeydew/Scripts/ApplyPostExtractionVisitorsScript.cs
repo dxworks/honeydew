@@ -3,7 +3,7 @@ using Honeydew.PostExtraction;
 using Honeydew.PostExtraction.Model;
 using Honeydew.PostExtraction.Model.ComplexityMetrics;
 using Honeydew.PostExtraction.ReferenceRelations;
-using Honeydew.ScriptBeePlugin.Models;
+using DxWorks.ScriptBee.Plugins.Honeydew.Models;
 
 namespace Honeydew.Scripts;
 

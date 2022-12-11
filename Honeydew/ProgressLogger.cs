@@ -1,5 +1,6 @@
-﻿using Honeydew.Logging;
-using Honeydew.ScriptBeePlugin;
+﻿using DxWorks.ScriptBee.Plugins.Honeydew;
+using Honeydew.Logging;
+using DxWorks.ScriptBee.Plugins.Honeydew;
 using Konsole;
 
 namespace Honeydew;
