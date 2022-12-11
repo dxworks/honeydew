@@ -34,7 +34,7 @@ jobs:
       - name: Release for OS
         run: |
           mkdir bin
-          dotnet publish -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.scriptbee_semver }} Honeydew/Honeydew.csproj
+          dotnet publish -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
 
       - name: Prepare Assets
         run: |
