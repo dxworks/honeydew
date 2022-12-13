@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package>
+    <metadata>
+        <id>DxWorks.ScriptBee.Plugins.Honeydew</id>
+        <title>DxWorks.ScriptBee.Plugins.Honeydew</title>
+        <description>Honeydew ScriptBee Loader Plugin</description>
+        <version>3.0.2</version>
+        <authors>dxworks</authors>
+        <owners>dxworks</owners>
+        <projectUrl>https://github.com/dxworks/honeydew/tree/master/DxWorks.ScriptBee.Plugins.Honeydew</projectUrl>
+        <repository type="git" url="https://github.com/dxworks/honeydew"/>
+        <readme>README.md</readme>
+        <license type="file">LICENSE</license>
+
+        <dependencies>
+            <group targetFramework="net6.0">
+                <dependency id="DxWorks.ScriptBee.Plugin.Api" version="1.0.0" exclude="Build,Analyzers"/>
+            </group>
+        </dependencies>
+
+    </metadata>
+    <files>
+        <file src="LICENSE"/>
+        <file src="README.md" target="README.md"/>
+        <file src="RELEASE_NOTES.md"/>
+        <file src="bin\Release\net6.0\*.dll" target="lib\net6.0"/>
+    </files>
+
+</package>

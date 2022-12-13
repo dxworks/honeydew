@@ -74,6 +74,16 @@ For loading a model from a json file
 dotnet pack -c Release -o pack -p:PackageVersion=1.0.0
 ```
 
+## Create new version of DxWorks.ScriptBee.Plugins.Honeydew
+
+```shell
+dotnet build .\DxWorks.ScriptBee.Plugins.Honeydew\DxWorks.ScriptBee.Plugins.Honeydew.csproj -c Release
+````
+
+```shell
+nuget pack .\DxWorks.ScriptBee.Plugins.Honeydew\DxWorks.ScriptBee.Plugins.Honeydew.csproj.nuspec -OutputDirectory pack -Version 3.0.0 -Properties Configuration=Release
+```
+
 ## Build Project
 
 ### Self-contained application - Single-file app
