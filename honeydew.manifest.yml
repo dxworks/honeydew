@@ -44,9 +44,9 @@ voyager:
       instrument-yml: https://raw.githubusercontent.com/dxworks/honeydew/v3.0.0-voyager/instrument.yml
     - version: 3.0.1
       name: dxworks/honeydew
-      tag: v3.0.1-voyager
-      asset: honeydew.zip
-      instrument-yml: https://raw.githubusercontent.com/dxworks/honeydew/v3.0.1-voyager/instrument.yml
+      tag: v3.0.1
+      asset: honeydew-voyager.zip
+      instrument-yml: https://raw.githubusercontent.com/dxworks/honeydew/v3.0.1/instrument.yml
 
 scriptBee:
   id: honeydew
@@ -61,4 +61,4 @@ scriptBee:
       name: dxworks/honeydew
       sourceCode: https://github.com/dxworks/honeydew/tree/v3.0.1/DxWorks.ScriptBee.Plugins.Honeydew
       manifest: https://raw.githubusercontent.com/dxworks/honeydew/v3.0.1/manifest.yaml
-      asset: honeydew@3.0.1.zip
+      asset: honeydew-scriptbee.zip
