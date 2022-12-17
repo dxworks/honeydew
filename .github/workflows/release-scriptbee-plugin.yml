@@ -1,4 +1,4 @@
-name: Publish ScriptBee Plugin
+name: Release ScriptBee Plugin
 
 on:
   push:
@@ -49,11 +49,15 @@ jobs:
           name: honeydew-scriptbee.zip
           path: honeydew-scriptbee.zip
 
+      - name: Prepare Release Notes
+        run: touch ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
+
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
           name: Honeydew ${{ steps.semver_parser.outputs.semver }}
+          body_path: ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
           body: ""
           prerelease: false
           draft: false
