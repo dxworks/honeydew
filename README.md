@@ -1,6 +1,7 @@
 ﻿# Honeydew
 
-Honeydew is a tool that extracts facts from a C# Solution or C# Project
+Honeydew is a tool that extracts facts using static code analysis from DotNet Solutions that contain C# and Visual Basic
+Projects.
 
 ## Extraction
 

@@ -1,12 +1,11 @@
 slug: honyedew
 name: Honeydew
-description: The Honeydew description
+description: Honeydew is a tool that extracts facts using static code analysis from DotNet Solutions that contain C# and Visual Basic Projects.
 
 license: Apache-2.0
 
 repositories:
   - https://github.com/dxworks/honeydew
-
 
 issues:
   - https://github.com/dxworks/honeydew/issues
@@ -19,6 +18,7 @@ site: https://dxworks.org/honeydew
 
 technologies:
   - C#
+  - Visual Basic
   - Roslyn
 
 tags:
@@ -35,12 +35,28 @@ voyager:
       tag: v2.1.2-voyager
       asset: honeydew.zip
       instrument-yml: https://raw.githubusercontent.com/dxworks/honeydew/v2.1.2-voyager/instrument.yml
+    - version: 3.0.0
+      name: dxworks/honeydew
+      tag: v3.0.0-voyager
+      asset: honeydew.zip
+      instrument-yml: https://raw.githubusercontent.com/dxworks/honeydew/v3.0.0-voyager/instrument.yml
+    - version: 3.0.1
+      name: dxworks/honeydew
+      tag: v3.0.1-voyager
+      asset: honeydew.zip
+      instrument-yml: https://raw.githubusercontent.com/dxworks/honeydew/v3.0.1-voyager/instrument.yml
 
 scriptBee:
+  id: honeydew
+  type: plugin
   versions:
-    - version: 2.1.2
-      name: Honeydew.ScriptBeePlugin.dll
-      sourceCode: https://github.com/dxworks/honeydew/tree/master/Honeydew.ScriptBeePlugin
-      asset: "https://github.com/dxworks/honeydew/releases/download/v2.1.2/honeydew@2.1.2.zip"
-      requires:
-        voyager: "2.1.x"
+    - version: 3.0.0
+      name: dxworks/honeydew
+      sourceCode: https://github.com/dxworks/honeydew/tree/v3.0.0/DxWorks.ScriptBee.Plugins.Honeydew
+      manifest: https://raw.githubusercontent.com/dxworks/honeydew/v3.0.0/manifest.yaml
+      asset: honeydew@3.0.0.zip
+    - version: 3.0.1
+      name: dxworks/honeydew
+      sourceCode: https://github.com/dxworks/honeydew/tree/v3.0.1/DxWorks.ScriptBee.Plugins.Honeydew
+      manifest: https://raw.githubusercontent.com/dxworks/honeydew/v3.0.1/manifest.yaml
+      asset: honeydew@3.0.1.zip

@@ -4,5 +4,5 @@ description: "Honeydew Loader Plugin"
 name: Honeydew
 extensionPoints:
   - kind: Loader
-    entryPoint: Honeydew.ScriptBeePlugin.dll
-    version: 2.1.2
+    entryPoint: DxWorks.ScriptBee.Plugins.Honeydew.dll
+    version: 3.0.1
