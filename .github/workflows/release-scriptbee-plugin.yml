@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-      - '!*-voyager'
 
 jobs:
   build:
@@ -42,13 +41,13 @@ jobs:
           cp -R bin/*.dll honeydew
 
       - name: Create Archive
-        run: zip -j honeydew@${{ steps.semver_parser.outputs.semver }}.zip honeydew/*
+        run: zip -j honeydew-scriptbee.zip honeydew/*
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: honeydew@${{ steps.semver_parser.outputs.semver }}.zip
-          path: honeydew@${{ steps.semver_parser.outputs.semver }}.zip
+          name: honeydew-scriptbee.zip
+          path: honeydew-scriptbee.zip
 
       - name: Create Release
         id: create_release
@@ -60,4 +59,4 @@ jobs:
           draft: false
           fail_on_unmatched_files: true
           files: |
-            ./honeydew@${{ steps.semver_parser.outputs.semver }}.zip
+            ./honeydew-scriptbee.zip

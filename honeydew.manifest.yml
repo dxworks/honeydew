@@ -27,6 +27,8 @@ tags:
 authors:
   - name: Andrei Timar
     github: https://github.com/andrei2699
+  - name: Victor Chircu
+    github: https://github.com/vchircu
 
 voyager:
   versions:

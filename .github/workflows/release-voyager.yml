@@ -3,7 +3,7 @@ name: Release Voyager
 on:
   push:
     tags:
-      - 'v*-voyager'
+      - 'v*'
 
 jobs:
   build-and-publish:
@@ -91,7 +91,7 @@ jobs:
           chmod +x honeydew/bin/osx/Honeydew
 
       - name: Zip Voyager Release
-        run: zip -rl honeydew.zip honeydew
+        run: zip -rl honeydew-voyager.zip honeydew
 
       - name: Prepare Release Notes
         run: touch ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
@@ -100,9 +100,9 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          name: Honeydew ${{ steps.semver_parser.outputs.semver }} (Voyager)
+          name: Honeydew ${{ steps.semver_parser.outputs.semver }}
           body_path: ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
           body: ""
           prerelease: false
           draft: false
-          files: honeydew.zip
+          files: honeydew-voyager.zip
