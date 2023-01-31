@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [win, linux, osx]
+        os: [ win, linux, osx ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -96,6 +96,7 @@ jobs:
             ./honeydew-linux.zip/honeydew-linux.zip
             ./honeydew-osx.zip/honeydew-osx.zip
 
+
   npm-publish:
     name: Publish Npm Package
     runs-on: ubuntu-latest
@@ -137,3 +138,32 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  docker-publish:
+    name: Docker Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Extract Semver
+        id: semver_parser
+        run: |
+          semver=${TAG#"refs/tags/v"}
+          semver=${semver%"-voyager"}
+
+          echo ::set-output name=semver::$semver
+        env:
+          TAG: ${{ github.ref }}
+
+      - name: Build Docker Image
+        run: |
+          docker build -t dxworks/honeydew:${{ steps.semver_parser.outputs.semver }} -f ./Dockerfile .
+      - name: Publish Docker Images
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker push dxworks/honeydew:${{ steps.semver_parser.outputs.semver }}

@@ -69,6 +69,14 @@ For loading a model from a json file
 
   If present, Honeydew will run scripts in parallel where possible
 
+## Docker
+
+Honeydew can be run from a Docker container like this:
+
+```sh
+docker run --rm -it -v ${PWD}/results:/app/results dxworks/honeydew extract <input> -p
+```
+
 ## Pack
 
 ```shell
