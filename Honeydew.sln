@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Honeydew.Extractors.VisualB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.DesignSmellsDetection", "Honeydew.DesignSmellsDetection\Honeydew.DesignSmellsDetection.csproj", "{669B4853-D97D-4F5A-8EED-441574BAE84B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.ModelAdapters", "Honeydew.ModelAdapters\Honeydew.ModelAdapters.csproj", "{A03B8DF9-755B-44F8-AE8C-70C0E11365AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{669B4853-D97D-4F5A-8EED-441574BAE84B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{669B4853-D97D-4F5A-8EED-441574BAE84B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{669B4853-D97D-4F5A-8EED-441574BAE84B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A03B8DF9-755B-44F8-AE8C-70C0E11365AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A03B8DF9-755B-44F8-AE8C-70C0E11365AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A03B8DF9-755B-44F8-AE8C-70C0E11365AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A03B8DF9-755B-44F8-AE8C-70C0E11365AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

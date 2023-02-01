@@ -10,6 +10,11 @@ public static class MetricAdder
     {
         foreach (var metricModel in typeWithMetrics.Metrics)
         {
+            if (string.IsNullOrEmpty(metricModel.Name))
+            {
+                continue;
+            }
+
             if (CSharpConstants.IsNumericType(metricModel.ValueType))
             {
                 fileModel.Metrics[metricModel.Name] = (int)metricModel.Value;
@@ -25,6 +30,11 @@ public static class MetricAdder
     {
         foreach (var metricModel in typeWithMetrics.Metrics)
         {
+            if (string.IsNullOrEmpty(metricModel.Name))
+            {
+                continue;
+            }
+
             if (CSharpConstants.IsNumericType(metricModel.ValueType))
             {
                 entityModel.Metrics[metricModel.Name] = (int)metricModel.Value;
@@ -40,6 +50,11 @@ public static class MetricAdder
     {
         foreach (var metricModel in typeWithMetrics.Metrics)
         {
+            if (string.IsNullOrEmpty(metricModel.Name))
+            {
+                continue;
+            }
+
             if (CSharpConstants.IsNumericType(metricModel.ValueType))
             {
                 fieldModel.Metrics[metricModel.Name] = (int)metricModel.Value;
@@ -56,6 +71,11 @@ public static class MetricAdder
     {
         foreach (var metricModel in typeWithMetrics.Metrics)
         {
+            if (string.IsNullOrEmpty(metricModel.Name))
+            {
+                continue;
+            }
+
             if (CSharpConstants.IsNumericType(metricModel.ValueType))
             {
                 methodModel.Metrics[metricModel.Name] = (long)metricModel.Value;

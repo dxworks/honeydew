@@ -13,9 +13,9 @@ For extracting information about a solution or project use the following command
 
 If `input_path` is a path to a solution file (.sln), Honeydew will extract facts from that solution file
 
-If `input_path` is a path to a C# project file (.csproj), Honeydew will extract facts from that project
+If `input_path` is a path to a project file (.csproj or .vbproj), Honeydew will extract facts from that project
 
-If `input_path` is a path to a folder, Honeydew will find all the solution files and C# project files and extract facts
+If `input_path` is a path to a folder, Honeydew will find all the solution files and project files and extract facts
 from those
 
 The output files will be placed in a folder named `results`
@@ -68,6 +68,31 @@ For loading a model from a json file
 - `-p` or `--parallel`
 
   If present, Honeydew will run scripts in parallel where possible
+
+## Adapt
+
+This command is used to adapt a raw model file from version 2.1.x to version 3.x.x.
+It will create a new file in the results folder with the raw model adapted to the new version.
+
+```
+.\Honeydew adapt <input_path>
+```
+
+## Docker
+
+Honeydew can be run from a Docker container like this:
+
+### Linux / MacOs
+
+```shell
+docker run --rm -it -v $(pwd)/results:/app/results -v $(pwd)/<input>:<input> dxworks/honeydew extract <input> -p
+```
+
+### Powershell
+
+```powershell
+docker run --rm -it -v ${PWD}/results:/app/results -v ${PWD}/<input>:<input> dxworks/honeydew extract <input> -p
+```
 
 ## Pack
 

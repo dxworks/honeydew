@@ -1,0 +1,22 @@
+name: Release Docs
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Release Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install Mkdocs
+        run: pip install mkdocs-material mkdocs-material-extensions mkdocs-mermaid2-plugin
+
+      - name: Deploy mkdocs
+        run: mkdocs gh-deploy --force
