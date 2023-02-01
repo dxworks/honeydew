@@ -31,3 +31,8 @@ public class LoadOptions : CommandLineOptions
     [Option('p', "parallel", Required = false, Default = false, HelpText = "Parallel Script Running")]
     public bool ParallelRunning { get; set; } = false;
 }
+
+[Verb("adapt")]
+public class AdaptOptions : CommandLineOptions
+{
+}

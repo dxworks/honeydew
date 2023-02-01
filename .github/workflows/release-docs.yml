@@ -3,11 +3,11 @@ name: Release Docs
 on:
   push:
     branches:
-      - docs
+      - master
 
 jobs:
   deploy:
-    name: Deploy Docs
+    name: Release Docs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

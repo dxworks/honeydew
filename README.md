@@ -69,12 +69,29 @@ For loading a model from a json file
 
   If present, Honeydew will run scripts in parallel where possible
 
+## Adapt
+
+This command is used to adapt a raw model file from version 2.1.x to version 3.x.x.
+It will create a new file in the results folder with the raw model adapted to the new version.
+
+```
+.\Honeydew adapt <input_path>
+```
+
 ## Docker
 
 Honeydew can be run from a Docker container like this:
 
-```sh
-docker run --rm -it -v ${PWD}/results:/app/results dxworks/honeydew extract <input> -p
+### Linux / MacOs
+
+```shell
+docker run --rm -it -v $(pwd)/results:/app/results -v $(pwd)/<input>:<input> dxworks/honeydew extract <input> -p
+```
+
+### Powershell
+
+```powershell
+docker run --rm -it -v ${PWD}/results:/app/results -v ${PWD}/<input>:<input> dxworks/honeydew extract <input> -p
 ```
 
 ## Pack

@@ -29,6 +29,7 @@ nav:
   - Commands:
       - Extract: commands/extract.md
       - Load: commands/load.md
+      - Adapt: commands/adapt.md
   - Model:
       - Types: model/types.md
       - Extractor: model/extractor.md
