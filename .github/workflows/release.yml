@@ -4,9 +4,10 @@ on:
   push:
     tags:
       - 'v*'
+      - '!*-voyager'
 
 jobs:
-  build-and-publish:
+  build-and-publish-os-specific:
     name: Build and Publish
     runs-on: ubuntu-latest
     strategy:
@@ -34,7 +35,7 @@ jobs:
       - name: Release for OS
         run: |
           mkdir bin
-          dotnet publish -r ${{matrix.os}}-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
+          dotnet publish -r ${{matrix.os}}-x64 --self-contained false -p:PublishSingleFile=true -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
 
       - name: Prepare Assets
         run: |
@@ -52,10 +53,54 @@ jobs:
           name: honeydew-${{ matrix.os }}.zip
           path: honeydew-${{ matrix.os }}.zip
 
+  build-scriptbee-plugin:
+    name: Build ScriptBee Plugin
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Extract Semver
+        id: semver_parser
+        run: |
+          semver=${TAG#"refs/tags/v"}
+          semver=${semver%"-voyager"}
+
+          echo ::set-output name=semver::$semver
+        env:
+          TAG: ${{ github.ref }}
+
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Release for OS
+        run: |
+          mkdir bin
+          dotnet publish -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
+
+      - name: Prepare Assets
+        run: |
+          mkdir honeydew
+          cp manifest.yaml honeydew/manifest.yaml
+          cp README.md honeydew/README.md
+          rm bin/*.pdb
+          cp -R bin/*.dll honeydew
+
+      - name: Create Archive
+        run: zip -j honeydew-scriptbee.zip honeydew/*
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: honeydew-scriptbee.zip
+          path: honeydew-scriptbee.zip
+
   release-and-upload:
     name: Release and Upload
     runs-on: ubuntu-latest
-    needs: build-and-publish
+    needs: [ build-and-publish-os-specific, build-scriptbee-plugin ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -95,6 +140,7 @@ jobs:
             ./honeydew-win.zip/honeydew-win.zip
             ./honeydew-linux.zip/honeydew-linux.zip
             ./honeydew-osx.zip/honeydew-osx.zip
+            ./honeydew-scriptbee.zip/honeydew-scriptbee.zip
 
 
   npm-publish:
