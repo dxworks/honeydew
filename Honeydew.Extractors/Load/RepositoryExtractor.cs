@@ -79,6 +79,7 @@ public class RepositoryExtractor
                            cancellationToken))
         {
             repositoryModel.Projects.Add(projectModel);
+            repositoryModel.UnprocessedProjects.Add(projectModel);
         }
 
         _logger.Log();
@@ -91,6 +92,7 @@ public class RepositoryExtractor
                            processedSourceCodeFilePaths, cancellationToken))
         {
             repositoryModel.Projects.Add(projectWithUnprocessedFiles);
+            repositoryModel.UnprocessedSourceFiles.Add(projectWithUnprocessedFiles);
         }
 
         return repositoryModel;
