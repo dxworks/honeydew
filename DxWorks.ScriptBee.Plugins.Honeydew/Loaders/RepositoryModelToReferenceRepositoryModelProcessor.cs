@@ -3,6 +3,7 @@ using DxWorks.ScriptBee.Plugins.Honeydew.Models;
 using Honeydew.Logging;
 using Honeydew.Models.Types;
 using HoneydewRepositoryModel = Honeydew.Models.RepositoryModel;
+using HoneydewProjectModel = Honeydew.Models.ProjectModel;
 using HoneydewLinesOfCode = Honeydew.Models.LinesOfCode;
 using static DxWorks.ScriptBee.Plugins.Honeydew.Loaders.MetricAdder;
 
@@ -82,210 +83,20 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
 
         foreach (var projectModel in repositoryModel.Projects)
         {
-            Log($"ReferenceModel - Populating Project {projectModel.FilePath}");
-            var presentNamespacesSet = new HashSet<string>();
-
-            var referenceProjectModel = new ProjectModel
-            {
-                Name = projectModel.Name,
-                FilePath = projectModel.FilePath,
-                Repository = referenceRepositoryModel,
-                Language = projectModel.Language,
-            };
-
+            var referenceProjectModel = ProcessProjectModel(referenceRepositoryModel, projectModel, namespaceTreeHandler);
             referenceRepositoryModel.Projects.Add(referenceProjectModel);
+        }
 
-            var repositoryModelConversionStrategy = GetRepositoryModelConversionStrategy(projectModel.Language);
+        foreach (var projectModel in repositoryModel.UnprocessedProjects)
+        {
+            var referenceProjectModel = ProcessProjectModel(referenceRepositoryModel, projectModel, namespaceTreeHandler);
+            referenceRepositoryModel.UnprocessedProjects.Add(referenceProjectModel);
+        }
 
-            foreach (var compilationUnitType in projectModel.CompilationUnits)
-            {
-                Log($"ReferenceModel - Populating File {compilationUnitType.FilePath}");
-                var fileModel = new FileModel
-                {
-                    FilePath = compilationUnitType.FilePath,
-                    Project = referenceProjectModel,
-                    Loc = ConvertLoc(compilationUnitType.Loc),
-                };
-
-                referenceProjectModel.Files.Add(fileModel);
-
-                foreach (var classType in compilationUnitType.ClassTypes)
-                {
-                    var namespaceModel = namespaceTreeHandler.GetOrAdd(classType.ContainingNamespaceName);
-                    presentNamespacesSet.Add(classType.ContainingNamespaceName);
-
-                    if (repositoryModelConversionStrategy.IsDelegateModel(classType))
-                    {
-                        var model = new DelegateModel
-                        {
-                            Name = classType.Name,
-                            FilePath = classType.FilePath,
-                            Modifier = classType.Modifier,
-                            AccessModifier = ConvertAccessModifier(classType.AccessModifier),
-                            Modifiers = ConvertModifierToModifierList(classType.Modifier),
-                            File = fileModel,
-                            Namespace = namespaceModel,
-                            IsInternal = true,
-                            IsExternal = false,
-                            IsPrimitive = false,
-                            LinesOfCode = ConvertLoc(classType.Loc),
-                        };
-
-                        namespaceModel.Entities.Add(model);
-                        fileModel.Entities.Add(model);
-
-                        // todo check case when there is a delegate with the same name in the same project 
-                        var genericParameterCount =
-                            repositoryModelConversionStrategy.GetGenericParameterCount(classType);
-                        _entityModels[(referenceProjectModel, classType.Name, genericParameterCount)] =
-                            new List<EntityModel>
-                            {
-                                model
-                            };
-                    }
-                    else if (repositoryModelConversionStrategy.IsEnumModel(classType))
-                    {
-                        var model = new EnumModel
-                        {
-                            Name = classType.Name,
-                            FilePath = classType.FilePath,
-                            Modifier = classType.Modifier,
-                            AccessModifier = ConvertAccessModifier(classType.AccessModifier),
-                            Modifiers = ConvertModifierToModifierList(classType.Modifier),
-                            File = fileModel,
-                            Namespace = namespaceModel,
-                            IsInternal = true,
-                            IsExternal = false,
-                            IsPrimitive = false,
-                            LinesOfCode = ConvertLoc(classType.Loc),
-                            Type = repositoryModelConversionStrategy.GetEnumType(classType)
-                        };
-                        namespaceModel.Entities.Add(model);
-                        fileModel.Entities.Add(model);
-
-                        // todo check case when there is an enum with the same name in the same project
-                        _entityModels[(referenceProjectModel, classType.Name, 0)] = new List<EntityModel>
-                        {
-                            model
-                        };
-                    }
-                    else if (repositoryModelConversionStrategy.IsInterfaceModel(classType))
-                    {
-                        var model = new InterfaceModel
-                        {
-                            Name = classType.Name,
-                            FilePath = classType.FilePath,
-                            Modifier = classType.Modifier,
-                            AccessModifier = ConvertAccessModifier(classType.AccessModifier),
-                            Modifiers = ConvertModifierToModifierList(classType.Modifier),
-                            File = fileModel,
-                            Namespace = namespaceModel,
-                            IsInternal = true,
-                            IsExternal = false,
-                            IsPrimitive = false,
-                            LinesOfCode = ConvertLoc(classType.Loc),
-                        };
-
-                        namespaceModel.Entities.Add(model);
-                        fileModel.Entities.Add(model);
-
-                        var genericParameterCount =
-                            repositoryModelConversionStrategy.GetGenericParameterCount(classType);
-                        if (_entityModels.TryGetValue((referenceProjectModel, model.Name, genericParameterCount),
-                                out var entities))
-                        {
-                            foreach (var entity in entities.OfType<InterfaceModel>())
-                            {
-                                entity.Partials.Add(model);
-                                model.Partials.Add(entity);
-                            }
-
-                            entities.Add(model);
-                        }
-                        else
-                        {
-                            _entityModels.Add((referenceProjectModel, model.Name, genericParameterCount),
-                                new List<EntityModel>
-                                {
-                                    model
-                                });
-                        }
-                    }
-                    else if (repositoryModelConversionStrategy.IsClassModel(classType))
-                    {
-                        var model = new ClassModel
-                        {
-                            Name = classType.Name,
-                            FilePath = classType.FilePath,
-                            Type = ConvertClassType(classType.ClassType),
-                            Modifier = classType.Modifier,
-                            AccessModifier = ConvertAccessModifier(classType.AccessModifier),
-                            Modifiers = ConvertModifierToModifierList(classType.Modifier),
-                            File = fileModel,
-                            Namespace = namespaceModel,
-                            IsInternal = true,
-                            IsExternal = false,
-                            IsPrimitive = false,
-                            LinesOfCode = ConvertLoc(classType.Loc),
-                        };
-
-                        namespaceModel.Entities.Add(model);
-                        fileModel.Entities.Add(model);
-
-                        var genericParameterCount =
-                            repositoryModelConversionStrategy.GetGenericParameterCount(classType);
-                        if (_entityModels.TryGetValue((referenceProjectModel, model.Name, genericParameterCount),
-                                out var entities))
-                        {
-                            foreach (var entity in entities.OfType<ClassModel>())
-                            {
-                                model.Partials.Add(entity);
-                                entity.Partials.Add(model);
-                            }
-
-                            entities.Add(model);
-                        }
-                        else
-                        {
-                            _entityModels.Add(
-                                (referenceProjectModel, model.Name, genericParameterCount),
-                                new List<EntityModel>
-                                {
-                                    model
-                                });
-                        }
-                    }
-                }
-            }
-
-            foreach (var namespaceModel in projectModel.Namespaces)
-            {
-                if (!presentNamespacesSet.Contains(namespaceModel.Name))
-                {
-                    presentNamespacesSet.Add(namespaceModel.Name);
-                }
-            }
-
-            foreach (var namespaceName in presentNamespacesSet)
-            {
-                var namespaceModel = namespaceTreeHandler.GetOrAdd(namespaceName);
-
-                var replaced = false;
-                for (var i = 0; i < referenceProjectModel.Namespaces.Count; i++)
-                {
-                    if (referenceProjectModel.Namespaces[i].FullName == namespaceModel.FullName)
-                    {
-                        referenceProjectModel.Namespaces[i] = namespaceModel;
-                        replaced = true;
-                        break;
-                    }
-                }
-
-                if (!replaced)
-                {
-                    referenceProjectModel.Namespaces.Add(namespaceModel);
-                }
-            }
+        foreach (var projectModel in repositoryModel.UnprocessedSourceFiles)
+        {
+            var referenceProjectModel = ProcessProjectModel(referenceRepositoryModel, projectModel, namespaceTreeHandler);
+            referenceRepositoryModel.UnprocessedSourceFiles.Add(referenceProjectModel);
         }
 
         referenceRepositoryModel.Namespaces = namespaceTreeHandler.GetRootNamespaces();
@@ -307,6 +118,215 @@ public class RepositoryModelToReferenceRepositoryModelProcessor
                 projectModel.Solutions.Add(referenceSolutionModel);
             }
         }
+    }
+
+    private ProjectModel ProcessProjectModel(RepositoryModel referenceRepositoryModel, HoneydewProjectModel projectModel,
+        NamespaceTreeHandler namespaceTreeHandler)
+    {
+        Log($"ReferenceModel - Populating Project {projectModel.FilePath}");
+        var presentNamespacesSet = new HashSet<string>();
+
+        var referenceProjectModel = new ProjectModel
+        {
+            Name = projectModel.Name,
+            FilePath = projectModel.FilePath,
+            Repository = referenceRepositoryModel,
+            Language = projectModel.Language,
+        };
+
+        var repositoryModelConversionStrategy = GetRepositoryModelConversionStrategy(projectModel.Language);
+
+        foreach (var compilationUnitType in projectModel.CompilationUnits)
+        {
+            Log($"ReferenceModel - Populating File {compilationUnitType.FilePath}");
+            var fileModel = new FileModel
+            {
+                FilePath = compilationUnitType.FilePath,
+                Project = referenceProjectModel,
+                Loc = ConvertLoc(compilationUnitType.Loc),
+            };
+
+            referenceProjectModel.Files.Add(fileModel);
+
+            foreach (var classType in compilationUnitType.ClassTypes)
+            {
+                var namespaceModel = namespaceTreeHandler.GetOrAdd(classType.ContainingNamespaceName);
+                presentNamespacesSet.Add(classType.ContainingNamespaceName);
+
+                if (repositoryModelConversionStrategy.IsDelegateModel(classType))
+                {
+                    var model = new DelegateModel
+                    {
+                        Name = classType.Name,
+                        FilePath = classType.FilePath,
+                        Modifier = classType.Modifier,
+                        AccessModifier = ConvertAccessModifier(classType.AccessModifier),
+                        Modifiers = ConvertModifierToModifierList(classType.Modifier),
+                        File = fileModel,
+                        Namespace = namespaceModel,
+                        IsInternal = true,
+                        IsExternal = false,
+                        IsPrimitive = false,
+                        LinesOfCode = ConvertLoc(classType.Loc),
+                    };
+
+                    namespaceModel.Entities.Add(model);
+                    fileModel.Entities.Add(model);
+
+                    // todo check case when there is a delegate with the same name in the same project 
+                    var genericParameterCount =
+                        repositoryModelConversionStrategy.GetGenericParameterCount(classType);
+                    _entityModels[(referenceProjectModel, classType.Name, genericParameterCount)] =
+                        new List<EntityModel>
+                        {
+                            model
+                        };
+                }
+                else if (repositoryModelConversionStrategy.IsEnumModel(classType))
+                {
+                    var model = new EnumModel
+                    {
+                        Name = classType.Name,
+                        FilePath = classType.FilePath,
+                        Modifier = classType.Modifier,
+                        AccessModifier = ConvertAccessModifier(classType.AccessModifier),
+                        Modifiers = ConvertModifierToModifierList(classType.Modifier),
+                        File = fileModel,
+                        Namespace = namespaceModel,
+                        IsInternal = true,
+                        IsExternal = false,
+                        IsPrimitive = false,
+                        LinesOfCode = ConvertLoc(classType.Loc),
+                        Type = repositoryModelConversionStrategy.GetEnumType(classType)
+                    };
+                    namespaceModel.Entities.Add(model);
+                    fileModel.Entities.Add(model);
+
+                    // todo check case when there is an enum with the same name in the same project
+                    _entityModels[(referenceProjectModel, classType.Name, 0)] = new List<EntityModel>
+                    {
+                        model
+                    };
+                }
+                else if (repositoryModelConversionStrategy.IsInterfaceModel(classType))
+                {
+                    var model = new InterfaceModel
+                    {
+                        Name = classType.Name,
+                        FilePath = classType.FilePath,
+                        Modifier = classType.Modifier,
+                        AccessModifier = ConvertAccessModifier(classType.AccessModifier),
+                        Modifiers = ConvertModifierToModifierList(classType.Modifier),
+                        File = fileModel,
+                        Namespace = namespaceModel,
+                        IsInternal = true,
+                        IsExternal = false,
+                        IsPrimitive = false,
+                        LinesOfCode = ConvertLoc(classType.Loc),
+                    };
+
+                    namespaceModel.Entities.Add(model);
+                    fileModel.Entities.Add(model);
+
+                    var genericParameterCount =
+                        repositoryModelConversionStrategy.GetGenericParameterCount(classType);
+                    if (_entityModels.TryGetValue((referenceProjectModel, model.Name, genericParameterCount),
+                            out var entities))
+                    {
+                        foreach (var entity in entities.OfType<InterfaceModel>())
+                        {
+                            entity.Partials.Add(model);
+                            model.Partials.Add(entity);
+                        }
+
+                        entities.Add(model);
+                    }
+                    else
+                    {
+                        _entityModels.Add((referenceProjectModel, model.Name, genericParameterCount),
+                            new List<EntityModel>
+                            {
+                                model
+                            });
+                    }
+                }
+                else if (repositoryModelConversionStrategy.IsClassModel(classType))
+                {
+                    var model = new ClassModel
+                    {
+                        Name = classType.Name,
+                        FilePath = classType.FilePath,
+                        Type = ConvertClassType(classType.ClassType),
+                        Modifier = classType.Modifier,
+                        AccessModifier = ConvertAccessModifier(classType.AccessModifier),
+                        Modifiers = ConvertModifierToModifierList(classType.Modifier),
+                        File = fileModel,
+                        Namespace = namespaceModel,
+                        IsInternal = true,
+                        IsExternal = false,
+                        IsPrimitive = false,
+                        LinesOfCode = ConvertLoc(classType.Loc),
+                    };
+
+                    namespaceModel.Entities.Add(model);
+                    fileModel.Entities.Add(model);
+
+                    var genericParameterCount =
+                        repositoryModelConversionStrategy.GetGenericParameterCount(classType);
+                    if (_entityModels.TryGetValue((referenceProjectModel, model.Name, genericParameterCount),
+                            out var entities))
+                    {
+                        foreach (var entity in entities.OfType<ClassModel>())
+                        {
+                            model.Partials.Add(entity);
+                            entity.Partials.Add(model);
+                        }
+
+                        entities.Add(model);
+                    }
+                    else
+                    {
+                        _entityModels.Add(
+                            (referenceProjectModel, model.Name, genericParameterCount),
+                            new List<EntityModel>
+                            {
+                                model
+                            });
+                    }
+                }
+            }
+        }
+
+        foreach (var namespaceModel in projectModel.Namespaces)
+        {
+            if (!presentNamespacesSet.Contains(namespaceModel.Name))
+            {
+                presentNamespacesSet.Add(namespaceModel.Name);
+            }
+        }
+
+        foreach (var namespaceName in presentNamespacesSet)
+        {
+            var namespaceModel = namespaceTreeHandler.GetOrAdd(namespaceName);
+
+            var replaced = false;
+            for (var i = 0; i < referenceProjectModel.Namespaces.Count; i++)
+            {
+                if (referenceProjectModel.Namespaces[i].FullName == namespaceModel.FullName)
+                {
+                    referenceProjectModel.Namespaces[i] = namespaceModel;
+                    replaced = true;
+                    break;
+                }
+            }
+
+            if (!replaced)
+            {
+                referenceProjectModel.Namespaces.Add(namespaceModel);
+            }
+        }
+
+        return referenceProjectModel;
     }
 
 

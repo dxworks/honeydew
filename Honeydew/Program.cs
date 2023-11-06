@@ -172,6 +172,7 @@ static void RunScripts(ScriptRunner scriptRunner, Dictionary<string, object?> de
     scriptRunner.Run(runInParallel, new List<ScriptRuntime>
     {
         new(new ExportDesignSmellsPerFileScript(jsonModelExporter, logger), defaultArguments),
+        new(new ExportDeadCodeTagsScript(jsonModelExporter), defaultArguments),
         new(new ExportCyclomaticComplexityPerFileScript(jsonModelExporter), defaultArguments),
         new(new ExportClassRelationsScript(csvRelationsRepresentationExporter), defaultArguments),
         new(new ExportStatisticsScript(jsonModelExporter), defaultArguments),
@@ -354,6 +355,7 @@ static async Task Load(string honeydewVersion, string projectName, string inputP
         { "classRelationsOutputName", $"{projectName}-class_relations.csv" },
         { "cycloOutputName", $"{projectName}-cyclomatic.json" },
         { "designSmellsOutputName", $"{projectName}-designSmells.json" },
+        { "deadCodeOutputName", $"{projectName}-deadCode.json" },
         { "statisticsFileOutputName", $"{projectName}-stats.json" },
         { "projectName", projectName },
     };
