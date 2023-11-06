@@ -7,6 +7,7 @@ using Honeydew;
 using Honeydew.Adapt;
 using Honeydew.Extraction;
 using Honeydew.Extractors.CSharp;
+using Honeydew.Extractors.Dotnet;
 using Honeydew.Extractors.Exporters;
 using Honeydew.Extractors.Load;
 using Honeydew.Extractors.VisualBasic;
@@ -260,6 +261,8 @@ static async Task Extract(string honeydewVersion, string projectName, string inp
         logger.Log("Parallel Extracting Enabled");
         progressLogger.Log("Parallel Extracting Enabled");
     }
+
+    DotNetSdkRegistry.RegisterMsBuild(logger);
 
     var repositoryModel = await ExtractModel(logger, progressLogger, missingFilesLogger, inputPath,
         extractOptions.ParallelExtraction, cancellationToken);
