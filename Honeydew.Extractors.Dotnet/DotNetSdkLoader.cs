@@ -3,7 +3,7 @@ using Microsoft.Build.Locator;
 
 namespace Honeydew.Extractors.Dotnet;
 
-public class DotNetSdkRegistry
+public class DotNetSdkLoader
 {
     private const int RequiredNetSdkVersion = 6;
 

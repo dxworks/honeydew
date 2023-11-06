@@ -262,7 +262,7 @@ static async Task Extract(string honeydewVersion, string projectName, string inp
         progressLogger.Log("Parallel Extracting Enabled");
     }
 
-    DotNetSdkRegistry.RegisterMsBuild(logger);
+    DotNetSdkLoader.RegisterMsBuild(logger);
 
     var repositoryModel = await ExtractModel(logger, progressLogger, missingFilesLogger, inputPath,
         extractOptions.ParallelExtraction, cancellationToken);

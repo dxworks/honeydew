@@ -128,7 +128,7 @@ public class SolutionExtractor : ISolutionExtractor
 
     private Task<Solution> GetSolution(string path, CancellationToken cancellationToken)
     {
-        DotNetSdkRegistry.RegisterMsBuild(_logger);
+        DotNetSdkLoader.RegisterMsBuild(_logger);
 
         var msBuildWorkspace = MSBuildWorkspace.Create();
 

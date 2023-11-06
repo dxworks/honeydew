@@ -16,7 +16,7 @@ public class MsBuildProjectProvider : IProjectProvider<Project>
 
     public Task<Project> GetProject(string path, CancellationToken cancellationToken)
     {
-        DotNetSdkRegistry.RegisterMsBuild(_logger);
+        DotNetSdkLoader.RegisterMsBuild(_logger);
 
         var msBuildWorkspace = MSBuildWorkspace.Create();
 
