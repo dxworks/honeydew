@@ -1,7 +1,7 @@
-﻿using Honeydew.Extractors.Load;
+﻿using Honeydew.Extractors.Dotnet;
+using Honeydew.Extractors.Load;
 using Honeydew.Logging;
 using Honeydew.Models;
-using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 
@@ -126,12 +126,9 @@ public class SolutionExtractor : ISolutionExtractor
         return null;
     }
 
-    private static Task<Solution> GetSolution(string path, CancellationToken cancellationToken)
+    private Task<Solution> GetSolution(string path, CancellationToken cancellationToken)
     {
-        if (!MSBuildLocator.IsRegistered)
-        {
-            MSBuildLocator.RegisterDefaults();
-        }
+        DotNetSdkLoader.RegisterMsBuild(_logger);
 
         var msBuildWorkspace = MSBuildWorkspace.Create();
 

@@ -31,11 +31,11 @@ public class ProjectExtractorFactory
         {
             CSharp => new DotnetProjectExtractor(_logger, _progressLogger,
                 GetProjectLoadingStrategy(_logger, _parallelExtraction),
-                new CSharpFactExtractor(CSharpExtractionVisitors.GetVisitors(_logger)), new MsBuildProjectProvider()),
+                new CSharpFactExtractor(CSharpExtractionVisitors.GetVisitors(_logger)), new MsBuildProjectProvider(_logger)),
             VisualBasic => new DotnetProjectExtractor(_logger, _progressLogger,
                 GetProjectLoadingStrategy(_logger, _parallelExtraction),
                 new VisualBasicFactExtractor(VisualBasicExtractionVisitors.GetVisitors(_logger)),
-                new MsBuildProjectProvider()),
+                new MsBuildProjectProvider(_logger)),
             _ => null
         };
     }

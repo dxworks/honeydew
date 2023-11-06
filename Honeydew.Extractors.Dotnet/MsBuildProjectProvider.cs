@@ -1,5 +1,5 @@
 ﻿using Honeydew.Extractors.Load;
-using Microsoft.Build.Locator;
+using Honeydew.Logging;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 
@@ -7,12 +7,16 @@ namespace Honeydew.Extractors.Dotnet;
 
 public class MsBuildProjectProvider : IProjectProvider<Project>
 {
+    private readonly ILogger _logger;
+
+    public MsBuildProjectProvider(ILogger logger)
+    {
+        _logger = logger;
+    }
+
     public Task<Project> GetProject(string path, CancellationToken cancellationToken)
     {
-        if (!MSBuildLocator.IsRegistered)
-        {
-            MSBuildLocator.RegisterDefaults();
-        }
+        DotNetSdkLoader.RegisterMsBuild(_logger);
 
         var msBuildWorkspace = MSBuildWorkspace.Create();
 
