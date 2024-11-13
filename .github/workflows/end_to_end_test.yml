@@ -40,6 +40,11 @@ jobs:
         run: |
           mkdir bin
           dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
+          if [ ! -f "/Users/runner/.dotnet/host/fxr/libhostfxr.dylib" ]; then
+            echo "libhostfxr.dylib is missing";
+            exit 1;
+          fi
+          dotnet --info
 
 
       - name: Checkout Test Project
