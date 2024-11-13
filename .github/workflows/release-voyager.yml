@@ -46,7 +46,7 @@ jobs:
         run: zip -r honeydew-${{ matrix.os }}.zip ${{matrix.os}}
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: honeydew-${{ matrix.os }}.zip
           path: honeydew-${{ matrix.os }}.zip
