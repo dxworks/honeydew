@@ -40,14 +40,6 @@ jobs:
         run: |
           mkdir bin
           dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
-
-      - if: matrix.os == 'macos-latest'
-        name: Display .NET Version Information
-        run: dotnet --info
-
-      - if: matrix.os == 'macos-latest'
-        name: Display .NET host folder
-        run: ls -R /Users/runner/.dotnet/host/
     
       - name: Checkout Test Project
         uses: actions/checkout@v2
