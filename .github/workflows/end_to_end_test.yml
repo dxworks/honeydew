@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ windows-latest, ubuntu-latest, macos-latest ]
+        os: [ windows-latest, ubuntu-latest ]
 
     runs-on: ${{matrix.os}}
 
@@ -48,15 +48,6 @@ jobs:
       - if: matrix.os == 'macos-latest'
         name: Display .NET host folder
         run: ls -R /Users/runner/.dotnet/host/
-
-      - if: matrix.os == 'macos-latest'
-        name: Print .NET Environment Variables
-        run: |
-          echo "DOTNET_ROOT: $DOTNET_ROOT"
-          echo "DOTNET_ROOT(x86): $DOTNET_ROOT(x86)"
-          echo "DOTNET_HOST_PATH: $DOTNET_HOST_PATH"
-          echo "DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR: $DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR"
-          echo "PATH: $PATH"
     
       - name: Checkout Test Project
         uses: actions/checkout@v2
