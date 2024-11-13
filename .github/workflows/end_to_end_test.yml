@@ -15,10 +15,6 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
-      - if: matrix.os == 'macos-latest'
-        name: Clear .NET Cache
-        run: rm -rf ~/.dotnet
-
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -50,12 +46,9 @@ jobs:
         run: dotnet --info
 
       - if: matrix.os == 'macos-latest'
-        name: Check for file
-        run: |
-          if [ ! -f "/Users/runner/.dotnet/host/fxr/libhostfxr.dylib" ]; then
-            echo "libhostfxr.dylib is missing";
-          fi
-
+        name: Display .NET host folder
+        run: ls -R /Users/runner/.dotnet/host/
+    
       - name: Checkout Test Project
         uses: actions/checkout@v2
         with:
