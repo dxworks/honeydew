@@ -27,9 +27,9 @@ jobs:
         env:
           TAG: ${{ github.ref }}
 
-      - uses: actions/setup-dotnet@v1
+      - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: '8.0.x'
 
       - name: Release for OS
         run: |
@@ -46,7 +46,7 @@ jobs:
         run: zip -r honeydew-${{ matrix.os }}.zip ${{matrix.os}}
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: honeydew-${{ matrix.os }}.zip
           path: honeydew-${{ matrix.os }}.zip
