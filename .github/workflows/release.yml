@@ -16,7 +16,7 @@ jobs:
         os: [ win, linux, osx ]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Extract Semver
         id: semver_parser
@@ -59,7 +59,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Extract Semver
         id: semver_parser
@@ -103,7 +103,7 @@ jobs:
     needs: [ build-and-publish-os-specific, build-scriptbee-plugin ]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Extract Semver
         id: semver_parser
@@ -116,7 +116,7 @@ jobs:
           TAG: ${{ github.ref }}
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
 
       - name: List all downloads
         run: |
@@ -128,7 +128,7 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: Honeydew ${{ steps.semver_parser.outputs.semver }}
           body_path: ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
@@ -152,10 +152,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '18.x'
           cache: 'npm'
@@ -186,7 +186,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node with NPM Package Registry
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18.x'
           cache: 'npm'
@@ -207,7 +207,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Extract Semver
         id: semver_parser
