@@ -19,6 +19,7 @@ using Honeydew.PostExtraction.ReferenceRelations;
 using Honeydew.Processors;
 using Honeydew.Scripts;
 using Honeydew.Utils;
+using Microsoft.Build.Locator;
 
 const string defaultPathForAllRepresentations = "results";
 
@@ -36,6 +37,8 @@ await result.MapResult(async options =>
 
     IProgressLogger progressLogger =
         disableProgressBars ? new NoBarsProgressLogger() : new ProgressLogger();
+
+    LogMsBuildAssemblies(logger);
 
     var honeydewVersion = "";
     try
@@ -423,4 +426,19 @@ static void Adapt(string honeydewVersion, string projectName, string inputPath, 
     progressLogger.Log("Finished Exporting!");
     logger.Log();
     logger.Log($"Output will be found at {Path.GetFullPath(defaultPathForAllRepresentations)}");
+}
+
+void LogMsBuildAssemblies(SerilogLogger log)
+{
+    AppDomain.CurrentDomain.AssemblyLoad += (_, args) =>
+    {
+        var name = args.LoadedAssembly.GetName().Name;
+        if (name != null && (name.StartsWith("Microsoft.Build") ||
+                             name.StartsWith("Microsoft.CodeAnalysis")))
+        {
+            log.Log($"[AssemblyLoad] {args.LoadedAssembly.FullName} loaded from {args.LoadedAssembly.Location}");
+        }
+    };
+
+    log.Log($"[Startup] MSBuildLocator.IsRegistered: {MSBuildLocator.IsRegistered}");
 }
