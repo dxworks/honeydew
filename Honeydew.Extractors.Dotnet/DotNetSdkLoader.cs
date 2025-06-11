@@ -1,5 +1,6 @@
 ﻿using Honeydew.Logging;
 using Microsoft.Build.Locator;
+using System.Runtime.InteropServices;
 
 namespace Honeydew.Extractors.Dotnet;
 
@@ -8,7 +9,7 @@ public class DotNetSdkLoader
     private const int RequiredNetSdkVersion = 8;
 
     public static void RegisterMsBuild(ILogger logger)
-    {
+     {
         if (MSBuildLocator.IsRegistered) return;
 
         logger.Log("Registering MsBuild");
@@ -27,10 +28,12 @@ public class DotNetSdkLoader
         MSBuildLocator.RegisterInstance(requiredNetSdk);
     }
 
-    private static void LogInstances(ILogger logger, IEnumerable<VisualStudioInstance> visualStudioInstances)
+    private static void LogInstances(ILogger logger, IEnumerable<VisualStudioInstance> instances)
     {
-        var versionString = string.Join(Environment.NewLine,
-            visualStudioInstances.Select(vsi => vsi.Name + " " + vsi.Version));
-        logger.Log("Detected the following versions: " + versionString);
+        logger.Log($"Process architecture: {RuntimeInformation.ProcessArchitecture}");
+        foreach (var instance in instances)
+        {
+            logger.Log($"- {instance.Name} {instance.Version} at {instance.MSBuildPath}");
+        }
     }
 }
