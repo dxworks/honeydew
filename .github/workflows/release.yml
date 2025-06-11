@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ win, linux, osx ]
+        rid: [ win-x64, linux-x64, osx-x64, osx-arm64 ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,7 +24,7 @@ jobs:
           semver=${TAG#"refs/tags/v"}
           semver=${semver%"-voyager"}
 
-          echo ::set-output name=semver::$semver
+          echo "semver=${semver}" >> $GITHUB_OUTPUT
         env:
           TAG: ${{ github.ref }}
 
@@ -34,24 +34,24 @@ jobs:
 
       - name: Release for OS
         run: |
-          mkdir bin
-          dotnet publish -r ${{matrix.os}}-x64 --self-contained false -p:PublishSingleFile=true -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
+          mkdir -p bin
+          dotnet publish -r ${{ matrix.rid }} --self-contained false -p:PublishSingleFile=true -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
 
       - name: Prepare Assets
         run: |
           mkdir -p honeydew/results
           cp README.md honeydew/README.md
-          rm bin/*.pdb
-          cp -R bin/* honeydew
+          rm bin/*.pdb || true
+          cp -R bin/* honeydew/
 
       - name: Create Archive
-        run: zip -r honeydew-${{ matrix.os }}.zip honeydew
+        run: zip -r honeydew-${{ matrix.rid }}.zip honeydew
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: honeydew-${{ matrix.os }}.zip
-          path: honeydew-${{ matrix.os }}.zip
+          name: honeydew-${{ matrix.rid }}.zip
+          path: honeydew-${{ matrix.rid }}.zip
 
   build-scriptbee-plugin:
     name: Build ScriptBee Plugin
@@ -67,7 +67,7 @@ jobs:
           semver=${TAG#"refs/tags/v"}
           semver=${semver%"-voyager"}
 
-          echo ::set-output name=semver::$semver
+          echo "semver=${semver}" >> $GITHUB_OUTPUT
         env:
           TAG: ${{ github.ref }}
 
@@ -85,8 +85,8 @@ jobs:
           mkdir honeydew
           cp manifest.yaml honeydew/manifest.yaml
           cp README.md honeydew/README.md
-          rm bin/*.pdb
-          cp -R bin/*.dll honeydew
+          rm bin/*.pdb || true
+          cp -R bin/*.dll honeydew/
 
       - name: Create Archive
         run: zip -j honeydew-scriptbee.zip honeydew/*
@@ -111,7 +111,7 @@ jobs:
           semver=${TAG#"refs/tags/v"}
           semver=${semver%"-voyager"}
 
-          echo ::set-output name=semver::$semver
+          echo "semver=${semver}" >> $GITHUB_OUTPUT
         env:
           TAG: ${{ github.ref }}
 
@@ -137,11 +137,11 @@ jobs:
           draft: false
           fail_on_unmatched_files: true
           files: |
-            ./honeydew-win.zip/honeydew-win.zip
-            ./honeydew-linux.zip/honeydew-linux.zip
-            ./honeydew-osx.zip/honeydew-osx.zip
+            ./honeydew-win-x64.zip/honeydew-win-x64.zip
+            ./honeydew-linux-x64.zip/honeydew-linux-x64.zip
+            ./honeydew-osx-x64.zip/honeydew-osx-x64.zip
+            ./honeydew-osx-arm64.zip/honeydew-osx-arm64.zip
             ./honeydew-scriptbee.zip/honeydew-scriptbee.zip
-
 
   npm-publish:
     name: Publish Npm Package
@@ -171,7 +171,7 @@ jobs:
           semver=${TAG#"refs/tags/v"}
           semver=${semver%"-voyager"}
 
-          echo ::set-output name=semver::$semver
+          echo "semver=${semver}" >> $GITHUB_OUTPUT
         env:
           TAG: ${{ github.ref }}
 
@@ -215,13 +215,14 @@ jobs:
           semver=${TAG#"refs/tags/v"}
           semver=${semver%"-voyager"}
 
-          echo ::set-output name=semver::$semver
+          echo "semver=${semver}" >> $GITHUB_OUTPUT
         env:
           TAG: ${{ github.ref }}
 
       - name: Build Docker Image
         run: |
           docker build -t dxworks/honeydew:${{ steps.semver_parser.outputs.semver }} -f ./Dockerfile .
+
       - name: Publish Docker Images
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}

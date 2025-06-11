@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [win, linux, osx]
+        rid: [win-x64, linux-x64, osx-x64, osx-arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,8 +22,7 @@ jobs:
         run: |
           semver=${TAG#"refs/tags/v"}
           semver=${semver%"-voyager"}
-
-          echo ::set-output name=semver::$semver
+          echo "semver=${semver}" >> $GITHUB_OUTPUT
         env:
           TAG: ${{ github.ref }}
 
@@ -33,23 +32,23 @@ jobs:
 
       - name: Release for OS
         run: |
-          mkdir bin
-          dotnet publish -r ${{matrix.os}}-x64 --self-contained false -p:PublishSingleFile=true -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
+          mkdir -p bin
+          dotnet publish -r ${{ matrix.rid }} --self-contained false -p:PublishSingleFile=true -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
 
       - name: Prepare Assets
         run: |
-          mkdir -p ${{matrix.os}}
-          rm bin/*.pdb
-          cp -R bin/* ${{matrix.os}}
+          mkdir -p ${{ matrix.rid }}
+          rm bin/*.pdb || true
+          cp -R bin/* ${{ matrix.rid }}
 
       - name: Create Archive
-        run: zip -r honeydew-${{ matrix.os }}.zip ${{matrix.os}}
+        run: zip -r honeydew-${{ matrix.rid }}.zip ${{ matrix.rid }}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: honeydew-${{ matrix.os }}.zip
-          path: honeydew-${{ matrix.os }}.zip
+          name: honeydew-${{ matrix.rid }}.zip
+          path: honeydew-${{ matrix.rid }}.zip
 
   release-and-upload:
     name: Release Honeydew for Voyager
@@ -67,8 +66,7 @@ jobs:
         run: |
           semver=${TAG#"refs/tags/v"}
           semver=${semver%"-voyager"}
-
-          echo ::set-output name=semver::$semver
+          echo "semver=${semver}" >> $GITHUB_OUTPUT
         env:
           TAG: ${{ github.ref }}
 
@@ -80,15 +78,17 @@ jobs:
           cp README.md honeydew/README.md
           cp instrument.yml honeydew/instrument.yml
 
-          unzip ./honeydew-win.zip/honeydew-win.zip -d honeydew/bin
-          unzip ./honeydew-linux.zip/honeydew-linux.zip -d honeydew/bin
-          unzip ./honeydew-osx.zip/honeydew-osx.zip -d honeydew/bin
+          unzip ./honeydew-win-x64.zip/honeydew-win-x64.zip -d honeydew/bin
+          unzip ./honeydew-linux-x64.zip/honeydew-linux-x64.zip -d honeydew/bin
+          unzip ./honeydew-osx-x64.zip/honeydew-osx-x64.zip -d honeydew/bin
+          unzip ./honeydew-osx-arm64.zip/honeydew-osx-arm64.zip -d honeydew/bin
 
           ls -al -R honeydew
 
           chmod +x honeydew/bin/win/Honeydew.exe
           chmod +x honeydew/bin/linux/Honeydew
-          chmod +x honeydew/bin/osx/Honeydew
+          chmod +x honeydew/bin/osx-x64/Honeydew
+          chmod +x honeydew/bin/osx-arm64/Honeydew
 
       - name: Zip Voyager Release
         run: zip -rl honeydew.zip honeydew
@@ -106,4 +106,3 @@ jobs:
           prerelease: false
           draft: false
           files: honeydew.zip
-          

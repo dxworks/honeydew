@@ -6,7 +6,17 @@ results:
 commands:
   - name: run honeydew
     win: .\bin\win\Honeydew.exe extract "${repo}" ${options}
-    unix: if [[ "$OSTYPE" == "darwin"* ]]; then chmod +x ./bin/osx/Honeydew && ./bin/osx/Honeydew extract "${repo}" ${options}; else chmod +x ./bin/linux/Honeydew && ./bin/linux/Honeydew extract "${repo}" ${options}; fi
+    unix: |
+      arch_name="$(uname -m)"
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        if [[ "$arch_name" == "arm64" ]]; then
+          chmod +x ./bin/osx-arm64/Honeydew && ./bin/osx-arm64/Honeydew extract "${repo}" ${options}
+        else
+          chmod +x ./bin/osx-x64/Honeydew && ./bin/osx-x64/Honeydew extract "${repo}" ${options}
+        fi
+      else
+        chmod +x ./bin/linux/Honeydew && ./bin/linux/Honeydew extract "${repo}" ${options}
+      fi
 
 parameters:
   options: "--no-progress-bars"
