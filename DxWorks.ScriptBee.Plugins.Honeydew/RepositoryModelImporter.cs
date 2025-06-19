@@ -15,13 +15,36 @@ public class RepositoryModelImporter
 
     public async Task<RepositoryModel?> Import(Stream inputStream, CancellationToken cancellationToken)
     {
+        // Ensure the inputStream supports reading and has data
+        if (inputStream == null || !inputStream.CanRead)
+            throw new ArgumentException("Invalid input stream.", nameof(inputStream));
+
+        // Use the stream reader and JSON text reader to handle large files efficiently
         using var streamReader = new StreamReader(inputStream);
-        var serializer = new JsonSerializer();
+        await using var jsonTextReader = new JsonTextReader(streamReader);
+
+        var serializer = new JsonSerializer
+        {
+            // Optional: Configure JSON serializer settings for large file performance
+            CheckAdditionalContent = true,
+            MaxDepth = null // Handle nested structures without predefined limits
+        };
 
         serializer.Converters.Add(_projectModelConverter);
 
-        using var jsonTextReader = new JsonTextReader(streamReader);
-        var result = await Task.Run(() => serializer.Deserialize<RepositoryModel>(jsonTextReader), cancellationToken);
+        // Perform deserialization in an asynchronous-friendly task
+        var result = await Task.Run(() =>
+        {
+            try
+            {
+                return serializer.Deserialize<RepositoryModel>(jsonTextReader);
+            }
+            catch (JsonReaderException ex)
+            {
+                // Handle JSON format issues gracefully
+                throw new InvalidOperationException("Failed to parse JSON data.", ex);
+            }
+        }, cancellationToken);
 
         return result;
     }

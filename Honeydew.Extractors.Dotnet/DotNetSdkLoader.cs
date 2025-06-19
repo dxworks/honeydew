@@ -6,7 +6,7 @@ namespace Honeydew.Extractors.Dotnet;
 
 public class DotNetSdkLoader
 {
-    private const int RequiredNetSdkVersion = 8;
+    private const int RequiredNetSdkVersion = 9;
 
     public static void RegisterMsBuild(ILogger logger)
      { 
