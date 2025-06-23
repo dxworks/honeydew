@@ -85,8 +85,8 @@ jobs:
 
           ls -al -R honeydew
 
-          chmod +x honeydew/bin/win/Honeydew.exe
-          chmod +x honeydew/bin/linux/Honeydew
+          chmod +x honeydew/bin/win-x64/Honeydew.exe
+          chmod +x honeydew/bin/linux-x64/Honeydew
           chmod +x honeydew/bin/osx-x64/Honeydew
           chmod +x honeydew/bin/osx-arm64/Honeydew
 

@@ -5,7 +5,7 @@ results:
 
 commands:
   - name: run honeydew
-    win: .\bin\win\Honeydew.exe extract "${repo}" ${options}
+    win: .\bin\win-x64\Honeydew.exe extract "${repo}" ${options}
     unix: |
       arch_name="$(uname -m)"
       if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -15,7 +15,7 @@ commands:
           chmod +x ./bin/osx-x64/Honeydew && ./bin/osx-x64/Honeydew extract "${repo}" ${options}
         fi
       else
-        chmod +x ./bin/linux/Honeydew && ./bin/linux/Honeydew extract "${repo}" ${options}
+        chmod +x ./bin/linux-x64/Honeydew && ./bin/linux-x64/Honeydew extract "${repo}" ${options}
       fi
 
 parameters:
