@@ -7,13 +7,8 @@ commands:
   - name: run honeydew
     win: .\bin\win-x64\Honeydew.exe extract "${repo}" ${options}
     unix: |
-      arch_name="$(uname -m)"
       if [[ "$OSTYPE" == "darwin"* ]]; then
-        if [[ "$arch_name" == "arm64" ]]; then
-          chmod +x ./bin/osx-arm64/Honeydew && ./bin/osx-arm64/Honeydew extract "${repo}" ${options}
-        else
-          chmod +x ./bin/osx-x64/Honeydew && ./bin/osx-x64/Honeydew extract "${repo}" ${options}
-        fi
+        chmod +x ./bin/osx-x64/Honeydew && ./bin/osx-x64/Honeydew extract "${repo}" ${options}
       else
         chmod +x ./bin/linux-x64/Honeydew && ./bin/linux-x64/Honeydew extract "${repo}" ${options}
       fi

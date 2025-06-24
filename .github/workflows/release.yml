@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        rid: [ win-x64, linux-x64, osx-x64, osx-arm64 ]
+        rid: [ win-x64, linux-x64, osx-x64 ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -140,7 +140,6 @@ jobs:
             ./honeydew-win-x64.zip/honeydew-win-x64.zip
             ./honeydew-linux-x64.zip/honeydew-linux-x64.zip
             ./honeydew-osx-x64.zip/honeydew-osx-x64.zip
-            ./honeydew-osx-arm64.zip/honeydew-osx-arm64.zip
             ./honeydew-scriptbee.zip/honeydew-scriptbee.zip
 
   npm-publish:

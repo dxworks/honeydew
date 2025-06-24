@@ -33,6 +33,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.DesignSmellsDetect
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honeydew.ModelAdapters", "Honeydew.ModelAdapters\Honeydew.ModelAdapters.csproj", "{A03B8DF9-755B-44F8-AE8C-70C0E11365AB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build-and-test.yml = .github\workflows\build-and-test.yml
+		.github\workflows\end_to_end_test.yml = .github\workflows\end_to_end_test.yml
+		lib\index.js = lib\index.js
+		instrument.yml = instrument.yml
+		.github\workflows\release-docs.yml = .github\workflows\release-docs.yml
+		.github\workflows\release-voyager.yml = .github\workflows\release-voyager.yml
+		.github\workflows\release.yml = .github\workflows\release.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
