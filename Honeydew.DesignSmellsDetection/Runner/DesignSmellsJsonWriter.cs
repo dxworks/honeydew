@@ -62,7 +62,13 @@ internal class DesignFlaw
 
     private static int RoundToInt(double value)
     {
-        return Convert.ToInt32(value);
+        if (double.IsNaN(value) || double.IsInfinity(value))
+        {
+            throw new InvalidOperationException($"Severity must be a finite number, got '{value}'.");
+        }
+
+        var clamped = Math.Clamp(value, 0d, 10d);
+        return (int)Math.Round(clamped, MidpointRounding.AwayFromZero);
     }
 
     private static string GetTag(string name)
