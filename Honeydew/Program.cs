@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using CommandLine;
 using DxWorks.ScriptBee.Plugins.Honeydew;
 using DxWorks.ScriptBee.Plugins.Honeydew.Converters;
@@ -352,6 +352,31 @@ static async Task Load(string honeydewVersion, string projectName, string inputP
 
     logger.Log("Done Converting Model");
     progressLogger.Log("Done Converting Model");
+
+    if (loadOptions.ExportGraph)
+    {
+        logger.Log("Exporting Graph Artifacts (JSONL)");
+        progressLogger.Log("Exporting Graph Artifacts (JSONL)");
+
+        var graphArguments = CreateArgumentsDictionary(new Dictionary<string, object?>
+        {
+            { "referenceRepositoryModel", referenceRepositoryModel },
+        }, new Dictionary<string, object?>
+        {
+            { "outputRoot", Path.Combine(defaultPathForAllRepresentations, "graph_v1", projectName) },
+            { "includeAttributes", true },
+            { "includeImports", true },
+            { "includeLocals", true },
+        });
+
+        new ScriptRunner(progressLogger).Run(false, new List<ScriptRuntime>
+        {
+            new(new ExportGraphScript(logger, progressLogger), graphArguments),
+        });
+
+        logger.Log("Finished Exporting Graph Artifacts");
+        progressLogger.Log("Finished Exporting Graph Artifacts");
+    }
 
     var defaultArguments = new Dictionary<string, object?>
     {

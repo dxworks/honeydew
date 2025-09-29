@@ -1,4 +1,4 @@
-﻿using CommandLine;
+using CommandLine;
 
 namespace Honeydew;
 
@@ -30,6 +30,9 @@ public class LoadOptions : CommandLineOptions
 {
     [Option('p', "parallel", Required = false, Default = false, HelpText = "Parallel Script Running")]
     public bool ParallelRunning { get; set; } = false;
+
+    [Option('g', "export-graph", Required = false, Default = false, HelpText = "Export code graph artifacts (JSONL)")]
+    public bool ExportGraph { get; set; } = false;
 }
 
 [Verb("adapt")]
