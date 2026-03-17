@@ -1,0 +1,37 @@
+name: honeydew
+id: honeydew
+version: 1.0.0
+
+actions:
+  start:
+    parameters:
+      options: '--no-progress-bars'
+    commands:
+      run-honeydew:
+        id: run-honeydew
+        dir: ${instrumentPath}
+        command:
+          windows: .\bin\win-x64\Honeydew.exe extract "${repo}" ${options}
+          unix: >-
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              chmod +x ./bin/osx-x64/Honeydew && ./bin/osx-x64/Honeydew extract "${repo}" ${options}
+            else
+              chmod +x ./bin/linux-x64/Honeydew && ./bin/linux-x64/Honeydew extract "${repo}" ${options}
+            fi
+
+  summary:
+    summaryMdFile: results/summary.md
+    summaryHtmlFile: results/summary.html
+    commands:
+      generate-summary:
+        id: generate-summary
+        dir: ${instrumentPath}
+        command:
+          windows: py -3 honeydew-summary.py "${instrumentPath}/results"
+          unix: python3 honeydew-summary.py "${instrumentPath}/results"
+
+  pack:
+    with:
+      locations:
+        - source: ${instrumentDir}/results
+          destination: /results
