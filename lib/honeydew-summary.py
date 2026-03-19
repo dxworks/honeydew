@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +16,7 @@ SUMMARY_DATA_FILE_NAME = 'honeydew-summary-data.json'
 
 def build_payload(summary_data: dict[str, Any]) -> dict[str, Any]:
     status = str(summary_data.get('status') or 'success')
+    generated_at = _format_generated_at(summary_data.get('generatedAt'))
 
     metadata = {
         'project.name': summary_data.get('projectName', 'unknown'),
@@ -31,7 +33,7 @@ def build_payload(summary_data: dict[str, Any]) -> dict[str, Any]:
         'unprocessed.projects.count': _to_int(summary_data.get('unprocessedProjectsCount')),
         'unprocessed.source.files.count': _to_int(summary_data.get('unprocessedSourceFilesCount')),
         'source.lines.total': _to_int(summary_data.get('sourceCodeLines')),
-        'generated.at': summary_data.get('generatedAt', 'unknown'),
+        'generated.at': generated_at,
     }
 
     markdown = '\n'.join(
@@ -53,7 +55,7 @@ def build_payload(summary_data: dict[str, Any]) -> dict[str, Any]:
             f"- Unprocessed projects: {_to_int(summary_data.get('unprocessedProjectsCount'))}",
             f"- Unprocessed source files: {_to_int(summary_data.get('unprocessedSourceFilesCount'))}",
             f"- Source lines: {_to_int(summary_data.get('sourceCodeLines'))}",
-            f"- Generated at: {summary_data.get('generatedAt', 'unknown')}",
+            f'- Generated at: {generated_at}',
         ]
     )
 
@@ -74,7 +76,7 @@ def build_payload(summary_data: dict[str, Any]) -> dict[str, Any]:
         'unprocessedProjectsCount': _to_int(summary_data.get('unprocessedProjectsCount')),
         'unprocessedSourceFilesCount': _to_int(summary_data.get('unprocessedSourceFilesCount')),
         'sourceCodeLines': _to_int(summary_data.get('sourceCodeLines')),
-        'generatedAt': summary_data.get('generatedAt', 'unknown'),
+        'generatedAt': generated_at,
     }
 
     return {
@@ -101,6 +103,22 @@ def _to_int(value: Any) -> int:
         return int(value)
     except Exception:
         return 0
+
+
+def _format_generated_at(value: Any) -> str:
+    if value is None:
+        return 'unknown'
+
+    raw_value = str(value).strip()
+    if not raw_value:
+        return 'unknown'
+
+    try:
+        parsed = datetime.fromisoformat(raw_value.replace('Z', '+00:00'))
+    except ValueError:
+        return raw_value
+
+    return parsed.astimezone(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
 
 
 def main() -> int:
