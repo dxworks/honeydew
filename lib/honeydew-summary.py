@@ -88,6 +88,25 @@ def build_payload(summary_data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def build_missing_payload() -> dict[str, Any]:
+    return {
+        'tool': 'honeydew',
+        'status': 'missing',
+        'metadata': {},
+        'markdown': '\n'.join([
+            '## Honeydew',
+            '',
+            '- Status: missing',
+            '- Summary input is missing',
+        ]),
+        'templateModel': {
+            'status': 'missing',
+            'statusClass': 'status-missing',
+            'isMissing': True,
+        },
+    }
+
+
 def _to_status_class(status: str) -> str:
     if status == 'success':
         return 'status-success'
@@ -95,6 +114,8 @@ def _to_status_class(status: str) -> str:
         return 'status-warning'
     if status == 'failed':
         return 'status-error'
+    if status == 'missing':
+        return 'status-missing'
     return 'status-unknown'
 
 
@@ -134,9 +155,13 @@ def main() -> int:
 
     try:
         if not summary_data_path.exists():
-            raise FileNotFoundError(f'missing {SUMMARY_DATA_FILE_NAME}. Run Honeydew extraction before summary')
-
-        payload = build_payload(json.loads(summary_data_path.read_text(encoding='utf-8')))
+            print(
+                f"summary input missing for honeydew: expected '{SUMMARY_DATA_FILE_NAME}' in "
+                f"'{target_directory}'; generating missing summary artifacts"
+            )
+            payload = build_missing_payload()
+        else:
+            payload = build_payload(json.loads(summary_data_path.read_text(encoding='utf-8')))
         rendered = render_summary(target_directory, payload)
         print(f"Generated summary markdown at {rendered['summaryMdPath']}")
         print(f"Generated summary html at {rendered['summaryHtmlPath']}")

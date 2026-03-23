@@ -26,6 +26,10 @@
       border-left: 4px solid #cf222e;
     }
 
+    .honeydew-summary.status-missing {
+      border-left: 4px solid #8c959f;
+    }
+
     .honeydew-summary .summary-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -43,21 +47,25 @@
   <h2>Honeydew</h2>
   <p>Status: <strong>{{status}}</strong></p>
 
-  <div class="summary-grid">
-    <div class="summary-item"><strong>Project</strong><br>{{projectName}}</div>
-    <div class="summary-item"><strong>Solutions</strong><br>{{solutionsCount}}</div>
-    <div class="summary-item"><strong>Projects</strong><br>{{projectsCount}}</div>
-    <div class="summary-item"><strong>C# projects</strong><br>{{projectsCSharpCount}}</div>
-    <div class="summary-item"><strong>VB projects</strong><br>{{projectsVisualBasicCount}}</div>
-    <div class="summary-item"><strong>Source files</strong><br>{{filesCount}}</div>
-    <div class="summary-item"><strong>C# files</strong><br>{{filesCSharpCount}}</div>
-    <div class="summary-item"><strong>VB files</strong><br>{{filesVisualBasicCount}}</div>
-    <div class="summary-item"><strong>Top-level classes</strong><br>{{topLevelClassesCount}}</div>
-    <div class="summary-item"><strong>Interfaces</strong><br>{{interfacesCount}}</div>
-    <div class="summary-item"><strong>Abstract classes</strong><br>{{abstractClassesCount}}</div>
-    <div class="summary-item"><strong>Unprocessed projects</strong><br>{{unprocessedProjectsCount}}</div>
-    <div class="summary-item"><strong>Unprocessed source files</strong><br>{{unprocessedSourceFilesCount}}</div>
-    <div class="summary-item"><strong>Source lines</strong><br>{{sourceCodeLines}}</div>
-    <div class="summary-item"><strong>Generated at</strong><br>{{generatedAt}}</div>
-  </div>
+  {{#if isMissing}}
+    <p>Summary input is missing</p>
+  {{else}}
+    <div class="summary-grid">
+      <div class="summary-item"><strong>Project</strong><br>{{projectName}}</div>
+      <div class="summary-item"><strong>Solutions</strong><br>{{solutionsCount}}</div>
+      <div class="summary-item"><strong>Projects</strong><br>{{projectsCount}}</div>
+      <div class="summary-item"><strong>C# projects</strong><br>{{projectsCSharpCount}}</div>
+      <div class="summary-item"><strong>VB projects</strong><br>{{projectsVisualBasicCount}}</div>
+      <div class="summary-item"><strong>Source files</strong><br>{{filesCount}}</div>
+      <div class="summary-item"><strong>C# files</strong><br>{{filesCSharpCount}}</div>
+      <div class="summary-item"><strong>VB files</strong><br>{{filesVisualBasicCount}}</div>
+      <div class="summary-item"><strong>Top-level classes</strong><br>{{topLevelClassesCount}}</div>
+      <div class="summary-item"><strong>Interfaces</strong><br>{{interfacesCount}}</div>
+      <div class="summary-item"><strong>Abstract classes</strong><br>{{abstractClassesCount}}</div>
+      <div class="summary-item"><strong>Unprocessed projects</strong><br>{{unprocessedProjectsCount}}</div>
+      <div class="summary-item"><strong>Unprocessed source files</strong><br>{{unprocessedSourceFilesCount}}</div>
+      <div class="summary-item"><strong>Source lines</strong><br>{{sourceCodeLines}}</div>
+      <div class="summary-item"><strong>Generated at</strong><br>{{generatedAt}}</div>
+    </div>
+  {{/if}}
 </section>
