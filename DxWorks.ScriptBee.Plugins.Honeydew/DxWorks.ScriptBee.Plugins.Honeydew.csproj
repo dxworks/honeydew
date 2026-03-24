@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
         <PackageId>DxWorks.ScriptBee.Plugins.Honeydew</PackageId>
         <Description>Honeydew ScriptBee Loader Plugin</Description>
         <PackageReleaseNotes>ReleaseNotes.md</PackageReleaseNotes>

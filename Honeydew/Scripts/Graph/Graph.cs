@@ -1,34 +1,44 @@
-﻿using DotNetGraph;
-using DotNetGraph.Edge;
+﻿using DotNetGraph.Core;
 using DotNetGraph.Extensions;
-using DotNetGraph.Node;
-using DotNetGraph.SubGraph;
+using DotNetGraph.Compilation;
+using DotNetGraph.Exceptions;
 
 namespace Honeydew.Scripts.Graph;
 
 public class Graph
 {
-    public DotEdge DefaultEdgeProperties { get; } = new("_", "_");
-    public DotNode DefaultNodeProperties { get; } = new("_");
-    public DotSubGraph DefaultSubGraphProperties { get; } = new("_");
+    public DotEdge DefaultEdgeProperties { get; } = new();
+    public DotNode DefaultNodeProperties { get; } = new();
+    public DotSubgraph DefaultSubGraphProperties { get; } = new();
 
     private readonly IDictionary<string, DotNode> _nodes = new Dictionary<string, DotNode>();
     private readonly IDictionary<(string, string), DotEdge> _edges = new Dictionary<(string, string), DotEdge>();
-    private readonly IDictionary<string, DotSubGraph> _subGraphs = new Dictionary<string, DotSubGraph>();
+    private readonly IDictionary<string, DotSubgraph> _subGraphs = new Dictionary<string, DotSubgraph>();
     private readonly DotGraph _graph;
 
     public IEnumerable<DotNode> Nodes => _nodes.Values;
     public IEnumerable<DotEdge> Edges => _edges.Values;
-    public IEnumerable<DotSubGraph> SubGraphs => _subGraphs.Values;
+    public IEnumerable<DotSubgraph> SubGraphs => _subGraphs.Values;
 
     public Graph(string name, bool directed = false)
     {
-        _graph = new DotGraph(name, directed);
+        _graph = new DotGraph
+        {
+            Identifier = new DotIdentifier(name, false, true),
+            Directed = directed
+        };
     }
 
     public string GenerateDotFileContent(bool indented = false)
     {
-        return _graph.Compile(indented);
+        using var stringWriter = new StringWriter();
+        var context = new CompilationContext(stringWriter, new CompilationOptions
+        {
+            Indented = indented
+        });
+
+        _graph.CompileAsync(context).GetAwaiter().GetResult();
+        return stringWriter.ToString();
     }
 
     public DotNode AddNode(string nodeId, string? label = null)
@@ -61,19 +71,21 @@ public class Graph
         return edge;
     }
 
-    public DotSubGraph AddSubGraph(string subGraphName, string? label = null)
+    public DotSubgraph AddSubGraph(string subGraphName, string? label = null)
     {
         if (_subGraphs.TryGetValue(subGraphName, out var subGraph))
         {
             return subGraph;
         }
 
-        subGraph = new DotSubGraph(subGraphName)
+        subGraph = new DotSubgraph
         {
-            Color = DefaultSubGraphProperties.Color,
-            Style = DefaultSubGraphProperties.Style,
+            Identifier = new DotIdentifier(subGraphName, false, true),
             Label = label ?? subGraphName,
         };
+
+        TryApply(() => subGraph.Color = DefaultSubGraphProperties.Color);
+        TryApply(() => subGraph.Style = DefaultSubGraphProperties.Style);
 
         _subGraphs.Add(subGraphName, subGraph);
         _graph.Elements.Add(subGraph);
@@ -91,12 +103,12 @@ public class Graph
         return _edges[(leftNodeId, rightNodeId)];
     }
 
-    public DotSubGraph GetSubGraph(string subGraphId)
+    public DotSubgraph GetSubGraph(string subGraphId)
     {
         return _subGraphs[subGraphId];
     }
 
-    public void AddNodeToSubGraph(DotSubGraph subGraph, string nodeId, string? nodeLabel = null)
+    public void AddNodeToSubGraph(DotSubgraph subGraph, string nodeId, string? nodeLabel = null)
     {
         var node = CreateNode(nodeId, nodeLabel);
         subGraph.Elements.Add(node);
@@ -104,7 +116,7 @@ public class Graph
         _nodes.TryAdd(nodeId, node);
     }
 
-    public void AddEdgeToSubGraph(DotSubGraph subGraph, string leftNodeId, string rightNodeId, string? label = null)
+    public void AddEdgeToSubGraph(DotSubgraph subGraph, string leftNodeId, string rightNodeId, string? label = null)
     {
         var edge = CreateEdge(leftNodeId, rightNodeId, label);
         subGraph.Elements.Add(edge);
@@ -114,18 +126,22 @@ public class Graph
 
     private DotNode CreateNode(string nodeId, string? label = null)
     {
-        return new DotNode(nodeId)
+        var node = new DotNode
         {
+            Identifier = new DotIdentifier(nodeId, false, true),
             Label = label ?? nodeId,
-            Height = DefaultNodeProperties.Height,
-            Width = DefaultNodeProperties.Width,
-            Shape = DefaultNodeProperties.Shape,
-            Color = DefaultNodeProperties.Color,
-            FillColor = DefaultNodeProperties.FillColor,
-            FontColor = DefaultNodeProperties.FontColor,
-            Style = DefaultNodeProperties.Style,
-            PenWidth = DefaultNodeProperties.PenWidth,
         };
+
+        TryApply(() => node.Height = DefaultNodeProperties.Height);
+        TryApply(() => node.Width = DefaultNodeProperties.Width);
+        TryApply(() => node.Shape = DefaultNodeProperties.Shape);
+        TryApply(() => node.Color = DefaultNodeProperties.Color);
+        TryApply(() => node.FillColor = DefaultNodeProperties.FillColor);
+        TryApply(() => node.FontColor = DefaultNodeProperties.FontColor);
+        TryApply(() => node.Style = DefaultNodeProperties.Style);
+        TryApply(() => node.PenWidth = DefaultNodeProperties.PenWidth);
+
+        return node;
     }
 
     private DotEdge CreateEdge(string leftNodeId, string rightNodeId, string? label = null)
@@ -133,15 +149,31 @@ public class Graph
         var leftNode = AddNode(leftNodeId);
         var rightNode = AddNode(rightNodeId);
 
-        return new DotEdge(leftNode, rightNode)
+        var edge = new DotEdge
         {
-            ArrowHead = DefaultEdgeProperties.ArrowHead,
-            ArrowTail = DefaultEdgeProperties.ArrowTail,
-            Color = DefaultEdgeProperties.Color,
-            FontColor = DefaultEdgeProperties.FontColor,
-            Style = DefaultEdgeProperties.Style,
-            PenWidth = DefaultEdgeProperties.PenWidth,
+            From = leftNode.Identifier,
+            To = rightNode.Identifier,
             Label = label ?? $"{leftNodeId}-{rightNodeId}",
         };
+
+        TryApply(() => edge.ArrowHead = DefaultEdgeProperties.ArrowHead);
+        TryApply(() => edge.ArrowTail = DefaultEdgeProperties.ArrowTail);
+        TryApply(() => edge.Color = DefaultEdgeProperties.Color);
+        TryApply(() => edge.FontColor = DefaultEdgeProperties.FontColor);
+        TryApply(() => edge.Style = DefaultEdgeProperties.Style);
+        TryApply(() => edge.PenWidth = DefaultEdgeProperties.PenWidth);
+
+        return edge;
+    }
+
+    private static void TryApply(Action action)
+    {
+        try
+        {
+            action();
+        }
+        catch (AttributeNotFoundException)
+        {
+        }
     }
 }
