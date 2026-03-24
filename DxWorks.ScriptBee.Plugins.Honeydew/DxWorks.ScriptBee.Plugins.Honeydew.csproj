@@ -19,10 +19,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DxWorks.ScriptBee.Plugin.Api" Version="1.1.0" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\Honeydew.Models.CSharp\Honeydew.Models.CSharp.csproj" />
         <ProjectReference Include="..\Honeydew.Models.VisualBasic\Honeydew.Models.VisualBasic.csproj" />
     </ItemGroup>
