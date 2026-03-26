@@ -6,7 +6,7 @@ from typing import Any
 
 
 DEFAULT_TEMPLATE_PATH = Path(__file__).resolve().parent / 'templates' / 'summary.html'
-FALLBACK_TEMPLATE = '<section><h2>{{tool}}</h2><p>Status: <strong>{{status}}</strong></p></section>'
+FALLBACK_TEMPLATE = '<section><h2>{{tool}}</h2></section>'
 
 
 def render_summary(
