@@ -17,22 +17,35 @@ SUMMARY_DATA_FILE_NAME = 'honeydew-summary-data.json'
 def build_payload(summary_data: dict[str, Any]) -> dict[str, Any]:
     status = str(summary_data.get('status') or 'success')
     generated_at = _format_generated_at(summary_data.get('generatedAt'))
+    solutions_count = _to_int(summary_data.get('solutionsCount'))
+    projects_count = _to_int(summary_data.get('projectsCount'))
+    projects_csharp_count = _to_int(summary_data.get('projectsCSharpCount'))
+    projects_visual_basic_count = _to_int(summary_data.get('projectsVisualBasicCount'))
+    files_count = _to_int(summary_data.get('filesCount'))
+    files_csharp_count = _to_int(summary_data.get('filesCSharpCount'))
+    files_visual_basic_count = _to_int(summary_data.get('filesVisualBasicCount'))
+    top_level_classes_count = _to_int(summary_data.get('topLevelClassesCount'))
+    interfaces_count = _to_int(summary_data.get('interfacesCount'))
+    abstract_classes_count = _to_int(summary_data.get('abstractClassesCount'))
+    unprocessed_projects_count = _to_int(summary_data.get('unprocessedProjectsCount'))
+    unprocessed_source_files_count = _to_int(summary_data.get('unprocessedSourceFilesCount'))
+    source_code_lines = _to_int(summary_data.get('sourceCodeLines'))
 
     metadata = {
         'project.name': summary_data.get('projectName', 'unknown'),
-        'solutions.count': _to_int(summary_data.get('solutionsCount')),
-        'projects.count': _to_int(summary_data.get('projectsCount')),
-        'projects.csharp.count': _to_int(summary_data.get('projectsCSharpCount')),
-        'projects.visualbasic.count': _to_int(summary_data.get('projectsVisualBasicCount')),
-        'files.total': _to_int(summary_data.get('filesCount')),
-        'files.csharp.count': _to_int(summary_data.get('filesCSharpCount')),
-        'files.visualbasic.count': _to_int(summary_data.get('filesVisualBasicCount')),
-        'classes.top.level': _to_int(summary_data.get('topLevelClassesCount')),
-        'interfaces.count': _to_int(summary_data.get('interfacesCount')),
-        'abstract.classes.count': _to_int(summary_data.get('abstractClassesCount')),
-        'unprocessed.projects.count': _to_int(summary_data.get('unprocessedProjectsCount')),
-        'unprocessed.source.files.count': _to_int(summary_data.get('unprocessedSourceFilesCount')),
-        'source.lines.total': _to_int(summary_data.get('sourceCodeLines')),
+        'solutions.count': solutions_count,
+        'projects.count': projects_count,
+        'projects.csharp.count': projects_csharp_count,
+        'projects.visualbasic.count': projects_visual_basic_count,
+        'files.total': files_count,
+        'files.csharp.count': files_csharp_count,
+        'files.visualbasic.count': files_visual_basic_count,
+        'classes.top.level': top_level_classes_count,
+        'interfaces.count': interfaces_count,
+        'abstract.classes.count': abstract_classes_count,
+        'unprocessed.projects.count': unprocessed_projects_count,
+        'unprocessed.source.files.count': unprocessed_source_files_count,
+        'source.lines.total': source_code_lines,
         'generated.at': generated_at,
     }
 
@@ -40,42 +53,39 @@ def build_payload(summary_data: dict[str, Any]) -> dict[str, Any]:
         [
             '## Honeydew',
             '',
-            f'- Status: {status}',
             f"- Project: {summary_data.get('projectName', 'unknown')}",
-            f"- Solutions: {_to_int(summary_data.get('solutionsCount'))}",
-            f"- Projects: {_to_int(summary_data.get('projectsCount'))}",
-            f"- C# projects: {_to_int(summary_data.get('projectsCSharpCount'))}",
-            f"- Visual Basic projects: {_to_int(summary_data.get('projectsVisualBasicCount'))}",
-            f"- Source files: {_to_int(summary_data.get('filesCount'))}",
-            f"- C# files: {_to_int(summary_data.get('filesCSharpCount'))}",
-            f"- Visual Basic files: {_to_int(summary_data.get('filesVisualBasicCount'))}",
-            f"- Top-level classes: {_to_int(summary_data.get('topLevelClassesCount'))}",
-            f"- Interfaces: {_to_int(summary_data.get('interfacesCount'))}",
-            f"- Abstract classes: {_to_int(summary_data.get('abstractClassesCount'))}",
-            f"- Unprocessed projects: {_to_int(summary_data.get('unprocessedProjectsCount'))}",
-            f"- Unprocessed source files: {_to_int(summary_data.get('unprocessedSourceFilesCount'))}",
-            f"- Source lines: {_to_int(summary_data.get('sourceCodeLines'))}",
+            f"- Solutions: {_format_int(solutions_count)}",
+            f"- Projects: {_format_int(projects_count)}",
+            f"- C# projects: {_format_int(projects_csharp_count)}",
+            f"- Visual Basic projects: {_format_int(projects_visual_basic_count)}",
+            f"- Source files: {_format_int(files_count)}",
+            f"- C# files: {_format_int(files_csharp_count)}",
+            f"- Visual Basic files: {_format_int(files_visual_basic_count)}",
+            f"- Top-level classes: {_format_int(top_level_classes_count)}",
+            f"- Interfaces: {_format_int(interfaces_count)}",
+            f"- Abstract classes: {_format_int(abstract_classes_count)}",
+            f"- Unprocessed projects: {_format_int(unprocessed_projects_count)}",
+            f"- Unprocessed source files: {_format_int(unprocessed_source_files_count)}",
+            f"- Source lines: {_format_int(source_code_lines)}",
             f'- Generated at: {generated_at}',
         ]
     )
 
     template_model = {
-        'status': status,
-        'statusClass': _to_status_class(status),
         'projectName': summary_data.get('projectName', 'unknown'),
-        'solutionsCount': _to_int(summary_data.get('solutionsCount')),
-        'projectsCount': _to_int(summary_data.get('projectsCount')),
-        'projectsCSharpCount': _to_int(summary_data.get('projectsCSharpCount')),
-        'projectsVisualBasicCount': _to_int(summary_data.get('projectsVisualBasicCount')),
-        'filesCount': _to_int(summary_data.get('filesCount')),
-        'filesCSharpCount': _to_int(summary_data.get('filesCSharpCount')),
-        'filesVisualBasicCount': _to_int(summary_data.get('filesVisualBasicCount')),
-        'topLevelClassesCount': _to_int(summary_data.get('topLevelClassesCount')),
-        'interfacesCount': _to_int(summary_data.get('interfacesCount')),
-        'abstractClassesCount': _to_int(summary_data.get('abstractClassesCount')),
-        'unprocessedProjectsCount': _to_int(summary_data.get('unprocessedProjectsCount')),
-        'unprocessedSourceFilesCount': _to_int(summary_data.get('unprocessedSourceFilesCount')),
-        'sourceCodeLines': _to_int(summary_data.get('sourceCodeLines')),
+        'solutionsCountFormatted': _format_int(solutions_count),
+        'projectsCountFormatted': _format_int(projects_count),
+        'projectsCSharpCountFormatted': _format_int(projects_csharp_count),
+        'projectsVisualBasicCountFormatted': _format_int(projects_visual_basic_count),
+        'filesCountFormatted': _format_int(files_count),
+        'filesCSharpCountFormatted': _format_int(files_csharp_count),
+        'filesVisualBasicCountFormatted': _format_int(files_visual_basic_count),
+        'topLevelClassesCountFormatted': _format_int(top_level_classes_count),
+        'interfacesCountFormatted': _format_int(interfaces_count),
+        'abstractClassesCountFormatted': _format_int(abstract_classes_count),
+        'unprocessedProjectsCountFormatted': _format_int(unprocessed_projects_count),
+        'unprocessedSourceFilesCountFormatted': _format_int(unprocessed_source_files_count),
+        'sourceCodeLinesFormatted': _format_int(source_code_lines),
         'generatedAt': generated_at,
     }
 
@@ -96,27 +106,12 @@ def build_missing_payload() -> dict[str, Any]:
         'markdown': '\n'.join([
             '## Honeydew',
             '',
-            '- Status: missing',
             '- Summary input is missing',
         ]),
         'templateModel': {
-            'status': 'missing',
-            'statusClass': 'status-missing',
             'isMissing': True,
         },
     }
-
-
-def _to_status_class(status: str) -> str:
-    if status == 'success':
-        return 'status-success'
-    if status == 'partial':
-        return 'status-warning'
-    if status == 'failed':
-        return 'status-error'
-    if status == 'missing':
-        return 'status-missing'
-    return 'status-unknown'
 
 
 def _to_int(value: Any) -> int:
@@ -124,6 +119,10 @@ def _to_int(value: Any) -> int:
         return int(value)
     except Exception:
         return 0
+
+
+def _format_int(value: int) -> str:
+    return f'{value:,}'
 
 
 def _format_generated_at(value: Any) -> str:
