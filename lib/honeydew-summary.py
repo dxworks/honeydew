@@ -136,9 +136,31 @@ def _format_generated_at(value: Any) -> str:
     try:
         parsed = datetime.fromisoformat(raw_value.replace('Z', '+00:00'))
     except ValueError:
-        return raw_value
+        try:
+            parsed = datetime.strptime(raw_value, '%Y-%m-%d %H:%M:%S UTC').replace(tzinfo=timezone.utc)
+        except ValueError:
+            return raw_value
 
-    return parsed.astimezone(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
+    return _format_local_datetime(parsed)
+
+
+def _format_local_datetime(value: datetime) -> str:
+    local_value = value.astimezone()
+    return f"{local_value.strftime('%Y-%m-%d %H:%M:%S')} {_format_gmt_offset(local_value.strftime('%z'))}"
+
+
+def _format_gmt_offset(offset: str) -> str:
+    if len(offset) != 5:
+        return 'GMT+0'
+
+    sign = offset[0]
+    hours = int(offset[1:3])
+    minutes = int(offset[3:5])
+
+    if minutes == 0:
+        return f'GMT{sign}{hours}'
+
+    return f'GMT{sign}{hours}:{minutes:02d}'
 
 
 def main() -> int:
