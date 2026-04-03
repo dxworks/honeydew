@@ -1,6 +1,6 @@
-name: honeydew
+name: Honeydew
 id: honeydew
-version: 1.0.0
+version: 3.2.3
 
 actions:
   start:
@@ -30,6 +30,11 @@ actions:
         command:
           windows: py -3 honeydew-summary.py "${instrumentPath}/results"
           unix: python3 honeydew-summary.py "${instrumentPath}/results"
+
+  clean:
+    with:
+      locations:
+        - source: ${instrumentDir}/results
 
   pack:
     with:
