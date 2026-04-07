@@ -15,24 +15,27 @@ SUMMARY_DATA_FILE_NAME = 'honeydew-summary-data.json'
 
 
 def build_payload(summary_data: dict[str, Any]) -> dict[str, Any]:
-    status = str(summary_data.get('status') or 'success')
-    generated_at = _format_generated_at(summary_data.get('generatedAt'))
-    solutions_count = _to_int(summary_data.get('solutionsCount'))
-    projects_count = _to_int(summary_data.get('projectsCount'))
-    projects_csharp_count = _to_int(summary_data.get('projectsCSharpCount'))
-    projects_visual_basic_count = _to_int(summary_data.get('projectsVisualBasicCount'))
-    files_count = _to_int(summary_data.get('filesCount'))
-    files_csharp_count = _to_int(summary_data.get('filesCSharpCount'))
-    files_visual_basic_count = _to_int(summary_data.get('filesVisualBasicCount'))
-    top_level_classes_count = _to_int(summary_data.get('topLevelClassesCount'))
-    interfaces_count = _to_int(summary_data.get('interfacesCount'))
-    abstract_classes_count = _to_int(summary_data.get('abstractClassesCount'))
-    unprocessed_projects_count = _to_int(summary_data.get('unprocessedProjectsCount'))
-    unprocessed_source_files_count = _to_int(summary_data.get('unprocessedSourceFilesCount'))
-    source_code_lines = _to_int(summary_data.get('sourceCodeLines'))
+    status = str(_get_value(summary_data, 'Status', 'status', default='success') or 'success')
+    generated_at = _format_generated_at(_get_value(summary_data, 'GeneratedAt', 'generatedAt'))
+    solutions_count = _to_int(_get_value(summary_data, 'SolutionsCount', 'solutionsCount'))
+    projects_count = _to_int(_get_value(summary_data, 'ProjectsCount', 'projectsCount'))
+    projects_csharp_count = _to_int(_get_value(summary_data, 'ProjectsCSharpCount', 'projectsCSharpCount'))
+    projects_visual_basic_count = _to_int(
+        _get_value(summary_data, 'ProjectsVisualBasicCount', 'projectsVisualBasicCount')
+    )
+    files_count = _to_int(_get_value(summary_data, 'FilesCount', 'filesCount'))
+    files_csharp_count = _to_int(_get_value(summary_data, 'FilesCSharpCount', 'filesCSharpCount'))
+    files_visual_basic_count = _to_int(_get_value(summary_data, 'FilesVisualBasicCount', 'filesVisualBasicCount'))
+    top_level_classes_count = _to_int(_get_value(summary_data, 'TopLevelClassesCount', 'topLevelClassesCount'))
+    interfaces_count = _to_int(_get_value(summary_data, 'InterfacesCount', 'interfacesCount'))
+    abstract_classes_count = _to_int(_get_value(summary_data, 'AbstractClassesCount', 'abstractClassesCount'))
+    unprocessed_projects_count = _to_int(_get_value(summary_data, 'UnprocessedProjectsCount', 'unprocessedProjectsCount'))
+    unprocessed_source_files_count = _to_int(
+        _get_value(summary_data, 'UnprocessedSourceFilesCount', 'unprocessedSourceFilesCount')
+    )
+    source_code_lines = _to_int(_get_value(summary_data, 'SourceCodeLines', 'sourceCodeLines'))
 
     metadata = {
-        'project.name': summary_data.get('projectName', 'unknown'),
         'solutions.count': solutions_count,
         'projects.count': projects_count,
         'projects.csharp.count': projects_csharp_count,
@@ -46,33 +49,35 @@ def build_payload(summary_data: dict[str, Any]) -> dict[str, Any]:
         'unprocessed.projects.count': unprocessed_projects_count,
         'unprocessed.source.files.count': unprocessed_source_files_count,
         'source.lines.total': source_code_lines,
-        'generated.at': generated_at,
     }
 
     markdown = '\n'.join(
         [
             '## Honeydew',
             '',
-            f"- Project: {summary_data.get('projectName', 'unknown')}",
-            f"- Solutions: {_format_int(solutions_count)}",
-            f"- Projects: {_format_int(projects_count)}",
-            f"- C# projects: {_format_int(projects_csharp_count)}",
-            f"- Visual Basic projects: {_format_int(projects_visual_basic_count)}",
-            f"- Source files: {_format_int(files_count)}",
-            f"- C# files: {_format_int(files_csharp_count)}",
-            f"- Visual Basic files: {_format_int(files_visual_basic_count)}",
-            f"- Top-level classes: {_format_int(top_level_classes_count)}",
-            f"- Interfaces: {_format_int(interfaces_count)}",
-            f"- Abstract classes: {_format_int(abstract_classes_count)}",
-            f"- Unprocessed projects: {_format_int(unprocessed_projects_count)}",
-            f"- Unprocessed source files: {_format_int(unprocessed_source_files_count)}",
-            f"- Source lines: {_format_int(source_code_lines)}",
-            f'- Generated at: {generated_at}',
+            (
+                f"- Solutions: {_format_int(solutions_count)} / "
+                f"Projects: {_format_int(projects_count)} / "
+                f"C# projects: {_format_int(projects_csharp_count)} / "
+                f"VB projects: {_format_int(projects_visual_basic_count)} / "
+                f"Unprocessed projects: {_format_int(unprocessed_projects_count)}"
+            ),
+            (
+                f"- Source lines: {_format_int(source_code_lines)} / "
+                f"Source files: {_format_int(files_count)} / "
+                f"C# files: {_format_int(files_csharp_count)} / "
+                f"VB files: {_format_int(files_visual_basic_count)} / "
+                f"Unprocessed source files: {_format_int(unprocessed_source_files_count)}"
+            ),
+            (
+                f"- Top-level classes: {_format_int(top_level_classes_count)} / "
+                f"Interfaces: {_format_int(interfaces_count)} / "
+                f"Abstract classes: {_format_int(abstract_classes_count)}"
+            ),
         ]
     )
 
     template_model = {
-        'projectName': summary_data.get('projectName', 'unknown'),
         'solutionsCountFormatted': _format_int(solutions_count),
         'projectsCountFormatted': _format_int(projects_count),
         'projectsCSharpCountFormatted': _format_int(projects_csharp_count),
@@ -119,6 +124,14 @@ def _to_int(value: Any) -> int:
         return int(value)
     except Exception:
         return 0
+
+
+def _get_value(summary_data: dict[str, Any], *keys: str, default: Any = None) -> Any:
+    for key in keys:
+        if key in summary_data:
+            return summary_data[key]
+
+    return default
 
 
 def _format_int(value: int) -> str:
