@@ -1,0 +1,66 @@
+<section class="honeydew-summary">
+  <style>
+    .honeydew-summary {
+      color: #1f2328;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .honeydew-summary .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px 12px;
+      margin: 4px 0;
+    }
+
+    .honeydew-summary .summary-row {
+      margin-bottom: 6px;
+    }
+
+    .honeydew-summary .summary-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .honeydew-summary .summary-item {
+      padding: 4px 6px;
+      background: #f6f8fa;
+      border-radius: 6px;
+      font-size: 0.92rem;
+    }
+
+    .honeydew-summary .summary-item--placeholder {
+      visibility: hidden;
+    }
+  </style>
+
+  {{#if isMissing}}
+    <p>Summary input is missing</p>
+  {{else}}
+    <div class="summary-row">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Solutions</strong><br>{{solutionsCountFormatted}}</div>
+        <div class="summary-item"><strong>Projects</strong><br>{{projectsCountFormatted}}</div>
+        <div class="summary-item"><strong>C# projects</strong><br>{{projectsCSharpCountFormatted}}</div>
+        <div class="summary-item"><strong>VB projects</strong><br>{{projectsVisualBasicCountFormatted}}</div>
+        <div class="summary-item"><strong>Unprocessed projects</strong><br>{{unprocessedProjectsCountFormatted}}</div>
+      </div>
+    </div>
+    <div class="summary-row">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Source lines</strong><br>{{sourceCodeLinesFormatted}}</div>
+        <div class="summary-item"><strong>Source files</strong><br>{{filesCountFormatted}}</div>
+        <div class="summary-item"><strong>C# files</strong><br>{{filesCSharpCountFormatted}}</div>
+        <div class="summary-item"><strong>VB files</strong><br>{{filesVisualBasicCountFormatted}}</div>
+        <div class="summary-item"><strong>Unprocessed source files</strong><br>{{unprocessedSourceFilesCountFormatted}}</div>
+      </div>
+    </div>
+    <div class="summary-row">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Top-level classes</strong><br>{{topLevelClassesCountFormatted}}</div>
+        <div class="summary-item"><strong>Interfaces</strong><br>{{interfacesCountFormatted}}</div>
+        <div class="summary-item"><strong>Abstract classes</strong><br>{{abstractClassesCountFormatted}}</div>
+        <div class="summary-item summary-item--placeholder" aria-hidden="true"></div>
+        <div class="summary-item summary-item--placeholder" aria-hidden="true"></div>
+      </div>
+    </div>
+  {{/if}}
+</section>
