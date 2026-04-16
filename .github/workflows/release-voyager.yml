@@ -33,13 +33,13 @@ jobs:
       - name: Release for OS
         run: |
           mkdir -p bin
-          dotnet publish -r ${{ matrix.rid }} --self-contained false -p:PublishSingleFile=true -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
+          dotnet publish -r ${{ matrix.rid }} --self-contained false -p:PublishSingleFile=false -o bin -c Release -p:Version=${{ steps.semver_parser.outputs.semver }} Honeydew/Honeydew.csproj
 
       - name: Prepare Assets
         run: |
           mkdir -p ${{ matrix.rid }}
-          rm bin/*.pdb || true
-          cp -R bin/* ${{ matrix.rid }}
+          find bin -name '*.pdb' -delete || true
+          cp -a bin/. ${{ matrix.rid }}/
 
       - name: Create Archive
         run: zip -r honeydew-${{ matrix.rid }}.zip ${{ matrix.rid }}
