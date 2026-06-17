@@ -74,9 +74,14 @@ jobs:
         run: |
           mkdir -p honeydew/results
           mkdir -p honeydew/bin
+          mkdir -p honeydew/templates
 
           cp README.md honeydew/README.md
           cp instrument.yml honeydew/instrument.yml
+          cp instrument.v2.yml honeydew/instrument.v2.yml
+          cp lib/honeydew-summary.py honeydew/honeydew-summary.py
+          cp lib/summary_render.py honeydew/summary_render.py
+          cp lib/templates/summary.html honeydew/templates/summary.html
 
           unzip ./honeydew-win-x64.zip/honeydew-win-x64.zip -d honeydew/bin
           unzip ./honeydew-linux-x64.zip/honeydew-linux-x64.zip -d honeydew/bin
