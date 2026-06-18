@@ -15,7 +15,7 @@ jobs:
         rid: [win-x64, linux-x64, osx-x64]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Extract Semver
         id: semver_parser
@@ -26,7 +26,7 @@ jobs:
         env:
           TAG: ${{ github.ref }}
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
 
@@ -45,7 +45,7 @@ jobs:
         run: zip -r honeydew-${{ matrix.rid }}.zip ${{ matrix.rid }}
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: honeydew-${{ matrix.rid }}.zip
           path: honeydew-${{ matrix.rid }}.zip
@@ -56,10 +56,10 @@ jobs:
     needs: build-and-publish
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
 
       - name: Extract Semver
         id: semver_parser
@@ -96,7 +96,7 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: Honeydew ${{ steps.semver_parser.outputs.semver }} (Voyager)
           body_path: ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
