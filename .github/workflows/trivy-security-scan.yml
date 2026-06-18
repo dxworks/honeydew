@@ -1,0 +1,24 @@
+name: Trivy Security Scan
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+
+jobs:
+  trivy-fs:
+    uses: dxworks/pipelines/.github/workflows/trivy-fs-scan.yml@v1
+
+  trivy-image:
+    uses: dxworks/pipelines/.github/workflows/trivy-image-scan.yml@v1
+    with:
+      # Honeydew ships a self-contained multi-stage Dockerfile that builds the
+      # whole .NET solution inside the image, so no build-setup / java-version
+      # pre-build step is needed (unlike the JVM plugins).
+      image-ref: honeydew:${{ github.sha }}
+      build-context: .
+      post-pr-comment: true

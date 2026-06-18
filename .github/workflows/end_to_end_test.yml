@@ -16,10 +16,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
 
@@ -42,7 +42,7 @@ jobs:
           dotnet publish -r osx-x64 --self-contained true -p:PublishSingleFile=true -o bin -c Release Honeydew/Honeydew.csproj
     
       - name: Checkout Test Project
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
         with:
           repository: dxworks/HoneydewTestProject
           path: test_folder
@@ -51,10 +51,10 @@ jobs:
         run: ./bin/Honeydew extract test_folder
 
       - name: Setup Java
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v5
         with:
-          distribution: 'adopt'
-          java-version: '15'
+          distribution: 'temurin'
+          java-version: '21'
           java-package: 'jdk'
 
       - if: matrix.os == 'windows-latest'
@@ -77,7 +77,7 @@ jobs:
         run: zip -r results.zip results
 
       - name: Upload results artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: results-${{matrix.os}}
           path: results.zip
