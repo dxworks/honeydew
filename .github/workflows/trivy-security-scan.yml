@@ -21,4 +21,8 @@ jobs:
       # pre-build step is needed (unlike the JVM plugins).
       image-ref: honeydew:${{ github.sha }}
       build-context: .
+      # Gate the image on HIGH,CRITICAL only (same policy as the dxworks
+      # release gate): the mcr.microsoft.com/dotnet/sdk base image carries
+      # unfixable MEDIUM OS-package CVEs. The fs scan stays strict (MEDIUM+).
+      severity: HIGH,CRITICAL
       post-pr-comment: true
