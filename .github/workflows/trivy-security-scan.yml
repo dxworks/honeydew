@@ -10,14 +10,11 @@ permissions:
   pull-requests: write
 
 jobs:
-  # NOTE: both jobs temporarily target the pipelines feature branch that adds
-  # the `fail-severity` input (dxworks/pipelines#1). Switch the two refs back
-  # to @v1 once that PR is merged and the v1 tag is moved.
   trivy-fs:
-    uses: dxworks/pipelines/.github/workflows/trivy-fs-scan.yml@feat/configurable-fail-severity
+    uses: dxworks/pipelines/.github/workflows/trivy-fs-scan.yml@v1
 
   trivy-image:
-    uses: dxworks/pipelines/.github/workflows/trivy-image-scan.yml@feat/configurable-fail-severity
+    uses: dxworks/pipelines/.github/workflows/trivy-image-scan.yml@v1
     with:
       # Honeydew ships a self-contained multi-stage Dockerfile that builds the
       # whole .NET solution inside the image, so no build-setup / java-version
