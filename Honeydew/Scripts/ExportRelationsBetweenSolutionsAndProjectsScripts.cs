@@ -1,7 +1,6 @@
 ﻿using System.Drawing;
 using System.Text;
-using DotNetGraph.Edge;
-using DotNetGraph.SubGraph;
+using DotNetGraph.Core;
 using Honeydew.IO.Writers.Exporters;
 using Honeydew.ModelRepresentations;
 using DxWorks.ScriptBee.Plugins.Honeydew.Models;
@@ -204,8 +203,8 @@ public class ExportRelationsBetweenSolutionsAndProjectsScripts : Script
         {
             DefaultSubGraphProperties =
             {
-                Color = Color.Coral,
-                Style = DotSubGraphStyle.Filled
+                Color = "coral",
+                Style = DotSubgraphStyle.Filled
             }
         };
 
