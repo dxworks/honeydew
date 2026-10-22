@@ -28,8 +28,8 @@ actions:
         id: generate-summary
         dir: ${instrumentPath}
         command:
-          windows: py -3 honeydew-summary.py "${instrumentPath}/results"
-          unix: python3 honeydew-summary.py "${instrumentPath}/results"
+          windows: py -3 --version >nul 2>nul & if not errorlevel 1 (py -3 honeydew-summary.py "${instrumentPath}/results") else (python honeydew-summary.py "${instrumentPath}/results")
+          unix: if command -v python3 >/dev/null 2>&1; then python3 honeydew-summary.py "${instrumentPath}/results"; else python honeydew-summary.py "${instrumentPath}/results"; fi
 
   clean:
     with:
