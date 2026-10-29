@@ -18,7 +18,7 @@ public class MsBuildProjectProvider : IProjectProvider<Project>
     {
         DotNetSdkLoader.RegisterMsBuild(_logger);
 
-        var msBuildWorkspace = MSBuildWorkspace.Create();
+        var msBuildWorkspace = MSBuildWorkspace.Create(MsBuildTempFolder.WorkspaceProperties());
 
         if (!msBuildWorkspace.Diagnostics.IsEmpty)
         {

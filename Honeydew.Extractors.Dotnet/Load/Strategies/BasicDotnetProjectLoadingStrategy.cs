@@ -42,6 +42,11 @@ public class BasicDotnetProjectLoadingStrategy : IDotnetProjectLoadingStrategy
 
         foreach (var syntaxTree in compilation.SyntaxTrees)
         {
+            if (MsBuildTempFolder.Contains(syntaxTree.FilePath))
+            {
+                continue;
+            }
+
             var syntaxTreeFilePath = _actualFilePathProvider.GetActualFilePath(syntaxTree.FilePath);
             try
             {
