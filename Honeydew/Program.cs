@@ -28,6 +28,17 @@ var result = Parser.Default.ParseArguments<ExtractOptions, LoadOptions, AdaptOpt
 
 await result.MapResult(async options =>
 {
+    // The log files are appended to; an extraction starts a new analysis, so it starts them empty
+    if (options is ExtractOptions)
+    {
+        foreach (var oldLogFile in new[] { "missing_files_logs.txt", "logs.txt" }
+                     .Select(name => $"{defaultPathForAllRepresentations}/{name}")
+                     .Where(System.IO.File.Exists))
+        {
+            System.IO.File.Delete(oldLogFile);
+        }
+    }
+
     var missingFilesLogger = new SerilogLogger($"{defaultPathForAllRepresentations}/missing_files_logs.txt");
 
     const string logFilePath = $"{defaultPathForAllRepresentations}/logs.txt";
