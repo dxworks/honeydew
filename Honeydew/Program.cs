@@ -17,6 +17,7 @@ using Honeydew.ModelAdapters.V2._1._0.Importers;
 using Honeydew.Models;
 using Honeydew.PostExtraction.ReferenceRelations;
 using Honeydew.Processors;
+using Honeydew.Summary;
 using Honeydew.Scripts;
 using Honeydew.Utils;
 using Microsoft.Build.Locator;
@@ -27,6 +28,17 @@ var result = Parser.Default.ParseArguments<ExtractOptions, LoadOptions, AdaptOpt
 
 await result.MapResult(async options =>
 {
+    // The log files are appended to; an extraction starts a new analysis, so it starts them empty
+    if (options is ExtractOptions)
+    {
+        foreach (var oldLogFile in new[] { "missing_files_logs.txt", "logs.txt" }
+                     .Select(name => $"{defaultPathForAllRepresentations}/{name}")
+                     .Where(System.IO.File.Exists))
+        {
+            System.IO.File.Delete(oldLogFile);
+        }
+    }
+
     var missingFilesLogger = new SerilogLogger($"{defaultPathForAllRepresentations}/missing_files_logs.txt");
 
     const string logFilePath = $"{defaultPathForAllRepresentations}/logs.txt";
@@ -315,6 +327,19 @@ static async Task Extract(string honeydewVersion, string projectName, string inp
             { "rawJsonOutputName", $"{projectName}-raw.json" },
         }),
     });
+
+    try
+    {
+        var summaryData = HoneydewSummaryService.BuildSummaryData(projectName, repositoryModel);
+        var summaryDataPath = HoneydewSummaryService.WriteSummaryData(defaultPathForAllRepresentations, summaryData);
+        logger.Log($"Summary snapshot data exported at {Path.GetFullPath(summaryDataPath)}");
+        progressLogger.Log($"Summary snapshot data exported at {Path.GetFullPath(summaryDataPath)}");
+    }
+    catch (Exception e)
+    {
+        logger.Log($"Could not export summary snapshot data because {e.Message}", LogLevels.Warning);
+        progressLogger.Log($"Could not export summary snapshot data because {e.Message}");
+    }
 
     logger.Log("Finished Exporting");
     progressLogger.Log("Finished Exporting!");

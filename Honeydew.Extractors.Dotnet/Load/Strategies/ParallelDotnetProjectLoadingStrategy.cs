@@ -29,11 +29,12 @@ public class ParallelDotnetProjectLoadingStrategy : IDotnetProjectLoadingStrateg
                 .Select(reference => ExtractPathFromProjectId(reference.ProjectId.ToString())).ToList()
         };
 
-        var documentCount = project.Documents.Count();
+        var documents = project.Documents.Where(document => !MsBuildTempFolder.Contains(document.FilePath)).ToList();
+        var documentCount = documents.Count;
         using var projectSemaphore = new SemaphoreSlim(1, 1);
 
 
-        var tasks = project.Documents.Select((document, index) =>
+        var tasks = documents.Select((document, index) =>
             ExtractCompilationUnit(factExtractor, document, index + 1, documentCount, cancellationToken));
 
         foreach (var bucket in TaskUtils.Interleaved(tasks))
