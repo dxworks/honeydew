@@ -19,6 +19,11 @@ FROM build AS publish
 RUN dotnet publish "Honeydew.csproj" -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS final
+# The base image can lag behind Ubuntu's security fixes (it shipped apt 2.8.3, CVE-2026-109518),
+# so apply the pending package updates in the image that is actually shipped.
+RUN apt-get update && \
+    apt-get upgrade -y --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Honeydew.dll"]

@@ -130,7 +130,7 @@ public class SolutionExtractor : ISolutionExtractor
     {
         DotNetSdkLoader.RegisterMsBuild(_logger);
 
-        var msBuildWorkspace = MSBuildWorkspace.Create();
+        var msBuildWorkspace = MSBuildWorkspace.Create(MsBuildTempFolder.WorkspaceProperties());
 
         if (!msBuildWorkspace.Diagnostics.IsEmpty)
         {
