@@ -8,11 +8,18 @@ on:
 jobs:
   build-and-publish:
     name: Build and Publish
-    runs-on: ubuntu-latest
+    # macOS builds run on macOS: the SDK only code-signs the osx apphost on a Mac,
+    # and Apple Silicon refuses to start an unsigned arm64 binary.
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
       matrix:
-        rid: [win-x64, linux-x64, osx-x64]
+        include:
+          - { rid: win-x64, os: ubuntu-latest }
+          - { rid: linux-x64, os: ubuntu-latest }
+          - { rid: linux-arm64, os: ubuntu-latest }
+          - { rid: osx-x64, os: macos-latest }
+          - { rid: osx-arm64, os: macos-latest }
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -80,13 +87,17 @@ jobs:
 
           unzip ./honeydew-win-x64.zip/honeydew-win-x64.zip -d honeydew/bin
           unzip ./honeydew-linux-x64.zip/honeydew-linux-x64.zip -d honeydew/bin
+          unzip ./honeydew-linux-arm64.zip/honeydew-linux-arm64.zip -d honeydew/bin
           unzip ./honeydew-osx-x64.zip/honeydew-osx-x64.zip -d honeydew/bin
+          unzip ./honeydew-osx-arm64.zip/honeydew-osx-arm64.zip -d honeydew/bin
 
           ls -al -R honeydew
 
           chmod +x honeydew/bin/win-x64/Honeydew.exe
           chmod +x honeydew/bin/linux-x64/Honeydew
+          chmod +x honeydew/bin/linux-arm64/Honeydew
           chmod +x honeydew/bin/osx-x64/Honeydew
+          chmod +x honeydew/bin/osx-arm64/Honeydew
 
       - name: Zip Voyager Release
         run: zip -rl honeydew.zip honeydew
