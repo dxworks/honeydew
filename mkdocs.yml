@@ -4,25 +4,44 @@ repo_url: https://github.com/dxworks/honeydew
 theme:
   name: material
   palette:
-    primary: amber
-    accent: pink
+    # Toggle light mode
+    - scheme: default
+      media: "(prefers-color-scheme: light)"
+      primary: amber
+      accent: pink
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+
+    # Toggle dark mode
+    - scheme: slate
+      media: "(prefers-color-scheme: dark)"
+      primary: amber
+      accent: pink
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
   features:
     - navigation.expand
     - navigation.indexes
     - navigation.instant
+    - content.code.copy
 
 plugins:
   - search
-  - mermaid2
 
 markdown_extensions:
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:mermaid2.fence_mermaid
-  - pymdownx.tabbed
-      
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+
+extra_css:
+  - stylesheets/dxworks-theme.css
+
 nav:
   - Home: index.md
   - Installation: installation.md
