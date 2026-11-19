@@ -1,22 +1,13 @@
 name: Release Docs
 
+# Publishes the docs by hand only, via the shared dxworks/pipelines workflow
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch:
 
 jobs:
-  deploy:
-    name: Release Docs
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
-        with:
-          python-version: 3.x
-
-      - name: Install Mkdocs
-        run: pip install mkdocs-material mkdocs-material-extensions mkdocs-mermaid2-plugin
-
-      - name: Deploy mkdocs
-        run: mkdocs gh-deploy --force
+  docs:
+    uses: dxworks/pipelines/.github/workflows/release-docs.yml@v1
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
