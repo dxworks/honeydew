@@ -45,5 +45,8 @@
         "command": "honeydewCommand"
       }
     ]
+  },
+  "engines": {
+    "node": ">=26"
   }
 }
