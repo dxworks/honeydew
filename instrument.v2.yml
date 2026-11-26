@@ -28,11 +28,10 @@ actions:
         command:
           windows: .\bin\win-x64\Honeydew.exe extract "${repo}" ${options}
           unix: >-
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-              if [[ "$(sysctl -n hw.optional.arm64 2>/dev/null)" == "1" ]]; then rid=osx-arm64; else rid=osx-x64; fi
-            else
-              case "$(uname -m)" in aarch64|arm64) rid=linux-arm64 ;; *) rid=linux-x64 ;; esac
-            fi;
+            case "$(uname -s)" in
+              Darwin) if [ "$(sysctl -n hw.optional.arm64 2>/dev/null)" = "1" ] && [ -d ./bin/osx-arm64 ]; then rid=osx-arm64; else rid=osx-x64; fi ;;
+              *) case "$(uname -m)" in aarch64|arm64) rid=linux-arm64 ;; *) rid=linux-x64 ;; esac ;;
+            esac;
             chmod +x ./bin/$rid/Honeydew && ./bin/$rid/Honeydew extract "${repo}" ${options}
 
   summary:

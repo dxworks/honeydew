@@ -178,6 +178,24 @@ jobs:
       - name: Zip Voyager Release
         run: zip -rl honeydew.zip honeydew
 
+      # One zip per platform, holding only that platform's bin/<rid>, for the per-platform
+      # voyager-full-<platform>.zip of the Full Instrument Release (voyager repo).
+      # honeydew.zip above keeps every platform, for voyenv files that name it.
+      - name: Zip Platform Releases
+        run: |
+          set -euo pipefail
+          mkdir platforms
+          for spec in win-x64:win-x64 linux-x64:linux-x64 linux-arm64:linux-arm64 macos-x64:osx-x64 macos-arm64:osx-arm64; do
+            p="${spec%%:*}"; rid="${spec#*:}"
+            rm -rf stage && mkdir stage
+            cp -a honeydew stage/
+            find stage/honeydew/bin -mindepth 1 -maxdepth 1 ! -name "$rid" -exec rm -rf {} +
+            [ -d "stage/honeydew/bin/$rid" ] || { echo "::error::$p: bin/$rid missing"; exit 1; }
+            (cd stage && zip -rl -q "../platforms/honeydew-$p.zip" honeydew)
+          done
+          rm -rf stage
+          ls -l platforms
+
       - name: Prepare Release Notes
         run: touch ${{ github.workspace }}/releaseNotes/v${{ steps.semver_parser.outputs.semver }}.md
 
@@ -190,4 +208,6 @@ jobs:
           body: ""
           prerelease: false
           draft: false
-          files: honeydew.zip
+          files: |
+            honeydew.zip
+            platforms/honeydew-*.zip

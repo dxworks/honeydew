@@ -9,8 +9,9 @@ commands:
     unix: |
       # Pick the build for this machine's CPU. On a Mac, hw.optional.arm64 is 1 on Apple Silicon
       # even when this shell runs under Rosetta, so an x64 JVM still gets the arm64 build.
+      # A package without the arm64 build (voyager-full-macos-x64.zip) runs the x64 one through Rosetta.
       if [[ "$OSTYPE" == "darwin"* ]]; then
-        if [[ "$(sysctl -n hw.optional.arm64 2>/dev/null)" == "1" ]]; then rid=osx-arm64; else rid=osx-x64; fi
+        if [[ "$(sysctl -n hw.optional.arm64 2>/dev/null)" == "1" && -d ./bin/osx-arm64 ]]; then rid=osx-arm64; else rid=osx-x64; fi
       else
         case "$(uname -m)" in aarch64|arm64) rid=linux-arm64 ;; *) rid=linux-x64 ;; esac
       fi
